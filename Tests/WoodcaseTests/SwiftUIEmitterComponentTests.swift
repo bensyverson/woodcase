@@ -257,7 +257,7 @@ struct SwiftUIEmitterComponentTests {
         let json = ##"{"version": "2.17", "children": [\##(nodes.joined(separator: ", "))]}"##
         let document = try PenParser.parse(Data(json.utf8))
         let diagnostics = PenDiagnosticCollector()
-        let result = SwiftUIEmitter.emit(
+        let result = try SwiftUIEmitter.emit(
             document: document, components: filter(ComponentAnalyzer.analyze(document)),
             pages: PageAnalyzer.analyze(document), theme: ThemeAnalyzer.analyze(document), diagnostics: diagnostics
         )

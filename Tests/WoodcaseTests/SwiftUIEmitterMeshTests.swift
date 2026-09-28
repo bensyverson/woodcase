@@ -122,7 +122,7 @@ struct SwiftUIEmitterMeshTests {
 
     @Test("The support file resolves Pen's mesh to a native MeshGradient, subdivided, in device colour space")
     func supportTemplate() throws {
-        let support = try #require(SwiftUIEmitter.supportTemplates["PenSupport+Mesh.swift"])
+        let support = try #require(SwiftUIEmitter.supportTemplates()["PenSupport+Mesh.swift"])
         #expect(support.contains("struct PenMeshVertex"))
         #expect(support.contains("struct PenMeshGradient: ShapeStyle"))
         #expect(support.contains("func resolve(in environment: EnvironmentValues) -> MeshGradient"))
@@ -153,7 +153,7 @@ struct SwiftUIEmitterMeshTests {
     ) throws -> String {
         let json = ##"{"version": "2.17", \##(extra)"children": [{"type": "frame", "id": "root", "name": "Board", \##(keys)"children": [\##(child)]}]}"##
         let document = try PenParser.parse(Data(json.utf8))
-        let result = SwiftUIEmitter.emit(
+        let result = try SwiftUIEmitter.emit(
             document: document, components: [], pages: PageAnalyzer.analyze(document),
             theme: ThemeAnalyzer.analyze(document), diagnostics: diagnostics
         )

@@ -170,7 +170,7 @@ struct SwiftUIEmitterThemeTests {
     static func emit(themes: String, variables: String, children: String = ##"{"type": "frame", "id": "root", "name": "Board", "width": 10, "height": 10}"##, diagnostics: PenDiagnosticCollector? = nil) throws -> EmitResult {
         let json = ##"{"version": "2.17", "themes": \##(themes), "variables": \##(variables), "children": [\##(children)]}"##
         let document = try PenParser.parse(Data(json.utf8))
-        return SwiftUIEmitter.emit(
+        return try SwiftUIEmitter.emit(
             document: document, components: ComponentAnalyzer.analyze(document), pages: PageAnalyzer.analyze(document),
             theme: ThemeAnalyzer.analyze(document), diagnostics: diagnostics
         )

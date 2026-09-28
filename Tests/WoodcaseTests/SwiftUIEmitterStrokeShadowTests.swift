@@ -121,7 +121,7 @@ struct SwiftUIEmitterStrokeShadowTests {
     private func body(child: String, layout: String = "horizontal") throws -> String {
         let json = ##"{"version": "2.19", "children": [{"type": "frame", "id": "root", "name": "Board", "width": 200, "height": 200, "layout": "\##(layout)", "children": [\##(child)]}]}"##
         let document = try PenParser.parse(Data(json.utf8))
-        let result = SwiftUIEmitter.emit(
+        let result = try SwiftUIEmitter.emit(
             document: document, components: [], pages: PageAnalyzer.analyze(document), theme: ThemeAnalyzer.analyze(document)
         )
         return try #require(result.files.first { $0.path.hasSuffix("Pages/Board.swift") }).content

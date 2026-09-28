@@ -116,7 +116,7 @@ struct Generate: AsyncParsableCommand {
 
                 // Generate viewer app if --preview
                 if preview {
-                    let viewerFiles = ViewerScaffolder.scaffold(
+                    let viewerFiles = try ViewerScaffolder.scaffold(
                         components: components,
                         pages: pages,
                         packageName: packageName

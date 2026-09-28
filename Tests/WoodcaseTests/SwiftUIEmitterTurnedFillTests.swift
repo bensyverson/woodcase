@@ -59,7 +59,7 @@ struct SwiftUIEmitterTurnedFillTests {
         let json = ##"{"version": "2.19", "children": [{"type": "frame", "id": "root", "name": "Board", "layout": "horizontal", "width": 400, "height": 300, "padding": 10, "gap": 10, "children": [\##(children.joined(separator: ","))]}]}"##
         let document = try PenParser.parse(Data(json.utf8))
         let collector = PenDiagnosticCollector()
-        let result = SwiftUIEmitter.emit(
+        let result = try SwiftUIEmitter.emit(
             document: document, components: [], pages: PageAnalyzer.analyze(document),
             theme: ThemeAnalyzer.analyze(document), diagnostics: collector
         )

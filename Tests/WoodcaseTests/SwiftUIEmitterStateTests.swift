@@ -183,7 +183,7 @@ struct SwiftUIEmitterStateTests {
 
     @Test("The support file reads and pins a control's state")
     func supportTemplate() throws {
-        let support = try #require(SwiftUIEmitter.supportTemplates["PenSupport+States.swift"])
+        let support = try #require(SwiftUIEmitter.supportTemplates()["PenSupport+States.swift"])
         #expect(support.contains("public struct PenControlState: OptionSet"))
         #expect(support.contains("public extension View {\n    /// Draws the generated controls"))
         #expect(support.contains("func penControlState(_ state: PenControlState) -> some View"))

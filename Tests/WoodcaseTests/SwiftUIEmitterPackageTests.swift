@@ -90,7 +90,7 @@ struct SwiftUIEmitterPackageTests {
 
     @Test("PenFonts registers every bundled font from its file URL, never from data")
     func penFontsRegistersFromURLs() throws {
-        let fonts = try #require(SwiftUIEmitter.supportTemplates["PenSupport+Fonts.swift"])
+        let fonts = try #require(SwiftUIEmitter.supportTemplates()["PenSupport+Fonts.swift"])
         #expect(fonts.contains("public enum PenFonts"))
         #expect(fonts.contains("public static func register()"))
         #expect(fonts.contains("CTFontManagerRegisterFontsForURL"))
@@ -100,9 +100,9 @@ struct SwiftUIEmitterPackageTests {
 
     @Test("A text face and an icon glyph both register the package's fonts before they draw")
     func facesRegisterFirst() throws {
-        let support = try #require(SwiftUIEmitter.supportTemplates["PenSupport.swift"])
+        let support = try #require(SwiftUIEmitter.supportTemplates()["PenSupport.swift"])
         #expect(support.contains("PenFonts.register()"))
-        let shape = try #require(SwiftUIEmitter.supportTemplates["PenSupport+Shape.swift"])
+        let shape = try #require(SwiftUIEmitter.supportTemplates()["PenSupport+Shape.swift"])
         #expect(shape.contains("PenFonts.font(file:"))
         #expect(!shape.contains("enum PenIconFonts"))
     }
@@ -128,7 +128,7 @@ struct SwiftUIEmitterPackageTests {
     private func emit(children: [String]) throws -> EmitResult {
         let json = ##"{"version": "2.17", "children": [{"type": "frame", "id": "root", "name": "Board", "children": [\##(children.joined(separator: ", "))]}]}"##
         let document = try PenParser.parse(Data(json.utf8))
-        return SwiftUIEmitter.emit(
+        return try SwiftUIEmitter.emit(
             document: document, components: [], pages: PageAnalyzer.analyze(document),
             theme: ThemeAnalyzer.analyze(document)
         )

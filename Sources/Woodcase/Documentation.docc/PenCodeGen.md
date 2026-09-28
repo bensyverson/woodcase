@@ -272,10 +272,11 @@ so components render with the correct theme.
 All viewer files use ``GeneratedFile/WritePolicy/scaffoldOnce`` except
 `viewer/components.ts`, which is regenerated on each run to match the current
 component and page list. Viewer templates are stored as bundled resources in
-`CodeGen/ViewerTemplates/` and loaded at runtime via `Bundle.module`.
+`CodeGen/ViewerTemplates/` and loaded at runtime through ``WoodcaseResources``, so
+`scaffold` throws ``WoodcaseResources/Missing`` when the resource bundle is not installed.
 
 ```swift
-let viewerFiles = ViewerScaffolder.scaffold(
+let viewerFiles = try ViewerScaffolder.scaffold(
     components: components, pages: pages, packageName: "@myorg/ui"
 )
 ```

@@ -204,7 +204,7 @@ struct SwiftUIEmitterNodeTests {
         let json = ##"{"version": "2.17", "children": [{"type": "frame", "id": "k", "name": "Card", "reusable": true}]}"##
         let document = try PenParser.parse(Data(json.utf8))
         let diagnostics = PenDiagnosticCollector()
-        let result = SwiftUIEmitter.emit(
+        let result = try SwiftUIEmitter.emit(
             document: document, components: ComponentAnalyzer.analyze(document), pages: [],
             theme: ThemeAnalyzer.analyze(document), diagnostics: diagnostics
         )
@@ -220,7 +220,7 @@ struct SwiftUIEmitterNodeTests {
     private func body(frame keys: String, diagnostics: PenDiagnosticCollector? = nil) throws -> String {
         let json = ##"{"version": "2.17", "children": [{"type": "frame", "id": "root", "name": "Board", \##(keys)}]}"##
         let document = try PenParser.parse(Data(json.utf8))
-        let result = SwiftUIEmitter.emit(
+        let result = try SwiftUIEmitter.emit(
             document: document, components: [], pages: PageAnalyzer.analyze(document),
             theme: ThemeAnalyzer.analyze(document), diagnostics: diagnostics
         )

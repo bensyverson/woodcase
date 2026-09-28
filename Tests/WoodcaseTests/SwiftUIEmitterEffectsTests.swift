@@ -278,7 +278,7 @@ struct SwiftUIEmitterEffectsTests {
     private func body(child: String, diagnostics: PenDiagnosticCollector? = nil) throws -> String {
         let json = ##"{"version": "2.19", "children": [{"type": "frame", "id": "root", "name": "Board", "children": [\##(child)]}]}"##
         let document = try PenParser.parse(Data(json.utf8))
-        let result = SwiftUIEmitter.emit(
+        let result = try SwiftUIEmitter.emit(
             document: document, components: [], pages: PageAnalyzer.analyze(document),
             theme: ThemeAnalyzer.analyze(document), diagnostics: diagnostics
         )

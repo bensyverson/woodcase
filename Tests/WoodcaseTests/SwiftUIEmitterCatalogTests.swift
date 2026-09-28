@@ -127,7 +127,7 @@ struct SwiftUIEmitterCatalogTests {
 
     @Test("Rows wrap at the width the window sets, and place as they were measured")
     func flowWrapsAtTheWindow() throws {
-        let layout = try #require(SwiftUIEmitter.supportTemplates["PenSupport+CatalogLayout.swift"])
+        let layout = try #require(SwiftUIEmitter.supportTemplates()["PenSupport+CatalogLayout.swift"])
         #expect(layout.contains("@Entry var penCatalogRowWidth"))
         #expect(layout.contains("environment(\\.penCatalogRowWidth, max(0, size.width - 2 * PenCatalogMetrics.margin))"))
         #expect(layout.contains("for (subview, frame) in zip(subviews, arrange(subviews, proposal: proposal))"))

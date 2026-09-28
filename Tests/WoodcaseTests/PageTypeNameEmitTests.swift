@@ -27,8 +27,8 @@ struct PageTypeNameEmitTests {
         return Dictionary(result.files.map { ($0.path, $0.content) }) { first, _ in first }
     }
 
-    private func swiftUI(_ doc: PenDocument) -> [String: String] {
-        let result = SwiftUIEmitter.emit(
+    private func swiftUI(_ doc: PenDocument) throws -> [String: String] {
+        let result = try SwiftUIEmitter.emit(
             document: doc, components: ComponentAnalyzer.analyze(doc), pages: PageAnalyzer.analyze(doc),
             theme: ThemeAnalyzer.analyze(doc)
         )

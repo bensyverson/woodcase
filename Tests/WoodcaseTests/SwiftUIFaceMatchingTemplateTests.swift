@@ -47,7 +47,7 @@
             defer { try? FileManager.default.removeItem(at: root) }
 
             var sources: [URL] = []
-            let files = SwiftUIEmitter.supportTemplates.merging([
+            let files = try SwiftUIEmitter.supportTemplates().merging([
                 "BundleShim.swift": SwiftUIRenderBatch.bundleShim(at: bundle),
                 "main.swift": Self.probe,
             ]) { $1 }

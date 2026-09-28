@@ -591,7 +591,12 @@ rebuild one fixture's views by hand: `woodcase generate swiftui <fixture> --outp
 Copying `.build/release/woodcase` aside to A/B it against another build (`scripts/perf-binary --binary`) leaves
 behind `Woodcase_Woodcase.bundle`, and `shot` then dies with *unable to find bundle named Woodcase_Woodcase* —
 `perf-binary` reports it as a fast `shot` with an exit code, easy to misread as a timing. Copy the bundle beside the
-binary. Separately, Instruments' Time Profiler records a SwiftPM binary's own frames as bare addresses; they need
+binary.
+
+> **2026-09-28:** since leaf `ZMvbBb` the bundle is found through `WoodcaseResources`, which throws instead of
+> trapping: a bare copy now exits 5 with *Woodcase's resources are missing* and never draws, so the misreading above
+> can only happen with an exit code you ignore. `scripts/install` and the Homebrew formula lay the bundle out beside
+> the real binary. Separately, Instruments' Time Profiler records a SwiftPM binary's own frames as bare addresses; they need
 `xctrace symbolicate --dsym <binary>.dSYM`, which `scripts/time-profile` does. Cost a round of A/B timings and an
 unreadable profile (leaf `KXKtc7`).
 

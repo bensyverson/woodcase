@@ -51,18 +51,19 @@ Woodcase includes a command-line tool that reads, edits and renders `.pen` files
 
 ### Install
 
-```bash
-swift package experimental-install --product woodcase
-# Binary is at ~/.swiftpm/bin/woodcase — add that directory to $PATH
-```
-
-Upgrading takes two commands, because installing over an existing copy is refused
-rather than silently replacing it:
+With Homebrew (macOS 15+, Xcode 26; builds from source):
 
 ```bash
-swift package experimental-uninstall woodcase && \
-swift package experimental-install --product woodcase
+brew install bensyverson/tap/woodcase
 ```
+
+Or from a checkout, which installs to `~/.local` (`--prefix` to change it) and upgrades in place when run again:
+
+```bash
+scripts/install
+```
+
+Either way the binary sits beside `Woodcase_Woodcase.bundle`, its icon fonts and code-generation templates. `swift package experimental-install` copies the binary without it, so `generate swiftui` and icon rendering fail.
 
 Or run it from the checkout without installing: `swift run woodcase --help`.
 
@@ -207,4 +208,4 @@ swift test
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE). Bundled fonts carry their own licenses in [LICENSES/](LICENSES/).

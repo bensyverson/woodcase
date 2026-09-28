@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# install — build woodcase in release and install it with its resource bundle.
+#
+# `swift package experimental-install` copies the executable alone, and woodcase needs
+# Woodcase_Woodcase.bundle (icon fonts, SwiftUI and viewer templates) beside it. This
+# lays an install out the way Homebrew does:
+#
+#     <prefix>/libexec/woodcase/woodcase
+#     <prefix>/libexec/woodcase/Woodcase_Woodcase.bundle
+#     <prefix>/bin/woodcase -> ../libexec/woodcase/woodcase
+#
+# Usage:
+#     scripts/install [--prefix <dir>]      build and install (default prefix: ~/.local)
+#     scripts/install --uninstall [--prefix <dir>]
+#
+# Re-running upgrades in place. The new binary and bundle are staged beside the old ones
+# and moved over them, never copied onto them: `cp` over a signed binary keeps its inode
+# and macOS kills the next launch (project/gotchas.md, 2026-08-31).
+#
+# Exits 0 on success, 2 on a usage error, 5 when the build or the installed binary fails.
+# Needs the Bash sandbox disabled for the build (project/agents/harness.md).
+set -euo pipefail
+
+prefix="${HOME}/.local"
+uninstall=false
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --prefix)
+            [[ $# -ge 2 ]] || { echo "install: --prefix needs a directory" >&2; exit 2; }
+            prefix="$2"
+            shift 2
+            ;;
+        --uninstall) uninstall=true; shift ;;
+        -h|--help) sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        *) echo "install: unknown argument '$1' (try --help)" >&2; exit 2 ;;
+    esac
+done
+
+bundle_name="Woodcase_Woodcase.bundle"
+libexec="${prefix}/libexec/woodcase"
+bin="${prefix}/bin"
+
+if $uninstall; then
+    rm -f "${bin}/woodcase"
+    rm -rf "${libexec}"
+    echo "Removed ${bin}/woodcase and ${libexec}"
+    exit 0
+fi
+
+repo="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$repo"
+
+echo "Building woodcase (release)…"
+swift build -c release --product woodcase || exit 5
+products="$(swift build -c release --show-bin-path)"
+[[ -x "${products}/woodcase" && -d "${products}/${bundle_name}" ]] || {
+    echo "install: the build left no woodcase and ${bundle_name} in ${products}" >&2
+    exit 5
+}
+
+mkdir -p "${libexec}" "${bin}"
+stage="$(mktemp -d "${libexec}/.stage.XXXXXX")"
+trap 'rm -rf "${stage}"' EXIT
+cp "${products}/woodcase" "${stage}/woodcase"
+cp -R "${products}/${bundle_name}" "${stage}/${bundle_name}"
+
+mv -f "${stage}/woodcase" "${libexec}/woodcase"
+rm -rf "${libexec}/${bundle_name}"
+mv "${stage}/${bundle_name}" "${libexec}/${bundle_name}"
+ln -sfn "../libexec/woodcase/woodcase" "${bin}/woodcase"
+
+version="$("${bin}/woodcase" --version)" || {
+    echo "install: ${bin}/woodcase did not run" >&2
+    exit 5
+}
+echo "Installed woodcase ${version} to ${bin}/woodcase"
+
+found="$(command -v woodcase || true)"
+if [[ -z "$found" ]]; then
+    echo "note: ${bin} is not on your PATH; add it to use woodcase by name"
+elif [[ "$found" != "${bin}/woodcase" ]]; then
+    echo "note: \`woodcase\` on your PATH is ${found}, which shadows this install."
+    if [[ "$found" == "${HOME}/.swiftpm/bin/woodcase" ]]; then
+        echo "      Remove it with: swift package experimental-uninstall woodcase"
+    fi
+fi

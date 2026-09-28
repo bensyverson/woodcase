@@ -57,8 +57,8 @@ struct ViewerScaffolderTests {
         components: [ComponentDefinition]? = nil,
         pages: [PageDefinition]? = nil,
         packageName: String = "@test/ui"
-    ) -> [GeneratedFile] {
-        ViewerScaffolder.scaffold(
+    ) throws -> [GeneratedFile] {
+        try ViewerScaffolder.scaffold(
             components: components ?? sampleComponents(),
             pages: pages ?? samplePages(),
             packageName: packageName
@@ -72,8 +72,8 @@ struct ViewerScaffolderTests {
     // MARK: - File generation
 
     @Test("Generates all expected viewer files")
-    func generatesAllFiles() {
-        let result = scaffold()
+    func generatesAllFiles() throws {
+        let result = try scaffold()
         let paths = Set(result.map(\.path))
         #expect(paths.contains("viewer/package.json"))
         #expect(paths.contains("viewer/vite.config.ts"))
@@ -87,8 +87,8 @@ struct ViewerScaffolderTests {
     // MARK: - Write policies
 
     @Test("Scaffold files use scaffoldOnce policy")
-    func scaffoldFilesPolicy() {
-        let result = scaffold()
+    func scaffoldFilesPolicy() throws {
+        let result = try scaffold()
         let scaffoldPaths = [
             "viewer/package.json",
             "viewer/vite.config.ts",
@@ -105,7 +105,7 @@ struct ViewerScaffolderTests {
 
     @Test("components.ts uses .always write policy")
     func componentsRegistryPolicy() throws {
-        let result = scaffold()
+        let result = try scaffold()
         let registry = try #require(file(named: "viewer/components.ts", in: result))
         #expect(registry.writePolicy == .always)
     }
@@ -114,7 +114,7 @@ struct ViewerScaffolderTests {
 
     @Test("components.ts imports all components from barrel export")
     func componentsImports() throws {
-        let result = scaffold()
+        let result = try scaffold()
         let registry = try #require(file(named: "viewer/components.ts", in: result))
         #expect(registry.content.contains("import { ActionButton } from \"../src/components/ActionButton\""))
         #expect(registry.content.contains("import { ScreenRatings } from \"../src/components/ScreenRatings\""))
@@ -122,14 +122,14 @@ struct ViewerScaffolderTests {
 
     @Test("components.ts imports pages")
     func pagesImports() throws {
-        let result = scaffold()
+        let result = try scaffold()
         let registry = try #require(file(named: "viewer/components.ts", in: result))
         #expect(registry.content.contains("import { Home } from \"../src/pages/Home\""))
     }
 
     @Test("components.ts exports components registry object")
     func componentsExport() throws {
-        let result = scaffold()
+        let result = try scaffold()
         let registry = try #require(file(named: "viewer/components.ts", in: result))
         #expect(registry.content.contains("export const components"))
         #expect(registry.content.contains("ActionButton"))
@@ -138,7 +138,7 @@ struct ViewerScaffolderTests {
 
     @Test("components.ts exports pages registry object")
     func pagesExport() throws {
-        let result = scaffold()
+        let result = try scaffold()
         let registry = try #require(file(named: "viewer/components.ts", in: result))
         #expect(registry.content.contains("export const pages"))
         #expect(registry.content.contains("Home"))
@@ -148,7 +148,7 @@ struct ViewerScaffolderTests {
 
     @Test("viewer/package.json includes react and vite dependencies")
     func viewerPackageJson() throws {
-        let result = scaffold()
+        let result = try scaffold()
         let pkg = try #require(file(named: "viewer/package.json", in: result))
         #expect(pkg.content.contains("\"react\""))
         #expect(pkg.content.contains("\"react-dom\""))
@@ -162,7 +162,7 @@ struct ViewerScaffolderTests {
 
     @Test("vite.config.ts allows parent directory access")
     func viteConfigParentAccess() throws {
-        let result = scaffold()
+        let result = try scaffold()
         let vite = try #require(file(named: "viewer/vite.config.ts", in: result))
         #expect(vite.content.contains("fs:"))
         #expect(vite.content.contains("allow"))
@@ -173,7 +173,7 @@ struct ViewerScaffolderTests {
 
     @Test("index.html has root div and script tag")
     func indexHtml() throws {
-        let result = scaffold()
+        let result = try scaffold()
         let html = try #require(file(named: "viewer/index.html", in: result))
         #expect(html.content.contains("<div id=\"root\">"))
         #expect(html.content.contains("src=\"/main.tsx\""))
@@ -183,7 +183,7 @@ struct ViewerScaffolderTests {
 
     @Test("main.tsx imports theme.css and renders App")
     func mainTsx() throws {
-        let result = scaffold()
+        let result = try scaffold()
         let main = try #require(file(named: "viewer/main.tsx", in: result))
         #expect(main.content.contains("../theme.css"))
         #expect(main.content.contains("<App"))
@@ -193,7 +193,7 @@ struct ViewerScaffolderTests {
 
     @Test("App.tsx contains viewer shell structure")
     func appTsx() throws {
-        let result = scaffold()
+        let result = try scaffold()
         let app = try #require(file(named: "viewer/App.tsx", in: result))
         // Should have key viewer elements
         #expect(app.content.contains("manifest"))
@@ -204,7 +204,7 @@ struct ViewerScaffolderTests {
 
     @Test("Empty components and pages produces valid registry")
     func emptyInputs() throws {
-        let result = scaffold(components: [], pages: [])
+        let result = try scaffold(components: [], pages: [])
         let registry = try #require(file(named: "viewer/components.ts", in: result))
         #expect(registry.content.contains("export const components"))
         #expect(registry.content.contains("export const pages"))

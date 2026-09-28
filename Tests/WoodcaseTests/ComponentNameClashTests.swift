@@ -81,7 +81,7 @@ struct ComponentNameClashTests {
         let components = ComponentAnalyzer.analyze(doc)
         let typeNames = SwiftUIEmitter.componentTypeNames(components)
         #expect(typeNames == ["A": "FooBar", "B": "Foobar2"])
-        let files = SwiftUIEmitter.emit(
+        let files = try SwiftUIEmitter.emit(
             document: doc, components: components, pages: [], theme: ThemeAnalyzer.analyze(doc)
         ).files
         #expect(files.contains { $0.path == "Sources/PenUI/Components/FooBar.swift" })

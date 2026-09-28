@@ -43,7 +43,7 @@ enum SwiftUIFixtures {
         diagnostics: PenDiagnosticCollector? = nil
     ) throws -> EmitResult {
         let document = try document(name)
-        return SwiftUIEmitter.emit(
+        return try SwiftUIEmitter.emit(
             document: document,
             components: ComponentAnalyzer.analyze(document),
             pages: PageAnalyzer.analyze(document),

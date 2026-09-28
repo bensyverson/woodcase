@@ -88,7 +88,7 @@ extension Generate {
             }.value
 
             let diagnostics = PenDiagnosticCollector()
-            let result = SwiftUIEmitter.emit(
+            let result = try SwiftUIEmitter.emit(
                 document: document,
                 components: ComponentAnalyzer.analyze(document),
                 pages: PageAnalyzer.analyze(document),

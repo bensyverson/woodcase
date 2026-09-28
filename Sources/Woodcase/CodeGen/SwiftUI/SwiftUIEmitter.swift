@@ -55,6 +55,8 @@ public enum SwiftUIEmitter {
     ///   (``GoogleFontResolver/fontBundle(for:declaredIn:relativeTo:)``) into
     ///   `Sources/<module>/Resources/`; the views load them from `Bundle.module`, and the
     ///   support file registers every font there (`PenFonts`).
+    /// - Throws: ``WoodcaseResources/Missing`` when the support templates cannot be read
+    ///   because the resource bundle is not installed.
     public static func emit(
         document: PenDocument,
         components: [ComponentDefinition],
@@ -62,7 +64,8 @@ public enum SwiftUIEmitter {
         theme themeManifest: ThemeManifest,
         options: Options = Options(),
         diagnostics: PenDiagnosticCollector? = nil
-    ) -> EmitResult {
+    ) throws -> EmitResult {
+        let templates = try supportTemplates()
         let typeNames = componentTypeNames(components)
         let theme = SwiftUITheme(themeManifest)
         for problem in theme?.problems ?? [] {
@@ -99,8 +102,8 @@ public enum SwiftUIEmitter {
             files.append(GeneratedFile(path: "\(root)/Theme/PenTheme.swift", content: theme.themeSource))
             files.append(GeneratedFile(path: "\(root)/Theme/PenTheme+Environment.swift", content: theme.environmentSource))
         }
-        for name in supportTemplates.keys.sorted() {
-            files.append(GeneratedFile(path: "\(root)/Support/\(name)", content: supportTemplates[name] ?? ""))
+        for name in templates.keys.sorted() {
+            files.append(GeneratedFile(path: "\(root)/Support/\(name)", content: templates[name] ?? ""))
         }
         let emitted = components.compactMap { scope.components[$0.id] }
         files += catalog(components: emitted, pages: pageTypes, drawn: drawn, theme: theme).files(module: options.moduleName)

@@ -12,8 +12,19 @@ extension SwiftUIEmitter {
     /// `PenSupport.swift` is the core; each concern the views need beyond SwiftUI adds its own
     /// `PenSupport+<Concern>.swift` beside it. These are the only files that may branch on
     /// `#available`, so a lower deployment floor costs no change anywhere else.
-    static let supportTemplates: [String: String] = {
-        let urls = Bundle.module.urls(forResourcesWithExtension: "swift", subdirectory: "SwiftUITemplates") ?? []
+    ///
+    /// - Returns: The templates, read once per process.
+    /// - Throws: ``WoodcaseResources/Missing`` when the resource bundle cannot be found.
+    static func supportTemplates() throws -> [String: String] {
+        try loadedSupportTemplates.get()
+    }
+
+    private static let loadedSupportTemplates: Result<[String: String], WoodcaseResources.Missing> = Result {
+        try readSupportTemplates(from: WoodcaseResources.bundle())
+    }.mapError { $0 as? WoodcaseResources.Missing ?? WoodcaseResources.Missing(searched: []) }
+
+    private static func readSupportTemplates(from bundle: Bundle) -> [String: String] {
+        let urls = bundle.urls(forResourcesWithExtension: "swift", subdirectory: "SwiftUITemplates") ?? []
         var templates: [String: String] = [:]
         for url in urls {
             guard let content = try? String(contentsOf: url, encoding: .utf8) else {
@@ -25,7 +36,7 @@ extension SwiftUIEmitter {
             preconditionFailure("Missing SwiftUI template: PenSupport.swift")
         }
         return templates
-    }()
+    }
 
     /// A minimal `Package.swift`: one library of the module, which processes
     /// `Resources/`, and the `<module>Catalog` executable that opens its catalog, on the

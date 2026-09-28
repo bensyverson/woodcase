@@ -188,7 +188,7 @@
                   var page = PageAnalyzer.analyze(document).first(where: { $0.id == root.id })
             else { throw BoardError.noPage(id) }
             page.name = type
-            let result = SwiftUIEmitter.emit(
+            let result = try SwiftUIEmitter.emit(
                 document: document, components: [], pages: [page], theme: ThemeAnalyzer.analyze(document)
             )
             let files = result.files

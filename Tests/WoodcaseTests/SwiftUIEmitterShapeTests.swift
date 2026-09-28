@@ -109,7 +109,7 @@ struct SwiftUIEmitterShapeTests {
 
     @Test("The support file defines penOutset, which draws a shape inset in the box it is offered")
     func supportDefinesOutset() throws {
-        let support = try #require(SwiftUIEmitter.supportTemplates["PenSupport+Shape.swift"])
+        let support = try #require(SwiftUIEmitter.supportTemplates()["PenSupport+Shape.swift"])
         #expect(support.contains("func penOutset(dx: CGFloat, dy: CGFloat) -> PenOutsetShape<Self>"))
         #expect(support.contains("struct PenOutsetShape<S: Shape>: Shape"))
     }
@@ -118,7 +118,7 @@ struct SwiftUIEmitterShapeTests {
     /// Pen draws a Material Symbols icon at the font's default optical size at every size.
     @Test("The support file draws an icon font with automatic optical sizing off")
     func supportPinsIconOpticalSize() throws {
-        let fonts = try #require(SwiftUIEmitter.supportTemplates["PenSupport+Fonts.swift"])
+        let fonts = try #require(SwiftUIEmitter.supportTemplates()["PenSupport+Fonts.swift"])
         let body = try #require(fonts.firstRange(of: "static func font(file: String").map { fonts[$0.lowerBound...] })
         let function = try body[..<#require(body.firstRange(of: "\n    }\n")).lowerBound]
         #expect(function.contains("kCTFontOpticalSizeAttribute: \"none\""))
@@ -198,7 +198,7 @@ struct SwiftUIEmitterShapeTests {
 
     @Test("The support files carry the fitted path and the icon shape")
     func supportFiles() throws {
-        let shape = try #require(SwiftUIEmitter.supportTemplates["PenSupport+Shape.swift"])
+        let shape = try #require(SwiftUIEmitter.supportTemplates()["PenSupport+Shape.swift"])
         #expect(shape.contains("func penFitted(from size: CGSize, to rect: CGRect) -> Path"))
         #expect(shape.contains("struct PenIconShape: Shape"))
     }
@@ -212,7 +212,7 @@ struct SwiftUIEmitterShapeTests {
     private func emit(child: String, diagnostics: PenDiagnosticCollector? = nil) throws -> EmitResult {
         let json = ##"{"version": "2.19", "children": [{"type": "frame", "id": "root", "name": "Board", "children": [\##(child)]}]}"##
         let document = try PenParser.parse(Data(json.utf8))
-        return SwiftUIEmitter.emit(
+        return try SwiftUIEmitter.emit(
             document: document, components: [], pages: PageAnalyzer.analyze(document),
             theme: ThemeAnalyzer.analyze(document), diagnostics: diagnostics
         )

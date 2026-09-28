@@ -88,11 +88,15 @@ final class CommandFixture: Sendable {
     ///     `WOODCASE_HOME` and `HOME` already point inside ``root``.
     ///   - stdin: Bytes to write to the process's standard input, then close — for a
     ///     verb read with `-F -`. `nil` (the default) leaves standard input untouched.
+    ///   - binary: The executable to run instead of the built one — a copy, or a
+    ///     symlink, laid out the way an install lays it out.
     /// - Returns: What the process printed and the status it exited with.
     /// - Throws: ``CommandFixture/LaunchFailure`` if the binary cannot be found, or
     ///   whatever `Process` throws if it cannot be launched.
-    func run(_ arguments: [String], environment: [String: String] = [:], stdin: Data? = nil) throws -> CommandRun {
-        let binary = try Self.binary()
+    func run(
+        _ arguments: [String], environment: [String: String] = [:], stdin: Data? = nil, binary: URL? = nil
+    ) throws -> CommandRun {
+        let binary = try binary ?? Self.binary()
         let outURL = root.appendingPathComponent("stdout-\(UUID().uuidString).txt")
         let errURL = root.appendingPathComponent("stderr-\(UUID().uuidString).txt")
         FileManager.default.createFile(atPath: outURL.path, contents: nil)

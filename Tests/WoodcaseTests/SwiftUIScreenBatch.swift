@@ -94,7 +94,7 @@
                 let instance = try #require(document.children.first { $0.id == screen.instanceID }, "no instance \(screen.instanceID)")
                 return PageDefinition(id: screen.instanceID, name: screen.pageName, sourceNode: instance)
             }
-            let result = SwiftUIEmitter.emit(
+            let result = try SwiftUIEmitter.emit(
                 document: document, components: components, pages: pages, theme: ThemeAnalyzer.analyze(document)
             )
             // The library's files only: the catalog executable's main.swift would be a second

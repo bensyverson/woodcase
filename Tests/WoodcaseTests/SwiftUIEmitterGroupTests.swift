@@ -198,14 +198,14 @@ struct SwiftUIEmitterGroupTests {
 
     @Test("The support file defines the group shadow modifier and its style")
     func supportDefinesGroupShadows() throws {
-        let support = try #require(SwiftUIEmitter.supportTemplates["PenSupport+Group.swift"])
+        let support = try #require(SwiftUIEmitter.supportTemplates()["PenSupport+Group.swift"])
         #expect(support.contains("struct PenShadowStyle"))
         #expect(support.contains("func penGroupShadows("))
     }
 
     @Test("The support file defines the layout a group in a stack uses")
     func supportDefinesGroupFlow() throws {
-        let support = try #require(SwiftUIEmitter.supportTemplates["PenSupport+GroupFlow.swift"])
+        let support = try #require(SwiftUIEmitter.supportTemplates()["PenSupport+GroupFlow.swift"])
         #expect(support.contains("struct PenGroupFlow: Layout"))
     }
 
@@ -228,7 +228,7 @@ struct SwiftUIEmitterGroupTests {
     private func body(child: String, layout: String = "none", diagnostics: PenDiagnosticCollector? = nil) throws -> String {
         let json = ##"{"version": "2.19", "children": [{"type": "frame", "id": "root", "name": "Board", "layout": "\##(layout)", "children": [\##(child)]}]}"##
         let document = try PenParser.parse(Data(json.utf8))
-        let result = SwiftUIEmitter.emit(
+        let result = try SwiftUIEmitter.emit(
             document: document, components: [], pages: PageAnalyzer.analyze(document),
             theme: ThemeAnalyzer.analyze(document), diagnostics: diagnostics
         )

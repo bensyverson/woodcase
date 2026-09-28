@@ -64,7 +64,10 @@ extension SwiftUIEmitter {
     static let supportTypeNames: Set<String> = {
         let declaration = /^(?:(?:public|internal|fileprivate|private|final)\s+)*(?:struct|enum|class|actor|protocol|typealias)\s+([A-Z][A-Za-z0-9_]*)/
         var names: Set<String> = []
-        for template in supportTemplates.values {
+        // Read only after `emit` has loaded the templates, so a missing bundle has
+        // already thrown by the time a name is checked against these.
+        let templates = (try? supportTemplates()) ?? [:]
+        for template in templates.values {
             for line in template.split(separator: "\n") {
                 if let match = line.prefixMatch(of: declaration) {
                     names.insert(String(match.1))

@@ -127,7 +127,7 @@ struct SwiftUIEmitterStrokeTests {
         #expect(!inner.contains(".penPaintBleed"))
         let image = try body(child: rect(##""stroke": {"type": "image", "url": "./a.png"}, "strokeWidth": 24"##))
         #expect(!image.contains(".penPaintBleed"))
-        #expect(try #require(SwiftUIEmitter.supportTemplates["PenSupport+Paint.swift"]).contains("func penPaintBleed("))
+        #expect(try #require(SwiftUIEmitter.supportTemplates()["PenSupport+Paint.swift"]).contains("func penPaintBleed("))
     }
 
     @Test("A stroke's image is bundled with the package, like a fill's")
@@ -260,7 +260,7 @@ struct SwiftUIEmitterStrokeTests {
 
     @Test("The support files carry the stroke shapes")
     func supportFiles() throws {
-        let support = SwiftUIEmitter.supportTemplates
+        let support = try SwiftUIEmitter.supportTemplates()
         let stroke = try #require(support["PenSupport+Stroke.swift"])
         #expect(stroke.contains("struct PenStrokeRegion"))
         #expect(stroke.contains("enum PenStrokeAlignment"))
@@ -278,7 +278,7 @@ struct SwiftUIEmitterStrokeTests {
     private func body(child: String, diagnostics: PenDiagnosticCollector? = nil) throws -> String {
         let json = ##"{"version": "2.19", "children": [{"type": "frame", "id": "root", "name": "Board", "children": [\##(child)]}]}"##
         let document = try PenParser.parse(Data(json.utf8))
-        let result = SwiftUIEmitter.emit(
+        let result = try SwiftUIEmitter.emit(
             document: document, components: [], pages: PageAnalyzer.analyze(document),
             theme: ThemeAnalyzer.analyze(document), diagnostics: diagnostics
         )

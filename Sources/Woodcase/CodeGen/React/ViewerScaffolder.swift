@@ -19,11 +19,13 @@ public enum ViewerScaffolder {
     ///   - pages: The analyzed page definitions.
     ///   - packageName: The npm package name (for display in the viewer).
     /// - Returns: Generated files for the viewer directory.
+    /// - Throws: ``WoodcaseResources/Missing`` when the templates cannot be read because
+    ///   the resource bundle is not installed.
     public static func scaffold(
         components: [ComponentDefinition],
         pages: [PageDefinition],
         packageName: String
-    ) -> [GeneratedFile] {
+    ) throws -> [GeneratedFile] {
         var files: [GeneratedFile] = []
 
         // Scaffold-once files loaded from bundled templates
@@ -36,7 +38,7 @@ public enum ViewerScaffolder {
         ]
 
         for entry in templateFiles {
-            let content = loadTemplate(named: entry.templateName)
+            let content = try loadTemplate(named: entry.templateName)
             files.append(GeneratedFile(
                 path: entry.outputPath,
                 content: content,
@@ -45,7 +47,7 @@ public enum ViewerScaffolder {
         }
 
         // App.tsx needs package name substitution
-        let appTemplate = loadTemplate(named: "App.tsx")
+        let appTemplate = try loadTemplate(named: "App.tsx")
         let appContent = appTemplate.replacingOccurrences(
             of: "{{packageName}}", with: escapedForJSX(packageName)
         )
@@ -66,8 +68,8 @@ public enum ViewerScaffolder {
 
     // MARK: - Template Loading
 
-    private static func loadTemplate(named name: String) -> String {
-        guard let url = Bundle.module.url(
+    private static func loadTemplate(named name: String) throws -> String {
+        guard let url = try WoodcaseResources.bundle().url(
             forResource: name, withExtension: nil,
             subdirectory: "ViewerTemplates"
         ) else {

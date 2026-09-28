@@ -31,3 +31,6 @@ project/2026-04-01-text-editing-research.md
 .jobs.db*
 # This machine's replica id, identity and focus
 .jobs/local.json
+
+# Claude Code settings local to this machine
+.claude/settings.local.json

@@ -14,18 +14,23 @@ and the addressing vocabulary — but everything it does is equally usable from 
 
 ## Installation
 
-```bash
-swift package experimental-install --product woodcase
-# Binary is at ~/.swiftpm/bin/woodcase — add that directory to $PATH
-```
-
-Installing over an existing copy is refused rather than silently replacing it
-(`error: woodcase is already installed at …`), so upgrading is two commands:
+With Homebrew (builds from source; needs Xcode 26 or later):
 
 ```bash
-swift package experimental-uninstall woodcase
-swift package experimental-install --product woodcase
+brew install bensyverson/tap/woodcase
 ```
+
+Or from a checkout, into `~/.local` (`--prefix` to change it); running it again upgrades in place:
+
+```bash
+scripts/install
+```
+
+Both lay the install out as `libexec/woodcase/woodcase` beside `Woodcase_Woodcase.bundle`, with
+`bin/woodcase` a symlink to it. The bundle holds the icon fonts and the SwiftUI and viewer templates, and
+the binary finds it through ``WoodcaseResources``. `swift package experimental-install` copies the binary
+alone: such a copy edits and lints, but `generate swiftui`, `generate react --viewer` and icon rendering
+fail with *Woodcase's resources are missing* (exit 5).
 
 Or build and run from the checkout without installing:
 

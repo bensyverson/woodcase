@@ -45,6 +45,7 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 - <doc:PenRemoteImages>
 - <doc:PenImportNamespaces>
 - <doc:PenInteroperability>
+- ``WoodcaseResources``
 
 ### Pipeline Stages
 

@@ -37,7 +37,7 @@ struct SwiftUIEmitterTests {
         // Resources/ is always written, so the directory Package.swift declares exists.
         #expect(views == ["Package.swift", "Sources/Acme/Pages/LayoutNested.swift", "Sources/Acme/Resources/.gitkeep"])
         // Every template, one file per concern; PenSupport.swift is always among them.
-        let support = SwiftUIEmitter.supportTemplates.keys.sorted().map { "Sources/Acme/Support/\($0)" }
+        let support = try SwiftUIEmitter.supportTemplates().keys.sorted().map { "Sources/Acme/Support/\($0)" }
         #expect(paths.filter { $0.contains("/Support/") } == support)
         #expect(support.contains("Sources/Acme/Support/PenSupport.swift"))
     }
@@ -70,16 +70,16 @@ struct SwiftUIEmitterTests {
     func supportFilesAreTheTemplates() throws {
         let emitted = try SwiftUIFixtures.emit("render-text").files.filter { $0.path.contains("/Support/") }
         let names = emitted.map { URL(fileURLWithPath: $0.path).lastPathComponent }
-        #expect(names == SwiftUIEmitter.supportTemplates.keys.sorted())
+        #expect(try names == SwiftUIEmitter.supportTemplates().keys.sorted())
         for file in emitted {
             let name = URL(fileURLWithPath: file.path).lastPathComponent
-            #expect(file.content == SwiftUIEmitter.supportTemplates[name], "\(name) is not its template")
+            #expect(try file.content == SwiftUIEmitter.supportTemplates()[name], "\(name) is not its template")
         }
     }
 
     @Test("PenSupport.swift holds the availability branches and the font face")
     func penSupportHoldsTheBranches() throws {
-        let support = try #require(SwiftUIEmitter.supportTemplates["PenSupport.swift"])
+        let support = try #require(SwiftUIEmitter.supportTemplates()["PenSupport.swift"])
         #expect(support.contains("import SwiftUI"))
         #expect(support.contains("#available(iOS 26, macOS 26, *)"))
         #expect(support.contains("kCTFontOpticalSizeAttribute"))

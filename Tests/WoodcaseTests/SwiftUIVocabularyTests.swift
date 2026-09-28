@@ -26,7 +26,7 @@ struct SwiftUIVocabularyTests {
     /// The emitted sources: every support template and every `.swift.golden` under
     /// `golden/swiftui/`, by name.
     private static let emitted: [String: String] = {
-        var sources = SwiftUIEmitter.supportTemplates
+        var sources = try! SwiftUIEmitter.supportTemplates() // WoodcaseResourcesTests covers a missing bundle
         let root = SwiftUIFixtures.directory.appendingPathComponent("golden/swiftui")
         let paths = FileManager.default.subpaths(atPath: root.path) ?? []
         for path in paths where path.hasSuffix(".swift.golden") {

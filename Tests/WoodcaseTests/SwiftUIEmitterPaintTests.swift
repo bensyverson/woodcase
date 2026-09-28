@@ -222,7 +222,7 @@ struct SwiftUIEmitterPaintTests {
 
     @Test("The paint support file draws Pen's gradient map and masks text paints")
     func supportTemplate() throws {
-        let support = try #require(SwiftUIEmitter.supportTemplates["PenSupport+Paint.swift"])
+        let support = try #require(SwiftUIEmitter.supportTemplates()["PenSupport+Paint.swift"])
         #expect(support.contains("struct PenGradient: View"))
         #expect(support.contains("func penTextFill"))
         #expect(support.contains("var gradient: AnyGradient"))
@@ -243,7 +243,7 @@ struct SwiftUIEmitterPaintTests {
     private func emit(child: String, frame keys: String = "", diagnostics: PenDiagnosticCollector? = nil) throws -> EmitResult {
         let json = ##"{"version": "2.17", "children": [{"type": "frame", "id": "root", "name": "Board", \##(keys)"children": [\##(child)]}]}"##
         let document = try PenParser.parse(Data(json.utf8))
-        return SwiftUIEmitter.emit(
+        return try SwiftUIEmitter.emit(
             document: document, components: [], pages: PageAnalyzer.analyze(document),
             theme: ThemeAnalyzer.analyze(document), diagnostics: diagnostics
         )

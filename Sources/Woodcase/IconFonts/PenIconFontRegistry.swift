@@ -179,16 +179,18 @@ public final class PenIconFontRegistry: Sendable {
     /// The bundled font file URLs backing a built-in family.
     ///
     /// These are the same files ``resolve(family:name:)`` registers with CoreText,
-    /// resolved via `Bundle.module` — useful for consumers (such as a WebView
+    /// resolved via ``WoodcaseResources`` — useful for consumers (such as a WebView
     /// harness) that need to load the actual font file rather than render with it.
     ///
     /// - Parameter family: The `.pen` family name.
     /// - Returns: File URLs into the package's bundled resources, or an empty
-    ///   array if `family` has no bundled fonts (e.g. a custom-registered family).
+    ///   array if `family` has no bundled fonts (e.g. a custom-registered family) or the
+    ///   resource bundle cannot be found.
     public func fontFileURLs(for family: String) -> [URL] {
-        guard let filenames = Self.builtInFontFiles[family] else { return [] }
+        guard let filenames = Self.builtInFontFiles[family],
+              let bundle = try? WoodcaseResources.bundle() else { return [] }
         return filenames.compactMap { filename in
-            Bundle.module.url(forResource: filename, withExtension: nil, subdirectory: "Fonts")
+            bundle.url(forResource: filename, withExtension: nil, subdirectory: "Fonts")
         }
     }
 
