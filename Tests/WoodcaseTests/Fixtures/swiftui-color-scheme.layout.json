@@ -1,0 +1,32 @@
+{
+  "CsUnf": {
+    "x": 0,
+    "y": 0,
+    "width": 240,
+    "height": 80
+  },
+  "CsTx1": {
+    "x": 12,
+    "y": 12,
+    "width": 66,
+    "height": 53
+  },
+  "CsIc1": {
+    "x": 160,
+    "y": 12,
+    "width": 56,
+    "height": 56
+  },
+  "CsMsh": {
+    "x": 300,
+    "y": 0,
+    "width": 160,
+    "height": 120
+  },
+  "CsMsD": {
+    "x": 500,
+    "y": 0,
+    "width": 160,
+    "height": 120
+  }
+}

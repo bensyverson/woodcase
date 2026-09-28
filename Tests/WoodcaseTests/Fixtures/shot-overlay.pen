@@ -1,0 +1,36 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "fill": "#E23B3B",
+          "height": 120,
+          "id": "RctA1",
+          "name": "A",
+          "type": "rectangle",
+          "width": 160,
+          "x": 40,
+          "y": 40
+        },
+        {
+          "fill": "#3B6FE2",
+          "height": 80,
+          "id": "RctB1",
+          "name": "B",
+          "type": "rectangle",
+          "width": 120,
+          "x": 240,
+          "y": 180
+        }
+      ],
+      "fill": "#F0F0F0",
+      "height": 300,
+      "id": "Brd01",
+      "layout": "none",
+      "name": "Board",
+      "type": "frame",
+      "width": 400
+    }
+  ],
+  "version": "2.17"
+}

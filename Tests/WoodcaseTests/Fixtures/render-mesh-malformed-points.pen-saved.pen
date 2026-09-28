@@ -1,0 +1,612 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "xA000",
+      "x": 0,
+      "y": 0,
+      "name": "control",
+      "width": 150,
+      "height": 100,
+      "fill": {
+        "type": "mesh_gradient",
+        "enabled": true,
+        "columns": 3,
+        "rows": 2,
+        "colors": [
+          "#FF0000",
+          "#00FF00",
+          "#0000FF",
+          "#FFFF00",
+          "#00FFFF",
+          "#FF00FF"
+        ],
+        "points": [
+          [
+            0,
+            0
+          ],
+          [
+            0.3,
+            0.2
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0.7,
+            0.8
+          ],
+          [
+            1,
+            1
+          ]
+        ]
+      }
+    },
+    {
+      "type": "frame",
+      "id": "xA001",
+      "x": 200,
+      "y": 0,
+      "name": "string",
+      "width": 150,
+      "height": 100,
+      "fill": {
+        "type": "mesh_gradient",
+        "enabled": true,
+        "columns": 3,
+        "rows": 2,
+        "colors": [
+          "#FF0000",
+          "#00FF00",
+          "#0000FF",
+          "#FFFF00",
+          "#00FFFF",
+          "#FF00FF"
+        ],
+        "points": [
+          [
+            0,
+            0
+          ],
+          [
+            0.5,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0.7,
+            0.8
+          ],
+          [
+            1,
+            1
+          ]
+        ]
+      }
+    },
+    {
+      "type": "frame",
+      "id": "xA002",
+      "x": 400,
+      "y": 0,
+      "name": "null",
+      "width": 150,
+      "height": 100,
+      "fill": {
+        "type": "mesh_gradient",
+        "enabled": true,
+        "columns": 3,
+        "rows": 2,
+        "colors": [
+          "#FF0000",
+          "#00FF00",
+          "#0000FF",
+          "#FFFF00",
+          "#00FFFF",
+          "#FF00FF"
+        ],
+        "points": [
+          [
+            0,
+            0
+          ],
+          [
+            0.3,
+            0.2
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0.5,
+            1
+          ],
+          [
+            1,
+            1
+          ]
+        ]
+      }
+    },
+    {
+      "type": "frame",
+      "id": "xA003",
+      "x": 600,
+      "y": 0,
+      "name": "no-position",
+      "width": 150,
+      "height": 100,
+      "fill": {
+        "type": "mesh_gradient",
+        "enabled": true,
+        "columns": 3,
+        "rows": 2,
+        "colors": [
+          "#FF0000",
+          "#00FF00",
+          "#0000FF",
+          "#FFFF00",
+          "#00FFFF",
+          "#FF00FF"
+        ],
+        "points": [
+          [
+            0,
+            0
+          ],
+          {
+            "position": [
+              0.5,
+              0
+            ],
+            "leftHandle": [
+              -0.3,
+              0.2
+            ]
+          },
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0.7,
+            0.8
+          ],
+          [
+            1,
+            1
+          ]
+        ]
+      }
+    },
+    {
+      "type": "frame",
+      "id": "xA004",
+      "x": 0,
+      "y": 200,
+      "name": "long",
+      "width": 150,
+      "height": 100,
+      "fill": {
+        "type": "mesh_gradient",
+        "enabled": true,
+        "columns": 3,
+        "rows": 2,
+        "colors": [
+          "#FF0000",
+          "#00FF00",
+          "#0000FF",
+          "#FFFF00",
+          "#00FFFF",
+          "#FF00FF"
+        ],
+        "points": [
+          [
+            0,
+            0
+          ],
+          [
+            0.3,
+            0.2
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0.7,
+            0.8
+          ],
+          [
+            1,
+            1
+          ]
+        ]
+      }
+    },
+    {
+      "type": "frame",
+      "id": "xA005",
+      "x": 200,
+      "y": 200,
+      "name": "null-number",
+      "width": 150,
+      "height": 100,
+      "fill": {
+        "type": "mesh_gradient",
+        "enabled": true,
+        "columns": 3,
+        "rows": 2,
+        "colors": [
+          "#FF0000",
+          "#00FF00",
+          "#0000FF",
+          "#FFFF00",
+          "#00FFFF",
+          "#FF00FF"
+        ],
+        "points": [
+          [
+            0,
+            0
+          ],
+          [
+            0.3,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0.7,
+            0.8
+          ],
+          [
+            1,
+            1
+          ]
+        ]
+      }
+    },
+    {
+      "type": "frame",
+      "id": "xA006",
+      "x": 400,
+      "y": 200,
+      "name": "booleans",
+      "width": 150,
+      "height": 100,
+      "fill": {
+        "type": "mesh_gradient",
+        "enabled": true,
+        "columns": 3,
+        "rows": 2,
+        "colors": [
+          "#FF0000",
+          "#00FF00",
+          "#0000FF",
+          "#FFFF00",
+          "#00FFFF",
+          "#FF00FF"
+        ],
+        "points": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0.7,
+            0.8
+          ],
+          [
+            1,
+            1
+          ]
+        ]
+      }
+    },
+    {
+      "type": "frame",
+      "id": "xA007",
+      "x": 600,
+      "y": 200,
+      "name": "long-handle",
+      "width": 150,
+      "height": 100,
+      "fill": {
+        "type": "mesh_gradient",
+        "enabled": true,
+        "columns": 3,
+        "rows": 2,
+        "colors": [
+          "#FF0000",
+          "#00FF00",
+          "#0000FF",
+          "#FFFF00",
+          "#00FFFF",
+          "#FF00FF"
+        ],
+        "points": [
+          [
+            0,
+            0
+          ],
+          {
+            "position": [
+              0.3,
+              0.2
+            ],
+            "leftHandle": [
+              -0.3,
+              0.2
+            ]
+          },
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0.7,
+            0.8
+          ],
+          [
+            1,
+            1
+          ]
+        ]
+      }
+    },
+    {
+      "type": "frame",
+      "id": "xA008",
+      "x": 0,
+      "y": 400,
+      "name": "short",
+      "width": 150,
+      "height": 100,
+      "fill": {
+        "type": "mesh_gradient",
+        "enabled": true,
+        "columns": 3,
+        "rows": 2,
+        "colors": [
+          "#FF0000",
+          "#00FF00",
+          "#0000FF",
+          "#FFFF00",
+          "#00FFFF",
+          "#FF00FF"
+        ],
+        "points": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            null
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0.7,
+            0.8
+          ],
+          [
+            1,
+            1
+          ]
+        ]
+      }
+    },
+    {
+      "type": "frame",
+      "id": "xA009",
+      "x": 200,
+      "y": 400,
+      "name": "string-position",
+      "width": 150,
+      "height": 100,
+      "fill": {
+        "type": "mesh_gradient",
+        "enabled": true,
+        "columns": 3,
+        "rows": 2,
+        "colors": [
+          "#FF0000",
+          "#00FF00",
+          "#0000FF",
+          "#FFFF00",
+          "#00FFFF",
+          "#FF00FF"
+        ],
+        "points": [
+          [
+            0,
+            0
+          ],
+          [
+            null,
+            null
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0.7,
+            0.8
+          ],
+          [
+            1,
+            1
+          ]
+        ]
+      }
+    },
+    {
+      "type": "frame",
+      "id": "xA010",
+      "x": 400,
+      "y": 400,
+      "name": "short-handle",
+      "width": 150,
+      "height": 100,
+      "fill": {
+        "type": "mesh_gradient",
+        "enabled": true,
+        "columns": 3,
+        "rows": 2,
+        "colors": [
+          "#FF0000",
+          "#00FF00",
+          "#0000FF",
+          "#FFFF00",
+          "#00FFFF",
+          "#FF00FF"
+        ],
+        "points": [
+          [
+            0,
+            0
+          ],
+          {
+            "position": [
+              0.3,
+              0.2
+            ],
+            "leftHandle": [
+              1,
+              null
+            ]
+          },
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0.7,
+            0.8
+          ],
+          [
+            1,
+            1
+          ]
+        ]
+      }
+    },
+    {
+      "type": "frame",
+      "id": "xA011",
+      "x": 600,
+      "y": 400,
+      "name": "numeric-strings",
+      "width": 150,
+      "height": 100,
+      "fill": {
+        "type": "mesh_gradient",
+        "enabled": true,
+        "columns": 3,
+        "rows": 2,
+        "colors": [
+          "#FF0000",
+          "#00FF00",
+          "#0000FF",
+          "#FFFF00",
+          "#00FFFF",
+          "#FF00FF"
+        ],
+        "points": [
+          [
+            0,
+            0
+          ],
+          [
+            0.3,
+            0.2
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0.7,
+            0.8
+          ],
+          [
+            1,
+            1
+          ]
+        ]
+      }
+    }
+  ],
+  "fileToken": "59e9cbf4-9eb8-4bb3-b9ee-afec9dbc8d5f"
+}

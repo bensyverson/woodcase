@@ -1,0 +1,39 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "fill": "#FF0000",
+          "height": 60,
+          "id": "zh08l",
+          "name": "child-1",
+          "type": "rectangle",
+          "width": 60
+        },
+        {
+          "fill": "#00FF00",
+          "height": 60,
+          "id": "0XlMn",
+          "name": "child-2",
+          "type": "rectangle",
+          "width": 60
+        },
+        {
+          "fill": "#0000FF",
+          "height": 60,
+          "id": "7abtK",
+          "name": "child-3",
+          "type": "rectangle",
+          "width": 60
+        }
+      ],
+      "fill": "#F0F0F0",
+      "height": 100,
+      "id": "nr4v6",
+      "name": "layout-justify-start",
+      "type": "frame",
+      "width": 400
+    }
+  ],
+  "version": "2.17"
+}

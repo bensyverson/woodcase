@@ -1,0 +1,602 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "type": "frame",
+      "id": "tf01f",
+      "name": "row-main-30",
+      "x": 0,
+      "y": 0,
+      "width": 360,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "frame",
+          "id": "tf01p",
+          "x": 20,
+          "y": 20,
+          "layout": "horizontal",
+          "gap": 10,
+          "padding": 10,
+          "fill": "#DDDDDD",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "tf01a",
+              "width": 40,
+              "height": 40,
+              "fill": "#3366FF"
+            },
+            {
+              "type": "rectangle",
+              "id": "tf01b",
+              "fill": "#FF3333",
+              "width": "fill_container",
+              "height": 40,
+              "rotation": 30
+            },
+            {
+              "type": "rectangle",
+              "id": "tf01c",
+              "width": 40,
+              "height": 40,
+              "fill": "#3366FF"
+            }
+          ],
+          "width": 300
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "tf02f",
+      "name": "row-main-90",
+      "x": 400,
+      "y": 0,
+      "width": 360,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "frame",
+          "id": "tf02p",
+          "x": 20,
+          "y": 20,
+          "layout": "horizontal",
+          "gap": 10,
+          "padding": 10,
+          "fill": "#DDDDDD",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "tf02a",
+              "width": 40,
+              "height": 40,
+              "fill": "#3366FF"
+            },
+            {
+              "type": "rectangle",
+              "id": "tf02b",
+              "fill": "#FF3333",
+              "width": "fill_container",
+              "height": 40,
+              "rotation": 90
+            },
+            {
+              "type": "rectangle",
+              "id": "tf02c",
+              "width": 40,
+              "height": 40,
+              "fill": "#3366FF"
+            }
+          ],
+          "width": 300
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "tf03f",
+      "name": "row-main-center-30",
+      "x": 800,
+      "y": 0,
+      "width": 360,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "frame",
+          "id": "tf03p",
+          "x": 20,
+          "y": 20,
+          "layout": "horizontal",
+          "gap": 10,
+          "padding": 10,
+          "fill": "#DDDDDD",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "tf03a",
+              "width": 40,
+              "height": 40,
+              "fill": "#3366FF"
+            },
+            {
+              "type": "rectangle",
+              "id": "tf03b",
+              "fill": "#FF3333",
+              "width": "fill_container",
+              "height": 40,
+              "rotation": 30
+            },
+            {
+              "type": "rectangle",
+              "id": "tf03c",
+              "width": 40,
+              "height": 40,
+              "fill": "#3366FF"
+            }
+          ],
+          "width": 300,
+          "alignItems": "center"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "tf04f",
+      "name": "row-main-two-30",
+      "x": 1200,
+      "y": 0,
+      "width": 360,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "frame",
+          "id": "tf04p",
+          "x": 20,
+          "y": 20,
+          "layout": "horizontal",
+          "gap": 10,
+          "padding": 10,
+          "fill": "#DDDDDD",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "tf04a",
+              "width": 40,
+              "height": 40,
+              "fill": "#3366FF"
+            },
+            {
+              "type": "rectangle",
+              "id": "tf04b",
+              "fill": "#FF3333",
+              "width": "fill_container",
+              "height": 40,
+              "rotation": 30
+            },
+            {
+              "type": "rectangle",
+              "id": "tf04c",
+              "width": 40,
+              "height": 40,
+              "fill": "#3366FF"
+            },
+            {
+              "type": "rectangle",
+              "id": "tf04d",
+              "width": "fill_container",
+              "height": 40,
+              "fill": "#22AA55"
+            }
+          ],
+          "width": 300
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "tf05f",
+      "name": "col-main-30",
+      "x": 1600,
+      "y": 0,
+      "width": 360,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "frame",
+          "id": "tf05p",
+          "x": 20,
+          "y": 20,
+          "layout": "vertical",
+          "gap": 10,
+          "padding": 10,
+          "fill": "#DDDDDD",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "tf05a",
+              "width": 40,
+              "height": 40,
+              "fill": "#3366FF"
+            },
+            {
+              "type": "rectangle",
+              "id": "tf05b",
+              "fill": "#FF3333",
+              "width": 40,
+              "height": "fill_container",
+              "rotation": 30
+            },
+            {
+              "type": "rectangle",
+              "id": "tf05c",
+              "width": 40,
+              "height": 40,
+              "fill": "#3366FF"
+            }
+          ],
+          "height": 200
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "tf06f",
+      "name": "col-main-90",
+      "x": 2000,
+      "y": 0,
+      "width": 360,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "frame",
+          "id": "tf06p",
+          "x": 20,
+          "y": 20,
+          "layout": "vertical",
+          "gap": 10,
+          "padding": 10,
+          "fill": "#DDDDDD",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "tf06a",
+              "width": 40,
+              "height": 40,
+              "fill": "#3366FF"
+            },
+            {
+              "type": "rectangle",
+              "id": "tf06b",
+              "fill": "#FF3333",
+              "width": 40,
+              "height": "fill_container",
+              "rotation": 90
+            },
+            {
+              "type": "rectangle",
+              "id": "tf06c",
+              "width": 40,
+              "height": 40,
+              "fill": "#3366FF"
+            }
+          ],
+          "height": 200
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "tf07f",
+      "name": "row-cross-30",
+      "x": 2400,
+      "y": 0,
+      "width": 360,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "frame",
+          "id": "tf07p",
+          "x": 20,
+          "y": 20,
+          "layout": "horizontal",
+          "gap": 10,
+          "padding": 10,
+          "fill": "#DDDDDD",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "tf07a",
+              "width": 40,
+              "height": 40,
+              "fill": "#3366FF"
+            },
+            {
+              "type": "rectangle",
+              "id": "tf07b",
+              "fill": "#FF3333",
+              "width": 60,
+              "height": "fill_container",
+              "rotation": 30
+            },
+            {
+              "type": "rectangle",
+              "id": "tf07c",
+              "width": 40,
+              "height": 40,
+              "fill": "#3366FF"
+            }
+          ],
+          "height": 120
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "tf08f",
+      "name": "row-cross-90",
+      "x": 2800,
+      "y": 0,
+      "width": 360,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "frame",
+          "id": "tf08p",
+          "x": 20,
+          "y": 20,
+          "layout": "horizontal",
+          "gap": 10,
+          "padding": 10,
+          "fill": "#DDDDDD",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "tf08a",
+              "width": 40,
+              "height": 40,
+              "fill": "#3366FF"
+            },
+            {
+              "type": "rectangle",
+              "id": "tf08b",
+              "fill": "#FF3333",
+              "width": 60,
+              "height": "fill_container",
+              "rotation": 90
+            },
+            {
+              "type": "rectangle",
+              "id": "tf08c",
+              "width": 40,
+              "height": 40,
+              "fill": "#3366FF"
+            }
+          ],
+          "height": 120
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "tf09f",
+      "name": "col-cross-30",
+      "x": 3200,
+      "y": 0,
+      "width": 360,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "frame",
+          "id": "tf09p",
+          "x": 20,
+          "y": 20,
+          "layout": "vertical",
+          "gap": 10,
+          "padding": 10,
+          "fill": "#DDDDDD",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "tf09a",
+              "width": 40,
+              "height": 40,
+              "fill": "#3366FF"
+            },
+            {
+              "type": "rectangle",
+              "id": "tf09b",
+              "fill": "#FF3333",
+              "width": "fill_container",
+              "height": 30,
+              "rotation": 30
+            },
+            {
+              "type": "rectangle",
+              "id": "tf09c",
+              "width": 40,
+              "height": 40,
+              "fill": "#3366FF"
+            }
+          ],
+          "width": 140
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "tf10f",
+      "name": "row-both-30",
+      "x": 3600,
+      "y": 0,
+      "width": 360,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "frame",
+          "id": "tf10p",
+          "x": 20,
+          "y": 20,
+          "layout": "horizontal",
+          "gap": 10,
+          "padding": 10,
+          "fill": "#DDDDDD",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "tf10a",
+              "width": 40,
+              "height": 40,
+              "fill": "#3366FF"
+            },
+            {
+              "type": "rectangle",
+              "id": "tf10b",
+              "fill": "#FF3333",
+              "width": "fill_container",
+              "height": "fill_container",
+              "rotation": 30
+            },
+            {
+              "type": "rectangle",
+              "id": "tf10c",
+              "width": 40,
+              "height": 40,
+              "fill": "#3366FF"
+            }
+          ],
+          "width": 300,
+          "height": 120
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "tf11f",
+      "name": "col-both-60",
+      "x": 4000,
+      "y": 0,
+      "width": 360,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "frame",
+          "id": "tf11p",
+          "x": 20,
+          "y": 20,
+          "layout": "vertical",
+          "gap": 10,
+          "padding": 10,
+          "fill": "#DDDDDD",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "tf11a",
+              "width": 40,
+              "height": 40,
+              "fill": "#3366FF"
+            },
+            {
+              "type": "rectangle",
+              "id": "tf11b",
+              "fill": "#FF3333",
+              "width": "fill_container",
+              "height": "fill_container",
+              "rotation": 60
+            },
+            {
+              "type": "rectangle",
+              "id": "tf11c",
+              "width": 40,
+              "height": 40,
+              "fill": "#3366FF"
+            }
+          ],
+          "width": 140,
+          "height": 200
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "tf12f",
+      "name": "row-cross-fit-30",
+      "x": 4400,
+      "y": 0,
+      "width": 360,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "frame",
+          "id": "tf12p",
+          "x": 20,
+          "y": 20,
+          "layout": "horizontal",
+          "gap": 10,
+          "padding": 10,
+          "fill": "#DDDDDD",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "tf12a",
+              "width": 40,
+              "height": 40,
+              "fill": "#3366FF"
+            },
+            {
+              "type": "rectangle",
+              "id": "tf12b",
+              "fill": "#FF3333",
+              "width": 60,
+              "height": "fill_container",
+              "rotation": 30
+            },
+            {
+              "type": "rectangle",
+              "id": "tf12c",
+              "width": 40,
+              "height": 40,
+              "fill": "#3366FF"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

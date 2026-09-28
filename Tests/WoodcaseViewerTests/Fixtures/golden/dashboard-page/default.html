@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Files · woodcase serve</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/viewer.css">
+    <script src="/viewer.js" defer></script>
+  </head>
+  <body class="v-body v-layout-dashboard">
+    <header class="v-topbar">
+      <a class="v-brand" href="/" title="Every file being served">woodcase</a>
+      <nav class="v-crumbs"></nav>
+      <div class="v-topbar-controls">
+        <details class="v-presence" id="v-presence">
+          <summary class="v-presence-summary"><span class="v-presence-stack"><span class="v-avatar v-avatar-medium" style="--v-actor: hsl(152 85% 48%); --v-actor-ink: #000000" title="claude-a" data-identity="claude-a">C</span><span class="v-avatar v-avatar-medium" style="--v-actor: hsl(149 60% 48%); --v-actor-ink: #000000" title="ben" data-identity="ben">B</span></span><span class="v-presence-note">2 active · <span class="v-presence-name">claude-a</span> editing</span></summary>
+          <ul class="v-presence-list">
+            <li class="v-presence-item"><span class="v-avatar v-avatar-medium" style="--v-actor: hsl(152 85% 48%); --v-actor-ink: #000000" title="claude-a" data-identity="claude-a">C</span><span class="v-presence-name">claude-a</span><span class="v-presence-age">4s</span><span class="v-presence-events">12 events</span></li>
+            <li class="v-presence-item"><span class="v-avatar v-avatar-medium" style="--v-actor: hsl(149 60% 48%); --v-actor-ink: #000000" title="ben" data-identity="ben">B</span><span class="v-presence-name">ben</span><span class="v-presence-age">10m</span><span class="v-presence-events">3 events</span></li>
+          </ul>
+        </details>
+        <span class="v-live" id="v-live" data-state="connecting"><span class="v-live-label" data-state="connecting">connecting…</span><span class="v-live-label" data-state="live">live</span><span class="v-live-label" data-state="lost">disconnected</span></span>
+        <button class="v-key-hint" type="button" popovertarget="v-keys" aria-label="Keyboard shortcuts">?</button>
+        <div class="v-key-hint-popover" id="v-keys" popover>
+          <h2 class="v-panel-title">Keyboard shortcuts</h2>
+          <dl class="v-key-list">
+            <dt class="v-mono v-key-keys">← / →</dt>
+            <dd class="v-key-does">previous / next artboard, with nothing selected</dd>
+            <dt class="v-mono v-key-keys">↑ / ↓</dt>
+            <dd class="v-key-does">previous / next outline row, with a node selected</dd>
+            <dt class="v-mono v-key-keys">← / →</dt>
+            <dd class="v-key-does">collapse / expand the selected row's children</dd>
+            <dt class="v-mono v-key-keys">Enter</dt>
+            <dd class="v-key-does">on the map, open the artboard the ring is on</dd>
+            <dt class="v-mono v-key-keys">f</dt>
+            <dd class="v-key-does">presentation mode: the artboard, and nothing else</dd>
+            <dt class="v-mono v-key-keys">Esc</dt>
+            <dd class="v-key-does">leave presentation, else select the parent node, else go up to the map</dd>
+          </dl>
+        </div>
+      </div>
+    </header>
+    <main class="v-main">
+      <section class="v-files" id="v-files">
+        <header class="v-section-head">
+          <div class="v-section-titles">
+            <h1 class="v-section-title">Files</h1>
+            <p class="v-section-subtitle">Every .pen the activity log has seen, most recent change first.</p>
+          </div>
+          <span class="v-mono v-section-note">.woodcase/activity.jsonl · 2 events</span>
+        </header>
+        <div class="v-file-cards">
+          <a class="v-file-card" href="/files/a1b2c3d4e5f6" data-file="a1b2c3d4e5f6"><span class="v-file-thumb">
+          <img class="v-file-shot" src="/files/a1b2c3d4e5f6/artboards/Cnv00.png?max=480" alt="" width="400" height="300" loading="lazy" decoding="async">
+          </span><span class="v-file-identity"><span class="v-file-name">banking</span><span class="v-mono v-file-path">/Users/ana/Designs/banking.pen</span></span><span class="v-row v-file-foot"><span class="v-file-count">4 artboards</span><span class="v-file-change"><span class="v-file-when">2 min ago</span><span class="v-avatar v-avatar-small" style="--v-actor: hsl(152 85% 48%); --v-actor-ink: #000000" title="claude-a" data-identity="claude-a">C</span></span></span></a><a class="v-file-card" href="/files/b2c3d4e5f6a1" data-file="b2c3d4e5f6a1"><span class="v-file-thumb">
+          <img class="v-file-shot" src="/files/b2c3d4e5f6a1/artboards/Cnv00.png?max=480" alt="" width="400" height="300" loading="lazy" decoding="async">
+          </span><span class="v-file-identity"><span class="v-file-name">onboarding</span><span class="v-mono v-file-path">/Users/ana/Designs/onboarding.pen</span></span><span class="v-row v-file-foot"><span class="v-file-count">7 artboards</span><span class="v-file-change"><span class="v-file-when is-quiet">no changes</span></span></span></a>
+        </div>
+      </section>
+      <section class="v-panel v-activity" id="v-activity">
+        <header class="v-panel-head">
+          <h2 class="v-panel-title">Activity</h2>
+          <span class="v-panel-note">all files · all identities</span>
+        </header>
+        <div class="v-activity-rows">
+          <details class="v-row v-activity-row" data-identity="claude-a">
+            <summary class="v-activity-summary">
+              <span class="v-activity-time" title="just now">06:13</span><span class="v-avatar v-avatar-small" style="--v-actor: hsl(152 85% 48%); --v-actor-ink: #000000" title="claude-a" data-identity="claude-a">C</span><span class="v-activity-identity">claude-a</span><span class="v-activity-verb">set</span><span class="v-activity-path">
+              <bdi>banking · Dashboard/Header/Title</bdi>
+              </span>
+            </summary>
+            <div class="v-activity-detail">
+              <p class="v-activity-file">/Users/ana/Designs/banking.pen</p>
+              <p class="v-activity-rev">rev 3f2a91c0d4e5b678</p>
+              <ul class="v-activity-nodes">
+                <li><span class="v-activity-node-path">Dashboard/Header/Title</span><span class="v-id-chip v-mono v-activity-node-id" data-copy-id="Ttl01" title="Click to copy Ttl01"><span class="v-id-chip-id">Ttl01</span><span class="v-copied" aria-hidden="true">copied</span></span></li>
+              </ul>
+            </div>
+          </details>
+          <details class="v-row v-activity-row" data-identity="ben">
+            <summary class="v-activity-summary">
+              <span class="v-activity-time" title="10 min ago">06:03</span><span class="v-avatar v-avatar-small" style="--v-actor: hsl(149 60% 48%); --v-actor-ink: #000000" title="ben" data-identity="ben">B</span><span class="v-activity-identity">ben</span><span class="v-activity-verb">mv</span><span class="v-activity-path">
+              <bdi>banking · Dashboard/Chart</bdi>
+              </span>
+            </summary>
+            <div class="v-activity-detail">
+              <p class="v-activity-file">/Users/ana/Designs/banking.pen</p>
+              <p class="v-activity-rev">rev 3f2a91c0d4e5b678</p>
+              <ul class="v-activity-nodes">
+                <li><span class="v-activity-node-path">Dashboard/Chart</span><span class="v-id-chip v-mono v-activity-node-id" data-copy-id="Cht01" title="Click to copy Cht01"><span class="v-id-chip-id">Cht01</span><span class="v-copied" aria-hidden="true">copied</span></span></li>
+              </ul>
+            </div>
+          </details>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

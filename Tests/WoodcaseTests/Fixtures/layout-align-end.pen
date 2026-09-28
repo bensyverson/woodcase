@@ -1,0 +1,40 @@
+{
+  "children": [
+    {
+      "alignItems": "end",
+      "children": [
+        {
+          "fill": "#FF0000",
+          "height": 40,
+          "id": "lnOx2",
+          "name": "child-1",
+          "type": "rectangle",
+          "width": 80
+        },
+        {
+          "fill": "#00FF00",
+          "height": 80,
+          "id": "HpxXB",
+          "name": "child-2",
+          "type": "rectangle",
+          "width": 80
+        },
+        {
+          "fill": "#0000FF",
+          "height": 60,
+          "id": "h1QSu",
+          "name": "child-3",
+          "type": "rectangle",
+          "width": 80
+        }
+      ],
+      "fill": "#F0F0F0",
+      "height": 200,
+      "id": "T4Diq",
+      "name": "layout-align-end",
+      "type": "frame",
+      "width": 400
+    }
+  ],
+  "version": "2.17"
+}

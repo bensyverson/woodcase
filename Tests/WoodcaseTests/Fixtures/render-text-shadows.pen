@@ -1,0 +1,171 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "tsI01",
+      "name": "text-inner",
+      "x": 0,
+      "y": 0,
+      "width": 280,
+      "height": 140,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "text",
+          "id": "tsI02",
+          "name": "word",
+          "x": 24,
+          "y": 24,
+          "content": "Shade",
+          "fontFamily": "Inter",
+          "fontSize": 72,
+          "fontWeight": "800",
+          "fill": "#2255EE",
+          "effect": { "type": "shadow", "shadowType": "inner", "color": "#000000FF", "offset": { "x": 4, "y": 4 }, "blur": 6 }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "tsS01",
+      "name": "text-inner-soft",
+      "x": 320,
+      "y": 0,
+      "width": 280,
+      "height": 140,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "text",
+          "id": "tsS02",
+          "name": "word",
+          "x": 24,
+          "y": 24,
+          "content": "Glow",
+          "fontFamily": "Inter",
+          "fontSize": 80,
+          "fontWeight": "800",
+          "fill": "#FFAA00",
+          "effect": { "type": "shadow", "shadowType": "inner", "color": "#99000099", "blur": 16 }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "tsB01",
+      "name": "text-inner-outer",
+      "x": 640,
+      "y": 0,
+      "width": 280,
+      "height": 140,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "text",
+          "id": "tsB02",
+          "name": "word",
+          "x": 24,
+          "y": 20,
+          "content": "Emboss",
+          "fontFamily": "Inter",
+          "fontSize": 64,
+          "fontWeight": "800",
+          "fill": "#22AA66",
+          "effect": [
+            { "type": "shadow", "shadowType": "outer", "color": "#00000080", "offset": { "x": 0, "y": 6 }, "blur": 8 },
+            { "type": "shadow", "shadowType": "inner", "color": "#FFFFFFCC", "offset": { "x": -2, "y": -3 }, "blur": 2 }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "tsW01",
+      "name": "text-inner-wrap",
+      "x": 960,
+      "y": 0,
+      "width": 280,
+      "height": 180,
+      "layout": "none",
+      "clip": true,
+      "fill": "#F4F4F4",
+      "children": [
+        {
+          "type": "text",
+          "id": "tsW02",
+          "name": "lines",
+          "x": 20,
+          "y": 20,
+          "width": 240,
+          "textGrowth": "fixed-width",
+          "content": "Two lines of inset type",
+          "fontFamily": "Inter",
+          "fontSize": 44,
+          "fontWeight": "700",
+          "fill": "#CC3355",
+          "effect": { "type": "shadow", "shadowType": "inner", "color": "#000000C0", "offset": { "x": 2, "y": 3 }, "blur": 4 }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "tsU01",
+      "name": "text-inner-unfilled",
+      "x": 1280,
+      "y": 0,
+      "width": 280,
+      "height": 140,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "text",
+          "id": "tsU02",
+          "name": "word",
+          "x": 24,
+          "y": 24,
+          "content": "Ghost",
+          "fontFamily": "Inter",
+          "fontSize": 72,
+          "fontWeight": "800",
+          "effect": { "type": "shadow", "shadowType": "inner", "color": "#000000FF", "offset": { "x": 4, "y": 4 }, "blur": 6 }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "tsT01",
+      "name": "text-inner-translucent",
+      "x": 1600,
+      "y": 0,
+      "width": 280,
+      "height": 140,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "text",
+          "id": "tsT02",
+          "name": "word",
+          "x": 24,
+          "y": 24,
+          "content": "Faint",
+          "fontFamily": "Inter",
+          "fontSize": 72,
+          "fontWeight": "800",
+          "fill": "#2255EE40",
+          "effect": { "type": "shadow", "shadowType": "inner", "color": "#000000FF", "offset": { "x": 4, "y": 4 }, "blur": 6 }
+        }
+      ]
+    }
+  ]
+}

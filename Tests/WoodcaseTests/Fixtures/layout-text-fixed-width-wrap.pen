@@ -1,0 +1,45 @@
+{
+  "children": [
+    {
+      "alignItems": "start",
+      "children": [
+        {
+          "fill": "#3B82F6",
+          "height": 40,
+          "id": "tfA01",
+          "name": "fixed-box",
+          "type": "rectangle",
+          "width": 40
+        },
+        {
+          "content": "Fixed-width text wraps inside its own width and grows downward as lines are added.",
+          "fill": "#1F2937",
+          "fontFamily": "IBM Plex Sans",
+          "fontSize": 14,
+          "fontWeight": "normal",
+          "id": "tfA02",
+          "name": "wrapping-180",
+          "textGrowth": "fixed-width",
+          "type": "text",
+          "width": 180
+        },
+        {
+          "fill": "#F59E0B",
+          "height": 40,
+          "id": "tfA03",
+          "name": "fill-box",
+          "type": "rectangle",
+          "width": "fill_container"
+        }
+      ],
+      "fill": "#F3F4F6",
+      "gap": 12,
+      "id": "tfA00",
+      "name": "layout-text-fixed-width-wrap",
+      "padding": 16,
+      "type": "frame",
+      "width": 360
+    }
+  ],
+  "version": "2.17"
+}

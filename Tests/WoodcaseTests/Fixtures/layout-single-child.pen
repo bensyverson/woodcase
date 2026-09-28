@@ -1,0 +1,25 @@
+{
+  "children": [
+    {
+      "alignItems": "center",
+      "children": [
+        {
+          "fill": "#FF0000",
+          "height": 60,
+          "id": "payu5",
+          "name": "child-1",
+          "type": "rectangle",
+          "width": 100
+        }
+      ],
+      "fill": "#F0F0F0",
+      "height": 200,
+      "id": "qbrf0",
+      "justifyContent": "center",
+      "name": "layout-single-child",
+      "type": "frame",
+      "width": 400
+    }
+  ],
+  "version": "2.17"
+}

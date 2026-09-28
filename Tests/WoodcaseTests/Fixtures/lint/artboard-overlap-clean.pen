@@ -1,0 +1,39 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "id": "Home1",
+      "name": "Home",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "width": 200,
+      "height": 100,
+      "layout": "none",
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "id": "Pnl01",
+          "name": "Panel",
+          "type": "rectangle",
+          "x": 20,
+          "y": 20,
+          "width": 100,
+          "height": 60,
+          "fill": "#CCCCCC"
+        }
+      ]
+    },
+    {
+      "id": "Chk01",
+      "name": "Checkout",
+      "type": "frame",
+      "x": 200,
+      "y": 0,
+      "width": 200,
+      "height": 100,
+      "layout": "none",
+      "fill": "#EEEEEE"
+    }
+  ]
+}

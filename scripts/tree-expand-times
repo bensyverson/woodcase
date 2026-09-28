@@ -1,0 +1,97 @@
+#!/usr/bin/env python3
+"""Times `woodcase tree --expand --json` per fixture, slowest first.
+
+Each file runs once under a per-file timeout; a file that hits it is reported as
+TIMEOUT rather than stalling the sweep. With `--out <dir>` each file's rows are saved
+as `<dir>/<fixture path, slashes as __>.json`, so two sweeps — before and after a change
+to the tree read — can be diffed for identical rows (`diff -r before after`). The saved
+JSON is canonical: keys sorted, and each row's `overflowAxes` sorted, because the CLI
+prints that set in whatever order the process's hash seed gives it.
+
+    scripts/tree-expand-times --binary .build/debug/woodcase
+    scripts/tree-expand-times --timeout 60 --top 15 --out /abs/before
+    scripts/tree-expand-times --no-expand Tests/WoodcaseTests/Fixtures/kit.lib.pen
+
+Files default to every `.pen` under `Tests/WoodcaseTests/Fixtures/`. Standard library
+only; needs a built `woodcase` and, for the Swift build, the sandbox disabled. See
+project/2026-09-27-expanded-tree-cost.md.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import subprocess
+import sys
+import time
+
+
+def fixtures(root: str) -> list[str]:
+    found = []
+    for directory, _, names in os.walk(root):
+        found += [os.path.join(directory, n) for n in names if n.endswith(".pen")]
+    return sorted(found)
+
+
+def canonical(output: bytes) -> bytes:
+    """The rows with keys and `overflowAxes` sorted, or the output as is when not JSON."""
+    try:
+        rows = json.loads(output)
+    except ValueError:
+        return output
+
+    def settle(value):
+        if isinstance(value, dict):
+            return {k: sorted(v) if k == "overflowAxes" and isinstance(v, list) else settle(v)
+                    for k, v in value.items()}
+        if isinstance(value, list):
+            return [settle(v) for v in value]
+        return value
+
+    return json.dumps(settle(rows), sort_keys=True, indent=1).encode() + b"\n"
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("files", nargs="*", help="The .pen files; default every fixture.")
+    parser.add_argument("--binary", default=".build/debug/woodcase", help="The woodcase binary.")
+    parser.add_argument("--timeout", type=float, default=120, help="Seconds allowed per file.")
+    parser.add_argument("--top", type=int, default=20, help="How many of the slowest files to print.")
+    parser.add_argument("--out", help="Directory to save each file's JSON output into.")
+    parser.add_argument("--no-expand", action="store_true", help="Time the plain tree read instead.")
+    args = parser.parse_args()
+
+    files = args.files or fixtures("Tests/WoodcaseTests/Fixtures")
+    if args.out:
+        os.makedirs(args.out, exist_ok=True)
+    command = [args.binary, "tree", "--json"] + ([] if args.no_expand else ["--expand"])
+
+    results = []
+    total = 0.0
+    for path in files:
+        start = time.monotonic()
+        try:
+            run = subprocess.run(command + [path], capture_output=True, timeout=args.timeout)
+            elapsed = time.monotonic() - start
+            status = "ok" if run.returncode == 0 else f"exit {run.returncode}"
+            output = run.stdout
+        except subprocess.TimeoutExpired:
+            elapsed, status, output = args.timeout, "TIMEOUT", b""
+        total += elapsed
+        results.append((elapsed, status, path))
+        if args.out:
+            name = os.path.relpath(path).replace(os.sep, "__") + ".json"
+            with open(os.path.join(args.out, name), "wb") as handle:
+                handle.write(canonical(output))
+
+    results.sort(reverse=True)
+    for elapsed, status, path in results[: args.top]:
+        print(f"{elapsed:9.2f}s  {status:8}  {path}")
+    timeouts = sum(1 for _, status, _ in results if status == "TIMEOUT")
+    print(f"{len(results)} files, {total:.1f}s total, {timeouts} timed out")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

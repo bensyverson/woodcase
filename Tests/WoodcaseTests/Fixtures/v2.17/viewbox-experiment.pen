@@ -1,0 +1,160 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "type": "frame",
+      "id": "root",
+      "x": 0,
+      "y": 0,
+      "name": "viewbox-experiment",
+      "width": 900,
+      "height": 300,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "bg1",
+          "x": 20,
+          "y": 20,
+          "fill": "#EEEEEE",
+          "width": 200,
+          "height": 200
+        },
+        {
+          "type": "path",
+          "id": "auto",
+          "x": 20,
+          "y": 20,
+          "name": "auto",
+          "geometry": "M10 10l80 0-40 80z",
+          "fill": "#FF0000",
+          "width": 200,
+          "height": 200
+        },
+        {
+          "type": "rectangle",
+          "id": "bg2",
+          "x": 240,
+          "y": 20,
+          "fill": "#EEEEEE",
+          "width": 200,
+          "height": 200
+        },
+        {
+          "type": "path",
+          "id": "fixed-larger",
+          "x": 240,
+          "y": 20,
+          "name": "fixed-larger",
+          "geometry": "M10 10l80 0-40 80z",
+          "viewBox": [
+            0,
+            0,
+            200,
+            200
+          ],
+          "fill": "#0000FF",
+          "width": 200,
+          "height": 200
+        },
+        {
+          "type": "rectangle",
+          "id": "bg3",
+          "x": 460,
+          "y": 20,
+          "fill": "#EEEEEE",
+          "width": 200,
+          "height": 200
+        },
+        {
+          "type": "path",
+          "id": "fixed-smaller",
+          "x": 460,
+          "y": 20,
+          "name": "fixed-smaller",
+          "geometry": "M10 10l80 0-40 80z",
+          "viewBox": [
+            25,
+            25,
+            50,
+            50
+          ],
+          "fill": "#00AA00",
+          "width": 200,
+          "height": 200
+        },
+        {
+          "type": "rectangle",
+          "id": "bg4",
+          "x": 680,
+          "y": 20,
+          "fill": "#EEEEEE",
+          "width": 200,
+          "height": 100
+        },
+        {
+          "type": "path",
+          "id": "fixed-nonuniform",
+          "x": 680,
+          "y": 20,
+          "name": "fixed-nonuniform",
+          "geometry": "M10 10l80 0-40 80z",
+          "viewBox": [
+            0,
+            0,
+            100,
+            100
+          ],
+          "fill": "#AA00AA",
+          "width": 200,
+          "height": 100
+        }
+      ]
+    },
+    {
+      "type": "line",
+      "id": "urRuG",
+      "x": 20,
+      "y": 250,
+      "name": "probe-line",
+      "width": 150,
+      "height": 0,
+      "stroke": "#333333",
+      "strokeWidth": 2
+    },
+    {
+      "type": "script",
+      "id": "TqFEu",
+      "x": 300,
+      "y": 250,
+      "name": "probe-script",
+      "width": 100,
+      "height": 40,
+      "scriptUri": "bars.js",
+      "inputs": {
+        "rows": 3,
+        "color": "#3B82F6"
+      }
+    },
+    {
+      "type": "rectangle",
+      "id": "sGuby",
+      "x": 500,
+      "y": 250,
+      "name": "probe-shader",
+      "fill": {
+        "type": "shader",
+        "enabled": true,
+        "url": "effect.glsl",
+        "uniforms": {
+          "u_size": 32,
+          "u_color1": "#ffffff"
+        }
+      },
+      "width": 100,
+      "height": 40
+    }
+  ],
+  "fileToken": "37f2ac7b-00a8-403d-9a8f-3303033990a4"
+}

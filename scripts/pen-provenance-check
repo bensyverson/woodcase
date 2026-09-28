@@ -1,0 +1,164 @@
+#!/usr/bin/env python3
+"""pen-provenance-check — does any .pen file in the repo share content with the
+documents Pen.app bundles?
+
+Reads Pen.app's `app.asar` directly (no `npx asar`), takes every bundled document
+under `/out/data/` (`*.lib.pen` design-system libraries and `pencil-*.pen` starter
+documents), and compares each repo `.pen` file against each of them by four
+features: node ids (4+ chars), names (4+ chars), text `content` (6+ chars) and
+variable names — the features of the 2026-09-26 audit
+(project/2026-09-26-fixture-provenance-audit.md, Appendix A).
+
+A file *overlaps* a bundled document when it shares something distinctive: any
+node id, five or more variable names, or a text of three or more words. Shared
+element names ("Label", "Card Content") and short texts ("Settings", "Button")
+are what any two UI documents share; the audit classified those as generic, and
+they are listed only under `--all`.
+
+Some overlaps are known and ruled on; they are listed in KNOWN below with the
+reason, and the check passes when every overlap it finds is exactly one of them.
+Anything else exits 1.
+
+Usage:
+    scripts/pen-provenance-check [--asar <path>] [--all]
+
+    --asar <path>   Pen.app's archive (default:
+                    /Applications/Pen.app/Contents/Resources/app.asar)
+    --all           print every file, with its generic (non-gating) overlaps too
+
+Files checked are `git ls-files --cached --others --exclude-standard '*.pen'`:
+tracked files plus new ones not yet added. Needs the Bash sandbox disabled
+(git reads ~/.gitconfig; the archive lives under /Applications).
+Exit: 0 clean, 1 an unexplained overlap, 4 the archive is missing.
+"""
+
+import json
+import os
+import re
+import struct
+import subprocess
+import sys
+
+DEFAULT_ASAR = "/Applications/Pen.app/Contents/Resources/app.asar"
+
+# (repo file, bundled document) -> (the exact shared features allowed, why).
+KNOWN = {
+    ("Tests/WoodcaseTests/Fixtures/banking.pen", "pencil-shadcn.pen"): (
+        {"ids": {"j4hLC", "nSNTs"}},
+        "banking.pen keeps the prompt and screen ids of Pen's starter document; "
+        "Ben ruled it kept (audit ruling 2).",
+    ),
+}
+for _blur in ["blur1", "blur2", "blur2-no-bg", "blur3", "blur3-no-bg"]:
+    KNOWN[(f"Tests/WoodcaseTests/Fixtures/{_blur}.pen", "pencil-new.pen")] = (
+        {"ids": {"bi8Au"}, "names": {"Frame"}},
+        "started from Pen's blank document (one empty frame); audit finding 4.",
+    )
+
+
+def asar_documents(path):
+    """Every `/out/data/*.pen` in the archive, parsed, by base name."""
+    with open(path, "rb") as f:
+        _, header_size, _, json_length = struct.unpack("<IIII", f.read(16))
+        header = json.loads(f.read(json_length))
+        base = 8 + header_size
+
+        def walk(node, prefix):
+            for name, child in node.get("files", {}).items():
+                full = f"{prefix}/{name}"
+                if "files" in child:
+                    yield from walk(child, full)
+                else:
+                    yield full, child
+
+        documents = {}
+        for full, entry in walk(header, ""):
+            if not re.match(r"^/out/data/[^/]+\.pen$", full) or entry.get("unpacked") or "offset" not in entry:
+                continue
+            f.seek(base + int(entry["offset"]))
+            documents[os.path.basename(full)] = json.loads(f.read(entry["size"]))
+        return documents
+
+
+def features(document):
+    ids, names, texts = set(), set(), set()
+
+    def walk(node):
+        if isinstance(node, dict):
+            if isinstance(node.get("id"), str) and len(node["id"]) >= 4:
+                ids.add(node["id"])
+            if isinstance(node.get("name"), str) and len(node["name"]) >= 4:
+                names.add(node["name"])
+            if isinstance(node.get("content"), str) and len(node["content"]) >= 6:
+                texts.add(node["content"])
+            for value in node.values():
+                walk(value)
+        elif isinstance(node, list):
+            for value in node:
+                walk(value)
+
+    walk(document)
+    variables = set(document.get("variables", {}).keys()) if isinstance(document, dict) else set()
+    return {"ids": ids, "names": names, "texts": texts, "vars": variables}
+
+
+def phrases(texts):
+    return {t for t in texts if len(t.split()) >= 3}
+
+
+def overlaps(shared):
+    return bool(shared["ids"]) or len(shared["vars"]) >= 5 or bool(phrases(shared["texts"]))
+
+
+def generic(shared):
+    return any(shared.values())
+
+
+def main(argv):
+    asar = argv[argv.index("--asar") + 1] if "--asar" in argv else DEFAULT_ASAR
+    if not os.path.exists(asar):
+        print(f"pen-provenance-check: no archive at {asar} (is Pen.app installed? pass --asar)", file=sys.stderr)
+        return 4
+    bundled = {name: features(doc) for name, doc in sorted(asar_documents(asar).items())}
+    files = subprocess.check_output(
+        ["git", "ls-files", "--cached", "--others", "--exclude-standard", "*.pen"], text=True
+    ).split()
+
+    unexplained = 0
+    known_seen = 0
+    for path in files:
+        if not os.path.exists(path):
+            continue  # deleted in the working tree, not yet committed
+        with open(path, encoding="utf-8") as f:
+            try:
+                mine = features(json.load(f))
+            except json.JSONDecodeError:
+                continue  # deliberately broken parser fixtures
+        hits = []
+        for name, theirs in bundled.items():
+            shared = {k: mine[k] & theirs[k] for k in mine}
+            if not overlaps(shared):
+                if "--all" in argv and generic(shared):
+                    summary = {k: sorted(v)[:5] for k, v in shared.items() if v}
+                    hits.append(f"  generic {name}: {summary}")
+                continue
+            allowed, why = KNOWN.get((path, name), ({}, None))
+            extra = {k: v - allowed.get(k, set()) for k, v in shared.items()}
+            if why and not overlaps(extra):
+                known_seen += 1
+                hits.append(f"  known   {name}: {why}")
+            else:
+                unexplained += 1
+                summary = {k: sorted(v)[:5] for k, v in shared.items() if v}
+                hits.append(f"  OVERLAP {name}: {summary}")
+        if hits or "--all" in argv:
+            print(path)
+            print("\n".join(hits) if hits else "  no overlap")
+
+    print(f"\n{len(files)} .pen files against {len(bundled)} bundled documents "
+          f"({', '.join(bundled)}): {unexplained} unexplained, {known_seen} known")
+    return 1 if unexplained else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

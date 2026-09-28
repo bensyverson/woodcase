@@ -1,0 +1,812 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "Ar000",
+      "x": 0,
+      "y": 0,
+      "name": "bare-injected",
+      "width": 220,
+      "height": 60,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "id": "To000",
+          "type": "ref",
+          "ref": "Scr01",
+          "x": 10,
+          "y": 10,
+          "descendants": {
+            "Inj1": {
+              "fill": "#0000FF"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Ar001",
+      "x": 0,
+      "y": 70,
+      "name": "path-injected",
+      "width": 220,
+      "height": 60,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "id": "To001",
+          "type": "ref",
+          "ref": "Scr01",
+          "x": 10,
+          "y": 10,
+          "descendants": {
+            "Inj1": {
+              "fill": "#00FF00"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Ar002",
+      "x": 0,
+      "y": 140,
+      "name": "bare-and-path",
+      "width": 220,
+      "height": 60,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "id": "To002",
+          "type": "ref",
+          "ref": "Scr01",
+          "x": 10,
+          "y": 10,
+          "descendants": {
+            "Inj1": {
+              "fill": "#00FF00"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Ar003",
+      "x": 0,
+      "y": 210,
+      "name": "bare-and-path-no-merge",
+      "width": 220,
+      "height": 60,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "id": "To003",
+          "type": "ref",
+          "ref": "Scr01",
+          "x": 10,
+          "y": 10,
+          "descendants": {
+            "Inj1": {
+              "fill": "#00FF00"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Ar004",
+      "x": 0,
+      "y": 280,
+      "name": "bare-nested-plain",
+      "width": 220,
+      "height": 60,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "id": "To004",
+          "type": "ref",
+          "ref": "Scr01",
+          "x": 10,
+          "y": 10
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Ar005",
+      "x": 0,
+      "y": 350,
+      "name": "bare-injected-deep",
+      "width": 220,
+      "height": 60,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "id": "To005",
+          "type": "ref",
+          "ref": "Scr01",
+          "x": 10,
+          "y": 10,
+          "descendants": {
+            "Deep": {
+              "fill": "#0000FF"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Ar006",
+      "x": 0,
+      "y": 420,
+      "name": "bare-injected-ref",
+      "width": 220,
+      "height": 60,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "id": "To006",
+          "type": "ref",
+          "ref": "Scr01",
+          "x": 10,
+          "y": 10,
+          "descendants": {
+            "InsB": {
+              "fill": "#0000FF"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Ar007",
+      "x": 0,
+      "y": 490,
+      "name": "bare-injected-twice",
+      "width": 220,
+      "height": 60,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "id": "To007",
+          "type": "ref",
+          "ref": "Scr01",
+          "x": 10,
+          "y": 10,
+          "descendants": {
+            "Inj3": {
+              "fill": "#0000FF"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Ar008",
+      "x": 0,
+      "y": 560,
+      "name": "bare-injected-replace",
+      "width": 220,
+      "height": 60,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "id": "To008",
+          "type": "ref",
+          "ref": "Scr01",
+          "x": 10,
+          "y": 10,
+          "descendants": {
+            "Deep": {
+              "type": "ellipse",
+              "id": "IFAjB",
+              "x": 0,
+              "y": 0,
+              "fill": "#0000FF",
+              "width": 20,
+              "height": 20
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Ar009",
+      "x": 0,
+      "y": 630,
+      "name": "path-injected-twice",
+      "width": 220,
+      "height": 60,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "id": "To009",
+          "type": "ref",
+          "ref": "Scr01",
+          "x": 10,
+          "y": 10,
+          "descendants": {
+            "Inj3": {
+              "fill": "#00FF00"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Ar010",
+      "x": 0,
+      "y": 700,
+      "name": "path-skips-injected-ref",
+      "width": 220,
+      "height": 60,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "id": "To010",
+          "type": "ref",
+          "ref": "Scr01",
+          "x": 10,
+          "y": 10,
+          "descendants": {
+            "Inj3": {
+              "fill": "#00FF00"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Ar011",
+      "x": 0,
+      "y": 770,
+      "name": "path-from-injected-ref",
+      "width": 220,
+      "height": 60,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "id": "To011",
+          "type": "ref",
+          "ref": "Scr01",
+          "x": 10,
+          "y": 10,
+          "descendants": {
+            "Inj3": {
+              "fill": "#00FF00"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Ar012",
+      "x": 0,
+      "y": 840,
+      "name": "path-injected-deep",
+      "width": 220,
+      "height": 60,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "id": "To012",
+          "type": "ref",
+          "ref": "Scr01",
+          "x": 10,
+          "y": 10,
+          "descendants": {
+            "Deep": {
+              "fill": "#00FF00"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Ar013",
+      "x": 0,
+      "y": 910,
+      "name": "path-through-injected-frame",
+      "width": 220,
+      "height": 60,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "id": "To013",
+          "type": "ref",
+          "ref": "Scr01",
+          "x": 10,
+          "y": 10,
+          "descendants": {
+            "Deep": {
+              "fill": "#00FF00"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Ar014",
+      "x": 0,
+      "y": 980,
+      "name": "path-ref-injected-frame",
+      "width": 220,
+      "height": 60,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "id": "To014",
+          "type": "ref",
+          "ref": "Scr01",
+          "x": 10,
+          "y": 10,
+          "descendants": {
+            "Deep": {
+              "fill": "#00FF00"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Ar015",
+      "x": 0,
+      "y": 1050,
+      "name": "path-ref-then-slot",
+      "width": 220,
+      "height": 60,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "id": "To015",
+          "type": "ref",
+          "ref": "Scr01",
+          "x": 10,
+          "y": 10,
+          "descendants": {
+            "Inj1": {
+              "fill": "#00FF00"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Ar016",
+      "x": 0,
+      "y": 1120,
+      "name": "path-slot-first",
+      "width": 220,
+      "height": 60,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "id": "To016",
+          "type": "ref",
+          "ref": "Scr01",
+          "x": 10,
+          "y": 10
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Ar017",
+      "x": 0,
+      "y": 1190,
+      "name": "path-plain-frame",
+      "width": 220,
+      "height": 60,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "id": "To017",
+          "type": "ref",
+          "ref": "Pln2",
+          "x": 10,
+          "y": 10,
+          "descendants": {
+            "PX1": {
+              "fill": "#00FF00"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Ar018",
+      "x": 0,
+      "y": 1260,
+      "name": "outer-bare",
+      "width": 220,
+      "height": 60,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "id": "To018",
+          "type": "ref",
+          "ref": "Scr03",
+          "x": 10,
+          "y": 10
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Ar019",
+      "x": 0,
+      "y": 1330,
+      "name": "outer-short-path",
+      "width": 220,
+      "height": 60,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "id": "To019",
+          "type": "ref",
+          "ref": "Scr03",
+          "x": 10,
+          "y": 10
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Ar020",
+      "x": 0,
+      "y": 1400,
+      "name": "outer-full-path",
+      "width": 220,
+      "height": 60,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "id": "To020",
+          "type": "ref",
+          "ref": "Scr03",
+          "x": 10,
+          "y": 10,
+          "descendants": {
+            "Mid01/Ins2A/Inj2": {
+              "fill": "#00FF00"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Ar021",
+      "x": 0,
+      "y": 1470,
+      "name": "bare-ref-children",
+      "width": 220,
+      "height": 60,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "id": "To021",
+          "type": "ref",
+          "ref": "Scr04",
+          "x": 10,
+          "y": 10,
+          "descendants": {
+            "RtC": {
+              "fill": "#0000FF"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Slot1",
+      "x": 400,
+      "y": 0,
+      "name": "Slot1",
+      "reusable": true,
+      "width": 200,
+      "height": 40,
+      "fill": "#EEEEEE",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "Hole1",
+          "x": 0,
+          "y": 0,
+          "name": "Hole1",
+          "width": 150,
+          "height": 30,
+          "fill": "#CCCCCC",
+          "layout": "none"
+        },
+        {
+          "type": "rectangle",
+          "id": "Pln01",
+          "x": 170,
+          "y": 10,
+          "name": "Pln01",
+          "fill": "#FF0000",
+          "width": 20,
+          "height": 20
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Slot2",
+      "x": 400,
+      "y": 60,
+      "name": "Slot2",
+      "reusable": true,
+      "width": 40,
+      "height": 30,
+      "fill": "#DDDDDD",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "Hole2",
+          "x": 5,
+          "y": 5,
+          "name": "Hole2",
+          "width": 30,
+          "height": 20,
+          "layout": "none"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Scr01",
+      "x": 400,
+      "y": 110,
+      "name": "Scr01",
+      "reusable": true,
+      "width": 200,
+      "height": 40,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "id": "Ins0A",
+          "type": "ref",
+          "ref": "Slot1",
+          "x": 0,
+          "y": 0,
+          "descendants": {
+            "Hole1": {
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "Inj1",
+                  "x": 0,
+                  "y": 5,
+                  "name": "Inj1",
+                  "fill": "#FF0000",
+                  "width": 20,
+                  "height": 20
+                },
+                {
+                  "type": "frame",
+                  "id": "InjF",
+                  "x": 30,
+                  "y": 5,
+                  "name": "InjF",
+                  "width": 20,
+                  "height": 20,
+                  "fill": "#FFFFFF",
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "Deep",
+                      "x": 0,
+                      "y": 0,
+                      "name": "Deep",
+                      "fill": "#FF0000",
+                      "width": 20,
+                      "height": 20
+                    }
+                  ]
+                },
+                {
+                  "id": "InsB",
+                  "type": "ref",
+                  "ref": "Slot2",
+                  "x": 60,
+                  "y": 0,
+                  "descendants": {
+                    "Hole2": {
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "Inj3",
+                          "x": 5,
+                          "y": 0,
+                          "name": "Inj3",
+                          "fill": "#FF0000",
+                          "width": 20,
+                          "height": 20
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Scr02",
+      "x": 400,
+      "y": 170,
+      "name": "Scr02",
+      "reusable": true,
+      "width": 200,
+      "height": 40,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "id": "Ins2A",
+          "type": "ref",
+          "ref": "Slot1",
+          "x": 0,
+          "y": 0,
+          "descendants": {
+            "Hole1": {
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "Inj2",
+                  "x": 0,
+                  "y": 5,
+                  "name": "Inj2",
+                  "fill": "#FF0000",
+                  "width": 20,
+                  "height": 20
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Scr03",
+      "x": 400,
+      "y": 230,
+      "name": "Scr03",
+      "reusable": true,
+      "width": 200,
+      "height": 40,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "id": "Mid01",
+          "type": "ref",
+          "ref": "Scr02",
+          "x": 0,
+          "y": 0
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Pln2",
+      "x": 400,
+      "y": 290,
+      "name": "Pln2",
+      "reusable": true,
+      "width": 200,
+      "height": 40,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "PF1",
+          "x": 0,
+          "y": 0,
+          "name": "PF1",
+          "width": 50,
+          "height": 30,
+          "fill": "#CCCCCC",
+          "layout": "none",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "PX1",
+              "x": 0,
+              "y": 5,
+              "name": "PX1",
+              "fill": "#FF0000",
+              "width": 20,
+              "height": 20
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Scr04",
+      "x": 400,
+      "y": 350,
+      "name": "Scr04",
+      "reusable": true,
+      "width": 200,
+      "height": 40,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "id": "RtA",
+          "type": "ref",
+          "ref": "Slot2",
+          "x": 0,
+          "y": 0,
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "RtC",
+              "x": 5,
+              "y": 5,
+              "name": "RtC",
+              "fill": "#FF0000",
+              "width": 20,
+              "height": 20
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "fileToken": "14447429-d794-4045-8552-4ef50d22ee36"
+}

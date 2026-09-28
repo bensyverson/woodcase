@@ -1,0 +1,49 @@
+import { cn } from "../lib/cn";
+import { Card } from "../components/Card";
+
+interface HomeProps {
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+export function Home({ className, style }: HomeProps = {}) {
+  return (
+    <div
+      className={cn("flex flex-col gap-3", className)}
+      style={{
+        width: 320,
+        height: 240,
+        backgroundColor: "#FFFFFF",
+        padding: 16,
+        ...style,
+      }}
+    >
+      <p
+        style={{
+          color: "transparent",
+          fontSize: 20,
+          fontWeight: 700,
+          lineHeight: "normal",
+          fontOpticalSizing: "none",
+          whiteSpace: "pre",
+        }}
+      >
+        Today
+      </p>
+      <div
+        className="flex gap-2"
+        style={{
+          width: 288,
+          height: 96,
+          flexShrink: 0,
+        }}
+      >
+        <Card label="Revenue"
+          style={{
+            flexShrink: 0,
+          }}
+        />
+      </div>
+    </div>
+  );
+}

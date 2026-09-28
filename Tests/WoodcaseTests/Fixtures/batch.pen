@@ -1,0 +1,82 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "id": "Cnv01",
+      "name": "Canvas",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "width": 400,
+      "height": 300,
+      "children": [
+        {
+          "id": "Ttl01",
+          "name": "Title",
+          "type": "text",
+          "content": "Canvas"
+        },
+        {
+          "id": "Crd01",
+          "name": "Cards",
+          "type": "frame",
+          "layout": "horizontal",
+          "width": 380,
+          "height": 200,
+          "children": [
+            {
+              "id": "Cd101",
+              "name": "First",
+              "type": "frame",
+              "width": 100,
+              "height": 60
+            },
+            {
+              "id": "Cd201",
+              "name": "Second",
+              "type": "frame",
+              "width": 100,
+              "height": 60
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Brd01",
+      "name": "Board",
+      "type": "frame",
+      "x": 500,
+      "y": 40,
+      "width": 200,
+      "height": 100,
+      "children": [
+        {
+          "id": "Chi01",
+          "name": "Chip",
+          "type": "ref",
+          "ref": "Cmp01"
+        }
+      ]
+    },
+    {
+      "id": "Cmp01",
+      "name": "Component",
+      "type": "frame",
+      "x": 0,
+      "y": 400,
+      "reusable": true,
+      "layout": "horizontal",
+      "width": 60,
+      "height": 24,
+      "children": [
+        {
+          "id": "Lbl01",
+          "name": "Label",
+          "type": "text",
+          "content": "chip"
+        }
+      ]
+    }
+  ]
+}

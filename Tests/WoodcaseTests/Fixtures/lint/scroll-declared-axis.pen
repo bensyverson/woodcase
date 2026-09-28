@@ -1,0 +1,63 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "id": "Rt001",
+      "name": "List",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "width": 200,
+      "height": 100,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "metadata": {
+        "type": "unknown",
+        "_scroll": "vertical"
+      },
+      "children": [
+        {
+          "id": "Alg01",
+          "name": "Along",
+          "type": "rectangle",
+          "x": 0,
+          "y": 80,
+          "width": 200,
+          "height": 200,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "Crs01",
+          "name": "Cross",
+          "type": "rectangle",
+          "x": 150,
+          "y": 0,
+          "width": 100,
+          "height": 50,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "Bth01",
+          "name": "Both",
+          "type": "rectangle",
+          "x": 150,
+          "y": 80,
+          "width": 100,
+          "height": 200,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "Fin01",
+          "name": "Fine",
+          "type": "rectangle",
+          "x": 10,
+          "y": 10,
+          "width": 50,
+          "height": 50,
+          "fill": "#4C8BF5"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "descendants": {
+            "Btn02/Lbl02": {
+              "content": "Buy"
+            },
+            "Ttl03": {
+              "content": "Hi"
+            }
+          },
+          "id": "Card1",
+          "name": "Card",
+          "ref": "CardC",
+          "type": "ref",
+          "x": 20,
+          "y": 20
+        }
+      ],
+      "height": 300,
+      "id": "Page1",
+      "name": "Page",
+      "type": "frame",
+      "width": 400
+    },
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "content": "Card",
+              "fontSize": 16,
+              "id": "Ttl03",
+              "name": "Title",
+              "type": "text"
+            },
+            {
+              "id": "Btn02",
+              "name": "Button",
+              "ref": "BtnC",
+              "type": "ref",
+              "x": 0,
+              "y": 40
+            }
+          ],
+          "id": "Grp01",
+          "name": "Row",
+          "type": "group",
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "height": 120,
+      "id": "CardC",
+      "layout": "vertical",
+      "name": "CardBase",
+      "reusable": true,
+      "type": "frame",
+      "width": 200
+    },
+    {
+      "children": [
+        {
+          "content": "Click",
+          "fontSize": 12,
+          "id": "Lbl02",
+          "name": "Label",
+          "type": "text"
+        },
+        {
+          "children": [
+            {
+              "fill": "#0066FF",
+              "height": 12,
+              "id": "Ico02",
+              "name": "Icon",
+              "type": "rectangle",
+              "width": 12
+            }
+          ],
+          "id": "Grp02",
+          "name": "Stack",
+          "type": "group",
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "height": 40,
+      "id": "BtnC",
+      "layout": "horizontal",
+      "name": "ButtonBase",
+      "reusable": true,
+      "type": "frame",
+      "width": 100
+    }
+  ],
+  "version": "2.17"
+}

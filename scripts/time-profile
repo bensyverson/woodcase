@@ -1,0 +1,158 @@
+#!/usr/bin/env python3
+"""Where one run of a command spends its time: a Time Profiler trace, summarized.
+
+Records the command under `xctrace` (Instruments' Time Profiler, 1 ms samples),
+then prints the functions with the most samples on the stack (inclusive) and on
+top of it (self). A single `woodcase set` is ~250 samples — enough to rank the
+stages, not to split hairs; pass `--runs N` to add N runs' samples together.
+
+    scripts/time-profile -- .build/release/woodcase set doc.pen ydnjs common.name=X
+    scripts/time-profile --runs 5 --top 40 --match Woodcase -- .build/release/woodcase tree doc.pen
+    scripts/time-profile --callers Regex -- .build/release/woodcase tree doc.pen
+
+A command that writes its input (`set`) is given a fresh copy each run when the
+input is named with `--copy <file>`: the path `@` in the command stands for it.
+
+    scripts/time-profile --runs 5 --copy Tests/WoodcaseTests/Fixtures/woodcase-app.pen \
+        -- .build/release/woodcase set @ ydnjs common.name=X
+
+Frames of the profiled binary are symbolicated from the `.dSYM` beside it
+(SwiftPM writes one into `.build/<config>/`). macOS only; needs Xcode's `xctrace`. See
+`Sources/Woodcase/Documentation.docc/WoodcasePerformance.md`.
+"""
+
+from __future__ import annotations
+
+import argparse
+import collections
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
+import xml.etree.ElementTree as ET
+
+
+def record(command: list[str], trace: str) -> str:
+    """Record one run of `command` into `trace`; return the trace to read.
+
+    A SwiftPM binary's frames come back as bare addresses, so the trace is
+    symbolicated against the `<binary>.dSYM` SwiftPM writes beside it, when there
+    is one.
+    """
+    subprocess.run(
+        ["xcrun", "xctrace", "record", "--template", "Time Profiler", "--output", trace, "--launch", "--", *command],
+        check=True,
+        capture_output=True,
+    )
+    dsym = os.path.realpath(shutil.which(command[0]) or command[0]) + ".dSYM"
+    if not os.path.isdir(dsym):
+        return trace
+    symbolicated = trace.replace(".trace", "-sym.trace")
+    subprocess.run(
+        ["xcrun", "xctrace", "symbolicate", "--input", trace, "--output", symbolicated, "--dsym", dsym],
+        check=True,
+        capture_output=True,
+    )
+    return symbolicated
+
+
+def stacks(trace: str) -> list[list[str]]:
+    """Every sample's backtrace, leaf first, as function names."""
+    xml = subprocess.run(
+        [
+            "xcrun", "xctrace", "export", "--input", trace, "--xpath",
+            '/trace-toc/run[@number="1"]/data/table[@schema="time-profile"]',
+        ],
+        check=True,
+        capture_output=True,
+    ).stdout
+    root = ET.fromstring(xml)
+    frames: dict[str, str] = {}
+    backtraces: dict[str, list[str]] = {}
+    result: list[list[str]] = []
+
+    def frame_name(element: ET.Element) -> str:
+        ref = element.get("ref")
+        if ref is not None:
+            return frames.get(ref, "?")
+        name = element.get("name", "?")
+        frames[element.get("id", "")] = name
+        return name
+
+    for row in root.iter("row"):
+        backtrace = row.find("tagged-backtrace")
+        if backtrace is None:
+            backtrace = row.find("backtrace")
+        if backtrace is None:
+            continue
+        ref = backtrace.get("ref")
+        if ref is not None:
+            result.append(backtraces.get(ref, []))
+            continue
+        names = [frame_name(frame) for frame in backtrace.findall("frame")]
+        backtraces[backtrace.get("id", "")] = names
+        result.append(names)
+    return result
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--runs", type=int, default=1, help="Runs whose samples are added together.")
+    parser.add_argument("--top", type=int, default=30, help="Rows per table.")
+    parser.add_argument("--match", default="", help="Only list functions whose name contains this.")
+    parser.add_argument("--callers", help="Also list who calls functions whose name contains this.")
+    parser.add_argument("--copy", help="A file copied fresh for each run; `@` in the command names the copy.")
+    parser.add_argument("command", nargs=argparse.REMAINDER, help="-- then the command to profile.")
+    args = parser.parse_args()
+    command = args.command[1:] if args.command[:1] == ["--"] else args.command
+    if not command:
+        parser.error("name a command after --")
+
+    scratch = tempfile.mkdtemp(prefix="time-profile-")
+    try:
+        samples: list[list[str]] = []
+        for run in range(args.runs):
+            argv = command
+            if args.copy:
+                copy = os.path.join(scratch, f"run{run}-" + os.path.basename(args.copy))
+                shutil.copyfile(args.copy, copy)
+                argv = [copy if part == "@" else part for part in command]
+            trace = os.path.join(scratch, f"run{run}.trace")
+            samples.extend(stacks(record(argv, trace)))
+    finally:
+        shutil.rmtree(scratch, ignore_errors=True)
+
+    inclusive: collections.Counter[str] = collections.Counter()
+    exclusive: collections.Counter[str] = collections.Counter()
+    for names in samples:
+        for name in set(names):
+            inclusive[name] += 1
+        if names:
+            exclusive[names[0]] += 1
+
+    total = len(samples)
+    print(f"# {total} samples over {args.runs} run(s), 1 ms each")
+    for title, counter in (("inclusive", inclusive), ("self", exclusive)):
+        print(f"\n## {title}")
+        rows = [(name, count) for name, count in counter.most_common() if args.match in name]
+        for name, count in rows[: args.top]:
+            print(f"{count:6d}  {100 * count / max(total, 1):5.1f}%  {name[:150]}")
+    if args.callers:
+        callers: collections.Counter[str] = collections.Counter()
+        for names in samples:
+            seen = set()
+            for index, name in enumerate(names[:-1]):
+                if args.callers in name and not any(args.callers in above for above in names[index + 1 :]):
+                    caller = next((up for up in names[index + 1 :] if not up.startswith("0x")), "?")
+                    if caller not in seen:
+                        seen.add(caller)
+                        callers[caller] += 1
+        print(f"\n## callers of {args.callers} (outermost call on each stack)")
+        for name, count in callers.most_common(args.top):
+            print(f"{count:6d}  {100 * count / max(total, 1):5.1f}%  {name[:150]}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

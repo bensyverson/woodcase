@@ -1,0 +1,181 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "geometry": "M0 20l150 0",
+              "height": 40,
+              "id": "LFH4b",
+              "name": "cap-butt",
+              "stroke": "#333333",
+              "strokeWidth": 20,
+              "type": "path",
+              "width": 150
+            },
+            {
+              "geometry": "M0 20l150 0",
+              "height": 40,
+              "id": "9O9ZC",
+              "name": "cap-round",
+              "stroke": "#333333",
+              "strokeLinecap": "round",
+              "strokeWidth": 20,
+              "type": "path",
+              "width": 150
+            },
+            {
+              "geometry": "M0 20l150 0",
+              "height": 40,
+              "id": "aAYCd",
+              "name": "cap-square",
+              "stroke": "#333333",
+              "strokeLinecap": "square",
+              "strokeWidth": 20,
+              "type": "path",
+              "width": 150
+            }
+          ],
+          "gap": 30,
+          "id": "QgPt5",
+          "name": "caps",
+          "type": "frame"
+        },
+        {
+          "children": [
+            {
+              "geometry": "M10 70l50-60 50 60",
+              "height": 80,
+              "id": "KGl25",
+              "name": "join-miter",
+              "stroke": "#0066CC",
+              "strokeWidth": 16,
+              "type": "path",
+              "width": 120
+            },
+            {
+              "geometry": "M10 70l50-60 50 60",
+              "height": 80,
+              "id": "lpzCe",
+              "name": "join-bevel",
+              "stroke": "#0066CC",
+              "strokeLinejoin": "bevel",
+              "strokeWidth": 16,
+              "type": "path",
+              "width": 120
+            },
+            {
+              "geometry": "M10 70l50-60 50 60",
+              "height": 80,
+              "id": "jd3Az",
+              "name": "join-round",
+              "stroke": "#0066CC",
+              "strokeLinejoin": "round",
+              "strokeWidth": 16,
+              "type": "path",
+              "width": 120
+            }
+          ],
+          "gap": 30,
+          "id": "HB0VA",
+          "name": "joins",
+          "type": "frame"
+        },
+        {
+          "children": [
+            {
+              "fill": "#FF6B6B",
+              "height": 80,
+              "id": "st9oA",
+              "name": "align-center",
+              "stroke": "#222222",
+              "strokeWidth": 10,
+              "type": "rectangle",
+              "width": 120
+            },
+            {
+              "fill": "#FF6B6B",
+              "height": 80,
+              "id": "R53qF",
+              "name": "align-inside",
+              "stroke": "#222222",
+              "strokeAlignment": "inner",
+              "strokeWidth": 10,
+              "type": "rectangle",
+              "width": 120
+            },
+            {
+              "fill": "#FF6B6B",
+              "height": 80,
+              "id": "WkXaN",
+              "name": "align-outside",
+              "stroke": "#222222",
+              "strokeAlignment": "outer",
+              "strokeWidth": 10,
+              "type": "rectangle",
+              "width": 120
+            }
+          ],
+          "gap": 30,
+          "id": "BsF6k",
+          "name": "alignment",
+          "type": "frame"
+        },
+        {
+          "alignItems": "center",
+          "children": [
+            {
+              "geometry": "M0 20l150 0",
+              "height": 40,
+              "id": "H0o7k",
+              "name": "dashed-line",
+              "stroke": "#666666",
+              "strokeLinecap": "round",
+              "strokeWidth": 8,
+              "type": "path",
+              "width": 150
+            },
+            {
+              "fill": "#FF69B4",
+              "geometry": "M60 100c-40-30-60-60-60-72 0-18 14-28 30-28 12 0 24 8 30 20 6-12 18-20 30-20 16 0 30 10 30 28 0 12-20 42-60 72z",
+              "height": 108,
+              "id": "IW4Sw",
+              "name": "heart",
+              "stroke": "#CC0066",
+              "strokeWidth": 4,
+              "type": "path",
+              "width": 120
+            },
+            {
+              "fill": "#FFD700",
+              "geometry": "M60 0l13 43 44 0-36 24 13 45-34-28-34 28 13-45-36-24 44 0z",
+              "height": 114,
+              "id": "EIeEG",
+              "name": "star",
+              "stroke": "#B8860B",
+              "strokeWidth": 4,
+              "type": "path",
+              "width": 120
+            }
+          ],
+          "gap": 30,
+          "id": "w2RCM",
+          "name": "complex",
+          "type": "frame"
+        }
+      ],
+      "fill": "#FFFFFF",
+      "gap": 30,
+      "id": "CdETp",
+      "layout": "vertical",
+      "name": "render-strokes-and-paths",
+      "padding": 30,
+      "type": "frame",
+      "width": 600,
+      "x": 0,
+      "y": 0
+    }
+  ],
+  "version": "2.17"
+}

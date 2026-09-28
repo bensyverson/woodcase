@@ -1,0 +1,95 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "fill": "#FF0000",
+                  "height": 30,
+                  "id": "a0OCg",
+                  "name": "leaf-1",
+                  "type": "rectangle",
+                  "width": 40
+                },
+                {
+                  "fill": "#00FF00",
+                  "height": 30,
+                  "id": "gBIte",
+                  "name": "leaf-2",
+                  "type": "rectangle",
+                  "width": 40
+                }
+              ],
+              "fill": "#D0D0D0",
+              "gap": 4,
+              "id": "7yODZ",
+              "layout": "vertical",
+              "name": "level-3a",
+              "padding": 6,
+              "type": "frame",
+              "width": "fill_container"
+            },
+            {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "fill": "#0000FF",
+                      "height": 20,
+                      "id": "gaLFu",
+                      "name": "deep-leaf-1",
+                      "type": "rectangle",
+                      "width": 30
+                    },
+                    {
+                      "fill": "#FF00FF",
+                      "height": 20,
+                      "id": "YOoQM",
+                      "name": "deep-leaf-2",
+                      "type": "rectangle",
+                      "width": 30
+                    }
+                  ],
+                  "fill": "#B0B0B0",
+                  "gap": 4,
+                  "id": "D48Fa",
+                  "name": "level-4",
+                  "type": "frame",
+                  "width": "fill_container"
+                }
+              ],
+              "fill": "#C0C0C0",
+              "gap": 4,
+              "id": "o3V8H",
+              "layout": "vertical",
+              "name": "level-3b",
+              "padding": 6,
+              "type": "frame",
+              "width": "fill_container"
+            }
+          ],
+          "fill": "#E0E0E0",
+          "gap": 6,
+          "id": "S4auN",
+          "name": "level-2",
+          "padding": 8,
+          "type": "frame",
+          "width": "fill_container"
+        }
+      ],
+      "fill": "#F0F0F0",
+      "gap": 8,
+      "height": 400,
+      "id": "Ms0rE",
+      "layout": "vertical",
+      "name": "layout-deep-nesting",
+      "padding": 10,
+      "type": "frame",
+      "width": 400
+    }
+  ],
+  "version": "2.17"
+}

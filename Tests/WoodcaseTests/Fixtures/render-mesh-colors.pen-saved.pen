@@ -1,0 +1,1266 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "MsC00",
+      "x": 0,
+      "y": 0,
+      "name": "control",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#FF0000",
+            "#FF0000",
+            "#FF0000",
+            "#FF0000"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC01",
+      "x": 60,
+      "y": 0,
+      "name": "badhex",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#GGGGGG",
+            "#GGGGGG",
+            "#GGGGGG",
+            "#GGGGGG"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC02",
+      "x": 120,
+      "y": 0,
+      "name": "word",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "red",
+            "red",
+            "red",
+            "red"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC03",
+      "x": 180,
+      "y": 0,
+      "name": "rgba",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#F00F",
+            "#F00F",
+            "#F00F",
+            "#F00F"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC04",
+      "x": 240,
+      "y": 0,
+      "name": "rgba-half",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#F008",
+            "#F008",
+            "#F008",
+            "#F008"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC05",
+      "x": 300,
+      "y": 0,
+      "name": "five",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#FF000",
+            "#FF000",
+            "#FF000",
+            "#FF000"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC06",
+      "x": 360,
+      "y": 0,
+      "name": "empty",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC07",
+      "x": 420,
+      "y": 0,
+      "name": "prefix",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#eGeGeG",
+            "#eGeGeG",
+            "#eGeGeG",
+            "#eGeGeG"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC08",
+      "x": 480,
+      "y": 0,
+      "name": "minus",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#-f-f-f",
+            "#-f-f-f",
+            "#-f-f-f",
+            "#-f-f-f"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC09",
+      "x": 540,
+      "y": 0,
+      "name": "space",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "# f f f",
+            "# f f f",
+            "# f f f",
+            "# f f f"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC10",
+      "x": 0,
+      "y": 60,
+      "name": "plus",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#+f+f+f",
+            "#+f+f+f",
+            "#+f+f+f",
+            "#+f+f+f"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC11",
+      "x": 60,
+      "y": 60,
+      "name": "zerox",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#0x0x0x",
+            "#0x0x0x",
+            "#0x0x0x",
+            "#0x0x0x"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC12",
+      "x": 120,
+      "y": 60,
+      "name": "short-bad",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#F0G",
+            "#F0G",
+            "#F0G",
+            "#F0G"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC13",
+      "x": 180,
+      "y": 60,
+      "name": "short-minus",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#-0F",
+            "#-0F",
+            "#-0F",
+            "#-0F"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC14",
+      "x": 240,
+      "y": 60,
+      "name": "trailing-hash",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "F00#",
+            "F00#",
+            "F00#",
+            "F00#"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC15",
+      "x": 300,
+      "y": 60,
+      "name": "double-hash",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "##F00",
+            "##F00",
+            "##F00",
+            "##F00"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC16",
+      "x": 360,
+      "y": 60,
+      "name": "hash-only",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#",
+            "#",
+            "#",
+            "#"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC17",
+      "x": 420,
+      "y": 60,
+      "name": "no-hash",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "00F",
+            "00F",
+            "00F",
+            "00F"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC18",
+      "x": 480,
+      "y": 60,
+      "name": "lower",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#ff000080",
+            "#ff000080",
+            "#ff000080",
+            "#ff000080"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC19",
+      "x": 540,
+      "y": 60,
+      "name": "seven",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#FF00000",
+            "#FF00000",
+            "#FF00000",
+            "#FF00000"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC20",
+      "x": 0,
+      "y": 120,
+      "name": "nine",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#FF0000FFF",
+            "#FF0000FFF",
+            "#FF0000FFF",
+            "#FF0000FFF"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC21",
+      "x": 60,
+      "y": 120,
+      "name": "mid-hash",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#F#F00",
+            "#F#F00",
+            "#F#F00",
+            "#F#F00"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC22",
+      "x": 120,
+      "y": 120,
+      "name": "six-minus-one",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#-00001",
+            "#-00001",
+            "#-00001",
+            "#-00001"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC23",
+      "x": 180,
+      "y": 120,
+      "name": "six-mid",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#FFGG00",
+            "#FFGG00",
+            "#FFGG00",
+            "#FFGG00"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC24",
+      "x": 240,
+      "y": 120,
+      "name": "eight-prefix",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#eGeGeGeG",
+            "#eGeGeGeG",
+            "#eGeGeGeG",
+            "#eGeGeGeG"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC25",
+      "x": 300,
+      "y": 120,
+      "name": "eight-tail",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#FF0000FG",
+            "#FF0000FG",
+            "#FF0000FG",
+            "#FF0000FG"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC26",
+      "x": 360,
+      "y": 120,
+      "name": "eight-bad",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#GGGGGGGG",
+            "#GGGGGGGG",
+            "#GGGGGGGG",
+            "#GGGGGGGG"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC27",
+      "x": 420,
+      "y": 120,
+      "name": "eight-minus",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#-0000001",
+            "#-0000001",
+            "#-0000001",
+            "#-0000001"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC28",
+      "x": 480,
+      "y": 120,
+      "name": "eight-mid",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#FF00GG80",
+            "#FF00GG80",
+            "#FF00GG80",
+            "#FF00GG80"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC29",
+      "x": 540,
+      "y": 120,
+      "name": "eight-space",
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "enabled": true,
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "# FFFF00F",
+            "# FFFF00F",
+            "# FFFF00F",
+            "# FFFF00F"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "fileToken": "16d1449c-b23a-4d17-8cbb-c84f405c1cd4"
+}

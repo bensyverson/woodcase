@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+#
+# mae-check — Compare MAE test results against baseline and warn on regressions.
+#
+# Called from the pre-commit hook after SwiftFormat. Reads performance/mae-test.csv
+# (written by WebView regression tests) and compares against performance/mae-baseline.csv.
+# Warns on any id whose MAE rose, reports ids new to this run or missing from it,
+# then updates the baseline with the current (sorted) results. This is a warning
+# gate, not a blocker: it always exits 0.
+#
+# Written without bash associative arrays (`declare -A`, bash >= 4 only) so it
+# works under the bash 3.2 shipped as /bin/bash on macOS — the shebang above
+# resolves to whatever `bash` is on PATH, but nothing here may assume that's
+# not 3.2. Both CSVs are sorted by id before comparing and before the baseline
+# is written, so parallel test runs appending rows in different orders don't
+# reorder performance/mae-baseline.csv from commit to commit.
+
+PERF_DIR="performance"
+TEST_CSV="$PERF_DIR/mae-test.csv"
+BASELINE_CSV="$PERF_DIR/mae-baseline.csv"
+
+# If no test results exist, nothing to do.
+if [ ! -f "$TEST_CSV" ]; then
+    exit 0
+fi
+
+echo "Checking MAE results..."
+
+sorted_test=$(mktemp "${TMPDIR:-/tmp}/mae-check-test.XXXXXX")
+sorted_baseline=$(mktemp "${TMPDIR:-/tmp}/mae-check-baseline.XXXXXX")
+trap 'rm -f "$sorted_test" "$sorted_baseline"' EXIT
+
+{
+    echo "id,MAE,limit"
+    tail -n +2 "$TEST_CSV" | sort -t, -k1,1
+} >"$sorted_test"
+
+if [ -f "$BASELINE_CSV" ]; then
+    {
+        echo "id,MAE,limit"
+        tail -n +2 "$BASELINE_CSV" | sort -t, -k1,1
+    } >"$sorted_baseline"
+
+    # Single awk pass over both (pre-sorted) files: awk's own associative
+    # arrays are plain POSIX awk, unlike bash's `declare -A`, so this works
+    # the same under macOS's bundled awk as anywhere else.
+    awk -F',' '
+        FNR == 1 { fileNum++; next }  # skip each file header, track which file we are in
+        fileNum == 1 {
+            baselineSeen[$1] = 1
+            baselineMAE[$1] = $2
+            baselineOrder[++baselineCount] = $1
+            next
+        }
+        fileNum == 2 {
+            testMAE[$1] = $2
+            testLimit[$1] = $3
+            testOrder[++testCount] = $1
+            next
+        }
+        END {
+            findings = 0
+            for (i = 1; i <= testCount; i++) {
+                id = testOrder[i]
+                mae = testMAE[id] + 0
+                if (id in baselineSeen) {
+                    prev = baselineMAE[id] + 0
+                    if (mae > prev) {
+                        pct = ((mae - prev) / prev) * 100
+                        printf "  WARNING: Regression in `%s` MAE test. %s -> %s / %s (%.1f%% increase)\n", \
+                            id, baselineMAE[id], testMAE[id], testLimit[id], pct
+                        findings++
+                    }
+                } else {
+                    printf "  NEW: `%s` has no baseline yet (MAE %s / %s) — recording as baseline.\n", \
+                        id, testMAE[id], testLimit[id]
+                    findings++
+                }
+            }
+            for (i = 1; i <= baselineCount; i++) {
+                id = baselineOrder[i]
+                if (!(id in testMAE)) {
+                    printf "  MISSING: `%s` was in the baseline (MAE %s) but not in this test run.\n", \
+                        id, baselineMAE[id]
+                    findings++
+                }
+            }
+            if (findings == 0) {
+                print "  No MAE regressions detected."
+            }
+        }
+    ' "$sorted_baseline" "$sorted_test"
+else
+    echo "  No baseline yet; recording current results as the baseline."
+fi
+
+# Update the baseline by merging: rows from this run replace their baseline
+# rows, and baseline rows the run did not produce are kept. A filtered
+# `swift test --filter …` writes a partial mae-test.csv, and before this
+# merge the hook silently dropped every row it did not see (2026-08-29,
+# fourteen rows lost in one commit).
+if [ -f "$BASELINE_CSV" ]; then
+    merged=$(mktemp "${TMPDIR:-/tmp}/mae-check-merged.XXXXXX")
+    {
+        echo "id,MAE,limit"
+        awk -F',' '
+            FNR == 1 { fileNum++; next }
+            fileNum == 1 { row[$1] = $0; next }
+            fileNum == 2 { row[$1] = $0; next }
+        END { for (id in row) print row[id] }
+        ' "$sorted_baseline" "$sorted_test" | sort -t, -k1,1
+    } >"$merged"
+    mv "$merged" "$BASELINE_CSV"
+else
+    cp "$sorted_test" "$BASELINE_CSV"
+fi
+git add "$BASELINE_CSV" 2>/dev/null || true
+
+echo "MAE baseline updated."
+exit 0

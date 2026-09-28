@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+"""gen-free-groups-fixture — write Tests/WoodcaseTests/Fixtures/render-free-groups.pen: one
+300x300 board per case of a group whose children reach left of / above its anchor, placed
+by its own x/y and in a flex flow, turned, flipped and turned, nested, blurred and shadowed,
+plus one group at the root (leaf cqBw2i, PenFreeGroupTests).
+
+Usage:
+    scripts/gen-free-groups-fixture [<out.pen>]     (default: the fixture's path)
+    scripts/pen-oracle Tests/WoodcaseTests/Fixtures/render-free-groups.pen
+
+The second command (sandbox disabled, `pen` logged in) writes Pen's first-pass layout (pass --settle for the settled one), its 2x
+exports and its re-save beside the fixture. Standard library only; runs sandboxed.
+"""
+
+import json, sys
+
+def rect(i, x, y, w, h, fill, **kw):
+    d = {"type": "rectangle", "id": i, "x": x, "y": y, "width": w, "height": h, "fill": fill}
+    d.update(kw)
+    return d
+
+def board(i, name, x, y, children, **kw):
+    d = {"type": "frame", "id": i, "name": name, "x": x, "y": y, "width": 300, "height": 300,
+         "layout": "none", "fill": "#000000", "children": children}
+    d.update(kw)
+    return d
+
+def group(i, x, y, children, **kw):
+    d = {"type": "group", "id": i, "x": x, "y": y, "children": children}
+    d.update(kw)
+    return d
+
+nodes = []
+slot = [0]
+def at():
+    slot[0] += 1
+    k = slot[0] - 1
+    return k % 5 * 400, k // 5 * 400
+
+x, y = at(); nodes.append(board("Gpos", "pos", x, y, [group("GposG", 50, 50, [
+    rect("GposA", 20, 30, 40, 40, "#00FF00"), rect("GposB", 80, 60, 30, 30, "#FFFF00")])]))
+x, y = at(); nodes.append(board("Gneg", "neg", x, y, [group("GnegG", 100, 100, [
+    rect("GnegA", -30, -20, 40, 40, "#00FF00"), rect("GnegB", 20, 10, 40, 40, "#FFFF00")])]))
+x, y = at(); nodes.append(board("Gflex", "flex", x, y, [
+    rect("GflexA", 0, 0, 40, 40, "#FF0000"),
+    group("GflexG", 0, 0, [rect("GflexGa", -10, -10, 30, 30, "#00FF00"), rect("GflexGb", 20, 20, 30, 30, "#FFFF00")]),
+    rect("GflexB", 0, 0, 40, 40, "#0000FF"),
+], layout="horizontal", gap=10, padding=20))
+x, y = at(); nodes.append(board("Grot", "rot", x, y, [group("GrotG", 100, 100, [
+    rect("GrotA", 0, 0, 60, 20, "#00FF00"), rect("GrotB", -20, 30, 40, 40, "#FFFF00")], rotation=30)]))
+x, y = at(); nodes.append(board("Gnest", "nest", x, y, [group("GnestG", 80, 80, [
+    rect("GnestA", 0, 0, 20, 20, "#00FF00"),
+    group("GnestH", -10, 20, [rect("GnestHa", -10, -10, 40, 40, "#FFFF00"), rect("GnestHb", 30, 30, 10, 10, "#00FFFF")]),
+])]))
+x, y = at(); nodes.append(board("Gfrot", "flexrot", x, y, [
+    rect("GfrotA", 0, 0, 40, 40, "#FF0000"),
+    group("GfrotG", 0, 0, [rect("GfrotGa", -10, -10, 30, 30, "#00FF00"), rect("GfrotGb", 20, 20, 30, 30, "#FFFF00")], rotation=30),
+    rect("GfrotB", 0, 0, 40, 40, "#0000FF"),
+], layout="horizontal", gap=10, padding=20))
+x, y = at(); nodes.append(board("Gflip", "flip", x, y, [group("GflipG", 100, 100, [
+    rect("GflipA", -20, 0, 60, 20, "#00FF00"), rect("GflipB", 10, 30, 40, 40, "#FFFF00")], flipX=True, rotation=-15)]))
+x, y = at(); nodes.append(board("Gblur", "blur", x, y, [group("GblurG", 100, 100, [
+    rect("GblurA", -40, -30, 50, 50, "#00FF00"), rect("GblurB", 30, 20, 50, 30, "#FFFF00")],
+    effect={"type": "blur", "radius": 6})]))
+x, y = at(); nodes.append(board("Gshad", "shadow", x, y, [group("GshadG", 100, 100, [
+    rect("GshadA", -40, -30, 50, 50, "#00FF00"), rect("GshadB", 30, 20, 50, 30, "#FFFF00")],
+    effect=[{"type": "shadow", "shadowType": "outer", "color": "#FFFFFFFF", "offset": {"x": 8, "y": 8}, "blur": 6},
+            {"type": "shadow", "shadowType": "inner", "color": "#FF0000FF", "offset": {"x": 4, "y": 4}, "blur": 4}])]))
+x, y = at(); nodes.append(group("Groot", x + 100, y + 100, [
+    rect("GrootA", -30, -20, 40, 40, "#00FF00"), rect("GrootB", 20, 10, 40, 40, "#FFFF00")], name="root"))
+
+out = sys.argv[1] if len(sys.argv) > 1 else "Tests/WoodcaseTests/Fixtures/render-free-groups.pen"
+with open(out, "w") as f:
+    json.dump({"version": "2.19", "children": nodes}, f, indent=2)

@@ -1,0 +1,63 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "id": "List2",
+      "name": "List",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "width": 200,
+      "height": 100,
+      "layout": "vertical",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "metadata": {
+        "type": "unknown",
+        "_scroll": "diagonal"
+      },
+      "children": [
+        {
+          "id": "Wide2",
+          "name": "Wide",
+          "type": "rectangle",
+          "width": 300,
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "Fits2",
+          "name": "Fits",
+          "type": "rectangle",
+          "width": 200,
+          "height": 50,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "Ovra2",
+          "name": "Row 1",
+          "type": "rectangle",
+          "width": 200,
+          "height": 50,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "Ovrb2",
+          "name": "Row 2",
+          "type": "rectangle",
+          "width": 200,
+          "height": 50,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "Ovrc2",
+          "name": "Row 3",
+          "type": "rectangle",
+          "width": 200,
+          "height": 50,
+          "fill": "#4C8BF5"
+        }
+      ]
+    }
+  ]
+}

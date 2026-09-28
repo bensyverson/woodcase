@@ -1,0 +1,110 @@
+import { Star } from "lucide-react";
+import { cn } from "../lib/cn";
+
+interface PencilListItemProps {
+  image?: string;
+  meta?: string;
+  name?: string;
+  score?: string;
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+export function PencilListItem({
+  image = "$bg-warm",
+  meta = "Brand · Grade",
+  name = "Pencil Name",
+  score = "5.0",
+  className,
+  style,
+}: PencilListItemProps) {
+  return (
+    <div
+      className={cn("flex items-center", className)}
+      style={{
+        width: 354,
+        backgroundColor: "var(--bg-card)",
+        borderRadius: "var(--card-radius)",
+        padding: "var(--spacing-md)",
+        gap: "var(--spacing-sm)",
+        boxShadow: "0px 4px 20px var(--shadow)",
+        ...style,
+      }}
+    >
+      <div
+        className="flex"
+        style={{
+          width: 44,
+          height: 44,
+          backgroundColor: "var(--bg-warm)",
+          borderRadius: 8,
+          flexShrink: 0,
+        }}
+      >
+      </div>
+      <div
+        className="flex flex-col gap-0.5"
+        style={{
+          width: "100%",
+          height: "fit-content",
+        }}
+      >
+        <p
+          style={{
+            color: "var(--text-primary)",
+            fontFamily: "var(--font-primary)",
+            fontSize: "var(--font-size-body)",
+            fontWeight: 600,
+            lineHeight: "normal",
+            fontOpticalSizing: "none",
+            whiteSpace: "pre",
+          }}
+        >
+          {name}
+        </p>
+        <p
+          style={{
+            color: "var(--text-secondary)",
+            fontFamily: "var(--font-primary)",
+            fontSize: 12,
+            fontWeight: "normal",
+            lineHeight: "16px",
+            fontOpticalSizing: "none",
+            whiteSpace: "pre",
+            marginTop: -0.5,
+            marginBottom: 0.5,
+          }}
+        >
+          {meta}
+        </p>
+      </div>
+      <div
+        className="flex items-center gap-1"
+        style={{
+          height: "fit-content",
+        }}
+      >
+        <Star size={14} color="var(--accent)"
+          style={{
+            flexShrink: 0,
+          }}
+        />
+        <p
+          style={{
+            color: "var(--text-primary)",
+            fontFamily: "var(--font-primary)",
+            fontSize: 13,
+            fontWeight: 600,
+            lineHeight: "17px",
+            fontOpticalSizing: "none",
+            whiteSpace: "pre",
+            marginTop: -0.375,
+            marginBottom: 0.375,
+          }}
+        >
+          {score}
+        </p>
+      </div>
+    </div>
+  );
+}

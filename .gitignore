@@ -1,0 +1,33 @@
+.DS_Store
+/.build
+/Packages
+xcuserdata/
+DerivedData/
+.swiftpm/configuration/registries.json
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+.netrc
+local/
+Tests/WoodcaseTests/Fixtures/tmp/
+performance/mae-test.csv
+project/2026-04-01-editing-architecture.md
+project/2026-04-01-text-editing-research.md
+
+# Jobs event store (local by default; remove .jobs.db to share it) and its SQLite WAL files
+.jobs.db
+.jobs.db-shm
+.jobs.db-wal
+
+# Woodcase activity log (local history of .pen edits; the .pen files are the truth)
+.woodcase/
+
+# Harness-made agent worktrees
+.claude/worktrees/
+
+# local project files
+.timetattle-project.json
+
+# job
+# Jobs cache and its sidecars — disposable, rebuilt from .jobs/log
+.jobs.db*
+# This machine's replica id, identity and focus
+.jobs/local.json

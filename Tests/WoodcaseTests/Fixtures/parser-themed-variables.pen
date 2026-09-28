@@ -1,0 +1,72 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "content": "Themed Content",
+          "fontSize": "$textSize",
+          "id": "label",
+          "type": "text"
+        }
+      ],
+      "fill": "$bgColor",
+      "height": 200,
+      "id": "container",
+      "type": "frame",
+      "width": 400
+    }
+  ],
+  "themes": {
+    "density": [
+      "compact",
+      "regular"
+    ],
+    "mode": [
+      "light",
+      "dark"
+    ]
+  },
+  "variables": {
+    "bgColor": {
+      "type": "color",
+      "value": [
+        {
+          "theme": {
+            "mode": "light"
+          },
+          "value": "#FFFFFF"
+        },
+        {
+          "theme": {
+            "mode": "dark"
+          },
+          "value": "#1A1A1A"
+        },
+        {
+          "value": "#F0F0F0"
+        }
+      ]
+    },
+    "textSize": {
+      "type": "number",
+      "value": [
+        {
+          "theme": {
+            "density": "compact"
+          },
+          "value": 14
+        },
+        {
+          "theme": {
+            "density": "regular"
+          },
+          "value": 18
+        },
+        {
+          "value": 16
+        }
+      ]
+    }
+  },
+  "version": "2.17"
+}

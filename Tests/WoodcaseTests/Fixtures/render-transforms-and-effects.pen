@@ -1,0 +1,168 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "fill": "#FF0000",
+          "height": 80,
+          "id": "4El5M",
+          "name": "rotated-45",
+          "rotation": 45,
+          "type": "rectangle",
+          "width": 80
+        },
+        {
+          "fill": {
+            "colors": [
+              {
+                "color": "#FF0000",
+                "position": 0
+              },
+              {
+                "color": "#0000FF",
+                "position": 1
+              }
+            ],
+            "enabled": true,
+            "gradientType": "linear",
+            "rotation": 90,
+            "size": {
+              "height": 1
+            },
+            "type": "gradient"
+          },
+          "flipX": true,
+          "height": 80,
+          "id": "Ndi7f",
+          "name": "flipped-x",
+          "type": "rectangle",
+          "width": 80
+        },
+        {
+          "fill": "#0066FF",
+          "height": 80,
+          "id": "kk8H1",
+          "name": "opacity-50",
+          "opacity": 0.5,
+          "type": "rectangle",
+          "width": 80
+        },
+        {
+          "children": [
+            {
+              "fill": "#FF0000",
+              "height": 160,
+              "id": "pQYW7",
+              "name": "oversized-child",
+              "type": "rectangle",
+              "width": 160,
+              "x": -30,
+              "y": -30
+            }
+          ],
+          "clip": true,
+          "fill": "#EEEEEE",
+          "height": 100,
+          "id": "9WUfQ",
+          "layout": "none",
+          "name": "clip-frame",
+          "type": "frame",
+          "width": 100
+        },
+        {
+          "cornerRadius": 8,
+          "effect": {
+            "blur": 8,
+            "color": "#00000080",
+            "offset": {
+              "x": 4,
+              "y": 4
+            },
+            "shadowType": "outer",
+            "type": "shadow"
+          },
+          "fill": "#FFFFFF",
+          "height": 80,
+          "id": "z7xX7",
+          "name": "shadow-outer",
+          "type": "rectangle",
+          "width": 80
+        },
+        {
+          "cornerRadius": 8,
+          "effect": {
+            "blur": 6,
+            "color": "#00000060",
+            "offset": {
+              "x": 2,
+              "y": 2
+            },
+            "shadowType": "inner",
+            "type": "shadow"
+          },
+          "fill": "#FFFFFF",
+          "height": 80,
+          "id": "SeGfy",
+          "name": "shadow-inner",
+          "type": "rectangle",
+          "width": 80
+        },
+        {
+          "effect": {
+            "radius": 4,
+            "type": "blur"
+          },
+          "fill": "#FF0000",
+          "height": 80,
+          "id": "drbht",
+          "name": "blurred",
+          "type": "rectangle",
+          "width": 80
+        },
+        {
+          "children": [
+            {
+              "fill": "#FF0000",
+              "height": 80,
+              "id": "Xmbx5",
+              "name": "blend-bottom",
+              "type": "rectangle",
+              "width": 80,
+              "x": 0,
+              "y": 0
+            },
+            {
+              "fill": {
+                "blendMode": "multiply",
+                "color": "#0000FF",
+                "enabled": true,
+                "type": "color"
+              },
+              "height": 80,
+              "id": "NkSsO",
+              "name": "blend-top-multiply",
+              "type": "rectangle",
+              "width": 80,
+              "x": 20,
+              "y": 20
+            }
+          ],
+          "fill": "#FFFFFF",
+          "height": 100,
+          "id": "3mQEm",
+          "layout": "none",
+          "name": "blend-mode-demo",
+          "type": "frame",
+          "width": 100
+        }
+      ],
+      "fill": "#FFFFFF",
+      "gap": 32,
+      "id": "cxwlV",
+      "name": "render-transforms-and-effects",
+      "padding": 48,
+      "type": "frame"
+    }
+  ],
+  "version": "2.17"
+}

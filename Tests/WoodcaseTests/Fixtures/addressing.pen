@@ -1,0 +1,104 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "id": "Dash1",
+      "name": "Dashboard",
+      "type": "frame",
+      "width": 800,
+      "height": 600,
+      "children": [
+        {
+          "id": "Hdr01",
+          "name": "Header",
+          "type": "frame",
+          "width": 800,
+          "height": 64,
+          "children": [
+            {
+              "id": "Ttl01",
+              "name": "Title",
+              "type": "text",
+              "content": "Dashboard"
+            },
+            {
+              "id": "Unn01",
+              "type": "text",
+              "content": "unnamed subtitle"
+            },
+            {
+              "id": "Slsh1",
+              "name": "A/B",
+              "type": "text",
+              "content": "slash in name"
+            }
+          ]
+        },
+        {
+          "id": "Body1",
+          "name": "Body",
+          "type": "frame",
+          "width": 800,
+          "height": 536,
+          "children": [
+            {
+              "id": "Ttl02",
+              "name": "Title",
+              "type": "text",
+              "content": "Orders"
+            },
+            {
+              "id": "Nav01",
+              "name": "Nav",
+              "type": "ref",
+              "ref": "Btn01",
+              "descendants": {
+                "Lbl01": { "content": "Menu" },
+                "Bdg01/Cnt01": { "content": "3" }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Btn01",
+      "name": "Button",
+      "type": "frame",
+      "reusable": true,
+      "layout": "horizontal",
+      "width": 120,
+      "height": 40,
+      "children": [
+        {
+          "id": "Lbl01",
+          "name": "Label",
+          "type": "text",
+          "content": "Click"
+        },
+        {
+          "id": "Bdg01",
+          "name": "Badge",
+          "type": "ref",
+          "ref": "Bge01"
+        }
+      ]
+    },
+    {
+      "id": "Bge01",
+      "name": "BadgeBase",
+      "type": "frame",
+      "reusable": true,
+      "width": 24,
+      "height": 24,
+      "children": [
+        {
+          "id": "Cnt01",
+          "name": "Count",
+          "type": "text",
+          "content": "0"
+        }
+      ]
+    }
+  ]
+}

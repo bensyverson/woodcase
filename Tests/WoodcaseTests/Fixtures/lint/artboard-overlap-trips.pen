@@ -1,0 +1,38 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "id": "Home1",
+      "name": "Home",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "width": 200,
+      "height": 100,
+      "layout": "none",
+      "fill": "#FFFFFF"
+    },
+    {
+      "id": "Chk01",
+      "name": "Checkout",
+      "type": "frame",
+      "x": 150,
+      "y": 40,
+      "width": 200,
+      "height": 100,
+      "layout": "none",
+      "fill": "#EEEEEE"
+    },
+    {
+      "id": "Set01",
+      "name": "Settings",
+      "type": "frame",
+      "x": 500,
+      "y": 0,
+      "width": 200,
+      "height": 100,
+      "layout": "none",
+      "fill": "#DDDDDD"
+    }
+  ]
+}

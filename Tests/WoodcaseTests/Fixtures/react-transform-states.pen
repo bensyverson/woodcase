@@ -1,0 +1,198 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "id": "TCrd1",
+      "name": "TurnedCard",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "reusable": true,
+      "width": 120,
+      "height": 120,
+      "layout": "none",
+      "fill": "#F3F4F6",
+      "metadata": {
+        "type": "component",
+        "_role": "button"
+      },
+      "children": [
+        {
+          "id": "TCtg1",
+          "name": "Target",
+          "type": "rectangle",
+          "x": 35,
+          "y": 35,
+          "width": 50,
+          "height": 50,
+          "fill": "#2563EB",
+          "cornerRadius": [
+            20,
+            0,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TCrd2",
+      "name": "TurnedCard:disabled",
+      "type": "frame",
+      "x": 200,
+      "y": 0,
+      "width": 120,
+      "height": 120,
+      "layout": "none",
+      "fill": "#F3F4F6",
+      "children": [
+        {
+          "id": "TCtg2",
+          "name": "Target",
+          "type": "rectangle",
+          "x": 35,
+          "y": 35,
+          "width": 50,
+          "height": 50,
+          "rotation": 25,
+          "fill": "#2563EB",
+          "cornerRadius": [
+            20,
+            0,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "FCrd1",
+      "name": "FlippedCard",
+      "type": "frame",
+      "x": 0,
+      "y": 200,
+      "reusable": true,
+      "width": 120,
+      "height": 120,
+      "layout": "none",
+      "fill": "#F3F4F6",
+      "metadata": {
+        "type": "component",
+        "_role": "button"
+      },
+      "children": [
+        {
+          "id": "FCtg1",
+          "name": "Target",
+          "type": "rectangle",
+          "x": 70,
+          "y": 35,
+          "width": 50,
+          "height": 50,
+          "fill": "#F59E0B",
+          "cornerRadius": [
+            20,
+            0,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "FCrd2",
+      "name": "FlippedCard:disabled",
+      "type": "frame",
+      "x": 200,
+      "y": 200,
+      "width": 120,
+      "height": 120,
+      "layout": "none",
+      "fill": "#F3F4F6",
+      "children": [
+        {
+          "id": "FCtg2",
+          "name": "Target",
+          "type": "rectangle",
+          "x": 70,
+          "y": 35,
+          "width": 50,
+          "height": 50,
+          "flipX": true,
+          "fill": "#F59E0B",
+          "cornerRadius": [
+            20,
+            0,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "BCrd1",
+      "name": "TurnFlipCard",
+      "type": "frame",
+      "x": 0,
+      "y": 400,
+      "reusable": true,
+      "width": 120,
+      "height": 120,
+      "layout": "none",
+      "fill": "#F3F4F6",
+      "metadata": {
+        "type": "component",
+        "_role": "button"
+      },
+      "children": [
+        {
+          "id": "BCtg1",
+          "name": "Target",
+          "type": "rectangle",
+          "x": 70,
+          "y": 35,
+          "width": 50,
+          "height": 50,
+          "fill": "#10B981",
+          "cornerRadius": [
+            20,
+            0,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "BCrd2",
+      "name": "TurnFlipCard:disabled",
+      "type": "frame",
+      "x": 200,
+      "y": 400,
+      "width": 120,
+      "height": 120,
+      "layout": "none",
+      "fill": "#F3F4F6",
+      "children": [
+        {
+          "id": "BCtg2",
+          "name": "Target",
+          "type": "rectangle",
+          "x": 70,
+          "y": 35,
+          "width": 50,
+          "height": 50,
+          "flipX": true,
+          "fill": "#10B981",
+          "cornerRadius": [
+            20,
+            0,
+            0,
+            0
+          ],
+          "rotation": 25
+        }
+      ]
+    }
+  ]
+}

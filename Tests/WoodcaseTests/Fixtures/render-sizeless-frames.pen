@@ -1,0 +1,255 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "Splain",
+      "name": "plain",
+      "x": 0,
+      "y": 0,
+      "width": 300,
+      "height": 300,
+      "layout": "none",
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "frame",
+          "id": "SplainF",
+          "x": 50,
+          "y": 50,
+          "layout": "none",
+          "fill": "#808080",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "SplainFa",
+              "x": 10,
+              "y": 10,
+              "width": 80,
+              "height": 40,
+              "fill": "#FF00FF"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Sclip",
+      "name": "clip",
+      "x": 400,
+      "y": 0,
+      "width": 300,
+      "height": 300,
+      "layout": "none",
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "frame",
+          "id": "SclipF",
+          "x": 50,
+          "y": 50,
+          "layout": "none",
+          "fill": "#808080",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "SclipFa",
+              "x": 10,
+              "y": 10,
+              "width": 80,
+              "height": 40,
+              "fill": "#FF00FF"
+            }
+          ],
+          "clip": true
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Spaint",
+      "name": "paint",
+      "x": 800,
+      "y": 0,
+      "width": 300,
+      "height": 300,
+      "layout": "none",
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "frame",
+          "id": "SpaintF",
+          "x": 50,
+          "y": 50,
+          "layout": "none",
+          "fill": "#808080",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "SpaintFa",
+              "x": 10,
+              "y": 10,
+              "width": 80,
+              "height": 40,
+              "fill": "#FF00FF"
+            }
+          ],
+          "stroke": "#00FF00",
+          "strokeWidth": 8,
+          "strokeAlignment": "outer",
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "#FFFFFFFF",
+            "offset": {
+              "x": 10,
+              "y": 10
+            },
+            "blur": 8
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Sflex",
+      "name": "flex",
+      "x": 0,
+      "y": 400,
+      "width": 300,
+      "height": 300,
+      "layout": "horizontal",
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "frame",
+          "id": "SflexF",
+          "x": 0,
+          "y": 0,
+          "layout": "none",
+          "fill": "#808080",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "SflexFa",
+              "x": 0,
+              "y": 0,
+              "width": 50,
+              "height": 50,
+              "fill": "#FF00FF"
+            }
+          ]
+        },
+        {
+          "type": "rectangle",
+          "id": "SflexS",
+          "x": 0,
+          "y": 0,
+          "width": 30,
+          "height": 30,
+          "fill": "#FF0000"
+        }
+      ],
+      "gap": 10
+    },
+    {
+      "type": "frame",
+      "id": "Sfit",
+      "name": "fitflex",
+      "x": 400,
+      "y": 400,
+      "width": 300,
+      "height": 300,
+      "layout": "none",
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "frame",
+          "id": "SfitP",
+          "x": 20,
+          "y": 20,
+          "layout": "horizontal",
+          "fill": "#0000FF",
+          "padding": 5,
+          "children": [
+            {
+              "type": "frame",
+              "id": "SfitF",
+              "x": 0,
+              "y": 0,
+              "layout": "none",
+              "fill": "#808080",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "SfitFa",
+                  "x": 0,
+                  "y": 0,
+                  "width": 50,
+                  "height": 50,
+                  "fill": "#FF00FF"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Sexp",
+      "name": "explicit",
+      "x": 800,
+      "y": 400,
+      "width": 300,
+      "height": 300,
+      "layout": "none",
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "frame",
+          "id": "SexpF",
+          "x": 50,
+          "y": 50,
+          "layout": "none",
+          "fill": "#808080",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "SexpFa",
+              "x": 10,
+              "y": 10,
+              "width": 80,
+              "height": 40,
+              "fill": "#FF00FF"
+            }
+          ],
+          "width": "fit_content",
+          "height": "fit_content"
+        },
+        {
+          "type": "frame",
+          "id": "SexpG",
+          "x": 50,
+          "y": 150,
+          "layout": "none",
+          "fill": "#808080",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "SexpGa",
+              "x": 10,
+              "y": 10,
+              "width": 80,
+              "height": 40,
+              "fill": "#FF00FF"
+            }
+          ],
+          "width": "fit_content(30)",
+          "height": 20
+        }
+      ]
+    }
+  ]
+}

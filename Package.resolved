@@ -1,0 +1,60 @@
+{
+  "originHash" : "e3a13087bba83bdf131d624a08f3aa6abeab7c4ec1fa658579e58bc11d6993fc",
+  "pins" : [
+    {
+      "identity" : "elementary",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/sliemeobn/elementary",
+      "state" : {
+        "revision" : "f0141ba98c0f3ec9eeaee40fb4bffd1427482a1d",
+        "version" : "0.8.1"
+      }
+    },
+    {
+      "identity" : "pixelpeeper",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/bensyverson/PixelPeeper.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "48427f2776fb0a80eacada4249fccf801e05e6f6"
+      }
+    },
+    {
+      "identity" : "sleepyhollow",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/bensyverson/sleepyhollow.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "5fd352a966ccd2ad9223ff6560d51961256a8bae"
+      }
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser",
+      "state" : {
+        "revision" : "6a52f3251125d74daf04fcbd5e6f08a75d074382",
+        "version" : "1.8.2"
+      }
+    },
+    {
+      "identity" : "swift-docc-plugin",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swiftlang/swift-docc-plugin",
+      "state" : {
+        "revision" : "e977f65879f82b375a044c8837597f690c067da6",
+        "version" : "1.4.6"
+      }
+    },
+    {
+      "identity" : "swift-docc-symbolkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swiftlang/swift-docc-symbolkit",
+      "state" : {
+        "revision" : "b45d1f2ed151d057b54504d653e0da5552844e34",
+        "version" : "1.0.0"
+      }
+    }
+  ],
+  "version" : 3
+}

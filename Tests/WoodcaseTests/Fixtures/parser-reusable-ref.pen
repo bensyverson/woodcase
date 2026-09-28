@@ -1,0 +1,59 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "content": "Default Title",
+          "fontSize": 24,
+          "fontWeight": "700",
+          "id": "card-title",
+          "type": "text"
+        },
+        {
+          "content": "Default body text",
+          "fontSize": 14,
+          "id": "card-body",
+          "type": "text"
+        }
+      ],
+      "fill": "#FFFFFF",
+      "gap": 8,
+      "height": 200,
+      "id": "card-component",
+      "layout": "vertical",
+      "padding": 16,
+      "reusable": true,
+      "type": "frame",
+      "width": 300
+    },
+    {
+      "descendants": {
+        "card-body": {
+          "content": "Overridden body text",
+          "fontSize": 16
+        },
+        "card-title": {
+          "content": "Custom Title"
+        }
+      },
+      "id": "card-instance1",
+      "ref": "card-component",
+      "type": "ref",
+      "x": 0,
+      "y": 0
+    },
+    {
+      "descendants": {
+        "card-title": {
+          "enabled": false
+        }
+      },
+      "id": "card-instance2",
+      "ref": "card-component",
+      "type": "ref",
+      "x": 320,
+      "y": 0
+    }
+  ],
+  "version": "2.17"
+}

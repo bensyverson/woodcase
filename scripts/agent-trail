@@ -1,0 +1,38 @@
+#!/usr/bin/env python3
+"""Condense a subagent JSONL transcript into a handoff trail: every assistant
+text message, and every tool call (commands abbreviated), in order."""
+import json
+import sys
+
+src, dst = sys.argv[1], sys.argv[2]
+out = ["# Predecessor trail\n",
+       "The agent before you was stopped mid-task (machine overload, not its fault). "
+       "Below: its own messages and tool calls, in order. Its edits are on disk in your worktree.\n"]
+for line in open(src):
+    try:
+        rec = json.loads(line)
+    except json.JSONDecodeError:
+        continue
+    if rec.get("type") != "assistant":
+        continue
+    content = rec.get("message", {}).get("content", [])
+    if isinstance(content, str):
+        content = [{"type": "text", "text": content}]
+    for block in content:
+        if block.get("type") == "text" and block["text"].strip():
+            out.append("\n**said:** " + block["text"].strip() + "\n")
+        elif block.get("type") == "tool_use":
+            inp = block.get("input", {})
+            name = block.get("name")
+            if name == "Bash":
+                detail = inp.get("command", "")
+            elif name in ("Read", "Write", "Edit"):
+                detail = inp.get("file_path", "")
+            else:
+                detail = json.dumps(inp)
+            detail = detail.replace("\n", " ⏎ ")
+            if len(detail) > 300:
+                detail = detail[:300] + "…"
+            out.append(f"- `{name}`: {detail}\n")
+open(dst, "w").write("".join(out))
+print(dst, sum(len(s) for s in out))

@@ -1,0 +1,99 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "tfH00",
+      "x": 0,
+      "y": 0,
+      "name": "layout-text-chips",
+      "width": 360,
+      "fill": "#F3F4F6",
+      "gap": 8,
+      "padding": 16,
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "tfH01",
+          "name": "chip-1",
+          "fill": "#DBEAFE",
+          "cornerRadius": 12,
+          "padding": [
+            4,
+            10
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "tfH02",
+              "name": "chip-1-label",
+              "fill": "#1E3A8A",
+              "content": "Design",
+              "fontFamily": "IBM Plex Sans",
+              "fontSize": 13,
+              "fontWeight": "500"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "tfH03",
+          "name": "chip-2",
+          "fill": "#DBEAFE",
+          "cornerRadius": 12,
+          "padding": [
+            4,
+            10
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "tfH04",
+              "name": "chip-2-label",
+              "fill": "#1E3A8A",
+              "content": "Engineering",
+              "fontFamily": "IBM Plex Sans",
+              "fontSize": 13,
+              "fontWeight": "500"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "tfH05",
+          "name": "chip-3",
+          "fill": "#DBEAFE",
+          "cornerRadius": 12,
+          "padding": [
+            4,
+            10
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "tfH06",
+              "name": "chip-3-label",
+              "fill": "#1E3A8A",
+              "content": "Q3 roadmap",
+              "fontFamily": "IBM Plex Sans",
+              "fontSize": 13,
+              "fontWeight": "500"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "tfH07",
+          "name": "auto-more",
+          "fill": "#6B7280",
+          "content": "+4",
+          "fontFamily": "IBM Plex Sans",
+          "fontSize": 13,
+          "fontWeight": "normal"
+        }
+      ]
+    }
+  ],
+  "fileToken": "1dd61ab3-1575-4c0f-abfa-b7d48569cc9e"
+}

@@ -1,0 +1,180 @@
+#!/usr/bin/env python3
+"""gen-geometry-probe — write the geometry-model probe: which extents (stroke band, shadow,
+blur, turn, flip) enter Pen's layout, for flex, group and free children, text and icons,
+and top-level nodes whose export is bounded by their painted extent.
+
+Usage:
+    scripts/gen-geometry-probe <out.pen>
+    scripts/pen-oracle <out.pen> --out <dir> --scale 2
+    woodcase tree <out.pen> --json > <dir>/woodcase-tree.json
+    scripts/layout-diff <dir>/<name>.layout.json <dir>/woodcase-tree.json
+
+Reproduces the tables in project/2026-09-28-geometry-model.md.
+Tests/WoodcaseTests/Fixtures/geometry-probe.pen is this script's output. Standard library only;
+runs sandboxed (pen-oracle and woodcase need the sandbox disabled).
+"""
+import json, sys
+
+STROKE = "#00AA0099"
+BLUE = "#3366FF"
+RED = "#FF3333"
+
+
+def rect(id, w=60, h=40, fill=RED, **extra):
+    n = {"type": "rectangle", "id": id, "width": w, "height": h, "fill": fill}
+    n.update(extra)
+    return n
+
+
+def stroke(align="outer", width=12):
+    return {"stroke": STROKE, "strokeWidth": width, "strokeAlignment": align}
+
+
+PER_SIDE = {"top": 4, "right": 16, "bottom": 24, "left": 8}
+SHADOW = {"type": "shadow", "shadowType": "outer", "offset": {"x": 10, "y": 10},
+          "blur": 8, "spread": 4, "color": "#00000080"}
+
+# ---- flex rows: [A, B(variant), C] in a fit_content horizontal frame ----
+flex_rows = [
+    ("f00", {}, {}),
+    ("f01", stroke("inner"), {}),
+    ("f02", stroke("center"), {}),
+    ("f03", stroke("outer"), {}),
+    ("f04", {"stroke": STROKE, "strokeWidth": PER_SIDE, "strokeAlignment": "outer"}, {}),
+    ("f05", {**stroke("outer"), "rotation": 30}, {}),
+    ("f06", {**stroke("outer"), "rotation": 90}, {}),
+    ("f07", {**stroke("outer"), "flipX": True}, {}),
+    ("f08", {**stroke("outer"), "rotation": 30, "flipY": True}, {}),
+    ("f09", {"effect": SHADOW}, {}),
+    ("f10", {"effect": {"type": "blur", "radius": 10}}, {}),
+    ("f11", {"effect": {"type": "background_blur", "radius": 10}}, {}),
+    ("f12", {"effect": SHADOW, "rotation": 30}, {}),
+    ("f13", stroke("outer"), {"layoutIncludeStroke": True}),
+    ("f14", {}, {"layoutIncludeStroke": True, **stroke("outer")}),
+    ("f15", {}, {"layoutIncludeStroke": True, **stroke("inner")}),
+    ("f16", {"rotation": 30, "width": "fill_container"}, {"width": 300}),
+    ("f17", {"rotation": 30}, {"alignItems": "center"}),
+    ("f18", {"rotation": 30}, {"width": 300, "justifyContent": "end"}),
+    ("f19", {"rotation": 30, "flipX": True}, {}),
+    ("f20", {"rotation": 90, "height": "fill_container"}, {"height": 120, "alignItems": "start"}),
+]
+
+rows = []
+for rid, bvar, rowvar in flex_rows:
+    b = rect(rid + "b")
+    b.update(bvar)
+    row = {"type": "frame", "id": rid, "name": rid, "layout": "horizontal", "gap": 10,
+           "padding": 10, "fill": "#DDDDDD",
+           "children": [rect(rid + "a", fill=BLUE), b, rect(rid + "c", fill=BLUE)]}
+    row.update(rowvar)
+    rows.append(row)
+
+flex_board = {"type": "frame", "id": "flex", "name": "flex", "x": 0, "y": 0,
+              "layout": "vertical", "gap": 30, "padding": 40, "fill": "#FFFFFF",
+              "children": rows}
+
+# ---- frames that are themselves turned in flex: a fit_content frame child ----
+# (covered by f16..f20 for leaves; here a turned fit_content frame)
+inner = {"type": "frame", "id": "fcin", "layout": "horizontal", "padding": 10, "fill": "#FFCC00",
+         "rotation": 30, "children": [rect("fcinr", 40, 20)]}
+flex_board["children"].append({"type": "frame", "id": "f21", "name": "f21", "layout": "horizontal",
+                               "gap": 10, "padding": 10, "fill": "#DDDDDD",
+                               "children": [rect("f21a", fill=BLUE), inner, rect("f21c", fill=BLUE)]})
+
+# ---- groups in a free board ----
+def group(gid, x, y, second_extra, group_extra=None):
+    g = {"type": "group", "id": gid, "name": gid, "x": x, "y": y,
+         "children": [rect(gid + "a", x=0, y=0, fill=BLUE), rect(gid + "b", x=80, y=0, **second_extra)]}
+    if group_extra:
+        g.update(group_extra)
+    return g
+
+groups = [
+    group("g1", 40, 40, stroke("outer")),
+    group("g2", 260, 40, {"effect": SHADOW}),
+    group("g3", 480, 40, {**stroke("outer"), "rotation": 30}),
+    group("g4", 40, 200, {}, {"rotation": 30}),
+    group("g5", 260, 200, {}, {"flipX": True}),
+    group("g6", 480, 200, {**stroke("outer"), "flipY": True}),
+]
+group_board = {"type": "frame", "id": "groups", "name": "groups", "x": 1200, "y": 0,
+               "width": 720, "height": 360, "layout": "none", "fill": "#FFFFFF", "children": groups}
+
+# ---- free (layout none) children ----
+free_children = [
+    rect("r1", x=40, y=40, **stroke("outer")),
+    rect("r2", x=180, y=40, **stroke("outer"), rotation=30),
+    rect("r3", x=320, y=40, **stroke("outer"), rotation=90),
+    rect("r4", x=460, y=40, **stroke("outer"), flipX=True),
+    rect("r5", x=600, y=40, **stroke("outer"), rotation=30, flipY=True),
+    rect("r6", x=40, y=200, stroke=STROKE, strokeWidth={"top": 4, "right": 4, "bottom": 4, "left": 24},
+         strokeAlignment="outer", flipX=True),
+    rect("r7", x=180, y=200, effect=SHADOW, rotation=30),
+    {"type": "ellipse", "id": "r8", "x": 320, "y": 200, "width": 60, "height": 40, "fill": RED,
+     **stroke("outer"), "rotation": 30},
+    rect("r9", x=460, y=200, stroke=STROKE, strokeWidth={"top": 4, "right": 4, "bottom": 4, "left": 24},
+         strokeAlignment="outer", rotation=90),
+]
+free_board = {"type": "frame", "id": "free", "name": "free", "x": 1200, "y": 500,
+              "width": 720, "height": 360, "layout": "none", "fill": "#FFFFFF", "children": free_children}
+
+# ---- text and icons turned in flex ----
+def text(tid, **extra):
+    n = {"type": "text", "id": tid, "content": "Hg", "fontFamily": "Inter", "fontSize": 32,
+         "fill": "#000000"}
+    n.update(extra)
+    return n
+
+def icon(iid, **extra):
+    n = {"type": "icon", "id": iid, "library": "lucide", "icon": "star", "width": 32, "height": 32,
+         "fill": "#000000"}
+    n.update(extra)
+    return n
+
+text_rows = [
+    ("t0", text("t0b")),
+    ("t1", text("t1b", rotation=30)),
+    ("t2", text("t2b", rotation=90)),
+    ("t3", text("t3b", flipX=True)),
+    ("t4", text("t4b", textGrowth="fixed-width", width=100, rotation=30)),
+    ("t5", icon("t5b")),
+    ("t6", icon("t6b", rotation=30)),
+    ("t7", icon("t7b", rotation=45, flipX=True)),
+]
+trows = []
+for rid, b in text_rows:
+    trows.append({"type": "frame", "id": rid, "name": rid, "layout": "horizontal", "gap": 10,
+                  "padding": 10, "fill": "#DDDDDD",
+                  "children": [rect(rid + "a", fill=BLUE), b, rect(rid + "c", fill=BLUE)]})
+text_board = {"type": "frame", "id": "texts", "name": "texts", "x": 2100, "y": 0,
+              "layout": "vertical", "gap": 30, "padding": 40, "fill": "#FFFFFF", "children": trows}
+
+# ---- top-level nodes whose export is bounded by their painted extent ----
+tops = [
+    rect("x1", 100, 60, x=2100, y=900, **stroke("outer"), effect=SHADOW),
+    rect("x2", 100, 60, x=2400, y=900, **stroke("outer"), rotation=30),
+    rect("x3", 100, 60, x=2700, y=900, effect={"type": "blur", "radius": 10}),
+    rect("x4", 100, 60, x=3000, y=900, **stroke("center")),
+    # x5-x7: a text node's painted extent is its glyph ink, not its box (Pen's
+    # `computeVisualLocalBounds` for text returns its Skia fill path's tight bounds).
+    # x5: an unbreakable word wider and taller than its fixed box, overflowing on every
+    # side. x6: italic overhang -- the slant reaches past the upright box on both axes.
+    # x7: an ordinary paragraph that wraps past its fixed height.
+    text("x5", x=2100, y=1050, width=60, height=20, textGrowth="fixed-width-height",
+         content="Hgy", fontSize=40),
+    text("x6", x=2400, y=1050, width=90, height=40, textGrowth="fixed-width-height",
+         content="Qjy", fontSize=40, fontStyle="italic"),
+    text("x7", x=2700, y=1050, width=120, height=30, textGrowth="fixed-width-height",
+         content="Hello world", fontSize=30),
+    # x8-x9: an icon's painted extent is its glyph ink too (Pen's DJt icon class returns
+    # its own `fillPath.bounds` from `computeVisualLocalBounds`) -- the vector glyph
+    # scaled to fit the box by its *shorter* side and centred, then measured tightly, not
+    # the box itself. x8: a wide box (60x20) makes the fitted glyph much narrower than
+    # the box. x9: a square box around a glyph ("minus") that does not fill its own
+    # em-square even when fitted.
+    icon("x8", x=2100, y=1200, library="lucide", icon="star", width=60, height=20),
+    icon("x9", x=2400, y=1200, library="lucide", icon="minus", width=40, height=40),
+]
+
+doc = {"version": "2.17", "children": [flex_board, group_board, free_board, text_board] + tops}
+json.dump(doc, open(sys.argv[1], "w"), indent=2)

@@ -1,0 +1,265 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "c9QeW",
+      "x": 0,
+      "y": 0,
+      "name": "plexmono-400",
+      "clip": true,
+      "width": 460,
+      "height": 72,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "text",
+          "id": "vj7FA",
+          "x": 12,
+          "y": 14,
+          "name": "t",
+          "fill": "#000000",
+          "content": "Hamburgefonstiv 0123",
+          "fontFamily": "IBM Plex Mono",
+          "fontSize": 32
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "uvSwM",
+      "x": 0,
+      "y": 100,
+      "name": "plexmono-700",
+      "clip": true,
+      "width": 460,
+      "height": 72,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "text",
+          "id": "JKY40",
+          "x": 12,
+          "y": 14,
+          "name": "t",
+          "fill": "#000000",
+          "content": "Hamburgefonstiv 0123",
+          "fontFamily": "IBM Plex Mono",
+          "fontSize": 32,
+          "fontWeight": "700"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "1f8rE",
+      "x": 0,
+      "y": 200,
+      "name": "plexmono-italic",
+      "clip": true,
+      "width": 460,
+      "height": 72,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "text",
+          "id": "FLZDe",
+          "x": 12,
+          "y": 14,
+          "name": "t",
+          "fill": "#000000",
+          "content": "Hamburgefonstiv 0123",
+          "fontFamily": "IBM Plex Mono",
+          "fontSize": 32,
+          "fontStyle": "italic"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "StPKR",
+      "x": 0,
+      "y": 300,
+      "name": "plexmono-700-italic",
+      "clip": true,
+      "width": 460,
+      "height": 72,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "text",
+          "id": "SQedU",
+          "x": 12,
+          "y": 14,
+          "name": "t",
+          "fill": "#000000",
+          "content": "Hamburgefonstiv 0123",
+          "fontFamily": "IBM Plex Mono",
+          "fontSize": 32,
+          "fontWeight": "700",
+          "fontStyle": "italic"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "4Qwb8",
+      "x": 0,
+      "y": 400,
+      "name": "spectral-400",
+      "clip": true,
+      "width": 460,
+      "height": 72,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "text",
+          "id": "0CsTy",
+          "x": 12,
+          "y": 14,
+          "name": "t",
+          "fill": "#000000",
+          "content": "Hamburgefonstiv 0123",
+          "fontFamily": "Spectral",
+          "fontSize": 32
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "FdnXs",
+      "x": 0,
+      "y": 500,
+      "name": "spectral-700",
+      "clip": true,
+      "width": 460,
+      "height": 72,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "text",
+          "id": "DwkNh",
+          "x": 12,
+          "y": 14,
+          "name": "t",
+          "fill": "#000000",
+          "content": "Hamburgefonstiv 0123",
+          "fontFamily": "Spectral",
+          "fontSize": 32,
+          "fontWeight": "700"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "63Ffk",
+      "x": 0,
+      "y": 600,
+      "name": "spectral-italic",
+      "clip": true,
+      "width": 460,
+      "height": 72,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "text",
+          "id": "iVpzz",
+          "x": 12,
+          "y": 14,
+          "name": "t",
+          "fill": "#000000",
+          "content": "Hamburgefonstiv 0123",
+          "fontFamily": "Spectral",
+          "fontSize": 32,
+          "fontStyle": "italic"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "i0B3J",
+      "x": 0,
+      "y": 700,
+      "name": "inter-italic",
+      "clip": true,
+      "width": 460,
+      "height": 72,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "text",
+          "id": "CzJr4",
+          "x": 12,
+          "y": 14,
+          "name": "t",
+          "fill": "#000000",
+          "content": "Hamburgefonstiv 0123",
+          "fontFamily": "Inter",
+          "fontSize": 32,
+          "fontStyle": "italic"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "4y9oj",
+      "x": 0,
+      "y": 800,
+      "name": "lora-italic",
+      "clip": true,
+      "width": 460,
+      "height": 72,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "text",
+          "id": "rTAwR",
+          "x": 12,
+          "y": 14,
+          "name": "t",
+          "fill": "#000000",
+          "content": "Hamburgefonstiv 0123",
+          "fontFamily": "Lora",
+          "fontSize": 32,
+          "fontStyle": "italic"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "oaF1L",
+      "x": 0,
+      "y": 900,
+      "name": "instrumentserif-italic",
+      "clip": true,
+      "width": 460,
+      "height": 72,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "text",
+          "id": "fljoQ",
+          "x": 12,
+          "y": 14,
+          "name": "t",
+          "fill": "#000000",
+          "content": "Hamburgefonstiv 0123",
+          "fontFamily": "Instrument Serif",
+          "fontSize": 32,
+          "fontStyle": "italic"
+        }
+      ]
+    }
+  ],
+  "fileToken": "a28c76dd-6de2-446d-804d-d92ee0e0f617"
+}

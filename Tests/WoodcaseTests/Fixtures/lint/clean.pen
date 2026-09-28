@@ -1,0 +1,70 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "id": "Rt001",
+      "name": "Root",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "width": 200,
+      "height": 100,
+      "layout": "none",
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "id": "Bx001",
+          "name": "Box",
+          "type": "rectangle",
+          "x": 10,
+          "y": 30,
+          "width": 50,
+          "height": 50,
+          "fill": "#FF0000"
+        },
+        {
+          "id": "Tx001",
+          "name": "Label",
+          "type": "text",
+          "x": 70,
+          "y": 30,
+          "width": 100,
+          "height": 20,
+          "content": "Hello",
+          "fill": "#000000"
+        },
+        {
+          "id": "Br001",
+          "name": "Bar",
+          "type": "frame",
+          "x": 0,
+          "y": 0,
+          "width": 100,
+          "height": 10,
+          "layout": "horizontal",
+          "fill": "#EEEEEE",
+          "children": [
+            {
+              "id": "Fl001",
+              "name": "Fill",
+              "type": "rectangle",
+              "width": "fill_container",
+              "height": 5,
+              "fill": "#00FF00"
+            }
+          ]
+        },
+        {
+          "id": "Cp001",
+          "name": "Chip",
+          "type": "frame",
+          "x": 120,
+          "y": 60,
+          "width": "fit_content(20)",
+          "height": 10,
+          "fill": "#0000FF"
+        }
+      ]
+    }
+  ]
+}

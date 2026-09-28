@@ -1,0 +1,187 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "fill": "#FF0000",
+              "height": 150,
+              "id": "exVHd",
+              "name": "solid-red",
+              "type": "rectangle",
+              "width": 150
+            },
+            {
+              "cornerRadius": 16,
+              "fill": "#0066FF",
+              "height": 150,
+              "id": "EkZRU",
+              "name": "rounded-blue",
+              "type": "rectangle",
+              "width": 150
+            },
+            {
+              "cornerRadius": [
+                24,
+                24,
+                0,
+                0
+              ],
+              "fill": "#00CC44",
+              "height": 150,
+              "id": "syjM1",
+              "name": "per-corner-green",
+              "type": "rectangle",
+              "width": 150
+            },
+            {
+              "fill": "#FF8800",
+              "height": 150,
+              "id": "McQCh",
+              "name": "solid-ellipse",
+              "type": "ellipse",
+              "width": 200
+            },
+            {
+              "fill": "#9933FF",
+              "height": 150,
+              "id": "Gv1d4",
+              "name": "pacman",
+              "startAngle": 30,
+              "sweepAngle": -300,
+              "type": "ellipse",
+              "width": 150
+            },
+            {
+              "fill": "#00CCDD",
+              "height": 150,
+              "id": "xRIvo",
+              "innerRadius": 0.4,
+              "name": "donut",
+              "type": "ellipse",
+              "width": 150
+            }
+          ],
+          "fill": "#FFFFFF00",
+          "gap": 24,
+          "id": "Uh1r4",
+          "name": "row1",
+          "type": "frame",
+          "width": "fill_container"
+        },
+        {
+          "children": [
+            {
+              "fill": "#7B1FA2",
+              "height": 150,
+              "id": "phpWi",
+              "name": "hexagon",
+              "polygonCount": 6,
+              "type": "polygon",
+              "width": 150
+            },
+            {
+              "fill": "#FF6D00",
+              "height": 150,
+              "id": "5o8zu",
+              "name": "solid-orange",
+              "type": "rectangle",
+              "width": 150
+            },
+            {
+              "fill": "#DDDDDD",
+              "height": 150,
+              "id": "pImXz",
+              "name": "stroke-center-red",
+              "stroke": "#FF0000",
+              "strokeWidth": 6,
+              "type": "rectangle",
+              "width": 150
+            },
+            {
+              "fill": "#DDDDDD",
+              "height": 150,
+              "id": "whdBH",
+              "name": "stroke-inside-blue",
+              "stroke": "#0000CC",
+              "strokeAlignment": "inner",
+              "strokeWidth": 6,
+              "type": "rectangle",
+              "width": 150
+            },
+            {
+              "fill": "#DDDDDD",
+              "height": 150,
+              "id": "bu8fm",
+              "name": "stroke-outside-green",
+              "stroke": "#009900",
+              "strokeAlignment": "outer",
+              "strokeWidth": 6,
+              "type": "rectangle",
+              "width": 150
+            }
+          ],
+          "fill": "#FFFFFF00",
+          "gap": 24,
+          "id": "12w6a",
+          "name": "row2",
+          "type": "frame",
+          "width": "fill_container"
+        },
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "fill": "#4CAF50",
+                  "height": 120,
+                  "id": "QJTSN",
+                  "name": "frame-child",
+                  "type": "rectangle",
+                  "width": 120,
+                  "x": 20,
+                  "y": 20
+                }
+              ],
+              "clip": true,
+              "fill": "#E8E8E8",
+              "height": 200,
+              "id": "zSVvo",
+              "layout": "none",
+              "name": "clip-frame",
+              "type": "frame",
+              "width": 300
+            },
+            {
+              "height": 200,
+              "id": "Nm19S",
+              "name": "diagonal-line",
+              "stroke": "#333333",
+              "strokeWidth": 4,
+              "type": "line",
+              "width": 200
+            }
+          ],
+          "fill": "#FFFFFF00",
+          "gap": 24,
+          "id": "9Y9ob",
+          "name": "row3",
+          "type": "frame",
+          "width": "fill_container"
+        }
+      ],
+      "fill": "#FFFFFF",
+      "gap": 24,
+      "id": "tlozv",
+      "layout": "vertical",
+      "name": "render-shapes-and-fills",
+      "padding": 40,
+      "type": "frame",
+      "width": 1400,
+      "x": 0,
+      "y": 0
+    }
+  ],
+  "version": "2.17"
+}

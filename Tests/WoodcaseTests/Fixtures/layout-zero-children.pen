@@ -1,0 +1,13 @@
+{
+  "children": [
+    {
+      "fill": "#F0F0F0",
+      "height": 100,
+      "id": "TsbZj",
+      "name": "layout-zero-children",
+      "type": "frame",
+      "width": 200
+    }
+  ],
+  "version": "2.17"
+}

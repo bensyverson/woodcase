@@ -1,0 +1,384 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "as01f",
+      "name": "poly-fill",
+      "x": 300,
+      "y": 0,
+      "width": 240,
+      "height": 180,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "polygon",
+          "id": "as01s",
+          "x": 30,
+          "y": 20,
+          "width": 180,
+          "height": 140,
+          "polygonCount": 6,
+          "fill": {
+            "type": "gradient",
+            "gradientType": "angular",
+            "colors": [
+              {
+                "color": "#FF0000",
+                "position": 0
+              },
+              {
+                "color": "#00FF00",
+                "position": 0.33
+              },
+              {
+                "color": "#0000FF",
+                "position": 0.66
+              },
+              {
+                "color": "#FF0000",
+                "position": 1
+              }
+            ],
+            "rotation": 30
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "as02f",
+      "name": "poly-stroke",
+      "x": 600,
+      "y": 0,
+      "width": 240,
+      "height": 180,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "polygon",
+          "id": "as02s",
+          "x": 30,
+          "y": 20,
+          "width": 180,
+          "height": 140,
+          "polygonCount": 5,
+          "fill": "#333333",
+          "stroke": {
+            "type": "gradient",
+            "gradientType": "angular",
+            "colors": [
+              {
+                "color": "#FF0000",
+                "position": 0
+              },
+              {
+                "color": "#00FF00",
+                "position": 0.33
+              },
+              {
+                "color": "#0000FF",
+                "position": 0.66
+              },
+              {
+                "color": "#FF0000",
+                "position": 1
+              }
+            ],
+            "rotation": 0
+          },
+          "strokeWidth": 12
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "as03f",
+      "name": "path-fill",
+      "x": 900,
+      "y": 0,
+      "width": 240,
+      "height": 180,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "path",
+          "id": "as03s",
+          "x": 30,
+          "y": 20,
+          "width": 180,
+          "height": 140,
+          "geometry": "M0 140 L90 0 L180 140 Z",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "angular",
+            "colors": [
+              {
+                "color": "#FF0000",
+                "position": 0
+              },
+              {
+                "color": "#00FF00",
+                "position": 0.33
+              },
+              {
+                "color": "#0000FF",
+                "position": 0.66
+              },
+              {
+                "color": "#FF0000",
+                "position": 1
+              }
+            ],
+            "rotation": 0
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "as04f",
+      "name": "path-stroke-inner",
+      "x": 1200,
+      "y": 0,
+      "width": 240,
+      "height": 180,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "path",
+          "id": "as04s",
+          "x": 30,
+          "y": 20,
+          "width": 180,
+          "height": 140,
+          "geometry": "M0 140 L90 0 L180 140 Z",
+          "fill": "#333333",
+          "stroke": {
+            "type": "gradient",
+            "gradientType": "angular",
+            "colors": [
+              {
+                "color": "#FF0000",
+                "position": 0
+              },
+              {
+                "color": "#00FF00",
+                "position": 0.33
+              },
+              {
+                "color": "#0000FF",
+                "position": 0.66
+              },
+              {
+                "color": "#FF0000",
+                "position": 1
+              }
+            ],
+            "rotation": 60
+          },
+          "strokeWidth": 16,
+          "strokeAlignment": "inner"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "as05f",
+      "name": "path-stroke-outer",
+      "x": 1500,
+      "y": 0,
+      "width": 240,
+      "height": 180,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "path",
+          "id": "as05s",
+          "x": 40,
+          "y": 30,
+          "width": 160,
+          "height": 120,
+          "geometry": "M0 120 L80 0 L160 120 Z",
+          "fill": "#333333",
+          "stroke": {
+            "type": "gradient",
+            "gradientType": "angular",
+            "colors": [
+              {
+                "color": "#FF0000",
+                "position": 0
+              },
+              {
+                "color": "#00FF00",
+                "position": 0.33
+              },
+              {
+                "color": "#0000FF",
+                "position": 0.66
+              },
+              {
+                "color": "#FF0000",
+                "position": 1
+              }
+            ],
+            "rotation": 0
+          },
+          "strokeWidth": 12,
+          "strokeAlignment": "outer"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "as06f",
+      "name": "line",
+      "x": 1800,
+      "y": 0,
+      "width": 240,
+      "height": 180,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "line",
+          "id": "as06s",
+          "x": 30,
+          "y": 30,
+          "width": 180,
+          "height": 120,
+          "stroke": {
+            "type": "gradient",
+            "gradientType": "angular",
+            "colors": [
+              {
+                "color": "#FF0000",
+                "position": 0
+              },
+              {
+                "color": "#00FF00",
+                "position": 0.33
+              },
+              {
+                "color": "#0000FF",
+                "position": 0.66
+              },
+              {
+                "color": "#FF0000",
+                "position": 1
+              }
+            ],
+            "rotation": 0
+          },
+          "strokeWidth": 16
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "as07f",
+      "name": "donut-fill",
+      "x": 2100,
+      "y": 0,
+      "width": 240,
+      "height": 180,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "ellipse",
+          "id": "as07s",
+          "x": 30,
+          "y": 20,
+          "width": 180,
+          "height": 140,
+          "innerRadius": 0.5,
+          "fill": {
+            "type": "gradient",
+            "gradientType": "angular",
+            "colors": [
+              {
+                "color": "#FF0000",
+                "position": 0
+              },
+              {
+                "color": "#00FF00",
+                "position": 0.33
+              },
+              {
+                "color": "#0000FF",
+                "position": 0.66
+              },
+              {
+                "color": "#FF0000",
+                "position": 1
+              }
+            ],
+            "rotation": 45
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "as08f",
+      "name": "arc-stroke",
+      "x": 2400,
+      "y": 0,
+      "width": 240,
+      "height": 180,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "ellipse",
+          "id": "as08s",
+          "x": 30,
+          "y": 20,
+          "width": 180,
+          "height": 140,
+          "startAngle": 0,
+          "sweepAngle": 270,
+          "fill": "#333333",
+          "stroke": {
+            "type": "gradient",
+            "gradientType": "angular",
+            "colors": [
+              {
+                "color": "#FF0000",
+                "position": 0
+              },
+              {
+                "color": "#00FF00",
+                "position": 0.33
+              },
+              {
+                "color": "#0000FF",
+                "position": 0.66
+              },
+              {
+                "color": "#FF0000",
+                "position": 1
+              }
+            ],
+            "rotation": 0
+          },
+          "strokeWidth": 12
+        }
+      ]
+    }
+  ]
+}

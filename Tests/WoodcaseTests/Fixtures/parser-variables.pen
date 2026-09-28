@@ -1,0 +1,30 @@
+{
+  "children": [
+    {
+      "content": "$headline",
+      "fill": "$primaryColor",
+      "fontSize": 32,
+      "id": "text1",
+      "type": "text"
+    }
+  ],
+  "variables": {
+    "headline": {
+      "type": "string",
+      "value": "Breaking News"
+    },
+    "primaryColor": {
+      "type": "color",
+      "value": "#FF6600"
+    },
+    "showSubtitle": {
+      "type": "boolean",
+      "value": true
+    },
+    "spacing": {
+      "type": "number",
+      "value": 16
+    }
+  },
+  "version": "2.17"
+}

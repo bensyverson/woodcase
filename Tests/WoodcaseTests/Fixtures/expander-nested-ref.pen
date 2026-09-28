@@ -1,0 +1,60 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "content": "0",
+          "fontSize": 12,
+          "id": "badge-label",
+          "type": "text"
+        }
+      ],
+      "fill": "#FF0000",
+      "height": 24,
+      "id": "badge",
+      "reusable": true,
+      "type": "frame",
+      "width": 24
+    },
+    {
+      "children": [
+        {
+          "content": "Click",
+          "fontSize": 16,
+          "id": "button-label",
+          "type": "text"
+        },
+        {
+          "descendants": {
+            "badge-label": {
+              "content": "!"
+            }
+          },
+          "id": "button-badge",
+          "ref": "badge",
+          "type": "ref"
+        }
+      ],
+      "fill": "#0066FF",
+      "height": 40,
+      "id": "button",
+      "layout": "horizontal",
+      "reusable": true,
+      "type": "frame",
+      "width": 120
+    },
+    {
+      "descendants": {
+        "button-label": {
+          "content": "Menu"
+        }
+      },
+      "id": "nav-button",
+      "ref": "button",
+      "type": "ref",
+      "x": 100,
+      "y": 50
+    }
+  ],
+  "version": "2.17"
+}

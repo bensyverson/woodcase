@@ -1,0 +1,28 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "content": "Handgloves",
+          "fill": "#000000",
+          "fontFamily": "IBM Plex Sans",
+          "fontSize": 32,
+          "height": "fit_content",
+          "id": "Txt01",
+          "name": "Label",
+          "type": "text",
+          "width": "fit_content"
+        }
+      ],
+      "fill": "#FFFFFF",
+      "height": "fit_content",
+      "id": "Cnv01",
+      "layout": "vertical",
+      "name": "Canvas",
+      "padding": 20,
+      "type": "frame",
+      "width": "fit_content"
+    }
+  ],
+  "version": "2.17"
+}

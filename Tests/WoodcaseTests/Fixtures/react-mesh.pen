@@ -1,0 +1,30 @@
+{
+  "version": "2.17",
+  "themes": {"mode": ["light", "dark"]},
+  "variables": {
+    "mesh-warm": {"type": "color", "value": [
+      {"value": "#FF0000", "theme": {"mode": "light"}},
+      {"value": "#00FFFF", "theme": {"mode": "dark"}}
+    ]},
+    "mesh-cool": {"type": "color", "value": [
+      {"value": "#0000FF", "theme": {"mode": "light"}},
+      {"value": "#FFFF00", "theme": {"mode": "dark"}}
+    ]},
+    "mesh-ink": {"type": "color", "value": "#000000"}
+  },
+  "children": [
+    {"type": "frame", "id": "MshSw", "name": "MeshSwatch", "reusable": true, "x": 0, "y": 0,
+     "width": 240, "height": 180, "cornerRadius": 12,
+     "fill": {"type": "mesh_gradient", "columns": 3, "rows": 3,
+       "colors": ["#FF0000", "#FF8800", "#FFFF00", "#00FF88", "#FFFFFF", "#0088FF", "#8800FF", "#000000", "#FF00AA"],
+       "points": [[0, 0], [0.5, 0], [1, 0], [0, 0.5], [0.5, 0.5], [1, 0.5], [0, 1], [0.5, 1], [1, 1]]}},
+    {"type": "frame", "id": "MshTh", "name": "ThemedMesh", "reusable": true, "x": 300, "y": 0,
+     "width": 160, "height": 160,
+     "fill": [
+       "#FFFFFF",
+       {"type": "mesh_gradient", "columns": 2, "rows": 2, "opacity": 0.8,
+        "colors": ["$mesh-warm", "$mesh-cool", "$mesh-ink", "$mesh-warm"],
+        "points": [[0, 0], [1, 0], [0, 1], [1, 1]]}
+     ]}
+  ]
+}

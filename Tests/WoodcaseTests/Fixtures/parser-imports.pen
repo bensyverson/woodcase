@@ -1,0 +1,18 @@
+{
+  "children": [
+    {
+      "children": [
+
+      ],
+      "height": 300,
+      "id": "frame1",
+      "type": "frame",
+      "width": 400
+    }
+  ],
+  "imports": {
+    "designSystem": "./design-system.pen",
+    "icons": "../shared/icons.pen"
+  },
+  "version": "2.17"
+}

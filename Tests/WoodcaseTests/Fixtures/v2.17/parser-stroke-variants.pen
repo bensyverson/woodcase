@@ -1,0 +1,46 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "type": "rectangle",
+      "id": "uniform-stroke",
+      "x": 0,
+      "y": 0,
+      "width": 100,
+      "height": 100,
+      "stroke": "#000000",
+      "strokeWidth": 2,
+      "strokeAlignment": "inner",
+      "strokeLinecap": "round"
+    },
+    {
+      "type": "rectangle",
+      "id": "per-side-stroke",
+      "x": 0,
+      "y": 0,
+      "width": 100,
+      "height": 100,
+      "stroke": "#0000FF",
+      "strokeWidth": {
+        "top": 1,
+        "right": 2,
+        "bottom": 3,
+        "left": 4
+      },
+      "strokeLinejoin": "bevel"
+    },
+    {
+      "type": "rectangle",
+      "id": "dashed-stroke",
+      "x": 0,
+      "y": 0,
+      "width": 100,
+      "height": 100,
+      "stroke": "#FF0000",
+      "strokeWidth": 2,
+      "strokeAlignment": "outer",
+      "strokeLinecap": "square"
+    }
+  ],
+  "fileToken": "1aa7be13-0695-43a9-aaee-4982692fc94d"
+}

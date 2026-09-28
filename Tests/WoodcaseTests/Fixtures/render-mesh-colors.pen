@@ -1,0 +1,1235 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "type": "frame",
+      "id": "MsC00",
+      "name": "control",
+      "x": 0,
+      "y": 0,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#FF0000",
+            "#FF0000",
+            "#FF0000",
+            "#FF0000"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC01",
+      "name": "badhex",
+      "x": 60,
+      "y": 0,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#GGGGGG",
+            "#GGGGGG",
+            "#GGGGGG",
+            "#GGGGGG"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC02",
+      "name": "word",
+      "x": 120,
+      "y": 0,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "red",
+            "red",
+            "red",
+            "red"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC03",
+      "name": "rgba",
+      "x": 180,
+      "y": 0,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#F00F",
+            "#F00F",
+            "#F00F",
+            "#F00F"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC04",
+      "name": "rgba-half",
+      "x": 240,
+      "y": 0,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#F008",
+            "#F008",
+            "#F008",
+            "#F008"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC05",
+      "name": "five",
+      "x": 300,
+      "y": 0,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#FF000",
+            "#FF000",
+            "#FF000",
+            "#FF000"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC06",
+      "name": "empty",
+      "x": 360,
+      "y": 0,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC07",
+      "name": "prefix",
+      "x": 420,
+      "y": 0,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#eGeGeG",
+            "#eGeGeG",
+            "#eGeGeG",
+            "#eGeGeG"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC08",
+      "name": "minus",
+      "x": 480,
+      "y": 0,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#-f-f-f",
+            "#-f-f-f",
+            "#-f-f-f",
+            "#-f-f-f"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC09",
+      "name": "space",
+      "x": 540,
+      "y": 0,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "# f f f",
+            "# f f f",
+            "# f f f",
+            "# f f f"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC10",
+      "name": "plus",
+      "x": 0,
+      "y": 60,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#+f+f+f",
+            "#+f+f+f",
+            "#+f+f+f",
+            "#+f+f+f"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC11",
+      "name": "zerox",
+      "x": 60,
+      "y": 60,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#0x0x0x",
+            "#0x0x0x",
+            "#0x0x0x",
+            "#0x0x0x"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC12",
+      "name": "short-bad",
+      "x": 120,
+      "y": 60,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#F0G",
+            "#F0G",
+            "#F0G",
+            "#F0G"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC13",
+      "name": "short-minus",
+      "x": 180,
+      "y": 60,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#-0F",
+            "#-0F",
+            "#-0F",
+            "#-0F"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC14",
+      "name": "trailing-hash",
+      "x": 240,
+      "y": 60,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "F00#",
+            "F00#",
+            "F00#",
+            "F00#"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC15",
+      "name": "double-hash",
+      "x": 300,
+      "y": 60,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "##F00",
+            "##F00",
+            "##F00",
+            "##F00"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC16",
+      "name": "hash-only",
+      "x": 360,
+      "y": 60,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#",
+            "#",
+            "#",
+            "#"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC17",
+      "name": "no-hash",
+      "x": 420,
+      "y": 60,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "00F",
+            "00F",
+            "00F",
+            "00F"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC18",
+      "name": "lower",
+      "x": 480,
+      "y": 60,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#ff000080",
+            "#ff000080",
+            "#ff000080",
+            "#ff000080"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC19",
+      "name": "seven",
+      "x": 540,
+      "y": 60,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#FF00000",
+            "#FF00000",
+            "#FF00000",
+            "#FF00000"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC20",
+      "name": "nine",
+      "x": 0,
+      "y": 120,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#FF0000FFF",
+            "#FF0000FFF",
+            "#FF0000FFF",
+            "#FF0000FFF"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC21",
+      "name": "mid-hash",
+      "x": 60,
+      "y": 120,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#F#F00",
+            "#F#F00",
+            "#F#F00",
+            "#F#F00"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC22",
+      "name": "six-minus-one",
+      "x": 120,
+      "y": 120,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#-00001",
+            "#-00001",
+            "#-00001",
+            "#-00001"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC23",
+      "name": "six-mid",
+      "x": 180,
+      "y": 120,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#FFGG00",
+            "#FFGG00",
+            "#FFGG00",
+            "#FFGG00"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC24",
+      "name": "eight-prefix",
+      "x": 240,
+      "y": 120,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#eGeGeGeG",
+            "#eGeGeGeG",
+            "#eGeGeGeG",
+            "#eGeGeGeG"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC25",
+      "name": "eight-tail",
+      "x": 300,
+      "y": 120,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#FF0000FG",
+            "#FF0000FG",
+            "#FF0000FG",
+            "#FF0000FG"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC26",
+      "name": "eight-bad",
+      "x": 360,
+      "y": 120,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#GGGGGGGG",
+            "#GGGGGGGG",
+            "#GGGGGGGG",
+            "#GGGGGGGG"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC27",
+      "name": "eight-minus",
+      "x": 420,
+      "y": 120,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#-0000001",
+            "#-0000001",
+            "#-0000001",
+            "#-0000001"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC28",
+      "name": "eight-mid",
+      "x": 480,
+      "y": 120,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "#FF00GG80",
+            "#FF00GG80",
+            "#FF00GG80",
+            "#FF00GG80"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "MsC29",
+      "name": "eight-space",
+      "x": 540,
+      "y": 120,
+      "width": 40,
+      "height": 40,
+      "fill": [
+        "#00FF00",
+        {
+          "type": "mesh_gradient",
+          "columns": 2,
+          "rows": 2,
+          "colors": [
+            "# FFFF00F",
+            "# FFFF00F",
+            "# FFFF00F",
+            "# FFFF00F"
+          ],
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}

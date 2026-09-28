@@ -1,0 +1,267 @@
+#!/usr/bin/env python3
+"""gen-paint-geometry-fixtures — write the fixtures that pin how Pen places a
+gradient inside a node's box, where it puts a per-side stroke, and how it paints
+a stroke with a gradient or an image.
+
+- Tests/WoodcaseTests/Fixtures/render-gradient-geometry.pen: one artboard per
+  case — linear gradients at rotations 0/45/90/135/210 on a square, a wide and a
+  tall box, with an off-centre `center`, a short `size`, and interior stops;
+  angular gradients with rotations, an off-centre `center`, a non-uniform `size`
+  and stops that do not reach 0 and 1; radial gradients with a rotation and a
+  non-uniform `size`.
+- Tests/WoodcaseTests/Fixtures/render-per-side-strokes.pen: one artboard per
+  case — per-side `strokeWidth` on a frame under each `strokeAlignment` (and
+  none, which Pen treats as centre) for four width combinations, the same with a
+  uniform and a per-corner `cornerRadius`, and on a rectangle.
+- Tests/WoodcaseTests/Fixtures/render-stroke-fills.pen and images/uv-map.png:
+  one artboard per case — a red→blue ramp and a UV image (red = u, green = v)
+  as the stroke of a rectangle under each alignment, a rounded rectangle, an
+  ellipse, an open path and per-side frames; image `fill`/`fit` modes on an
+  outer stroke; radial and angular gradients; a stack, a multiply blend and a
+  fill opacity. The node box is x 60…260, y 60…180 on every board.
+
+Every artboard is a black, clipped, `layout: "none"` frame, so Pen's PNG export
+is exactly the artboard. The reference PNGs come from `scripts/pen-oracle`:
+
+    scripts/gen-paint-geometry-fixtures
+    scripts/pen-oracle Tests/WoodcaseTests/Fixtures/render-gradient-geometry.pen --scale 1,2
+    scripts/pen-oracle Tests/WoodcaseTests/Fixtures/render-per-side-strokes.pen --scale 2
+    scripts/pen-oracle Tests/WoodcaseTests/Fixtures/render-stroke-fills.pen --scale 2
+
+(pen-oracle needs the sandbox disabled; this script does not.) Ids are
+sequential per fixture, so the output is a pure function of this file.
+`--check` exits 1 when a file on disk differs. Standard library only.
+
+See project/2026-09-26-gradient-geometry-and-per-side-strokes.md and
+project/2026-09-26-stroke-paints.md for what the
+references showed.
+"""
+
+import json
+import os
+import struct
+import sys
+import zlib
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+FIXTURES = os.path.join(ROOT, "Tests", "WoodcaseTests", "Fixtures")
+
+RED, GREEN, BLUE, YELLOW, WHITE = "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FFFFFF"
+
+
+class Fixture:
+    def __init__(self, prefix):
+        self.prefix = prefix
+        self.boards = []
+        self.cursor = 0
+        self.count = 0
+
+    def nid(self):
+        self.count += 1
+        return f"{self.prefix}{self.count:03d}"
+
+    def board(self, name, width, height, child):
+        self.boards.append({
+            "type": "frame", "id": self.nid(), "name": name, "x": self.cursor, "y": 0,
+            "width": width, "height": height, "layout": "none", "clip": True,
+            "fill": "#000000", "children": [child],
+        })
+        self.cursor += width + 40
+
+    def document(self):
+        return {"version": "2.19", "children": self.boards}
+
+
+def gradient(kind, stops, **keys):
+    fill = {"type": "gradient", "gradientType": kind,
+            "colors": [{"color": c, "position": p} for c, p in stops]}
+    fill.update(keys)
+    return fill
+
+
+RAMP = ((RED, 0), (BLUE, 1))
+THREE = ((YELLOW, 0.2), (RED, 0.5), (BLUE, 0.8))
+WHEEL = ((RED, 0), (GREEN, 0.33), (BLUE, 0.66), (RED, 1))
+
+# name -> (width, height); a square, a wide and a tall box.
+BOXES = {"sq": (120, 120), "wide": (240, 72), "tall": (72, 180)}
+MARGIN = 20
+
+
+def gradient_geometry():
+    fx = Fixture("gg")
+
+    def case(name, box, fill):
+        w, h = BOXES[box]
+        fx.board(name, w + 2 * MARGIN, h + 2 * MARGIN, {
+            "type": "rectangle", "id": fx.nid(), "name": "r", "x": MARGIN, "y": MARGIN,
+            "width": w, "height": h, "fill": fill,
+        })
+
+    for box in ("sq", "wide", "tall"):
+        for rotation in (0, 45, 90, 135, 210):
+            case(f"lin-{box}-r{rotation}", box, gradient("linear", RAMP, rotation=rotation))
+    case("lin-wide-r30-centre", "wide",
+         gradient("linear", RAMP, rotation=30, center={"x": 0.3, "y": 0.4}))
+    case("lin-wide-r315-centre-size", "wide",
+         gradient("linear", RAMP, rotation=315, center={"x": 0.3, "y": 0.4},
+                  size={"width": 1, "height": 0.6}))
+    case("lin-tall-r30-size", "tall",
+         gradient("linear", RAMP, rotation=30, size={"width": 0.5, "height": 0.6}))
+    case("lin-sq-r135-stops", "sq", gradient("linear", THREE, rotation=135))
+
+    for box in ("sq", "wide", "tall"):
+        for rotation in (0, 45, 90, 210):
+            case(f"ang-{box}-r{rotation}", box, gradient("angular", WHEEL, rotation=rotation))
+    case("ang-wide-r45-centre", "wide",
+         gradient("angular", WHEEL, rotation=45, center={"x": 0.3, "y": 0.4}))
+    case("ang-sq-r45-size", "sq",
+         gradient("angular", WHEEL, rotation=45, size={"width": 0.5, "height": 1}))
+    case("ang-wide-r0-stops", "wide", gradient("angular", THREE))
+
+    case("rad-wide-r45-size", "wide",
+         gradient("radial", WHEEL, rotation=45, size={"width": 0.5, "height": 1}))
+    case("rad-sq-r30-centre-size", "sq",
+         gradient("radial", THREE, rotation=30, center={"x": 0.4, "y": 0.6},
+                  size={"width": 1, "height": 0.5}))
+    return fx.document()
+
+
+WIDTHS = {
+    "mixed": {"top": 4, "right": 16, "bottom": 24, "left": 8},
+    "sides": {"right": 8, "left": 8},
+    "top": {"top": 10},
+    "even": {"top": 6, "right": 6, "bottom": 6, "left": 6},
+}
+ALIGNMENTS = (None, "inner", "center", "outer")
+
+
+def per_side_strokes():
+    fx = Fixture("ps")
+
+    def case(name, kind="frame", alignment=None, widths=WIDTHS["mixed"], **keys):
+        node = {"type": kind, "id": fx.nid(), "name": "s", "x": 60, "y": 60,
+                "width": 200, "height": 120, "stroke": WHITE, "strokeWidth": widths}
+        if kind == "frame":
+            node["layout"] = "none"
+        if alignment:
+            node["strokeAlignment"] = alignment
+        node.update(keys)
+        fx.board(name, 320, 240, node)
+
+    for key, widths in WIDTHS.items():
+        for alignment in ALIGNMENTS:
+            case(f"{key}-{alignment or 'unset'}", alignment=alignment, widths=widths)
+    for alignment in ALIGNMENTS:
+        case(f"radius-{alignment or 'unset'}", alignment=alignment, cornerRadius=24)
+    for alignment in ("inner", "center", "outer"):
+        case(f"corners-{alignment}", alignment=alignment, cornerRadius=[0, 24, 8, 40])
+    case("small-radius-center", alignment="center", cornerRadius=6)
+    for alignment in ("inner", "outer"):
+        case(f"rect-{alignment}", kind="rectangle", alignment=alignment)
+    return fx.document()
+
+
+UV_MAP = "images/uv-map.png"
+UV_SIZE = (256, 128)
+
+
+def uv_map_png():
+    """A 256×128 RGB PNG whose red is u·255 and green v·255, pixel centres 0…255 end to end."""
+    w, h = UV_SIZE
+    rows = b"".join(
+        b"\x00" + bytes(
+            channel
+            for x in range(w)
+            for channel in (round(x * 255 / (w - 1)), round(y * 255 / (h - 1)), 0)
+        )
+        for y in range(h)
+    )
+
+    def chunk(kind, data):
+        body = kind + data
+        return struct.pack(">I", len(data)) + body + struct.pack(">I", zlib.crc32(body))
+
+    header = struct.pack(">IIBBBBB", w, h, 8, 2, 0, 0, 0)
+    return (b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", header)
+            + chunk(b"IDAT", zlib.compress(rows, 9)) + chunk(b"IEND", b""))
+
+
+def stroke_fills():
+    fx = Fixture("sf")
+    ramp_h = gradient("linear", RAMP, rotation=270)
+    ramp_v = gradient("linear", RAMP, rotation=180)
+
+    def uv(mode="stretch"):
+        return {"type": "image", "url": f"./{UV_MAP}", "mode": mode}
+
+    def case(name, kind, stroke, width, alignment=None, **keys):
+        node = {"type": kind, "id": fx.nid(), "name": "s", "x": 60, "y": 60,
+                "width": 200, "height": 120, "stroke": stroke, "strokeWidth": width}
+        if kind == "frame":
+            node["layout"] = "none"
+        if alignment:
+            node["strokeAlignment"] = alignment
+        node.update(keys)
+        fx.board(name, 320, 240, node)
+
+    for alignment in ("inner", "center", "outer"):
+        case(f"rect-lin-h-{alignment}", "rectangle", ramp_h, 16, alignment)
+    case("rect-lin-v-outer", "rectangle", ramp_v, 16, "outer")
+    case("rect-lin-h-outer-radius", "rectangle", ramp_h, 16, "outer", cornerRadius=24)
+    case("rect-lin-h-center-filled", "rectangle", ramp_h, 16, "center", fill="#444444")
+    for alignment in ("inner", "center", "outer"):
+        case(f"rect-uv-{alignment}", "rectangle", uv(), 16, alignment)
+    case("rect-uv-fill-outer", "rectangle", uv("fill"), 16, "outer")
+    case("rect-uv-fit-outer", "rectangle", uv("fit"), 16, "outer")
+    case("rect-radial-center", "rectangle",
+         gradient("radial", ((YELLOW, 0), ("#FF00FF", 0.5), ("#00FFFF", 1))), 24, "center")
+    case("rect-angular-center", "rectangle", gradient("angular", WHEEL), 24, "center")
+    case("rect-stack", "rectangle", [RED, dict(ramp_h, opacity=0.5)], 24, "center")
+    case("rect-blend-multiply", "rectangle", [GREEN, dict(ramp_h, blendMode="multiply")], 24, "center")
+    case("rect-grad-opacity", "rectangle", dict(ramp_h, opacity=0.4), 24, "center")
+    case("ellipse-lin-h-outer", "ellipse", ramp_h, 16, "outer")
+    case("ellipse-uv-center", "ellipse", uv(), 16, "center")
+    case("path-lin-h-center", "path", ramp_h, 12, "center",
+         height=100, geometry="M0 0 L50 100 L100 0 L150 100 L200 0")
+    case("path-uv-center", "path", uv(), 12, "center",
+         height=100, geometry="M0 0 L50 100 L100 0 L150 100 L200 0")
+    per_side = {"top": 4, "right": 16, "bottom": 24, "left": 8}
+    for alignment in (None, "inner", "outer"):
+        case(f"frame-perside-lin-h-{alignment or 'unset'}", "frame", ramp_h, per_side, alignment)
+    case("frame-perside-uv", "frame", uv(), per_side)
+    case("frame-perside-uv-radius", "frame", uv(), per_side, cornerRadius=24)
+    return fx.document()
+
+
+def main():
+    outputs = {
+        "render-gradient-geometry.pen": gradient_geometry(),
+        "render-per-side-strokes.pen": per_side_strokes(),
+        "render-stroke-fills.pen": stroke_fills(),
+    }
+    check = "--check" in sys.argv[1:]
+    stale = False
+    files = {name: (json.dumps(doc, indent=2) + "\n").encode() for name, doc in outputs.items()}
+    files[UV_MAP] = uv_map_png()
+    for name, data in files.items():
+        path = os.path.join(FIXTURES, name)
+        if check:
+            try:
+                with open(path, "rb") as f:
+                    if f.read() != data:
+                        print(f"{name}: differs from the generator", file=sys.stderr)
+                        stale = True
+            except FileNotFoundError:
+                print(f"{name}: missing", file=sys.stderr)
+                stale = True
+        else:
+            with open(path, "wb") as f:
+                f.write(data)
+            boards = f" ({len(outputs[name]['children'])} artboards)" if name in outputs else ""
+            print(f"wrote {path}{boards}")
+    sys.exit(1 if stale else 0)
+
+
+if __name__ == "__main__":
+    main()

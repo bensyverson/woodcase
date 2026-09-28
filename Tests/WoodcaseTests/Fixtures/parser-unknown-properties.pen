@@ -1,0 +1,27 @@
+{
+  "children": [
+    {
+      "fill": "#FF0000",
+      "height": 100,
+      "id": "known-with-extras",
+      "metadata": {
+        "customKey": "customValue",
+        "type": "unknown",
+        "version": 2
+      },
+      "type": "rectangle",
+      "width": 100
+    },
+    {
+      "duration": 10.5,
+      "id": "future-node",
+      "loop": true,
+      "name": "My Video",
+      "opacity": 0.8,
+      "startTime": 0,
+      "type": "video_clip",
+      "videoUrl": "https://example.com/video.mp4"
+    }
+  ],
+  "version": "2.17"
+}

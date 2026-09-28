@@ -1,0 +1,60 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "fill": "#ff0000ff",
+          "height": 40,
+          "id": "r1",
+          "type": "rectangle",
+          "width": 30,
+          "x": 10,
+          "y": 20
+        },
+        {
+          "children": [
+            {
+              "fill": "#00ff00ff",
+              "height": 40,
+              "id": "g1a",
+              "type": "rectangle",
+              "width": 40,
+              "x": 0,
+              "y": 0
+            },
+            {
+              "fill": "#0000ffff",
+              "height": 25,
+              "id": "g1b",
+              "type": "rectangle",
+              "width": 25,
+              "x": 30,
+              "y": 50
+            },
+            {
+              "fill": "#ffff00ff",
+              "height": 20,
+              "id": "g1r",
+              "rotation": 45,
+              "type": "rectangle",
+              "width": 20,
+              "x": 100,
+              "y": 0
+            }
+          ],
+          "id": "g1",
+          "type": "group",
+          "x": 60,
+          "y": 10
+        }
+      ],
+      "id": "frame1",
+      "layout": "none",
+      "name": "Absolute fit_content frame",
+      "type": "frame",
+      "x": 0,
+      "y": 0
+    }
+  ],
+  "version": "2.17"
+}

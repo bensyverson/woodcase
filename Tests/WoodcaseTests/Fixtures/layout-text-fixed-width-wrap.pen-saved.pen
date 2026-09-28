@@ -1,0 +1,47 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "tfA00",
+      "x": 0,
+      "y": 0,
+      "name": "layout-text-fixed-width-wrap",
+      "width": 360,
+      "fill": "#F3F4F6",
+      "gap": 12,
+      "padding": 16,
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "tfA01",
+          "name": "fixed-box",
+          "fill": "#3B82F6",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "type": "text",
+          "id": "tfA02",
+          "name": "wrapping-180",
+          "fill": "#1F2937",
+          "textGrowth": "fixed-width",
+          "width": 180,
+          "content": "Fixed-width text wraps inside its own width and grows downward as lines are added.",
+          "fontFamily": "IBM Plex Sans",
+          "fontSize": 14,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "id": "tfA03",
+          "name": "fill-box",
+          "fill": "#F59E0B",
+          "width": "fill_container",
+          "height": 40
+        }
+      ]
+    }
+  ],
+  "fileToken": "04d13f3f-5568-4d94-87d3-30372b9794cb"
+}

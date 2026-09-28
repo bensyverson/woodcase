@@ -1,0 +1,83 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "id": "Rt001",
+      "name": "Root",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "width": 200,
+      "height": 100,
+      "layout": "none",
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "id": "Rf001",
+          "name": "Chip",
+          "type": "ref",
+          "ref": "Cmp01",
+          "x": 10,
+          "y": 10
+        }
+      ]
+    },
+    {
+      "id": "Cmp01",
+      "name": "Card",
+      "type": "frame",
+      "x": 0,
+      "y": 400,
+      "reusable": true,
+      "layout": "none",
+      "width": 120,
+      "height": 30,
+      "fill": "#EEEEEE",
+      "metadata": {
+        "type": "unknown",
+        "_props": {
+          "title": "Nope",
+          "tag": "Row/Missing",
+          "count": 7
+        }
+      },
+      "children": [
+        {
+          "id": "Lbl01",
+          "name": "Label",
+          "type": "text",
+          "x": 0,
+          "y": 0,
+          "width": 40,
+          "height": 20,
+          "content": "chip",
+          "fill": "#000000"
+        },
+        {
+          "id": "Row01",
+          "name": "Row",
+          "type": "frame",
+          "x": 60,
+          "y": 0,
+          "width": 60,
+          "height": 20,
+          "layout": "none",
+          "fill": "#DDDDDD",
+          "children": [
+            {
+              "id": "Tag01",
+              "name": "Tag",
+              "type": "text",
+              "x": 0,
+              "y": 0,
+              "width": 40,
+              "height": 20,
+              "content": "tag",
+              "fill": "#000000"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

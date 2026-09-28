@@ -1,0 +1,4404 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "fill": "$actor-a",
+          "height": 6,
+          "id": "HZr3a",
+          "name": "AD-Disc",
+          "type": "ellipse",
+          "width": 6,
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "context": "6px identity disc. Fill carries the actor color as literal hex (identity is hashed per name, not a token) — e.g. override <inst>/AD-Disc fill=#2289D3.",
+      "height": 6,
+      "id": "wexC6",
+      "layout": "none",
+      "name": "AvatarDot",
+      "reusable": true,
+      "type": "frame",
+      "width": 6,
+      "x": 0,
+      "y": -1250
+    },
+    {
+      "children": [
+        {
+          "fill": "$actor-b",
+          "height": 15,
+          "id": "AMTsS",
+          "name": "AS-Disc",
+          "stroke": "$v-chrome",
+          "strokeAlignment": "outer",
+          "strokeWidth": 0,
+          "type": "ellipse",
+          "width": 15,
+          "x": 0,
+          "y": 0
+        },
+        {
+          "content": "c",
+          "fill": "#FFFFFF",
+          "fontFamily": "$v-sans",
+          "fontSize": 9,
+          "fontWeight": "700",
+          "height": 15,
+          "id": "smF3Q",
+          "name": "AS-Initial",
+          "textAlign": "center",
+          "textAlignVertical": "middle",
+          "textGrowth": "fixed-width-height",
+          "type": "text",
+          "width": 15,
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "context": "15px identity disc with a white initial. The colour lives on the AS-Disc CHILD, not on the root, so an instance varies identity with `override <inst>/AS-Disc fill=$actor-b` — a $variable in kind.rootOverrides renders correctly but is mis-reported by `woodcase lint` as unresolved (the linter reads the authored ref, which expansion replaces rather than resolves). Add stroke $v-chrome 2 outer to AS-Disc when stacking presence.",
+      "height": 15,
+      "id": "8FB9u",
+      "layout": "none",
+      "name": "AvatarSmall",
+      "reusable": true,
+      "type": "frame",
+      "width": 15,
+      "x": 120,
+      "y": -1250
+    },
+    {
+      "alignItems": "center",
+      "children": [
+        {
+          "content": "ALu8G",
+          "fill": "$v-muted",
+          "fontFamily": "$v-mono",
+          "fontSize": 11,
+          "fontWeight": "500",
+          "id": "iqJpK",
+          "name": "IC-Id",
+          "type": "text"
+        }
+      ],
+      "context": "A node's 5-char id as a mono chip on $v-line — the handoff point to an agent. Override IC-Id content.",
+      "cornerRadius": 4,
+      "fill": "$v-line",
+      "height": "fit_content",
+      "id": "dy3YM",
+      "layout": "horizontal",
+      "name": "IdChip",
+      "padding": [
+        2,
+        6
+      ],
+      "reusable": true,
+      "type": "frame",
+      "width": "fit_content",
+      "x": 240,
+      "y": -1250
+    },
+    {
+      "alignItems": "center",
+      "children": [
+        {
+          "content": "◈",
+          "fill": "$v-mark-component",
+          "fontFamily": "$v-mono",
+          "fontSize": 9,
+          "id": "9mAp3",
+          "name": "KMC-Glyph",
+          "type": "text"
+        },
+        {
+          "content": "component",
+          "fill": "$v-mark-component",
+          "fontFamily": "$v-mono",
+          "fontSize": 9,
+          "fontWeight": "600",
+          "id": "PZQs7",
+          "letterSpacing": 0.18,
+          "name": "KMC-Word",
+          "type": "text"
+        }
+      ],
+      "context": "Component-vocabulary pill: glyph + word, mark colour at 12% fill and 45% border (both drawn as flat gradients, the only way .pen expresses alpha over a themed colour variable).",
+      "cornerRadius": 999,
+      "fill": {
+        "colors": [
+          {
+            "color": "$v-mark-component",
+            "position": 0
+          },
+          {
+            "color": "$v-mark-component",
+            "position": 1
+          }
+        ],
+        "gradientType": "linear",
+        "opacity": 0.12,
+        "type": "gradient"
+      },
+      "gap": 3,
+      "height": "fit_content",
+      "id": "YYepH",
+      "layout": "horizontal",
+      "name": "KindMark-Component",
+      "padding": [
+        1,
+        5
+      ],
+      "reusable": true,
+      "stroke": {
+        "colors": [
+          {
+            "color": "$v-mark-component",
+            "position": 0
+          },
+          {
+            "color": "$v-mark-component",
+            "position": 1
+          }
+        ],
+        "gradientType": "linear",
+        "opacity": 0.45,
+        "type": "gradient"
+      },
+      "strokeWidth": 1,
+      "type": "frame",
+      "width": "fit_content",
+      "x": 360,
+      "y": -1250
+    },
+    {
+      "alignItems": "center",
+      "children": [
+        {
+          "content": "◇",
+          "fill": "$v-mark-instance",
+          "fontFamily": "$v-mono",
+          "fontSize": 9,
+          "id": "TnaAl",
+          "name": "KMI-Glyph",
+          "type": "text"
+        },
+        {
+          "content": "instance",
+          "fill": "$v-mark-instance",
+          "fontFamily": "$v-mono",
+          "fontSize": 9,
+          "fontWeight": "600",
+          "id": "M4SDb",
+          "letterSpacing": 0.18,
+          "name": "KMI-Word",
+          "type": "text"
+        }
+      ],
+      "context": "Component-vocabulary pill for an instance.",
+      "cornerRadius": 999,
+      "fill": {
+        "colors": [
+          {
+            "color": "$v-mark-instance",
+            "position": 0
+          },
+          {
+            "color": "$v-mark-instance",
+            "position": 1
+          }
+        ],
+        "gradientType": "linear",
+        "opacity": 0.12,
+        "type": "gradient"
+      },
+      "gap": 3,
+      "height": "fit_content",
+      "id": "drTdC",
+      "layout": "horizontal",
+      "name": "KindMark-Instance",
+      "padding": [
+        1,
+        5
+      ],
+      "reusable": true,
+      "stroke": {
+        "colors": [
+          {
+            "color": "$v-mark-instance",
+            "position": 0
+          },
+          {
+            "color": "$v-mark-instance",
+            "position": 1
+          }
+        ],
+        "gradientType": "linear",
+        "opacity": 0.45,
+        "type": "gradient"
+      },
+      "strokeWidth": 1,
+      "type": "frame",
+      "width": "fit_content",
+      "x": 480,
+      "y": -1250
+    },
+    {
+      "alignItems": "center",
+      "children": [
+        {
+          "content": "▥",
+          "fill": "$v-mark-slot",
+          "fontFamily": "$v-mono",
+          "fontSize": 9,
+          "id": "JbKsT",
+          "name": "KMS-Glyph",
+          "type": "text"
+        },
+        {
+          "content": "slot",
+          "fill": "$v-mark-slot",
+          "fontFamily": "$v-mono",
+          "fontSize": 9,
+          "fontWeight": "600",
+          "id": "fkQg9",
+          "letterSpacing": 0.18,
+          "name": "KMS-Word",
+          "type": "text"
+        }
+      ],
+      "context": "Component-vocabulary pill for a slot.",
+      "cornerRadius": 999,
+      "fill": {
+        "colors": [
+          {
+            "color": "$v-mark-slot",
+            "position": 0
+          },
+          {
+            "color": "$v-mark-slot",
+            "position": 1
+          }
+        ],
+        "gradientType": "linear",
+        "opacity": 0.12,
+        "type": "gradient"
+      },
+      "gap": 3,
+      "height": "fit_content",
+      "id": "zhkad",
+      "layout": "horizontal",
+      "name": "KindMark-Slot",
+      "padding": [
+        1,
+        5
+      ],
+      "reusable": true,
+      "stroke": {
+        "colors": [
+          {
+            "color": "$v-mark-slot",
+            "position": 0
+          },
+          {
+            "color": "$v-mark-slot",
+            "position": 1
+          }
+        ],
+        "gradientType": "linear",
+        "opacity": 0.45,
+        "type": "gradient"
+      },
+      "strokeWidth": 1,
+      "type": "frame",
+      "width": "fit_content",
+      "x": 600,
+      "y": -1250
+    },
+    {
+      "alignItems": "center",
+      "children": [
+        {
+          "content": "Details",
+          "fill": "$v-muted",
+          "fontFamily": "$v-mono",
+          "fontSize": 11,
+          "id": "SoZKm",
+          "name": "TP-Label",
+          "type": "text"
+        }
+      ],
+      "context": "Sheet tab at rest: 11px mono on $v-muted, no fill. Override TP-Label content.",
+      "cornerRadius": 999,
+      "height": "fit_content",
+      "id": "MInM2",
+      "layout": "horizontal",
+      "name": "TabPill",
+      "padding": [
+        3,
+        9
+      ],
+      "reusable": true,
+      "type": "frame",
+      "width": "fit_content",
+      "x": 720,
+      "y": -1250
+    },
+    {
+      "alignItems": "center",
+      "children": [
+        {
+          "content": "Outline",
+          "fill": "$v-text",
+          "fontFamily": "$v-mono",
+          "fontSize": 11,
+          "id": "z84S1",
+          "name": "TPC-Label",
+          "type": "text"
+        }
+      ],
+      "context": "Sheet tab, current: $v-chrome fill and $v-text ink. Override TPC-Label content.",
+      "cornerRadius": 999,
+      "fill": "$v-chrome",
+      "height": "fit_content",
+      "id": "sBunx",
+      "layout": "horizontal",
+      "name": "TabPill-Current",
+      "padding": [
+        3,
+        9
+      ],
+      "reusable": true,
+      "type": "frame",
+      "width": "fit_content",
+      "x": 840,
+      "y": -1250
+    },
+    {
+      "alignItems": "center",
+      "children": [
+        {
+          "content": "claude-a",
+          "fill": "#FFFFFF",
+          "fontFamily": "$v-mono",
+          "fontSize": 9,
+          "fontWeight": "600",
+          "id": "dRi6u",
+          "name": "ET-Name",
+          "type": "text"
+        }
+      ],
+      "context": "Actor-coloured tag over the render, the mobile twin of the desktop edit marker's box tag. White ink on a colour fill is the standing DESIGN.md exception. Override the root fill for identity and ET-Name content.",
+      "cornerRadius": [
+        2,
+        2,
+        0,
+        0
+      ],
+      "fill": "$actor-a",
+      "height": "fit_content",
+      "id": "fqHRq",
+      "layout": "horizontal",
+      "name": "EditTag",
+      "padding": [
+        1,
+        4
+      ],
+      "reusable": true,
+      "type": "frame",
+      "width": "fit_content",
+      "x": 960,
+      "y": -1250
+    },
+    {
+      "alignItems": "center",
+      "children": [
+        {
+          "fill": "$v-accent",
+          "height": 5,
+          "id": "fXPQS",
+          "name": "FP-Dot",
+          "type": "ellipse",
+          "width": 5
+        },
+        {
+          "content": "following",
+          "fill": "$v-accent",
+          "fontFamily": "$v-mono",
+          "fontSize": 11,
+          "id": "eqaQG",
+          "name": "FP-Label",
+          "type": "text"
+        }
+      ],
+      "context": "Follow mode at the ticker's end. Accent is earned here: this is liveness. Override FP-Label content to \"follow\" for the off state and drop the fill.",
+      "cornerRadius": 999,
+      "fill": "$v-select",
+      "gap": 4,
+      "height": "fit_content",
+      "id": "uW1NO",
+      "layout": "horizontal",
+      "name": "FollowPill",
+      "padding": [
+        2,
+        7
+      ],
+      "reusable": true,
+      "stroke": "$v-accent",
+      "strokeWidth": 1,
+      "type": "frame",
+      "width": "fit_content",
+      "x": 1080,
+      "y": -1250
+    },
+    {
+      "alignItems": "center",
+      "children": [
+        {
+          "cornerRadius": 2,
+          "fill": "$v-faint",
+          "height": 4,
+          "id": "miOOx",
+          "name": "SG-Bar",
+          "type": "rectangle",
+          "width": 36
+        }
+      ],
+      "context": "The floating bottom-sheet handle, 402 wide so it can sit straight on an artboard.",
+      "height": 22,
+      "id": "aNG1m",
+      "justifyContent": "center",
+      "layout": "horizontal",
+      "name": "SheetGrabber",
+      "reusable": true,
+      "type": "frame",
+      "width": 402,
+      "x": 1566,
+      "y": -1120
+    },
+    {
+      "alignItems": "center",
+      "children": [
+        {
+          "fill": "$v-faint",
+          "height": 5,
+          "id": "9qqs4",
+          "name": "TDP-Dot",
+          "type": "ellipse",
+          "width": 5
+        }
+      ],
+      "context": "Ticker slot, 22x22 for every state so a dot is always exactly one slot wide. Plain = an artboard you have seen, nobody in it.",
+      "height": 22,
+      "id": "AIym3",
+      "justifyContent": "center",
+      "layout": "horizontal",
+      "name": "TickerDot-Plain",
+      "reusable": true,
+      "type": "frame",
+      "width": 22,
+      "x": 1200,
+      "y": -1250
+    },
+    {
+      "children": [
+        {
+          "height": 14,
+          "id": "pVbi8",
+          "name": "TDC-Ring",
+          "stroke": "$v-accent",
+          "strokeWidth": 1.5,
+          "type": "ellipse",
+          "width": 14,
+          "x": 4,
+          "y": 4
+        },
+        {
+          "fill": "$v-accent",
+          "height": 5,
+          "id": "0JgYn",
+          "name": "TDC-Dot",
+          "type": "ellipse",
+          "width": 5,
+          "x": 8.5,
+          "y": 8.5
+        }
+      ],
+      "context": "Ticker slot: the artboard you are on — accent ring around an accent dot. Accent means selection here, per DESIGN.md.",
+      "height": 22,
+      "id": "Fw25g",
+      "layout": "none",
+      "name": "TickerDot-Current",
+      "reusable": true,
+      "type": "frame",
+      "width": 22,
+      "x": 1320,
+      "y": -1250
+    },
+    {
+      "alignItems": "center",
+      "children": [
+        {
+          "fill": "$v-warn",
+          "height": 6,
+          "id": "VX1qI",
+          "name": "TDU-Dot",
+          "type": "ellipse",
+          "width": 6
+        }
+      ],
+      "context": "Ticker slot: an artboard that changed since you last looked — the 6px warn unread dot.",
+      "height": 22,
+      "id": "yB2BP",
+      "justifyContent": "center",
+      "layout": "horizontal",
+      "name": "TickerDot-Unread",
+      "reusable": true,
+      "type": "frame",
+      "width": 22,
+      "x": 1440,
+      "y": -1250
+    },
+    {
+      "alignItems": "center",
+      "children": [
+        {
+          "fill": "$actor-a",
+          "height": 6,
+          "id": "Fdprd",
+          "name": "TDA-Disc",
+          "type": "ellipse",
+          "width": 6
+        }
+      ],
+      "context": "Ticker slot: one agent is working in this artboard right now — its 6px identity disc stands in for the dot. Override TDA-Disc fill.",
+      "height": 22,
+      "id": "At7Pi",
+      "justifyContent": "center",
+      "layout": "horizontal",
+      "name": "TickerDot-Actor",
+      "reusable": true,
+      "type": "frame",
+      "width": 22,
+      "x": 1560,
+      "y": -1250
+    },
+    {
+      "children": [
+        {
+          "fill": "$actor-a",
+          "height": 6,
+          "id": "ySZgE",
+          "name": "TDS-DiscA",
+          "type": "ellipse",
+          "width": 6,
+          "x": 2,
+          "y": 8
+        },
+        {
+          "fill": "$actor-b",
+          "height": 6,
+          "id": "LDqTU",
+          "name": "TDS-DiscB",
+          "stroke": "$v-chrome",
+          "strokeAlignment": "outer",
+          "strokeWidth": 1,
+          "type": "ellipse",
+          "width": 6,
+          "x": 5.5,
+          "y": 8
+        },
+        {
+          "content": "+1",
+          "fill": "$v-muted",
+          "fontFamily": "$v-mono",
+          "fontSize": 7,
+          "fontWeight": "600",
+          "id": "mhzVV",
+          "name": "TDS-More",
+          "textGrowth": "fixed-width",
+          "type": "text",
+          "width": 10,
+          "x": 12,
+          "y": 6
+        }
+      ],
+      "context": "Ticker slot: several agents in one artboard, coalesced. Two overlapped 6px discs plus +N, laid out by coordinate so the group can never spill past the 22pt slot. Override TDS-More content for +2, +3.",
+      "height": 22,
+      "id": "Xs32t",
+      "layout": "none",
+      "name": "TickerDot-Stack",
+      "reusable": true,
+      "type": "frame",
+      "width": 22,
+      "x": 1680,
+      "y": -1250
+    },
+    {
+      "alignItems": "center",
+      "children": [
+        {
+          "fill": "$v-muted",
+          "height": 16,
+          "icon": "chevron-left",
+          "id": "EDTEJ",
+          "library": "lucide",
+          "name": "SS-Back",
+          "type": "icon",
+          "width": 16
+        },
+        {
+          "content": "…/checkout/Card Screen",
+          "fill": "$v-text",
+          "fontFamily": "$v-mono",
+          "fontSize": 11,
+          "id": "fLbVO",
+          "name": "SS-Name",
+          "textGrowth": "fixed-width",
+          "type": "text",
+          "width": "fill_container"
+        },
+        {
+          "alignItems": "center",
+          "children": [
+            {
+              "fill": "$v-accent",
+              "height": 6,
+              "id": "bONlm",
+              "name": "SS-LiveDot",
+              "type": "ellipse",
+              "width": 6
+            },
+            {
+              "content": "live",
+              "fill": "$v-accent",
+              "fontFamily": "$v-mono",
+              "fontSize": 11,
+              "id": "71nnu",
+              "name": "SS-LiveLabel",
+              "type": "text"
+            }
+          ],
+          "gap": 4,
+          "height": "fit_content",
+          "id": "wMjgh",
+          "layout": "horizontal",
+          "name": "SS-Live",
+          "type": "frame",
+          "width": "fit_content"
+        },
+        {
+          "alignItems": "center",
+          "children": [
+            {
+              "descendants": {
+                "AMTsS": {
+                  "fill": "#942FC6",
+                  "strokeWidth": 2
+                },
+                "smF3Q": {
+                  "content": "a"
+                }
+              },
+              "id": "a57ow",
+              "name": "SS-Pres-A",
+              "ref": "8FB9u",
+              "type": "ref"
+            },
+            {
+              "descendants": {
+                "AMTsS": {
+                  "fill": "#2289D3",
+                  "strokeWidth": 2
+                },
+                "smF3Q": {
+                  "content": "b"
+                }
+              },
+              "id": "JJIa6",
+              "name": "SS-Pres-B",
+              "ref": "8FB9u",
+              "type": "ref"
+            },
+            {
+              "descendants": {
+                "AMTsS": {
+                  "fill": "#EB680A",
+                  "strokeWidth": 2
+                },
+                "smF3Q": {
+                  "content": "n"
+                }
+              },
+              "id": "389uw",
+              "name": "SS-Pres-C",
+              "ref": "8FB9u",
+              "type": "ref"
+            }
+          ],
+          "gap": -7,
+          "height": "fit_content",
+          "id": "4tYIG",
+          "layout": "horizontal",
+          "name": "SS-Presence",
+          "type": "frame",
+          "width": "fit_content"
+        }
+      ],
+      "context": "The thin floating chrome at the top of an artboard view: back-to-map glyph, front-truncated artboard name, live badge, coalesced presence. Every control is 11px mono on $v-chrome.",
+      "fill": "$v-chrome",
+      "gap": 8,
+      "height": 30,
+      "id": "nXBSr",
+      "layout": "horizontal",
+      "name": "StatusStrip",
+      "padding": [
+        0,
+        10
+      ],
+      "reusable": true,
+      "type": "frame",
+      "width": 402,
+      "x": 522,
+      "y": -1120
+    },
+    {
+      "alignItems": "center",
+      "children": [
+        {
+          "id": "PVF22",
+          "name": "TK-Slot-1",
+          "ref": "AIym3",
+          "type": "ref"
+        },
+        {
+          "id": "TFrXE",
+          "name": "TK-Slot-2",
+          "ref": "yB2BP",
+          "type": "ref"
+        },
+        {
+          "id": "1W3XP",
+          "name": "TK-Slot-3",
+          "ref": "AIym3",
+          "type": "ref"
+        },
+        {
+          "id": "6Daym",
+          "name": "TK-Slot-4",
+          "ref": "Fw25g",
+          "type": "ref"
+        },
+        {
+          "id": "FbMAy",
+          "name": "TK-Slot-5",
+          "ref": "At7Pi",
+          "type": "ref"
+        },
+        {
+          "id": "sn4OW",
+          "name": "TK-Slot-6",
+          "ref": "Xs32t",
+          "type": "ref"
+        },
+        {
+          "id": "YK4ak",
+          "name": "TK-Slot-7",
+          "ref": "AIym3",
+          "type": "ref"
+        },
+        {
+          "id": "YdbMY",
+          "name": "TK-Slot-8",
+          "ref": "AIym3",
+          "type": "ref"
+        }
+      ],
+      "context": "Reference roster only — a ref's target cannot vary per instance, so screens COMPOSE their own strip from TickerDot-* atoms at this geometry (22pt slots, 402x22) instead of instancing Ticker. See Quiet/Following.",
+      "gap": 2,
+      "height": 22,
+      "id": "nP0Tx",
+      "justifyContent": "center",
+      "layout": "horizontal",
+      "name": "Ticker",
+      "reusable": true,
+      "type": "frame",
+      "width": 402,
+      "x": 1044,
+      "y": -1120
+    },
+    {
+      "children": [
+        {
+          "id": "p05cD",
+          "name": "SH-Grabber",
+          "ref": "aNG1m",
+          "type": "ref"
+        },
+        {
+          "alignItems": "center",
+          "children": [
+            {
+              "id": "fIyg4",
+              "name": "SH-Tab-Outline",
+              "ref": "sBunx",
+              "type": "ref"
+            },
+            {
+              "id": "Cxx3l",
+              "name": "SH-Tab-Details",
+              "ref": "MInM2",
+              "type": "ref"
+            },
+            {
+              "descendants": {
+                "SoZKm": {
+                  "content": "Activity"
+                }
+              },
+              "id": "pZv2c",
+              "name": "SH-Tab-Activity",
+              "ref": "MInM2",
+              "type": "ref"
+            }
+          ],
+          "gap": 6,
+          "height": "fit_content",
+          "id": "obU74",
+          "layout": "horizontal",
+          "name": "SH-Tabs",
+          "padding": [
+            0,
+            12,
+            10,
+            12
+          ],
+          "type": "frame",
+          "width": "fill_container"
+        },
+        {
+          "fill": "$v-line",
+          "height": 1,
+          "id": "cJnau",
+          "name": "SH-Rule",
+          "type": "rectangle",
+          "width": "fill_container"
+        }
+      ],
+      "context": "Bottom-sheet CHROME ONLY — grabber, tab row, hairline. A .pen instance cannot take new children, so the sheet body is the agent's own $v-panel frame placed directly under this instance; that keeps the chrome identical across artboards while the body stays local.",
+      "cornerRadius": [
+        8,
+        8,
+        0,
+        0
+      ],
+      "fill": "$v-panel",
+      "gap": 0,
+      "height": "fit_content",
+      "id": "A4aue",
+      "layout": "vertical",
+      "name": "Sheet",
+      "reusable": true,
+      "stroke": "$v-line",
+      "strokeWidth": {
+        "top": 1
+      },
+      "type": "frame",
+      "width": 402,
+      "x": 2088,
+      "y": -1120
+    },
+    {
+      "alignItems": "center",
+      "children": [
+        {
+          "content": "…/Details/OriginPill",
+          "fill": "$v-text",
+          "fontFamily": "$v-mono",
+          "fontSize": 11,
+          "id": "r8iEf",
+          "name": "SP-Name",
+          "type": "text"
+        },
+        {
+          "id": "y4BJm",
+          "name": "SP-Id",
+          "ref": "dy3YM",
+          "type": "ref"
+        },
+        {
+          "fill": "$v-muted",
+          "height": 13,
+          "icon": "copy",
+          "id": "9Lxgr",
+          "library": "lucide",
+          "name": "SP-Copy",
+          "type": "icon",
+          "width": 13
+        }
+      ],
+      "context": "Docked above the ticker when a node is tapped: front-truncated name tail, id chip, copy glyph. The leading ellipsis is authored into SP-Name — .pen has no front-truncation, so the tail that names the node is written out and the head is elided by hand.",
+      "cornerRadius": 999,
+      "fill": "$v-panel",
+      "gap": 7,
+      "height": "fit_content",
+      "id": "XJnsE",
+      "layout": "horizontal",
+      "name": "SelectionPill",
+      "padding": [
+        4,
+        8
+      ],
+      "reusable": true,
+      "stroke": "$v-line",
+      "strokeWidth": 1,
+      "type": "frame",
+      "width": "fit_content",
+      "x": 1800,
+      "y": -1250
+    },
+    {
+      "children": [
+        {
+          "enabled": false,
+          "fill": "$v-select",
+          "height": 30,
+          "id": "VAfIy",
+          "name": "OR-Tint",
+          "type": "rectangle",
+          "width": 402,
+          "x": 0,
+          "y": 0
+        },
+        {
+          "enabled": false,
+          "fill": "$actor-c",
+          "height": 30,
+          "id": "gdz9f",
+          "name": "OR-TouchBar",
+          "type": "rectangle",
+          "width": 3,
+          "x": 0,
+          "y": 0
+        },
+        {
+          "alignItems": "center",
+          "children": [
+            {
+              "height": 6,
+              "id": "YgO0p",
+              "name": "OR-Indent",
+              "type": "frame",
+              "width": 14
+            },
+            {
+              "fill": "$v-faint",
+              "height": 14,
+              "icon": "chevron-right",
+              "id": "zpB5N",
+              "library": "lucide",
+              "name": "OR-Glyph",
+              "type": "icon",
+              "width": 14
+            },
+            {
+              "content": "CardSection",
+              "fill": "$v-text",
+              "fontFamily": "$v-sans",
+              "fontSize": 12,
+              "id": "sPE55",
+              "name": "OR-Name",
+              "textGrowth": "fixed-width",
+              "type": "text",
+              "width": "fill_container"
+            },
+            {
+              "enabled": false,
+              "id": "xciYB",
+              "name": "OR-Mark",
+              "ref": "drTdC",
+              "type": "ref"
+            }
+          ],
+          "gap": 6,
+          "height": 30,
+          "id": "fj21z",
+          "layout": "horizontal",
+          "name": "OR-Body",
+          "type": "frame",
+          "width": 381,
+          "x": 9,
+          "y": 0
+        }
+      ],
+      "context": "Phone outline row, laid out by coordinate so the themed state layers can sit behind the content. OR-Tint is the $v-select selection wash and OR-TouchBar the 3pt actor bar for a row touched in the last 30s: both ship disabled/enabled and are switched with `override <inst>/OR-Tint enabled=true` — a bool, which keeps lint clean, where an override carrying a $variable would not. OR-Indent's width is one level of depth (14pt). Vertical rhythm is 7pt, not DESIGN.md's 2pt row-y: a 19pt row is not tappable.",
+      "height": 30,
+      "id": "taUnE",
+      "layout": "none",
+      "name": "OutlineRowM",
+      "reusable": true,
+      "type": "frame",
+      "width": 402,
+      "x": 2610,
+      "y": -1120
+    },
+    {
+      "children": [
+        {
+          "alignItems": "center",
+          "children": [
+            {
+              "content": "14:32:07",
+              "fill": "$v-faint",
+              "fontFamily": "$v-mono",
+              "fontSize": 11,
+              "id": "Uiko4",
+              "name": "AR-Time",
+              "type": "text"
+            },
+            {
+              "descendants": {
+                "AMTsS": {
+                  "fill": "#942FC6"
+                },
+                "smF3Q": {
+                  "content": "a"
+                }
+              },
+              "id": "T1w5A",
+              "name": "AR-Avatar",
+              "ref": "8FB9u",
+              "type": "ref"
+            },
+            {
+              "content": "claude-a",
+              "fill": "$v-text",
+              "fontFamily": "$v-sans",
+              "fontSize": 12,
+              "fontWeight": "600",
+              "id": "aGCbx",
+              "name": "AR-Who",
+              "type": "text"
+            },
+            {
+              "content": "override",
+              "fill": "$v-text",
+              "fontFamily": "$v-mono",
+              "fontSize": 11,
+              "fontWeight": "600",
+              "id": "uQS9p",
+              "name": "AR-Verb",
+              "type": "text"
+            }
+          ],
+          "gap": 7,
+          "height": "fit_content",
+          "id": "bjThV",
+          "layout": "horizontal",
+          "name": "AR-Top",
+          "type": "frame",
+          "width": "fill_container"
+        },
+        {
+          "content": "…/Sheet/SH-Tabs/SH-Tab-Details",
+          "fill": "$v-muted",
+          "fontFamily": "$v-mono",
+          "fontSize": 11,
+          "id": "76vw0",
+          "name": "AR-Path",
+          "type": "text"
+        }
+      ],
+      "context": "The desktop's five-column activity row folded into two phone lines: time + avatar + identity + verb on the first, path on the second. The verb is the row's one bold mono word and never truncates.",
+      "gap": 3,
+      "height": "fit_content",
+      "id": "BqAZl",
+      "layout": "vertical",
+      "name": "ActivityRowM",
+      "padding": [
+        8,
+        12
+      ],
+      "reusable": true,
+      "stroke": "$v-line",
+      "strokeWidth": {
+        "bottom": 1
+      },
+      "type": "frame",
+      "width": 402,
+      "x": 3132,
+      "y": -1120
+    },
+    {
+      "children": [
+        {
+          "cornerRadius": 6,
+          "fill": "$v-chrome",
+          "height": 144,
+          "id": "a1rGV",
+          "name": "FC-Thumb",
+          "type": "rectangle",
+          "width": "fill_container"
+        },
+        {
+          "children": [
+            {
+              "content": "checkout.pen",
+              "fill": "$v-text",
+              "fontFamily": "$v-sans",
+              "fontSize": 13,
+              "fontWeight": "600",
+              "id": "kXVe7",
+              "name": "FC-Name",
+              "type": "text"
+            },
+            {
+              "content": "…/project/2026-08-31-mobile-viewer",
+              "fill": "$v-muted",
+              "fontFamily": "$v-mono",
+              "fontSize": 11,
+              "id": "eipNg",
+              "name": "FC-Path",
+              "type": "text"
+            },
+            {
+              "alignItems": "center",
+              "children": [
+                {
+                  "content": "8 artboards",
+                  "fill": "$v-faint",
+                  "fontFamily": "$v-mono",
+                  "fontSize": 11,
+                  "id": "jnLOi",
+                  "name": "FC-Count",
+                  "type": "text"
+                },
+                {
+                  "fill": "$v-faint",
+                  "height": 3,
+                  "id": "MSiip",
+                  "name": "FC-Sep",
+                  "type": "ellipse",
+                  "width": 3
+                },
+                {
+                  "content": "2m ago",
+                  "fill": "$v-faint",
+                  "fontFamily": "$v-mono",
+                  "fontSize": 11,
+                  "id": "QmhCg",
+                  "name": "FC-When",
+                  "type": "text"
+                },
+                {
+                  "height": 6,
+                  "id": "7o2aB",
+                  "name": "FC-Spacer",
+                  "type": "frame",
+                  "width": "fill_container"
+                },
+                {
+                  "descendants": {
+                    "AMTsS": {
+                      "fill": "#EB680A"
+                    },
+                    "smF3Q": {
+                      "content": "n"
+                    }
+                  },
+                  "id": "WkOJP",
+                  "name": "FC-Avatar",
+                  "ref": "8FB9u",
+                  "type": "ref"
+                }
+              ],
+              "gap": 6,
+              "height": "fit_content",
+              "id": "BTbE1",
+              "layout": "horizontal",
+              "name": "FC-Foot",
+              "type": "frame",
+              "width": "fill_container"
+            }
+          ],
+          "gap": 2,
+          "height": "fit_content",
+          "id": "ln1yQ",
+          "layout": "vertical",
+          "name": "FC-Meta",
+          "padding": [
+            0,
+            2,
+            2,
+            2
+          ],
+          "type": "frame",
+          "width": "fill_container"
+        }
+      ],
+      "context": "Mobile file card: 144pt render box, name, front-truncated path, artboard count, last change with its avatar. A broken file tints FC-Thumb and FC-Name toward $v-warn and says why in FC-Path.",
+      "cornerRadius": 8,
+      "fill": "$v-panel",
+      "gap": 8,
+      "height": "fit_content",
+      "id": "JjPT6",
+      "layout": "vertical",
+      "name": "FileCardM",
+      "padding": 8,
+      "reusable": true,
+      "stroke": "$v-line",
+      "strokeWidth": 1,
+      "type": "frame",
+      "width": 370,
+      "x": 3654,
+      "y": -1120
+    },
+    {
+      "children": [
+        {
+          "alignItems": "center",
+          "children": [
+            {
+              "content": "9:41",
+              "fill": "$v-text",
+              "fontFamily": "$v-sans",
+              "fontSize": 12,
+              "fontWeight": "700",
+              "id": "pqk5a",
+              "name": "MA-Clock",
+              "type": "text"
+            },
+            {
+              "alignItems": "center",
+              "children": [
+                {
+                  "cornerRadius": 2,
+                  "fill": "$v-faint",
+                  "height": 8,
+                  "id": "S5HX1",
+                  "name": "MA-Signal",
+                  "type": "rectangle",
+                  "width": 15
+                },
+                {
+                  "cornerRadius": 2,
+                  "fill": "$v-faint",
+                  "height": 9,
+                  "id": "30DCf",
+                  "name": "MA-Battery",
+                  "type": "rectangle",
+                  "width": 22
+                }
+              ],
+              "gap": 5,
+              "height": "fit_content",
+              "id": "wVRsW",
+              "layout": "horizontal",
+              "name": "MA-Indicators",
+              "type": "frame",
+              "width": "fit_content"
+            }
+          ],
+          "height": 44,
+          "id": "v2pZQ",
+          "justifyContent": "space_between",
+          "layout": "horizontal",
+          "name": "MA-StatusBar",
+          "padding": [
+            16,
+            20,
+            0,
+            20
+          ],
+          "type": "frame",
+          "width": "fill_container"
+        },
+        {
+          "children": [
+            {
+              "content": "Field Notes",
+              "fill": "$v-text",
+              "fontFamily": "$v-sans",
+              "fontSize": 20,
+              "fontWeight": "700",
+              "id": "bxLRw",
+              "name": "MA-Title",
+              "type": "text"
+            },
+            {
+              "content": "12 entries · updated today",
+              "fill": "$v-muted",
+              "fontFamily": "$v-sans",
+              "fontSize": 12,
+              "id": "cU5YL",
+              "name": "MA-Sub",
+              "type": "text"
+            }
+          ],
+          "gap": 3,
+          "height": "fit_content",
+          "id": "DSiRE",
+          "layout": "vertical",
+          "name": "MA-Header",
+          "padding": [
+            14,
+            20,
+            10,
+            20
+          ],
+          "type": "frame",
+          "width": "fill_container"
+        },
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "cornerRadius": 6,
+                  "fill": "$v-chrome",
+                  "height": 140,
+                  "id": "6ClIp",
+                  "name": "MA-Thumb1",
+                  "type": "rectangle",
+                  "width": "fill_container"
+                },
+                {
+                  "content": "Ridge trail, first light",
+                  "fill": "$v-text",
+                  "fontFamily": "$v-sans",
+                  "fontSize": 13,
+                  "fontWeight": "600",
+                  "id": "JIBhA",
+                  "name": "MA-CardTitle1",
+                  "type": "text"
+                },
+                {
+                  "content": "6 photos · 2 hours ago",
+                  "fill": "$v-muted",
+                  "fontFamily": "$v-sans",
+                  "fontSize": 12,
+                  "id": "eLBrG",
+                  "name": "MA-CardMeta1",
+                  "type": "text"
+                }
+              ],
+              "cornerRadius": 8,
+              "fill": "$v-panel",
+              "gap": 8,
+              "height": "fit_content",
+              "id": "VuSUV",
+              "layout": "vertical",
+              "name": "MA-Card1",
+              "padding": 10,
+              "stroke": "$v-line",
+              "strokeWidth": 1,
+              "type": "frame",
+              "width": "fill_container"
+            },
+            {
+              "children": [
+                {
+                  "cornerRadius": 6,
+                  "fill": "$v-chrome",
+                  "height": 140,
+                  "id": "u42oO",
+                  "name": "MA-Thumb2",
+                  "type": "rectangle",
+                  "width": "fill_container"
+                },
+                {
+                  "content": "Sawmill Road, in fog",
+                  "fill": "$v-text",
+                  "fontFamily": "$v-sans",
+                  "fontSize": 13,
+                  "fontWeight": "600",
+                  "id": "hpEBh",
+                  "name": "MA-CardTitle2",
+                  "type": "text"
+                },
+                {
+                  "content": "3 photos · yesterday",
+                  "fill": "$v-muted",
+                  "fontFamily": "$v-sans",
+                  "fontSize": 12,
+                  "id": "qL5CH",
+                  "name": "MA-CardMeta2",
+                  "type": "text"
+                }
+              ],
+              "cornerRadius": 8,
+              "fill": "$v-panel",
+              "gap": 8,
+              "height": "fit_content",
+              "id": "ODr4B",
+              "layout": "vertical",
+              "name": "MA-Card2",
+              "padding": 10,
+              "stroke": "$v-line",
+              "strokeWidth": 1,
+              "type": "frame",
+              "width": "fill_container"
+            },
+            {
+              "children": [
+                {
+                  "cornerRadius": 6,
+                  "fill": "$v-chrome",
+                  "height": 140,
+                  "id": "WN6fT",
+                  "name": "MA-Thumb3",
+                  "type": "rectangle",
+                  "width": "fill_container"
+                },
+                {
+                  "content": "The long field",
+                  "fill": "$v-text",
+                  "fontFamily": "$v-sans",
+                  "fontSize": 13,
+                  "fontWeight": "600",
+                  "id": "AsMps",
+                  "name": "MA-CardTitle3",
+                  "type": "text"
+                },
+                {
+                  "content": "9 photos · Tuesday",
+                  "fill": "$v-muted",
+                  "fontFamily": "$v-sans",
+                  "fontSize": 12,
+                  "id": "OIjZN",
+                  "name": "MA-CardMeta3",
+                  "type": "text"
+                }
+              ],
+              "cornerRadius": 8,
+              "fill": "$v-panel",
+              "gap": 8,
+              "height": "fit_content",
+              "id": "iRjWr",
+              "layout": "vertical",
+              "name": "MA-Card3",
+              "padding": 10,
+              "stroke": "$v-line",
+              "strokeWidth": 1,
+              "type": "frame",
+              "width": "fill_container"
+            }
+          ],
+          "gap": 12,
+          "height": "fill_container",
+          "id": "atSN7",
+          "layout": "vertical",
+          "name": "MA-List",
+          "padding": [
+            0,
+            16
+          ],
+          "type": "frame",
+          "width": "fill_container"
+        },
+        {
+          "alignItems": "start",
+          "children": [
+            {
+              "alignItems": "center",
+              "children": [
+                {
+                  "fill": "$v-text",
+                  "height": 19,
+                  "icon": "house",
+                  "id": "PTpIy",
+                  "library": "lucide",
+                  "name": "MA-TabIcon1",
+                  "type": "icon",
+                  "width": 19
+                },
+                {
+                  "content": "Notes",
+                  "fill": "$v-text",
+                  "fontFamily": "$v-sans",
+                  "fontSize": 10,
+                  "fontWeight": "600",
+                  "id": "CJRC9",
+                  "name": "MA-TabLabel1",
+                  "type": "text"
+                }
+              ],
+              "gap": 4,
+              "height": "fit_content",
+              "id": "NQ31d",
+              "layout": "vertical",
+              "name": "MA-Tab1",
+              "type": "frame",
+              "width": "fit_content"
+            },
+            {
+              "alignItems": "center",
+              "children": [
+                {
+                  "fill": "$v-faint",
+                  "height": 19,
+                  "icon": "search",
+                  "id": "VFQc6",
+                  "library": "lucide",
+                  "name": "MA-TabIcon2",
+                  "type": "icon",
+                  "width": 19
+                },
+                {
+                  "content": "Search",
+                  "fill": "$v-faint",
+                  "fontFamily": "$v-sans",
+                  "fontSize": 10,
+                  "fontWeight": "600",
+                  "id": "taXGR",
+                  "name": "MA-TabLabel2",
+                  "type": "text"
+                }
+              ],
+              "gap": 4,
+              "height": "fit_content",
+              "id": "ynpen",
+              "layout": "vertical",
+              "name": "MA-Tab2",
+              "type": "frame",
+              "width": "fit_content"
+            },
+            {
+              "alignItems": "center",
+              "children": [
+                {
+                  "fill": "$v-faint",
+                  "height": 19,
+                  "icon": "user",
+                  "id": "gNUf8",
+                  "library": "lucide",
+                  "name": "MA-TabIcon3",
+                  "type": "icon",
+                  "width": 19
+                },
+                {
+                  "content": "You",
+                  "fill": "$v-faint",
+                  "fontFamily": "$v-sans",
+                  "fontSize": 10,
+                  "fontWeight": "600",
+                  "id": "qof7P",
+                  "name": "MA-TabLabel3",
+                  "type": "text"
+                }
+              ],
+              "gap": 4,
+              "height": "fit_content",
+              "id": "hMz89",
+              "layout": "vertical",
+              "name": "MA-Tab3",
+              "type": "frame",
+              "width": "fit_content"
+            }
+          ],
+          "fill": "$v-panel",
+          "height": 64,
+          "id": "2xbqh",
+          "justifyContent": "space_between",
+          "layout": "horizontal",
+          "name": "MA-TabBar",
+          "padding": [
+            10,
+            44,
+            0,
+            44
+          ],
+          "stroke": "$v-line",
+          "strokeWidth": {
+            "top": 1
+          },
+          "type": "frame",
+          "width": "fill_container"
+        }
+      ],
+      "clip": true,
+      "context": "The sample phone design the viewer is 'viewing' — a plain card-list app, so the chrome around it is the thing under review, not this. It rides the same mode=light/dark variables as the viewer chrome and never uses $v-accent: accent belongs to the viewer's liveness and selection, not to the file on the stage.",
+      "fill": "$v-bg",
+      "gap": 0,
+      "height": 874,
+      "id": "60RQv",
+      "layout": "vertical",
+      "name": "MockApp",
+      "reusable": true,
+      "type": "frame",
+      "width": 402,
+      "x": 0,
+      "y": -1120
+    },
+    {
+      "children": [
+        {
+          "alignItems": "center",
+          "children": [
+            {
+              "content": "woodcase",
+              "fill": "$v-text",
+              "fontFamily": "$v-mono",
+              "fontSize": 13,
+              "fontWeight": "600",
+              "id": "6oSnJ",
+              "name": "FS-Brand",
+              "type": "text"
+            },
+            {
+              "height": 6,
+              "id": "s8OFg",
+              "name": "FS-BarSpacer",
+              "type": "frame",
+              "width": "fill_container"
+            },
+            {
+              "alignItems": "center",
+              "children": [
+                {
+                  "fill": "$v-accent",
+                  "height": 6,
+                  "id": "m7Pfe",
+                  "name": "FS-LiveDot",
+                  "type": "ellipse",
+                  "width": 6
+                },
+                {
+                  "content": "live",
+                  "fill": "$v-accent",
+                  "fontFamily": "$v-mono",
+                  "fontSize": 11,
+                  "id": "v0GU9",
+                  "name": "FS-LiveLabel",
+                  "type": "text"
+                }
+              ],
+              "gap": 4,
+              "height": "fit_content",
+              "id": "ncBSG",
+              "layout": "horizontal",
+              "name": "FS-Live",
+              "type": "frame",
+              "width": "fit_content"
+            }
+          ],
+          "fill": "$v-chrome",
+          "gap": 8,
+          "height": 44,
+          "id": "RXcwC",
+          "layout": "horizontal",
+          "name": "FS-TopBar",
+          "padding": [
+            0,
+            16
+          ],
+          "stroke": "$v-line",
+          "strokeWidth": {
+            "bottom": 1
+          },
+          "type": "frame",
+          "width": "fill_container"
+        },
+        {
+          "alignItems": "center",
+          "children": [
+            {
+              "content": "4 files",
+              "fill": "$v-faint",
+              "fontFamily": "$v-mono",
+              "fontSize": 11,
+              "id": "tBFOj",
+              "name": "FS-SubCount",
+              "type": "text"
+            },
+            {
+              "fill": "$v-faint",
+              "height": 3,
+              "id": "pcXM5",
+              "name": "FS-SubDot",
+              "type": "ellipse",
+              "width": 3
+            },
+            {
+              "content": "1 unreadable",
+              "fill": "$v-warn",
+              "fontFamily": "$v-mono",
+              "fontSize": 11,
+              "id": "iFiOz",
+              "name": "FS-SubNote",
+              "type": "text"
+            }
+          ],
+          "gap": 6,
+          "height": "fit_content",
+          "id": "lHb3D",
+          "layout": "horizontal",
+          "name": "FS-Sub",
+          "padding": [
+            10,
+            16,
+            4,
+            16
+          ],
+          "type": "frame",
+          "width": "fill_container"
+        },
+        {
+          "children": [
+            {
+              "descendants": {
+                "QmhCg": {
+                  "content": "2m ago"
+                },
+                "WkOJP/AMTsS": {
+                  "fill": "#942FC6"
+                },
+                "WkOJP/smF3Q": {
+                  "content": "c"
+                },
+                "a1rGV": {
+                  "height": 112
+                },
+                "eipNg": {
+                  "content": "…/Local/Pen/field-notes"
+                },
+                "jnLOi": {
+                  "content": "8 artboards"
+                },
+                "kXVe7": {
+                  "content": "field-notes.pen"
+                }
+              },
+              "id": "FKRyx",
+              "name": "FS-Card-Viewer",
+              "ref": "JjPT6",
+              "type": "ref"
+            },
+            {
+              "descendants": {
+                "QmhCg": {
+                  "content": "1h ago"
+                },
+                "WkOJP/AMTsS": {
+                  "fill": "#2289D3"
+                },
+                "WkOJP/smF3Q": {
+                  "content": "s"
+                },
+                "a1rGV": {
+                  "height": 112
+                },
+                "eipNg": {
+                  "content": "…/git/Woodcase/local/designs"
+                },
+                "jnLOi": {
+                  "content": "14 artboards"
+                },
+                "kXVe7": {
+                  "content": "woodcase-app.pen"
+                }
+              },
+              "id": "Puc6P",
+              "name": "FS-Card-App",
+              "ref": "JjPT6",
+              "type": "ref"
+            },
+            {
+              "descendants": {
+                "QmhCg": {
+                  "content": "yesterday"
+                },
+                "WkOJP/AMTsS": {
+                  "fill": "#EB680A"
+                },
+                "WkOJP/smF3Q": {
+                  "content": "n"
+                },
+                "a1rGV": {
+                  "height": 112
+                },
+                "eipNg": {
+                  "content": "…/Local/Pen/banking"
+                },
+                "jnLOi": {
+                  "content": "23 artboards"
+                },
+                "kXVe7": {
+                  "content": "banking.pen"
+                }
+              },
+              "id": "ZHzhU",
+              "name": "FS-Card-Banking",
+              "ref": "JjPT6",
+              "type": "ref"
+            },
+            {
+              "descendants": {
+                "QmhCg": {
+                  "content": "3m ago"
+                },
+                "WkOJP/AMTsS": {
+                  "fill": "#942FC6"
+                },
+                "WkOJP/smF3Q": {
+                  "content": "c"
+                },
+                "a1rGV": {
+                  "fill": [
+                    "$v-chrome",
+                    {
+                      "colors": [
+                        {
+                          "color": "$v-warn",
+                          "position": 0
+                        },
+                        {
+                          "color": "$v-warn",
+                          "position": 1
+                        }
+                      ],
+                      "gradientType": "linear",
+                      "opacity": 0.16,
+                      "type": "gradient"
+                    }
+                  ],
+                  "height": 112
+                },
+                "eipNg": {
+                  "content": "parse error · line 412: unterminated string",
+                  "fill": "$v-warn"
+                },
+                "jnLOi": {
+                  "content": "0 artboards"
+                },
+                "kXVe7": {
+                  "content": "exports.pen",
+                  "fill": "$v-warn"
+                }
+              },
+              "fill": [
+                "$v-panel",
+                {
+                  "colors": [
+                    {
+                      "color": "$v-warn",
+                      "position": 0
+                    },
+                    {
+                      "color": "$v-warn",
+                      "position": 1
+                    }
+                  ],
+                  "gradientType": "linear",
+                  "opacity": 0.1,
+                  "type": "gradient"
+                }
+              ],
+              "id": "kgzI1",
+              "name": "FS-Card-Broken",
+              "ref": "JjPT6",
+              "stroke": "$v-warn",
+              "type": "ref"
+            }
+          ],
+          "gap": 12,
+          "height": "fill_container",
+          "id": "WXc5A",
+          "layout": "vertical",
+          "name": "FS-List",
+          "padding": [
+            4,
+            16,
+            12,
+            16
+          ],
+          "type": "frame",
+          "width": "fill_container"
+        }
+      ],
+      "clip": true,
+      "context": "Mobile card list: thumbnail, name, path, count, last change + avatar; one broken-file card. Built from FileCardM instances.",
+      "fill": "$v-bg",
+      "gap": 0,
+      "height": 874,
+      "id": "18mij",
+      "layout": "vertical",
+      "name": "Files",
+      "type": "frame",
+      "width": 402,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "children": [
+        {
+          "descendants": {
+            "fLbVO": {
+              "content": "field-notes.pen"
+            }
+          },
+          "id": "TnNtW",
+          "name": "MP-Strip",
+          "ref": "nXBSr",
+          "type": "ref"
+        },
+        {
+          "alignItems": "center",
+          "children": [
+            {
+              "content": "ARTBOARDS",
+              "fill": "$v-muted",
+              "fontFamily": "$v-sans",
+              "fontSize": 10,
+              "fontWeight": "700",
+              "id": "q9WMh",
+              "letterSpacing": 0.9,
+              "name": "MP-HeadLabel",
+              "type": "text"
+            },
+            {
+              "height": 6,
+              "id": "8I09l",
+              "name": "MP-HeadSpacer",
+              "type": "frame",
+              "width": "fill_container"
+            },
+            {
+              "content": "8 boards",
+              "fill": "$v-faint",
+              "fontFamily": "$v-mono",
+              "fontSize": 11,
+              "id": "921CT",
+              "name": "MP-HeadCount",
+              "type": "text"
+            },
+            {
+              "fill": "$v-faint",
+              "height": 3,
+              "id": "wih0z",
+              "name": "MP-HeadDot",
+              "type": "ellipse",
+              "width": 3
+            },
+            {
+              "content": "1 unread",
+              "fill": "$v-warn",
+              "fontFamily": "$v-mono",
+              "fontSize": 11,
+              "id": "IPman",
+              "name": "MP-HeadUnread",
+              "type": "text"
+            }
+          ],
+          "gap": 6,
+          "height": "fit_content",
+          "id": "9NQyU",
+          "layout": "horizontal",
+          "name": "MP-Head",
+          "padding": [
+            12,
+            16,
+            6,
+            16
+          ],
+          "type": "frame",
+          "width": "fill_container"
+        },
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "alignItems": "start",
+                  "children": [
+                    {
+                      "children": [
+                        {
+                          "cornerRadius": 2,
+                          "fill": "$v-chrome",
+                          "height": 155,
+                          "id": "nWk4m",
+                          "name": "MP-Render-Files",
+                          "type": "rectangle",
+                          "width": 72,
+                          "x": 53,
+                          "y": 7
+                        }
+                      ],
+                      "cornerRadius": 2,
+                      "fill": "$v-panel",
+                      "height": 169,
+                      "id": "oti68",
+                      "layout": "none",
+                      "name": "MP-Box-Files",
+                      "stroke": "$v-accent",
+                      "strokeAlignment": "outer",
+                      "strokeWidth": 2,
+                      "type": "frame",
+                      "width": 178
+                    },
+                    {
+                      "content": "Home",
+                      "fill": "$v-text",
+                      "fontFamily": "$v-mono",
+                      "fontSize": 11,
+                      "id": "Ec1c8",
+                      "name": "MP-Name-Files",
+                      "type": "text"
+                    }
+                  ],
+                  "gap": 6,
+                  "height": "fit_content",
+                  "id": "zakNh",
+                  "layout": "vertical",
+                  "name": "MP-Cell-Files",
+                  "type": "frame",
+                  "width": 178
+                },
+                {
+                  "alignItems": "start",
+                  "children": [
+                    {
+                      "children": [
+                        {
+                          "cornerRadius": 2,
+                          "fill": "$v-chrome",
+                          "height": 155,
+                          "id": "dizqT",
+                          "name": "MP-Render-Map",
+                          "type": "rectangle",
+                          "width": 72,
+                          "x": 53,
+                          "y": 7
+                        },
+                        {
+                          "fill": "$v-warn",
+                          "height": 6,
+                          "id": "sTX84",
+                          "name": "MP-Unread-Map",
+                          "stroke": "$v-panel",
+                          "strokeAlignment": "outer",
+                          "strokeWidth": 2,
+                          "type": "ellipse",
+                          "width": 6,
+                          "x": 163,
+                          "y": 9
+                        }
+                      ],
+                      "cornerRadius": 2,
+                      "fill": "$v-panel",
+                      "height": 169,
+                      "id": "vRxFC",
+                      "layout": "none",
+                      "name": "MP-Box-Map",
+                      "stroke": "$v-line",
+                      "strokeAlignment": "inner",
+                      "strokeWidth": 1,
+                      "type": "frame",
+                      "width": 178
+                    },
+                    {
+                      "content": "Entry",
+                      "fill": "$v-muted",
+                      "fontFamily": "$v-mono",
+                      "fontSize": 11,
+                      "id": "4henU",
+                      "name": "MP-Name-Map",
+                      "type": "text"
+                    }
+                  ],
+                  "gap": 6,
+                  "height": "fit_content",
+                  "id": "zgg59",
+                  "layout": "vertical",
+                  "name": "MP-Cell-Map",
+                  "type": "frame",
+                  "width": 178
+                }
+              ],
+              "gap": 14,
+              "height": "fit_content",
+              "id": "hZn4s",
+              "layout": "horizontal",
+              "name": "MP-Row-1",
+              "type": "frame",
+              "width": "fill_container"
+            },
+            {
+              "children": [
+                {
+                  "alignItems": "start",
+                  "children": [
+                    {
+                      "children": [
+                        {
+                          "cornerRadius": 2,
+                          "fill": "$v-chrome",
+                          "height": 155,
+                          "id": "4AXzN",
+                          "name": "MP-Render-Quiet",
+                          "type": "rectangle",
+                          "width": 72,
+                          "x": 53,
+                          "y": 7
+                        }
+                      ],
+                      "cornerRadius": 2,
+                      "fill": "$v-panel",
+                      "height": 169,
+                      "id": "FxCzB",
+                      "layout": "none",
+                      "name": "MP-Box-Quiet",
+                      "stroke": "#2289D3",
+                      "strokeAlignment": "inner",
+                      "strokeWidth": 2,
+                      "type": "frame",
+                      "width": 178
+                    },
+                    {
+                      "content": "Photo",
+                      "fill": "$v-muted",
+                      "fontFamily": "$v-mono",
+                      "fontSize": 11,
+                      "id": "HnN7c",
+                      "name": "MP-Name-Quiet",
+                      "type": "text"
+                    }
+                  ],
+                  "gap": 6,
+                  "height": "fit_content",
+                  "id": "GXLuH",
+                  "layout": "vertical",
+                  "name": "MP-Cell-Quiet",
+                  "type": "frame",
+                  "width": 178
+                },
+                {
+                  "alignItems": "start",
+                  "children": [
+                    {
+                      "children": [
+                        {
+                          "cornerRadius": 2,
+                          "fill": "$v-chrome",
+                          "height": 155,
+                          "id": "gOvuC",
+                          "name": "MP-Render-Immersive",
+                          "type": "rectangle",
+                          "width": 72,
+                          "x": 53,
+                          "y": 7
+                        },
+                        {
+                          "descendants": {
+                            "LDqTU": {
+                              "stroke": "$v-panel"
+                            },
+                            "mhzVV": {
+                              "content": "+2",
+                              "width": 10,
+                              "x": 12
+                            }
+                          },
+                          "id": "znx90",
+                          "name": "MP-Busy",
+                          "ref": "Xs32t",
+                          "type": "ref",
+                          "x": 152,
+                          "y": 2
+                        }
+                      ],
+                      "cornerRadius": 2,
+                      "fill": "$v-panel",
+                      "height": 169,
+                      "id": "EXX3T",
+                      "layout": "none",
+                      "name": "MP-Box-Immersive",
+                      "stroke": "$v-line",
+                      "strokeAlignment": "inner",
+                      "strokeWidth": 1,
+                      "type": "frame",
+                      "width": 178
+                    },
+                    {
+                      "content": "Search",
+                      "fill": "$v-muted",
+                      "fontFamily": "$v-mono",
+                      "fontSize": 11,
+                      "id": "nFXb4",
+                      "name": "MP-Name-Immersive",
+                      "type": "text"
+                    }
+                  ],
+                  "gap": 6,
+                  "height": "fit_content",
+                  "id": "exZQj",
+                  "layout": "vertical",
+                  "name": "MP-Cell-Immersive",
+                  "type": "frame",
+                  "width": 178
+                }
+              ],
+              "gap": 14,
+              "height": "fit_content",
+              "id": "sMurC",
+              "layout": "horizontal",
+              "name": "MP-Row-2",
+              "type": "frame",
+              "width": "fill_container"
+            },
+            {
+              "children": [
+                {
+                  "alignItems": "start",
+                  "children": [
+                    {
+                      "children": [
+                        {
+                          "cornerRadius": 2,
+                          "fill": "$v-chrome",
+                          "height": 155,
+                          "id": "VilXQ",
+                          "name": "MP-Render-Following",
+                          "type": "rectangle",
+                          "width": 72,
+                          "x": 53,
+                          "y": 7
+                        }
+                      ],
+                      "cornerRadius": 2,
+                      "fill": "$v-panel",
+                      "height": 169,
+                      "id": "Js7dR",
+                      "layout": "none",
+                      "name": "MP-Box-Following",
+                      "stroke": "$v-line",
+                      "strokeAlignment": "inner",
+                      "strokeWidth": 1,
+                      "type": "frame",
+                      "width": 178
+                    },
+                    {
+                      "content": "You",
+                      "fill": "$v-muted",
+                      "fontFamily": "$v-mono",
+                      "fontSize": 11,
+                      "id": "Z6uhs",
+                      "name": "MP-Name-Following",
+                      "type": "text"
+                    }
+                  ],
+                  "gap": 6,
+                  "height": "fit_content",
+                  "id": "vBXhj",
+                  "layout": "vertical",
+                  "name": "MP-Cell-Following",
+                  "type": "frame",
+                  "width": 178
+                },
+                {
+                  "alignItems": "start",
+                  "children": [
+                    {
+                      "children": [
+                        {
+                          "cornerRadius": 2,
+                          "fill": "$v-chrome",
+                          "height": 155,
+                          "id": "ayTk8",
+                          "name": "MP-Render-Outline",
+                          "type": "rectangle",
+                          "width": 72,
+                          "x": 53,
+                          "y": 7
+                        }
+                      ],
+                      "cornerRadius": 2,
+                      "fill": "$v-panel",
+                      "height": 169,
+                      "id": "EhvgB",
+                      "layout": "none",
+                      "name": "MP-Box-Outline",
+                      "stroke": "$v-line",
+                      "strokeAlignment": "inner",
+                      "strokeWidth": 1,
+                      "type": "frame",
+                      "width": 178
+                    },
+                    {
+                      "content": "Settings",
+                      "fill": "$v-muted",
+                      "fontFamily": "$v-mono",
+                      "fontSize": 11,
+                      "id": "RQZW7",
+                      "name": "MP-Name-Outline",
+                      "type": "text"
+                    }
+                  ],
+                  "gap": 6,
+                  "height": "fit_content",
+                  "id": "tF63p",
+                  "layout": "vertical",
+                  "name": "MP-Cell-Outline",
+                  "type": "frame",
+                  "width": 178
+                }
+              ],
+              "gap": 14,
+              "height": "fit_content",
+              "id": "VvBMh",
+              "layout": "horizontal",
+              "name": "MP-Row-3",
+              "type": "frame",
+              "width": "fill_container"
+            },
+            {
+              "children": [
+                {
+                  "alignItems": "start",
+                  "children": [
+                    {
+                      "children": [
+                        {
+                          "cornerRadius": 2,
+                          "fill": "$v-chrome",
+                          "height": 155,
+                          "id": "Qzo6D",
+                          "name": "MP-Render-Details",
+                          "type": "rectangle",
+                          "width": 72,
+                          "x": 53,
+                          "y": 7
+                        }
+                      ],
+                      "cornerRadius": 2,
+                      "fill": "$v-panel",
+                      "height": 169,
+                      "id": "JsBuP",
+                      "layout": "none",
+                      "name": "MP-Box-Details",
+                      "stroke": "$v-line",
+                      "strokeAlignment": "inner",
+                      "strokeWidth": 1,
+                      "type": "frame",
+                      "width": 178
+                    },
+                    {
+                      "content": "Onboarding",
+                      "fill": "$v-muted",
+                      "fontFamily": "$v-mono",
+                      "fontSize": 11,
+                      "id": "bV8kn",
+                      "name": "MP-Name-Details",
+                      "type": "text"
+                    }
+                  ],
+                  "gap": 6,
+                  "height": "fit_content",
+                  "id": "dBpnB",
+                  "layout": "vertical",
+                  "name": "MP-Cell-Details",
+                  "type": "frame",
+                  "width": 178
+                },
+                {
+                  "alignItems": "start",
+                  "children": [
+                    {
+                      "children": [
+                        {
+                          "cornerRadius": 2,
+                          "fill": "$v-chrome",
+                          "height": 155,
+                          "id": "QxVKM",
+                          "name": "MP-Render-Activity",
+                          "type": "rectangle",
+                          "width": 72,
+                          "x": 53,
+                          "y": 7
+                        }
+                      ],
+                      "cornerRadius": 2,
+                      "fill": "$v-panel",
+                      "height": 169,
+                      "id": "Yr1Dq",
+                      "layout": "none",
+                      "name": "MP-Box-Activity",
+                      "stroke": "$v-line",
+                      "strokeAlignment": "inner",
+                      "strokeWidth": 1,
+                      "type": "frame",
+                      "width": 178
+                    },
+                    {
+                      "content": "Empty",
+                      "fill": "$v-muted",
+                      "fontFamily": "$v-mono",
+                      "fontSize": 11,
+                      "id": "LFd5C",
+                      "name": "MP-Name-Activity",
+                      "type": "text"
+                    }
+                  ],
+                  "gap": 6,
+                  "height": "fit_content",
+                  "id": "sDkXG",
+                  "layout": "vertical",
+                  "name": "MP-Cell-Activity",
+                  "type": "frame",
+                  "width": 178
+                }
+              ],
+              "gap": 14,
+              "height": "fit_content",
+              "id": "PjIwg",
+              "layout": "horizontal",
+              "name": "MP-Row-4",
+              "type": "frame",
+              "width": "fill_container"
+            }
+          ],
+          "gap": 18,
+          "height": "fill_container",
+          "id": "zJbnX",
+          "layout": "vertical",
+          "name": "MP-Grid",
+          "padding": [
+            0,
+            16
+          ],
+          "type": "frame",
+          "width": "fill_container"
+        }
+      ],
+      "clip": true,
+      "context": "The bird's-eye as a vertical-scroll grid; unread dots; touched frames tinted; one coalesced actor stack on a busy board.",
+      "fill": "$v-bg",
+      "gap": 0,
+      "height": 874,
+      "id": "dg4wh",
+      "layout": "vertical",
+      "name": "Map",
+      "type": "frame",
+      "width": 402,
+      "x": 522,
+      "y": 0
+    },
+    {
+      "children": [
+        {
+          "id": "y0VeB",
+          "name": "QT-Render",
+          "ref": "60RQv",
+          "type": "ref",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "children": [
+            {
+              "descendants": {
+                "389uw/smF3Q": {
+                  "content": "s"
+                },
+                "JJIa6/smF3Q": {
+                  "content": "n"
+                },
+                "a57ow/smF3Q": {
+                  "content": "c"
+                },
+                "fLbVO": {
+                  "content": "…/field-notes/Home — Field Notes"
+                }
+              },
+              "id": "yi22v",
+              "name": "QT-Status",
+              "ref": "nXBSr",
+              "type": "ref",
+              "x": 0,
+              "y": 7
+            }
+          ],
+          "fill": "$v-chrome",
+          "height": 44,
+          "id": "y2iv8",
+          "layout": "none",
+          "name": "QT-TopBar",
+          "type": "frame",
+          "width": 402,
+          "x": 0,
+          "y": 0
+        },
+        {
+          "children": [
+            {
+              "alignItems": "center",
+              "children": [
+                {
+                  "id": "UaPyb",
+                  "name": "QT-Dot-1",
+                  "ref": "AIym3",
+                  "type": "ref"
+                },
+                {
+                  "id": "2ZJBb",
+                  "name": "QT-Dot-2",
+                  "ref": "AIym3",
+                  "type": "ref"
+                },
+                {
+                  "id": "MrG2o",
+                  "name": "QT-Dot-3",
+                  "ref": "Fw25g",
+                  "type": "ref"
+                },
+                {
+                  "id": "h5EZ1",
+                  "name": "QT-Dot-4",
+                  "ref": "AIym3",
+                  "type": "ref"
+                },
+                {
+                  "id": "ojgXC",
+                  "name": "QT-Dot-5",
+                  "ref": "AIym3",
+                  "type": "ref"
+                },
+                {
+                  "id": "Qk87a",
+                  "name": "QT-Dot-6",
+                  "ref": "AIym3",
+                  "type": "ref"
+                },
+                {
+                  "id": "HhLA2",
+                  "name": "QT-Dot-7",
+                  "ref": "yB2BP",
+                  "type": "ref"
+                },
+                {
+                  "id": "ABEWR",
+                  "name": "QT-Dot-8",
+                  "ref": "AIym3",
+                  "type": "ref"
+                }
+              ],
+              "gap": 2,
+              "height": 22,
+              "id": "M5Low",
+              "justifyContent": "center",
+              "layout": "horizontal",
+              "name": "QT-Ticker",
+              "type": "frame",
+              "width": 402,
+              "x": 0,
+              "y": 11
+            },
+            {
+              "id": "LlGTR",
+              "name": "QT-Grabber",
+              "ref": "aNG1m",
+              "type": "ref",
+              "x": 0,
+              "y": 42
+            }
+          ],
+          "fill": "$v-chrome",
+          "height": 64,
+          "id": "benzo",
+          "layout": "none",
+          "name": "QT-ChromeBar",
+          "type": "frame",
+          "width": 402,
+          "x": 0,
+          "y": 810
+        }
+      ],
+      "clip": true,
+      "context": "Artboard view, chrome visible: StatusStrip, Ticker, SheetGrabber over a full-bleed MockApp instance.",
+      "fill": "$v-bg",
+      "gap": 0,
+      "height": 874,
+      "id": "iwd4o",
+      "layout": "none",
+      "name": "Quiet",
+      "type": "frame",
+      "width": 402,
+      "x": 1044,
+      "y": 0
+    },
+    {
+      "children": [
+        {
+          "id": "Pff7c",
+          "name": "IM-Render",
+          "ref": "60RQv",
+          "type": "ref",
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "clip": true,
+      "context": "The same artboard with the chrome receded — the render and nothing else. The resting state.",
+      "fill": "$v-bg",
+      "gap": 0,
+      "height": 874,
+      "id": "xgavD",
+      "layout": "none",
+      "name": "Immersive",
+      "type": "frame",
+      "width": 402,
+      "x": 1566,
+      "y": 0
+    },
+    {
+      "children": [
+        {
+          "id": "oonjk",
+          "name": "FL-Render",
+          "ref": "60RQv",
+          "type": "ref",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "children": [
+            {
+              "height": 140,
+              "id": "wdXmx",
+              "name": "FL-Box-A",
+              "stroke": "#942FC6",
+              "strokeAlignment": "inner",
+              "strokeWidth": 2,
+              "type": "rectangle",
+              "width": 350,
+              "x": 26,
+              "y": 119
+            },
+            {
+              "descendants": {
+                "dRi6u": {
+                  "content": "core · set 4s"
+                }
+              },
+              "fill": "#942FC6",
+              "id": "PSvdU",
+              "name": "FL-Tag-A",
+              "ref": "fqHRq",
+              "type": "ref",
+              "x": 26,
+              "y": 105
+            },
+            {
+              "height": 48,
+              "id": "lf1hS",
+              "name": "FL-Box-B",
+              "stroke": "#2289D3",
+              "strokeAlignment": "inner",
+              "strokeWidth": 2,
+              "type": "rectangle",
+              "width": 200,
+              "x": 22,
+              "y": 481
+            },
+            {
+              "descendants": {
+                "dRi6u": {
+                  "content": "nav · set 11s"
+                }
+              },
+              "fill": "#2289D3",
+              "id": "jqlPO",
+              "name": "FL-Tag-B",
+              "ref": "fqHRq",
+              "type": "ref",
+              "x": 22,
+              "y": 467
+            },
+            {
+              "height": 140,
+              "id": "HNnqx",
+              "name": "FL-Box-C",
+              "stroke": "#EB680A",
+              "strokeAlignment": "inner",
+              "strokeWidth": 2,
+              "type": "rectangle",
+              "width": 350,
+              "x": 26,
+              "y": 555
+            },
+            {
+              "descendants": {
+                "dRi6u": {
+                  "content": "sheet · add 2s"
+                }
+              },
+              "fill": "#EB680A",
+              "id": "LEKG5",
+              "name": "FL-Tag-C",
+              "ref": "fqHRq",
+              "type": "ref",
+              "x": 26,
+              "y": 541
+            }
+          ],
+          "height": 874,
+          "id": "Caa2Y",
+          "layout": "none",
+          "name": "FL-Marks",
+          "type": "frame",
+          "width": 402,
+          "x": 0,
+          "y": 0
+        },
+        {
+          "children": [
+            {
+              "descendants": {
+                "389uw/smF3Q": {
+                  "content": "s"
+                },
+                "JJIa6/smF3Q": {
+                  "content": "n"
+                },
+                "a57ow/smF3Q": {
+                  "content": "c"
+                },
+                "fLbVO": {
+                  "content": "…/field-notes/Home — Field Notes"
+                }
+              },
+              "id": "BUfaK",
+              "name": "FL-Status",
+              "ref": "nXBSr",
+              "type": "ref",
+              "x": 0,
+              "y": 7
+            }
+          ],
+          "fill": "$v-chrome",
+          "height": 44,
+          "id": "ihcmt",
+          "layout": "none",
+          "name": "FL-TopBar",
+          "type": "frame",
+          "width": 402,
+          "x": 0,
+          "y": 0
+        },
+        {
+          "children": [
+            {
+              "alignItems": "center",
+              "children": [
+                {
+                  "id": "EzIcc",
+                  "name": "FL-Dot-1",
+                  "ref": "AIym3",
+                  "type": "ref"
+                },
+                {
+                  "id": "FYE14",
+                  "name": "FL-Dot-2",
+                  "ref": "AIym3",
+                  "type": "ref"
+                },
+                {
+                  "id": "Isuzf",
+                  "name": "FL-Dot-3",
+                  "ref": "Fw25g",
+                  "type": "ref"
+                },
+                {
+                  "id": "0YIJC",
+                  "name": "FL-Dot-4",
+                  "ref": "AIym3",
+                  "type": "ref"
+                },
+                {
+                  "descendants": {
+                    "Fdprd": {
+                      "fill": "#2289D3"
+                    }
+                  },
+                  "id": "LNqs4",
+                  "name": "FL-Dot-5",
+                  "ref": "At7Pi",
+                  "type": "ref"
+                },
+                {
+                  "id": "kn2yw",
+                  "name": "FL-Dot-6",
+                  "ref": "Xs32t",
+                  "type": "ref"
+                },
+                {
+                  "id": "r3FXb",
+                  "name": "FL-Dot-7",
+                  "ref": "yB2BP",
+                  "type": "ref"
+                },
+                {
+                  "id": "uddOG",
+                  "name": "FL-Dot-8",
+                  "ref": "AIym3",
+                  "type": "ref"
+                }
+              ],
+              "gap": 2,
+              "height": 22,
+              "id": "3YKzK",
+              "justifyContent": "center",
+              "layout": "horizontal",
+              "name": "FL-Ticker",
+              "type": "frame",
+              "width": 402,
+              "x": 0,
+              "y": 11
+            },
+            {
+              "id": "QMmcr",
+              "name": "FL-Follow",
+              "ref": "uW1NO",
+              "type": "ref",
+              "x": 306,
+              "y": 14
+            },
+            {
+              "id": "Sx8aG",
+              "name": "FL-Grabber",
+              "ref": "aNG1m",
+              "type": "ref",
+              "x": 0,
+              "y": 42
+            }
+          ],
+          "fill": "$v-chrome",
+          "height": 64,
+          "id": "mjTo9",
+          "layout": "none",
+          "name": "FL-ChromeBar",
+          "type": "frame",
+          "width": 402,
+          "x": 0,
+          "y": 810
+        }
+      ],
+      "clip": true,
+      "context": "Three agents mid-edit: EditTag markers on the render, the ticker wearing actor discs with one coalesced stack, FollowPill active.",
+      "fill": "$v-bg",
+      "gap": 0,
+      "height": 874,
+      "id": "OPQmw",
+      "layout": "none",
+      "name": "Following",
+      "type": "frame",
+      "width": 402,
+      "x": 2088,
+      "y": 0
+    },
+    {
+      "children": [
+        {
+          "id": "vI9xl",
+          "name": "OS-Render",
+          "ref": "60RQv",
+          "type": "ref",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "fill": "$v-scrim",
+          "height": 874,
+          "id": "LZSUM",
+          "name": "OS-Scrim",
+          "type": "rectangle",
+          "width": 402,
+          "x": 0,
+          "y": 0
+        },
+        {
+          "id": "h0OTW",
+          "name": "OS-Sheet",
+          "ref": "A4aue",
+          "type": "ref",
+          "x": 0,
+          "y": 290
+        },
+        {
+          "children": [
+            {
+              "descendants": {
+                "YgO0p": {
+                  "width": 0
+                },
+                "gdz9f": {
+                  "enabled": false
+                },
+                "sPE55": {
+                  "content": "Home"
+                },
+                "xciYB": {
+                  "enabled": false
+                },
+                "zpB5N": {
+                  "icon": "chevron-down"
+                }
+              },
+              "id": "Jr6cF",
+              "name": "OS-Row-01",
+              "ref": "taUnE",
+              "type": "ref"
+            },
+            {
+              "descendants": {
+                "YgO0p": {
+                  "width": 14
+                },
+                "gdz9f": {
+                  "enabled": false
+                },
+                "sPE55": {
+                  "content": "Header"
+                },
+                "xciYB": {
+                  "enabled": false
+                },
+                "zpB5N": {
+                  "icon": "chevron-down"
+                }
+              },
+              "id": "psxkF",
+              "name": "OS-Row-02",
+              "ref": "taUnE",
+              "type": "ref"
+            },
+            {
+              "descendants": {
+                "YgO0p": {
+                  "width": 28
+                },
+                "gdz9f": {
+                  "enabled": false
+                },
+                "sPE55": {
+                  "content": "Title"
+                },
+                "xciYB": {
+                  "enabled": false
+                },
+                "zpB5N": {
+                  "opacity": 0
+                }
+              },
+              "id": "YEBCC",
+              "name": "OS-Row-03",
+              "ref": "taUnE",
+              "type": "ref"
+            },
+            {
+              "descendants": {
+                "YgO0p": {
+                  "width": 28
+                },
+                "gdz9f": {
+                  "enabled": false
+                },
+                "sPE55": {
+                  "content": "Subtitle"
+                },
+                "xciYB": {
+                  "enabled": false
+                },
+                "zpB5N": {
+                  "opacity": 0
+                }
+              },
+              "id": "EldVi",
+              "name": "OS-Row-04",
+              "ref": "taUnE",
+              "type": "ref"
+            },
+            {
+              "descendants": {
+                "YgO0p": {
+                  "width": 14
+                },
+                "gdz9f": {
+                  "enabled": false
+                },
+                "sPE55": {
+                  "content": "Cards"
+                },
+                "xciYB": {
+                  "enabled": false
+                },
+                "zpB5N": {
+                  "icon": "chevron-down"
+                }
+              },
+              "id": "vKTDw",
+              "name": "OS-Row-05",
+              "ref": "taUnE",
+              "type": "ref"
+            },
+            {
+              "descendants": {
+                "YgO0p": {
+                  "width": 28
+                },
+                "gdz9f": {
+                  "enabled": false
+                },
+                "sPE55": {
+                  "content": "Card"
+                },
+                "zpB5N": {
+                  "icon": "chevron-down"
+                }
+              },
+              "id": "gM0Il",
+              "name": "OS-Row-06",
+              "ref": "taUnE",
+              "type": "ref"
+            },
+            {
+              "descendants": {
+                "YgO0p": {
+                  "width": 42
+                },
+                "gdz9f": {
+                  "fill": "#2289D3"
+                },
+                "sPE55": {
+                  "content": "Photo"
+                },
+                "xciYB": {
+                  "enabled": false
+                },
+                "zpB5N": {
+                  "opacity": 0
+                }
+              },
+              "id": "14nRU",
+              "name": "OS-Row-07",
+              "ref": "taUnE",
+              "type": "ref"
+            },
+            {
+              "descendants": {
+                "VAfIy": {
+                  "enabled": true
+                },
+                "YgO0p": {
+                  "width": 42
+                },
+                "gdz9f": {
+                  "enabled": false
+                },
+                "sPE55": {
+                  "content": "Caption"
+                },
+                "xciYB": {
+                  "enabled": false
+                },
+                "zpB5N": {
+                  "opacity": 0
+                }
+              },
+              "id": "mMJjR",
+              "name": "OS-Row-08",
+              "ref": "taUnE",
+              "type": "ref"
+            },
+            {
+              "descendants": {
+                "YgO0p": {
+                  "width": 28
+                },
+                "gdz9f": {
+                  "enabled": false
+                },
+                "sPE55": {
+                  "content": "Divider"
+                },
+                "xciYB": {
+                  "enabled": false
+                },
+                "zpB5N": {
+                  "opacity": 0
+                }
+              },
+              "id": "BNxqN",
+              "name": "OS-Row-09",
+              "ref": "taUnE",
+              "type": "ref"
+            },
+            {
+              "descendants": {
+                "YgO0p": {
+                  "width": 14
+                },
+                "gdz9f": {
+                  "enabled": false
+                },
+                "sPE55": {
+                  "content": "TabBar"
+                },
+                "xciYB": {
+                  "enabled": false
+                }
+              },
+              "id": "UBoBR",
+              "name": "OS-Row-10",
+              "ref": "taUnE",
+              "type": "ref"
+            }
+          ],
+          "clip": true,
+          "fill": "$v-panel",
+          "gap": 0,
+          "height": 532,
+          "id": "nIW0H",
+          "layout": "vertical",
+          "name": "OS-Body",
+          "padding": [
+            6,
+            0,
+            0,
+            0
+          ],
+          "type": "frame",
+          "width": 402,
+          "x": 0,
+          "y": 342
+        }
+      ],
+      "clip": true,
+      "context": "Sheet at two-thirds height over a dimmed render: outline tree of OutlineRowM instances, kind marks, touched rows.",
+      "fill": "$v-bg",
+      "gap": 0,
+      "height": 874,
+      "id": "UUcuZ",
+      "layout": "none",
+      "name": "Outline Sheet",
+      "type": "frame",
+      "width": 402,
+      "x": 2610,
+      "y": 0
+    },
+    {
+      "children": [
+        {
+          "id": "Hf7Yi",
+          "name": "DS-Render",
+          "ref": "60RQv",
+          "type": "ref",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "fill": "$v-scrim",
+          "height": 874,
+          "id": "nmsFN",
+          "name": "DS-Scrim",
+          "type": "rectangle",
+          "width": 402,
+          "x": 0,
+          "y": 0
+        },
+        {
+          "descendants": {
+            "r8iEf": {
+              "content": "…/Card/Caption"
+            },
+            "y4BJm/iqJpK": {
+              "content": "eLBrG"
+            }
+          },
+          "id": "DFttF",
+          "name": "DS-Pill",
+          "ref": "XJnsE",
+          "type": "ref",
+          "x": 115,
+          "y": 215
+        },
+        {
+          "descendants": {
+            "Cxx3l": {
+              "fill": "$v-chrome"
+            },
+            "Cxx3l/SoZKm": {
+              "fill": "$v-text"
+            },
+            "fIyg4": {
+              "fill": null
+            },
+            "fIyg4/z84S1": {
+              "fill": "$v-muted"
+            }
+          },
+          "id": "iXioM",
+          "name": "DS-Sheet",
+          "ref": "A4aue",
+          "type": "ref",
+          "x": 0,
+          "y": 250
+        },
+        {
+          "children": [
+            {
+              "alignItems": "center",
+              "children": [
+                {
+                  "content": "name",
+                  "fill": "$v-muted",
+                  "fontFamily": "$v-mono",
+                  "fontSize": 11,
+                  "id": "9n3pk",
+                  "name": "DR-Key-01",
+                  "textGrowth": "fixed-width",
+                  "type": "text",
+                  "width": 74
+                },
+                {
+                  "content": "Caption",
+                  "fill": "$v-text",
+                  "fontFamily": "$v-mono",
+                  "fontSize": 11,
+                  "id": "VrBrt",
+                  "name": "DR-Val-01",
+                  "textGrowth": "fixed-width",
+                  "type": "text",
+                  "width": "fill_container"
+                },
+                {
+                  "descendants": {
+                    "M4SDb": {
+                      "content": "override"
+                    },
+                    "TnaAl": {
+                      "enabled": false
+                    }
+                  },
+                  "id": "tN8Et",
+                  "name": "DS-Pill-Override",
+                  "ref": "drTdC",
+                  "type": "ref"
+                }
+              ],
+              "gap": 10,
+              "height": 30,
+              "id": "6UyW7",
+              "layout": "horizontal",
+              "name": "DS-Row-01",
+              "padding": [
+                0,
+                16
+              ],
+              "type": "frame",
+              "width": "fill_container"
+            },
+            {
+              "alignItems": "center",
+              "children": [
+                {
+                  "content": "id",
+                  "fill": "$v-muted",
+                  "fontFamily": "$v-mono",
+                  "fontSize": 11,
+                  "id": "pr3On",
+                  "name": "DR-Key-02",
+                  "textGrowth": "fixed-width",
+                  "type": "text",
+                  "width": 74
+                },
+                {
+                  "content": "eLBrG",
+                  "fill": "$v-text",
+                  "fontFamily": "$v-mono",
+                  "fontSize": 11,
+                  "id": "y6Ko2",
+                  "name": "DR-Val-02",
+                  "textGrowth": "fixed-width",
+                  "type": "text",
+                  "width": "fill_container"
+                }
+              ],
+              "gap": 10,
+              "height": 30,
+              "id": "8GqeH",
+              "layout": "horizontal",
+              "name": "DS-Row-02",
+              "padding": [
+                0,
+                16
+              ],
+              "type": "frame",
+              "width": "fill_container"
+            },
+            {
+              "alignItems": "center",
+              "children": [
+                {
+                  "content": "x",
+                  "fill": "$v-muted",
+                  "fontFamily": "$v-mono",
+                  "fontSize": 11,
+                  "id": "Y7bhc",
+                  "name": "DR-Key-03",
+                  "textGrowth": "fixed-width",
+                  "type": "text",
+                  "width": 74
+                },
+                {
+                  "content": "10",
+                  "fill": "$v-text",
+                  "fontFamily": "$v-mono",
+                  "fontSize": 11,
+                  "id": "fgVQ2",
+                  "name": "DR-Val-03",
+                  "textGrowth": "fixed-width",
+                  "type": "text",
+                  "width": "fill_container"
+                }
+              ],
+              "gap": 10,
+              "height": 30,
+              "id": "MYnBa",
+              "layout": "horizontal",
+              "name": "DS-Row-03",
+              "padding": [
+                0,
+                16
+              ],
+              "type": "frame",
+              "width": "fill_container"
+            },
+            {
+              "alignItems": "center",
+              "children": [
+                {
+                  "content": "y",
+                  "fill": "$v-muted",
+                  "fontFamily": "$v-mono",
+                  "fontSize": 11,
+                  "id": "UXqyN",
+                  "name": "DR-Key-04",
+                  "textGrowth": "fixed-width",
+                  "type": "text",
+                  "width": 74
+                },
+                {
+                  "content": "182",
+                  "fill": "$v-text",
+                  "fontFamily": "$v-mono",
+                  "fontSize": 11,
+                  "id": "6bIjt",
+                  "name": "DR-Val-04",
+                  "textGrowth": "fixed-width",
+                  "type": "text",
+                  "width": "fill_container"
+                }
+              ],
+              "gap": 10,
+              "height": 30,
+              "id": "K0EUu",
+              "layout": "horizontal",
+              "name": "DS-Row-04",
+              "padding": [
+                0,
+                16
+              ],
+              "type": "frame",
+              "width": "fill_container"
+            },
+            {
+              "alignItems": "center",
+              "children": [
+                {
+                  "content": "width",
+                  "fill": "$v-muted",
+                  "fontFamily": "$v-mono",
+                  "fontSize": 11,
+                  "id": "MMh1Y",
+                  "name": "DR-Key-05",
+                  "textGrowth": "fixed-width",
+                  "type": "text",
+                  "width": 74
+                },
+                {
+                  "content": "128",
+                  "fill": "$v-text",
+                  "fontFamily": "$v-mono",
+                  "fontSize": 11,
+                  "id": "gZ5mi",
+                  "name": "DR-Val-05",
+                  "textGrowth": "fixed-width",
+                  "type": "text",
+                  "width": "fill_container"
+                }
+              ],
+              "gap": 10,
+              "height": 30,
+              "id": "pTVcr",
+              "layout": "horizontal",
+              "name": "DS-Row-05",
+              "padding": [
+                0,
+                16
+              ],
+              "type": "frame",
+              "width": "fill_container"
+            },
+            {
+              "alignItems": "center",
+              "children": [
+                {
+                  "content": "height",
+                  "fill": "$v-muted",
+                  "fontFamily": "$v-mono",
+                  "fontSize": 11,
+                  "id": "mk10j",
+                  "name": "DR-Key-06",
+                  "textGrowth": "fixed-width",
+                  "type": "text",
+                  "width": 74
+                },
+                {
+                  "content": "14",
+                  "fill": "$v-text",
+                  "fontFamily": "$v-mono",
+                  "fontSize": 11,
+                  "id": "Tdhzv",
+                  "name": "DR-Val-06",
+                  "textGrowth": "fixed-width",
+                  "type": "text",
+                  "width": "fill_container"
+                }
+              ],
+              "gap": 10,
+              "height": 30,
+              "id": "TrlKc",
+              "layout": "horizontal",
+              "name": "DS-Row-06",
+              "padding": [
+                0,
+                16
+              ],
+              "type": "frame",
+              "width": "fill_container"
+            },
+            {
+              "alignItems": "center",
+              "children": [
+                {
+                  "content": "revision",
+                  "fill": "$v-muted",
+                  "fontFamily": "$v-mono",
+                  "fontSize": 11,
+                  "id": "kkMBo",
+                  "name": "DR-Key-07",
+                  "textGrowth": "fixed-width",
+                  "type": "text",
+                  "width": 74
+                },
+                {
+                  "content": "7b126ca3",
+                  "fill": "$v-text",
+                  "fontFamily": "$v-mono",
+                  "fontSize": 11,
+                  "id": "MbKAe",
+                  "name": "DR-Val-07",
+                  "textGrowth": "fixed-width",
+                  "type": "text",
+                  "width": "fill_container"
+                }
+              ],
+              "gap": 10,
+              "height": 30,
+              "id": "kECWv",
+              "layout": "horizontal",
+              "name": "DS-Row-07",
+              "padding": [
+                0,
+                16
+              ],
+              "type": "frame",
+              "width": "fill_container"
+            },
+            {
+              "alignItems": "center",
+              "children": [
+                {
+                  "content": "fill",
+                  "fill": "$v-muted",
+                  "fontFamily": "$v-mono",
+                  "fontSize": 11,
+                  "id": "ujJXY",
+                  "name": "DR-Key-08",
+                  "textGrowth": "fixed-width",
+                  "type": "text",
+                  "width": 74
+                },
+                {
+                  "content": "$v-muted",
+                  "fill": "$v-text",
+                  "fontFamily": "$v-mono",
+                  "fontSize": 11,
+                  "id": "UoJyE",
+                  "name": "DR-Val-08",
+                  "textGrowth": "fixed-width",
+                  "type": "text",
+                  "width": "fill_container"
+                },
+                {
+                  "descendants": {
+                    "9mAp3": {
+                      "enabled": false
+                    },
+                    "PZQs7": {
+                      "content": "variable"
+                    }
+                  },
+                  "id": "h9Jiy",
+                  "name": "DS-Pill-Variable",
+                  "ref": "YYepH",
+                  "type": "ref"
+                }
+              ],
+              "gap": 10,
+              "height": 30,
+              "id": "6rMeC",
+              "layout": "horizontal",
+              "name": "DS-Row-08",
+              "padding": [
+                0,
+                16
+              ],
+              "type": "frame",
+              "width": "fill_container"
+            },
+            {
+              "fill": "$v-line",
+              "height": 1,
+              "id": "p1Bp6",
+              "name": "DS-Seam",
+              "type": "rectangle",
+              "width": "fill_container"
+            },
+            {
+              "alignItems": "center",
+              "children": [
+                {
+                  "content": "VARIABLES",
+                  "fill": "$v-muted",
+                  "fontFamily": "$v-sans",
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                  "id": "Lh8TL",
+                  "letterSpacing": 0.9,
+                  "name": "DV-Title",
+                  "type": "text"
+                }
+              ],
+              "height": 40,
+              "id": "yYWpQ",
+              "layout": "horizontal",
+              "name": "DS-VarHead",
+              "padding": [
+                16,
+                16,
+                4,
+                16
+              ],
+              "type": "frame",
+              "width": "fill_container"
+            },
+            {
+              "alignItems": "center",
+              "children": [
+                {
+                  "cornerRadius": 2,
+                  "fill": "$v-accent",
+                  "height": 11,
+                  "id": "q73lS",
+                  "name": "DV-Swatch-01",
+                  "stroke": "$v-line",
+                  "strokeWidth": 1,
+                  "type": "rectangle",
+                  "width": 11
+                },
+                {
+                  "content": "v-accent",
+                  "fill": "$v-text",
+                  "fontFamily": "$v-mono",
+                  "fontSize": 11,
+                  "id": "ONp3A",
+                  "name": "DV-Name-01",
+                  "textGrowth": "fixed-width",
+                  "type": "text",
+                  "width": "fill_container"
+                },
+                {
+                  "content": "$v-accent",
+                  "fill": "$v-muted",
+                  "fontFamily": "$v-mono",
+                  "fontSize": 11,
+                  "id": "cukkN",
+                  "name": "DV-Value-01",
+                  "textAlign": "right",
+                  "textGrowth": "fixed-width",
+                  "type": "text",
+                  "width": 80
+                }
+              ],
+              "gap": 10,
+              "height": 30,
+              "id": "hNC4n",
+              "layout": "horizontal",
+              "name": "DS-Var-01",
+              "padding": [
+                0,
+                16
+              ],
+              "type": "frame",
+              "width": "fill_container"
+            },
+            {
+              "alignItems": "center",
+              "children": [
+                {
+                  "cornerRadius": 2,
+                  "fill": "$v-muted",
+                  "height": 11,
+                  "id": "w0Rii",
+                  "name": "DV-Swatch-02",
+                  "stroke": "$v-line",
+                  "strokeWidth": 1,
+                  "type": "rectangle",
+                  "width": 11
+                },
+                {
+                  "content": "v-muted",
+                  "fill": "$v-text",
+                  "fontFamily": "$v-mono",
+                  "fontSize": 11,
+                  "id": "ZlKzL",
+                  "name": "DV-Name-02",
+                  "textGrowth": "fixed-width",
+                  "type": "text",
+                  "width": "fill_container"
+                },
+                {
+                  "content": "$v-muted",
+                  "fill": "$v-muted",
+                  "fontFamily": "$v-mono",
+                  "fontSize": 11,
+                  "id": "uAbeO",
+                  "name": "DV-Value-02",
+                  "textAlign": "right",
+                  "textGrowth": "fixed-width",
+                  "type": "text",
+                  "width": 80
+                }
+              ],
+              "gap": 10,
+              "height": 30,
+              "id": "bHtu8",
+              "layout": "horizontal",
+              "name": "DS-Var-02",
+              "padding": [
+                0,
+                16
+              ],
+              "type": "frame",
+              "width": "fill_container"
+            }
+          ],
+          "clip": true,
+          "fill": "$v-panel",
+          "gap": 0,
+          "height": 572,
+          "id": "tvUvP",
+          "layout": "vertical",
+          "name": "DS-Body",
+          "padding": [
+            12,
+            0,
+            0,
+            0
+          ],
+          "type": "frame",
+          "width": 402,
+          "x": 0,
+          "y": 302
+        }
+      ],
+      "clip": true,
+      "context": "A node selected: SelectionPill above the ticker, sheet on the Details tab — origin pills, rect, revision, a Variables section.",
+      "fill": "$v-bg",
+      "gap": 0,
+      "height": 874,
+      "id": "De2Q5",
+      "layout": "none",
+      "name": "Details Sheet",
+      "type": "frame",
+      "width": 402,
+      "x": 3132,
+      "y": 0
+    },
+    {
+      "children": [
+        {
+          "descendants": {
+            "fLbVO": {
+              "content": "Home"
+            }
+          },
+          "id": "7lJFL",
+          "name": "AC-Status",
+          "ref": "nXBSr",
+          "type": "ref"
+        },
+        {
+          "descendants": {
+            "fIyg4": {
+              "fill": null
+            },
+            "fIyg4/z84S1": {
+              "fill": "$v-muted"
+            },
+            "pZv2c": {
+              "fill": "$v-chrome"
+            },
+            "pZv2c/SoZKm": {
+              "fill": "$v-text"
+            }
+          },
+          "id": "qAXRH",
+          "name": "AC-Sheet",
+          "ref": "A4aue",
+          "type": "ref"
+        },
+        {
+          "children": [
+            {
+              "descendants": {
+                "76vw0": {
+                  "content": "Home / Card 2 / Caption"
+                },
+                "T1w5A/AMTsS": {
+                  "fill": "#942FC6"
+                },
+                "T1w5A/smF3Q": {
+                  "content": "k"
+                },
+                "Uiko4": {
+                  "content": "14:32"
+                },
+                "aGCbx": {
+                  "content": "kit"
+                },
+                "uQS9p": {
+                  "content": "set"
+                }
+              },
+              "id": "n9iXx",
+              "name": "ActivityRowM",
+              "ref": "BqAZl",
+              "type": "ref"
+            },
+            {
+              "descendants": {
+                "76vw0": {
+                  "content": "Home / Card 3 / Meta"
+                },
+                "T1w5A/AMTsS": {
+                  "fill": "#2289D3"
+                },
+                "T1w5A/smF3Q": {
+                  "content": "c"
+                },
+                "Uiko4": {
+                  "content": "14:31"
+                },
+                "aGCbx": {
+                  "content": "core"
+                },
+                "uQS9p": {
+                  "content": "add"
+                }
+              },
+              "id": "RQFHK",
+              "name": "ActivityRowM",
+              "ref": "BqAZl",
+              "type": "ref"
+            },
+            {
+              "descendants": {
+                "76vw0": {
+                  "content": "Home / Tab Bar / Tab 2 / Label"
+                },
+                "T1w5A/AMTsS": {
+                  "fill": "#EB680A"
+                },
+                "T1w5A/smF3Q": {
+                  "content": "n"
+                },
+                "Uiko4": {
+                  "content": "14:29"
+                },
+                "aGCbx": {
+                  "content": "nav-style"
+                },
+                "uQS9p": {
+                  "content": "rm"
+                }
+              },
+              "id": "KkfsC",
+              "name": "ActivityRowM",
+              "ref": "BqAZl",
+              "type": "ref"
+            },
+            {
+              "descendants": {
+                "76vw0": {
+                  "content": "Home / Header / Subtitle"
+                },
+                "T1w5A/AMTsS": {
+                  "fill": "#942FC6"
+                },
+                "T1w5A/smF3Q": {
+                  "content": "k"
+                },
+                "Uiko4": {
+                  "content": "14:26"
+                },
+                "aGCbx": {
+                  "content": "kit"
+                },
+                "uQS9p": {
+                  "content": "cp"
+                }
+              },
+              "id": "tlc7S",
+              "name": "ActivityRowM",
+              "ref": "BqAZl",
+              "type": "ref"
+            },
+            {
+              "children": [
+                {
+                  "descendants": {
+                    "76vw0": {
+                      "content": "Home / Card 1 / Thumb"
+                    },
+                    "T1w5A/AMTsS": {
+                      "fill": "#2289D3"
+                    },
+                    "T1w5A/smF3Q": {
+                      "content": "c"
+                    },
+                    "Uiko4": {
+                      "content": "14:24"
+                    },
+                    "aGCbx": {
+                      "content": "core"
+                    },
+                    "uQS9p": {
+                      "content": "apply"
+                    }
+                  },
+                  "id": "I17Mr",
+                  "name": "ActivityRowM",
+                  "ref": "BqAZl",
+                  "type": "ref"
+                },
+                {
+                  "children": [
+                    {
+                      "content": "3 nodes · batch a1b2",
+                      "fill": "$v-muted",
+                      "fontFamily": "$v-mono",
+                      "fontSize": 10,
+                      "id": "3WVGA",
+                      "name": "AR-Detail",
+                      "type": "text"
+                    }
+                  ],
+                  "height": "fit_content",
+                  "id": "mLNUK",
+                  "name": "AR-Detail-Wrap",
+                  "padding": [
+                    0,
+                    12,
+                    10,
+                    12
+                  ],
+                  "type": "frame",
+                  "width": "fill_container"
+                }
+              ],
+              "fill": "$v-panel",
+              "gap": 0,
+              "id": "pEf2S",
+              "layout": "vertical",
+              "name": "AC-Row-Expanded",
+              "stroke": "$v-line",
+              "strokeWidth": {
+                "top": 1
+              },
+              "type": "frame",
+              "width": 402
+            },
+            {
+              "descendants": {
+                "76vw0": {
+                  "content": "Home / Status Bar / Clock"
+                },
+                "T1w5A/AMTsS": {
+                  "fill": "#EB680A"
+                },
+                "T1w5A/smF3Q": {
+                  "content": "n"
+                },
+                "Uiko4": {
+                  "content": "14:20"
+                },
+                "aGCbx": {
+                  "content": "nav-style"
+                },
+                "uQS9p": {
+                  "content": "set"
+                }
+              },
+              "id": "k0PT2",
+              "name": "ActivityRowM",
+              "ref": "BqAZl",
+              "type": "ref"
+            },
+            {
+              "descendants": {
+                "76vw0": {
+                  "content": "Home / Card 3 / Title"
+                },
+                "T1w5A/AMTsS": {
+                  "fill": "#942FC6"
+                },
+                "T1w5A/smF3Q": {
+                  "content": "k"
+                },
+                "Uiko4": {
+                  "content": "14:17"
+                },
+                "aGCbx": {
+                  "content": "kit"
+                },
+                "uQS9p": {
+                  "content": "add"
+                }
+              },
+              "id": "4ne8A",
+              "name": "ActivityRowM",
+              "ref": "BqAZl",
+              "type": "ref"
+            },
+            {
+              "descendants": {
+                "76vw0": {
+                  "content": "Home / Tab Bar / Tab 1 / Icon"
+                },
+                "T1w5A/AMTsS": {
+                  "fill": "#2289D3"
+                },
+                "T1w5A/smF3Q": {
+                  "content": "c"
+                },
+                "Uiko4": {
+                  "content": "14:14"
+                },
+                "aGCbx": {
+                  "content": "core"
+                },
+                "uQS9p": {
+                  "content": "rm"
+                }
+              },
+              "id": "QEvVL",
+              "name": "ActivityRowM",
+              "ref": "BqAZl",
+              "type": "ref"
+            },
+            {
+              "descendants": {
+                "76vw0": {
+                  "content": "Home / Card 1 / Meta"
+                },
+                "T1w5A/AMTsS": {
+                  "fill": "#EB680A"
+                },
+                "T1w5A/smF3Q": {
+                  "content": "n"
+                },
+                "Uiko4": {
+                  "content": "14:10"
+                },
+                "aGCbx": {
+                  "content": "nav-style"
+                },
+                "uQS9p": {
+                  "content": "cp"
+                }
+              },
+              "id": "biAAn",
+              "name": "ActivityRowM",
+              "ref": "BqAZl",
+              "type": "ref"
+            },
+            {
+              "descendants": {
+                "76vw0": {
+                  "content": "Home / Header / Title"
+                },
+                "T1w5A/AMTsS": {
+                  "fill": "#942FC6"
+                },
+                "T1w5A/smF3Q": {
+                  "content": "k"
+                },
+                "Uiko4": {
+                  "content": "14:06"
+                },
+                "aGCbx": {
+                  "content": "kit"
+                },
+                "uQS9p": {
+                  "content": "set"
+                }
+              },
+              "id": "G6tWK",
+              "name": "ActivityRowM",
+              "ref": "BqAZl",
+              "type": "ref"
+            },
+            {
+              "descendants": {
+                "76vw0": {
+                  "content": "Home / Card 2 / Thumb"
+                },
+                "T1w5A/AMTsS": {
+                  "fill": "#2289D3"
+                },
+                "T1w5A/smF3Q": {
+                  "content": "c"
+                },
+                "Uiko4": {
+                  "content": "14:02"
+                },
+                "aGCbx": {
+                  "content": "core"
+                },
+                "uQS9p": {
+                  "content": "apply"
+                }
+              },
+              "id": "yZtMD",
+              "name": "ActivityRowM",
+              "ref": "BqAZl",
+              "type": "ref"
+            }
+          ],
+          "clip": true,
+          "fill": "$v-panel",
+          "gap": 0,
+          "height": 792,
+          "id": "X47bl",
+          "layout": "vertical",
+          "name": "AC-Body",
+          "type": "frame",
+          "width": 402
+        }
+      ],
+      "clip": true,
+      "context": "Sheet on the Activity tab, full height: the five-column feed as two-line ActivityRowM instances.",
+      "fill": "$v-bg",
+      "gap": 0,
+      "height": 874,
+      "id": "00Krw",
+      "layout": "vertical",
+      "name": "Activity",
+      "type": "frame",
+      "width": 402,
+      "x": 3654,
+      "y": 0
+    }
+  ],
+  "themes": {
+    "mode": [
+      "light",
+      "dark"
+    ]
+  },
+  "variables": {
+    "actor-a": {
+      "type": "color",
+      "value": "#942FC6"
+    },
+    "actor-b": {
+      "type": "color",
+      "value": "#2289D3"
+    },
+    "actor-c": {
+      "type": "color",
+      "value": "#EB680A"
+    },
+    "v-accent": {
+      "type": "color",
+      "value": [
+        {
+          "theme": {
+            "mode": "light"
+          },
+          "value": "#2FBF6F"
+        },
+        {
+          "theme": {
+            "mode": "dark"
+          },
+          "value": "#3ED483"
+        }
+      ]
+    },
+    "v-bg": {
+      "type": "color",
+      "value": [
+        {
+          "theme": {
+            "mode": "light"
+          },
+          "value": "#F6F5F1"
+        },
+        {
+          "theme": {
+            "mode": "dark"
+          },
+          "value": "#161615"
+        }
+      ]
+    },
+    "v-chrome": {
+      "type": "color",
+      "value": [
+        {
+          "theme": {
+            "mode": "light"
+          },
+          "value": "#ECEAE3"
+        },
+        {
+          "theme": {
+            "mode": "dark"
+          },
+          "value": "#232321"
+        }
+      ]
+    },
+    "v-faint": {
+      "type": "color",
+      "value": [
+        {
+          "theme": {
+            "mode": "light"
+          },
+          "value": "#A5A096"
+        },
+        {
+          "theme": {
+            "mode": "dark"
+          },
+          "value": "#6A665E"
+        }
+      ]
+    },
+    "v-line": {
+      "type": "color",
+      "value": [
+        {
+          "theme": {
+            "mode": "light"
+          },
+          "value": "#E2DFD6"
+        },
+        {
+          "theme": {
+            "mode": "dark"
+          },
+          "value": "#33322F"
+        }
+      ]
+    },
+    "v-mark-component": {
+      "type": "color",
+      "value": [
+        {
+          "theme": {
+            "mode": "light"
+          },
+          "value": "#7C5CFC"
+        },
+        {
+          "theme": {
+            "mode": "dark"
+          },
+          "value": "#A594FF"
+        }
+      ]
+    },
+    "v-mark-instance": {
+      "type": "color",
+      "value": [
+        {
+          "theme": {
+            "mode": "light"
+          },
+          "value": "#2F7DE1"
+        },
+        {
+          "theme": {
+            "mode": "dark"
+          },
+          "value": "#6BA6F5"
+        }
+      ]
+    },
+    "v-mark-slot": {
+      "type": "color",
+      "value": [
+        {
+          "theme": {
+            "mode": "light"
+          },
+          "value": "#1D8F82"
+        },
+        {
+          "theme": {
+            "mode": "dark"
+          },
+          "value": "#4FC8B8"
+        }
+      ]
+    },
+    "v-mono": {
+      "type": "string",
+      "value": "ui-monospace"
+    },
+    "v-muted": {
+      "type": "color",
+      "value": [
+        {
+          "theme": {
+            "mode": "light"
+          },
+          "value": "#77736A"
+        },
+        {
+          "theme": {
+            "mode": "dark"
+          },
+          "value": "#928D83"
+        }
+      ]
+    },
+    "v-panel": {
+      "type": "color",
+      "value": [
+        {
+          "theme": {
+            "mode": "light"
+          },
+          "value": "#FFFFFF"
+        },
+        {
+          "theme": {
+            "mode": "dark"
+          },
+          "value": "#1D1D1B"
+        }
+      ]
+    },
+    "v-sans": {
+      "type": "string",
+      "value": "system-ui"
+    },
+    "v-scrim": {
+      "type": "color",
+      "value": [
+        {
+          "theme": {
+            "mode": "light"
+          },
+          "value": "#00000066"
+        },
+        {
+          "theme": {
+            "mode": "dark"
+          },
+          "value": "#00000038"
+        }
+      ]
+    },
+    "v-select": {
+      "type": "color",
+      "value": [
+        {
+          "theme": {
+            "mode": "light"
+          },
+          "value": "#2FBF6F1F"
+        },
+        {
+          "theme": {
+            "mode": "dark"
+          },
+          "value": "#3ED48329"
+        }
+      ]
+    },
+    "v-text": {
+      "type": "color",
+      "value": [
+        {
+          "theme": {
+            "mode": "light"
+          },
+          "value": "#1B1B18"
+        },
+        {
+          "theme": {
+            "mode": "dark"
+          },
+          "value": "#EDEBE4"
+        }
+      ]
+    },
+    "v-warn": {
+      "type": "color",
+      "value": [
+        {
+          "theme": {
+            "mode": "light"
+          },
+          "value": "#C4571F"
+        },
+        {
+          "theme": {
+            "mode": "dark"
+          },
+          "value": "#E08A4E"
+        }
+      ]
+    }
+  },
+  "version": "2.17"
+}

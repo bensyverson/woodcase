@@ -1,0 +1,985 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "id": "Gap1F",
+      "name": "Gap One",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "width": 350,
+      "height": 40,
+      "layout": "horizontal",
+      "gap": 1,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "id": "a001",
+          "name": "Bar 1",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a002",
+          "name": "Bar 2",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a003",
+          "name": "Bar 3",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a004",
+          "name": "Bar 4",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a005",
+          "name": "Bar 5",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a006",
+          "name": "Bar 6",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a007",
+          "name": "Bar 7",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a008",
+          "name": "Bar 8",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a009",
+          "name": "Bar 9",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a010",
+          "name": "Bar 10",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a011",
+          "name": "Bar 11",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a012",
+          "name": "Bar 12",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a013",
+          "name": "Bar 13",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a014",
+          "name": "Bar 14",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a015",
+          "name": "Bar 15",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a016",
+          "name": "Bar 16",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a017",
+          "name": "Bar 17",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a018",
+          "name": "Bar 18",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a019",
+          "name": "Bar 19",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a020",
+          "name": "Bar 20",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a021",
+          "name": "Bar 21",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a022",
+          "name": "Bar 22",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a023",
+          "name": "Bar 23",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a024",
+          "name": "Bar 24",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a025",
+          "name": "Bar 25",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a026",
+          "name": "Bar 26",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a027",
+          "name": "Bar 27",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a028",
+          "name": "Bar 28",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a029",
+          "name": "Bar 29",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a030",
+          "name": "Bar 30",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a031",
+          "name": "Bar 31",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a032",
+          "name": "Bar 32",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a033",
+          "name": "Bar 33",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a034",
+          "name": "Bar 34",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a035",
+          "name": "Bar 35",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a036",
+          "name": "Bar 36",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a037",
+          "name": "Bar 37",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a038",
+          "name": "Bar 38",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a039",
+          "name": "Bar 39",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a040",
+          "name": "Bar 40",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a041",
+          "name": "Bar 41",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a042",
+          "name": "Bar 42",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a043",
+          "name": "Bar 43",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a044",
+          "name": "Bar 44",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a045",
+          "name": "Bar 45",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a046",
+          "name": "Bar 46",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a047",
+          "name": "Bar 47",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a048",
+          "name": "Bar 48",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a049",
+          "name": "Bar 49",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a050",
+          "name": "Bar 50",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a051",
+          "name": "Bar 51",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a052",
+          "name": "Bar 52",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a053",
+          "name": "Bar 53",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a054",
+          "name": "Bar 54",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a055",
+          "name": "Bar 55",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a056",
+          "name": "Bar 56",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a057",
+          "name": "Bar 57",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a058",
+          "name": "Bar 58",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "a059",
+          "name": "Bar 59",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        }
+      ]
+    },
+    {
+      "id": "Gap2F",
+      "name": "Gap Two",
+      "type": "frame",
+      "x": 450,
+      "y": 0,
+      "width": 350,
+      "height": 40,
+      "layout": "horizontal",
+      "gap": 2,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "id": "b001",
+          "name": "Bar 1",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b002",
+          "name": "Bar 2",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b003",
+          "name": "Bar 3",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b004",
+          "name": "Bar 4",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b005",
+          "name": "Bar 5",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b006",
+          "name": "Bar 6",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b007",
+          "name": "Bar 7",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b008",
+          "name": "Bar 8",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b009",
+          "name": "Bar 9",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b010",
+          "name": "Bar 10",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b011",
+          "name": "Bar 11",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b012",
+          "name": "Bar 12",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b013",
+          "name": "Bar 13",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b014",
+          "name": "Bar 14",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b015",
+          "name": "Bar 15",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b016",
+          "name": "Bar 16",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b017",
+          "name": "Bar 17",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b018",
+          "name": "Bar 18",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b019",
+          "name": "Bar 19",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b020",
+          "name": "Bar 20",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b021",
+          "name": "Bar 21",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b022",
+          "name": "Bar 22",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b023",
+          "name": "Bar 23",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b024",
+          "name": "Bar 24",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b025",
+          "name": "Bar 25",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b026",
+          "name": "Bar 26",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b027",
+          "name": "Bar 27",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b028",
+          "name": "Bar 28",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b029",
+          "name": "Bar 29",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b030",
+          "name": "Bar 30",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b031",
+          "name": "Bar 31",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b032",
+          "name": "Bar 32",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b033",
+          "name": "Bar 33",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b034",
+          "name": "Bar 34",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b035",
+          "name": "Bar 35",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b036",
+          "name": "Bar 36",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b037",
+          "name": "Bar 37",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b038",
+          "name": "Bar 38",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b039",
+          "name": "Bar 39",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b040",
+          "name": "Bar 40",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b041",
+          "name": "Bar 41",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b042",
+          "name": "Bar 42",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b043",
+          "name": "Bar 43",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b044",
+          "name": "Bar 44",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b045",
+          "name": "Bar 45",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b046",
+          "name": "Bar 46",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b047",
+          "name": "Bar 47",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b048",
+          "name": "Bar 48",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b049",
+          "name": "Bar 49",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b050",
+          "name": "Bar 50",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b051",
+          "name": "Bar 51",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b052",
+          "name": "Bar 52",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b053",
+          "name": "Bar 53",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b054",
+          "name": "Bar 54",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b055",
+          "name": "Bar 55",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b056",
+          "name": "Bar 56",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b057",
+          "name": "Bar 57",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b058",
+          "name": "Bar 58",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b059",
+          "name": "Bar 59",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "b060",
+          "name": "Bar 60",
+          "type": "rectangle",
+          "width": "fill_container",
+          "height": 20,
+          "fill": "#4C8BF5"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,440 @@
+#!/usr/bin/env python3
+#
+# swiftui-api — SwiftUI's API, with Apple's doc comments, extracted from an installed SDK
+# into a local, agent-readable, versioned corpus; and questions answered from it.
+#
+# Apple's documentation site is a JavaScript app an agent cannot read, and the SDK's
+# SwiftUI.swiftinterface carries no doc comments. The compiler's symbol-graph extractor
+# joins the interface with the SDK's .swiftdoc: every public symbol, its declaration, its
+# availability per platform (including Apple's "soft" deprecations — deprecated in
+# version 100000 — which the compiler never warns about), and its doc comment.
+#
+# Usage:
+#   scripts/swiftui-api fetch [--sdk <path>] [--ios-sdk <path>] [--force]
+#       Extract the modules in MODULES — SwiftUI, SwiftUICore, CoreText, CoreGraphics,
+#       ImageIO, UniformTypeIdentifiers, AppKit, Foundation and DeveloperToolsSupport from
+#       the macOS SDK (default: `xcrun --show-sdk-path`), and SwiftUI, SwiftUICore and
+#       UIKit from the iOS SDK (default: `xcrun --sdk iphoneos --show-sdk-path`; skipped
+#       with a warning when none is installed) — into <docs>/<macOS-sdk-version>/.
+#       Idempotent: an existing copy stamped with the same SDK builds, toolchain and
+#       modules is left alone unless --force. A few minutes.
+#   scripts/swiftui-api show <query> [--all] [--version <v>]
+#       Declaration, availability and doc comment. <query> is a dotted path matched
+#       exactly first, then as a case-insensitive substring: `MeshGradient`,
+#       `View.lineHeight(_:)`, `ShadowStyle.inner`. Ten matches unless --all.
+#   scripts/swiftui-api audit <file> [--floor ios=18,macos=15] [--version <v>]
+#       One dotted path per line (`#` comments allowed): the vocabulary an emitter
+#       writes. Exits 1 when a path is missing, deprecated (hard or soft), introduced
+#       above the floor, or unavailable on a floor platform; 2 on a malformed line.
+#       Two annotations may follow a path:
+#         @available ios=26,macos=26   reached only inside `#available(iOS 26, macOS 26, *)`:
+#                                      held to the higher of the floor and the gate
+#         @only macos                  reached only on these platforms (`#if os(macOS)`):
+#                                      the other floor platforms are not checked
+#   scripts/swiftui-api diff <old-version> <new-version> [--only <file>]
+#       What moved between two stamped copies: paths added and removed, availability
+#       changed, newly deprecated or renamed. --only limits it to the paths in <file>
+#       (the emitter's vocabulary). Exits 1 when a listed path was removed or newly
+#       deprecated.
+#   scripts/swiftui-api list
+#       The stamped copies on disk.
+#
+# <docs> is $SWIFTUI_DOCS_DIR, or else local/swiftui-docs/ in the *main* checkout (found
+# through .git, so a worktree writes to the shared copy). local/ is gitignored: the
+# corpus is Apple's copyrighted text and must never be committed; only this script is.
+# Each <sdk-version>/ holds stamp.json (SDK version and build, Xcode version, swift
+# version, date), index.json (what show/audit/diff read), and one Markdown file per
+# module (<Module>.md) for grep and for reading by eye.
+#
+# `fetch` needs Xcode and the Bash sandbox disabled (the Swift toolchain); every other
+# verb reads only the corpus. Standard library only.
+# See project/2026-09-26-swiftui-codegen-feasibility.md §2–3.
+
+import datetime
+import glob
+import json
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
+
+# Every SDK module generated SwiftUI code may call, per SDK. The macOS SDK is the main one
+# (the corpus is named for its version); the iOS SDK adds what exists only there — UIKit, and
+# SwiftUI's UIKit bridges such as `Image(uiImage:)`. A symbol both SDKs declare alike is kept
+# once: the symbol graph records its availability on every platform either way.
+MODULES = {
+    "macosx": ["SwiftUI", "SwiftUICore", "CoreText", "CoreGraphics", "ImageIO",
+               "UniformTypeIdentifiers", "AppKit", "Foundation", "DeveloperToolsSupport"],
+    "iphoneos": ["SwiftUI", "SwiftUICore", "UIKit"],
+}
+PLATFORMS = ["iOS", "macOS", "tvOS", "watchOS", "visionOS"]
+SOFT = 100000  # Apple's API_TO_BE_DEPRECATED version: deprecated, but no warning
+
+
+# MARK: - Where the corpus lives
+
+def main_checkout():
+    """The main checkout's root, from a worktree's `.git` file or a checkout's `.git` directory."""
+    here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    dotgit = os.path.join(here, ".git")
+    if os.path.isfile(dotgit):
+        gitdir = open(dotgit).read().split("gitdir:", 1)[1].strip()
+        # <main>/.git/worktrees/<name> -> <main>
+        return os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(gitdir))))
+    return here
+
+
+def docs_root():
+    return os.environ.get("SWIFTUI_DOCS_DIR") or os.path.join(main_checkout(), "local", "swiftui-docs")
+
+
+def version_key(v):
+    return tuple(int(p) if p.isdigit() else 0 for p in v.split("."))
+
+
+def copies():
+    root = docs_root()
+    found = [os.path.basename(os.path.dirname(p)) for p in glob.glob(os.path.join(root, "*", "stamp.json"))]
+    return sorted(found, key=version_key)
+
+
+def load_index(version=None):
+    available = copies()
+    if not available:
+        sys.exit(f"swiftui-api: no corpus in {docs_root()}; run `scripts/swiftui-api fetch` with the sandbox disabled")
+    version = version or available[-1]
+    if version not in available:
+        sys.exit(f"swiftui-api: no copy for {version}; on disk: {', '.join(available)}")
+    return json.load(open(os.path.join(docs_root(), version, "index.json"))), version
+
+
+# MARK: - fetch
+
+def tool(*cmd):
+    return subprocess.run(list(cmd), capture_output=True, text=True, check=True).stdout.strip()
+
+
+def sdk_settings(sdk):
+    settings = json.load(open(os.path.join(sdk, "SDKSettings.json")))
+    return settings["Version"], settings.get("CanonicalName", "")
+
+
+def ios_sdk(explicit):
+    """The iOS SDK to read, or None (with a warning) when Xcode has none installed."""
+    if explicit:
+        return os.path.realpath(explicit)
+    try:
+        return os.path.realpath(tool("xcrun", "--sdk", "iphoneos", "--show-sdk-path"))
+    except subprocess.CalledProcessError:
+        print("swiftui-api: no iOS SDK installed; iOS-only paths (UIKit, Image(uiImage:)) will be missing",
+              file=sys.stderr)
+        return None
+
+
+def extract(module, sdk, target, tmp, index):
+    """Adds `module`'s public symbols, as the SDK at `sdk` declares them for `target`, to `index`."""
+    out = os.path.join(tmp, f"{target}-{module}")
+    os.makedirs(out)
+    subprocess.run([
+        "xcrun", "swift-symbolgraph-extract", "-module-name", module,
+        "-target", target, "-sdk", sdk, "-output-dir", out,
+        "-minimum-access-level", "public", "-skip-synthesized-members",
+    ], check=True)
+    for path in sorted(glob.glob(os.path.join(out, "*.symbols.json"))):
+        for sym in json.load(open(path))["symbols"]:
+            key = ".".join(sym["pathComponents"])
+            if key.startswith("_") or "._" in key:
+                continue
+            entry = {
+                "module": module,
+                "kind": sym["kind"]["displayName"],
+                "decl": "".join(f["spelling"] for f in sym.get("declarationFragments", [])),
+                "availability": sym.get("availability", []),
+                "doc": "\n".join(l["text"] for l in (sym.get("docComment") or {}).get("lines", [])),
+            }
+            # Overloads share a path; keep each distinct declaration.
+            bucket = index.setdefault(key, [])
+            if all(e["decl"] != entry["decl"] for e in bucket):
+                bucket.append(entry)
+
+
+def fetch(sdk, ios, force):
+    sdk = os.path.realpath(sdk or tool("xcrun", "--show-sdk-path"))
+    ios = ios_sdk(ios)
+    version, canonical = sdk_settings(sdk)
+    build = tool("xcrun", "--sdk", sdk, "--show-sdk-build-version") if canonical else ""
+    ios_version = sdk_settings(ios)[0] if ios else None
+    stamp = {
+        "sdkVersion": version,
+        "sdkBuild": build,
+        "sdkPath": sdk,
+        "iosSdkVersion": ios_version,
+        "iosSdkBuild": tool("xcrun", "--sdk", ios, "--show-sdk-build-version") if ios else None,
+        "iosSdkPath": ios,
+        "xcode": " ".join(tool("xcodebuild", "-version").splitlines()),
+        "swift": tool("xcrun", "swift", "--version").splitlines()[0],
+        "modules": MODULES,
+        "date": datetime.date.today().isoformat(),
+    }
+    dest = os.path.join(docs_root(), version)
+    old_stamp = os.path.join(dest, "stamp.json")
+    if os.path.exists(old_stamp) and not force:
+        old = json.load(open(old_stamp))
+        if all(old.get(k) == stamp[k] for k in ("sdkVersion", "sdkBuild", "iosSdkVersion", "iosSdkBuild", "swift", "modules")):
+            print(f"up to date: {dest} (SDK {version} {build}, extracted {old.get('date')}); --force to redo")
+            return
+
+    index = {}
+    with tempfile.TemporaryDirectory() as tmp:
+        for module in MODULES["macosx"]:
+            extract(module, sdk, f"arm64-apple-macos{version}", tmp, index)
+        if ios:
+            for module in MODULES["iphoneos"]:
+                extract(module, ios, f"arm64-apple-ios{ios_version}", tmp, index)
+    markdown = {}
+
+    for key in sorted(index):
+        for e in index[key]:
+            avail, flags = describe_availability(e)
+            section = [f"## {key}", "", f"*{e['kind']}* — {avail}", ""]
+            section += [f"- {f}" for f in flags] + ([""] if flags else [])
+            section += ["```swift", e["decl"], "```", ""]
+            if e["doc"]:
+                section += [e["doc"], ""]
+            markdown.setdefault(e["module"], []).append("\n".join(section))
+
+    # Write beside the destination, then swap, so a failed run never leaves half a copy.
+    os.makedirs(docs_root(), exist_ok=True)
+    staging = tempfile.mkdtemp(dir=docs_root(), prefix=f".{version}-")
+    json.dump(index, open(os.path.join(staging, "index.json"), "w"))
+    for module, sections in markdown.items():
+        head = f"# {module} — SDK {version} ({build})\n\nExtracted {stamp['date']} by scripts/swiftui-api from {stamp['xcode']}. Apple's text: do not commit.\n\n"
+        open(os.path.join(staging, f"{module}.md"), "w").write(head + "\n".join(sections))
+    json.dump(stamp, open(os.path.join(staging, "stamp.json"), "w"), indent=2)
+    if os.path.exists(dest):
+        shutil.rmtree(dest)
+    os.rename(staging, dest)
+
+    total = sum(len(b) for b in index.values())
+    documented = sum(1 for b in index.values() for e in b if e["doc"])
+    size = sum(os.path.getsize(p) for p in glob.glob(os.path.join(dest, "*")))
+    print(f"SDK {version} ({build}): {total} declarations under {len(index)} paths, "
+          f"{documented} with doc comments, {size / 1e6:.1f} MB -> {dest}")
+
+
+# MARK: - Availability
+
+def version_tuple(v):
+    return (v.get("major", 0), v.get("minor", 0))
+
+
+def fmt(v):
+    return ".".join(str(x) for x in version_tuple(v))
+
+
+def is_deprecated(a):
+    return "deprecated" in a or bool(a.get("isUnconditionallyDeprecated"))
+
+
+def describe_availability(entry):
+    parts, flags = [], []
+    for a in entry["availability"]:
+        domain = a.get("domain")
+        if domain == "*" and a.get("isUnconditionallyDeprecated"):
+            flags.append("deprecated (all platforms)")
+        if domain not in PLATFORMS:
+            continue
+        text = domain
+        if "introduced" in a:
+            text += " " + fmt(a["introduced"])
+        if "deprecated" in a:
+            text += " (soft-deprecated)" if a["deprecated"].get("major", 0) >= SOFT else f" (deprecated {fmt(a['deprecated'])})"
+        if a.get("isUnconditionallyUnavailable"):
+            text += " (unavailable)"
+        parts.append(text)
+        for k in ("renamed", "message"):
+            if a.get(k) and f"{k}: {a[k]}" not in flags:
+                flags.append(f"{k}: {a[k]}")
+    return ", ".join(parts) or "no platform availability recorded", flags
+
+
+def summary(entries):
+    """One comparable string per path: each overload's availability, sorted."""
+    return sorted(describe_availability(e)[0] + "".join(f" [{f}]" for f in describe_availability(e)[1]) for e in entries)
+
+
+# MARK: - show, audit, diff
+
+def show(query, show_all, version):
+    index, version = load_index(version)
+    keys = [query] if query in index else sorted(k for k in index if query.lower() in k.lower())
+    if not keys:
+        sys.exit(f"swiftui-api: nothing matches {query!r} in SDK {version}")
+    limit = None if show_all else 10
+    for key in keys[:limit]:
+        for e in index[key]:
+            avail, flags = describe_availability(e)
+            print(f"## {key}  [{e['module']} {e['kind']}]")
+            print(e["decl"])
+            print("Available:", avail)
+            for f in flags:
+                print(" ", f)
+            if e["doc"]:
+                print()
+                print(e["doc"])
+            print()
+    if limit and len(keys) > limit:
+        print(f"... {len(keys) - limit} more paths match; narrow the query or pass --all")
+
+
+def read_list(path):
+    """The vocabulary: (path, gate, only) per line. `gate` is the floor an `@available`
+    annotation names, or None; `only` the platforms an `@only` annotation names, or None."""
+    entries = []
+    for number, raw in enumerate(open(path), 1):
+        words = raw.split("#", 1)[0].split()
+        if not words:
+            continue
+        gate, only, rest = None, None, words[1:]
+        while rest:
+            word = rest.pop(0)
+            if word == "@available" and rest:
+                gate = parse_floor(rest.pop(0))
+            elif word == "@only" and rest:
+                only = {p.strip().lower() for p in rest.pop(0).split(",")}
+            else:
+                print(f"swiftui-api: {path}:{number}: unknown annotation {word!r}; "
+                      "expected `@available ios=26,macos=26` or `@only macos`", file=sys.stderr)
+                sys.exit(2)
+        entries.append((words[0], gate, only))
+    return entries
+
+
+def read_paths(path):
+    return [entry[0] for entry in read_list(path)]
+
+
+def audit(path, floor, version):
+    """Each listed path against `floor`. A path gated by `@available` is held to the higher
+    of the floor and its gate on each platform, and one scoped by `@only` is held only on
+    those platforms. It fails when it is missing, deprecated (hard or soft), introduced
+    above its floor, or unavailable on a platform it is held on."""
+    index, version = load_index(version)
+    entries_by_line = read_list(path)
+    print(f"# SDK {version}")
+    failed = False
+    for line, gate, only in entries_by_line:
+        entries = index.get(line)
+        if not entries:
+            print(f"MISSING     {line}")
+            failed = True
+            continue
+        held = {p: v for p, v in floor.items() if only is None or p in only}
+        for platform, version_floor in (gate or {}).items():
+            if platform in held:
+                held[platform] = max(held[platform], version_floor)
+        problems = []
+        for e in entries:
+            for a in e["availability"]:
+                d = (a.get("domain") or "").lower()
+                if is_deprecated(a):
+                    problems.append("soft-deprecated" if a.get("deprecated", {}).get("major", 0) >= SOFT else "deprecated")
+                if d in held and "introduced" in a and version_tuple(a["introduced"]) > held[d]:
+                    problems.append(f"{a['domain']} {fmt(a['introduced'])} > floor")
+        # An overload set passes when at least one overload is clean, and a platform is
+        # unavailable only when no overload offers it.
+        for platform in held:
+            if all(any((a.get("domain") or "").lower() == platform and a.get("isUnconditionallyUnavailable")
+                       for a in e["availability"]) for e in entries):
+                name = next(p for p in PLATFORMS if p.lower() == platform)
+                problems.append(f"{name} unavailable")
+        avail, _ = describe_availability(entries[0])
+        clean = any(not any(is_deprecated(a) for a in e["availability"]) for e in entries)
+        status = "OK" if clean and not any("floor" in p or "unavailable" in p for p in problems) else "FAIL"
+        failed |= status == "FAIL"
+        notes = sorted(set(problems))
+        if gate:
+            notes.append("gated " + ",".join(f"{p}={v[0]}" + (f".{v[1]}" if v[1] else "") for p, v in sorted(gate.items())))
+        if only:
+            notes.append("only " + ",".join(sorted(only)))
+        print(f"{status:<11} {line}  —  {avail}" + (f"  [{', '.join(notes)}]" if notes else ""))
+    sys.exit(1 if failed else 0)
+
+
+def diff(old_v, new_v, only):
+    old, old_v = load_index(old_v)
+    new, new_v = load_index(new_v)
+    keys = set(read_paths(only)) if only else set(old) | set(new)
+    added = sorted(k for k in keys if k in new and k not in old)
+    removed = sorted(k for k in keys if k in old and k not in new)
+    changed, deprecated = [], []
+    for k in sorted(keys & set(old) & set(new)):
+        before, after = summary(old[k]), summary(new[k])
+        if before != after:
+            changed.append((k, before, after))
+            was = all(any(is_deprecated(a) for a in e["availability"]) for e in old[k])
+            now = all(any(is_deprecated(a) for a in e["availability"]) for e in new[k])
+            if now and not was:
+                deprecated.append(k)
+    print(f"# SDK {old_v} -> {new_v}: {len(added)} added, {len(removed)} removed, "
+          f"{len(changed)} availability changed, {len(deprecated)} newly deprecated"
+          + (f" (of {len(keys)} listed paths)" if only else ""))
+    for k in removed:
+        print(f"REMOVED     {k}")
+    for k in deprecated:
+        print(f"DEPRECATED  {k}  —  {'; '.join(summary(new[k]))}")
+    for k, before, after in changed:
+        if k not in deprecated:
+            print(f"CHANGED     {k}\n    was: {'; '.join(before)}\n    now: {'; '.join(after)}")
+    for k in added:
+        print(f"ADDED       {k}  —  {'; '.join(summary(new[k]))}")
+    sys.exit(1 if only and (removed or deprecated) else 0)
+
+
+def parse_floor(text):
+    floor = {}
+    for part in text.split(","):
+        name, _, ver = part.partition("=")
+        nums = [int(x) for x in ver.split(".")] + [0]
+        floor[name.strip().lower()] = (nums[0], nums[1])
+    return floor
+
+
+def option(argv, name):
+    return argv[argv.index(name) + 1] if name in argv else None
+
+
+def usage():
+    header = []
+    for line in open(__file__).read().splitlines()[1:]:
+        if not line.startswith("#"):
+            break
+        header.append(line[2:])
+    print("\n".join(header).strip())
+
+
+def main(argv):
+    if len(argv) < 2 or argv[1] in ("-h", "--help", "help"):
+        usage()
+        return
+    cmd, version = argv[1], option(argv, "--version")
+    if cmd == "fetch":
+        fetch(option(argv, "--sdk"), option(argv, "--ios-sdk"), "--force" in argv)
+    elif cmd == "show" and len(argv) >= 3:
+        show(argv[2], "--all" in argv, version)
+    elif cmd == "audit" and len(argv) >= 3:
+        floor = parse_floor(option(argv, "--floor")) if "--floor" in argv else {}
+        audit(argv[2], floor, version)
+    elif cmd == "diff" and len(argv) >= 4:
+        diff(argv[2], argv[3], option(argv, "--only"))
+    elif cmd == "list":
+        for v in copies():
+            s = json.load(open(os.path.join(docs_root(), v, "stamp.json")))
+            print(f"{v}\t{s['sdkBuild']}\t{s['date']}\t{s['xcode']}")
+    else:
+        sys.exit("usage: swiftui-api fetch [--sdk <path>] [--force] | show <query> | audit <file> | diff <old> <new> | list  (--help for more)")
+
+
+if __name__ == "__main__":
+    main(sys.argv)

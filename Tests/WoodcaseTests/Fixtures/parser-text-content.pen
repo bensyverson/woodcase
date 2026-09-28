@@ -1,0 +1,46 @@
+{
+  "children": [
+    {
+      "content": "Hello World",
+      "fontFamily": "Helvetica",
+      "fontSize": 24,
+      "fontWeight": "700",
+      "id": "plain-text",
+      "textAlign": "center",
+      "textAlignVertical": "middle",
+      "textGrowth": "auto",
+      "type": "text"
+    },
+    {
+      "content": "Bold Italic Colored",
+      "fontFamily": "Helvetica",
+      "fontSize": 16,
+      "id": "rich-text",
+      "type": "text"
+    },
+    {
+      "content": "This is a longer text that should wrap within its container",
+      "fontSize": 14,
+      "id": "fixed-width-text",
+      "textGrowth": "fixed-width",
+      "type": "text",
+      "width": 200
+    },
+    {
+      "content": "Fixed dimensions",
+      "fontSize": 14,
+      "height": 100,
+      "id": "fixed-both-text",
+      "textGrowth": "fixed-width-height",
+      "type": "text",
+      "width": 200
+    },
+    {
+      "content": "$headline",
+      "fontSize": 32,
+      "id": "variable-text",
+      "type": "text"
+    }
+  ],
+  "version": "2.17"
+}

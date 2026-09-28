@@ -1,0 +1,61 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "type": "frame",
+      "id": "Shd01",
+      "name": "Shaded",
+      "x": 0,
+      "y": 0,
+      "width": 120,
+      "height": 60,
+      "layout": "none",
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "Rct01",
+          "name": "Swatch",
+          "x": 10,
+          "y": 10,
+          "width": 40,
+          "height": 40,
+          "fill": {"type": "shader", "url": "./shader-uv.frag"}
+        },
+        {
+          "type": "rectangle",
+          "id": "Rct02",
+          "name": "Ring",
+          "x": 70,
+          "y": 10,
+          "width": 40,
+          "height": 40,
+          "fill": "#CCCCCC",
+          "stroke": {"type": "shader", "url": "./shader-uv.frag"},
+          "strokeWidth": 4
+        },
+        {
+          "type": "rectangle",
+          "id": "Rct03",
+          "name": "Off",
+          "x": 10,
+          "y": 50,
+          "width": 10,
+          "height": 10,
+          "fill": {"type": "shader", "url": "./shader-uv.frag", "enabled": false}
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Pln01",
+      "name": "Plain",
+      "x": 200,
+      "y": 0,
+      "width": 60,
+      "height": 60,
+      "layout": "none",
+      "fill": "#FF0000"
+    }
+  ]
+}

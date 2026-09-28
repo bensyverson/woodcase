@@ -1,0 +1,62 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "type": "text",
+      "id": "plain-text",
+      "x": 0,
+      "y": 0,
+      "content": "Hello World",
+      "textAlign": "center",
+      "textAlignVertical": "middle",
+      "fontFamily": "Helvetica",
+      "fontSize": 24,
+      "fontWeight": "700"
+    },
+    {
+      "type": "text",
+      "id": "rich-text",
+      "x": 0,
+      "y": 0,
+      "fontFamily": "Helvetica",
+      "fontSize": 16,
+      "fontWeight": "normal"
+    },
+    {
+      "type": "text",
+      "id": "fixed-width-text",
+      "x": 0,
+      "y": 0,
+      "textGrowth": "fixed-width",
+      "width": 200,
+      "content": "This is a longer text that should wrap within its container",
+      "fontFamily": "Inter",
+      "fontSize": 14,
+      "fontWeight": "normal"
+    },
+    {
+      "type": "text",
+      "id": "fixed-both-text",
+      "x": 0,
+      "y": 0,
+      "textGrowth": "fixed-width-height",
+      "width": 200,
+      "height": 100,
+      "content": "Fixed dimensions",
+      "fontFamily": "Inter",
+      "fontSize": 14,
+      "fontWeight": "normal"
+    },
+    {
+      "type": "text",
+      "id": "variable-text",
+      "x": 0,
+      "y": 0,
+      "content": "$headline",
+      "fontFamily": "Inter",
+      "fontSize": 32,
+      "fontWeight": "normal"
+    }
+  ],
+  "fileToken": "6dd7eb12-01f3-4089-ac72-15808151859f"
+}

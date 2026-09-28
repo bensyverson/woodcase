@@ -1,0 +1,112 @@
+#!/usr/bin/env python3
+"""Sweep the viewer's preview catalog with `sleepy contrast` and group what fails.
+
+`sleepy contrast` answers one page at a time and reports one row per text node, so a
+palette failure comes back 85 times over — once per state that happens to carry the
+token. This walks every state in both colour schemes and collapses the rows into the
+*pairs* that actually differ: an ink on a ground, at a size, with the worst ratio seen
+and how many states carry it. That is the shape a token decision is made from.
+
+    woodcase preview --port 7423 &
+    woodcase preview --list | scripts/viewer-contrast --base http://127.0.0.1:7423
+
+Reads state paths on stdin: either bare paths (`/preview/avatar/small`) or the columns
+`preview --list` prints, in which case the last column is taken. With nothing on stdin
+it asks the server for the catalog it is already serving.
+
+Exit 0 always: this is a measurement, not a gate.
+"""
+
+import argparse
+import json
+import re
+import subprocess
+import sys
+from collections import defaultdict
+
+
+def paths_from_stdin() -> list[str]:
+    """The state paths on stdin, one per line, tolerating `--list`'s columns."""
+    rows = []
+    for line in sys.stdin.read().splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        token = line.split()[-1]
+        rows.append(token[token.index("/preview/"):] if "/preview/" in token else token)
+    return rows
+
+
+def paths_from_server(base: str) -> list[str]:
+    """Every state path, scraped from the index the server is already serving."""
+    index = subprocess.run(
+        ["curl", "-s", f"{base}/preview"], capture_output=True, text=True, check=True
+    ).stdout
+    components = re.findall(r'href="(/preview/[a-z0-9-]+)"', index)
+    paths = []
+    for component in dict.fromkeys(components):
+        canvas = subprocess.run(
+            ["curl", "-s", f"{base}{component}"], capture_output=True, text=True, check=True
+        ).stdout
+        paths += re.findall(rf'href="({re.escape(component)}/[a-z0-9-]+)"', canvas)
+    return list(dict.fromkeys(paths))
+
+
+def leaf(path: str) -> str:
+    """The last selector in a sleepy path — the element the ink is actually on."""
+    last = path.split(" > ")[-1]
+    return re.sub(r":nth-of-type\(\d+\)", "", last)
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--base", default="http://127.0.0.1:7423", help="where preview is serving")
+    parser.add_argument("--min", default="wcag-aa", dest="minimum", help="sleepy's --min")
+    parser.add_argument("--theme", action="append", default=None, help="light and/or dark")
+    args = parser.parse_args()
+    themes = args.theme or ["light", "dark"]
+
+    paths = paths_from_stdin() if not sys.stdin.isatty() else []
+    if not paths:
+        paths = paths_from_server(args.base)
+
+    # (theme, element, ink, ground, size) -> [worst ratio, states carrying it]
+    pairs: dict[tuple, list] = defaultdict(lambda: [99.0, set()])
+    checked = 0
+    for path in paths:
+        for theme in themes:
+            run = subprocess.run(
+                [
+                    "sleepy", "contrast", "--min", args.minimum,
+                    "--theme", theme, "--quiet", f"{args.base}{path}",
+                ],
+                capture_output=True, text=True,
+            )
+            try:
+                report = json.loads(run.stdout)
+            except json.JSONDecodeError:
+                print(f"!! {path} [{theme}]: {run.stderr.strip()[:200]}", file=sys.stderr)
+                continue
+            checked += report.get("checked", 0)
+            for failure in report.get("failures", []):
+                key = (
+                    theme,
+                    leaf(failure["path"]),
+                    failure["foreground"],
+                    failure["background"],
+                    failure["fontSize"],
+                )
+                pairs[key][0] = min(pairs[key][0], failure["ratio"])
+                pairs[key][1].add(path)
+
+    print(f"{len(paths)} states, {len(themes)} schemes, {checked} text nodes checked, "
+          f"{len(pairs)} distinct failing pairs (--min {args.minimum})\n")
+    print(f"{'ratio':>6}  {'scheme':<6} {'ink':<9} {'on':<9} {'px':>3}  {'n':>3}  element")
+    for key, (ratio, states) in sorted(pairs.items(), key=lambda item: item[1][0]):
+        theme, element, ink, ground, size = key
+        print(f"{ratio:>6.2f}  {theme:<6} {ink:<9} {ground:<9} {size:>3}  {len(states):>3}  {element}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

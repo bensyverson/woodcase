@@ -1,0 +1,212 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "bbF01",
+      "x": 0,
+      "y": 0,
+      "name": "flip",
+      "clip": true,
+      "width": 240,
+      "height": 240,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "bbF02",
+          "x": 0,
+          "y": 0,
+          "name": "left",
+          "fill": "#FF0000",
+          "width": 120,
+          "height": 240
+        },
+        {
+          "type": "rectangle",
+          "id": "bbF03",
+          "x": 120,
+          "y": 0,
+          "name": "right",
+          "fill": "#0000FF",
+          "width": 120,
+          "height": 240
+        },
+        {
+          "type": "rectangle",
+          "id": "bbF04",
+          "x": 0,
+          "y": 0,
+          "name": "band",
+          "fill": "#00FF00",
+          "width": 240,
+          "height": 40
+        },
+        {
+          "type": "rectangle",
+          "id": "bbF05",
+          "x": 40,
+          "y": 20,
+          "name": "glass",
+          "fill": "#FFFFFF01",
+          "width": 160,
+          "height": 180,
+          "effect": {
+            "type": "background_blur",
+            "radius": 20
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "bbR01",
+      "x": 280,
+      "y": 0,
+      "name": "r8",
+      "clip": true,
+      "width": 240,
+      "height": 240,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "bbR02",
+          "x": 0,
+          "y": 0,
+          "name": "left",
+          "fill": "#FF0000",
+          "width": 120,
+          "height": 240
+        },
+        {
+          "type": "rectangle",
+          "id": "bbR03",
+          "x": 120,
+          "y": 0,
+          "name": "right",
+          "fill": "#0000FF",
+          "width": 120,
+          "height": 240
+        },
+        {
+          "type": "rectangle",
+          "id": "bbR04",
+          "x": 0,
+          "y": 200,
+          "name": "band",
+          "fill": "#00FF00",
+          "width": 240,
+          "height": 40
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 24,
+          "id": "bbR05",
+          "x": 40,
+          "y": 40,
+          "name": "glass",
+          "fill": "#FFFFFF33",
+          "width": 160,
+          "height": 180,
+          "effect": {
+            "type": "background_blur",
+            "radius": 8
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "bbN01",
+      "x": 560,
+      "y": 0,
+      "name": "no-fill",
+      "clip": true,
+      "width": 240,
+      "height": 240,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "bbN02",
+          "x": 0,
+          "y": 0,
+          "name": "left",
+          "fill": "#FF0000",
+          "width": 120,
+          "height": 240
+        },
+        {
+          "type": "rectangle",
+          "id": "bbN03",
+          "x": 120,
+          "y": 0,
+          "name": "right",
+          "fill": "#0000FF",
+          "width": 120,
+          "height": 240
+        },
+        {
+          "type": "rectangle",
+          "id": "bbN04",
+          "x": 40,
+          "y": 20,
+          "name": "clear",
+          "fill": "#FFFFFF00",
+          "width": 160,
+          "height": 90,
+          "effect": {
+            "type": "background_blur",
+            "radius": 20
+          }
+        },
+        {
+          "type": "ellipse",
+          "id": "bbN05",
+          "x": 70,
+          "y": 130,
+          "name": "unfilled",
+          "width": 100,
+          "height": 90,
+          "effect": {
+            "type": "background_blur",
+            "radius": 20
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "bbL01",
+      "x": 840,
+      "y": 0,
+      "name": "layer-blur",
+      "clip": true,
+      "width": 240,
+      "height": 160,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "bbL02",
+          "x": 60,
+          "y": 40,
+          "name": "blurred",
+          "fill": "#FF0000",
+          "width": 120,
+          "height": 80,
+          "effect": {
+            "type": "blur",
+            "radius": 8
+          }
+        }
+      ]
+    }
+  ],
+  "fileToken": "00ef5e74-2de7-414a-b1fa-eaa9f2861c52"
+}

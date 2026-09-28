@@ -1,0 +1,39 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "fill": "#FF0000",
+          "height": 60,
+          "id": "pxyCB",
+          "name": "child-1",
+          "type": "rectangle",
+          "width": "fill_container"
+        },
+        {
+          "fill": "#00FF00",
+          "height": 60,
+          "id": "7hnVA",
+          "name": "child-2",
+          "type": "rectangle",
+          "width": "fill_container"
+        },
+        {
+          "fill": "#0000FF",
+          "height": 60,
+          "id": "9oDU1",
+          "name": "child-3",
+          "type": "rectangle",
+          "width": "fill_container"
+        }
+      ],
+      "fill": "#F0F0F0",
+      "height": 100,
+      "id": "Jf531",
+      "name": "layout-multi-fill",
+      "type": "frame",
+      "width": 400
+    }
+  ],
+  "version": "2.17"
+}

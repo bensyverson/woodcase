@@ -1,0 +1,110 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "id": "Brd01",
+      "name": "Board",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "layout": "horizontal",
+      "width": 400,
+      "height": 200,
+      "children": [
+        {
+          "id": "Zta01",
+          "name": "Zeta",
+          "type": "ref",
+          "ref": "Cmp01"
+        },
+        {
+          "id": "Alp01",
+          "name": "Alpha",
+          "type": "ref",
+          "ref": "Cmp01"
+        }
+      ]
+    },
+    {
+      "id": "Brd02",
+      "name": "Second",
+      "type": "frame",
+      "x": 0,
+      "y": 300,
+      "layout": "horizontal",
+      "width": 400,
+      "height": 200,
+      "children": [
+        {
+          "id": "Mid01",
+          "name": "Middle",
+          "type": "ref",
+          "ref": "Cmp01"
+        },
+        {
+          "id": "Oth01",
+          "name": "Other",
+          "type": "ref",
+          "ref": "Cmp02"
+        }
+      ]
+    },
+    {
+      "id": "Cmp01",
+      "name": "Chip",
+      "type": "frame",
+      "x": 0,
+      "y": 600,
+      "reusable": true,
+      "layout": "horizontal",
+      "width": 60,
+      "height": 24,
+      "children": [
+        {
+          "id": "Lbl01",
+          "name": "Label",
+          "type": "text",
+          "content": "chip"
+        }
+      ]
+    },
+    {
+      "id": "Cmp02",
+      "name": "Panel",
+      "type": "frame",
+      "x": 0,
+      "y": 700,
+      "reusable": true,
+      "layout": "horizontal",
+      "width": 100,
+      "height": 50,
+      "children": [
+        {
+          "id": "Cap01",
+          "name": "Caption",
+          "type": "text",
+          "content": "panel"
+        }
+      ]
+    },
+    {
+      "id": "Cmp03",
+      "name": "Lonely",
+      "type": "frame",
+      "x": 0,
+      "y": 800,
+      "reusable": true,
+      "layout": "horizontal",
+      "width": 40,
+      "height": 40,
+      "children": [
+        {
+          "id": "Nte01",
+          "name": "Note",
+          "type": "text",
+          "content": "unused"
+        }
+      ]
+    }
+  ]
+}

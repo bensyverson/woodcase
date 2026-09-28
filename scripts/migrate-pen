@@ -1,0 +1,61 @@
+#!/bin/bash
+#
+# migrate-pen — Rewrite .pen files in the current format version, in place.
+#
+# Builds the woodcase CLI and runs `woodcase migrate` over the paths given
+# (default: Tests). Directories are searched recursively; files already at the
+# current version are left alone unless --force is passed. Every migration
+# diagnostic is printed to stderr, prefixed with the file's path.
+#
+# Two fixture directories are excluded by default and must stay that way:
+#   Tests/WoodcaseTests/Fixtures/v2.9   legacy inputs the version-gate and
+#                                       migrator tests parse as 2.9
+#   Tests/WoodcaseTests/Fixtures/v2.17  Pen.app's own saves, the golden oracle
+#
+# One file is excluded for the same reason: lint/pipeline-trips.pen declares an
+# unobserved version on purpose, so `woodcase lint` has a version-gate warning to
+# report. Migrating it would silently empty that test.
+#
+# Run from the repo root:
+#   scripts/migrate-pen                  # every .pen under Tests/, minus those two
+#   scripts/migrate-pen --dry-run        # report without writing
+#   scripts/migrate-pen local            # the gitignored local/ tree
+#   scripts/migrate-pen --force Tests    # rewrite files already at 2.17 too
+#
+# Flags (--dry-run, --force, --exclude <path>) may appear anywhere; everything
+# else is a path.
+
+set -euo pipefail
+
+FIXTURES="Tests/WoodcaseTests/Fixtures"
+
+flags=()
+paths=()
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --exclude)
+            flags+=("--exclude" "$2")
+            shift 2
+            ;;
+        --*)
+            flags+=("$1")
+            shift
+            ;;
+        *)
+            paths+=("$1")
+            shift
+            ;;
+    esac
+done
+
+if [ ${#paths[@]} -eq 0 ]; then
+    paths=("Tests")
+fi
+
+flags+=("--exclude" "$FIXTURES/v2.9" "--exclude" "$FIXTURES/v2.17")
+flags+=("--exclude" "$FIXTURES/lint/pipeline-trips.pen")
+
+swift build --product woodcase
+BINARY="$(swift build --product woodcase --show-bin-path)/woodcase"
+
+"$BINARY" migrate "${paths[@]}" "${flags[@]}"

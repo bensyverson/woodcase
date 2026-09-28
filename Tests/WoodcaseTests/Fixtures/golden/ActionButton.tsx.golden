@@ -1,0 +1,44 @@
+import { cn } from "../lib/cn";
+
+interface ActionButtonProps {
+  label?: string;
+  disabled?: boolean;
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+export function ActionButton({
+  label = "Button",
+  disabled,
+  className,
+  style,
+}: ActionButtonProps) {
+  return (
+    <button type="button" disabled={disabled}
+      className={cn("wc-action-button flex items-center justify-center", className)}
+      style={{
+        width: 354,
+        backgroundColor: "var(--accent)",
+        borderRadius: 12,
+        padding: "14px 0px",
+        ...style,
+      }}
+    >
+      <p
+        style={{
+          color: "var(--white)",
+          fontFamily: "var(--font-primary)",
+          fontSize: 14,
+          fontWeight: 600,
+          lineHeight: "18px",
+          fontOpticalSizing: "none",
+          whiteSpace: "pre",
+          marginTop: -0.25,
+          marginBottom: 0.25,
+        }}
+      >
+        {label}
+      </p>
+    </button>
+  );
+}

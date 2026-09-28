@@ -1,0 +1,64 @@
+#!/usr/bin/env python3
+"""gen-sizeless-frames-fixture — write Tests/WoodcaseTests/Fixtures/render-sizeless-frames.pen:
+one 300x300 board per case of a `layout: "none"` frame with no width or height (grey fill,
+children that overhang it) — plain, clipped, stroked and shadowed, in a flex flow, inside a
+fit_content flex frame, and with an explicit `fit_content` and `fit_content(30)` (leaf Jg0BOv,
+PenSizelessFrameTests). Pen settles every such frame at 0x0, or at its fallback.
+
+Usage:
+    scripts/gen-sizeless-frames-fixture [<out.pen>]     (default: the fixture's path)
+    scripts/pen-oracle Tests/WoodcaseTests/Fixtures/render-sizeless-frames.pen
+
+The second command (sandbox disabled, `pen` logged in) writes Pen's first-pass layout (pass --settle for the settled one), its 2x
+exports and its re-save beside the fixture. Standard library only; runs sandboxed.
+"""
+
+import json, sys
+
+def rect(i, x, y, w, h, fill, **kw):
+    d = {"type": "rectangle", "id": i, "x": x, "y": y, "width": w, "height": h, "fill": fill}
+    d.update(kw)
+    return d
+
+def board(i, name, x, y, children, **kw):
+    d = {"type": "frame", "id": i, "name": name, "x": x, "y": y, "width": 300, "height": 300,
+         "layout": "none", "fill": "#000000", "children": children}
+    d.update(kw)
+    return d
+
+def sizeless(i, x, y, children, **kw):
+    d = {"type": "frame", "id": i, "x": x, "y": y, "layout": "none", "fill": "#808080", "children": children}
+    d.update(kw)
+    return d
+
+def overhang(prefix):
+    return [rect(prefix + "a", 10, 10, 80, 40, "#FF00FF")]
+
+nodes = []
+slot = [0]
+def at():
+    slot[0] += 1
+    k = slot[0] - 1
+    return k % 3 * 400, k // 3 * 400
+
+x, y = at(); nodes.append(board("Splain", "plain", x, y, [sizeless("SplainF", 50, 50, overhang("SplainF"))]))
+x, y = at(); nodes.append(board("Sclip", "clip", x, y, [sizeless("SclipF", 50, 50, overhang("SclipF"), clip=True)]))
+x, y = at(); nodes.append(board("Spaint", "paint", x, y, [sizeless(
+    "SpaintF", 50, 50, overhang("SpaintF"), stroke="#00FF00", strokeWidth=8, strokeAlignment="outer",
+    effect={"type": "shadow", "shadowType": "outer", "color": "#FFFFFFFF", "offset": {"x": 10, "y": 10}, "blur": 8})]))
+x, y = at(); nodes.append(board("Sflex", "flex", x, y, [
+    sizeless("SflexF", 0, 0, [rect("SflexFa", 0, 0, 50, 50, "#FF00FF")]),
+    rect("SflexS", 0, 0, 30, 30, "#FF0000"),
+], layout="horizontal", gap=10))
+x, y = at(); nodes.append(board("Sfit", "fitflex", x, y, [
+    {"type": "frame", "id": "SfitP", "x": 20, "y": 20, "layout": "horizontal", "fill": "#0000FF", "padding": 5,
+     "children": [sizeless("SfitF", 0, 0, [rect("SfitFa", 0, 0, 50, 50, "#FF00FF")])]},
+]))
+x, y = at(); nodes.append(board("Sexp", "explicit", x, y, [
+    sizeless("SexpF", 50, 50, overhang("SexpF"), width="fit_content", height="fit_content"),
+    sizeless("SexpG", 50, 150, overhang("SexpG"), width="fit_content(30)", height=20),
+]))
+
+out = sys.argv[1] if len(sys.argv) > 1 else "Tests/WoodcaseTests/Fixtures/render-sizeless-frames.pen"
+with open(out, "w") as f:
+    json.dump({"version": "2.19", "children": nodes}, f, indent=2)

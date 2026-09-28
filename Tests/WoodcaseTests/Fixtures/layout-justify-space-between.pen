@@ -1,0 +1,40 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "fill": "#FF0000",
+          "height": 60,
+          "id": "3GwVu",
+          "name": "child-1",
+          "type": "rectangle",
+          "width": 60
+        },
+        {
+          "fill": "#00FF00",
+          "height": 60,
+          "id": "UFqsI",
+          "name": "child-2",
+          "type": "rectangle",
+          "width": 60
+        },
+        {
+          "fill": "#0000FF",
+          "height": 60,
+          "id": "dqY0i",
+          "name": "child-3",
+          "type": "rectangle",
+          "width": 60
+        }
+      ],
+      "fill": "#F0F0F0",
+      "height": 100,
+      "id": "xkSE7",
+      "justifyContent": "space_between",
+      "name": "layout-justify-space-between",
+      "type": "frame",
+      "width": 400
+    }
+  ],
+  "version": "2.17"
+}

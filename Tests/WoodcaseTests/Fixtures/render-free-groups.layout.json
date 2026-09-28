@@ -1,0 +1,272 @@
+{
+  "Gpos": {
+    "x": 0,
+    "y": 0,
+    "width": 300,
+    "height": 300
+  },
+  "GposG": {
+    "x": 70,
+    "y": 80,
+    "width": 90,
+    "height": 60
+  },
+  "GposA": {
+    "x": 20,
+    "y": 30,
+    "width": 40,
+    "height": 40
+  },
+  "GposB": {
+    "x": 80,
+    "y": 60,
+    "width": 30,
+    "height": 30
+  },
+  "Gneg": {
+    "x": 400,
+    "y": 0,
+    "width": 300,
+    "height": 300
+  },
+  "GnegG": {
+    "x": 70,
+    "y": 80,
+    "width": 90,
+    "height": 70
+  },
+  "GnegA": {
+    "x": -30,
+    "y": -20,
+    "width": 40,
+    "height": 40
+  },
+  "GnegB": {
+    "x": 20,
+    "y": 10,
+    "width": 40,
+    "height": 40
+  },
+  "Gflex": {
+    "x": 800,
+    "y": 0,
+    "width": 300,
+    "height": 300
+  },
+  "GflexA": {
+    "x": 20,
+    "y": 20,
+    "width": 40,
+    "height": 40
+  },
+  "GflexG": {
+    "x": 70,
+    "y": 20,
+    "width": 60,
+    "height": 60
+  },
+  "GflexGa": {
+    "x": -10,
+    "y": -10,
+    "width": 30,
+    "height": 30
+  },
+  "GflexGb": {
+    "x": 20,
+    "y": 20,
+    "width": 30,
+    "height": 30
+  },
+  "GflexB": {
+    "x": 140,
+    "y": 20,
+    "width": 40,
+    "height": 40
+  },
+  "Grot": {
+    "x": 1200,
+    "y": 0,
+    "width": 300,
+    "height": 300
+  },
+  "GrotG": {
+    "x": 82.67949192431122,
+    "y": 70,
+    "width": 104.2820323027551,
+    "height": 100.62177826491069
+  },
+  "GrotA": {
+    "x": 0,
+    "y": 0,
+    "width": 60,
+    "height": 20
+  },
+  "GrotB": {
+    "x": -20,
+    "y": 30,
+    "width": 40,
+    "height": 40
+  },
+  "Gnest": {
+    "x": 1600,
+    "y": 0,
+    "width": 300,
+    "height": 300
+  },
+  "GnestG": {
+    "x": 60,
+    "y": 80,
+    "width": 50,
+    "height": 60
+  },
+  "GnestA": {
+    "x": 0,
+    "y": 0,
+    "width": 20,
+    "height": 20
+  },
+  "GnestH": {
+    "x": -20,
+    "y": 10,
+    "width": 50,
+    "height": 50
+  },
+  "GnestHa": {
+    "x": -10,
+    "y": -10,
+    "width": 40,
+    "height": 40
+  },
+  "GnestHb": {
+    "x": 30,
+    "y": 30,
+    "width": 10,
+    "height": 10
+  },
+  "Gfrot": {
+    "x": 0,
+    "y": 400,
+    "width": 300,
+    "height": 300
+  },
+  "GfrotA": {
+    "x": 20,
+    "y": 20,
+    "width": 40,
+    "height": 40
+  },
+  "GfrotG": {
+    "x": 70,
+    "y": 20,
+    "width": 81.96152422706632,
+    "height": 81.96152422706632
+  },
+  "GfrotGa": {
+    "x": -10,
+    "y": -10,
+    "width": 30,
+    "height": 30
+  },
+  "GfrotGb": {
+    "x": 20,
+    "y": 20,
+    "width": 30,
+    "height": 30
+  },
+  "GfrotB": {
+    "x": 161.96152422706632,
+    "y": 20,
+    "width": 40,
+    "height": 40
+  },
+  "Gflip": {
+    "x": 400,
+    "y": 400,
+    "width": 300,
+    "height": 300
+  },
+  "GflipG": {
+    "x": 33.58637552837013,
+    "y": 87.05904774487396,
+    "width": 85.73214099741124,
+    "height": 85.73214099741122
+  },
+  "GflipA": {
+    "x": -20,
+    "y": 0,
+    "width": 60,
+    "height": 20
+  },
+  "GflipB": {
+    "x": 10,
+    "y": 30,
+    "width": 40,
+    "height": 40
+  },
+  "Gblur": {
+    "x": 800,
+    "y": 400,
+    "width": 300,
+    "height": 300
+  },
+  "GblurG": {
+    "x": 60,
+    "y": 70,
+    "width": 120,
+    "height": 80
+  },
+  "GblurA": {
+    "x": -40,
+    "y": -30,
+    "width": 50,
+    "height": 50
+  },
+  "GblurB": {
+    "x": 30,
+    "y": 20,
+    "width": 50,
+    "height": 30
+  },
+  "Gshad": {
+    "x": 1200,
+    "y": 400,
+    "width": 300,
+    "height": 300
+  },
+  "GshadG": {
+    "x": 60,
+    "y": 70,
+    "width": 120,
+    "height": 80
+  },
+  "GshadA": {
+    "x": -40,
+    "y": -30,
+    "width": 50,
+    "height": 50
+  },
+  "GshadB": {
+    "x": 30,
+    "y": 20,
+    "width": 50,
+    "height": 30
+  },
+  "Groot": {
+    "x": 1670,
+    "y": 480,
+    "width": 90,
+    "height": 70
+  },
+  "GrootA": {
+    "x": -30,
+    "y": -20,
+    "width": 40,
+    "height": 40
+  },
+  "GrootB": {
+    "x": 20,
+    "y": 10,
+    "width": 40,
+    "height": 40
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "id": "Rt001",
+      "name": "Root",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "width": 400,
+      "height": 100,
+      "layout": "none",
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "id": "Rf001",
+          "name": "BadValue",
+          "type": "ref",
+          "ref": "Cmp01",
+          "x": 10,
+          "y": 10,
+          "descendants": {
+            "Lbl01": {
+              "content": {
+                "a": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "Rf002",
+          "name": "FineValue",
+          "type": "ref",
+          "ref": "Cmp01",
+          "x": 80,
+          "y": 10,
+          "descendants": {
+            "Lbl01": {
+              "content": "Hello"
+            }
+          }
+        },
+        {
+          "id": "Rf003",
+          "name": "Replacement",
+          "type": "ref",
+          "ref": "Cmp01",
+          "x": 150,
+          "y": 10,
+          "descendants": {
+            "Lbl01": {
+              "type": "rectangle",
+              "width": 10,
+              "height": 10,
+              "fill": "#000000"
+            }
+          }
+        },
+        {
+          "id": "Rf004",
+          "name": "Unresolved",
+          "type": "ref",
+          "ref": "CmpMissing",
+          "x": 220,
+          "y": 10,
+          "descendants": {
+            "Lbl01": {
+              "content": {
+                "a": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "Cmp01",
+      "name": "Component",
+      "type": "frame",
+      "x": 0,
+      "y": 400,
+      "reusable": true,
+      "layout": "horizontal",
+      "width": 60,
+      "height": 24,
+      "fill": "#EEEEEE",
+      "children": [
+        {
+          "id": "Lbl01",
+          "name": "Label",
+          "type": "text",
+          "width": 40,
+          "height": 20,
+          "content": "chip",
+          "fill": "#000000"
+        }
+      ]
+    }
+  ]
+}

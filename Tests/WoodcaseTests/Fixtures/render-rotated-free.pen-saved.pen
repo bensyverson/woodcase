@@ -1,0 +1,109 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "rrect",
+      "x": 0,
+      "y": 0,
+      "name": "rrect",
+      "clip": true,
+      "width": 400,
+      "height": 300,
+      "fill": "#000000",
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "Ra001",
+          "x": 80,
+          "y": 60,
+          "rotation": -20,
+          "fill": "#FF0000",
+          "width": 200,
+          "height": 60
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "rtxtf",
+      "x": 500,
+      "y": 0,
+      "name": "rtxtf",
+      "clip": true,
+      "width": 400,
+      "height": 300,
+      "fill": "#000000",
+      "layout": "none",
+      "children": [
+        {
+          "type": "text",
+          "id": "Ta001",
+          "x": 80,
+          "y": 60,
+          "rotation": -20,
+          "fill": "#FF0000",
+          "textGrowth": "fixed-width",
+          "width": 240,
+          "content": "MMMM",
+          "fontFamily": "Inter",
+          "fontSize": 48,
+          "fontWeight": "900"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "rtxta",
+      "x": 1000,
+      "y": 0,
+      "name": "rtxta",
+      "clip": true,
+      "width": 400,
+      "height": 300,
+      "fill": "#000000",
+      "layout": "none",
+      "children": [
+        {
+          "type": "text",
+          "id": "Ta002",
+          "x": 80,
+          "y": 60,
+          "rotation": -20,
+          "fill": "#FF0000",
+          "content": "MMMM",
+          "fontFamily": "Inter",
+          "fontSize": 48,
+          "fontWeight": "900"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "rtxts",
+      "x": 1500,
+      "y": 0,
+      "name": "rtxts",
+      "clip": true,
+      "width": 400,
+      "height": 300,
+      "fill": "#000000",
+      "layout": "none",
+      "children": [
+        {
+          "type": "text",
+          "id": "Ta003",
+          "x": 80,
+          "y": 60,
+          "fill": "#FF0000",
+          "content": "MMMM",
+          "fontFamily": "Inter",
+          "fontSize": 48,
+          "fontWeight": "900"
+        }
+      ]
+    }
+  ],
+  "fileToken": "bfed6cfc-f19d-49ba-9022-1c73617bdb51"
+}

@@ -1,0 +1,36 @@
+{
+  "children": [
+    {
+      "alignItems": "center",
+      "children": [
+        {
+          "content": "This label is longer than its row",
+          "fill": "#1F2937",
+          "fontFamily": "IBM Plex Sans",
+          "fontSize": 14,
+          "fontWeight": "normal",
+          "id": "tfG01",
+          "name": "auto-long",
+          "type": "text"
+        },
+        {
+          "fill": "#10B981",
+          "height": 16,
+          "id": "tfG02",
+          "name": "fill-bar",
+          "type": "rectangle",
+          "width": "fill_container"
+        }
+      ],
+      "clip": true,
+      "fill": "#F3F4F6",
+      "gap": 8,
+      "id": "tfG00",
+      "name": "layout-text-auto-overflow",
+      "padding": 12,
+      "type": "frame",
+      "width": 200
+    }
+  ],
+  "version": "2.17"
+}

@@ -1,0 +1,186 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "CsUnf",
+      "x": 0,
+      "y": 0,
+      "name": "unfilled",
+      "width": 240,
+      "height": 80,
+      "fill": "#808080",
+      "layout": "none",
+      "children": [
+        {
+          "type": "text",
+          "id": "CsTx1",
+          "x": 12,
+          "y": 12,
+          "content": "Ink",
+          "fontFamily": "Inter",
+          "fontSize": 44,
+          "fontWeight": "700"
+        },
+        {
+          "type": "icon",
+          "id": "CsIc1",
+          "x": 160,
+          "y": 12,
+          "width": 56,
+          "height": 56,
+          "icon": "square",
+          "library": "lucide"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "CsMsh",
+      "x": 300,
+      "y": 0,
+      "name": "themed-mesh",
+      "width": 160,
+      "height": 120,
+      "fill": {
+        "type": "mesh_gradient",
+        "enabled": true,
+        "columns": 3,
+        "rows": 2,
+        "colors": [
+          "$mesh-warm",
+          "#FFFFFF",
+          "$mesh-cool",
+          "$mesh-cool",
+          "$mesh-ink",
+          "$mesh-warm"
+        ],
+        "points": [
+          [
+            0,
+            0
+          ],
+          [
+            0.5,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0.5,
+            1
+          ],
+          [
+            1,
+            1
+          ]
+        ]
+      }
+    },
+    {
+      "type": "frame",
+      "id": "CsMsD",
+      "x": 500,
+      "y": 0,
+      "name": "themed-mesh-dark",
+      "theme": {
+        "mode": "dark"
+      },
+      "width": 160,
+      "height": 120,
+      "fill": {
+        "type": "mesh_gradient",
+        "enabled": true,
+        "columns": 3,
+        "rows": 2,
+        "colors": [
+          "$mesh-warm",
+          "#FFFFFF",
+          "$mesh-cool",
+          "$mesh-cool",
+          "$mesh-ink",
+          "$mesh-warm"
+        ],
+        "points": [
+          [
+            0,
+            0
+          ],
+          [
+            0.5,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0.5,
+            1
+          ],
+          [
+            1,
+            1
+          ]
+        ]
+      }
+    }
+  ],
+  "themes": {
+    "mode": [
+      "light",
+      "dark"
+    ]
+  },
+  "variables": {
+    "mesh-warm": {
+      "type": "color",
+      "value": [
+        {
+          "value": "#FF3B30",
+          "theme": {
+            "mode": "light"
+          }
+        },
+        {
+          "value": "#0A84FF",
+          "theme": {
+            "mode": "dark"
+          }
+        }
+      ]
+    },
+    "mesh-cool": {
+      "type": "color",
+      "value": [
+        {
+          "value": "#5856D6",
+          "theme": {
+            "mode": "light"
+          }
+        },
+        {
+          "value": "#FFD60A",
+          "theme": {
+            "mode": "dark"
+          }
+        }
+      ]
+    },
+    "mesh-ink": {
+      "type": "color",
+      "value": "#1C1C1E"
+    }
+  },
+  "fileToken": "3a56f168-f69b-468e-9889-7b55e8af4c8e"
+}

@@ -1,0 +1,403 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "pr002",
+      "name": "donut-h",
+      "x": 0,
+      "y": 0,
+      "width": 240,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "ellipse",
+          "id": "pr001",
+          "name": "s",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 120,
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "rotation": 270,
+            "colors": [
+              {
+                "color": "#FF0000",
+                "position": 0
+              },
+              {
+                "color": "#0000FF",
+                "position": 1
+              }
+            ]
+          },
+          "innerRadius": 0.5
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "pr004",
+      "name": "donut-v",
+      "x": 280,
+      "y": 0,
+      "width": 240,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "ellipse",
+          "id": "pr003",
+          "name": "s",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 120,
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "rotation": 180,
+            "colors": [
+              {
+                "color": "#FF0000",
+                "position": 0
+              },
+              {
+                "color": "#0000FF",
+                "position": 1
+              }
+            ]
+          },
+          "innerRadius": 0.5
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "pr006",
+      "name": "evenodd-h",
+      "x": 560,
+      "y": 0,
+      "width": 240,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "path",
+          "id": "pr005",
+          "name": "s",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 120,
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "rotation": 270,
+            "colors": [
+              {
+                "color": "#FF0000",
+                "position": 0
+              },
+              {
+                "color": "#0000FF",
+                "position": 1
+              }
+            ]
+          },
+          "fillRule": "evenodd",
+          "geometry": "M0 0 L100 0 L100 100 L0 100 Z M25 25 L75 25 L75 75 L25 75 Z"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "pr008",
+      "name": "hexagon-h",
+      "x": 840,
+      "y": 0,
+      "width": 240,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "polygon",
+          "id": "pr007",
+          "name": "s",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 120,
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "rotation": 270,
+            "colors": [
+              {
+                "color": "#FF0000",
+                "position": 0
+              },
+              {
+                "color": "#0000FF",
+                "position": 1
+              }
+            ]
+          },
+          "polygonCount": 6
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "pr010",
+      "name": "triangle-v",
+      "x": 1120,
+      "y": 0,
+      "width": 240,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "polygon",
+          "id": "pr009",
+          "name": "s",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 120,
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "rotation": 180,
+            "colors": [
+              {
+                "color": "#FF0000",
+                "position": 0
+              },
+              {
+                "color": "#0000FF",
+                "position": 1
+              }
+            ]
+          },
+          "polygonCount": 3
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "pr012",
+      "name": "arc-h",
+      "x": 1400,
+      "y": 0,
+      "width": 240,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "ellipse",
+          "id": "pr011",
+          "name": "s",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 120,
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "rotation": 270,
+            "colors": [
+              {
+                "color": "#FF0000",
+                "position": 0
+              },
+              {
+                "color": "#0000FF",
+                "position": 1
+              }
+            ]
+          },
+          "startAngle": 0,
+          "sweepAngle": 90
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "pr014",
+      "name": "arc-v",
+      "x": 1680,
+      "y": 0,
+      "width": 240,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "ellipse",
+          "id": "pr013",
+          "name": "s",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 120,
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "rotation": 180,
+            "colors": [
+              {
+                "color": "#FF0000",
+                "position": 0
+              },
+              {
+                "color": "#0000FF",
+                "position": 1
+              }
+            ]
+          },
+          "startAngle": 0,
+          "sweepAngle": 90
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "pr016",
+      "name": "curve-v",
+      "x": 1960,
+      "y": 0,
+      "width": 240,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "path",
+          "id": "pr015",
+          "name": "s",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 120,
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "rotation": 180,
+            "colors": [
+              {
+                "color": "#FF0000",
+                "position": 0
+              },
+              {
+                "color": "#0000FF",
+                "position": 1
+              }
+            ]
+          },
+          "geometry": "M0 100 C0 0 100 0 100 100 Z"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "pr018",
+      "name": "viewbox-h",
+      "x": 2240,
+      "y": 0,
+      "width": 240,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "path",
+          "id": "pr017",
+          "name": "s",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 120,
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "rotation": 270,
+            "colors": [
+              {
+                "color": "#FF0000",
+                "position": 0
+              },
+              {
+                "color": "#0000FF",
+                "position": 1
+              }
+            ]
+          },
+          "geometry": "M25 25 L75 25 L75 75 L25 75 Z",
+          "viewBox": [
+            0,
+            0,
+            100,
+            100
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "pr020",
+      "name": "donut-radial",
+      "x": 2520,
+      "y": 0,
+      "width": 240,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "ellipse",
+          "id": "pr019",
+          "name": "s",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 120,
+          "fill": {
+            "type": "gradient",
+            "gradientType": "radial",
+            "colors": [
+              {
+                "color": "#FF0000",
+                "position": 0
+              },
+              {
+                "color": "#0000FF",
+                "position": 1
+              }
+            ]
+          },
+          "innerRadius": 0.4
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,356 @@
+#!/usr/bin/env swift
+//
+// blur-sigma-fit — fit the Gaussian sigma of a blurred edge in a PNG.
+//
+// A background-blur or layer-blur probe (a Pen export, or a Woodcase
+// render) paints a hard color edge, then blurs it. Reading one row across
+// that edge gives a step blurred by a Gaussian, whose CDF is closed-form:
+//
+//   M(x; c, sigma) = 0.5 * (1 - erf((x + 0.5 - c) / (sigma * sqrt(2))))
+//
+// This fits (c, sigma) by least squares over a grid, refined around the
+// best point, matching Appendix A3 of
+// project/2026-09-26-pen-1.2.14-compatibility.md. It is how findings 6, 8
+// and 10 in that report were measured: Woodcase's background-blur sigma
+// (finding 6), the inner-shadow blur profile (finding 8), and layer-blur
+// scaling (finding 10).
+//
+// Usage:
+//   scripts/blur-sigma-fit <image.png> --row <y> --x1 <x> --x2 <x>
+//       [--channel r|g|b] [--radius <points>] [--scale <n>]
+//       [--colorspace srgb|linear|both] [--plateau-samples <n>]
+//
+// Arguments:
+//   <image.png>            The PNG to measure. Pixel coordinates, not points.
+//   --row <y>              Row to sample (0 at the top, matching image pixel
+//                          coordinates).
+//   --x1 <x> --x2 <x>      The column range spanning the edge, from one flat
+//                          plateau to the other (inclusive). Widen it past
+//                          both plateaus so the fit has flat ground on each
+//                          side — a range that stops mid-slope biases sigma
+//                          low.
+//
+// Flags:
+//   --channel r|g|b        Which channel to fit. Default: r. Pick a channel
+//                          that actually steps across the edge (a red/blue
+//                          edge fits red or blue; a red/white edge fits any
+//                          of them).
+//   --radius <points>      The effect's declared radius, in points. When
+//                          given, prints the expected sigma (radius * scale
+//                          / 2 pixels — Pen's own convention, see finding 6)
+//                          and whether the fit is within 10% of it — the
+//                          `blur-sigma-fit` criterion for leaf Gusv9b.
+//   --scale <n>            The export scale the PNG was rendered at.
+//                          Default: 1. Only affects --radius's expected
+//                          value and the points-space sigma this prints.
+//   --colorspace srgb|linear|both
+//                          Fit the row as its encoded sRGB bytes, or after
+//                          converting to linear light, or both (default).
+//                          Comparing the two RMS residuals is how finding 6
+//                          told Woodcase's linear-light blur apart from
+//                          Pen's sRGB one.
+//   --plateau-samples <n>  How many pixels at each end of the range to
+//                          average for the plateau value. Default: 5.
+//
+// Output: the fitted edge center (c, in pixel columns), sigma in pixels,
+// the RMS residual of the fit (how well the data matches a Gaussian edge
+// at all), and, with --scale, sigma in points. With --radius, the expected
+// sigma, the ratio, and PASS/FAIL against a 10% tolerance.
+//
+// Exit codes: 0 fit succeeded (regardless of PASS/FAIL against --radius);
+// 1 the row has no edge to fit (flat, or the two plateaus are equal);
+// 2 usage error; 4 the image could not be read, or --row/--x1/--x2 are out
+// of bounds.
+//
+// Hand-run only — an oracle for reading fixtures, never called by the
+// suite. Needs no `pen` CLI or network; it only reads a PNG already on
+// disk. Runs sandboxed, but a PNG loaded from outside the worktree needs
+// the sandbox disabled.
+
+import AppKit
+import Foundation
+
+// MARK: - Argument parsing
+
+struct Arguments {
+    var imagePath = ""
+    var row = 0
+    var x1 = 0
+    var x2 = 0
+    var channel = "r"
+    var radius: Double?
+    var scale = 1.0
+    var colorspace = "both"
+    var plateauSamples = 5
+}
+
+func usage() -> String {
+    """
+    usage: blur-sigma-fit <image.png> --row <y> --x1 <x> --x2 <x> [options]
+
+      --channel r|g|b               Channel to fit (default: r)
+      --radius <points>             Effect radius, to check fit vs radius/2
+      --scale <n>                   Export scale (default: 1)
+      --colorspace srgb|linear|both Which colorspace(s) to fit (default: both)
+      --plateau-samples <n>         Pixels averaged per plateau (default: 5)
+
+    See scripts/blur-sigma-fit's header comment for the full contract.
+    """
+}
+
+func fail(_ message: String, code: Int32) -> Never {
+    FileHandle.standardError.write("blur-sigma-fit: \(message)\n".data(using: .utf8)!)
+    exit(code)
+}
+
+func parseInt(_ value: String, flag: String) -> Int {
+    guard let result = Int(value) else {
+        fail("\(flag) must be an integer, got '\(value)'", code: 2)
+    }
+    return result
+}
+
+func parseDouble(_ value: String, flag: String) -> Double {
+    guard let result = Double(value) else {
+        fail("\(flag) must be a number, got '\(value)'", code: 2)
+    }
+    return result
+}
+
+func parseArguments(_ raw: [String]) -> Arguments {
+    if raw.isEmpty || raw.first == "-h" || raw.first == "--help" {
+        print(usage())
+        exit(raw.isEmpty ? 2 : 0)
+    }
+
+    var args = Arguments()
+    var positional: [String] = []
+    var i = 0
+    func nextValue(for flag: String) -> String {
+        i += 1
+        guard i < raw.count else { fail("'\(flag)' needs a value", code: 2) }
+        return raw[i]
+    }
+    while i < raw.count {
+        let token = raw[i]
+        switch token {
+        case "--row": args.row = parseInt(nextValue(for: token), flag: token)
+        case "--x1": args.x1 = parseInt(nextValue(for: token), flag: token)
+        case "--x2": args.x2 = parseInt(nextValue(for: token), flag: token)
+        case "--channel": args.channel = nextValue(for: token)
+        case "--radius": args.radius = parseDouble(nextValue(for: token), flag: token)
+        case "--scale": args.scale = parseDouble(nextValue(for: token), flag: token)
+        case "--colorspace": args.colorspace = nextValue(for: token)
+        case "--plateau-samples": args.plateauSamples = parseInt(nextValue(for: token), flag: token)
+        default:
+            if token.hasPrefix("--") {
+                fail("unknown flag '\(token)' — see 'blur-sigma-fit --help'", code: 2)
+            }
+            positional.append(token)
+        }
+        i += 1
+    }
+
+    guard positional.count == 1 else {
+        fail("expected exactly one image path, got \(positional.count) — see 'blur-sigma-fit --help'", code: 2)
+    }
+    args.imagePath = positional[0]
+
+    guard ["r", "g", "b"].contains(args.channel) else {
+        fail("--channel must be r, g or b, got '\(args.channel)'", code: 2)
+    }
+    guard ["srgb", "linear", "both"].contains(args.colorspace) else {
+        fail("--colorspace must be srgb, linear or both, got '\(args.colorspace)'", code: 2)
+    }
+    guard args.x2 > args.x1 else {
+        fail("--x2 (\(args.x2)) must be greater than --x1 (\(args.x1))", code: 2)
+    }
+    guard args.plateauSamples > 0 else {
+        fail("--plateau-samples must be positive", code: 2)
+    }
+    return args
+}
+
+let arguments = parseArguments(Array(CommandLine.arguments.dropFirst()))
+
+// MARK: - PNG row extraction (sRGB bitmap context, un-premultiplied)
+//
+// Follows scripts/probe-pixels.swift's approach: draw into a sRGB
+// premultipliedLast context so every reader gets the same bytes CoreGraphics
+// itself would composite, then un-premultiply.
+
+guard let nsImage = NSImage(contentsOf: URL(fileURLWithPath: arguments.imagePath)),
+      let cgImage = nsImage.cgImage(forProposedRect: nil, context: nil, hints: nil)
+else {
+    fail("could not load image at '\(arguments.imagePath)'", code: 4)
+}
+
+let width = cgImage.width
+let height = cgImage.height
+guard arguments.row >= 0, arguments.row < height else {
+    fail("--row \(arguments.row) is out of bounds (image is \(width)x\(height))", code: 4)
+}
+guard arguments.x1 >= 0, arguments.x2 < width else {
+    fail("--x1/--x2 (\(arguments.x1)..\(arguments.x2)) is out of bounds (image is \(width)x\(height) wide)", code: 4)
+}
+
+let colorSpace = CGColorSpace(name: CGColorSpace.sRGB)!
+let bytesPerPixel = 4
+let bytesPerRow = width * bytesPerPixel
+let bitmapInfo = CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue
+
+var pixelData = [UInt8](repeating: 0, count: width * height * bytesPerPixel)
+guard let context = CGContext(
+    data: &pixelData,
+    width: width,
+    height: height,
+    bitsPerComponent: 8,
+    bytesPerRow: bytesPerRow,
+    space: colorSpace,
+    bitmapInfo: bitmapInfo
+) else {
+    fail("could not create a bitmap context to read '\(arguments.imagePath)'", code: 4)
+}
+context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+
+let channelOffset: Int
+switch arguments.channel {
+case "r": channelOffset = 0
+case "g": channelOffset = 1
+default: channelOffset = 2 // channel == "b"
+}
+
+/// One 0...1 sample per column in `x1...x2`, un-premultiplied.
+func rawProfile() -> [Double] {
+    (arguments.x1 ... arguments.x2).map { x in
+        let offset = (arguments.row * bytesPerRow) + (x * bytesPerPixel)
+        let alpha = pixelData[offset + 3]
+        let raw = pixelData[offset + channelOffset]
+        if alpha > 0, alpha < 255 {
+            let unpremultiplied = min(255.0, Double(raw) * 255.0 / Double(alpha))
+            return unpremultiplied / 255.0
+        }
+        return Double(raw) / 255.0
+    }
+}
+
+// MARK: - sRGB -> linear transfer
+
+func linearize(_ value: Double) -> Double {
+    value <= 0.04045 ? value / 12.92 : pow((value + 0.055) / 1.055, 2.4)
+}
+
+// MARK: - Normalize to a falling edge (1 -> 0) between the two plateaus
+
+/// Returns nil if the two plateaus are indistinguishable — no edge to fit.
+func normalizedFallingEdge(_ profile: [Double], plateauSamples: Int) -> [Double]? {
+    let n = min(plateauSamples, profile.count / 2 == 0 ? 1 : profile.count / 2)
+    let left = profile.prefix(n).reduce(0, +) / Double(n)
+    let right = profile.suffix(n).reduce(0, +) / Double(n)
+    let lo = min(left, right)
+    let hi = max(left, right)
+    guard hi - lo > 1e-6 else { return nil }
+    if left >= right {
+        return profile.map { ($0 - lo) / (hi - lo) }
+    } else {
+        return profile.map { (hi - $0) / (hi - lo) }
+    }
+}
+
+// MARK: - The model and its least-squares fit, by grid search + refinement
+
+func model(x: Double, c: Double, sigma: Double) -> Double {
+    0.5 * (1 - erf((x + 0.5 - c) / (sigma * 2.0.squareRoot())))
+}
+
+struct Fit {
+    var c: Double
+    var sigma: Double
+    var rms: Double
+}
+
+/// Grid search over (c, sigma), refined by narrowing the search box around
+/// the best point three times. Faithful to Appendix A3's "least-squares
+/// (c, sigma) over a grid" — no external solver, no new dependency.
+func fitEdge(xs: [Double], target: [Double]) -> Fit {
+    func sse(_ c: Double, _ sigma: Double) -> Double {
+        var total = 0.0
+        for (x, t) in zip(xs, target) {
+            let d = model(x: x, c: c, sigma: sigma) - t
+            total += d * d
+        }
+        return total
+    }
+
+    var cLo = xs.first!, cHi = xs.last!
+    var sLo = 0.05, sHi = max(xs.last! - xs.first!, 1.0)
+    var bestC = (cLo + cHi) / 2
+    var bestSigma = (sLo + sHi) / 2
+    var bestSSE = Double.infinity
+
+    for _ in 0 ..< 4 {
+        let cSteps = 60
+        let sSteps = 60
+        for ci in 0 ... cSteps {
+            let c = cLo + (cHi - cLo) * Double(ci) / Double(cSteps)
+            for si in 0 ... sSteps {
+                let sigma = sLo + (sHi - sLo) * Double(si) / Double(sSteps)
+                guard sigma > 0 else { continue }
+                let e = sse(c, sigma)
+                if e < bestSSE {
+                    bestSSE = e
+                    bestC = c
+                    bestSigma = sigma
+                }
+            }
+        }
+        let cSpan = (cHi - cLo) / Double(cSteps) * 3
+        let sSpan = (sHi - sLo) / Double(sSteps) * 3
+        cLo = bestC - cSpan
+        cHi = bestC + cSpan
+        sLo = max(0.01, bestSigma - sSpan)
+        sHi = bestSigma + sSpan
+    }
+
+    let rms = (bestSSE / Double(xs.count)).squareRoot()
+    return Fit(c: bestC, sigma: bestSigma, rms: rms)
+}
+
+// MARK: - Run
+
+let xs = (arguments.x1 ... arguments.x2).map { Double($0) }
+let raw = rawProfile()
+
+func report(label: String, values: [Double]) {
+    guard let target = normalizedFallingEdge(values, plateauSamples: arguments.plateauSamples) else {
+        fail("row \(arguments.row), x \(arguments.x1)..\(arguments.x2): the two plateaus are equal — no edge to fit", code: 1)
+    }
+    let fit = fitEdge(xs: xs, target: target)
+    let sigmaPoints = fit.sigma / arguments.scale
+    let paddedLabel = label.padding(toLength: 6, withPad: " ", startingAt: 0)
+    var line = String(
+        format: "  %@ fit: c=%.2f  sigma=%.3f px (%.3f pt at scale %.2g)  rms=%.4f",
+        paddedLabel, fit.c, fit.sigma, sigmaPoints, arguments.scale, fit.rms
+    )
+    if let radius = arguments.radius {
+        let expected = radius * arguments.scale / 2.0
+        let ratio = fit.sigma / expected
+        let withinTolerance = abs(ratio - 1.0) <= 0.10
+        let verdict = withinTolerance ? "PASS" : "FAIL"
+        line += String(
+            format: "\n           expected sigma = radius*scale/2 = %.3f px, ratio %.2fx (%@, tolerance 10%%)",
+            expected, ratio, verdict
+        )
+    }
+    print(line)
+}
+
+print("blur-sigma-fit: \(arguments.imagePath)")
+print("  row \(arguments.row), x \(arguments.x1)..\(arguments.x2), channel \(arguments.channel)")
+
+if arguments.colorspace == "srgb" || arguments.colorspace == "both" {
+    report(label: "sRGB", values: raw)
+}
+if arguments.colorspace == "linear" || arguments.colorspace == "both" {
+    report(label: "linear", values: raw.map(linearize))
+}

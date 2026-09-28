@@ -1,0 +1,129 @@
+#!/usr/bin/env python3
+"""End-to-end timing of the `woodcase` binary, as information beside the budgets.
+
+The performance budgets in `Tests/WoodcaseTests/Performance/` time the library
+in process, on purpose: process start-up and an unoptimized `ArgumentParser` are
+not the library's to fix, and putting them inside an assertion would make the
+number un-actionable. This script measures the other half — what a caller
+actually waits for at a shell prompt.
+
+For the in-process release figures, run the budgets themselves:
+
+    swift test -c release --filter Performance 2>&1 | grep BUDGET
+
+Every timing is the minimum of several runs, for the same reason the budgets
+are: one sample on a loaded machine is several times the true figure, and the
+minimum is what survives a neighbour building in another worktree.
+
+    scripts/perf-binary --config release
+    scripts/perf-binary --config debug --reps 7
+    scripts/perf-binary --binary /path/to/other/woodcase   # A/B another build
+
+Build the binary first — the script times it, it does not build it:
+
+    swift build -c release          # or: swift build
+
+See `Sources/Woodcase/Documentation.docc/WoodcasePerformance.md` for the budgets
+these figures sit beside.
+"""
+
+from __future__ import annotations
+
+import argparse
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+
+REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+FIXTURES = os.path.join(REPO, "Tests", "WoodcaseTests", "Fixtures")
+
+
+def best_of(command: list[str], reps: int) -> tuple[float, int, str]:
+    """Run `command` `reps` times; return the fastest wall time in ms, its exit
+    code, and the first line of any output the failing run produced."""
+    best = float("inf")
+    code = 0
+    message = ""
+    for _ in range(reps):
+        started = time.perf_counter()
+        done = subprocess.run(command, capture_output=True, text=True)
+        best = min(best, (time.perf_counter() - started) * 1000)
+        if done.returncode != 0:
+            code = done.returncode
+            message = (done.stderr or done.stdout).strip().split("\n")[0]
+    return best, code, message
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--config",
+        choices=("debug", "release"),
+        default="release",
+        help="Which build of the binary to time (default: release).",
+    )
+    parser.add_argument(
+        "--reps", type=int, default=5, help="Runs per figure; the minimum is reported."
+    )
+    parser.add_argument(
+        "--binary",
+        help="Time this binary instead of .build/<config>/woodcase — for an A/B "
+        "against a build of another commit, run back to back at the same load.",
+    )
+    args = parser.parse_args()
+
+    binary = args.binary or os.path.join(REPO, ".build", args.config, "woodcase")
+    if not os.path.exists(binary):
+        print(
+            f"No {args.config} binary at {binary}.\n"
+            f"Build it first:  swift build"
+            + (" -c release" if args.config == "release" else ""),
+            file=sys.stderr,
+        )
+        return 1
+
+    scratch = tempfile.mkdtemp(prefix="woodcase-perf-")
+    try:
+        largest = os.path.join(scratch, "woodcase-app.pen")
+        shutil.copy(os.path.join(FIXTURES, "woodcase-app.pen"), largest)
+        # kit.lib.pen's component sheet is a large top-level frame that is not a
+        # reusable *definition*, so `shot` can render all of it end to end.
+        shot_file = os.path.join(FIXTURES, "kit.lib.pen")
+        png = os.path.join(scratch, "shot.png")
+
+        figures = [
+            ("startup floor", [binary, "--help"]),
+            ("tree woodcase-app.pen", [binary, "tree", largest]),
+            (
+                "set woodcase-app.pen",
+                [binary, "set", largest, "ydnjs", "common.name=Perf"],
+            ),
+            (
+                "shot kit.lib.pen",
+                [
+                    binary,
+                    "shot",
+                    shot_file,
+                    "kit component sheet",
+                    "--out",
+                    png,
+                ],
+            ),
+        ]
+
+        label = args.binary or f"woodcase {args.config} binary"
+        print(f"# {label}, minimum of {args.reps} runs")
+        for name, command in figures:
+            elapsed, code, message = best_of(command, args.reps)
+            status = "" if code == 0 else f"  [exit {code}: {message}]"
+            print(f"{name:<28} {elapsed:8.1f} ms{status}")
+    finally:
+        shutil.rmtree(scratch, ignore_errors=True)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

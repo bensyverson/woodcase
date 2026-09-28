@@ -1,0 +1,133 @@
+#!/usr/bin/env python3
+"""gen-react-fx-fixtures — write the probe fixtures of React's inner shadows on SVG shapes and
+icons, and of painted strokes on full-width lines (leaf 4fZZ38, ReactRenderWebViewTests.gapFixtures),
+into Tests/WoodcaseTests/Fixtures:
+
+  render-inner-shadow-shapes.pen  inner shadows on polygons, paths (stroked, viewBox-stretched,
+                                  two shadows, a blended one, a gradient fill), a donut and an
+                                  arc, and on Lucide and Material Symbols icons
+  render-painted-lines.pen        lines whose stroke is a gradient or a stack of fills, full-width
+                                  (fill_container) and fixed, on grey; `fill-degenerate` holds the
+                                  ramps a zero-height box collapses, which Pen paints as a
+                                  split or black
+
+Usage:
+    scripts/gen-react-fx-fixtures [<out dir>]     (default: Tests/WoodcaseTests/Fixtures)
+    scripts/pen-oracle Tests/WoodcaseTests/Fixtures/<fixture>.pen --scale 2
+
+The second command (sandbox disabled, `pen` logged in) writes Pen's layout, its 2x export of
+each board and its re-save beside the fixture. Standard library only; runs sandboxed.
+"""
+
+import json, os, sys
+
+def inner(color="#000000CC", x=8, y=8, blur=12, blend=None):
+    shadow = {"type": "shadow", "shadowType": "inner", "color": color, "offset": {"x": x, "y": y}, "blur": blur}
+    if blend:
+        shadow["blendMode"] = blend
+    return shadow
+
+def outer(color="#00000099", x=6, y=6, blur=8):
+    return {"type": "shadow", "shadowType": "outer", "color": color, "offset": {"x": x, "y": y}, "blur": blur}
+
+def linear(rotation, colors=("#FF3B30", "#34C759", "#007AFF")):
+    return {
+        "type": "gradient", "gradientType": "linear", "rotation": rotation,
+        "colors": [{"color": c, "position": i / (len(colors) - 1)} for i, c in enumerate(colors)],
+    }
+
+BLUE = "#3B82F6"
+
+def board(prefix, index, name, children, fill="#E5E5E5", width=240, height=180, layout="none"):
+    return {
+        "type": "frame", "id": f"{prefix}{index:02d}f", "name": name,
+        "x": index * 300, "y": 0, "width": width, "height": height,
+        "layout": layout, "clip": True, "fill": fill,
+        "children": children,
+    }
+
+TRIANGLE = "M0 140 L90 0 L180 140 Z"
+STAR = "M50 0 L61 35 L98 35 L68 57 L79 91 L50 70 L21 91 L32 57 L2 35 L39 35 Z"
+
+shapes = [
+    ("polygon", {"type": "polygon", "id": "ish01", "x": 30, "y": 20, "width": 180, "height": 140,
+                 "polygonCount": 6, "fill": BLUE, "effect": inner()}),
+    ("path-stroked", {"type": "path", "id": "ish02", "x": 30, "y": 20, "width": 180, "height": 140,
+                      "geometry": TRIANGLE, "fill": BLUE, "stroke": "#FFFFFF", "strokeWidth": 8,
+                      "effect": inner(x=10, y=10, blur=8)}),
+    ("path-viewbox", {"type": "path", "id": "ish03", "x": 20, "y": 10, "width": 200, "height": 160,
+                      "geometry": STAR, "viewBox": [0, 0, 100, 100], "fill": BLUE, "effect": inner()}),
+    ("donut", {"type": "ellipse", "id": "ish04", "x": 30, "y": 20, "width": 180, "height": 140,
+               "innerRadius": 0.5, "fill": BLUE, "effect": inner()}),
+    ("arc", {"type": "ellipse", "id": "ish05", "x": 30, "y": 20, "width": 180, "height": 140,
+             "startAngle": 0, "sweepAngle": 270, "fill": BLUE, "effect": inner()}),
+    ("blended", {"type": "polygon", "id": "ish06", "x": 30, "y": 20, "width": 180, "height": 140,
+                 "polygonCount": 5, "fill": "#FFD60A",
+                 "effect": inner(color="#FF0000FF", x=0, y=0, blur=24, blend="multiply")}),
+    ("two-shadows", {"type": "path", "id": "ish07", "x": 30, "y": 20, "width": 180, "height": 140,
+                     "geometry": TRIANGLE, "fill": BLUE,
+                     "effect": [inner(color="#FFFFFFCC", x=-6, y=-6, blur=6), inner(color="#000000CC", x=8, y=8, blur=10)]}),
+    ("gradient-fill", {"type": "polygon", "id": "ish08", "x": 30, "y": 20, "width": 180, "height": 140,
+                       "polygonCount": 6, "fill": linear(45), "effect": inner(x=-8, y=10, blur=14)}),
+    ("icon-lucide", {"type": "icon", "id": "ish09", "x": 50, "y": 20, "width": 140, "height": 140,
+                     "library": "lucide", "icon": "heart", "fill": BLUE, "effect": inner(x=6, y=6, blur=6)}),
+    ("icon-material", {"type": "icon", "id": "ish10", "x": 50, "y": 20, "width": 140, "height": 140,
+                       "library": "Material Symbols Rounded", "icon": "favorite", "fill": BLUE,
+                       "effect": inner(x=6, y=6, blur=6)}),
+    ("icon-both", {"type": "icon", "id": "ish11", "x": 50, "y": 20, "width": 140, "height": 140,
+                   "library": "Material Symbols Rounded", "icon": "star", "fill": "#FFD60A",
+                   "effect": [outer(), inner(color="#FF3B30FF", x=0, y=8, blur=10)]}),
+]
+
+def full_width(lid, stroke, width=6):
+    return {"type": "line", "id": lid, "width": "fill_container", "height": 0, "stroke": stroke, "strokeWidth": width}
+
+RADIAL = {"type": "gradient", "gradientType": "radial",
+          "colors": [{"color": "#FFFFFF", "position": 0}, {"color": "#FF2D55", "position": 1}]}
+
+def full_width_board(prefix, lines, gap=24):
+    return [{
+        "type": "frame", "id": f"{prefix}n", "x": 20, "y": 20, "width": 200, "height": 140, "layout": "vertical",
+        "gap": gap, "padding": 20, "fill": "#333333",
+        "children": lines,
+    }]
+
+painted_lines = [
+    # Ramps that run along the line.
+    ("fill-gradients", full_width_board("pl01", [
+        full_width("pl01a", linear(90)),
+        full_width("pl01b", linear(270), width=12),
+    ])),
+    ("fill-stack", [{
+        "type": "frame", "id": "pl02n", "x": 20, "y": 20, "width": 200, "height": 140, "layout": "vertical",
+        "gap": 30, "padding": 24, "fill": "#333333",
+        "children": [
+            full_width("pl02a", ["#FF9500", {"type": "color", "color": "#007AFF80"}], width=10),
+            full_width("pl02b", [linear(90, ("#FFFFFF", "#000000")), {"type": "color", "color": "#FF000080",
+                                                                       "blendMode": "multiply"}], width=14),
+        ],
+    }]),
+    # Ramps with a component across the line, which a zero-height box collapses: Pen paints
+    # a slanted ramp as its two end colours split at the line, and a vertical or radial one
+    # black.
+    ("fill-degenerate", full_width_board("pl04", [
+        full_width("pl04a", linear(0), width=16),
+        full_width("pl04b", RADIAL, width=12),
+        full_width("pl04c", linear(45), width=16),
+    ])),
+    ("fixed", [
+        {"type": "line", "id": "pl03a", "x": 30, "y": 50, "width": 180, "height": 0, "stroke": linear(90), "strokeWidth": 10},
+        {"type": "line", "id": "pl03b", "x": 30, "y": 110, "width": 180, "height": 0,
+         "stroke": ["#FF9500", {"type": "color", "color": "#007AFF80"}], "strokeWidth": 10},
+    ]),
+]
+
+FIXTURES = {
+    "render-inner-shadow-shapes": [board("is", i + 1, n, [c]) for i, (n, c) in enumerate(shapes)],
+    "render-painted-lines": [board("pl", i + 1, n, c, fill="#808080") for i, (n, c) in enumerate(painted_lines)],
+}
+
+out_dir = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(__file__), "..", "Tests", "WoodcaseTests", "Fixtures")
+for name, boards in FIXTURES.items():
+    with open(os.path.join(out_dir, name + ".pen"), "w") as f:
+        json.dump({"version": "2.19", "children": boards}, f, indent=2)

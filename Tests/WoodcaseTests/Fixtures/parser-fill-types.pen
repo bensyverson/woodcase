@@ -1,0 +1,99 @@
+{
+  "children": [
+    {
+      "fill": {
+        "color": "#FF6600",
+        "type": "color"
+      },
+      "height": 100,
+      "id": "solid",
+      "type": "rectangle",
+      "width": 100
+    },
+    {
+      "fill": {
+        "colors": [
+          {
+            "color": "#FF0000",
+            "position": 0
+          },
+          {
+            "color": "#00FF00",
+            "position": 0.5
+          },
+          {
+            "color": "#0000FF",
+            "position": 1
+          }
+        ],
+        "gradientType": "linear",
+        "rotation": 90,
+        "type": "gradient"
+      },
+      "height": 100,
+      "id": "linear-grad",
+      "type": "rectangle",
+      "width": 100
+    },
+    {
+      "fill": {
+        "colors": [
+          {
+            "color": "#FFFFFF",
+            "position": 0
+          },
+          {
+            "color": "#000000",
+            "position": 1
+          }
+        ],
+        "gradientType": "radial",
+        "type": "gradient"
+      },
+      "height": 100,
+      "id": "radial-grad",
+      "type": "rectangle",
+      "width": 100
+    },
+    {
+      "fill": {
+        "colors": [
+          {
+            "color": "#FF0000",
+            "position": 0
+          },
+          {
+            "color": "#00FF00",
+            "position": 0.33
+          },
+          {
+            "color": "#0000FF",
+            "position": 0.66
+          },
+          {
+            "color": "#FF0000",
+            "position": 1
+          }
+        ],
+        "gradientType": "angular",
+        "type": "gradient"
+      },
+      "height": 100,
+      "id": "angular-grad",
+      "type": "rectangle",
+      "width": 100
+    },
+    {
+      "fill": {
+        "mode": "fill",
+        "type": "image",
+        "url": "https://example.com/texture.png"
+      },
+      "height": 100,
+      "id": "image-fill",
+      "type": "rectangle",
+      "width": 100
+    }
+  ],
+  "version": "2.17"
+}

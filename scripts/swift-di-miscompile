@@ -1,0 +1,91 @@
+#!/bin/bash
+# swift-di-miscompile — is the Swift optimizer still miscompiling the
+# declared-but-unassigned `var` inside a generic function?
+#
+# Swift 6.3.3 (swiftlang-6.3.3.1.3) emits, at -O without whole-module
+# optimization, an *unguarded* release of the previous value of a
+# declared-but-unassigned local `var` whose type mixes a native class with a
+# generic parameter and which is assigned inside a loop. On the first iteration
+# there is no previous value, so `swift_release` runs on whatever register the
+# preceding call left behind. See
+# project/2026-08-30-release-only-ctfont-sigtrap.md.
+#
+# `PenTextMeasurerFontCacheTests.undisturbed` is written the long way around
+# because of this. Run this script after a toolchain update: when it prints
+# FIXED, that helper can go back to the obvious shape.
+#
+# Usage: scripts/swift-di-miscompile
+# Exit:  0 the toolchain still miscompiles it (workaround still needed)
+#        1 the toolchain no longer miscompiles it (workaround can be retired)
+#        2 could not run
+#
+# Needs the Bash sandbox disabled — see project/agents/harness.md.
+set -u
+
+work=$(mktemp -d) || exit 2
+trap 'rm -rf "$work"' EXIT
+src="$work/case.swift"
+
+cat > "$src" <<'SWIFT'
+import CoreText
+import Foundation
+
+final class Box { var fonts: [String: CTFont] = [:] }
+
+func makeFont() -> CTFont {
+    let descriptor = CTFontDescriptorCreateWithAttributes(
+        [kCTFontFamilyNameAttribute: "Helvetica"] as CFDictionary
+    )
+    return CTFontCreateWithFontDescriptor(descriptor, 14, nil)
+}
+
+func resolve(_ box: Box) -> CTFont {
+    if let cached = box.fonts["k"] { return cached }
+    let font = makeFont()
+    box.fonts["k"] = font
+    return font
+}
+
+nonisolated(unsafe) var generation = 0
+
+func undisturbed<T>(_ body: (Box) -> T) -> (box: Box, value: T) {
+    var result: (box: Box, value: T)
+    var attempt = 0
+    repeat {
+        let box = Box()
+        let before = generation
+        result = (box, body(box))
+        if generation == before { return result }
+        attempt += 1
+    } while attempt < 5
+    return result
+}
+
+func go() {
+    let (box, fonts) = undisturbed { box in (resolve(box), resolve(box)) }
+    print("identical=\(fonts.0 === fonts.1) count=\(box.fonts.count)")
+}
+
+go()
+print("SURVIVED")
+SWIFT
+
+if ! xcrun swiftc -O -swift-version 6 "$src" -o "$work/case" 2> "$work/build.log"; then
+    echo "could not build the case:"
+    cat "$work/build.log"
+    exit 2
+fi
+
+# Run in a child shell so this one does not print its own "Bus error" notice.
+bash -c '"$0" > "$1" 2>&1' "$work/case" "$work/run.log" 2>/dev/null
+status=$?
+
+echo "toolchain: $(xcrun swiftc --version | head -1)"
+if [ "$status" -eq 0 ]; then
+    echo "FIXED — the case ran clean (exit 0). The undisturbed() workaround in"
+    echo "Tests/WoodcaseTests/PenTextMeasurerFontCacheTests.swift can be retired."
+    exit 1
+fi
+echo "STILL BROKEN — the case died with exit $status (128+signal)."
+echo "Keep the workaround in PenTextMeasurerFontCacheTests.undisturbed."
+exit 0

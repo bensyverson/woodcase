@@ -1,0 +1,264 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "fill": {
+            "colors": [
+              {
+                "color": "#FF0000",
+                "position": 0
+              },
+              {
+                "color": "#0000FF",
+                "position": 1
+              }
+            ],
+            "enabled": true,
+            "gradientType": "linear",
+            "rotation": 0,
+            "size": {
+              "height": 1
+            },
+            "type": "gradient"
+          },
+          "height": 120,
+          "id": "YodO0",
+          "name": "linear-top-bottom",
+          "type": "rectangle",
+          "width": 120
+        },
+        {
+          "fill": {
+            "colors": [
+              {
+                "color": "#FF0000",
+                "position": 0
+              },
+              {
+                "color": "#0000FF",
+                "position": 1
+              }
+            ],
+            "enabled": true,
+            "gradientType": "linear",
+            "rotation": 90,
+            "size": {
+              "height": 1
+            },
+            "type": "gradient"
+          },
+          "height": 120,
+          "id": "vKzPP",
+          "name": "linear-left-right",
+          "type": "rectangle",
+          "width": 120
+        },
+        {
+          "fill": {
+            "colors": [
+              {
+                "color": "#FF0000",
+                "position": 0
+              },
+              {
+                "color": "#FFFF00",
+                "position": 0.5
+              },
+              {
+                "color": "#0000FF",
+                "position": 1
+              }
+            ],
+            "enabled": true,
+            "gradientType": "linear",
+            "rotation": 0,
+            "size": {
+              "height": 1
+            },
+            "type": "gradient"
+          },
+          "height": 120,
+          "id": "uOnxU",
+          "name": "linear-3-stop",
+          "type": "rectangle",
+          "width": 120
+        },
+        {
+          "fill": {
+            "colors": [
+              {
+                "color": "#FFFFFF",
+                "position": 0
+              },
+              {
+                "color": "#000000",
+                "position": 1
+              }
+            ],
+            "enabled": true,
+            "gradientType": "radial",
+            "rotation": 0,
+            "size": {
+              "height": 1,
+              "width": 1
+            },
+            "type": "gradient"
+          },
+          "height": 120,
+          "id": "Aa9bg",
+          "name": "radial",
+          "type": "rectangle",
+          "width": 120
+        },
+        {
+          "fill": {
+            "colors": [
+              {
+                "color": "#FF0000",
+                "position": 0
+              },
+              {
+                "color": "#00FF00",
+                "position": 0.33
+              },
+              {
+                "color": "#0000FF",
+                "position": 0.66
+              },
+              {
+                "color": "#FF0000",
+                "position": 1
+              }
+            ],
+            "enabled": true,
+            "gradientType": "angular",
+            "rotation": 0,
+            "size": {
+              "height": 1,
+              "width": 1
+            },
+            "type": "gradient"
+          },
+          "height": 120,
+          "id": "vjmna",
+          "name": "angular",
+          "type": "rectangle",
+          "width": 120
+        },
+        {
+          "fill": {
+            "colors": [
+              {
+                "color": "#FF8800",
+                "position": 0
+              },
+              {
+                "color": "#8800FF",
+                "position": 1
+              }
+            ],
+            "enabled": true,
+            "gradientType": "linear",
+            "rotation": 45,
+            "size": {
+              "height": 1
+            },
+            "type": "gradient"
+          },
+          "height": 120,
+          "id": "UZYMR",
+          "name": "ellipse-gradient",
+          "type": "ellipse",
+          "width": 120
+        }
+      ],
+      "fill": "#FFFFFF",
+      "gap": 24,
+      "id": "mZWB6",
+      "name": "render-gradients",
+      "padding": 32,
+      "type": "frame",
+      "x": 0,
+      "y": 0
+    },
+    {
+      "children": [
+        {
+          "fill": [
+            "#00FF00",
+            {
+              "colors": [
+                {
+                  "color": "#FF0000",
+                  "position": 0
+                },
+                {
+                  "color": "#0000FF",
+                  "position": 1
+                }
+              ],
+              "enabled": true,
+              "gradientType": "linear",
+              "opacity": 0.5,
+              "rotation": 0,
+              "size": {
+                "height": 1
+              },
+              "type": "gradient"
+            }
+          ],
+          "height": 120,
+          "id": "rOebR",
+          "name": "gradient-opacity",
+          "type": "rectangle",
+          "width": 120,
+          "x": 30,
+          "y": 40
+        },
+        {
+          "fill": [
+            "#FF0000",
+            {
+              "blendMode": "multiply",
+              "colors": [
+                {
+                  "color": "#FFFFFF",
+                  "position": 0
+                },
+                {
+                  "color": "#0000FF",
+                  "position": 1
+                }
+              ],
+              "enabled": true,
+              "gradientType": "linear",
+              "rotation": 0,
+              "size": {
+                "height": 1
+              },
+              "type": "gradient"
+            }
+          ],
+          "height": 120,
+          "id": "BSVhF",
+          "name": "gradient-blendmode",
+          "type": "rectangle",
+          "width": 120,
+          "x": 200,
+          "y": 40
+        }
+      ],
+      "fill": "#FFFFFF",
+      "height": 200,
+      "id": "UsS56",
+      "layout": "none",
+      "name": "gradient-extras",
+      "type": "frame",
+      "width": 400,
+      "x": 0,
+      "y": 400
+    }
+  ],
+  "version": "2.17"
+}

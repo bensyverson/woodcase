@@ -1,0 +1,437 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "Allip",
+      "name": "ellip-top12",
+      "x": 0,
+      "y": 0,
+      "width": 200,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "ellipse",
+          "id": "pE1a2",
+          "x": 30,
+          "y": 30,
+          "width": 140,
+          "height": 100,
+          "fill": "#DDDDDD",
+          "stroke": "#FF0000",
+          "strokeWidth": {
+            "top": 12,
+            "right": 2,
+            "bottom": 6,
+            "left": 0
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Aolyg",
+      "name": "polyg-top12",
+      "x": 300,
+      "y": 0,
+      "width": 200,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "polygon",
+          "id": "pQ1b3",
+          "x": 30,
+          "y": 30,
+          "width": 140,
+          "height": 100,
+          "polygonCount": 6,
+          "fill": "#DDDDDD",
+          "stroke": "#FF0000",
+          "strokeWidth": {
+            "top": 12,
+            "right": 2,
+            "bottom": 6,
+            "left": 0
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Aathx",
+      "name": "pathx-top12",
+      "x": 600,
+      "y": 0,
+      "width": 200,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "path",
+          "id": "pP1c4",
+          "x": 30,
+          "y": 30,
+          "width": 140,
+          "height": 100,
+          "geometry": "M0 100 L70 0 L140 100 Z",
+          "fill": "#DDDDDD",
+          "stroke": "#FF0000",
+          "strokeWidth": {
+            "top": 12,
+            "right": 2,
+            "bottom": 6,
+            "left": 0
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Bllip",
+      "name": "ellip-top2",
+      "x": 0,
+      "y": 200,
+      "width": 200,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "ellipse",
+          "id": "pE2d5",
+          "x": 30,
+          "y": 30,
+          "width": 140,
+          "height": 100,
+          "fill": "#DDDDDD",
+          "stroke": "#FF0000",
+          "strokeWidth": {
+            "top": 2,
+            "right": 10,
+            "bottom": 4,
+            "left": 6
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Bolyg",
+      "name": "polyg-top2",
+      "x": 300,
+      "y": 200,
+      "width": 200,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "polygon",
+          "id": "pQ2e6",
+          "x": 30,
+          "y": 30,
+          "width": 140,
+          "height": 100,
+          "polygonCount": 6,
+          "fill": "#DDDDDD",
+          "stroke": "#FF0000",
+          "strokeWidth": {
+            "top": 2,
+            "right": 10,
+            "bottom": 4,
+            "left": 6
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Bathx",
+      "name": "pathx-top2",
+      "x": 600,
+      "y": 200,
+      "width": 200,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "path",
+          "id": "pP2f7",
+          "x": 30,
+          "y": 30,
+          "width": 140,
+          "height": 100,
+          "geometry": "M0 100 L70 0 L140 100 Z",
+          "fill": "#DDDDDD",
+          "stroke": "#FF0000",
+          "strokeWidth": {
+            "top": 2,
+            "right": 10,
+            "bottom": 4,
+            "left": 6
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Cllip",
+      "name": "ellip-inner",
+      "x": 0,
+      "y": 400,
+      "width": 200,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "ellipse",
+          "id": "pE3i0",
+          "x": 30,
+          "y": 30,
+          "width": 140,
+          "height": 100,
+          "fill": "#DDDDDD",
+          "stroke": "#FF0000",
+          "strokeWidth": {
+            "top": 12,
+            "right": 2,
+            "bottom": 6,
+            "left": 0
+          },
+          "strokeAlignment": "inner"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Colyg",
+      "name": "polyg-inner",
+      "x": 300,
+      "y": 400,
+      "width": 200,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "polygon",
+          "id": "pQ3i1",
+          "x": 30,
+          "y": 30,
+          "width": 140,
+          "height": 100,
+          "fill": "#DDDDDD",
+          "polygonCount": 6,
+          "stroke": "#FF0000",
+          "strokeWidth": {
+            "top": 12,
+            "right": 2,
+            "bottom": 6,
+            "left": 0
+          },
+          "strokeAlignment": "inner"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Cathx",
+      "name": "pathx-inner",
+      "x": 600,
+      "y": 400,
+      "width": 200,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "path",
+          "id": "pP3i2",
+          "x": 30,
+          "y": 30,
+          "width": 140,
+          "height": 100,
+          "fill": "#DDDDDD",
+          "geometry": "M0 100 L70 0 L140 100 Z",
+          "stroke": "#FF0000",
+          "strokeWidth": {
+            "top": 12,
+            "right": 2,
+            "bottom": 6,
+            "left": 0
+          },
+          "strokeAlignment": "inner"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Dllip",
+      "name": "ellip-outer",
+      "x": 0,
+      "y": 600,
+      "width": 200,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "ellipse",
+          "id": "pE4o0",
+          "x": 30,
+          "y": 30,
+          "width": 140,
+          "height": 100,
+          "fill": "#DDDDDD",
+          "stroke": "#FF0000",
+          "strokeWidth": {
+            "top": 12,
+            "right": 2,
+            "bottom": 6,
+            "left": 0
+          },
+          "strokeAlignment": "outer"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Dolyg",
+      "name": "polyg-outer",
+      "x": 300,
+      "y": 600,
+      "width": 200,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "polygon",
+          "id": "pQ4o1",
+          "x": 30,
+          "y": 30,
+          "width": 140,
+          "height": 100,
+          "fill": "#DDDDDD",
+          "polygonCount": 6,
+          "stroke": "#FF0000",
+          "strokeWidth": {
+            "top": 12,
+            "right": 2,
+            "bottom": 6,
+            "left": 0
+          },
+          "strokeAlignment": "outer"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Dathx",
+      "name": "pathx-outer",
+      "x": 600,
+      "y": 600,
+      "width": 200,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "path",
+          "id": "pP4o2",
+          "x": 30,
+          "y": 30,
+          "width": 140,
+          "height": 100,
+          "fill": "#DDDDDD",
+          "geometry": "M0 100 L70 0 L140 100 Z",
+          "stroke": "#FF0000",
+          "strokeWidth": {
+            "top": 12,
+            "right": 2,
+            "bottom": 6,
+            "left": 0
+          },
+          "strokeAlignment": "outer"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Enotp",
+      "name": "ellip-notop",
+      "x": 0,
+      "y": 800,
+      "width": 200,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "ellipse",
+          "id": "pE5n0",
+          "x": 30,
+          "y": 30,
+          "width": 140,
+          "height": 100,
+          "fill": "#DDDDDD",
+          "stroke": "#FF0000",
+          "strokeWidth": {
+            "right": 10,
+            "bottom": 4,
+            "left": 6
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Eline",
+      "name": "line-top12",
+      "x": 300,
+      "y": 800,
+      "width": 200,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "line",
+          "id": "pL5l1",
+          "x": 30,
+          "y": 80,
+          "width": 140,
+          "height": 0,
+          "stroke": "#FF0000",
+          "strokeWidth": {
+            "top": 12,
+            "right": 2,
+            "bottom": 6,
+            "left": 0
+          }
+        }
+      ]
+    }
+  ]
+}

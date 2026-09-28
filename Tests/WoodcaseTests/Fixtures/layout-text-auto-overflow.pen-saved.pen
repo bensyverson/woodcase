@@ -1,0 +1,39 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "tfG00",
+      "x": 0,
+      "y": 0,
+      "name": "layout-text-auto-overflow",
+      "clip": true,
+      "width": 200,
+      "fill": "#F3F4F6",
+      "gap": 8,
+      "padding": 12,
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "text",
+          "id": "tfG01",
+          "name": "auto-long",
+          "fill": "#1F2937",
+          "content": "This label is longer than its row",
+          "fontFamily": "IBM Plex Sans",
+          "fontSize": 14,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "id": "tfG02",
+          "name": "fill-bar",
+          "fill": "#10B981",
+          "width": "fill_container",
+          "height": 16
+        }
+      ]
+    }
+  ],
+  "fileToken": "f264b3bb-ffc2-493f-a73c-8bedf7a6e422"
+}

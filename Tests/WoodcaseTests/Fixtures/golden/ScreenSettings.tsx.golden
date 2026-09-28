@@ -1,0 +1,495 @@
+import { ChevronRight, SlidersHorizontal } from "lucide-react";
+import { cn } from "../lib/cn";
+import { ActionButton } from "./ActionButton";
+import { StatusBar } from "./StatusBar";
+import { TabBar } from "./TabBar";
+import { Toggle } from "./Toggle";
+
+interface ScreenSettingsProps {
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+export function ScreenSettings({
+  className,
+  style,
+}: ScreenSettingsProps) {
+  return (
+    <div
+      className={cn("flex flex-col", className)}
+      style={{
+        width: 402,
+        height: 874,
+        backgroundColor: "var(--bg-page)",
+        overflow: "hidden",
+        ...style,
+      }}
+    >
+      <StatusBar
+        style={{
+          width: "100%",
+          flexShrink: 0,
+        }}
+      />
+      <div
+        className="flex items-center justify-between"
+        style={{
+          width: "100%",
+          padding: "0px 24px",
+        }}
+      >
+        <p
+          style={{
+            color: "var(--text-primary)",
+            fontFamily: "var(--font-primary)",
+            fontSize: 36,
+            fontWeight: 600,
+            letterSpacing: -0.5,
+            lineHeight: 1.05,
+            fontOpticalSizing: "none",
+            whiteSpace: "pre",
+            marginTop: 0.6,
+            marginBottom: -0.6,
+          }}
+        >
+          Settings
+        </p>
+        <SlidersHorizontal size={20} color="var(--text-primary)"
+          style={{
+            flexShrink: 0,
+          }}
+        />
+      </div>
+      <div
+        className="flex flex-col gap-6"
+        style={{
+          width: "100%",
+          flex: 1,
+          minHeight: 0,
+          padding: "20px 24px",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          className="flex flex-col"
+          style={{
+            width: "100%",
+            gap: "var(--spacing-sm)",
+          }}
+        >
+          <p
+            style={{
+              color: "var(--text-secondary)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 12,
+              fontWeight: 600,
+              letterSpacing: 1,
+              lineHeight: "16px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.5,
+              marginBottom: 0.5,
+            }}
+          >
+            Profile
+          </p>
+          {/* Customized from: TextInput */}
+          <div
+            className="flex flex-col gap-1.5"
+            style={{
+              width: "100%",
+              height: "fit-content",
+            }}
+          >
+            <p
+              style={{
+                color: "var(--text-secondary)",
+                fontFamily: "var(--font-primary)",
+                fontSize: 12,
+                fontWeight: 500,
+                lineHeight: "16px",
+                fontOpticalSizing: "none",
+                whiteSpace: "pre",
+                marginTop: -0.5,
+                marginBottom: 0.5,
+              }}
+            >
+              Display Name
+            </p>
+            <div
+              className="flex"
+              style={{
+                width: "100%",
+                height: "fit-content",
+                backgroundColor: "var(--bg-warm)",
+                borderRadius: 10,
+                padding: "var(--spacing-sm)",
+                boxShadow: "inset 0 0 0 1px var(--border-default)",
+              }}
+            >
+              <p
+                style={{
+                  color: "var(--text-muted)",
+                  fontFamily: "var(--font-primary)",
+                  fontSize: 14,
+                  fontWeight: "normal",
+                  lineHeight: "18px",
+                  fontOpticalSizing: "none",
+                  whiteSpace: "pre",
+                  marginTop: -0.25,
+                  marginBottom: 0.25,
+                }}
+              >
+                Your name
+              </p>
+            </div>
+          </div>
+          {/* Customized from: TextInput */}
+          <div
+            className="flex flex-col gap-1.5"
+            style={{
+              width: "100%",
+              height: "fit-content",
+            }}
+          >
+            <p
+              style={{
+                color: "var(--text-secondary)",
+                fontFamily: "var(--font-primary)",
+                fontSize: 12,
+                fontWeight: 500,
+                lineHeight: "16px",
+                fontOpticalSizing: "none",
+                whiteSpace: "pre",
+                marginTop: -0.5,
+                marginBottom: 0.5,
+              }}
+            >
+              Email
+            </p>
+            <div
+              className="flex"
+              style={{
+                width: "100%",
+                height: "fit-content",
+                backgroundColor: "var(--bg-warm)",
+                borderRadius: 10,
+                padding: "var(--spacing-sm)",
+                boxShadow: "inset 0 0 0 1px var(--border-default)",
+              }}
+            >
+              <p
+                style={{
+                  color: "var(--text-muted)",
+                  fontFamily: "var(--font-primary)",
+                  fontSize: 14,
+                  fontWeight: "normal",
+                  lineHeight: "18px",
+                  fontOpticalSizing: "none",
+                  whiteSpace: "pre",
+                  marginTop: -0.25,
+                  marginBottom: 0.25,
+                }}
+              >
+                you@example.com
+              </p>
+            </div>
+          </div>
+        </div>
+        <div
+          className="flex flex-col"
+          style={{
+            width: "100%",
+            gap: "var(--spacing-sm)",
+          }}
+        >
+          <p
+            style={{
+              color: "var(--text-secondary)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 12,
+              fontWeight: 600,
+              letterSpacing: 1,
+              lineHeight: "16px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.5,
+              marginBottom: 0.5,
+            }}
+          >
+            Preferences
+          </p>
+          {/* Customized from: ToggleRow */}
+          <div
+            className="flex items-center justify-between"
+            style={{
+              width: "100%",
+              height: "fit-content",
+            }}
+          >
+            <p
+              style={{
+                color: "var(--text-primary)",
+                fontFamily: "var(--font-primary)",
+                fontSize: 14,
+                fontWeight: 500,
+                lineHeight: "18px",
+                fontOpticalSizing: "none",
+                whiteSpace: "pre",
+                marginTop: -0.25,
+                marginBottom: 0.25,
+              }}
+            >
+              Dark Mode
+            </p>
+            <Toggle
+              style={{
+                flexShrink: 0,
+              }}
+            />
+          </div>
+          {/* Customized from: ToggleRow */}
+          <div
+            className="flex items-center justify-between"
+            style={{
+              width: "100%",
+              height: "fit-content",
+            }}
+          >
+            <p
+              style={{
+                color: "var(--text-primary)",
+                fontFamily: "var(--font-primary)",
+                fontSize: 14,
+                fontWeight: 500,
+                lineHeight: "18px",
+                fontOpticalSizing: "none",
+                whiteSpace: "pre",
+                marginTop: -0.25,
+                marginBottom: 0.25,
+              }}
+            >
+              Notifications
+            </p>
+            <Toggle
+              style={{
+                flexShrink: 0,
+              }}
+            />
+          </div>
+          {/* Customized from: SelectRow */}
+          <div
+            className="flex items-center justify-between"
+            style={{
+              width: "100%",
+              height: "fit-content",
+            }}
+          >
+            <p
+              style={{
+                color: "var(--text-primary)",
+                fontFamily: "var(--font-primary)",
+                fontSize: 14,
+                fontWeight: 500,
+                lineHeight: "18px",
+                fontOpticalSizing: "none",
+                whiteSpace: "pre",
+                marginTop: -0.25,
+                marginBottom: 0.25,
+              }}
+            >
+              Default Grade
+            </p>
+            <div
+              className="flex items-center gap-1"
+              style={{
+                width: "fit-content",
+                height: "fit-content",
+              }}
+            >
+              <p
+                style={{
+                  color: "var(--text-secondary)",
+                  fontFamily: "var(--font-primary)",
+                  fontSize: 14,
+                  fontWeight: "normal",
+                  lineHeight: "18px",
+                  fontOpticalSizing: "none",
+                  whiteSpace: "pre",
+                  marginTop: -0.25,
+                  marginBottom: 0.25,
+                }}
+              >
+                HB
+              </p>
+              <ChevronRight size={16} color="var(--text-muted)"
+                style={{
+                  flexShrink: 0,
+                }}
+              />
+            </div>
+          </div>
+        </div>
+        <div
+          className="flex flex-col"
+          style={{
+            width: "100%",
+            gap: "var(--spacing-sm)",
+          }}
+        >
+          <p
+            style={{
+              color: "var(--text-secondary)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 12,
+              fontWeight: 600,
+              letterSpacing: 1,
+              lineHeight: "16px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.5,
+              marginBottom: 0.5,
+            }}
+          >
+            Collection
+          </p>
+          {/* Customized from: ToggleRow */}
+          <div
+            className="flex items-center justify-between"
+            style={{
+              width: "100%",
+              height: "fit-content",
+            }}
+          >
+            <p
+              style={{
+                color: "var(--text-primary)",
+                fontFamily: "var(--font-primary)",
+                fontSize: 14,
+                fontWeight: 500,
+                lineHeight: "18px",
+                fontOpticalSizing: "none",
+                whiteSpace: "pre",
+                marginTop: -0.25,
+                marginBottom: 0.25,
+              }}
+            >
+              Show Ratings
+            </p>
+            <Toggle
+              style={{
+                flexShrink: 0,
+              }}
+            />
+          </div>
+          {/* Customized from: ToggleRow */}
+          <div
+            className="flex items-center justify-between"
+            style={{
+              width: "100%",
+              height: "fit-content",
+            }}
+          >
+            <p
+              style={{
+                color: "var(--text-primary)",
+                fontFamily: "var(--font-primary)",
+                fontSize: 14,
+                fontWeight: 500,
+                lineHeight: "18px",
+                fontOpticalSizing: "none",
+                whiteSpace: "pre",
+                marginTop: -0.25,
+                marginBottom: 0.25,
+              }}
+            >
+              Auto-sort
+            </p>
+            <Toggle
+              style={{
+                flexShrink: 0,
+              }}
+            />
+          </div>
+        </div>
+        <div
+          className="flex flex-col"
+          style={{
+            width: "100%",
+            gap: "var(--spacing-sm)",
+          }}
+        >
+          <p
+            style={{
+              color: "var(--text-secondary)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 12,
+              fontWeight: 600,
+              letterSpacing: 1,
+              lineHeight: "16px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.5,
+              marginBottom: 0.5,
+            }}
+          >
+            Danger Zone
+          </p>
+          <ActionButton label="Export Data"
+            style={{
+              height: "fit-content",
+              width: "100%",
+              flexShrink: 0,
+            }}
+          />
+          <ActionButton label="Delete Account"
+            style={{
+              backgroundColor: "var(--status-negative)",
+              height: "fit-content",
+              width: "100%",
+              flexShrink: 0,
+            }}
+          />
+        </div>
+        <div
+          className="flex flex-col items-center gap-1"
+          style={{
+            width: "100%",
+          }}
+        >
+          <p
+            style={{
+              color: "var(--text-muted)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 12,
+              fontWeight: "normal",
+              lineHeight: "16px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.5,
+              marginBottom: 0.5,
+            }}
+          >
+            Woodcase v1.0.0
+          </p>
+          <p
+            style={{
+              color: "var(--accent)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 13,
+              fontWeight: 500,
+              lineHeight: "17px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.375,
+              marginBottom: 0.375,
+            }}
+          >
+            About
+          </p>
+        </div>
+      </div>
+      <TabBar />
+    </div>
+  );
+}

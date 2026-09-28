@@ -1,0 +1,34 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "id": "Rt001",
+      "name": "Screen",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "width": 200,
+      "height": 300,
+      "layout": "none",
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "id": "Ovr01",
+          "name": "ScrollList",
+          "type": "rectangle",
+          "x": 0,
+          "y": 40,
+          "width": 200,
+          "height": 400,
+          "fill": "#00FF00"
+        },
+        {
+          "id": "Rf001",
+          "name": "Chip",
+          "type": "ref",
+          "ref": "Gone1"
+        }
+      ]
+    }
+  ]
+}

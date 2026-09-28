@@ -1,0 +1,33 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "AIxNK",
+      "name": "script",
+      "x": 0,
+      "y": 0,
+      "width": 200,
+      "height": 100,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "clip": true,
+      "children": [
+        {
+          "type": "script",
+          "id": "lqsaj",
+          "name": "bars",
+          "x": 10,
+          "y": 10,
+          "width": 180,
+          "height": 80,
+          "scriptUri": "./script-bars.js",
+          "inputs": {
+            "rows": 4,
+            "color": "#FF0000"
+          }
+        }
+      ]
+    }
+  ]
+}

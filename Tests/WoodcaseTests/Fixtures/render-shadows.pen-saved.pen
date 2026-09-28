@@ -1,0 +1,327 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "shS01",
+      "x": 0,
+      "y": 0,
+      "name": "inner-under-stroke",
+      "clip": true,
+      "width": 200,
+      "height": 200,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "shS02",
+          "x": 40,
+          "y": 40,
+          "name": "card",
+          "fill": "#FFFFFF",
+          "width": 120,
+          "height": 120,
+          "stroke": "#0000FF",
+          "strokeWidth": 12,
+          "strokeAlignment": "inner",
+          "effect": {
+            "type": "shadow",
+            "shadowType": "inner",
+            "color": "#000000FF",
+            "offset": {
+              "x": 8,
+              "y": 8
+            },
+            "blur": 16
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "shC01",
+      "x": 240,
+      "y": 0,
+      "name": "inner-under-child",
+      "clip": true,
+      "width": 200,
+      "height": 200,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "shC02",
+          "x": 30,
+          "y": 30,
+          "name": "card",
+          "width": 140,
+          "height": 140,
+          "fill": "#FFFFFF",
+          "effect": {
+            "type": "shadow",
+            "shadowType": "inner",
+            "color": "#000000FF",
+            "blur": 24
+          },
+          "layout": "none",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "shC03",
+              "x": 0,
+              "y": 0,
+              "name": "chip",
+              "fill": "#FF8800",
+              "width": 60,
+              "height": 60
+            },
+            {
+              "type": "rectangle",
+              "id": "shC04",
+              "x": 90,
+              "y": 40,
+              "name": "bar",
+              "fill": "#00AA44",
+              "width": 50,
+              "height": 100
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "shO01",
+      "x": 480,
+      "y": 0,
+      "name": "outer-and-inner",
+      "clip": true,
+      "width": 200,
+      "height": 200,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "cornerRadius": 12,
+          "id": "shO02",
+          "x": 40,
+          "y": 30,
+          "name": "card",
+          "fill": "#FFFFFF",
+          "width": 120,
+          "height": 120,
+          "stroke": "#333333",
+          "strokeWidth": 2,
+          "effect": [
+            {
+              "type": "shadow",
+              "shadowType": "outer",
+              "color": "#00000080",
+              "offset": {
+                "x": 0,
+                "y": 8
+              },
+              "blur": 16
+            },
+            {
+              "type": "shadow",
+              "shadowType": "inner",
+              "color": "#FFAA00FF",
+              "offset": {
+                "x": 0,
+                "y": -4
+              },
+              "blur": 6
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "shE01",
+      "x": 720,
+      "y": 0,
+      "name": "inner-ellipse",
+      "clip": true,
+      "width": 200,
+      "height": 200,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "ellipse",
+          "id": "shE02",
+          "x": 40,
+          "y": 40,
+          "name": "disc",
+          "fill": "#DDEEFF",
+          "width": 120,
+          "height": 120,
+          "stroke": "#224488",
+          "strokeWidth": 4,
+          "effect": {
+            "type": "shadow",
+            "shadowType": "inner",
+            "color": "#00AA00FF",
+            "offset": {
+              "x": 6,
+              "y": 6
+            },
+            "blur": 10
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "shT01",
+      "x": 960,
+      "y": 0,
+      "name": "two-outer",
+      "clip": true,
+      "width": 200,
+      "height": 200,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "shT02",
+          "x": 60,
+          "y": 60,
+          "name": "card",
+          "fill": "#EEEEEE",
+          "width": 80,
+          "height": 80,
+          "effect": [
+            {
+              "type": "shadow",
+              "shadowType": "outer",
+              "color": "#FF0000FF",
+              "offset": {
+                "x": -20,
+                "y": 0
+              },
+              "blur": 8
+            },
+            {
+              "type": "shadow",
+              "shadowType": "outer",
+              "color": "#0000FFFF",
+              "offset": {
+                "x": 20,
+                "y": 0
+              },
+              "blur": 8
+            },
+            {
+              "type": "shadow",
+              "shadowType": "outer",
+              "color": "#00AA0080",
+              "offset": {
+                "x": 0,
+                "y": 24
+              },
+              "blur": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "shL01",
+      "x": 1200,
+      "y": 0,
+      "name": "outer-translucent",
+      "clip": true,
+      "width": 200,
+      "height": 200,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "shL02",
+          "x": 50,
+          "y": 50,
+          "name": "card",
+          "fill": "#FF000040",
+          "width": 100,
+          "height": 100,
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "#000000FF",
+            "offset": {
+              "x": 12,
+              "y": 12
+            },
+            "blur": 8
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "shK01",
+      "x": 1440,
+      "y": 0,
+      "name": "outer-frame-children",
+      "clip": true,
+      "width": 200,
+      "height": 200,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "shK02",
+          "x": 30,
+          "y": 30,
+          "name": "holder",
+          "width": 140,
+          "height": 140,
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "#000000FF",
+            "offset": {
+              "x": 10,
+              "y": 10
+            },
+            "blur": 6
+          },
+          "layout": "none",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "shK03",
+              "x": 10,
+              "y": 10,
+              "name": "chip",
+              "fill": "#FF8800",
+              "width": 50,
+              "height": 50
+            },
+            {
+              "type": "ellipse",
+              "id": "shK04",
+              "x": 70,
+              "y": 70,
+              "name": "dot",
+              "fill": "#2288FF",
+              "width": 50,
+              "height": 50
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "fileToken": "e8b0856e-de86-465b-8e59-952393eb57d7"
+}

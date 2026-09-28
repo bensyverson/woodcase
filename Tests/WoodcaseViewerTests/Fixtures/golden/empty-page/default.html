@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Nothing to show yet · woodcase serve</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/viewer.css">
+    <script src="/viewer.js" defer></script>
+  </head>
+  <body class="v-body v-layout-empty">
+    <header class="v-topbar">
+      <a class="v-brand" href="/" title="Every file being served">woodcase</a>
+      <nav class="v-crumbs"></nav>
+      <div class="v-topbar-controls">
+        <details class="v-presence" id="v-presence">
+          <summary class="v-presence-summary"><span class="v-presence-stack"></span><span class="v-presence-note">no identities yet</span></summary>
+          <ul class="v-presence-list"></ul>
+        </details>
+        <span class="v-live" id="v-live" data-state="connecting"><span class="v-live-label" data-state="connecting">connecting…</span><span class="v-live-label" data-state="live">live</span><span class="v-live-label" data-state="lost">disconnected</span></span>
+        <button class="v-key-hint" type="button" popovertarget="v-keys" aria-label="Keyboard shortcuts">?</button>
+        <div class="v-key-hint-popover" id="v-keys" popover>
+          <h2 class="v-panel-title">Keyboard shortcuts</h2>
+          <dl class="v-key-list">
+            <dt class="v-mono v-key-keys">← / →</dt>
+            <dd class="v-key-does">previous / next artboard, with nothing selected</dd>
+            <dt class="v-mono v-key-keys">↑ / ↓</dt>
+            <dd class="v-key-does">previous / next outline row, with a node selected</dd>
+            <dt class="v-mono v-key-keys">← / →</dt>
+            <dd class="v-key-does">collapse / expand the selected row's children</dd>
+            <dt class="v-mono v-key-keys">Enter</dt>
+            <dd class="v-key-does">on the map, open the artboard the ring is on</dd>
+            <dt class="v-mono v-key-keys">f</dt>
+            <dd class="v-key-does">presentation mode: the artboard, and nothing else</dd>
+            <dt class="v-mono v-key-keys">Esc</dt>
+            <dd class="v-key-does">leave presentation, else select the parent node, else go up to the map</dd>
+          </dl>
+        </div>
+      </div>
+    </header>
+    <main class="v-main">
+      <section class="v-empty" data-empty-file="">
+        <h1 class="v-empty-title">Nothing to show yet</h1>
+        <p class="v-empty-lede">Files appear here as the activity log sees them, or pass one on the command line.</p>
+        <div class="v-empty-block">
+          <pre class="v-mono v-empty-commands"><code class="is-primary">woodcase serve ~/Designs/banking.pen</code><code>woodcase set banking.pen Dashboard/Header/Title content="Overview"</code></pre>
+          <span class="v-empty-fade" aria-hidden="true"></span>
+        </div>
+        <p class="v-mono v-empty-note">watching .woodcase/activity.jsonl · 0 events</p>
+      </section>
+    </main>
+  </body>
+</html>

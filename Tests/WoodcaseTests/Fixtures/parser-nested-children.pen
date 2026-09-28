@@ -1,0 +1,51 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "fill": "#FF0000",
+              "height": 50,
+              "id": "logo",
+              "type": "rectangle",
+              "width": 50
+            },
+            {
+              "content": "Title",
+              "fontSize": 32,
+              "id": "title",
+              "type": "text"
+            }
+          ],
+          "height": 100,
+          "id": "header",
+          "layout": "horizontal",
+          "type": "frame",
+          "width": "fill_container"
+        },
+        {
+          "children": [
+            {
+              "fill": "#CCCCCC",
+              "height": 200,
+              "id": "content-rect",
+              "type": "rectangle",
+              "width": 200
+            }
+          ],
+          "height": "fill_container",
+          "id": "body",
+          "type": "frame",
+          "width": "fill_container"
+        }
+      ],
+      "height": 600,
+      "id": "outer",
+      "layout": "vertical",
+      "type": "frame",
+      "width": 800
+    }
+  ],
+  "version": "2.17"
+}

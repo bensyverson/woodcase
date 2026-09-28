@@ -1,0 +1,149 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "fill": "#FFFFFF",
+          "futureChildKey": "kept",
+          "height": 50,
+          "id": "Card1",
+          "name": "Card",
+          "type": "rectangle",
+          "width": 50
+        },
+        {
+          "height": 80,
+          "id": "Gizmo",
+          "knob": 3,
+          "name": "Gizmo",
+          "type": "gizmo",
+          "width": 120,
+          "x": 60,
+          "y": 10
+        }
+      ],
+      "effect": [
+        {
+          "blur": 4,
+          "color": "#00000040",
+          "futureShadowKey": 7,
+          "offset": {
+            "x": 0,
+            "y": 2
+          },
+          "shadowType": "outer",
+          "type": "shadow"
+        },
+        {
+          "futureBlurKey": 1,
+          "radius": 3,
+          "type": "blur"
+        },
+        {
+          "futureBackdropKey": 2,
+          "radius": 5,
+          "type": "background_blur"
+        },
+        {
+          "radius": 9,
+          "spreadColor": "#FF00FF",
+          "type": "glow"
+        }
+      ],
+      "fill": [
+        {
+          "color": "#FF0000",
+          "futureFillKey": true,
+          "type": "color"
+        },
+        {
+          "shimmer": 0.5,
+          "type": "hologram"
+        }
+      ],
+      "futureNodeKey": {
+        "nested": [
+          1,
+          2
+        ]
+      },
+      "height": 300,
+      "id": "Board",
+      "layout": "none",
+      "name": "Board",
+      "stroke": {
+        "color": "#00FF00",
+        "futureStrokeKey": "s",
+        "type": "color"
+      },
+      "strokeWidth": 2,
+      "type": "frame",
+      "width": 400,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "children": [
+        {
+          "content": "Hi",
+          "fill": "#000000",
+          "id": "Label",
+          "name": "Label",
+          "type": "text"
+        },
+        {
+          "height": 20,
+          "id": "Slot1",
+          "layout": "none",
+          "name": "Slot",
+          "type": "frame",
+          "width": 20,
+          "y": 40
+        }
+      ],
+      "height": 100,
+      "id": "Comp1",
+      "name": "Comp",
+      "reusable": true,
+      "type": "frame",
+      "width": 100,
+      "x": 500,
+      "y": 0
+    },
+    {
+      "descendants": {
+        "Label": {
+          "content": "Yo",
+          "futureOverrideKey": "o"
+        }
+      },
+      "id": "Inst1",
+      "name": "Inst",
+      "ref": "Comp1",
+      "type": "ref",
+      "x": 700,
+      "y": 0
+    },
+    {
+      "height": 100,
+      "id": "Spare",
+      "layout": "vertical",
+      "name": "Spare",
+      "type": "frame",
+      "width": 100,
+      "x": 900,
+      "y": 0
+    }
+  ],
+  "fonts": [
+    {
+      "futureFontKey": 1,
+      "name": "Inter",
+      "url": "fonts/Inter.ttf"
+    }
+  ],
+  "futureRootKey": {
+    "a": 1
+  },
+  "version": "2.19"
+}

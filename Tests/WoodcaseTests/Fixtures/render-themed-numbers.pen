@@ -1,0 +1,232 @@
+{
+ "version": "2.19",
+ "themes": {
+  "mode": [
+   "light",
+   "dark"
+  ]
+ },
+ "variables": {
+  "numShadowBlur": {
+   "type": "number",
+   "value": [
+    {
+     "theme": {
+      "mode": "light"
+     },
+     "value": 2
+    },
+    {
+     "theme": {
+      "mode": "dark"
+     },
+     "value": 8
+    }
+   ]
+  },
+  "numAngle": {
+   "type": "number",
+   "value": [
+    {
+     "theme": {
+      "mode": "light"
+     },
+     "value": 15
+    },
+    {
+     "theme": {
+      "mode": "dark"
+     },
+     "value": 45
+    }
+   ]
+  },
+  "numGradientStop": {
+   "type": "number",
+   "value": [
+    {
+     "theme": {
+      "mode": "light"
+     },
+     "value": 0.3
+    },
+    {
+     "theme": {
+      "mode": "dark"
+     },
+     "value": 0.7
+    }
+   ]
+  },
+  "numEdgeWidth": {
+   "type": "number",
+   "value": [
+    {
+     "theme": {
+      "mode": "light"
+     },
+     "value": 2
+    },
+    {
+     "theme": {
+      "mode": "dark"
+     },
+     "value": 10
+    }
+   ]
+  }
+ },
+ "children": [
+  {
+   "type": "frame",
+   "id": "TNlg0",
+   "name": "themed-numbers-light",
+   "layout": "horizontal",
+   "gap": 24,
+   "padding": 32,
+   "fill": "#FFFFFF",
+   "children": [
+    {
+     "type": "rectangle",
+     "id": "TNlg1",
+     "name": "shadow",
+     "width": 60,
+     "height": 60,
+     "fill": "#3366CC",
+     "effect": {
+      "type": "shadow",
+      "shadowType": "outer",
+      "color": "#00000080",
+      "offset": {
+       "x": 2,
+       "y": 2
+      },
+      "blur": "$numShadowBlur"
+     }
+    },
+    {
+     "type": "rectangle",
+     "id": "TNlg2",
+     "name": "rotated",
+     "width": 60,
+     "height": 30,
+     "fill": "#CC6633",
+     "rotation": "$numAngle"
+    },
+    {
+     "type": "rectangle",
+     "id": "TNlg3",
+     "name": "gradient",
+     "width": 60,
+     "height": 60,
+     "fill": {
+      "type": "gradient",
+      "gradientType": "linear",
+      "colors": [
+       {
+        "color": "#FF0000",
+        "position": 0
+       },
+       {
+        "color": "#0000FF",
+        "position": "$numGradientStop"
+       }
+      ]
+     }
+    },
+    {
+     "type": "rectangle",
+     "id": "TNlg4",
+     "name": "per-side",
+     "width": 60,
+     "height": 60,
+     "fill": "#EEEEEE",
+     "stroke": "#000000",
+     "strokeWidth": {
+      "top": "$numEdgeWidth",
+      "right": 2,
+      "bottom": 2,
+      "left": 2
+     }
+    }
+   ]
+  },
+  {
+   "type": "frame",
+   "id": "TNdk0",
+   "name": "themed-numbers-dark",
+   "layout": "horizontal",
+   "gap": 24,
+   "padding": 32,
+   "fill": "#FFFFFF",
+   "children": [
+    {
+     "type": "rectangle",
+     "id": "TNdk1",
+     "name": "shadow",
+     "width": 60,
+     "height": 60,
+     "fill": "#3366CC",
+     "effect": {
+      "type": "shadow",
+      "shadowType": "outer",
+      "color": "#00000080",
+      "offset": {
+       "x": 2,
+       "y": 2
+      },
+      "blur": "$numShadowBlur"
+     }
+    },
+    {
+     "type": "rectangle",
+     "id": "TNdk2",
+     "name": "rotated",
+     "width": 60,
+     "height": 30,
+     "fill": "#CC6633",
+     "rotation": "$numAngle"
+    },
+    {
+     "type": "rectangle",
+     "id": "TNdk3",
+     "name": "gradient",
+     "width": 60,
+     "height": 60,
+     "fill": {
+      "type": "gradient",
+      "gradientType": "linear",
+      "colors": [
+       {
+        "color": "#FF0000",
+        "position": 0
+       },
+       {
+        "color": "#0000FF",
+        "position": "$numGradientStop"
+       }
+      ]
+     }
+    },
+    {
+     "type": "rectangle",
+     "id": "TNdk4",
+     "name": "per-side",
+     "width": 60,
+     "height": 60,
+     "fill": "#EEEEEE",
+     "stroke": "#000000",
+     "strokeWidth": {
+      "top": "$numEdgeWidth",
+      "right": 2,
+      "bottom": 2,
+      "left": 2
+     }
+    }
+   ],
+   "theme": {
+    "mode": "dark"
+   }
+  }
+ ]
+}

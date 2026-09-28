@@ -1,0 +1,156 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "content": "Accent bar: thin vertical strip in brand color",
+          "id": "ctx-accent",
+          "type": "context"
+        },
+        {
+          "fill": "$accentColor",
+          "height": "fill_container",
+          "id": "accent-bar",
+          "type": "rectangle",
+          "width": 4
+        },
+        {
+          "content": "Text area: speaker name bold on top, title lighter below",
+          "id": "ctx-text-area",
+          "type": "context"
+        },
+        {
+          "children": [
+            {
+              "content": "$speakerName",
+              "fill": "$textColor",
+              "fontFamily": "SF Pro",
+              "fontSize": 22,
+              "fontWeight": "700",
+              "id": "name-text",
+              "textGrowth": "auto",
+              "type": "text"
+            },
+            {
+              "content": "$speakerTitle",
+              "fill": "$textColor",
+              "fontFamily": "SF Pro",
+              "fontSize": 14,
+              "fontWeight": "400",
+              "id": "title-text",
+              "opacity": 0.7,
+              "textGrowth": "auto",
+              "type": "text"
+            }
+          ],
+          "gap": 2,
+          "height": "fill_container",
+          "id": "text-area",
+          "justifyContent": "center",
+          "layout": "vertical",
+          "padding": [
+            0,
+            16
+          ],
+          "type": "frame",
+          "width": "fill_container"
+        }
+      ],
+      "clip": true,
+      "cornerRadius": 8,
+      "effect": {
+        "blur": 12,
+        "color": "#00000030",
+        "offset": {
+          "x": 0,
+          "y": 2
+        },
+        "shadowType": "outer",
+        "type": "shadow"
+      },
+      "fill": "$bgColor",
+      "height": 80,
+      "id": "lower-third-root",
+      "layout": "horizontal",
+      "type": "frame",
+      "width": 480
+    }
+  ],
+  "themes": {
+    "mode": [
+      "light",
+      "dark"
+    ]
+  },
+  "variables": {
+    "accentColor": {
+      "type": "color",
+      "value": [
+        {
+          "theme": {
+            "mode": "light"
+          },
+          "value": "#0066FF"
+        },
+        {
+          "theme": {
+            "mode": "dark"
+          },
+          "value": "#3399FF"
+        },
+        {
+          "value": "#0066FF"
+        }
+      ]
+    },
+    "bgColor": {
+      "type": "color",
+      "value": [
+        {
+          "theme": {
+            "mode": "light"
+          },
+          "value": "#FFFFFFEE"
+        },
+        {
+          "theme": {
+            "mode": "dark"
+          },
+          "value": "#1A1A1AEE"
+        },
+        {
+          "value": "#FFFFFFEE"
+        }
+      ]
+    },
+    "speakerName": {
+      "type": "string",
+      "value": "Jane Smith"
+    },
+    "speakerTitle": {
+      "type": "string",
+      "value": "CEO, Acme Corp"
+    },
+    "textColor": {
+      "type": "color",
+      "value": [
+        {
+          "theme": {
+            "mode": "light"
+          },
+          "value": "#111111"
+        },
+        {
+          "theme": {
+            "mode": "dark"
+          },
+          "value": "#F0F0F0"
+        },
+        {
+          "value": "#111111"
+        }
+      ]
+    }
+  },
+  "version": "2.17"
+}

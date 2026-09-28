@@ -1,0 +1,69 @@
+{
+  "children": [
+    {
+      "alignItems": "center",
+      "children": [
+        {
+          "fill": "#3B82F6",
+          "height": 40,
+          "id": "tfF01",
+          "name": "avatar",
+          "type": "rectangle",
+          "width": 40
+        },
+        {
+          "children": [
+            {
+              "content": "Quarterly planning review",
+              "fill": "#111827",
+              "fontFamily": "IBM Plex Sans",
+              "fontSize": 14,
+              "fontWeight": "600",
+              "id": "tfF03",
+              "name": "title",
+              "textGrowth": "fixed-width",
+              "type": "text",
+              "width": "fill_container"
+            },
+            {
+              "content": "Notes from Tuesday's session and the follow-ups everyone agreed to.",
+              "fill": "#6B7280",
+              "fontFamily": "IBM Plex Sans",
+              "fontSize": 13,
+              "fontWeight": "normal",
+              "id": "tfF04",
+              "name": "subtitle",
+              "textGrowth": "fixed-width",
+              "type": "text",
+              "width": "fill_container"
+            }
+          ],
+          "gap": 2,
+          "id": "tfF02",
+          "layout": "vertical",
+          "name": "fill-column",
+          "type": "frame",
+          "width": "fill_container"
+        },
+        {
+          "content": "9:41",
+          "fill": "#6B7280",
+          "fontFamily": "IBM Plex Sans",
+          "fontSize": 12,
+          "fontWeight": "normal",
+          "id": "tfF05",
+          "name": "auto-time",
+          "type": "text"
+        }
+      ],
+      "fill": "#FFFFFF",
+      "gap": 12,
+      "id": "tfF00",
+      "name": "layout-text-list-row",
+      "padding": 12,
+      "type": "frame",
+      "width": 360
+    }
+  ],
+  "version": "2.17"
+}

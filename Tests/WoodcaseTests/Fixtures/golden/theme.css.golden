@@ -1,0 +1,49 @@
+:root {
+  --accent: #C67A52;
+  --accent-soft: #C67A5220;
+  --bg-card: #FFFFFF;
+  --bg-page: #FAF8F4;
+  --bg-warm: #F5F2EC;
+  --border-default: #E5E2DC;
+  --border-strong: #D0CCC4;
+  --card-radius: 16px;
+  --font-primary: 'IBM Plex Sans';
+  --font-size-body: 14px;
+  --shadow: #C67A5215;
+  --spacing-lg: 20px;
+  --spacing-md: 16px;
+  --spacing-sm: 8px;
+  --status-negative: #C4574C;
+  --status-positive: #5A9E6F;
+  --tab-inactive: #9A9A9A;
+  --text-muted: #9A9A9A;
+  --text-primary: #2C2C2C;
+  --text-secondary: #6B6B6B;
+  --white: #FFFFFF;
+}
+
+[data-density="compact"] {
+  --card-radius: 10px;
+  --font-size-body: 12px;
+  --spacing-lg: 14px;
+  --spacing-md: 10px;
+  --spacing-sm: 4px;
+}
+
+[data-mode="dark"] {
+  --accent: #D4895F;
+  --accent-soft: #D4895F20;
+  --bg-card: #2A2725;
+  --bg-page: #1A1A1A;
+  --bg-warm: #332F2B;
+  --border-default: #3D3935;
+  --border-strong: #4A4540;
+  --font-primary: 'IBM Plex Sans';
+  --shadow: #00000040;
+  --status-negative: #D4685E;
+  --status-positive: #6DB882;
+  --tab-inactive: #706B64;
+  --text-muted: #706B64;
+  --text-primary: #F5F2EC;
+  --text-secondary: #A09A92;
+}

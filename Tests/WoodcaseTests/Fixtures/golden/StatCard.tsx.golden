@@ -1,0 +1,59 @@
+import { cn } from "../lib/cn";
+
+interface StatCardProps {
+  label?: string;
+  value?: string;
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+export function StatCard({
+  label = "Total Hours",
+  value = "142h",
+  className,
+  style,
+}: StatCardProps) {
+  return (
+    <div
+      className={cn("flex flex-col items-center gap-1", className)}
+      style={{
+        width: 120,
+        backgroundColor: "var(--bg-card)",
+        borderRadius: "var(--card-radius)",
+        padding: "var(--spacing-md)",
+        boxShadow: "0px 4px 20px var(--shadow)",
+        ...style,
+      }}
+    >
+      <p
+        style={{
+          color: "var(--text-primary)",
+          fontFamily: "var(--font-primary)",
+          fontSize: 24,
+          fontWeight: 600,
+          letterSpacing: -0.5,
+          lineHeight: "31px",
+          fontOpticalSizing: "none",
+          whiteSpace: "pre",
+          marginTop: 0.5,
+          marginBottom: -0.5,
+        }}
+      >
+        {value}
+      </p>
+      <p
+        style={{
+          color: "var(--text-secondary)",
+          fontFamily: "var(--font-primary)",
+          fontSize: "var(--font-size-body)",
+          fontWeight: 500,
+          lineHeight: "normal",
+          fontOpticalSizing: "none",
+          whiteSpace: "pre",
+        }}
+      >
+        {label}
+      </p>
+    </div>
+  );
+}

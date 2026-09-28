@@ -1,0 +1,34 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "AIxNK",
+      "x": 0,
+      "y": 0,
+      "name": "script",
+      "clip": true,
+      "width": 200,
+      "height": 100,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "script",
+          "id": "lqsaj",
+          "x": 10,
+          "y": 10,
+          "name": "bars",
+          "width": 180,
+          "height": 80,
+          "scriptUri": "script-bars.js",
+          "inputs": {
+            "rows": 4,
+            "color": "#FF0000"
+          }
+        }
+      ]
+    }
+  ],
+  "fileToken": "d2e86c28-2b92-40fa-878d-bdfb8c01e6d5"
+}

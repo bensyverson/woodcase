@@ -1,0 +1,59 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "id": "List1",
+      "name": "List",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "width": 200,
+      "height": 100,
+      "layout": "vertical",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "id": "Wide1",
+          "name": "Wide",
+          "type": "rectangle",
+          "width": 300,
+          "height": 20,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "Fits1",
+          "name": "Fits",
+          "type": "rectangle",
+          "width": 200,
+          "height": 50,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "Over1",
+          "name": "Row 1",
+          "type": "rectangle",
+          "width": 200,
+          "height": 50,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "Over2",
+          "name": "Row 2",
+          "type": "rectangle",
+          "width": 200,
+          "height": 50,
+          "fill": "#4C8BF5"
+        },
+        {
+          "id": "Over3",
+          "name": "Row 3",
+          "type": "rectangle",
+          "width": 200,
+          "height": 50,
+          "fill": "#4C8BF5"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "id": "Rt001",
+      "name": "Root",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "width": 200,
+      "height": 100,
+      "layout": "none",
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "id": "Rf001",
+          "name": "Chip",
+          "type": "ref",
+          "ref": "Cmp01",
+          "x": 10,
+          "y": 10,
+          "descendants": {
+            "Lbl01": {
+              "content": "Mapped"
+            },
+            "Knb01": {
+              "fill": "#FF0000"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "Cmp01",
+      "name": "Row",
+      "type": "frame",
+      "x": 0,
+      "y": 400,
+      "reusable": true,
+      "layout": "none",
+      "width": 120,
+      "height": 30,
+      "fill": "#EEEEEE",
+      "metadata": {
+        "type": "unknown",
+        "_props": {
+          "label": "Label"
+        }
+      },
+      "children": [
+        {
+          "id": "Lbl01",
+          "name": "Label",
+          "type": "text",
+          "x": 0,
+          "y": 0,
+          "width": 40,
+          "height": 20,
+          "content": "row",
+          "fill": "#000000"
+        },
+        {
+          "id": "Rf009",
+          "name": "Switch",
+          "type": "ref",
+          "ref": "Cmp02",
+          "x": 60,
+          "y": 0
+        }
+      ]
+    },
+    {
+      "id": "Cmp02",
+      "name": "Toggle",
+      "type": "frame",
+      "x": 0,
+      "y": 500,
+      "reusable": true,
+      "layout": "none",
+      "width": 40,
+      "height": 20,
+      "fill": "#EEEEEE",
+      "children": [
+        {
+          "id": "Knb01",
+          "name": "Knob",
+          "type": "rectangle",
+          "x": 0,
+          "y": 0,
+          "width": 20,
+          "height": 20,
+          "fill": "#4C8BF5"
+        }
+      ]
+    }
+  ]
+}

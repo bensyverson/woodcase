@@ -1,0 +1,294 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "is01f",
+      "name": "col",
+      "x": 300,
+      "y": 0,
+      "width": 240,
+      "height": 180,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "frame",
+          "id": "is01n",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 140,
+          "fill": "#333333",
+          "stroke": "#FFFFFF",
+          "strokeWidth": {
+            "top": 12,
+            "right": 4,
+            "bottom": 20,
+            "left": 24
+          },
+          "strokeAlignment": "inner",
+          "layout": "vertical",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "is01a",
+              "width": 80,
+              "height": 40,
+              "fill": "#FF00FF"
+            },
+            {
+              "type": "rectangle",
+              "id": "is01b",
+              "width": 60,
+              "height": 30,
+              "fill": "#00FFFF"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "is02f",
+      "name": "row-center",
+      "x": 600,
+      "y": 0,
+      "width": 240,
+      "height": 180,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "frame",
+          "id": "is02n",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 140,
+          "fill": "#333333",
+          "stroke": "#FFFFFF",
+          "strokeWidth": {
+            "top": 12,
+            "right": 4,
+            "bottom": 20,
+            "left": 24
+          },
+          "strokeAlignment": "inner",
+          "layout": "horizontal",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "is02a",
+              "width": 80,
+              "height": 40,
+              "fill": "#FF00FF"
+            },
+            {
+              "type": "rectangle",
+              "id": "is02b",
+              "width": 60,
+              "height": 30,
+              "fill": "#00FFFF"
+            }
+          ],
+          "justifyContent": "center",
+          "alignItems": "center"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "is03f",
+      "name": "none",
+      "x": 900,
+      "y": 0,
+      "width": 240,
+      "height": 180,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "frame",
+          "id": "is03n",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 140,
+          "fill": "#333333",
+          "stroke": "#FFFFFF",
+          "strokeWidth": {
+            "top": 12,
+            "right": 4,
+            "bottom": 20,
+            "left": 24
+          },
+          "strokeAlignment": "inner",
+          "layout": "none",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "is03a",
+              "width": 80,
+              "height": 40,
+              "fill": "#FF00FF"
+            },
+            {
+              "type": "rectangle",
+              "id": "is03b",
+              "width": 60,
+              "height": 30,
+              "fill": "#00FFFF",
+              "x": 90,
+              "y": 60
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "is04f",
+      "name": "uniform",
+      "x": 1200,
+      "y": 0,
+      "width": 240,
+      "height": 180,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "frame",
+          "id": "is04n",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 140,
+          "fill": "#333333",
+          "stroke": "#FFFFFF",
+          "strokeWidth": 16,
+          "strokeAlignment": "inner",
+          "layout": "vertical",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "is04a",
+              "width": 80,
+              "height": 40,
+              "fill": "#FF00FF"
+            },
+            {
+              "type": "rectangle",
+              "id": "is04b",
+              "width": 60,
+              "height": 30,
+              "fill": "#00FFFF"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "is05f",
+      "name": "col-padded",
+      "x": 1500,
+      "y": 0,
+      "width": 240,
+      "height": 180,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "frame",
+          "id": "is05n",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 140,
+          "fill": "#333333",
+          "stroke": "#FFFFFF",
+          "strokeWidth": {
+            "top": 12,
+            "right": 4,
+            "bottom": 20,
+            "left": 24
+          },
+          "strokeAlignment": "inner",
+          "layout": "vertical",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "is05a",
+              "width": 80,
+              "height": 40,
+              "fill": "#FF00FF"
+            },
+            {
+              "type": "rectangle",
+              "id": "is05b",
+              "width": 60,
+              "height": 30,
+              "fill": "#00FFFF"
+            }
+          ],
+          "padding": 8,
+          "gap": 4
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "is06f",
+      "name": "col-center",
+      "x": 1800,
+      "y": 0,
+      "width": 240,
+      "height": 180,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "frame",
+          "id": "is06n",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 140,
+          "fill": "#333333",
+          "stroke": "#FFFFFF",
+          "strokeWidth": {
+            "top": 12,
+            "right": 4,
+            "bottom": 20,
+            "left": 24
+          },
+          "strokeAlignment": "center",
+          "layout": "vertical",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "is06a",
+              "width": 80,
+              "height": 40,
+              "fill": "#FF00FF"
+            },
+            {
+              "type": "rectangle",
+              "id": "is06b",
+              "width": 60,
+              "height": 30,
+              "fill": "#00FFFF"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

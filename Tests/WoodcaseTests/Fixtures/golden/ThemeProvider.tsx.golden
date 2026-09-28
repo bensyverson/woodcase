@@ -1,0 +1,25 @@
+import { createContext, useContext, useState } from "react";
+
+type ThemeContextType = {
+  density: string;
+  setDensity: (v: string) => void;
+  mode: string;
+  setMode: (v: string) => void;
+};
+
+const ThemeContext = createContext<ThemeContextType>({ density: "default", setDensity: () => {}, mode: "light", setMode: () => {} });
+
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [density, setDensity] = useState("default");
+  const [mode, setMode] = useState("light");
+
+  return (
+    <ThemeContext.Provider value={{ density, setDensity, mode, setMode }}>
+      <div data-density={density} data-mode={mode}>
+        {children}
+      </div>
+    </ThemeContext.Provider>
+  );
+}
+
+export const useTheme = () => useContext(ThemeContext);

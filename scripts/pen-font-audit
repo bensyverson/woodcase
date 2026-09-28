@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+#
+# pen-font-audit — for every family in Pen's bundled Google font table, compare the file
+# Pen draws (static or variable, its axes, its fonts.gstatic.com version, the styles it
+# offers) with the file Woodcase's Google font resolver would pick from google/fonts.
+#
+# Pen's table is read from Pen.app's app.asar (read-only) by scripts/pen-font-table.py.
+# Woodcase's pick is made by the library's own selection code — GoogleFontMetadata's
+# parser and entry(weight:style:), PenFontFace and GoogleFontCache.directoryName —
+# compiled with scripts/pen-font-audit.swift, against a local checkout of google/fonts
+# holding only its METADATA.pb files. No font file is downloaded.
+#
+# Usage:
+#   scripts/pen-font-audit [--asar <app.asar>] [--google-fonts <dir>] [--update] > audit.tsv
+#
+#   --asar <path>          Pen's archive. Default /Applications/Pen.app/Contents/Resources/app.asar.
+#   --google-fonts <dir>   The google/fonts checkout. Default local/google-fonts (gitignored).
+#                          Made on first use: a blobless shallow clone, sparse-checked-out to
+#                          */*/METADATA.pb (about 2,000 small files).
+#   --update               Pull the checkout to google/fonts' current main first.
+#
+# stdout: one tab-separated row per family (family, Pen's kind, version, styles and axes;
+# the google/fonts path, kind and files the resolver picks; the verdict). stderr: the
+# summary — how many families agree, and how many show each kind of disagreement.
+#
+# Needs the Bash sandbox off (swiftc; git for the checkout). Findings:
+# project/2026-09-28-pen-font-faces.md.
+
+set -euo pipefail
+
+root="$(cd "$(dirname "$0")/.." && pwd)"
+asar="/Applications/Pen.app/Contents/Resources/app.asar"
+google_fonts="$root/local/google-fonts"
+update=0
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --asar) asar="$2"; shift 2 ;;
+        --google-fonts) google_fonts="$2"; shift 2 ;;
+        --update) update=1; shift ;;
+        *) echo "unknown argument: $1" >&2; exit 64 ;;
+    esac
+done
+
+if [[ ! -d "$google_fonts/.git" ]]; then
+    git clone --quiet --depth 1 --filter=blob:none --no-checkout https://github.com/google/fonts "$google_fonts"
+    git -C "$google_fonts" sparse-checkout set --no-cone '/ofl/*/METADATA.pb' '/apache/*/METADATA.pb' '/ufl/*/METADATA.pb'
+    git -C "$google_fonts" checkout --quiet
+elif [[ $update -eq 1 ]]; then
+    git -C "$google_fonts" pull --quiet --depth 1
+fi
+echo "google/fonts at $(git -C "$google_fonts" log -1 --format='%h %cs')" >&2
+
+work="$(mktemp -d "${TMPDIR:-/tmp}/pen-font-audit.XXXXXX")"
+trap 'rm -rf "$work"' EXIT
+
+python3 "$root/scripts/pen-font-table.py" --asar "$asar" > "$work/pen-fonts.json"
+
+# GoogleFontError drags in the network layer; the parser only needs its parse case.
+cat > "$work/Shim.swift" <<'SWIFT'
+enum GoogleFontError: Error { case metadataParseError(String) }
+SWIFT
+
+# Top-level code compiles beside other files only as main.swift.
+cp "$root/scripts/pen-font-audit.swift" "$work/main.swift"
+sources="$root/Sources/Woodcase"
+swiftc -O -enable-bare-slash-regex -o "$work/pen-font-audit" \
+    "$work/main.swift" "$work/Shim.swift" \
+    "$sources/Friendly.swift" "$sources/Files/WoodcaseHome.swift" \
+    "$sources/Models/PenFontWeight.swift" \
+    "$sources/GoogleFonts/PenFontFace.swift" \
+    "$sources/GoogleFonts/GoogleFontMetadata.swift" \
+    "$sources/GoogleFonts/GoogleFontMetadata+FaceMatching.swift" \
+    "$sources/GoogleFonts/GoogleFontCache.swift"
+
+"$work/pen-font-audit" "$work/pen-fonts.json" "$google_fonts"

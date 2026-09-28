@@ -1,0 +1,259 @@
+#!/usr/bin/env bash
+#
+# test-pen-validate — Regression test for scripts/pen-validate's
+# classification logic (PASS/FAIL, --allow-unknowns), against a stub `pen`
+# CLI rather than the real one — the real CLI is hand-run only (see
+# pen-validate's own header comment) and this suite must never depend on it.
+#
+# The stub dispatches on the basename of the file passed to `--in` and plays
+# back a canned transcript for each scenario named below, so every branch of
+# pen-validate's classification is exercised deterministically. Run directly;
+# it exits non-zero on the first failed assertion.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PEN_VALIDATE="$SCRIPT_DIR/pen-validate"
+
+WORKDIR="${TMPDIR:-/tmp}/pen-validate-test.$$"
+rm -rf "$WORKDIR"
+mkdir -p "$WORKDIR/bin"
+trap 'rm -rf "$WORKDIR"' EXIT
+
+fail() {
+    echo "FAIL: $1" >&2
+    exit 1
+}
+
+assert_contains() {
+    # assert_contains <haystack-file> <needle>
+    if ! grep -qF -- "$2" "$1"; then
+        fail "expected output to contain: $2 (got: $(cat "$1"))"
+    fi
+}
+
+assert_not_contains() {
+    if grep -qF -- "$2" "$1"; then
+        fail "expected output NOT to contain: $2 (got: $(cat "$1"))"
+    fi
+}
+
+assert_exit() {
+    # assert_exit <label> <expected> <actual>
+    if [ "$3" -ne "$2" ]; then
+        fail "$1: expected exit $2, got $3"
+    fi
+}
+
+assert_first_line() {
+    # assert_first_line <output-file> <expected-prefix>
+    local first
+    first="$(head -1 "$1")"
+    case "$first" in
+        "$2"*) ;;
+        *) fail "expected first line to start with '$2', got: $first" ;;
+    esac
+}
+
+# ---- stub `pen` CLI ---------------------------------------------------
+# One canned transcript per scenario, keyed by the input file's basename.
+# `status` reports authenticated so pen-validate's environment gate passes.
+
+cat >"$WORKDIR/bin/pen" <<'STUB'
+#!/bin/sh
+set -eu
+case "$1" in
+    status)
+        echo "Active as stub@example.com"
+        exit 0
+        ;;
+    interactive)
+        shift
+        infile=""
+        outfile=""
+        while [ $# -gt 0 ]; do
+            case "$1" in
+                --in)
+                    infile="$2"
+                    shift 2
+                    ;;
+                --out)
+                    outfile="$2"
+                    shift 2
+                    ;;
+                *)
+                    shift
+                    ;;
+            esac
+        done
+        cat >/dev/null
+        base=$(basename "$infile")
+        echo "[INFO] Starting pen.dev (headless)..."
+        case "$base" in
+            clean.pen)
+                cp "$infile" "$outfile"
+                exit 0
+                ;;
+            soft-allowed.pen)
+                echo "[ERROR] Document is not valid:"
+                echo "- /futureKey - unexpected property, got \"futureKey\""
+                cp "$infile" "$outfile"
+                exit 0
+                ;;
+            soft-disallowed.pen)
+                echo "[ERROR] Document is not valid:"
+                echo "- /width - expected number, got string"
+                cp "$infile" "$outfile"
+                exit 0
+                ;;
+            hard-allowed.pen)
+                echo "[ERROR] Document is not valid:"
+                echo "- /children/0/type - expected one of: \"frame\", \"text\", got \"video_clip\""
+                echo "[ERROR] Error loading scene graph: Error: Node 'x' has no type"
+                echo "[ERROR] Fatal error: Error: Failed to open document: $infile"
+                exit 1
+                ;;
+            hard-disallowed.pen)
+                echo "[ERROR] Fatal error: Error: something else entirely broke"
+                exit 1
+                ;;
+            hard-mixed.pen)
+                echo "[ERROR] Document is not valid:"
+                echo "- /children/0/type - expected one of: \"frame\", \"text\", got \"video_clip\""
+                echo "- /width - expected number, got string"
+                echo "[ERROR] Fatal error: Error: Failed to open document: $infile"
+                exit 1
+                ;;
+            *)
+                echo "stub-pen: unrecognized fixture $base" >&2
+                exit 9
+                ;;
+        esac
+        ;;
+    *)
+        echo "stub-pen: unrecognized subcommand ${1:-}" >&2
+        exit 9
+        ;;
+esac
+STUB
+chmod +x "$WORKDIR/bin/pen"
+export PATH="$WORKDIR/bin:$PATH"
+
+# ---- fixtures -----------------------------------------------------------
+# Content is irrelevant to the stub (it keys off the basename) but must be
+# valid JSON, since a PASS runs diff_json against it.
+
+for name in clean soft-allowed soft-disallowed hard-allowed hard-disallowed hard-mixed; do
+    echo '{"version":"2.19"}' >"$WORKDIR/$name.pen"
+done
+
+run() {
+    # run <output-file> -- <args...>
+    local out="$1"
+    shift
+    set +e
+    "$PEN_VALIDATE" "$@" >"$out" 2>&1
+    echo $? >"$out.status"
+    set -e
+}
+
+# --- Scenario 1: a clean file still PASSes and still diffs -----------------
+
+run "$WORKDIR/out1.txt" "$WORKDIR/clean.pen"
+assert_exit "clean, no flag" 0 "$(cat "$WORKDIR/out1.txt.status")"
+assert_first_line "$WORKDIR/out1.txt" "PASS"
+assert_contains "$WORKDIR/out1.txt" "byte-for-byte identical"
+echo "Scenario 1 (clean PASS) OK"
+
+# --- Scenario 2: a non-fatal validator error list now FAILs by default -----
+# This is the regression this leaf fixes: Pen's engine still loaded and
+# saved the file, so the old script (which only checked exit code and
+# output-file presence) reported PASS on a document Pen's validator rejects.
+
+run "$WORKDIR/out2.txt" "$WORKDIR/soft-allowed.pen"
+assert_exit "soft error, no flag" 1 "$(cat "$WORKDIR/out2.txt.status")"
+assert_first_line "$WORKDIR/out2.txt" "FAIL"
+assert_contains "$WORKDIR/out2.txt" "futureKey"
+echo "Scenario 2 (non-fatal validator error FAILs by default) OK"
+
+# --- Scenario 3: --allow-unknowns PASSes a soft, all-unknown error list ----
+
+run "$WORKDIR/out3.txt" --allow-unknowns "$WORKDIR/soft-allowed.pen"
+assert_exit "soft error, --allow-unknowns" 0 "$(cat "$WORKDIR/out3.txt.status")"
+assert_first_line "$WORKDIR/out3.txt" "PASS"
+assert_contains "$WORKDIR/out3.txt" "futureKey"
+assert_contains "$WORKDIR/out3.txt" "allow-unknowns"
+assert_contains "$WORKDIR/out3.txt" "byte-for-byte identical"
+echo "Scenario 3 (--allow-unknowns forgives an all-unknown soft error) OK"
+
+# --- Scenario 4: --allow-unknowns does not forgive a non-unknown error -----
+
+run "$WORKDIR/out4.txt" --allow-unknowns "$WORKDIR/soft-disallowed.pen"
+assert_exit "soft error, unrelated violation, --allow-unknowns" 1 "$(cat "$WORKDIR/out4.txt.status")"
+assert_first_line "$WORKDIR/out4.txt" "FAIL"
+assert_contains "$WORKDIR/out4.txt" "expected number, got string"
+echo "Scenario 4 (--allow-unknowns does not blanket-forgive) OK"
+
+# --- Scenario 5: a fatal load failure still FAILs by default (unchanged) ---
+
+run "$WORKDIR/out5.txt" "$WORKDIR/hard-allowed.pen"
+assert_exit "fatal failure, no flag" 1 "$(cat "$WORKDIR/out5.txt.status")"
+assert_first_line "$WORKDIR/out5.txt" "FAIL"
+assert_contains "$WORKDIR/out5.txt" "Fatal error"
+echo "Scenario 5 (fatal failure still FAILs without the flag) OK"
+
+# --- Scenario 6: --allow-unknowns PASSes a fatal, all-unknown error list ---
+# This is the deliberate-unknowns fixtures' own shape: Pen's engine refuses
+# to open the document at all because of an unrecognized node type, so there
+# is no re-saved output to diff.
+
+run "$WORKDIR/out6.txt" --allow-unknowns "$WORKDIR/hard-allowed.pen"
+assert_exit "fatal failure, --allow-unknowns" 0 "$(cat "$WORKDIR/out6.txt.status")"
+assert_first_line "$WORKDIR/out6.txt" "PASS"
+assert_contains "$WORKDIR/out6.txt" "allow-unknowns"
+assert_contains "$WORKDIR/out6.txt" "video_clip"
+assert_contains "$WORKDIR/out6.txt" "no re-saved output"
+echo "Scenario 6 (--allow-unknowns forgives a fatal all-unknown failure) OK"
+
+# --- Scenario 7: --allow-unknowns does not forgive an unrelated crash ------
+
+run "$WORKDIR/out7.txt" --allow-unknowns "$WORKDIR/hard-disallowed.pen"
+assert_exit "unrelated fatal crash, --allow-unknowns" 1 "$(cat "$WORKDIR/out7.txt.status")"
+assert_first_line "$WORKDIR/out7.txt" "FAIL"
+assert_contains "$WORKDIR/out7.txt" "something else entirely broke"
+echo "Scenario 7 (--allow-unknowns does not forgive an unrelated crash) OK"
+
+# --- Scenario 8: one disallowed line poisons an otherwise-allowed file -----
+
+run "$WORKDIR/out8.txt" --allow-unknowns "$WORKDIR/hard-mixed.pen"
+assert_exit "mixed allowed+disallowed, --allow-unknowns" 1 "$(cat "$WORKDIR/out8.txt.status")"
+assert_first_line "$WORKDIR/out8.txt" "FAIL"
+echo "Scenario 8 (one non-unknown violation still FAILs the whole file) OK"
+
+# --- Scenario 9: a multi-file run applies what can be applied --------------
+
+run "$WORKDIR/out9.txt" "$WORKDIR/clean.pen" "$WORKDIR/soft-allowed.pen"
+assert_exit "multi-file, mixed result" 1 "$(cat "$WORKDIR/out9.txt.status")"
+assert_contains "$WORKDIR/out9.txt" "PASS $WORKDIR/clean.pen"
+assert_contains "$WORKDIR/out9.txt" "FAIL $WORKDIR/soft-allowed.pen"
+echo "Scenario 9 (multi-file run reports one status per file) OK"
+
+# --- Scenario 10: --allow-unknowns alone, no files, is still a usage error -
+
+run "$WORKDIR/out10.txt" --allow-unknowns
+assert_exit "--allow-unknowns with no files" 2 "$(cat "$WORKDIR/out10.txt.status")"
+assert_contains "$WORKDIR/out10.txt" "usage:"
+echo "Scenario 10 (a flag alone is still a usage error) OK"
+
+# --- Scenario 11: --help and an unknown flag are unaffected -----------------
+
+run "$WORKDIR/out11.txt" --help
+assert_exit "--help" 0 "$(cat "$WORKDIR/out11.txt.status")"
+assert_contains "$WORKDIR/out11.txt" "--allow-unknowns"
+
+run "$WORKDIR/out11b.txt" --bogus "$WORKDIR/clean.pen"
+assert_exit "unknown flag" 2 "$(cat "$WORKDIR/out11b.txt.status")"
+assert_contains "$WORKDIR/out11b.txt" "unknown flag"
+echo "Scenario 11 (--help documents the flag; an unknown flag still errors) OK"
+
+echo "All pen-validate tests passed."

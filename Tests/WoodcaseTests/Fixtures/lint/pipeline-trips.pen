@@ -1,0 +1,28 @@
+{
+  "version": "2.13",
+  "children": [
+    {
+      "id": "Rt001",
+      "name": "Root",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "width": 200,
+      "height": 100,
+      "layout": "none",
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "id": "Bx001",
+          "name": "Box",
+          "type": "rectangle",
+          "x": 10,
+          "y": 10,
+          "width": 50,
+          "height": 50,
+          "fill": "#FF0000"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,457 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "Gpos",
+      "x": 0,
+      "y": 0,
+      "name": "pos",
+      "width": 300,
+      "height": 300,
+      "fill": "#000000",
+      "layout": "none",
+      "children": [
+        {
+          "type": "group",
+          "id": "GposG",
+          "x": 50,
+          "y": 50,
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "GposA",
+              "x": 20,
+              "y": 30,
+              "fill": "#00FF00",
+              "width": 40,
+              "height": 40
+            },
+            {
+              "type": "rectangle",
+              "id": "GposB",
+              "x": 80,
+              "y": 60,
+              "fill": "#FFFF00",
+              "width": 30,
+              "height": 30
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Gneg",
+      "x": 400,
+      "y": 0,
+      "name": "neg",
+      "width": 300,
+      "height": 300,
+      "fill": "#000000",
+      "layout": "none",
+      "children": [
+        {
+          "type": "group",
+          "id": "GnegG",
+          "x": 100,
+          "y": 100,
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "GnegA",
+              "x": -30,
+              "y": -20,
+              "fill": "#00FF00",
+              "width": 40,
+              "height": 40
+            },
+            {
+              "type": "rectangle",
+              "id": "GnegB",
+              "x": 20,
+              "y": 10,
+              "fill": "#FFFF00",
+              "width": 40,
+              "height": 40
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Gflex",
+      "x": 800,
+      "y": 0,
+      "name": "flex",
+      "width": 300,
+      "height": 300,
+      "fill": "#000000",
+      "gap": 10,
+      "padding": 20,
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "GflexA",
+          "fill": "#FF0000",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "type": "group",
+          "id": "GflexG",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "GflexGa",
+              "x": -10,
+              "y": -10,
+              "fill": "#00FF00",
+              "width": 30,
+              "height": 30
+            },
+            {
+              "type": "rectangle",
+              "id": "GflexGb",
+              "x": 20,
+              "y": 20,
+              "fill": "#FFFF00",
+              "width": 30,
+              "height": 30
+            }
+          ]
+        },
+        {
+          "type": "rectangle",
+          "id": "GflexB",
+          "fill": "#0000FF",
+          "width": 40,
+          "height": 40
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Grot",
+      "x": 1200,
+      "y": 0,
+      "name": "rot",
+      "width": 300,
+      "height": 300,
+      "fill": "#000000",
+      "layout": "none",
+      "children": [
+        {
+          "type": "group",
+          "id": "GrotG",
+          "x": 100,
+          "y": 100,
+          "rotation": 29.999999999999996,
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "GrotA",
+              "x": 0,
+              "y": 0,
+              "fill": "#00FF00",
+              "width": 60,
+              "height": 20
+            },
+            {
+              "type": "rectangle",
+              "id": "GrotB",
+              "x": -20,
+              "y": 30,
+              "fill": "#FFFF00",
+              "width": 40,
+              "height": 40
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Gnest",
+      "x": 1600,
+      "y": 0,
+      "name": "nest",
+      "width": 300,
+      "height": 300,
+      "fill": "#000000",
+      "layout": "none",
+      "children": [
+        {
+          "type": "group",
+          "id": "GnestG",
+          "x": 80,
+          "y": 80,
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "GnestA",
+              "x": 0,
+              "y": 0,
+              "fill": "#00FF00",
+              "width": 20,
+              "height": 20
+            },
+            {
+              "type": "group",
+              "id": "GnestH",
+              "x": -10,
+              "y": 20,
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "GnestHa",
+                  "x": -10,
+                  "y": -10,
+                  "fill": "#FFFF00",
+                  "width": 40,
+                  "height": 40
+                },
+                {
+                  "type": "rectangle",
+                  "id": "GnestHb",
+                  "x": 30,
+                  "y": 30,
+                  "fill": "#00FFFF",
+                  "width": 10,
+                  "height": 10
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Gfrot",
+      "x": 0,
+      "y": 400,
+      "name": "flexrot",
+      "width": 300,
+      "height": 300,
+      "fill": "#000000",
+      "gap": 10,
+      "padding": 20,
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "GfrotA",
+          "fill": "#FF0000",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "type": "group",
+          "id": "GfrotG",
+          "rotation": 29.999999999999996,
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "GfrotGa",
+              "x": -10,
+              "y": -10,
+              "fill": "#00FF00",
+              "width": 30,
+              "height": 30
+            },
+            {
+              "type": "rectangle",
+              "id": "GfrotGb",
+              "x": 20,
+              "y": 20,
+              "fill": "#FFFF00",
+              "width": 30,
+              "height": 30
+            }
+          ]
+        },
+        {
+          "type": "rectangle",
+          "id": "GfrotB",
+          "fill": "#0000FF",
+          "width": 40,
+          "height": 40
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Gflip",
+      "x": 400,
+      "y": 400,
+      "name": "flip",
+      "width": 300,
+      "height": 300,
+      "fill": "#000000",
+      "layout": "none",
+      "children": [
+        {
+          "type": "group",
+          "id": "GflipG",
+          "x": 100,
+          "y": 100,
+          "rotation": -14.999999999999998,
+          "flipX": true,
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "GflipA",
+              "x": -20,
+              "y": 0,
+              "fill": "#00FF00",
+              "width": 60,
+              "height": 20
+            },
+            {
+              "type": "rectangle",
+              "id": "GflipB",
+              "x": 10,
+              "y": 30,
+              "fill": "#FFFF00",
+              "width": 40,
+              "height": 40
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Gblur",
+      "x": 800,
+      "y": 400,
+      "name": "blur",
+      "width": 300,
+      "height": 300,
+      "fill": "#000000",
+      "layout": "none",
+      "children": [
+        {
+          "type": "group",
+          "id": "GblurG",
+          "x": 100,
+          "y": 100,
+          "effect": {
+            "type": "blur",
+            "radius": 6
+          },
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "GblurA",
+              "x": -40,
+              "y": -30,
+              "fill": "#00FF00",
+              "width": 50,
+              "height": 50
+            },
+            {
+              "type": "rectangle",
+              "id": "GblurB",
+              "x": 30,
+              "y": 20,
+              "fill": "#FFFF00",
+              "width": 50,
+              "height": 30
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Gshad",
+      "x": 1200,
+      "y": 400,
+      "name": "shadow",
+      "width": 300,
+      "height": 300,
+      "fill": "#000000",
+      "layout": "none",
+      "children": [
+        {
+          "type": "group",
+          "id": "GshadG",
+          "x": 100,
+          "y": 100,
+          "effect": [
+            {
+              "type": "shadow",
+              "shadowType": "outer",
+              "color": "#FFFFFFFF",
+              "offset": {
+                "x": 8,
+                "y": 8
+              },
+              "blur": 6
+            },
+            {
+              "type": "shadow",
+              "shadowType": "inner",
+              "color": "#FF0000FF",
+              "offset": {
+                "x": 4,
+                "y": 4
+              },
+              "blur": 4
+            }
+          ],
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "GshadA",
+              "x": -40,
+              "y": -30,
+              "fill": "#00FF00",
+              "width": 50,
+              "height": 50
+            },
+            {
+              "type": "rectangle",
+              "id": "GshadB",
+              "x": 30,
+              "y": 20,
+              "fill": "#FFFF00",
+              "width": 50,
+              "height": 30
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "id": "Groot",
+      "x": 1700,
+      "y": 500,
+      "name": "root",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "GrootA",
+          "x": -30,
+          "y": -20,
+          "fill": "#00FF00",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "type": "rectangle",
+          "id": "GrootB",
+          "x": 20,
+          "y": 10,
+          "fill": "#FFFF00",
+          "width": 40,
+          "height": 40
+        }
+      ]
+    }
+  ],
+  "fileToken": "26bb2b33-daab-4834-8999-cf25690a3f4d"
+}

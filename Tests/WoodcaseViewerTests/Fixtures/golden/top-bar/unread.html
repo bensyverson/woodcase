@@ -1,0 +1,54 @@
+<header class="v-topbar">
+  <a class="v-brand" href="/" title="Every file being served">woodcase</a>
+  <nav class="v-crumbs"><a class="v-crumb v-crumb-map" href="/files/a1b2c3d4e5f6" title="Every artboard in this file" data-unread="1"><span class="v-crumb-glyph">▦</span>banking</a><span class="v-crumb-sep">/</span><span class="v-crumb is-current">Dashboard</span></nav>
+  <div class="v-topbar-controls">
+    <div class="v-follow" id="v-follow">
+      <form class="v-follow-form" method="get" action="/files/a1b2c3d4e5f6/artboards/Cnv01">
+        <label class="v-follow-label" for="v-follow-select">follow:</label>
+        <select id="v-follow-select" class="v-follow-select" name="follow">
+          <option value="nobody" selected>nobody</option>
+          <option value="anyone">anyone</option>
+          <option value="claude-a">claude-a</option>
+        </select>
+        <button class="v-go" type="submit">apply</button>
+      </form>
+    </div>
+    <div class="v-theme">
+      <form class="v-theme-axis" method="get" action="/files/a1b2c3d4e5f6/artboards/Cnv01">
+        <label class="v-theme-label" for="v-theme-Mode">Mode:</label>
+        <select id="v-theme-Mode" class="v-theme-select" name="theme" data-axis="Mode">
+          <option value="" selected>default</option>
+          <option value="Mode:Light">Light</option>
+          <option value="Mode:Dark">Dark</option>
+        </select>
+        <button class="v-go" type="submit">apply</button>
+      </form>
+    </div>
+    <details class="v-presence" id="v-presence">
+      <summary class="v-presence-summary"><span class="v-presence-stack"><span class="v-avatar v-avatar-medium" style="--v-actor: hsl(152 85% 48%); --v-actor-ink: #000000" title="claude-a" data-identity="claude-a">C</span></span><span class="v-presence-note">1 active · <span class="v-presence-name">claude-a</span> editing</span></summary>
+      <ul class="v-presence-list">
+        <li class="v-presence-item"><span class="v-avatar v-avatar-medium" style="--v-actor: hsl(152 85% 48%); --v-actor-ink: #000000" title="claude-a" data-identity="claude-a">C</span><span class="v-presence-name">claude-a</span><span class="v-presence-age">4s</span><span class="v-presence-events">12 events</span></li>
+      </ul>
+    </details>
+    <span class="v-live" id="v-live" data-state="connecting"><span class="v-live-label" data-state="connecting">connecting…</span><span class="v-live-label" data-state="live">live</span><span class="v-live-label" data-state="lost">disconnected</span></span>
+    <button class="v-present" id="v-present" type="button" title="Presentation (f)">⛶</button>
+    <button class="v-key-hint" type="button" popovertarget="v-keys" aria-label="Keyboard shortcuts">?</button>
+    <div class="v-key-hint-popover" id="v-keys" popover>
+      <h2 class="v-panel-title">Keyboard shortcuts</h2>
+      <dl class="v-key-list">
+        <dt class="v-mono v-key-keys">← / →</dt>
+        <dd class="v-key-does">previous / next artboard, with nothing selected</dd>
+        <dt class="v-mono v-key-keys">↑ / ↓</dt>
+        <dd class="v-key-does">previous / next outline row, with a node selected</dd>
+        <dt class="v-mono v-key-keys">← / →</dt>
+        <dd class="v-key-does">collapse / expand the selected row's children</dd>
+        <dt class="v-mono v-key-keys">Enter</dt>
+        <dd class="v-key-does">on the map, open the artboard the ring is on</dd>
+        <dt class="v-mono v-key-keys">f</dt>
+        <dd class="v-key-does">presentation mode: the artboard, and nothing else</dd>
+        <dt class="v-mono v-key-keys">Esc</dt>
+        <dd class="v-key-does">leave presentation, else select the parent node, else go up to the map</dd>
+      </dl>
+    </div>
+  </div>
+</header>

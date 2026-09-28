@@ -1,0 +1,74 @@
+{
+  "version": "2.17",
+  "imports": {
+    "K": "kit.lib.pen"
+  },
+  "children": [
+    {
+      "id": "Art01",
+      "name": "screen",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "width": 400,
+      "height": 300,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "id": "Ins01",
+          "name": "plain",
+          "type": "ref",
+          "ref": "K:Chip1",
+          "x": 10,
+          "y": 10,
+          "descendants": {
+            "K:Txt01": { "content": "Hello" }
+          }
+        },
+        {
+          "id": "Ins02",
+          "name": "carded",
+          "type": "ref",
+          "ref": "K:Card1",
+          "x": 10,
+          "y": 60,
+          "descendants": {
+            "K:Cc001/K:Txt01": { "content": "Nested" }
+          }
+        },
+        {
+          "id": "Ins03",
+          "name": "wrapped",
+          "type": "ref",
+          "ref": "Wrap1",
+          "x": 10,
+          "y": 180,
+          "descendants": {
+            "Kin01/K:Txt01": { "content": "Wrapped" }
+          }
+        }
+      ]
+    },
+    {
+      "id": "Wrap1",
+      "name": "wrap",
+      "type": "frame",
+      "reusable": true,
+      "x": 500,
+      "y": 0,
+      "width": 120,
+      "height": 44,
+      "fill": "#EEEEEE",
+      "children": [
+        {
+          "id": "Kin01",
+          "name": "inner",
+          "type": "ref",
+          "ref": "K:Chip1",
+          "x": 10,
+          "y": 10
+        }
+      ]
+    }
+  ]
+}

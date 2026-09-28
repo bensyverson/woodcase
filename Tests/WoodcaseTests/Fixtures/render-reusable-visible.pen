@@ -1,0 +1,28 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "id": "Scr01",
+      "name": "Screen",
+      "type": "frame",
+      "width": 100,
+      "height": 100
+    },
+    {
+      "id": "Cmp01",
+      "name": "Component",
+      "type": "frame",
+      "reusable": true,
+      "width": 50,
+      "height": 50,
+      "children": [
+        {
+          "id": "Lbl01",
+          "name": "Label",
+          "type": "text",
+          "content": "chip"
+        }
+      ]
+    }
+  ]
+}

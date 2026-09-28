@@ -1,0 +1,41 @@
+{
+  "children": [
+    {
+      "alignItems": "start",
+      "children": [
+        {
+          "content": "Short",
+          "fill": "#1F2937",
+          "fontFamily": "IBM Plex Sans",
+          "fontSize": 14,
+          "fontWeight": "normal",
+          "id": "tfD01",
+          "name": "fill-short",
+          "textGrowth": "fixed-width",
+          "type": "text",
+          "width": "fill_container"
+        },
+        {
+          "content": "A much longer sentence that has to wrap across several lines in its share of the row.",
+          "fill": "#1F2937",
+          "fontFamily": "IBM Plex Sans",
+          "fontSize": 14,
+          "fontWeight": "normal",
+          "id": "tfD02",
+          "name": "fill-long",
+          "textGrowth": "fixed-width",
+          "type": "text",
+          "width": "fill_container"
+        }
+      ],
+      "fill": "#F3F4F6",
+      "gap": 12,
+      "id": "tfD00",
+      "name": "layout-text-two-fill",
+      "padding": 16,
+      "type": "frame",
+      "width": 360
+    }
+  ],
+  "version": "2.17"
+}

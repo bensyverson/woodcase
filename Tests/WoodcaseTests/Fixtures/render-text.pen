@@ -1,0 +1,123 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "content": "Hello World",
+          "fill": "#000000",
+          "fontFamily": "Inter",
+          "fontSize": 14,
+          "fontWeight": "normal",
+          "id": "QPEwZ",
+          "name": "plain-default",
+          "type": "text"
+        },
+        {
+          "content": "Bold Title",
+          "fill": "#000000",
+          "fontFamily": "Inter",
+          "fontSize": 24,
+          "fontWeight": "bold",
+          "id": "4Fz5E",
+          "name": "bold-24pt",
+          "type": "text"
+        },
+        {
+          "content": "Centered Text",
+          "fill": "#000000",
+          "fontFamily": "Inter",
+          "fontSize": 16,
+          "fontWeight": "normal",
+          "id": "0pnX5",
+          "name": "center-aligned",
+          "textAlign": "center",
+          "textGrowth": "fixed-width",
+          "type": "text",
+          "width": "fill_container"
+        },
+        {
+          "content": "Vertically Centered",
+          "fill": [
+            "#F0F0F0",
+            "#000000"
+          ],
+          "fontFamily": "Inter",
+          "fontSize": 16,
+          "fontWeight": "normal",
+          "height": 80,
+          "id": "r0rO2",
+          "name": "middle-vertical",
+          "textAlignVertical": "middle",
+          "textGrowth": "fixed-width-height",
+          "type": "text",
+          "width": "fill_container"
+        },
+        {
+          "content": "Bold and Italic",
+          "fill": "#000000",
+          "fontFamily": "Inter",
+          "fontSize": 16,
+          "fontWeight": "normal",
+          "id": "OlYBl",
+          "name": "rich-spans",
+          "type": "text"
+        },
+        {
+          "content": "Underline Strikethrough",
+          "fill": "#000000",
+          "fontFamily": "Inter",
+          "fontSize": 16,
+          "fontWeight": "normal",
+          "id": "AZeCv",
+          "name": "underline-strike",
+          "type": "text"
+        },
+        {
+          "content": "This is a longer piece of text that should wrap within the fixed width container to test line wrapping behavior.",
+          "fill": "#333333",
+          "fontFamily": "Inter",
+          "fontSize": 14,
+          "fontWeight": "normal",
+          "id": "NMNlY",
+          "name": "wrapping-text",
+          "textGrowth": "fixed-width",
+          "type": "text",
+          "width": "fill_container"
+        },
+        {
+          "content": "LETTER SPACING",
+          "fill": "#000000",
+          "fontFamily": "Inter",
+          "fontSize": 14,
+          "fontWeight": "normal",
+          "id": "zqoZ2",
+          "letterSpacing": 4,
+          "name": "letter-spaced",
+          "type": "text"
+        },
+        {
+          "content": "Line one\nLine two\nLine three",
+          "fill": "#000000",
+          "fontFamily": "Inter",
+          "fontSize": 14,
+          "fontWeight": "normal",
+          "id": "hWnkq",
+          "lineHeight": 2,
+          "name": "line-height",
+          "textGrowth": "fixed-width",
+          "type": "text",
+          "width": "fill_container"
+        }
+      ],
+      "fill": "#FFFFFF",
+      "gap": 16,
+      "id": "ZxSVB",
+      "layout": "vertical",
+      "name": "render-text",
+      "padding": 32,
+      "type": "frame",
+      "width": 500
+    }
+  ],
+  "version": "2.17"
+}

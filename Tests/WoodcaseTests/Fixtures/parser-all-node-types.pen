@@ -1,0 +1,85 @@
+{
+  "children": [
+    {
+      "children": [
+
+      ],
+      "fill": "#FFFFFF",
+      "height": 300,
+      "id": "frame1",
+      "name": "Container",
+      "type": "frame",
+      "width": 400
+    },
+    {
+      "fill": "#FF0000",
+      "height": 50,
+      "id": "rect1",
+      "type": "rectangle",
+      "width": 100
+    },
+    {
+      "fill": "#00FF00",
+      "height": 80,
+      "id": "ellipse1",
+      "type": "ellipse",
+      "width": 80
+    },
+    {
+      "content": "Hello World",
+      "fontFamily": "Helvetica",
+      "fontSize": 24,
+      "id": "text1",
+      "type": "text"
+    },
+    {
+      "fill": "#0000FF",
+      "geometry": "M 0 0 L 100 0 L 50 100 Z",
+      "id": "path1",
+      "type": "path"
+    },
+    {
+      "children": [
+
+      ],
+      "id": "group1",
+      "name": "My Group",
+      "type": "group"
+    },
+    {
+      "height": 2,
+      "id": "line1",
+      "type": "line",
+      "width": 200
+    },
+    {
+      "height": 100,
+      "id": "polygon1",
+      "polygonCount": 6,
+      "type": "polygon",
+      "width": 100
+    },
+    {
+      "id": "ref1",
+      "ref": "frame1",
+      "type": "ref"
+    },
+    {
+      "content": "Design note: this is a test layout",
+      "id": "note1",
+      "type": "note"
+    },
+    {
+      "content": "Generate a modern lower third",
+      "id": "prompt1",
+      "model": "claude-3",
+      "type": "prompt"
+    },
+    {
+      "content": "This section displays the speaker name",
+      "id": "context1",
+      "type": "context"
+    }
+  ],
+  "version": "2.17"
+}

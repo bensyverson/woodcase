@@ -1,0 +1,45 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "fill": "#FF0000",
+          "height": 50,
+          "id": "Fit01",
+          "name": "fits",
+          "type": "rectangle",
+          "width": 50,
+          "x": 10,
+          "y": 10
+        },
+        {
+          "fill": "#00FF00",
+          "height": 40,
+          "id": "Ovr01",
+          "name": "overflows",
+          "type": "rectangle",
+          "width": 80,
+          "x": 160,
+          "y": 20
+        },
+        {
+          "fill": "#0000FF",
+          "height": 20,
+          "id": "Out01",
+          "type": "rectangle",
+          "width": 20,
+          "x": 260,
+          "y": 120
+        }
+      ],
+      "fill": "#F0F0F0",
+      "height": 100,
+      "id": "Card1",
+      "layout": "none",
+      "name": "Card",
+      "type": "frame",
+      "width": 200
+    }
+  ],
+  "version": "2.17"
+}

@@ -1,0 +1,17 @@
+{
+  "version": "2.17",
+  "variables": {
+    "v-muted": {
+      "type": "color",
+      "value": "#888888"
+    }
+  },
+  "children": [
+    {
+      "id": "Ttl01",
+      "name": "Title",
+      "type": "text",
+      "content": "Original"
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+//
+//  PerformanceBudgetAdvisoryTests.swift
+//  WoodcaseTests
+//
+
+import Foundation
+import Testing
+import Woodcase
+
+/// What ``PerformanceBudget/check(_:sourceLocation:)`` does with a measurement that is
+/// over the limit.
+///
+/// The decision is the point: on the build the budgets are *stated* for, over is a
+/// failure; on the default debug build it is a note until the overshoot is too large
+/// to be machine load. Nothing here measures anything — these are the rules, asserted
+/// directly, so a change to them is a change somebody chose.
+struct PerformanceBudgetAdvisoryTests {
+    private let budget = PerformanceBudget(name: "a budget under test", release: .milliseconds(100))
+
+    /// A sample whose minimum is exactly `elapsed`.
+    private func sample(_ elapsed: Duration) -> PerformanceSample {
+        PerformanceSample(elapsed: [elapsed, elapsed * 2])
+    }
+
+    @Test("The advisory ceiling is a multiple of the build's own limit")
+    func ceilingScalesWithTheLimit() {
+        #expect(budget.advisoryCeiling == budget.limit * PerformanceBudget.advisoryMultiplier)
+        #expect(budget.limit < budget.advisoryCeiling)
+    }
+
+    @Test("A measurement inside the limit records nothing on any build")
+    func insideTheLimitPasses() {
+        budget.check(sample(budget.limit / 2))
+    }
+
+    /// Why the next two are traits and not `#require`: they describe the *advisory*
+    /// build, so on a strict one they have nothing to say and must be **skipped**.
+    /// `try #require(!isStrict)` reads like a guard but fails the test instead, which
+    /// nobody noticed while `swift test -c release` could not run — the only two ways
+    /// to reach a strict build were that and `WOODCASE_BUDGET_STRICT=1`. `.enabled(if:)`
+    /// is the trait that actually skips.
+    static let isAdvisoryBuild = !PerformanceBudget.isStrict
+
+    @Test(
+        "A debug measurement over the limit but under the ceiling is only a note",
+        .enabled(if: isAdvisoryBuild, "This case is about the advisory build.")
+    )
+    func overTheLimitIsAdvisoryUnderDebug() {
+        budget.check(sample(budget.limit * 2))
+    }
+
+    @Test(
+        "A debug measurement past the ceiling still fails",
+        .enabled(if: isAdvisoryBuild, "This case is about the advisory build.")
+    )
+    func pastTheCeilingFails() {
+        withKnownIssue("the overshoot is past what load explains") {
+            budget.check(sample(budget.advisoryCeiling * 2))
+        }
+    }
+
+    @Test("Strictness follows the build, and the environment can force it on")
+    func strictnessFollowsTheBuild() {
+        #expect(
+            PerformanceBudget.isStrict
+                == (PerformanceBudget.isOptimized
+                    || ProcessInfo.processInfo
+                    .environment[PerformanceBudget.strictEnvironmentVariable] != nil)
+        )
+    }
+}

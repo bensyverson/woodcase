@@ -1,0 +1,33 @@
+{
+  "children": [
+    {
+      "fill": [
+        {
+          "color": "#FF0000",
+          "type": "color"
+        },
+        {
+          "colors": [
+            {
+              "color": "#00000000",
+              "position": 0
+            },
+            {
+              "color": "#000000FF",
+              "position": 1
+            }
+          ],
+          "gradientType": "linear",
+          "rotation": 45,
+          "type": "gradient"
+        },
+        "#00FF0080"
+      ],
+      "height": 200,
+      "id": "multi-fill",
+      "type": "rectangle",
+      "width": 200
+    }
+  ],
+  "version": "2.17"
+}

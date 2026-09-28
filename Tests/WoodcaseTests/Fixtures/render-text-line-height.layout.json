@@ -1,0 +1,74 @@
+{
+  "lhTgt": {
+    "x": 0,
+    "y": 0,
+    "width": 380,
+    "height": 220
+  },
+  "lhTg1": {
+    "x": 40,
+    "y": 40,
+    "width": 300,
+    "height": 96
+  },
+  "lhLse": {
+    "x": 440,
+    "y": 0,
+    "width": 380,
+    "height": 260
+  },
+  "lhLs1": {
+    "x": 40,
+    "y": 40,
+    "width": 300,
+    "height": 86
+  },
+  "lhMid": {
+    "x": 880,
+    "y": 0,
+    "width": 380,
+    "height": 260
+  },
+  "lhMd1": {
+    "x": 40,
+    "y": 40,
+    "width": 300,
+    "height": 180
+  },
+  "lhAut": {
+    "x": 1320,
+    "y": 0,
+    "width": 380,
+    "height": 200
+  },
+  "lhAt1": {
+    "x": 40,
+    "y": 40,
+    "width": 236,
+    "height": 100
+  },
+  "lhStk": {
+    "x": 1760,
+    "y": 0,
+    "width": 380,
+    "height": 204
+  },
+  "lhSk1": {
+    "x": 40,
+    "y": 40,
+    "width": 253,
+    "height": 44
+  },
+  "lhSk2": {
+    "x": 40,
+    "y": 96,
+    "width": 300,
+    "height": 48
+  },
+  "lhSk3": {
+    "x": 40,
+    "y": 156,
+    "width": 300,
+    "height": 8
+  }
+}

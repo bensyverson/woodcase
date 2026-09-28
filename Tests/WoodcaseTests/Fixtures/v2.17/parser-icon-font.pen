@@ -1,0 +1,122 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "type": "frame",
+      "id": "root1",
+      "x": 0,
+      "y": 0,
+      "name": "Icon Font Test",
+      "width": 500,
+      "height": 99,
+      "fill": "#FFFFFF",
+      "gap": 16,
+      "padding": 16,
+      "children": [
+        {
+          "type": "icon",
+          "id": "icon1",
+          "name": "Bell Icon",
+          "width": 48,
+          "height": 48,
+          "icon": "vpn_lock",
+          "library": "Material Symbols Outlined",
+          "fill": "#000000"
+        },
+        {
+          "type": "icon",
+          "id": "xI7eY",
+          "name": "Bell Icon",
+          "width": 48,
+          "height": 48,
+          "icon": "vpn_lock",
+          "library": "Material Symbols Rounded",
+          "fill": "#000000"
+        },
+        {
+          "type": "icon",
+          "id": "jAUOk",
+          "name": "Bell Icon",
+          "width": 48,
+          "height": 48,
+          "icon": "vpn_lock",
+          "library": "Material Symbols Sharp",
+          "fill": "#000000"
+        },
+        {
+          "type": "icon",
+          "id": "TGJms",
+          "name": "Bell Icon",
+          "width": 24,
+          "height": 24,
+          "icon": "bell",
+          "library": "feather",
+          "fill": "#d90000ff"
+        },
+        {
+          "type": "icon",
+          "id": "NzQQK",
+          "name": "Bell Icon",
+          "width": 24,
+          "height": 24,
+          "icon": "bell",
+          "library": "phosphor",
+          "fill": "#d90000ff"
+        },
+        {
+          "type": "icon",
+          "id": "EGLFk",
+          "name": "Bell Icon",
+          "width": 12,
+          "height": 24,
+          "icon": "loader",
+          "library": "feather",
+          "fill": "#08ab17ff"
+        },
+        {
+          "type": "icon",
+          "id": "G8dfl",
+          "name": "Bell Icon",
+          "width": 12,
+          "height": 24,
+          "icon": "factory",
+          "library": "lucide",
+          "fill": "#0975ffff"
+        },
+        {
+          "type": "icon",
+          "id": "rcsOO",
+          "name": "Bell Icon",
+          "width": 32,
+          "height": 32,
+          "icon": "chat-dots-thin",
+          "library": "phosphor",
+          "fill": "#009ddfff"
+        },
+        {
+          "type": "icon",
+          "id": "icon2",
+          "name": "Star Icon",
+          "width": 32,
+          "height": 32,
+          "icon": "ellipsis",
+          "library": "lucide",
+          "weight": 400,
+          "fill": "#1900ffff"
+        },
+        {
+          "type": "icon",
+          "id": "icon3",
+          "name": "Material Icon",
+          "width": 48,
+          "height": 48,
+          "icon": "aperture-thin",
+          "library": "phosphor",
+          "weight": 700,
+          "fill": "#9accffff"
+        }
+      ]
+    }
+  ],
+  "fileToken": "e2c0ac0b-6166-4e46-9d92-e28c9aba505e"
+}

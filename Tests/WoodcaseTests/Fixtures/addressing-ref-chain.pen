@@ -1,0 +1,73 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "id": "Inst2",
+          "name": "Primary",
+          "ref": "IconC",
+          "type": "ref",
+          "x": 20,
+          "y": 20
+        }
+      ],
+      "height": 200,
+      "id": "Page2",
+      "name": "Page",
+      "type": "frame",
+      "width": 300
+    },
+    {
+      "descendants": {
+        "Ico04": {
+          "fill": "#FF0000"
+        }
+      },
+      "id": "IconC",
+      "name": "IconButton",
+      "ref": "BtnB0",
+      "reusable": true,
+      "type": "ref",
+      "x": 0,
+      "y": 400
+    },
+    {
+      "children": [
+        {
+          "content": "Click",
+          "fontSize": 12,
+          "id": "Lbl04",
+          "name": "Label",
+          "type": "text"
+        },
+        {
+          "children": [
+            {
+              "fill": "#0066FF",
+              "height": 12,
+              "id": "Ico04",
+              "name": "Icon",
+              "type": "rectangle",
+              "width": 12
+            }
+          ],
+          "id": "Grp04",
+          "name": "Stack",
+          "type": "group",
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "height": 40,
+      "id": "BtnB0",
+      "layout": "horizontal",
+      "name": "ButtonBase",
+      "reusable": true,
+      "type": "frame",
+      "width": 100,
+      "x": 0,
+      "y": 300
+    }
+  ],
+  "version": "2.17"
+}

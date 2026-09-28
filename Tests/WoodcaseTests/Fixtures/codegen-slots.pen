@@ -1,0 +1,139 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "id": "SlCd1", "name": "Card", "type": "frame", "x": 0, "y": 0, "reusable": true,
+      "width": 240, "height": "fit_content", "layout": "vertical", "gap": 12, "padding": 16,
+      "cornerRadius": 12, "fill": "#FFFFFF",
+      "metadata": {"type": "component", "_props": {"title": "Title"}},
+      "children": [
+        {"id": "SlCt1", "name": "Title", "type": "text", "content": "Card title", "fill": "#111827",
+         "fontFamily": "Inter", "fontSize": 16, "fontWeight": "600"},
+        {"id": "SlCs1", "name": "Content", "type": "frame", "slot": [], "layout": "vertical", "gap": 8,
+         "width": "fill_container", "height": "fit_content",
+         "children": [
+           {"id": "SlCe1", "name": "Empty", "type": "text", "content": "Nothing here yet", "fill": "#6B7280",
+            "fontFamily": "Inter", "fontSize": 14}
+         ]}
+      ]
+    },
+    {
+      "id": "SlPn1", "name": "Panel", "type": "frame", "x": 300, "y": 0, "reusable": true,
+      "width": 260, "height": "fit_content", "layout": "vertical", "gap": 8, "padding": 12,
+      "cornerRadius": 8, "fill": "#FFFFFF",
+      "metadata": {"type": "component"},
+      "children": [
+        {"id": "SlPh1", "name": "Header", "type": "frame", "slot": [], "layout": "horizontal", "gap": 8,
+         "alignItems": "center", "width": "fill_container", "height": "fit_content"},
+        {"id": "SlPd1", "name": "Divider", "type": "rectangle", "width": "fill_container", "height": 1, "fill": "#E5E7EB"},
+        {"id": "SlPf1", "name": "Footer", "type": "frame", "slot": [], "layout": "horizontal", "gap": 8,
+         "width": "fill_container", "height": "fit_content",
+         "children": [
+           {"id": "SlPe1", "name": "Note", "type": "text", "content": "No actions", "fill": "#9CA3AF",
+            "fontFamily": "Inter", "fontSize": 12}
+         ]}
+      ]
+    },
+    {
+      "id": "SlBt1", "name": "SlotButton", "type": "frame", "x": 600, "y": 0, "reusable": true,
+      "layout": "horizontal", "gap": 8, "padding": [10, 16], "alignItems": "center",
+      "cornerRadius": 10, "fill": "#2563EB",
+      "metadata": {"type": "component", "_role": "button", "_props": {"label": "Label"}},
+      "children": [
+        {"id": "SlBi1", "name": "Icon", "type": "frame", "slot": [], "layout": "horizontal",
+         "children": [
+           {"id": "SlBd1", "name": "Dot", "type": "ellipse", "width": 12, "height": 12, "fill": "#FFFFFF"}
+         ]},
+        {"id": "SlBl1", "name": "Label", "type": "text", "content": "Send", "fill": "#FFFFFF",
+         "fontFamily": "Inter", "fontSize": 15, "fontWeight": "600"}
+      ]
+    },
+    {
+      "id": "SlP01", "name": "Filled Card", "type": "frame", "x": 0, "y": 300,
+      "width": 280, "height": "fit_content", "layout": "vertical", "padding": 20, "fill": "#F3F4F6",
+      "children": [
+        {"id": "SlI01", "type": "ref", "ref": "SlCd1",
+         "descendants": {
+           "SlCt1": {"content": "Recent orders"},
+           "SlCs1": {"children": [
+             {"id": "SlF01", "name": "First", "type": "text", "content": "Order 1024 shipped", "fill": "#111827",
+              "fontFamily": "Inter", "fontSize": 14},
+             {"id": "SlF02", "name": "Second", "type": "text", "content": "Order 1025 packed", "fill": "#111827",
+              "fontFamily": "Inter", "fontSize": 14}
+           ]}
+         }}
+      ]
+    },
+    {
+      "id": "SlP02", "name": "Profile Card", "type": "frame", "x": 320, "y": 300,
+      "width": 280, "height": "fit_content", "layout": "vertical", "padding": 20, "fill": "#F3F4F6",
+      "children": [
+        {"id": "SlI02", "type": "ref", "ref": "SlCd1",
+         "descendants": {
+           "SlCt1": {"content": "Profile"},
+           "SlCs1": {"children": [
+             {"id": "SlF03", "name": "Row", "type": "frame", "layout": "horizontal", "gap": 10, "alignItems": "center",
+              "children": [
+                {"id": "SlF04", "name": "Avatar", "type": "ellipse", "width": 32, "height": 32, "fill": "#F59E0B"},
+                {"id": "SlF05", "name": "Name", "type": "text", "content": "Ada Lovelace", "fill": "#111827",
+                 "fontFamily": "Inter", "fontSize": 14, "fontWeight": "500"}
+              ]}
+           ]}
+         }}
+      ]
+    },
+    {
+      "id": "SlP03", "name": "Default Card", "type": "frame", "x": 640, "y": 300,
+      "width": 280, "height": "fit_content", "layout": "vertical", "padding": 20, "fill": "#F3F4F6",
+      "children": [
+        {"id": "SlI03", "type": "ref", "ref": "SlCd1", "descendants": {"SlCt1": {"content": "Inbox"}}}
+      ]
+    },
+    {
+      "id": "SlP04", "name": "Filled Panel", "type": "frame", "x": 0, "y": 600,
+      "width": 300, "height": "fit_content", "layout": "vertical", "padding": 20, "fill": "#F3F4F6",
+      "children": [
+        {"id": "SlI04", "type": "ref", "ref": "SlPn1",
+         "descendants": {
+           "SlPh1": {"children": [
+             {"id": "SlF06", "name": "Heading", "type": "text", "content": "Settings", "fill": "#111827",
+              "fontFamily": "Inter", "fontSize": 15, "fontWeight": "600"},
+             {"id": "SlF07", "name": "Badge", "type": "rectangle", "width": 8, "height": 8, "cornerRadius": 4, "fill": "#10B981"}
+           ]},
+           "SlPf1": {"children": [
+             {"id": "SlF08", "name": "Cancel", "type": "text", "content": "Cancel", "fill": "#6B7280",
+              "fontFamily": "Inter", "fontSize": 13},
+             {"id": "SlF09", "name": "Save", "type": "text", "content": "Save", "fill": "#2563EB",
+              "fontFamily": "Inter", "fontSize": 13, "fontWeight": "600"}
+           ]}
+         }}
+      ]
+    },
+    {
+      "id": "SlP05", "name": "Header Panel", "type": "frame", "x": 340, "y": 600,
+      "width": 300, "height": "fit_content", "layout": "vertical", "padding": 20, "fill": "#F3F4F6",
+      "children": [
+        {"id": "SlI05", "type": "ref", "ref": "SlPn1",
+         "descendants": {
+           "SlPh1": {"children": [
+             {"id": "SlF10", "name": "Heading", "type": "text", "content": "Notifications", "fill": "#111827",
+              "fontFamily": "Inter", "fontSize": 15, "fontWeight": "600"}
+           ]}
+         }}
+      ]
+    },
+    {
+      "id": "SlP06", "name": "Upload Button", "type": "frame", "x": 680, "y": 600,
+      "width": "fit_content", "height": "fit_content", "layout": "vertical", "padding": 20, "fill": "#F3F4F6",
+      "children": [
+        {"id": "SlI06", "type": "ref", "ref": "SlBt1",
+         "descendants": {
+           "SlBl1": {"content": "Upload"},
+           "SlBi1": {"children": [
+             {"id": "SlF11", "name": "Square", "type": "rectangle", "width": 14, "height": 14, "cornerRadius": 3, "fill": "#FDE68A"}
+           ]}
+         }}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+#!/usr/bin/env python3
+"""gen-stroke-shadows-fixture — write Tests/WoodcaseTests/Fixtures/render-stroke-shadows.pen:
+one 240x200 black board per case of a grey node, stroked green 12 pt wide, casting a white
+outer shadow (offset 10,10, blur 8) — so each board shows whether the stroke band casts the
+shadow and whether it knocks the shadow out underneath (leaf vPZ0ia).
+
+Cases: a rectangle stroked outside, centred and inside; a rounded one outside; a translucent
+outside stroke (the shadow must not show through the band); a frame with a width per side,
+outside and centred; a frame with a child, outside; an ellipse, a polygon and a closed path,
+outside; a diagonal and a flat line; and an inside stroke under an inner shadow.
+
+Usage:
+    scripts/gen-stroke-shadows-fixture [<out.pen>]     (default: the fixture's path)
+    scripts/pen-oracle Tests/WoodcaseTests/Fixtures/render-stroke-shadows.pen --scale 2
+
+The second command (sandbox disabled, `pen` logged in) writes Pen's first-pass layout (pass --settle for the settled one), its 2x
+exports and its re-save beside the fixture. Standard library only; runs sandboxed.
+"""
+
+import json, sys
+
+GREY, GREEN, WHITE = "#808080", "#00FF00", "#FFFFFFFF"
+SHADOW = {"type": "shadow", "shadowType": "outer", "color": WHITE, "offset": {"x": 10, "y": 10}, "blur": 8}
+
+nodes = []
+
+
+def board(name, child):
+    k = len(nodes)
+    nodes.append({"type": "frame", "id": f"K{k:02d}", "name": name, "x": k % 4 * 300, "y": k // 4 * 260,
+                  "width": 240, "height": 200, "layout": "none", "fill": "#000000", "children": [child]})
+
+
+def node(i, kind, alignment="outer", width=12, stroke=GREEN, effect=SHADOW, **keys):
+    d = {"type": kind, "id": i, "x": 50, "y": 50, "width": 120, "height": 80,
+         "stroke": stroke, "strokeWidth": width, "effect": effect}
+    if kind != "line":
+        d["fill"] = GREY
+    if alignment:
+        d["strokeAlignment"] = alignment
+    if kind == "frame":
+        d["layout"] = "none"
+    d.update(keys)
+    return d
+
+
+board("rect-outer", node("Rout", "rectangle"))
+board("rect-center", node("Rcen", "rectangle", "center"))
+board("rect-inner", node("Rinn", "rectangle", "inner"))
+board("rect-round-outer", node("Rrnd", "rectangle", cornerRadius=20))
+board("rect-translucent-outer", node("Rtra", "rectangle", stroke="#00FF0040"))
+per_side = {"top": 4, "right": 16, "bottom": 8, "left": 0}
+board("frame-perside-outer", node("Fpso", "frame", width=per_side))
+board("frame-perside-center", node("Fpsc", "frame", "center", width=per_side))
+board("frame-child-outer", node("Fchd", "frame", children=[
+    {"type": "rectangle", "id": "FchdA", "x": 20, "y": 20, "width": 40, "height": 30, "fill": "#FF00FF"}]))
+board("ellipse-outer", node("Eout", "ellipse"))
+board("polygon-outer", node("Pout", "polygon", polygonCount=5))
+board("path-outer", node("Hout", "path", geometry="M0 0 L120 0 L60 80 Z"))
+board("line-diagonal", node("Ldia", "line", alignment=None))
+board("line-flat", node("Lflt", "line", alignment=None, height=0))
+board("inner-under-inner-stroke", node("Iinn", "rectangle", "inner", width=16, effect={
+    "type": "shadow", "shadowType": "inner", "color": WHITE, "offset": {"x": 6, "y": 6}, "blur": 8}))
+
+out = sys.argv[1] if len(sys.argv) > 1 else "Tests/WoodcaseTests/Fixtures/render-stroke-shadows.pen"
+with open(out, "w") as f:
+    json.dump({"version": "2.19", "children": nodes}, f, indent=2)

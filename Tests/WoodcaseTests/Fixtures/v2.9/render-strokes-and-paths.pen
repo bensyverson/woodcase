@@ -1,0 +1,215 @@
+{
+  "version": "2.9",
+  "children": [
+    {
+      "type": "frame",
+      "id": "CdETp",
+      "x": 0,
+      "y": 0,
+      "name": "render-strokes-and-paths",
+      "width": 600,
+      "fill": "#FFFFFF",
+      "layout": "vertical",
+      "gap": 30,
+      "padding": 30,
+      "children": [
+        {
+          "type": "frame",
+          "id": "QgPt5",
+          "name": "caps",
+          "gap": 30,
+          "children": [
+            {
+              "type": "path",
+              "id": "LFH4b",
+              "name": "cap-butt",
+              "geometry": "M0 20l150 0",
+              "width": 150,
+              "height": 40,
+              "stroke": {
+                "align": "center",
+                "thickness": 20,
+                "fill": "#333333"
+              }
+            },
+            {
+              "type": "path",
+              "id": "9O9ZC",
+              "name": "cap-round",
+              "geometry": "M0 20l150 0",
+              "width": 150,
+              "height": 40,
+              "stroke": {
+                "align": "center",
+                "thickness": 20,
+                "cap": "round",
+                "fill": "#333333"
+              }
+            },
+            {
+              "type": "path",
+              "id": "aAYCd",
+              "name": "cap-square",
+              "geometry": "M0 20l150 0",
+              "width": 150,
+              "height": 40,
+              "stroke": {
+                "align": "center",
+                "thickness": 20,
+                "cap": "square",
+                "fill": "#333333"
+              }
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "HB0VA",
+          "name": "joins",
+          "gap": 30,
+          "children": [
+            {
+              "type": "path",
+              "id": "KGl25",
+              "name": "join-miter",
+              "geometry": "M10 70l50-60 50 60",
+              "width": 120,
+              "height": 80,
+              "stroke": {
+                "align": "center",
+                "thickness": 16,
+                "fill": "#0066CC"
+              }
+            },
+            {
+              "type": "path",
+              "id": "lpzCe",
+              "name": "join-bevel",
+              "geometry": "M10 70l50-60 50 60",
+              "width": 120,
+              "height": 80,
+              "stroke": {
+                "align": "center",
+                "thickness": 16,
+                "join": "bevel",
+                "fill": "#0066CC"
+              }
+            },
+            {
+              "type": "path",
+              "id": "jd3Az",
+              "name": "join-round",
+              "geometry": "M10 70l50-60 50 60",
+              "width": 120,
+              "height": 80,
+              "stroke": {
+                "align": "center",
+                "thickness": 16,
+                "join": "round",
+                "fill": "#0066CC"
+              }
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "BsF6k",
+          "name": "alignment",
+          "gap": 30,
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "st9oA",
+              "name": "align-center",
+              "fill": "#FF6B6B",
+              "width": 120,
+              "height": 80,
+              "stroke": {
+                "align": "center",
+                "thickness": 10,
+                "fill": "#222222"
+              }
+            },
+            {
+              "type": "rectangle",
+              "id": "R53qF",
+              "name": "align-inside",
+              "fill": "#FF6B6B",
+              "width": 120,
+              "height": 80,
+              "stroke": {
+                "align": "inside",
+                "thickness": 10,
+                "fill": "#222222"
+              }
+            },
+            {
+              "type": "rectangle",
+              "id": "WkXaN",
+              "name": "align-outside",
+              "fill": "#FF6B6B",
+              "width": 120,
+              "height": 80,
+              "stroke": {
+                "align": "outside",
+                "thickness": 10,
+                "fill": "#222222"
+              }
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "w2RCM",
+          "name": "complex",
+          "gap": 30,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "path",
+              "id": "H0o7k",
+              "name": "dashed-line",
+              "geometry": "M0 20l150 0",
+              "width": 150,
+              "height": 40,
+              "stroke": {
+                "align": "center",
+                "thickness": 8,
+                "cap": "round",
+                "fill": "#666666"
+              }
+            },
+            {
+              "type": "path",
+              "id": "IW4Sw",
+              "name": "heart",
+              "geometry": "M60 100c-40-30-60-60-60-72 0-18 14-28 30-28 12 0 24 8 30 20 6-12 18-20 30-20 16 0 30 10 30 28 0 12-20 42-60 72z",
+              "fill": "#FF69B4",
+              "width": 120,
+              "height": 108,
+              "stroke": {
+                "align": "center",
+                "thickness": 4,
+                "fill": "#CC0066"
+              }
+            },
+            {
+              "type": "path",
+              "id": "EIeEG",
+              "name": "star",
+              "geometry": "M60 0l13 43 44 0-36 24 13 45-34-28-34 28 13-45-36-24 44 0z",
+              "fill": "#FFD700",
+              "width": 120,
+              "height": 114,
+              "stroke": {
+                "align": "center",
+                "thickness": 4,
+                "fill": "#B8860B"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

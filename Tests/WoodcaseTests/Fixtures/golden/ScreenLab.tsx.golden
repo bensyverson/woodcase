@@ -1,0 +1,705 @@
+import { cn } from "../lib/cn";
+import { StatusBar } from "./StatusBar";
+
+interface ScreenLabProps {
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+export function ScreenLab({
+  className,
+  style,
+}: ScreenLabProps) {
+  return (
+    <div
+      className={cn("flex flex-col", className)}
+      style={{
+        width: 402,
+        height: 1249,
+        backgroundColor: "var(--bg-page)",
+        overflow: "hidden",
+        ...style,
+      }}
+    >
+      <StatusBar
+        style={{
+          width: "100%",
+          flexShrink: 0,
+        }}
+      />
+      <div
+        className="flex"
+        style={{
+          width: "100%",
+          padding: "0px 24px",
+        }}
+      >
+        <p
+          style={{
+            color: "var(--text-primary)",
+            fontFamily: "var(--font-primary)",
+            fontSize: 36,
+            fontWeight: 600,
+            lineHeight: "47px",
+            fontOpticalSizing: "none",
+            whiteSpace: "pre",
+          }}
+        >
+          Lab
+        </p>
+      </div>
+      <div
+        className="flex flex-col gap-8"
+        style={{
+          width: "100%",
+          flex: 1,
+          minHeight: 0,
+          padding: "10px 24px",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          className="flex flex-col gap-3"
+          style={{
+            width: "100%",
+          }}
+        >
+          <p
+            style={{
+              color: "var(--text-secondary)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 12,
+              fontWeight: 600,
+              letterSpacing: 1,
+              lineHeight: "16px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.5,
+              marginBottom: 0.5,
+            }}
+          >
+            Shapes
+          </p>
+          <div
+            className="flex gap-3"
+            style={{
+              width: "100%",
+            }}
+          >
+            <div
+              style={{
+                width: 48,
+                height: 48,
+                backgroundColor: "var(--accent)",
+                borderRadius: 8,
+                flexShrink: 0,
+              }}
+            />
+            <div
+              style={{
+                width: 48,
+                height: 48,
+                backgroundColor: "var(--accent)",
+                borderRadius: "0px 16px 0px 16px",
+                flexShrink: 0,
+              }}
+            />
+            <div
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: "50%",
+                backgroundColor: "var(--accent)",
+                flexShrink: 0,
+              }}
+            />
+            <svg width={48} height={48} viewBox="0 0 48 48"
+              style={{
+                flexShrink: 0,
+              }}
+            >
+              <path d="M48 24 A24 24 0 1 1 0 24 A24 24 0 1 1 48 24 Z M33.6 24 A9.6 9.6 0 1 1 14.4 24 A9.6 9.6 0 1 1 33.6 24 Z" fill="var(--accent)" fillRule="evenodd" />
+            </svg>
+            <svg width={48} height={48} viewBox="0 0 48 48"
+              style={{
+                flexShrink: 0,
+              }}
+            >
+              <path d="M24 24 L48 24 A24 24 0 1 0 24 48 Z" fill="var(--accent)" />
+            </svg>
+            <svg width={48} height={48} viewBox="0 0 48 48"
+              style={{
+                flexShrink: 0,
+              }}
+            >
+              <polygon points="24.0,0.0 44.8,12.0 44.8,36.0 24.0,48.0 3.2,36.0 3.2,12.0" fill="var(--accent)" />
+            </svg>
+            <svg width={48} height={48} viewBox="0 0 48 48"
+              style={{
+                flexShrink: 0,
+              }}
+            >
+              <polygon points="24.0,0.0 44.8,36.0 3.2,36.0" fill="var(--accent)" />
+            </svg>
+          </div>
+          <div
+            style={{
+              width: "100%",
+              borderTop: "2px solid var(--border-strong)",
+              marginTop: -1,
+              marginBottom: 1,
+              flexShrink: 0,
+            }}
+          />
+          <svg width={48} height={48} viewBox="8 2 32 34" preserveAspectRatio="none" overflow="visible"
+            style={{
+              flexShrink: 0,
+            }}
+          >
+            <path d="M24 8c-4-8-16-8-16 0 0 8 8 16 16 28 8-12 16-20 16-28 0-8-12-8-16 0z" fill="var(--status-negative)" />
+          </svg>
+        </div>
+        <div
+          className="flex flex-col gap-3"
+          style={{
+            width: "100%",
+            isolation: "isolate",
+          }}
+        >
+          <p
+            style={{
+              color: "var(--text-secondary)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 12,
+              fontWeight: 600,
+              letterSpacing: 1,
+              lineHeight: "16px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.5,
+              marginBottom: 0.5,
+            }}
+          >
+            Fills
+          </p>
+          <div
+            className="flex gap-3"
+            style={{
+              width: "100%",
+            }}
+          >
+            <div
+              style={{
+                width: 60,
+                height: 60,
+                backgroundColor: "var(--accent)",
+                borderRadius: 8,
+                flexShrink: 0,
+              }}
+            />
+            <div
+              style={{
+                width: 60,
+                height: 60,
+                background: "linear-gradient(to top left, var(--accent) 14.645%, #7B68B0 85.355%)",
+                borderRadius: 8,
+                flexShrink: 0,
+              }}
+            />
+            <div
+              style={{
+                width: 60,
+                height: 60,
+                background: "radial-gradient(closest-side, var(--accent) 0%, #7B68B0 100%)",
+                borderRadius: 8,
+                flexShrink: 0,
+              }}
+            />
+            <div
+              style={{
+                width: 60,
+                height: 60,
+                background: "conic-gradient(var(--accent) 0%, #7B68B0 50%, var(--accent) 100%)",
+                borderRadius: 8,
+                flexShrink: 0,
+              }}
+            />
+            <div
+              className="flex"
+              style={{
+                width: 60,
+                height: 60,
+                backgroundImage: "url('./images/generated-1774296205111.png')",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                borderRadius: 8,
+                flexShrink: 0,
+              }}
+            >
+            </div>
+          </div>
+          <div
+            style={{
+              width: 120,
+              height: 60,
+              background: "linear-gradient(to top left, #FFFFFF00 14.645%, #FFFFFFCC 85.355%), var(--accent)",
+              backgroundBlendMode: "overlay, normal",
+              borderRadius: 8,
+              flexShrink: 0,
+            }}
+          />
+        </div>
+        <div
+          className="flex flex-col gap-3"
+          style={{
+            width: "100%",
+          }}
+        >
+          <p
+            style={{
+              color: "var(--text-secondary)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 12,
+              fontWeight: 600,
+              letterSpacing: 1,
+              lineHeight: "16px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.5,
+              marginBottom: 0.5,
+            }}
+          >
+            Strokes
+          </p>
+          <div
+            className="flex items-center gap-3"
+            style={{
+              width: "100%",
+            }}
+          >
+            <div
+              style={{
+                width: 60,
+                height: 60,
+                borderRadius: 8,
+                boxShadow: "inset 0 0 0 3px var(--accent)",
+                flexShrink: 0,
+              }}
+            />
+            <div
+              style={{
+                width: 60,
+                height: 60,
+                borderRadius: 8,
+                boxShadow: "0 0 0 3px var(--accent)",
+                flexShrink: 0,
+              }}
+            />
+            <div
+              style={{
+                width: 60,
+                height: 60,
+                position: "relative",
+                flexShrink: 0,
+              }}
+            >
+              <div
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  inset: "-1.5px 0 -1.5px 0",
+                  borderStyle: "solid",
+                  borderColor: "transparent",
+                  borderWidth: "1.5px 0 1.5px 0",
+                  padding: "1.5px 0 1.5px 0",
+                  backgroundImage: "linear-gradient(var(--accent), var(--accent))",
+                  backgroundSize: "100% 100%",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                  backgroundOrigin: "border-box",
+                  WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+                  WebkitMaskComposite: "xor",
+                  mask: "linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0)",
+                  pointerEvents: "none",
+                }}
+              />
+            </div>
+            <svg width={122} height={3} viewBox="-1 -1 122 3" overflow="visible"
+              style={{
+                margin: -1,
+                flexShrink: 0,
+              }}
+            >
+              <line x1="0" y1="0" x2="120" y2="1" stroke="var(--text-primary)" strokeWidth="2" />
+            </svg>
+          </div>
+        </div>
+        <div
+          className="flex flex-col gap-3"
+          style={{
+            width: "100%",
+          }}
+        >
+          <p
+            style={{
+              color: "var(--text-secondary)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 12,
+              fontWeight: 600,
+              letterSpacing: 1,
+              lineHeight: "16px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.5,
+              marginBottom: 0.5,
+            }}
+          >
+            Effects
+          </p>
+          <div
+            className="flex gap-3"
+            style={{
+              width: "100%",
+            }}
+          >
+            <div
+              style={{
+                width: 60,
+                height: 60,
+                backgroundColor: "var(--bg-card)",
+                borderRadius: 12,
+                boxShadow: "0px 4px 12px var(--shadow)",
+                flexShrink: 0,
+              }}
+            />
+            <div
+              style={{
+                width: 60,
+                height: 60,
+                backgroundColor: "var(--bg-card)",
+                borderRadius: 12,
+                boxShadow: "0px 2px 8px #00000030",
+                flexShrink: 0,
+              }}
+            />
+            <div
+              style={{
+                width: 60,
+                height: 60,
+                backgroundColor: "var(--accent)",
+                borderRadius: 12,
+                filter: "blur(2px)",
+                flexShrink: 0,
+              }}
+            />
+            <div
+              className="relative"
+              style={{
+                width: 60,
+                height: 60,
+                borderRadius: 12,
+                overflow: "hidden",
+                flexShrink: 0,
+              }}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  left: 0,
+                  top: 0,
+                }}
+              >
+                <div
+                  className="flex"
+                  style={{
+                    width: 60,
+                    height: 60,
+                    backgroundImage: "url('./images/generated-1774296205111.png')",
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                </div>
+              </div>
+              <div
+                style={{
+                  position: "absolute",
+                  left: 0,
+                  top: 0,
+                }}
+              >
+                <div
+                  style={{
+                    width: 60,
+                    height: 60,
+                    backgroundColor: "#FFFFFF40",
+                    backdropFilter: "blur(4px)",
+                    WebkitBackdropFilter: "blur(4px)",
+                    flexShrink: 0,
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="flex flex-col gap-3"
+          style={{
+            width: "100%",
+          }}
+        >
+          <p
+            style={{
+              color: "var(--text-secondary)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 12,
+              fontWeight: 600,
+              letterSpacing: 1,
+              lineHeight: "16px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.5,
+              marginBottom: 0.5,
+            }}
+          >
+            Transforms
+          </p>
+          <div
+            className="flex items-center gap-6"
+            style={{
+              width: "100%",
+            }}
+          >
+            <div
+              style={{
+                width: 48,
+                height: 48,
+                backgroundColor: "var(--accent)",
+                borderRadius: 8,
+                flexShrink: 0,
+                transform: "rotate(-45deg)",
+                margin: "9.941px 9.941px",
+              }}
+            />
+            <p
+              style={{
+                color: "var(--text-primary)",
+                fontFamily: "var(--font-primary)",
+                fontSize: 16,
+                fontWeight: 600,
+                lineHeight: "21px",
+                fontOpticalSizing: "none",
+                whiteSpace: "pre",
+                marginTop: -0.5,
+                marginBottom: 0.5,
+                transform: "scaleX(-1)",
+              }}
+            >
+              Flip
+            </p>
+            <div
+              style={{
+                width: 60,
+                height: 60,
+                backgroundColor: "var(--accent)",
+                flexShrink: 0,
+                opacity: 0.3,
+              }}
+            />
+          </div>
+        </div>
+        <div
+          className="flex flex-col gap-3"
+          style={{
+            width: "100%",
+          }}
+        >
+          <p
+            style={{
+              color: "var(--text-secondary)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 12,
+              fontWeight: 600,
+              letterSpacing: 1,
+              lineHeight: "16px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.5,
+              marginBottom: 0.5,
+            }}
+          >
+            Text
+          </p>
+          <p
+            style={{
+              color: "var(--text-primary)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 14,
+              fontWeight: "normal",
+              lineHeight: "18px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.25,
+              marginBottom: 0.25,
+              minHeight: 18,
+            }}
+          >
+            &nbsp;
+          </p>
+          <p
+            style={{
+              color: "var(--text-primary)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 14,
+              fontWeight: "normal",
+              lineHeight: "18px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.25,
+              marginBottom: 0.25,
+            }}
+          >
+            {"Underline & Strike"}
+          </p>
+          <p
+            style={{
+              color: "var(--text-primary)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 14,
+              fontWeight: "normal",
+              lineHeight: "18px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre-wrap",
+              marginTop: -0.25,
+              marginBottom: 0.25,
+              textAlign: "justify",
+              width: "100%",
+              overflowWrap: "break-word",
+            }}
+          >
+            This is justified text that wraps across the full width of the container to demonstrate text alignment.
+          </p>
+          <p
+            style={{
+              color: "var(--accent)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 14,
+              fontWeight: 500,
+              lineHeight: "18px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.25,
+              marginBottom: 0.25,
+            }}
+          >
+            Visit the Lab
+          </p>
+        </div>
+        <div
+          className="flex flex-col gap-3"
+          style={{
+            width: "100%",
+          }}
+        >
+          <p
+            style={{
+              color: "var(--text-secondary)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 12,
+              fontWeight: 600,
+              letterSpacing: 1,
+              lineHeight: "16px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.5,
+              marginBottom: 0.5,
+            }}
+          >
+            Blend Modes
+          </p>
+          <div
+            className="relative"
+            style={{
+              width: 120,
+              height: 120,
+              backgroundColor: "var(--accent)",
+              borderRadius: 8,
+              flexShrink: 0,
+              isolation: "isolate",
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                left: 4,
+                top: 4,
+              }}
+            >
+              <div
+                style={{
+                  width: 48,
+                  height: 48,
+                  backgroundColor: "#7B68B0",
+                  mixBlendMode: "multiply",
+                  flexShrink: 0,
+                }}
+              />
+            </div>
+            <div
+              style={{
+                position: "absolute",
+                left: 68,
+                top: 4,
+              }}
+            >
+              <div
+                style={{
+                  width: 48,
+                  height: 48,
+                  backgroundColor: "#7B68B0",
+                  mixBlendMode: "screen",
+                  flexShrink: 0,
+                }}
+              />
+            </div>
+            <div
+              style={{
+                position: "absolute",
+                left: 4,
+                top: 68,
+              }}
+            >
+              <div
+                style={{
+                  width: 48,
+                  height: 48,
+                  backgroundColor: "#7B68B0",
+                  mixBlendMode: "overlay",
+                  flexShrink: 0,
+                }}
+              />
+            </div>
+            <div
+              style={{
+                position: "absolute",
+                left: 68,
+                top: 68,
+              }}
+            >
+              <div
+                style={{
+                  width: 48,
+                  height: 48,
+                  backgroundColor: "#7B68B0",
+                  mixBlendMode: "difference",
+                  flexShrink: 0,
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,84 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "ul01f",
+      "x": 300,
+      "y": 0,
+      "name": "fixed",
+      "clip": true,
+      "width": 240,
+      "height": 180,
+      "fill": "#808080",
+      "layout": "none",
+      "children": [
+        {
+          "type": "line",
+          "id": "ul01a",
+          "x": 30,
+          "y": 40,
+          "width": 180,
+          "height": 0
+        },
+        {
+          "type": "line",
+          "id": "ul01b",
+          "x": 30,
+          "y": 60,
+          "width": 180,
+          "height": 100
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ul02f",
+      "x": 600,
+      "y": 0,
+      "name": "fill",
+      "clip": true,
+      "width": 240,
+      "height": 180,
+      "fill": "#808080",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "ul02n",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 140,
+          "fill": "#333333",
+          "layout": "vertical",
+          "gap": 20,
+          "padding": 20,
+          "children": [
+            {
+              "type": "line",
+              "id": "ul02a",
+              "width": "fill_container",
+              "height": 0
+            },
+            {
+              "type": "line",
+              "id": "ul02b",
+              "width": "fill_container",
+              "height": 0
+            },
+            {
+              "type": "line",
+              "id": "ul02c",
+              "width": "fill_container",
+              "height": 0,
+              "stroke": "#FF0000",
+              "strokeWidth": 6
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "fileToken": "a9a6df90-3db6-4820-93e5-a7e7cf578eab"
+}

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>banking · map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/viewer.css">
+    <script src="/viewer.js" defer></script>
+  </head>
+  <body class="v-body v-layout-artboard">
+    <header class="v-topbar">
+      <a class="v-brand" href="/" title="Every file being served">woodcase</a>
+      <nav class="v-crumbs"><span class="v-crumb is-current">banking</span></nav>
+      <div class="v-topbar-controls">
+        <div class="v-follow" id="v-follow">
+          <form class="v-follow-form" method="get" action="/files/24294ca51a33">
+            <input type="hidden" name="theme" value="Mode:Dark">
+            <label class="v-follow-label" for="v-follow-select">follow:</label>
+            <select id="v-follow-select" class="v-follow-select" name="follow">
+              <option value="nobody" selected>nobody</option>
+              <option value="anyone">anyone</option>
+              <option value="claude-a">claude-a</option>
+              <option value="ben">ben</option>
+            </select>
+            <button class="v-go" type="submit">apply</button>
+          </form>
+        </div>
+        <div class="v-theme">
+          <form class="v-theme-axis" method="get" action="/files/24294ca51a33">
+            <label class="v-theme-label" for="v-theme-Mode">Mode:</label>
+            <select id="v-theme-Mode" class="v-theme-select" name="theme" data-axis="Mode">
+              <option value="">default</option>
+              <option value="Mode:Light">Light</option>
+              <option value="Mode:Dark" selected>Dark</option>
+            </select>
+            <button class="v-go" type="submit">apply</button>
+          </form>
+        </div>
+        <details class="v-presence" id="v-presence">
+          <summary class="v-presence-summary"><span class="v-presence-stack"><span class="v-avatar v-avatar-medium" style="--v-actor: hsl(152 85% 48%); --v-actor-ink: #000000" title="claude-a" data-identity="claude-a">C</span><span class="v-avatar v-avatar-medium" style="--v-actor: hsl(149 60% 48%); --v-actor-ink: #000000" title="ben" data-identity="ben">B</span></span><span class="v-presence-note">2 active · <span class="v-presence-name">claude-a</span> editing</span></summary>
+          <ul class="v-presence-list">
+            <li class="v-presence-item"><span class="v-avatar v-avatar-medium" style="--v-actor: hsl(152 85% 48%); --v-actor-ink: #000000" title="claude-a" data-identity="claude-a">C</span><span class="v-presence-name">claude-a</span><span class="v-presence-age">4s</span><span class="v-presence-events">12 events</span></li>
+            <li class="v-presence-item"><span class="v-avatar v-avatar-medium" style="--v-actor: hsl(149 60% 48%); --v-actor-ink: #000000" title="ben" data-identity="ben">B</span><span class="v-presence-name">ben</span><span class="v-presence-age">5m</span><span class="v-presence-events">3 events</span></li>
+          </ul>
+        </details>
+        <span class="v-live" id="v-live" data-state="connecting"><span class="v-live-label" data-state="connecting">connecting…</span><span class="v-live-label" data-state="live">live</span><span class="v-live-label" data-state="lost">disconnected</span></span>
+        <button class="v-key-hint" type="button" popovertarget="v-keys" aria-label="Keyboard shortcuts">?</button>
+        <div class="v-key-hint-popover" id="v-keys" popover>
+          <h2 class="v-panel-title">Keyboard shortcuts</h2>
+          <dl class="v-key-list">
+            <dt class="v-mono v-key-keys">← / →</dt>
+            <dd class="v-key-does">previous / next artboard, with nothing selected</dd>
+            <dt class="v-mono v-key-keys">↑ / ↓</dt>
+            <dd class="v-key-does">previous / next outline row, with a node selected</dd>
+            <dt class="v-mono v-key-keys">← / →</dt>
+            <dd class="v-key-does">collapse / expand the selected row's children</dd>
+            <dt class="v-mono v-key-keys">Enter</dt>
+            <dd class="v-key-does">on the map, open the artboard the ring is on</dd>
+            <dt class="v-mono v-key-keys">f</dt>
+            <dd class="v-key-does">presentation mode: the artboard, and nothing else</dd>
+            <dt class="v-mono v-key-keys">Esc</dt>
+            <dd class="v-key-does">leave presentation, else select the parent node, else go up to the map</dd>
+          </dl>
+        </div>
+      </div>
+    </header>
+    <main class="v-main" id="v-main">
+      <aside class="v-side v-side-left" id="v-left">
+        <section class="v-panel v-outline v-artboards" id="v-outline">
+          <header class="v-panel-head">
+            <h2 class="v-panel-title">Artboards</h2>
+            <span class="v-panel-note" title="3f2a91c0d4e5b678">rev 3f2a…b678</span>
+          </header>
+          <div class="v-outline-rows"><a href="/files/24294ca51a33/artboards/Cnv01?theme=Mode%3ADark" class="v-row v-artboard-row" data-artboard="Cnv01"><span class="v-glyph">⊟</span><span class="v-outline-name">Dashboard</span><span class="v-outline-rect">0,0 400×300</span><span class="v-id-chip v-outline-id" data-copy-id="Cnv01" title="Click to copy Cnv01"><span class="v-id-chip-id">Cnv01</span><span class="v-copied" aria-hidden="true">copied</span></span></a><a href="/files/24294ca51a33/artboards/nSNTs?theme=Mode%3ADark" class="v-row v-artboard-row is-touched" data-artboard="nSNTs" style="--v-actor: hsl(152 85% 48%)" data-editors="claude-a"><span class="v-kind-mark v-kind-component" title="Reusable component definition"><span class="v-kind-glyph">◈</span><span class="v-kind-label">component</span></span><span class="v-outline-name">banking-home</span><span class="v-outline-rect">500,0 402×874</span><span class="v-id-chip v-outline-id" data-copy-id="nSNTs" title="Click to copy nSNTs"><span class="v-id-chip-id">nSNTs</span><span class="v-copied" aria-hidden="true">copied</span></span></a><a href="/files/24294ca51a33/artboards/YGJ0d%2FnSNTs?theme=Mode%3ADark" class="v-row v-artboard-row" data-artboard="YGJ0d/nSNTs"><span class="v-kind-mark v-kind-instance" title="Instance of a reusable component"><span class="v-kind-glyph">◇</span><span class="v-kind-label">instance</span></span><span class="v-outline-name">banking-home / Dark</span><span class="v-outline-rect">1000,0 402×874</span><span class="v-id-chip v-outline-id" data-copy-id="YGJ0d/nSNTs" title="Click to copy YGJ0d/nSNTs"><span class="v-id-chip-id">YGJ0d/nSNTs</span><span class="v-copied" aria-hidden="true">copied</span></span></a></div>
+        </section>
+        <div class="v-grip" data-grip="lower" data-property="--v-row-lower" data-axis="y" data-edge="after" role="separator" aria-orientation="horizontal"></div>
+        <section class="v-panel v-variables" id="v-variables">
+          <header class="v-panel-head">
+            <div class="v-panel-head-title">
+              <button class="v-variables-toggle" type="button" title="Collapse or expand the variables list">
+                <span class="v-disclosure-glyph" aria-hidden="true">
+                <svg viewBox="0 0 10 10">
+                  <polygon points="1,3 9,3 5,8" fill="currentColor" />
+                </svg>
+                </span>
+              </button>
+              <h2 class="v-panel-title">Variables</h2>
+            </div>
+            <span class="v-panel-note">Mode: Light, Dark</span>
+          </header>
+          <div class="v-variable-rows">
+            <details class="v-row v-variable-row" data-variable="accent">
+              <summary class="v-variable-summary">
+                <span class="v-disclosure-glyph" aria-hidden="true">
+                <svg viewBox="0 0 10 10">
+                  <polygon points="1,3 9,3 5,8" fill="currentColor" />
+                </svg>
+                </span><span class="v-swatch" style="--v-swatch: #2FBF6F" title="#2FBF6F"></span><span class="v-variable-name">accent</span><span class="v-variable-value">#2FBF6F</span><span class="v-avatar v-avatar-small" style="--v-actor: hsl(152 85% 48%); --v-actor-ink: #000000" title="claude-a" data-identity="claude-a">C</span><span class="v-variable-age">4s</span>
+              </summary>
+              <div class="v-variable-detail">
+                <p class="v-variable-type">color variable</p>
+                <div class="v-variant-table">
+                  <div class="v-variant-row"><span class="v-variant-axis">*</span><span class="v-variant-value"><span class="v-swatch" style="--v-swatch: #2FBF6F" title="#2FBF6F"></span>#2FBF6F</span></div>
+                </div>
+              </div>
+            </details>
+          </div>
+        </section>
+      </aside>
+      <div class="v-grip" data-grip="left" data-property="--v-col-left" data-axis="x" data-edge="before" role="separator" aria-orientation="vertical"></div>
+      <section class="v-canvas">
+        <div class="v-map" id="v-map" data-file="24294ca51a33" style="--v-map-scale: 0.500; --v-map-w: 1402; --v-map-h: 874">
+          <div class="v-map-plane">
+            <a class="v-map-board" data-artboard="Cnv01" title="Dashboard" style="--v-board-x: 0; --v-board-y: 0; --v-board-w: 400; --v-board-h: 300" href="/files/24294ca51a33/artboards/Cnv01?theme=Mode%3ADark"><span class="v-map-frame is-loading">
+            <img class="v-map-thumb" src="/files/24294ca51a33/artboards/Cnv01.png?max=320&amp;theme=Mode%3ADark" alt="" width="400" height="300" loading="lazy" decoding="async">
+            </span><span class="v-map-label"><span class="v-map-name">Dashboard</span></span></a><a class="v-map-board is-touched" data-artboard="nSNTs" title="banking-home" style="--v-board-x: 500; --v-board-y: 0; --v-board-w: 402; --v-board-h: 874;--v-actor: hsl(152 85% 48%)" href="/files/24294ca51a33/artboards/nSNTs?theme=Mode%3ADark" data-editors="claude-a"><span class="v-map-frame is-loading">
+            <img class="v-map-thumb" src="/files/24294ca51a33/artboards/nSNTs.png?max=320&amp;theme=Mode%3ADark" alt="" width="402" height="874" loading="lazy" decoding="async">
+            </span><span class="v-map-label"><span class="v-kind-mark v-kind-component" title="Reusable component definition"><span class="v-kind-glyph">◈</span><span class="v-kind-label">component</span></span><span class="v-map-name">banking-home</span></span></a><a class="v-map-board" data-artboard="YGJ0d/nSNTs" title="banking-home / Dark" style="--v-board-x: 1000; --v-board-y: 0; --v-board-w: 402; --v-board-h: 874" href="/files/24294ca51a33/artboards/YGJ0d%2FnSNTs?theme=Mode%3ADark"><span class="v-map-frame is-loading">
+            <img class="v-map-thumb" src="/files/24294ca51a33/artboards/YGJ0d%2FnSNTs.png?max=320&amp;theme=Mode%3ADark" alt="" width="402" height="874" loading="lazy" decoding="async">
+            </span><span class="v-map-label"><span class="v-kind-mark v-kind-instance" title="Instance of a reusable component"><span class="v-kind-glyph">◇</span><span class="v-kind-label">instance</span></span><span class="v-map-name">banking-home / Dark</span></span></a>
+          </div>
+        </div>
+      </section>
+      <div class="v-grip" data-grip="right" data-property="--v-col-right" data-axis="x" data-edge="after" role="separator" aria-orientation="vertical"></div>
+      <aside class="v-side v-side-right" id="v-right" data-tab="activity">
+        <nav class="v-tabbar"><a class="v-tab is-current" data-tab="activity" href="/files/24294ca51a33?theme=Mode%3ADark">Activity</a></nav>
+        <div class="v-pane" data-pane="activity">
+          <section class="v-panel v-activity" id="v-activity">
+            <header class="v-panel-head">
+              <h2 class="v-panel-title">Activity</h2>
+              <span class="v-panel-note">this file · all identities</span>
+            </header>
+            <div class="v-activity-rows">
+              <details class="v-row v-activity-row" data-identity="claude-a">
+                <summary class="v-activity-summary">
+                  <span class="v-activity-time" title="just now">06:13</span><span class="v-avatar v-avatar-small" style="--v-actor: hsl(152 85% 48%); --v-actor-ink: #000000" title="claude-a" data-identity="claude-a">C</span><span class="v-activity-identity">claude-a</span><span class="v-activity-verb">set</span><span class="v-activity-path">
+                  <bdi>Dashboard/Header/Title</bdi>
+                  </span>
+                </summary>
+                <div class="v-activity-detail">
+                  <p class="v-activity-file">/Users/ana/Designs/banking.pen</p>
+                  <p class="v-activity-rev">rev 3f2a91c0d4e5b678</p>
+                  <ul class="v-activity-nodes">
+                    <li><span class="v-activity-node-path">Dashboard/Header/Title</span><span class="v-id-chip v-mono v-activity-node-id" data-copy-id="Ttl01" title="Click to copy Ttl01"><span class="v-id-chip-id">Ttl01</span><span class="v-copied" aria-hidden="true">copied</span></span></li>
+                  </ul>
+                </div>
+              </details>
+              <details class="v-row v-activity-row" data-identity="ben">
+                <summary class="v-activity-summary">
+                  <span class="v-activity-time" title="5 min ago">06:08</span><span class="v-avatar v-avatar-small" style="--v-actor: hsl(149 60% 48%); --v-actor-ink: #000000" title="ben" data-identity="ben">B</span><span class="v-activity-identity">ben</span><span class="v-activity-verb">mv</span><span class="v-activity-path">
+                  <bdi>Dashboard/Header</bdi>
+                  </span>
+                </summary>
+                <div class="v-activity-detail">
+                  <p class="v-activity-file">/Users/ana/Designs/banking.pen</p>
+                  <p class="v-activity-rev">rev 3f2a91c0d4e5b678</p>
+                  <ul class="v-activity-nodes">
+                    <li><span class="v-activity-node-path">Dashboard/Header</span><span class="v-id-chip v-mono v-activity-node-id" data-copy-id="Hdr01" title="Click to copy Hdr01"><span class="v-id-chip-id">Hdr01</span><span class="v-copied" aria-hidden="true">copied</span></span></li>
+                  </ul>
+                </div>
+              </details>
+            </div>
+          </section>
+        </div>
+      </aside>
+    </main>
+    <div class="v-present-hint" id="v-present-hint">Press f or Escape to exit</div>
+  </body>
+</html>

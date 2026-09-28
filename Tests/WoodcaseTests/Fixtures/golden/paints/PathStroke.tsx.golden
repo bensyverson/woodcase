@@ -1,0 +1,45 @@
+import { cn } from "../lib/cn";
+
+interface PathStrokeProps {
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+export function PathStroke({
+  className,
+  style,
+}: PathStrokeProps) {
+  return (
+    <div
+      className={cn("relative", className)}
+      style={{
+        width: 320,
+        height: 220,
+        backgroundColor: "#000000",
+        ...style,
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          left: 60,
+          top: 60,
+        }}
+      >
+        <svg width={200} height={100} viewBox="0 0 200 100" overflow="visible"
+          style={{
+            flexShrink: 0,
+          }}
+        >
+          <defs>
+            <linearGradient id="wc-paint-33b967f0e187" gradientUnits="userSpaceOnUse" x1="0" y1="0.5" x2="0" y2="-0.5" gradientTransform="matrix(0 100 -200 0 100 50)">
+              <stop offset="0" style={{ stopColor: "#FF0000" }} />
+              <stop offset="1" style={{ stopColor: "#0000FF" }} />
+            </linearGradient>
+          </defs>
+          <path d="M0 0 L50 100 L100 0 L150 100 L200 0" fill="none" stroke="url(#wc-paint-33b967f0e187)" strokeWidth="12" />
+        </svg>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,87 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "id": "Pag01",
+      "name": "Page",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "width": 400,
+      "height": 300,
+      "children": [
+        {
+          "id": "Crd01",
+          "name": "Card",
+          "type": "ref",
+          "ref": "Stc01"
+        }
+      ]
+    },
+    {
+      "id": "Stc01",
+      "name": "StatCard",
+      "type": "frame",
+      "x": 0,
+      "y": 400,
+      "reusable": true,
+      "width": 200,
+      "height": 100,
+      "metadata": {
+        "type": "component",
+        "_props": {
+          "label": "Body/Title",
+          "tint": "Body/Swatch",
+          "gone": "Body/Missing",
+          "width": "Body/Title"
+        }
+      },
+      "children": [
+        {
+          "id": "Bdy01",
+          "name": "Body",
+          "type": "frame",
+          "width": 200,
+          "height": 100,
+          "children": [
+            {
+              "id": "Ttl01",
+              "name": "Title",
+              "type": "text",
+              "content": "Total"
+            },
+            {
+              "id": "Swt01",
+              "name": "Swatch",
+              "type": "rectangle",
+              "width": 16,
+              "height": 16,
+              "fill": {
+                "type": "color",
+                "color": "#FFD166"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Pln01",
+      "name": "Plain",
+      "type": "frame",
+      "x": 0,
+      "y": 600,
+      "reusable": true,
+      "width": 60,
+      "height": 24,
+      "children": [
+        {
+          "id": "Cap01",
+          "name": "Caption",
+          "type": "text",
+          "content": "plain"
+        }
+      ]
+    }
+  ]
+}

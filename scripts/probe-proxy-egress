@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+#
+# probe-proxy-egress — Prove a Google Font download through an authenticated proxy,
+# from a process whose only way out is that proxy.
+#
+#   scripts/probe-proxy-egress [--deny-trustd] [FAMILY]      (sandbox off)
+#
+# Builds nothing: run `swift build` first. It starts a throwaway CONNECT proxy on
+# 127.0.0.1 with made-up Basic credentials (scripts/probe-proxy-egress-proxy.py), then
+# renders a one-line document in FAMILY (default Lobster) with a fresh $WOODCASE_HOME,
+# under a sandbox-exec profile shaped like the Claude Code Bash sandbox: no DNS
+# (com.apple.dnssd.service denied) and IP egress only to localhost. HTTPS_PROXY names the
+# proxy as `localhost`, as the harness does.
+#
+# Expected: the proxy log shows one unauthorised CONNECT (the 407 challenge) and one
+# authorised one, the render prints no font warning, and the family's TTF is in the
+# cache. --deny-trustd also denies com.apple.trustd.agent, reproducing what the real
+# harness does unless `sandbox.enableWeakerNetworkIsolation` is set: URLSession then cannot
+# check the certificate, and on macOS the curl fallback (CurlDataFetcher) fetches instead,
+# so the render still prints no warning and the proxy log shows each URL twice — once
+# from URLSession (407, then authorised), once from curl (authorised up front). See
+# project/2026-09-26-sandbox-font-downloads.md.
+
+set -euo pipefail
+
+deny_trustd=""
+if [[ "${1:-}" == "--deny-trustd" ]]; then
+    deny_trustd='(deny mach-lookup (global-name "com.apple.trustd.agent"))'
+    shift
+fi
+family="${1:-Lobster}"
+
+repo="$(cd "$(dirname "$0")/.." && pwd)"
+binary="$repo/.build/debug/woodcase"
+[[ -x "$binary" ]] || { echo "probe-proxy-egress: no $binary; run swift build first" >&2; exit 2; }
+
+work="$(mktemp -d "${TMPDIR:-/tmp}/probe-proxy-egress.XXXXXX")"
+port=$((20000 + RANDOM % 20000))
+python3 "$repo/scripts/probe-proxy-egress-proxy.py" "$port" tester 'p@ss' "$work/proxy.log" &
+proxy_pid=$!
+trap 'kill "$proxy_pid" 2>/dev/null || true' EXIT
+sleep 1
+
+cat > "$work/egress.sb" <<EOF
+(version 1)
+(allow default)
+(deny mach-lookup (global-name "com.apple.dnssd.service"))
+(deny network-outbound (remote ip "*:*"))
+(allow network-outbound (remote ip "localhost:*"))
+$deny_trustd
+EOF
+
+cat > "$work/probe.pen" <<EOF
+{"version": "2.17", "children": [{"type": "frame", "id": "Cnv01", "layout": "vertical",
+ "padding": 20, "fill": "#FFFFFF", "width": "fit_content", "height": "fit_content",
+ "children": [{"type": "text", "id": "Txt01", "content": "Handgloves", "fill": "#000000",
+ "fontFamily": "$family", "fontSize": 32, "width": "fit_content", "height": "fit_content"}]}]}
+EOF
+
+mkdir -p "$work/home" "$work/out"
+echo "== render"
+env -u https_proxy -u http_proxy -u all_proxy -u ALL_PROXY -u NO_PROXY -u no_proxy \
+    HTTPS_PROXY="http://tester:p%40ss@localhost:$port" WOODCASE_HOME="$work/home" \
+    sandbox-exec -f "$work/egress.sb" "$binary" render "$work/probe.pen" --output-dir "$work/out"
+echo "== proxy log"
+cat "$work/proxy.log"
+echo "== font cache"
+find "$work/home" -name '*.ttf' || true
+echo "== output in $work/out"

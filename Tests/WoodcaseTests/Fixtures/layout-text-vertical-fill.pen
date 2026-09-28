@@ -1,0 +1,73 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "content": "Vertical stack",
+          "fill": "#111827",
+          "fontFamily": "IBM Plex Sans",
+          "fontSize": 18,
+          "fontWeight": "600",
+          "id": "tfE01",
+          "name": "auto-title",
+          "type": "text"
+        },
+        {
+          "content": "A fill-width paragraph in a vertical stack takes the column's inner width and wraps to as many lines as it needs.",
+          "fill": "#374151",
+          "fontFamily": "IBM Plex Sans",
+          "fontSize": 14,
+          "fontWeight": "normal",
+          "id": "tfE02",
+          "name": "fill-paragraph",
+          "textGrowth": "fixed-width",
+          "type": "text",
+          "width": "fill_container"
+        },
+        {
+          "children": [
+            {
+              "content": "A banner frame fills the width; its text fills the banner and wraps.",
+              "fill": "#1E3A8A",
+              "fontFamily": "IBM Plex Sans",
+              "fontSize": 14,
+              "fontWeight": "500",
+              "id": "tfE04",
+              "name": "banner-text",
+              "textGrowth": "fixed-width",
+              "type": "text",
+              "width": "fill_container"
+            }
+          ],
+          "fill": "#DBEAFE",
+          "id": "tfE03",
+          "name": "fill-banner",
+          "padding": 8,
+          "type": "frame",
+          "width": "fill_container"
+        },
+        {
+          "content": "Fixed at 160 points, this one wraps sooner.",
+          "fill": "#374151",
+          "fontFamily": "IBM Plex Sans",
+          "fontSize": 14,
+          "fontWeight": "normal",
+          "id": "tfE05",
+          "name": "fixed-160",
+          "textGrowth": "fixed-width",
+          "type": "text",
+          "width": 160
+        }
+      ],
+      "fill": "#F3F4F6",
+      "gap": 10,
+      "id": "tfE00",
+      "layout": "vertical",
+      "name": "layout-text-vertical-fill",
+      "padding": 16,
+      "type": "frame",
+      "width": 320
+    }
+  ],
+  "version": "2.17"
+}

@@ -1,0 +1,47 @@
+#!/usr/bin/env python3
+"""png-mae — MAE between PNG pairs, as the snapshot suites report it.
+
+The mean absolute difference of every premultiplied sRGB channel byte, alpha
+included, in 8-bit steps (0–255); when the two images differ in size both are
+resampled (bilinear) onto the smaller width and height first. This mirrors
+PixelPeeper's figure closely enough to rank boards and measure a probe against
+Pen's export; it is not the gate — the suites' own figures are.
+
+Usage:
+    scripts/png-mae <render.png> <reference.png> [<render.png> <reference.png> ...]
+
+Prints one line per pair: MAE, tab, the two paths. Needs numpy and Pillow; runs
+sandboxed. Written for project/2026-09-27-fidelity-gaps.md.
+"""
+import sys
+
+import numpy as np
+from PIL import Image
+
+
+def load(path, size):
+    image = Image.open(path).convert("RGBA")
+    if image.size != size:
+        image = image.resize(size, Image.BILINEAR)
+    pixels = np.asarray(image).astype(np.float64)
+    pixels[..., :3] *= pixels[..., 3:4] / 255.0
+    return pixels
+
+
+def mae(render, reference):
+    a, b = Image.open(render), Image.open(reference)
+    size = (min(a.width, b.width), min(a.height, b.height))
+    return float(np.abs(load(render, size) - load(reference, size)).mean())
+
+
+def main(args):
+    if not args or len(args) % 2:
+        print(__doc__.strip(), file=sys.stderr)
+        return 2
+    for i in range(0, len(args), 2):
+        print(f"{mae(args[i], args[i + 1]):.3f}\t{args[i]}\t{args[i + 1]}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

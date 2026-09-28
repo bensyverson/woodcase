@@ -1,0 +1,30 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "id": "Rt001",
+      "name": "Root",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "width": 200,
+      "height": 100,
+      "layout": "none",
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "id": "Ic001",
+          "name": "Status",
+          "type": "icon",
+          "x": 10,
+          "y": 10,
+          "width": 24,
+          "height": 24,
+          "library": "lucide",
+          "icon": "circle-check",
+          "fill": "#000000"
+        }
+      ]
+    }
+  ]
+}

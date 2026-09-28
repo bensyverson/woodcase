@@ -1,0 +1,142 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "ad00f",
+      "name": "quarter",
+      "x": 0,
+      "y": 0,
+      "width": 240,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "ellipse",
+          "id": "ad00e",
+          "name": "s",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 120,
+          "fill": "#FFFFFF",
+          "startAngle": 0,
+          "sweepAngle": 90,
+          "innerRadius": 0.5
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ad01f",
+      "name": "three-quarter",
+      "x": 0,
+      "y": 200,
+      "width": 240,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "ellipse",
+          "id": "ad01e",
+          "name": "s",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 120,
+          "fill": "#FFFFFF",
+          "startAngle": 45,
+          "sweepAngle": 270,
+          "innerRadius": 0.6
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ad02f",
+      "name": "negative",
+      "x": 0,
+      "y": 400,
+      "width": 240,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "ellipse",
+          "id": "ad02e",
+          "name": "s",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 120,
+          "fill": "#FFFFFF",
+          "startAngle": 90,
+          "sweepAngle": -120,
+          "innerRadius": 0.4
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ad03f",
+      "name": "half-thin",
+      "x": 0,
+      "y": 600,
+      "width": 240,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "ellipse",
+          "id": "ad03e",
+          "name": "s",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 120,
+          "fill": "#FFFFFF",
+          "startAngle": 200,
+          "sweepAngle": 180,
+          "innerRadius": 0.85
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ad04f",
+      "name": "stroked",
+      "x": 0,
+      "y": 800,
+      "width": 240,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "ellipse",
+          "id": "ad04e",
+          "name": "s",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 120,
+          "stroke": "#FFFFFF",
+          "strokeWidth": 4,
+          "strokeAlignment": "center",
+          "startAngle": 0,
+          "sweepAngle": 90,
+          "innerRadius": 0.5
+        }
+      ]
+    }
+  ]
+}

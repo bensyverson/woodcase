@@ -1,0 +1,13 @@
+{
+  "children": [
+    {
+      "fill": "#F0F0F0",
+      "height": "fit_content(100)",
+      "id": "TxE4H",
+      "name": "layout-fit-content-fallback",
+      "type": "frame",
+      "width": "fit_content(200)"
+    }
+  ],
+  "version": "2.17"
+}

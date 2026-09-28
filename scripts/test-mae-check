@@ -1,0 +1,119 @@
+#!/bin/sh
+#
+# test-mae-check — Regression test for scripts/mae-check.
+#
+# Builds baseline/test CSV fixtures in a scratch directory under $TMPDIR and
+# checks that mae-check reports a regression, a new id, a missing id, and a
+# clean no-change run correctly — and that its baseline output is sorted and
+# deterministic regardless of the order mae-test.csv rows arrive in (parallel
+# test runs append rows in nondeterministic order). Run directly; it exits
+# non-zero on the first failed assertion.
+#
+# Runs under plain /bin/sh so it exercises mae-check the same way the
+# pre-commit hook does, without assuming a bash >= 4 is on PATH.
+
+set -eu
+
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+MAE_CHECK="$SCRIPT_DIR/mae-check"
+
+WORKDIR="${TMPDIR:-/tmp}/mae-check-test.$$"
+rm -rf "$WORKDIR"
+mkdir -p "$WORKDIR/performance"
+trap 'rm -rf "$WORKDIR"' EXIT
+
+fail() {
+    echo "FAIL: $1" >&2
+    exit 1
+}
+
+assert_contains() {
+    # assert_contains <haystack-file> <needle>
+    if ! grep -qF "$2" "$1"; then
+        fail "expected output to contain: $2 (got: $(cat "$1"))"
+    fi
+}
+
+assert_not_contains() {
+    if grep -qF "$2" "$1"; then
+        fail "expected output NOT to contain: $2 (got: $(cat "$1"))"
+    fi
+}
+
+run_mae_check() {
+    # run_mae_check <output-file>
+    if ! (cd "$WORKDIR" && "$MAE_CHECK") >"$1" 2>&1; then
+        fail "mae-check exited non-zero — it must always exit 0 (warning gate, not a blocker); output: $(cat "$1")"
+    fi
+}
+
+# --- Scenario 1: regression, new id, missing id, and an unchanged id -------
+
+cat >"$WORKDIR/performance/mae-baseline.csv" <<'EOF'
+id,MAE,limit
+a,1.00,2.0
+b,1.00,2.0
+c,1.00,2.0
+d,1.00,2.0
+EOF
+
+cat >"$WORKDIR/performance/mae-test.csv" <<'EOF'
+id,MAE,limit
+a,1.00,2.0
+b,1.50,2.0
+c,1.00,2.0
+e,2.00,3.0
+EOF
+
+run_mae_check "$WORKDIR/out1.txt"
+
+assert_contains "$WORKDIR/out1.txt" "Regression in \`b\`"
+assert_contains "$WORKDIR/out1.txt" "NEW: \`e\`"
+assert_contains "$WORKDIR/out1.txt" "MISSING: \`d\`"
+assert_not_contains "$WORKDIR/out1.txt" "\`a\`"
+assert_not_contains "$WORKDIR/out1.txt" "\`c\`"
+
+cat >"$WORKDIR/expected-baseline-1.csv" <<'EOF'
+id,MAE,limit
+a,1.00,2.0
+b,1.50,2.0
+c,1.00,2.0
+e,2.00,3.0
+EOF
+diff "$WORKDIR/expected-baseline-1.csv" "$WORKDIR/performance/mae-baseline.csv" \
+    || fail "baseline after scenario 1 did not match the sorted test results"
+
+echo "Scenario 1 (regression/new/missing) OK"
+
+# --- Scenario 2: no changes -------------------------------------------------
+
+cp "$WORKDIR/performance/mae-baseline.csv" "$WORKDIR/performance/mae-test.csv"
+
+run_mae_check "$WORKDIR/out2.txt"
+
+assert_contains "$WORKDIR/out2.txt" "No MAE regressions detected."
+assert_not_contains "$WORKDIR/out2.txt" "WARNING"
+assert_not_contains "$WORKDIR/out2.txt" "NEW:"
+assert_not_contains "$WORKDIR/out2.txt" "MISSING:"
+
+echo "Scenario 2 (no changes) OK"
+
+# --- Scenario 3: row order in mae-test.csv must not affect the baseline ----
+# (parallel test runs append MAE rows in nondeterministic order)
+
+cat >"$WORKDIR/performance/mae-test.csv" <<'EOF'
+id,MAE,limit
+e,2.00,3.0
+c,1.00,2.0
+a,1.00,2.0
+b,1.50,2.0
+EOF
+
+run_mae_check "$WORKDIR/out3.txt"
+
+diff "$WORKDIR/expected-baseline-1.csv" "$WORKDIR/performance/mae-baseline.csv" \
+    || fail "baseline was not sorted deterministically after a reordered mae-test.csv"
+
+echo "Scenario 3 (deterministic sort) OK"
+
+echo "All mae-check tests passed."

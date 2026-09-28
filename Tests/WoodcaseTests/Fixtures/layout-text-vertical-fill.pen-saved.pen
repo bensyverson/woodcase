@@ -1,0 +1,76 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "tfE00",
+      "x": 0,
+      "y": 0,
+      "name": "layout-text-vertical-fill",
+      "width": 320,
+      "fill": "#F3F4F6",
+      "layout": "vertical",
+      "gap": 10,
+      "padding": 16,
+      "children": [
+        {
+          "type": "text",
+          "id": "tfE01",
+          "name": "auto-title",
+          "fill": "#111827",
+          "content": "Vertical stack",
+          "fontFamily": "IBM Plex Sans",
+          "fontSize": 18,
+          "fontWeight": "600"
+        },
+        {
+          "type": "text",
+          "id": "tfE02",
+          "name": "fill-paragraph",
+          "fill": "#374151",
+          "textGrowth": "fixed-width",
+          "width": "fill_container",
+          "content": "A fill-width paragraph in a vertical stack takes the column's inner width and wraps to as many lines as it needs.",
+          "fontFamily": "IBM Plex Sans",
+          "fontSize": 14,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "frame",
+          "id": "tfE03",
+          "name": "fill-banner",
+          "width": "fill_container",
+          "fill": "#DBEAFE",
+          "padding": 8,
+          "children": [
+            {
+              "type": "text",
+              "id": "tfE04",
+              "name": "banner-text",
+              "fill": "#1E3A8A",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "A banner frame fills the width; its text fills the banner and wraps.",
+              "fontFamily": "IBM Plex Sans",
+              "fontSize": 14,
+              "fontWeight": "500"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "tfE05",
+          "name": "fixed-160",
+          "fill": "#374151",
+          "textGrowth": "fixed-width",
+          "width": 160,
+          "content": "Fixed at 160 points, this one wraps sooner.",
+          "fontFamily": "IBM Plex Sans",
+          "fontSize": 14,
+          "fontWeight": "normal"
+        }
+      ]
+    }
+  ],
+  "fileToken": "8e7da3b0-9575-4534-8bee-f9ca6f38f433"
+}

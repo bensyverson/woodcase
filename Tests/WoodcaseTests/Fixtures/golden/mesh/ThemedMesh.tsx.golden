@@ -1,0 +1,24 @@
+import { cn } from "../lib/cn";
+
+interface ThemedMeshProps {
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+export function ThemedMesh({
+  className,
+  style,
+}: ThemedMeshProps) {
+  return (
+    <div
+      className={cn("flex", className)}
+      style={{
+        width: 160,
+        height: 160,
+        background: "var(--wc-mesh-961528631618) center / 100% 100% no-repeat, #FFFFFF",
+        ...style,
+      }}
+    >
+    </div>
+  );
+}

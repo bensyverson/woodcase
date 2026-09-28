@@ -1,0 +1,685 @@
+import { Bell, Heart } from "lucide-react";
+import { cn } from "../lib/cn";
+import { StatusBar } from "./StatusBar";
+import { TabBar } from "./TabBar";
+
+interface HomeCollectionProps {
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+export function HomeCollection({
+  className,
+  style,
+}: HomeCollectionProps) {
+  return (
+    <div
+      className={cn("flex flex-col", className)}
+      style={{
+        width: 402,
+        height: 874,
+        backgroundColor: "var(--bg-page)",
+        overflow: "hidden",
+        ...style,
+      }}
+    >
+      <StatusBar
+        style={{
+          backgroundColor: "var(--bg-page)",
+          width: "100%",
+          flexShrink: 0,
+        }}
+      />
+      <div
+        className="flex flex-col gap-5"
+        style={{
+          width: "100%",
+          flex: 1,
+          minHeight: 0,
+          padding: "0px 24px 20px 24px",
+        }}
+      >
+        <div
+          className="flex items-center justify-between"
+          style={{
+            width: "100%",
+          }}
+        >
+          <p
+            style={{
+              color: "var(--text-primary)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 36,
+              fontWeight: 600,
+              letterSpacing: -0.5,
+              lineHeight: 1.05,
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: 0.6,
+              marginBottom: -0.6,
+            }}
+          >
+            Woodcase
+          </p>
+          <Bell size={20} color="var(--text-primary)"
+            style={{
+              flexShrink: 0,
+            }}
+          />
+        </div>
+        <div
+          className="flex flex-col gap-3"
+          style={{
+            width: "100%",
+          }}
+        >
+          <p
+            style={{
+              color: "var(--text-primary)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 14,
+              fontWeight: 600,
+              lineHeight: "18px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.25,
+              marginBottom: 0.25,
+            }}
+          >
+            Favorites
+          </p>
+          <div
+            className="flex gap-3"
+            style={{
+              width: "100%",
+            }}
+          >
+            {/* Customized from: FavoriteCard */}
+            <div
+              className="flex flex-col gap-2"
+              style={{
+                width: 160,
+                height: "fit-content",
+                backgroundColor: "var(--bg-card)",
+                borderRadius: "var(--card-radius)",
+                padding: "0px 0px 16px 0px",
+                boxShadow: "0px 4px 20px var(--shadow)",
+                flexShrink: 0,
+              }}
+            >
+              <div
+                className="flex"
+                style={{
+                  width: "100%",
+                  height: 90,
+                  backgroundImage: "url('./images/generated-1774296205111.png')",
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  borderRadius: "16px 16px 0px 0px",
+                  flexShrink: 0,
+                }}
+              >
+              </div>
+              <div
+                className="flex flex-col gap-0.5"
+                style={{
+                  width: "100%",
+                  height: "fit-content",
+                  padding: "0px 12px",
+                }}
+              >
+                <p
+                  style={{
+                    color: "var(--text-primary)",
+                    fontFamily: "var(--font-primary)",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    lineHeight: "18px",
+                    fontOpticalSizing: "none",
+                    whiteSpace: "pre",
+                    marginTop: -0.25,
+                    marginBottom: 0.25,
+                  }}
+                >
+                  Blackwing 602
+                </p>
+                <p
+                  style={{
+                    color: "var(--text-secondary)",
+                    fontFamily: "var(--font-primary)",
+                    fontSize: 12,
+                    fontWeight: 500,
+                    lineHeight: "16px",
+                    fontOpticalSizing: "none",
+                    whiteSpace: "pre",
+                    marginTop: -0.5,
+                    marginBottom: 0.5,
+                  }}
+                >
+                  Palomino
+                </p>
+              </div>
+              <div
+                className="flex justify-end"
+                style={{
+                  width: "100%",
+                  height: "fit-content",
+                  padding: "0px 12px",
+                }}
+              >
+                <Heart size={14} color="var(--accent)"
+                  style={{
+                    flexShrink: 0,
+                  }}
+                />
+              </div>
+            </div>
+            {/* Customized from: FavoriteCard */}
+            <div
+              className="flex flex-col gap-2"
+              style={{
+                width: 160,
+                height: "fit-content",
+                backgroundColor: "var(--bg-card)",
+                borderRadius: "var(--card-radius)",
+                padding: "0px 0px 16px 0px",
+                boxShadow: "0px 4px 20px var(--shadow)",
+                flexShrink: 0,
+              }}
+            >
+              <div
+                className="flex"
+                style={{
+                  width: "100%",
+                  height: 90,
+                  backgroundImage: "url('./images/generated-1774296966417.png')",
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  borderRadius: "16px 16px 0px 0px",
+                  flexShrink: 0,
+                }}
+              >
+              </div>
+              <div
+                className="flex flex-col gap-0.5"
+                style={{
+                  width: "100%",
+                  height: "fit-content",
+                  padding: "0px 12px",
+                }}
+              >
+                <p
+                  style={{
+                    color: "var(--text-primary)",
+                    fontFamily: "var(--font-primary)",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    lineHeight: "18px",
+                    fontOpticalSizing: "none",
+                    whiteSpace: "pre",
+                    marginTop: -0.25,
+                    marginBottom: 0.25,
+                  }}
+                >
+                  Tombow Mono 100
+                </p>
+                <p
+                  style={{
+                    color: "var(--text-secondary)",
+                    fontFamily: "var(--font-primary)",
+                    fontSize: 12,
+                    fontWeight: 500,
+                    lineHeight: "16px",
+                    fontOpticalSizing: "none",
+                    whiteSpace: "pre",
+                    marginTop: -0.5,
+                    marginBottom: 0.5,
+                  }}
+                >
+                  Tombow
+                </p>
+              </div>
+              <div
+                className="flex justify-end"
+                style={{
+                  width: "100%",
+                  height: "fit-content",
+                  padding: "0px 12px",
+                }}
+              >
+                <Heart size={14} color="var(--accent)"
+                  style={{
+                    flexShrink: 0,
+                  }}
+                />
+              </div>
+            </div>
+            {/* Customized from: FavoriteCard */}
+            <div
+              className="flex flex-col gap-2"
+              style={{
+                width: 160,
+                height: "fit-content",
+                backgroundColor: "var(--bg-card)",
+                borderRadius: "var(--card-radius)",
+                padding: "0px 0px 16px 0px",
+                boxShadow: "0px 4px 20px var(--shadow)",
+                flexShrink: 0,
+              }}
+            >
+              <div
+                className="flex"
+                style={{
+                  width: "100%",
+                  height: 90,
+                  backgroundImage: "url('./images/generated-1774297057972.png')",
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  borderRadius: "16px 16px 0px 0px",
+                  flexShrink: 0,
+                }}
+              >
+              </div>
+              <div
+                className="flex flex-col gap-0.5"
+                style={{
+                  width: "100%",
+                  height: "fit-content",
+                  padding: "0px 12px",
+                }}
+              >
+                <p
+                  style={{
+                    color: "var(--text-primary)",
+                    fontFamily: "var(--font-primary)",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    lineHeight: "18px",
+                    fontOpticalSizing: "none",
+                    whiteSpace: "pre",
+                    marginTop: -0.25,
+                    marginBottom: 0.25,
+                  }}
+                >
+                  Staedtler Mars
+                </p>
+                <p
+                  style={{
+                    color: "var(--text-secondary)",
+                    fontFamily: "var(--font-primary)",
+                    fontSize: 12,
+                    fontWeight: 500,
+                    lineHeight: "16px",
+                    fontOpticalSizing: "none",
+                    whiteSpace: "pre",
+                    marginTop: -0.5,
+                    marginBottom: 0.5,
+                  }}
+                >
+                  Staedtler
+                </p>
+              </div>
+              <div
+                className="flex justify-end"
+                style={{
+                  width: "100%",
+                  height: "fit-content",
+                  padding: "0px 12px",
+                }}
+              >
+                <Heart size={14} color="var(--accent)"
+                  style={{
+                    flexShrink: 0,
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="flex flex-col gap-3.5"
+          style={{
+            width: "100%",
+          }}
+        >
+          <div
+            className="flex items-center justify-between"
+            style={{
+              width: "100%",
+            }}
+          >
+            <p
+              style={{
+                color: "var(--text-primary)",
+                fontFamily: "var(--font-primary)",
+                fontSize: 18,
+                fontWeight: 600,
+                letterSpacing: -0.3,
+                lineHeight: "23px",
+                fontOpticalSizing: "none",
+                whiteSpace: "pre",
+                marginTop: -0.25,
+                marginBottom: 0.25,
+              }}
+            >
+              My Collection
+            </p>
+            <div
+              className="flex"
+              style={{
+                height: "fit-content",
+                backgroundColor: "var(--accent-soft)",
+                borderRadius: 12,
+                padding: "4px 10px",
+              }}
+            >
+              <p
+                style={{
+                  color: "var(--accent)",
+                  fontFamily: "var(--font-primary)",
+                  fontSize: 12,
+                  fontWeight: 500,
+                  lineHeight: "16px",
+                  fontOpticalSizing: "none",
+                  whiteSpace: "pre",
+                  marginTop: -0.5,
+                  marginBottom: 0.5,
+                }}
+              >
+                24 pencils
+              </p>
+            </div>
+          </div>
+          <div
+            className="flex flex-col"
+            style={{
+              width: "100%",
+              backgroundColor: "var(--bg-card)",
+              borderRadius: 16,
+              boxShadow: "0px 4px 20px var(--shadow)",
+            }}
+          >
+            <div
+              className="flex items-center gap-3"
+              style={{
+                width: "100%",
+                padding: 16,
+              }}
+            >
+              <div
+                className="flex flex-col gap-0.5"
+                style={{
+                  width: "100%",
+                  height: "fit-content",
+                }}
+              >
+                <p
+                  style={{
+                    color: "var(--text-primary)",
+                    fontFamily: "var(--font-primary)",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    lineHeight: "18px",
+                    fontOpticalSizing: "none",
+                    whiteSpace: "pre",
+                    marginTop: -0.25,
+                    marginBottom: 0.25,
+                  }}
+                >
+                  Blackwing 602
+                </p>
+                <p
+                  style={{
+                    color: "var(--text-secondary)",
+                    fontFamily: "var(--font-primary)",
+                    fontSize: 12,
+                    fontWeight: "normal",
+                    lineHeight: "16px",
+                    fontOpticalSizing: "none",
+                    whiteSpace: "pre",
+                    marginTop: -0.5,
+                    marginBottom: 0.5,
+                  }}
+                >
+                  Palomino · HB
+                </p>
+              </div>
+              <p
+                style={{
+                  color: "var(--accent)",
+                  fontFamily: "var(--font-primary)",
+                  fontSize: 12,
+                  fontWeight: "normal",
+                  lineHeight: "16px",
+                  fontOpticalSizing: "none",
+                  whiteSpace: "pre",
+                  marginTop: -0.5,
+                  marginBottom: 0.5,
+                }}
+              >
+                ★★★★★
+              </p>
+            </div>
+            <div
+              className="flex"
+              style={{
+                width: "100%",
+                height: 1,
+                backgroundColor: "var(--border-default)",
+                padding: "0px 0px 0px 54px",
+                flexShrink: 0,
+              }}
+            >
+            </div>
+            <div
+              className="flex items-center gap-3"
+              style={{
+                width: "100%",
+                padding: 16,
+              }}
+            >
+              <div
+                className="flex flex-col gap-0.5"
+                style={{
+                  width: "100%",
+                  height: "fit-content",
+                }}
+              >
+                <p
+                  style={{
+                    color: "var(--text-primary)",
+                    fontFamily: "var(--font-primary)",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    lineHeight: "18px",
+                    fontOpticalSizing: "none",
+                    whiteSpace: "pre",
+                    marginTop: -0.25,
+                    marginBottom: 0.25,
+                  }}
+                >
+                  Tombow Mono 100
+                </p>
+                <p
+                  style={{
+                    color: "var(--text-secondary)",
+                    fontFamily: "var(--font-primary)",
+                    fontSize: 12,
+                    fontWeight: "normal",
+                    lineHeight: "16px",
+                    fontOpticalSizing: "none",
+                    whiteSpace: "pre",
+                    marginTop: -0.5,
+                    marginBottom: 0.5,
+                  }}
+                >
+                  Tombow · 2B
+                </p>
+              </div>
+              <p
+                style={{
+                  color: "var(--accent)",
+                  fontFamily: "var(--font-primary)",
+                  fontSize: 12,
+                  fontWeight: "normal",
+                  lineHeight: "16px",
+                  fontOpticalSizing: "none",
+                  whiteSpace: "pre",
+                  marginTop: -0.5,
+                  marginBottom: 0.5,
+                }}
+              >
+                ★★★★☆
+              </p>
+            </div>
+            <div
+              className="flex"
+              style={{
+                width: "100%",
+                height: 1,
+                backgroundColor: "var(--border-default)",
+                padding: "0px 0px 0px 54px",
+                flexShrink: 0,
+              }}
+            >
+            </div>
+            <div
+              className="flex items-center gap-3"
+              style={{
+                width: "100%",
+                padding: 16,
+              }}
+            >
+              <div
+                className="flex flex-col gap-0.5"
+                style={{
+                  width: "100%",
+                  height: "fit-content",
+                }}
+              >
+                <p
+                  style={{
+                    color: "var(--text-primary)",
+                    fontFamily: "var(--font-primary)",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    lineHeight: "18px",
+                    fontOpticalSizing: "none",
+                    whiteSpace: "pre",
+                    marginTop: -0.25,
+                    marginBottom: 0.25,
+                  }}
+                >
+                  Staedtler Mars Lumograph
+                </p>
+                <p
+                  style={{
+                    color: "var(--text-secondary)",
+                    fontFamily: "var(--font-primary)",
+                    fontSize: 12,
+                    fontWeight: "normal",
+                    lineHeight: "16px",
+                    fontOpticalSizing: "none",
+                    whiteSpace: "pre",
+                    marginTop: -0.5,
+                    marginBottom: 0.5,
+                  }}
+                >
+                  Staedtler · 4H
+                </p>
+              </div>
+              <p
+                style={{
+                  color: "var(--accent)",
+                  fontFamily: "var(--font-primary)",
+                  fontSize: 12,
+                  fontWeight: "normal",
+                  lineHeight: "16px",
+                  fontOpticalSizing: "none",
+                  whiteSpace: "pre",
+                  marginTop: -0.5,
+                  marginBottom: 0.5,
+                }}
+              >
+                ★★★★☆
+              </p>
+            </div>
+            <div
+              className="flex"
+              style={{
+                width: "100%",
+                height: 1,
+                backgroundColor: "var(--border-default)",
+                padding: "0px 0px 0px 54px",
+                flexShrink: 0,
+              }}
+            >
+            </div>
+            <div
+              className="flex items-center gap-3"
+              style={{
+                width: "100%",
+                padding: 16,
+              }}
+            >
+              <div
+                className="flex flex-col gap-0.5"
+                style={{
+                  width: "100%",
+                  height: "fit-content",
+                }}
+              >
+                <p
+                  style={{
+                    color: "var(--text-primary)",
+                    fontFamily: "var(--font-primary)",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    lineHeight: "18px",
+                    fontOpticalSizing: "none",
+                    whiteSpace: "pre",
+                    marginTop: -0.25,
+                    marginBottom: 0.25,
+                  }}
+                >
+                  Mitsubishi Hi-Uni
+                </p>
+                <p
+                  style={{
+                    color: "var(--text-secondary)",
+                    fontFamily: "var(--font-primary)",
+                    fontSize: 12,
+                    fontWeight: "normal",
+                    lineHeight: "16px",
+                    fontOpticalSizing: "none",
+                    whiteSpace: "pre",
+                    marginTop: -0.5,
+                    marginBottom: 0.5,
+                  }}
+                >
+                  Mitsubishi · HB
+                </p>
+              </div>
+              <p
+                style={{
+                  color: "var(--accent)",
+                  fontFamily: "var(--font-primary)",
+                  fontSize: 12,
+                  fontWeight: "normal",
+                  lineHeight: "16px",
+                  fontOpticalSizing: "none",
+                  whiteSpace: "pre",
+                  marginTop: -0.5,
+                  marginBottom: 0.5,
+                }}
+              >
+                ★★★★★
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <TabBar selected="home" />
+    </div>
+  );
+}

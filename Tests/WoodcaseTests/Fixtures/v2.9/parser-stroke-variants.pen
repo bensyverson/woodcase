@@ -1,0 +1,43 @@
+{
+  "version": "2.9",
+  "children": [
+    {
+      "id": "uniform-stroke",
+      "type": "rectangle",
+      "width": 100,
+      "height": 100,
+      "stroke": {
+        "align": "inside",
+        "thickness": 2,
+        "join": "miter",
+        "cap": "round",
+        "fill": "#000000"
+      }
+    },
+    {
+      "id": "per-side-stroke",
+      "type": "rectangle",
+      "width": 100,
+      "height": 100,
+      "stroke": {
+        "align": "center",
+        "thickness": {"top": 1, "right": 2, "bottom": 3, "left": 4},
+        "join": "bevel",
+        "fill": "#0000FF"
+      }
+    },
+    {
+      "id": "dashed-stroke",
+      "type": "rectangle",
+      "width": 100,
+      "height": 100,
+      "stroke": {
+        "align": "outside",
+        "thickness": 2,
+        "dashPattern": [5, 3],
+        "cap": "square",
+        "fill": "#FF0000"
+      }
+    }
+  ]
+}

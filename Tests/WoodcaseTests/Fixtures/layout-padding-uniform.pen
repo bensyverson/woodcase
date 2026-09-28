@@ -1,0 +1,32 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "fill": "#FF0000",
+          "height": 80,
+          "id": "5el9E",
+          "name": "child-1",
+          "type": "rectangle",
+          "width": 100
+        },
+        {
+          "fill": "#00FF00",
+          "height": 80,
+          "id": "r0UFv",
+          "name": "child-2",
+          "type": "rectangle",
+          "width": 100
+        }
+      ],
+      "fill": "#F0F0F0",
+      "height": 200,
+      "id": "oWSfz",
+      "name": "layout-padding-uniform",
+      "padding": 24,
+      "type": "frame",
+      "width": 400
+    }
+  ],
+  "version": "2.17"
+}

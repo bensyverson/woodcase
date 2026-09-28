@@ -1,0 +1,77 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "fill": "#FF0000",
+              "height": 50,
+              "id": "ivpJg",
+              "name": "cell-1",
+              "type": "rectangle",
+              "width": 80
+            },
+            {
+              "fill": "#00FF00",
+              "height": 50,
+              "id": "RFDGe",
+              "name": "cell-2",
+              "type": "rectangle",
+              "width": 80
+            }
+          ],
+          "fill": "#E0E0E0",
+          "gap": 8,
+          "id": "JZAMb",
+          "name": "row-1",
+          "type": "frame",
+          "width": "fill_container"
+        },
+        {
+          "children": [
+            {
+              "fill": "#0000FF",
+              "height": 40,
+              "id": "CShRs",
+              "name": "cell-3",
+              "type": "rectangle",
+              "width": 60
+            },
+            {
+              "fill": "#FF00FF",
+              "height": 40,
+              "id": "gbiDV",
+              "name": "cell-4",
+              "type": "rectangle",
+              "width": 100
+            },
+            {
+              "fill": "#00FFFF",
+              "height": 40,
+              "id": "pNdc4",
+              "name": "cell-5",
+              "type": "rectangle",
+              "width": 40
+            }
+          ],
+          "fill": "#D0D0D0",
+          "gap": 8,
+          "id": "iVmqp",
+          "name": "row-2",
+          "type": "frame",
+          "width": "fill_container"
+        }
+      ],
+      "fill": "#F0F0F0",
+      "gap": 10,
+      "height": 300,
+      "id": "BzwEx",
+      "layout": "vertical",
+      "name": "layout-nested",
+      "type": "frame",
+      "width": 400
+    }
+  ],
+  "version": "2.17"
+}

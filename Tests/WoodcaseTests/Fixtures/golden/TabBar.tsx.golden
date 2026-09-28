@@ -1,0 +1,771 @@
+import { BookOpen, Heart, House, Star } from "lucide-react";
+import { cn } from "../lib/cn";
+
+interface TabBarProps {
+  selected?: "home" | "log" | "ratings" | "wishlist";
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+function TabBarDefault({
+  className,
+  style,
+}: TabBarProps) {
+  return (
+    <nav role="tablist"
+      className={cn("wc-tab-bar flex justify-center", className)}
+      style={{
+        width: "100%",
+        padding: "12px 21px 21px 21px",
+        ...style,
+      }}
+    >
+      <div
+        className="flex"
+        style={{
+          width: "100%",
+          height: 62,
+          backgroundColor: "var(--bg-card)",
+          borderRadius: 36,
+          padding: 4,
+          boxShadow: "inset 0 0 0 1px var(--border-default), 0px 4px 20px var(--shadow)",
+        }}
+      >
+        <div
+          className="flex flex-col items-center justify-center gap-1"
+          style={{
+            width: "100%",
+            height: "100%",
+            backgroundColor: "var(--bg-card)",
+            borderRadius: 26,
+          }}
+        >
+          <House size={18} color="var(--tab-inactive)"
+            style={{
+              flexShrink: 0,
+            }}
+          />
+          <p
+            style={{
+              color: "var(--tab-inactive)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: 0.5,
+              lineHeight: "13px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.25,
+              marginBottom: 0.25,
+            }}
+          >
+            HOME
+          </p>
+        </div>
+        <div
+          className="flex flex-col items-center justify-center gap-1"
+          style={{
+            width: "100%",
+            height: "100%",
+            borderRadius: 26,
+          }}
+        >
+          <BookOpen size={18} color="var(--tab-inactive)"
+            style={{
+              flexShrink: 0,
+            }}
+          />
+          <p
+            style={{
+              color: "var(--tab-inactive)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: 0.5,
+              lineHeight: "13px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.25,
+              marginBottom: 0.25,
+            }}
+          >
+            LOG
+          </p>
+        </div>
+        <div
+          className="flex flex-col items-center justify-center gap-1"
+          style={{
+            width: "100%",
+            height: "100%",
+            borderRadius: 26,
+          }}
+        >
+          <Star size={18} color="var(--tab-inactive)"
+            style={{
+              flexShrink: 0,
+            }}
+          />
+          <p
+            style={{
+              color: "var(--tab-inactive)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: 0.5,
+              lineHeight: "13px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.25,
+              marginBottom: 0.25,
+            }}
+          >
+            RATINGS
+          </p>
+        </div>
+        <div
+          className="flex flex-col items-center justify-center gap-1"
+          style={{
+            width: "100%",
+            height: "100%",
+            borderRadius: 26,
+          }}
+        >
+          <Heart size={18} color="var(--tab-inactive)"
+            style={{
+              flexShrink: 0,
+            }}
+          />
+          <p
+            style={{
+              color: "var(--tab-inactive)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: 0.5,
+              lineHeight: "13px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.25,
+              marginBottom: 0.25,
+            }}
+          >
+            WISHLIST
+          </p>
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+function TabBarHome({
+  className,
+  style,
+}: TabBarProps) {
+  return (
+    <nav role="tablist"
+      className={cn("wc-tab-bar flex justify-center", className)}
+      style={{
+        width: 402,
+        padding: "12px 21px 21px 21px",
+        ...style,
+      }}
+    >
+      <div
+        className="flex"
+        style={{
+          width: "100%",
+          height: 62,
+          backgroundColor: "var(--bg-card)",
+          borderRadius: 36,
+          padding: 4,
+          boxShadow: "inset 0 0 0 1px var(--border-default), 0px 4px 20px var(--shadow)",
+        }}
+      >
+        <div
+          className="flex flex-col items-center justify-center gap-1"
+          style={{
+            width: "100%",
+            height: "100%",
+            backgroundColor: "var(--accent)",
+            borderRadius: 26,
+          }}
+        >
+          <House size={18} color="var(--white)"
+            style={{
+              flexShrink: 0,
+            }}
+          />
+          <p
+            style={{
+              color: "var(--white)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: 0.5,
+              lineHeight: "13px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.25,
+              marginBottom: 0.25,
+            }}
+          >
+            HOME
+          </p>
+        </div>
+        <div
+          className="flex flex-col items-center justify-center gap-1"
+          style={{
+            width: "100%",
+            height: "100%",
+            borderRadius: 26,
+          }}
+        >
+          <BookOpen size={18} color="var(--tab-inactive)"
+            style={{
+              flexShrink: 0,
+            }}
+          />
+          <p
+            style={{
+              color: "var(--tab-inactive)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: 0.5,
+              lineHeight: "13px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.25,
+              marginBottom: 0.25,
+            }}
+          >
+            LOG
+          </p>
+        </div>
+        <div
+          className="flex flex-col items-center justify-center gap-1"
+          style={{
+            width: "100%",
+            height: "100%",
+            borderRadius: 26,
+          }}
+        >
+          <Star size={18} color="var(--tab-inactive)"
+            style={{
+              flexShrink: 0,
+            }}
+          />
+          <p
+            style={{
+              color: "var(--tab-inactive)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: 0.5,
+              lineHeight: "13px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.25,
+              marginBottom: 0.25,
+            }}
+          >
+            RATINGS
+          </p>
+        </div>
+        <div
+          className="flex flex-col items-center justify-center gap-1"
+          style={{
+            width: "100%",
+            height: "100%",
+            borderRadius: 26,
+          }}
+        >
+          <Heart size={18} color="var(--tab-inactive)"
+            style={{
+              flexShrink: 0,
+            }}
+          />
+          <p
+            style={{
+              color: "var(--tab-inactive)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: 0.5,
+              lineHeight: "13px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.25,
+              marginBottom: 0.25,
+            }}
+          >
+            WISHLIST
+          </p>
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+function TabBarLog({
+  className,
+  style,
+}: TabBarProps) {
+  return (
+    <nav role="tablist"
+      className={cn("wc-tab-bar flex justify-center", className)}
+      style={{
+        width: 402,
+        padding: "12px 21px 21px 21px",
+        ...style,
+      }}
+    >
+      <div
+        className="flex"
+        style={{
+          width: "100%",
+          height: 62,
+          backgroundColor: "var(--bg-card)",
+          borderRadius: 36,
+          padding: 4,
+          boxShadow: "inset 0 0 0 1px var(--border-default), 0px 4px 20px var(--shadow)",
+        }}
+      >
+        <div
+          className="flex flex-col items-center justify-center gap-1"
+          style={{
+            width: "100%",
+            height: "100%",
+            borderRadius: 26,
+          }}
+        >
+          <House size={18} color="var(--tab-inactive)"
+            style={{
+              flexShrink: 0,
+            }}
+          />
+          <p
+            style={{
+              color: "var(--tab-inactive)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: 0.5,
+              lineHeight: "13px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.25,
+              marginBottom: 0.25,
+            }}
+          >
+            HOME
+          </p>
+        </div>
+        <div
+          className="flex flex-col items-center justify-center gap-1"
+          style={{
+            width: "100%",
+            height: "100%",
+            backgroundColor: "var(--accent)",
+            borderRadius: 26,
+          }}
+        >
+          <BookOpen size={18} color="var(--white)"
+            style={{
+              flexShrink: 0,
+            }}
+          />
+          <p
+            style={{
+              color: "var(--white)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: 0.5,
+              lineHeight: "13px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.25,
+              marginBottom: 0.25,
+            }}
+          >
+            LOG
+          </p>
+        </div>
+        <div
+          className="flex flex-col items-center justify-center gap-1"
+          style={{
+            width: "100%",
+            height: "100%",
+            borderRadius: 26,
+          }}
+        >
+          <Star size={18} color="var(--tab-inactive)"
+            style={{
+              flexShrink: 0,
+            }}
+          />
+          <p
+            style={{
+              color: "var(--tab-inactive)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: 0.5,
+              lineHeight: "13px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.25,
+              marginBottom: 0.25,
+            }}
+          >
+            RATINGS
+          </p>
+        </div>
+        <div
+          className="flex flex-col items-center justify-center gap-1"
+          style={{
+            width: "100%",
+            height: "100%",
+            borderRadius: 26,
+          }}
+        >
+          <Heart size={18} color="var(--tab-inactive)"
+            style={{
+              flexShrink: 0,
+            }}
+          />
+          <p
+            style={{
+              color: "var(--tab-inactive)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: 0.5,
+              lineHeight: "13px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.25,
+              marginBottom: 0.25,
+            }}
+          >
+            WISHLIST
+          </p>
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+function TabBarRatings({
+  className,
+  style,
+}: TabBarProps) {
+  return (
+    <nav role="tablist"
+      className={cn("wc-tab-bar flex justify-center", className)}
+      style={{
+        width: 402,
+        padding: "12px 21px 21px 21px",
+        ...style,
+      }}
+    >
+      <div
+        className="flex"
+        style={{
+          width: "100%",
+          height: 62,
+          backgroundColor: "var(--bg-card)",
+          borderRadius: 36,
+          padding: 4,
+          boxShadow: "inset 0 0 0 1px var(--border-default), 0px 4px 20px var(--shadow)",
+        }}
+      >
+        <div
+          className="flex flex-col items-center justify-center gap-1"
+          style={{
+            width: "100%",
+            height: "100%",
+            borderRadius: 26,
+          }}
+        >
+          <House size={18} color="var(--tab-inactive)"
+            style={{
+              flexShrink: 0,
+            }}
+          />
+          <p
+            style={{
+              color: "var(--tab-inactive)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: 0.5,
+              lineHeight: "13px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.25,
+              marginBottom: 0.25,
+            }}
+          >
+            HOME
+          </p>
+        </div>
+        <div
+          className="flex flex-col items-center justify-center gap-1"
+          style={{
+            width: "100%",
+            height: "100%",
+            borderRadius: 26,
+          }}
+        >
+          <BookOpen size={18} color="var(--tab-inactive)"
+            style={{
+              flexShrink: 0,
+            }}
+          />
+          <p
+            style={{
+              color: "var(--tab-inactive)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: 0.5,
+              lineHeight: "13px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.25,
+              marginBottom: 0.25,
+            }}
+          >
+            LOG
+          </p>
+        </div>
+        <div
+          className="flex flex-col items-center justify-center gap-1"
+          style={{
+            width: "100%",
+            height: "100%",
+            backgroundColor: "var(--accent)",
+            borderRadius: 26,
+          }}
+        >
+          <Star size={18} color="var(--white)"
+            style={{
+              flexShrink: 0,
+            }}
+          />
+          <p
+            style={{
+              color: "var(--white)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: 0.5,
+              lineHeight: "13px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.25,
+              marginBottom: 0.25,
+            }}
+          >
+            RATINGS
+          </p>
+        </div>
+        <div
+          className="flex flex-col items-center justify-center gap-1"
+          style={{
+            width: "100%",
+            height: "100%",
+            borderRadius: 26,
+          }}
+        >
+          <Heart size={18} color="var(--tab-inactive)"
+            style={{
+              flexShrink: 0,
+            }}
+          />
+          <p
+            style={{
+              color: "var(--tab-inactive)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: 0.5,
+              lineHeight: "13px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.25,
+              marginBottom: 0.25,
+            }}
+          >
+            WISHLIST
+          </p>
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+function TabBarWishlist({
+  className,
+  style,
+}: TabBarProps) {
+  return (
+    <nav role="tablist"
+      className={cn("wc-tab-bar flex justify-center", className)}
+      style={{
+        width: 402,
+        padding: "12px 21px 21px 21px",
+        ...style,
+      }}
+    >
+      <div
+        className="flex"
+        style={{
+          width: "100%",
+          height: 62,
+          backgroundColor: "var(--bg-card)",
+          borderRadius: 36,
+          padding: 4,
+          boxShadow: "inset 0 0 0 1px var(--border-default), 0px 4px 20px var(--shadow)",
+        }}
+      >
+        <div
+          className="flex flex-col items-center justify-center gap-1"
+          style={{
+            width: "100%",
+            height: "100%",
+            borderRadius: 26,
+          }}
+        >
+          <House size={18} color="var(--tab-inactive)"
+            style={{
+              flexShrink: 0,
+            }}
+          />
+          <p
+            style={{
+              color: "var(--tab-inactive)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: 0.5,
+              lineHeight: "13px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.25,
+              marginBottom: 0.25,
+            }}
+          >
+            HOME
+          </p>
+        </div>
+        <div
+          className="flex flex-col items-center justify-center gap-1"
+          style={{
+            width: "100%",
+            height: "100%",
+            borderRadius: 26,
+          }}
+        >
+          <BookOpen size={18} color="var(--tab-inactive)"
+            style={{
+              flexShrink: 0,
+            }}
+          />
+          <p
+            style={{
+              color: "var(--tab-inactive)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: 0.5,
+              lineHeight: "13px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.25,
+              marginBottom: 0.25,
+            }}
+          >
+            LOG
+          </p>
+        </div>
+        <div
+          className="flex flex-col items-center justify-center gap-1"
+          style={{
+            width: "100%",
+            height: "100%",
+            borderRadius: 26,
+          }}
+        >
+          <Star size={18} color="var(--tab-inactive)"
+            style={{
+              flexShrink: 0,
+            }}
+          />
+          <p
+            style={{
+              color: "var(--tab-inactive)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: 0.5,
+              lineHeight: "13px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.25,
+              marginBottom: 0.25,
+            }}
+          >
+            RATINGS
+          </p>
+        </div>
+        <div
+          className="flex flex-col items-center justify-center gap-1"
+          style={{
+            width: "100%",
+            height: "100%",
+            backgroundColor: "var(--accent)",
+            borderRadius: 26,
+          }}
+        >
+          <Heart size={18} color="var(--white)"
+            style={{
+              flexShrink: 0,
+            }}
+          />
+          <p
+            style={{
+              color: "var(--white)",
+              fontFamily: "var(--font-primary)",
+              fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: 0.5,
+              lineHeight: "13px",
+              fontOpticalSizing: "none",
+              whiteSpace: "pre",
+              marginTop: -0.25,
+              marginBottom: 0.25,
+            }}
+          >
+            WISHLIST
+          </p>
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+export function TabBar({
+  selected,
+  ...props
+}: TabBarProps) {
+  return (
+    selected === "home" ? <TabBarHome {...props} /> :
+    selected === "log" ? <TabBarLog {...props} /> :
+    selected === "ratings" ? <TabBarRatings {...props} /> :
+    selected === "wishlist" ? <TabBarWishlist {...props} /> :
+    <TabBarDefault {...props} />
+  );
+}

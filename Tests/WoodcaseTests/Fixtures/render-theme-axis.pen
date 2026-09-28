@@ -1,0 +1,28 @@
+{
+  "version": "2.17",
+  "themes": {
+    "mode": [
+      "light",
+      "dark"
+    ]
+  },
+  "children": [
+    {
+      "id": "Scr01",
+      "name": "Screen",
+      "type": "frame",
+      "width": 100,
+      "height": 100
+    },
+    {
+      "id": "Spc01",
+      "name": "Special",
+      "type": "frame",
+      "theme": {
+        "mode": "dark"
+      },
+      "width": 100,
+      "height": 100
+    }
+  ]
+}

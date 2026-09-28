@@ -1,0 +1,29 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "id": "Card1",
+      "name": "Card",
+      "type": "frame",
+      "width": 200,
+      "height": 100,
+      "children": [
+        {
+          "id": "Fld01",
+          "name": "content",
+          "type": "frame",
+          "width": 180,
+          "height": 80,
+          "slot": ["text", "frame"]
+        },
+        {
+          "id": "Ord01",
+          "name": "plain",
+          "type": "frame",
+          "width": 50,
+          "height": 50
+        }
+      ]
+    }
+  ]
+}

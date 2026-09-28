@@ -1,0 +1,151 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "eA3x2",
+      "x": 0,
+      "y": 0,
+      "name": "elide3x2",
+      "width": 300,
+      "height": 150,
+      "fill": {
+        "type": "mesh_gradient",
+        "enabled": true,
+        "columns": 3,
+        "rows": 2,
+        "colors": [
+          "#FF0000",
+          "#00FF00",
+          "#0000FF",
+          "#FFFF00",
+          "#00FFFF",
+          "#FF00FF"
+        ],
+        "points": [
+          [
+            0,
+            0
+          ],
+          [
+            0.5,
+            0
+          ],
+          {
+            "position": [
+              1,
+              0
+            ],
+            "rightHandle": [
+              0.3,
+              0.1
+            ],
+            "topHandle": [
+              0,
+              -0.2502
+            ]
+          },
+          [
+            0.1235,
+            1
+          ],
+          [
+            0.5,
+            0.9877
+          ],
+          {
+            "position": [
+              1,
+              1
+            ],
+            "topHandle": [
+              0.0123,
+              -0.3333
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "frame",
+      "id": "eB2x2",
+      "x": 400,
+      "y": 0,
+      "name": "elide2x2",
+      "width": 200,
+      "height": 200,
+      "fill": {
+        "type": "mesh_gradient",
+        "enabled": true,
+        "columns": 2,
+        "rows": 2,
+        "colors": [
+          "#FF0000",
+          "#00FF00",
+          "#0000FF",
+          "#FFFF00"
+        ],
+        "points": [
+          [
+            0,
+            0
+          ],
+          {
+            "position": [
+              1,
+              0
+            ],
+            "leftHandle": [
+              -0.25,
+              0.0002
+            ]
+          },
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            1
+          ]
+        ]
+      }
+    },
+    {
+      "type": "frame",
+      "id": "eC1x2",
+      "x": 700,
+      "y": 0,
+      "name": "elide1col",
+      "width": 100,
+      "height": 200,
+      "fill": {
+        "type": "mesh_gradient",
+        "enabled": true,
+        "columns": 1,
+        "rows": 2,
+        "colors": [
+          "#FF0000",
+          "#0000FF"
+        ],
+        "points": [
+          [
+            0,
+            0
+          ],
+          {
+            "position": [
+              0,
+              1
+            ],
+            "leftHandle": [
+              -0.5,
+              0
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "fileToken": "fe3afd0f-9de3-4607-a197-ce78520f3453"
+}

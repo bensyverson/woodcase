@@ -1,0 +1,28 @@
+<section class="v-panel v-export" id="v-export">
+  <header class="v-panel-head">
+    <h2 class="v-panel-title">Export</h2>
+    <span class="v-panel-note">400×300 pt</span>
+  </header>
+  <form class="v-export-form" method="get" action="/files/a1b2c3d4e5f6/artboards/Cnv01/export">
+    <label class="v-export-field" for="v-export-format"><span class="v-export-label">Format</span>
+    <select id="v-export-format" class="v-export-format" name="format">
+      <option value="png" selected>PNG image</option>
+      <option value="pdf">PDF document</option>
+      <option value="react">React (.tsx)</option>
+      <option value="theme-css">Theme (.css)</option>
+      <option value="states-css">States (.css)</option>
+      <option value="manifest">Manifest (.json)</option>
+    </select>
+    </label><label class="v-export-field" for="v-export-scale"><span class="v-export-label">Scale</span>
+    <select id="v-export-scale" class="v-export-scale" name="scale">
+      <option value="1">1×</option>
+      <option value="2" selected>2×</option>
+      <option value="3">3×</option>
+    </select>
+    </label><label class="v-export-field" for="v-export-max"><span class="v-export-label">or longest edge</span>
+    <input id="v-export-max" class="v-export-max" type="number" name="max" min="1" placeholder="points">
+    </label>
+    <button class="v-export-go" type="submit">Download</button>
+  </form>
+  <p class="v-empty-note">PNG and PDF are what <code>render</code> and <code>shot</code> write; the rest is what <code>generate react</code> writes. Scale and longest edge apply to the PNG only.</p>
+</section>

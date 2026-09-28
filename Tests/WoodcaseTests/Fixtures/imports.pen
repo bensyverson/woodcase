@@ -1,0 +1,33 @@
+{
+  "version": "2.17",
+  "imports": {
+    "V": "./library.pen",
+    "icons": "../shared/icons.pen"
+  },
+  "children": [
+    {
+      "id": "Cnv01",
+      "name": "Canvas",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "width": 400,
+      "height": 300,
+      "children": [
+        {
+          "id": "Btn01",
+          "name": "Button",
+          "type": "ref",
+          "ref": "V:Bt0aA"
+        },
+        {
+          "id": "Ttl01",
+          "name": "Title",
+          "type": "text",
+          "content": "Canvas",
+          "fill": "$V:--primary"
+        }
+      ]
+    }
+  ]
+}

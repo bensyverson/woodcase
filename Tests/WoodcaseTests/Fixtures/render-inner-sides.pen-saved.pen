@@ -1,0 +1,295 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "is01f",
+      "x": 300,
+      "y": 0,
+      "name": "col",
+      "clip": true,
+      "width": 240,
+      "height": 180,
+      "fill": "#000000",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "is01n",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 140,
+          "fill": "#333333",
+          "stroke": "#FFFFFF",
+          "strokeWidth": {
+            "top": 12,
+            "right": 4,
+            "bottom": 20,
+            "left": 24
+          },
+          "strokeAlignment": "inner",
+          "layout": "vertical",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "is01a",
+              "fill": "#FF00FF",
+              "width": 80,
+              "height": 40
+            },
+            {
+              "type": "rectangle",
+              "id": "is01b",
+              "fill": "#00FFFF",
+              "width": 60,
+              "height": 30
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "is02f",
+      "x": 600,
+      "y": 0,
+      "name": "row-center",
+      "clip": true,
+      "width": 240,
+      "height": 180,
+      "fill": "#000000",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "is02n",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 140,
+          "fill": "#333333",
+          "stroke": "#FFFFFF",
+          "strokeWidth": {
+            "top": 12,
+            "right": 4,
+            "bottom": 20,
+            "left": 24
+          },
+          "strokeAlignment": "inner",
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "is02a",
+              "fill": "#FF00FF",
+              "width": 80,
+              "height": 40
+            },
+            {
+              "type": "rectangle",
+              "id": "is02b",
+              "fill": "#00FFFF",
+              "width": 60,
+              "height": 30
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "is03f",
+      "x": 900,
+      "y": 0,
+      "name": "none",
+      "clip": true,
+      "width": 240,
+      "height": 180,
+      "fill": "#000000",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "is03n",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 140,
+          "fill": "#333333",
+          "stroke": "#FFFFFF",
+          "strokeWidth": {
+            "top": 12,
+            "right": 4,
+            "bottom": 20,
+            "left": 24
+          },
+          "strokeAlignment": "inner",
+          "layout": "none",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "is03a",
+              "x": 0,
+              "y": 0,
+              "fill": "#FF00FF",
+              "width": 80,
+              "height": 40
+            },
+            {
+              "type": "rectangle",
+              "id": "is03b",
+              "x": 90,
+              "y": 60,
+              "fill": "#00FFFF",
+              "width": 60,
+              "height": 30
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "is04f",
+      "x": 1200,
+      "y": 0,
+      "name": "uniform",
+      "clip": true,
+      "width": 240,
+      "height": 180,
+      "fill": "#000000",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "is04n",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 140,
+          "fill": "#333333",
+          "stroke": "#FFFFFF",
+          "strokeWidth": 16,
+          "strokeAlignment": "inner",
+          "layout": "vertical",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "is04a",
+              "fill": "#FF00FF",
+              "width": 80,
+              "height": 40
+            },
+            {
+              "type": "rectangle",
+              "id": "is04b",
+              "fill": "#00FFFF",
+              "width": 60,
+              "height": 30
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "is05f",
+      "x": 1500,
+      "y": 0,
+      "name": "col-padded",
+      "clip": true,
+      "width": 240,
+      "height": 180,
+      "fill": "#000000",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "is05n",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 140,
+          "fill": "#333333",
+          "stroke": "#FFFFFF",
+          "strokeWidth": {
+            "top": 12,
+            "right": 4,
+            "bottom": 20,
+            "left": 24
+          },
+          "strokeAlignment": "inner",
+          "layout": "vertical",
+          "gap": 4,
+          "padding": 8,
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "is05a",
+              "fill": "#FF00FF",
+              "width": 80,
+              "height": 40
+            },
+            {
+              "type": "rectangle",
+              "id": "is05b",
+              "fill": "#00FFFF",
+              "width": 60,
+              "height": 30
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "is06f",
+      "x": 1800,
+      "y": 0,
+      "name": "col-center",
+      "clip": true,
+      "width": 240,
+      "height": 180,
+      "fill": "#000000",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "is06n",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 140,
+          "fill": "#333333",
+          "stroke": "#FFFFFF",
+          "strokeWidth": {
+            "top": 12,
+            "right": 4,
+            "bottom": 20,
+            "left": 24
+          },
+          "layout": "vertical",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "is06a",
+              "fill": "#FF00FF",
+              "width": 80,
+              "height": 40
+            },
+            {
+              "type": "rectangle",
+              "id": "is06b",
+              "fill": "#00FFFF",
+              "width": 60,
+              "height": 30
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "fileToken": "ff040262-b7fa-4975-bd55-2a5cbd872071"
+}

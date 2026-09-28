@@ -1,0 +1,49 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "id": "Root0",
+      "name": "Root",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "width": 800,
+      "height": 600,
+      "children": [
+        { "id": "NFrme", "name": "AFrame", "type": "frame", "width": 10, "height": 10 },
+        { "id": "NGrup", "name": "AGroup", "type": "group", "children": [] },
+        { "id": "NRect", "name": "ARect", "type": "rectangle", "width": 10, "height": 10 },
+        { "id": "NElps", "name": "AnEllipse", "type": "ellipse", "width": 10, "height": 10 },
+        { "id": "NPath", "name": "APath", "type": "path", "width": 10, "height": 10, "geometry": "M0 0 L10 10" },
+        { "id": "NPoly", "name": "APolygon", "type": "polygon", "width": 10, "height": 10, "polygonCount": 5 },
+        { "id": "NText", "name": "AText", "type": "text", "content": "hi" },
+        { "id": "NNote", "name": "ANote", "type": "note", "content": "a note" },
+        { "id": "NPrmt", "name": "APrompt", "type": "prompt", "content": "a prompt" },
+        { "id": "NCtxt", "name": "AContext", "type": "context", "content": "context" },
+        { "id": "NIcon", "name": "AnIcon", "type": "icon", "icon": "star", "library": "lucide", "width": 10, "height": 10 },
+        { "id": "NScpt", "name": "AScript", "type": "script", "scriptUri": "s.js", "width": 10, "height": 10 },
+        { "id": "NLine", "name": "ALine", "type": "line", "width": 10, "height": 10 },
+        { "id": "NBrws", "name": "ABrowser", "type": "browser", "url": "example.com", "width": 10, "height": 10 },
+        { "id": "NRefr", "name": "ARef", "type": "ref", "ref": "Btton" }
+      ]
+    },
+    {
+      "id": "Btton",
+      "name": "Button",
+      "type": "frame",
+      "x": 900,
+      "y": 0,
+      "width": 100,
+      "height": 40,
+      "reusable": true
+    },
+    {
+      "id": "NConn",
+      "name": "AConnection",
+      "type": "connection",
+      "source": { "path": "NRect", "anchor": "right" },
+      "target": { "path": "NElps", "anchor": "left" },
+      "stroke": "#000000"
+    }
+  ]
+}

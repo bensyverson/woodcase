@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+#
+# soak-tests — Run the full suite N times and log one result line per run.
+#
+# The suite's flakes are load-shaped: an orphaned child from run N failing run
+# N+1, a wall-clock budget that measures the machine, a runaway that takes the
+# whole test host down without printing a summary. None of those show up in one
+# green run, so "is it fixed?" is answered by a soak, not by a pass.
+#
+#   scripts/soak-tests 10 /tmp/soak.log             # ten runs, quiet machine
+#   scripts/soak-tests 5 /tmp/soak.log --load 2     # five, with two busy cores
+#   scripts/soak-tests 3 /tmp/soak.log --timeout 60 # a tighter watchdog
+#
+# Each run's summary line ("Test run with N tests ... passed after ...") lands
+# in the log along with its exit status and elapsed seconds; the full output of
+# a run goes beside the log as <log>.run<i>. Two failures that are not test
+# failures get named as themselves:
+#
+#   NO-SUMMARY  the run printed no "Test run with" line — what an out-of-memory
+#               kill of the test host looks like from outside.
+#   TIMEOUT     the run outstayed --timeout. `sample` output for the test host
+#               is written beside the log before it is killed, because a run
+#               that hangs prints nothing and cannot be diagnosed afterwards.
+#
+# Only pids this script started are ever killed. Never `pkill -f`: the pattern
+# matches other agents' runs and the shared dev server.
+#
+# Exits non-zero if any run failed.
+
+set -u
+
+usage() {
+    echo "usage: $0 <runs> <logfile> [--load <cores>] [--timeout <seconds>]" >&2
+    exit 64
+}
+
+[ $# -ge 2 ] || usage
+RUNS="$1"
+LOG="$2"
+shift 2
+
+LOAD=0
+TIMEOUT=600
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --load) LOAD="${2:-0}"; shift 2 ;;
+        --timeout) TIMEOUT="${2:-600}"; shift 2 ;;
+        *) usage ;;
+    esac
+done
+
+LOAD_PIDS=""
+start_load() {
+    [ "$LOAD" -gt 0 ] || return 0
+    local i=0
+    while [ "$i" -lt "$LOAD" ]; do
+        yes > /dev/null &
+        LOAD_PIDS="$LOAD_PIDS $!"
+        i=$((i + 1))
+    done
+    echo "soak: synthetic load pids$LOAD_PIDS" | tee -a "$LOG"
+}
+
+stop_load() {
+    [ -n "$LOAD_PIDS" ] || return 0
+    for pid in $LOAD_PIDS; do kill "$pid" 2>/dev/null; done
+    LOAD_PIDS=""
+}
+trap stop_load EXIT INT TERM
+
+# Runs the suite once under a watchdog. Returns the run's exit status, or 124 if
+# the watchdog fired.
+run_once() {
+    local out="$1"
+    swift test --quiet > "$out" 2>&1 &
+    local pid=$!
+    local waited=0
+    while kill -0 "$pid" 2>/dev/null; do
+        if [ "$waited" -ge "$TIMEOUT" ]; then
+            echo "soak: run exceeded ${TIMEOUT}s — sampling, then killing pid $pid" >> "$out"
+            for child in $(pgrep -P "$pid" 2>/dev/null); do
+                sample "$child" 5 -f "$out.sample.$child" > /dev/null 2>&1
+                kill -9 "$child" 2>/dev/null
+            done
+            kill -9 "$pid" 2>/dev/null
+            wait "$pid" 2>/dev/null
+            return 124
+        fi
+        sleep 1
+        waited=$((waited + 1))
+    done
+    wait "$pid"
+}
+
+: > "$LOG"
+start_load
+
+failures=0
+i=1
+while [ "$i" -le "$RUNS" ]; do
+    out="$LOG.run$i"
+    began=$(date +%s)
+    run_once "$out"
+    status=$?
+    elapsed=$(($(date +%s) - began))
+    if [ "$status" -eq 124 ]; then
+        summary="TIMEOUT after ${TIMEOUT}s — samples beside $out"
+    else
+        summary=$(grep -a "Test run with" "$out" | tail -1)
+        [ -n "$summary" ] || summary="NO-SUMMARY (no 'Test run with' line — check $out)"
+    fi
+    printf 'run %2d  exit=%d  %3ds  %s\n' "$i" "$status" "$elapsed" "$summary" | tee -a "$LOG"
+    [ "$status" -eq 0 ] || failures=$((failures + 1))
+    i=$((i + 1))
+done
+
+stop_load
+echo "soak: $((RUNS - failures))/$RUNS runs passed" | tee -a "$LOG"
+[ "$failures" -eq 0 ]

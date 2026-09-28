@@ -1,0 +1,78 @@
+#!/usr/bin/env python3
+"""deep-pen — print a .pen document nested deeper than any fixture.
+
+    scripts/deep-pen frames <depth>                  # one root frame D0 … D<depth-1>
+    scripts/deep-pen instances <depth> [--frames N]  # C0 … C<depth-1>, each placing the one before
+
+The documents are the ones the stack-depth tests generate — `DeepDocuments` in
+Tests/WoodcaseTests/Performance/ and `TreeDeepNestingTests` — so a measurement in
+project/2026-09-26-debug-stack-depth.md can be re-run against a built binary:
+
+    scripts/deep-pen frames 200 > "$TMPDIR/frames.pen"
+    .build/debug/woodcase tree "$TMPDIR/frames.pen"; echo $?
+    scripts/deep-pen instances 32 > "$TMPDIR/nested.pen"
+    .build/debug/woodcase tree "$TMPDIR/nested.pen" Top --expand; echo $?
+
+`instances`: `C0` is a leaf holding `Leaf`; each `C<i>` wraps an instance of `C<i-1>`
+in N plain frames (default 1) and writes a rectangle `Inj<i>` into that instance's slot;
+`Top` places the last one and renames the rectangle its component wrote.
+
+Foundation refuses JSON nested past 512 arrays and objects, so a frame tree deeper than
+255 does not parse at all. Standard library only; runs sandboxed.
+"""
+
+import argparse
+
+
+def frames(depth):
+    tree = '{"id": "D%d", "type": "frame"}' % (depth - 1)
+    for level in range(depth - 2, -1, -1):
+        tree = '{"id": "D%d", "type": "frame", "children": [%s]}' % (level, tree)
+    return '{"version": "2.17", "children": [%s]}' % tree
+
+
+def instances(depth, wrapping_frames):
+    components = [
+        '{"id": "C0", "type": "frame", "reusable": true, "children": ['
+        '{"id": "Hole0", "type": "frame", "children": []},'
+        '{"id": "Leaf", "type": "rectangle", "width": 4, "height": 4}]}'
+    ]
+    for level in range(1, depth):
+        wrapped = (
+            '{"id": "I%d", "type": "ref", "ref": "C%d", "descendants": {'
+            '"Hole%d": {"children": [{"id": "Inj%d", "type": "rectangle", "width": 2}]}}}'
+            % (level, level - 1, level - 1, level)
+        )
+        for frame in range(wrapping_frames):
+            wrapped = '{"id": "F%dx%d", "type": "frame", "children": [%s]}' % (level, frame, wrapped)
+        components.append(
+            '{"id": "C%d", "type": "frame", "reusable": true, "children": ['
+            '{"id": "Hole%d", "type": "frame", "children": []}, %s]}' % (level, level, wrapped)
+        )
+    top = (
+        '{"id": "Top", "type": "ref", "ref": "C%d", "descendants": {"Inj%d": {"name": "patched"}}}'
+        % (depth - 1, depth - 1)
+    )
+    return '{"version": "2.17", "children": [%s, %s]}' % (", ".join(components), top)
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Print a deeply nested .pen document.")
+    shapes = parser.add_subparsers(dest="shape", required=True)
+    frame_tree = shapes.add_parser("frames", help="a plain frame tree")
+    frame_tree.add_argument("depth", type=int, help="nodes on the one path")
+    nested = shapes.add_parser("instances", help="components nested inside one another")
+    nested.add_argument("depth", type=int, help="how many components nest")
+    nested.add_argument("--frames", type=int, default=1, help="plain frames around each nested instance")
+    args = parser.parse_args()
+
+    if args.depth < 1:
+        parser.error("depth must be 1 or more")
+    if args.shape == "frames":
+        print(frames(args.depth))
+    else:
+        print(instances(args.depth, args.frames))
+
+
+if __name__ == "__main__":
+    main()

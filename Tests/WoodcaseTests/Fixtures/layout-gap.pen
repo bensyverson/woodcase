@@ -1,0 +1,40 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "fill": "#FF0000",
+          "height": 60,
+          "id": "2dzC4",
+          "name": "child-1",
+          "type": "rectangle",
+          "width": 80
+        },
+        {
+          "fill": "#00FF00",
+          "height": 60,
+          "id": "bVHUE",
+          "name": "child-2",
+          "type": "rectangle",
+          "width": 80
+        },
+        {
+          "fill": "#0000FF",
+          "height": 60,
+          "id": "OzQi9",
+          "name": "child-3",
+          "type": "rectangle",
+          "width": 80
+        }
+      ],
+      "fill": "#F0F0F0",
+      "gap": 16,
+      "height": 100,
+      "id": "Ut7JJ",
+      "name": "layout-gap",
+      "type": "frame",
+      "width": 400
+    }
+  ],
+  "version": "2.17"
+}

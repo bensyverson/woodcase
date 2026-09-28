@@ -1,0 +1,45 @@
+# 2026-09-26 — Why Google Font downloads fail inside the Claude Code sandbox
+
+**Finding: honouring the proxy is necessary but not enough.** Inside the Claude Code Bash sandbox a `woodcase render` hits three failures in a row, and fixing the first two only exposes the third. That one is outside Woodcase's reach: the sandbox denies the system's certificate-trust service, so *no* Apple TLS client in the sandbox can verify any HTTPS server, through a proxy or not. A render fetches an uncached Google family in the sandbox only once the user sets `sandbox.enableWeakerNetworkIsolation: true` in Claude Code's settings (or runs the command outside the sandbox). Leaf `RnoR9o`; reported by the UFTI pilot, [item 1](2026-09-10-ufti-pilot-feedback.md).
+
+> **Update (2026-09-26, later the same day):** "only once the user sets…" no longer holds on macOS. Ben ruled to build the curl fallback listed under *Options left, not taken*, and it is built: `StandardDataFetcher.make()` composes `URLSessionDataFetcher` with `CurlDataFetcher` in a `TrustFallbackDataFetcher`, which retries a URL with `/usr/bin/curl` only when `URLSession` fails with `certificateTrustUnavailable`. From a sandboxed Bash call with no setting changed, `WOODCASE_HOME=<fresh dir> .build/debug/woodcase render lobster.pen --output-dir out` printed no warning, cached `fonts/lobster/Lobster-Regular.ttf` (406,076 bytes) and drew the PNG in Lobster. `scripts/probe-proxy-egress --deny-trustd` (sandbox off) now succeeds too. The diagnosis below stands: Apple TLS still cannot verify anything in that sandbox; curl simply does not need trustd. The trust-service warning now reaches a reader only where there is no fallback (iOS, or a bare `URLSessionDataFetcher`).
+
+## The three failures
+
+Observed with a standalone `swiftc` probe and with `.build/debug/woodcase render`, both built with the sandbox off and run from a sandboxed Bash call, fetching `https://raw.githubusercontent.com/google/fonts/main/ofl/lobster/METADATA.pb`. In that environment `HTTPS_PROXY`, `HTTP_PROXY` and `ALL_PROXY` (and lowercase forms) are all `http://<user>:<password>@localhost:<port>`, and `NO_PROXY` lists loopback and the private ranges.
+
+| Step | What the code did | Error |
+|---|---|---|
+| 1 | `URLSession.shared` — ignores the environment, goes direct | `NSURLErrorDomain -1003` (cannot find host) |
+| 2 | Proxy configured with host `localhost` | `kCFErrorDomainCFNetwork 310` via `connectionProxyDictionary`; `-1003` via Network's `ProxyConfiguration` |
+| 3 | Proxy configured as `127.0.0.1`, credentials applied, `CONNECT` succeeds | `NSURLErrorDomain -1202` (certificate untrusted); re-evaluating the peer trust gives `errSecInternalComponent` (`-26276`) |
+
+1. **No environment proxy.** On Apple platforms `URLSession` takes proxies from System Configuration only. The sandbox also has no DNS, so a direct request cannot even resolve the host.
+2. **No DNS for `localhost` either.** The sandbox's Seatbelt profile does not allow `com.apple.dnssd.service`, so the system resolver answers nothing, `localhost` included. curl works because it resolves `localhost` itself without asking the resolver (RFC 6761). Dialling `127.0.0.1` reaches the proxy (`::1` is refused). The proxy answers an unauthenticated `CONNECT` with `407` and `Proxy-Authenticate: Basic realm="srt"`. `ProxyConfiguration.applyCredential(username:password:)` answers it, and so does a `URLSessionTaskDelegate` returning a `URLCredential` for the `isProxy()` challenge. A proxy challenge left unanswered surfaces as `NSPOSIXErrorDomain 80` (`EAUTH`).
+3. **No trust service.** With the tunnel open, TLS gets GitHub's real certificate (`*.github.io`, issued by Let's Encrypt `YR1`; curl sees the same chain, so this is not interception). But evaluating it fails. `SecTrustEvaluateWithError` returns `errSecInternalComponent` even offline, on that chain saved to disk, with a basic X.509 policy. The Claude Code profile allows `mach-lookup` of `com.apple.trustd.agent` only when `sandbox.enableWeakerNetworkIsolation` is set (read from the profile generator in the Claude Code 2.1.283 binary). Outside the session sandbox, `sandbox-exec -p '(version 1)(allow default)(deny mach-lookup (global-name "com.apple.trustd.agent"))'` reproduces `-26276` exactly, and `(allow default)` alone evaluates the chain cleanly. curl is unaffected because it verifies with LibreSSL against `/etc/ssl/cert.pem`.
+
+So the pilot's diagnosis ("the Swift HTTP layer does not honor `HTTPS_PROXY`") was correct but incomplete. Its workaround worked because curl uses neither the system resolver nor trustd.
+
+## What changed
+
+- **`URLSessionDataFetcher` routes by the proxy environment** (`ProxyEnvironment`, `ProxyEndpoint`, `ProxyExclusion`, all pure and unit-tested). When the environment names a proxy it is authoritative, as for curl. Each URL goes through its scheme's proxy by an HTTP `CONNECT` tunnel (`ProxyConfiguration` with the variable's Basic credentials), or direct when `NO_PROXY` excludes its host (domains by suffix, IP literals and CIDR blocks). A proxy host of `localhost` is dialled as `127.0.0.1`. With no proxy variables it is `URLSession.shared`, as before.
+- **Every transport failure is typed.** The fetcher throws `RemoteFetchError.unreachable(NetworkFailure)`, and the `NetworkFailure` carries a `Reason` plus the underlying domain and code. On a certificate error the fetcher re-evaluates the peer trust, which separates "could not be checked" (`certificateTrustUnavailable`, which names `com.apple.trustd.agent` and the setting) from "checked and rejected". `EPERM` on connect reads as `connectionBlocked`.
+- **`GoogleFontResolver` no longer turns a network failure into "no such family".** A 404 in every license directory is `familyNotFound`. Any other fetch failure is `networkUnavailable(family:failure:)` and stops the probe. The render warning now says which it was:
+
+```text
+warning: [fontResolution] font "Lobster" is not installed and could not be downloaded from Google Fonts: the server's certificate could not be checked because this process cannot reach the system certificate-trust service (com.apple.trustd.agent) — a sandbox is blocking it; in the Claude Code Bash sandbox, set `sandbox.enableWeakerNetworkIsolation: true` or run outside the sandbox (via proxy localhost:<port>) [NSURLErrorDomain -1202]; text in it falls back to SF Pro.
+```
+
+That is the actual output of `WOODCASE_HOME=<fresh dir> .build/debug/woodcase render lobster.pen --output-dir out` from a sandboxed Bash call on 2026-09-26. Before this change the same path emitted `Font 'Lobster' could not be resolved; will fall back to SF Pro`, according to the code (the old binary was not re-run). That was a warning, but it named no cause.
+
+## Proof that the fix works where trust is available
+
+`scripts/probe-proxy-egress` (sandbox off) starts a throwaway authenticated `CONNECT` proxy on 127.0.0.1 with made-up credentials. It then renders under a `sandbox-exec` profile shaped like the harness: no `com.apple.dnssd.service`, IP egress only to localhost, and `HTTPS_PROXY=http://tester:p%40ss@localhost:<port>`. On 2026-09-26 the proxy logged one `CONNECT raw.githubusercontent.com:443 authorized=False` (the 407), then one `authorized=True`. The render printed no warning, the TTF landed in the fresh `$WOODCASE_HOME/fonts`, and the PNG is set in Lobster. `--deny-trustd` adds the harness's trustd denial and reproduces the warning above. A wrong password gives `the proxy rejected its credentials … [NSPOSIXErrorDomain 80]`. `NO_PROXY=githubusercontent.com` sends the request direct, where the profile blocks it: `the connection was not permitted … [NSPOSIXErrorDomain 1]`.
+
+## Options left, not taken
+
+- **Set `sandbox.enableWeakerNetworkIsolation: true`** for sessions that render. This is a user setting, and Claude Code's own description warns that it "opens a potential data exfiltration vector through the trustd service". It is the user's call, not an agent's.
+- **Fall back to `/usr/bin/curl` in a subprocess** when the trust service is unavailable. curl reads the proxy variables itself and verifies with its own CA bundle, so this would work in the default sandbox. It is macOS-only (no `Process` on iOS). It would also put a second HTTP stack behind the one fetching seam. That is an architectural choice for Ben, not a leaf.
+
+  > **Taken (2026-09-26):** Ben ruled for this option, and it shipped as `CurlDataFetcher` behind `TrustFallbackDataFetcher` (macOS only; Linux's FoundationNetworking is libcurl already). The second stack runs only after `URLSession` reports `certificateTrustUnavailable`, so the normal path is still one stack. curl's output is read from a pipe, not a temporary file: `FileManager.default.temporaryDirectory` ignores `$TMPDIR` and resolves to `/var/folders/…/T`, which the sandbox denies (the first sandboxed run failed `NSCocoaErrorDomain 513` for exactly that reason).
+- **Verify certificates ourselves** without trustd. Re-implementing X.509 path validation is not a reasonable thing to own. Skipping validation is not an option at all.

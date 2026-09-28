@@ -1,0 +1,121 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "fill": "#000000",
+          "height": 48,
+          "icon": "vpn_lock",
+          "id": "icon1",
+          "library": "Material Symbols Outlined",
+          "name": "Bell Icon",
+          "type": "icon",
+          "width": 48
+        },
+        {
+          "fill": "#000000",
+          "height": 48,
+          "icon": "vpn_lock",
+          "id": "xI7eY",
+          "library": "Material Symbols Rounded",
+          "name": "Bell Icon",
+          "type": "icon",
+          "width": 48
+        },
+        {
+          "fill": "#000000",
+          "height": 48,
+          "icon": "vpn_lock",
+          "id": "jAUOk",
+          "library": "Material Symbols Sharp",
+          "name": "Bell Icon",
+          "type": "icon",
+          "width": 48
+        },
+        {
+          "fill": "#d90000ff",
+          "height": 24,
+          "icon": "bell",
+          "id": "TGJms",
+          "library": "feather",
+          "name": "Bell Icon",
+          "type": "icon",
+          "width": 24
+        },
+        {
+          "fill": "#d90000ff",
+          "height": 24,
+          "icon": "bell",
+          "id": "NzQQK",
+          "library": "phosphor",
+          "name": "Bell Icon",
+          "type": "icon",
+          "width": 24
+        },
+        {
+          "fill": "#08ab17ff",
+          "height": 24,
+          "icon": "loader",
+          "id": "EGLFk",
+          "library": "feather",
+          "name": "Bell Icon",
+          "type": "icon",
+          "width": 12
+        },
+        {
+          "fill": "#0975ffff",
+          "height": 24,
+          "icon": "factory",
+          "id": "G8dfl",
+          "library": "lucide",
+          "name": "Bell Icon",
+          "type": "icon",
+          "width": 12
+        },
+        {
+          "fill": "#009ddfff",
+          "height": 32,
+          "icon": "chat-dots-thin",
+          "id": "rcsOO",
+          "library": "phosphor",
+          "name": "Bell Icon",
+          "type": "icon",
+          "width": 32
+        },
+        {
+          "fill": "#1900ffff",
+          "height": 32,
+          "icon": "ellipsis",
+          "id": "icon2",
+          "library": "lucide",
+          "name": "Star Icon",
+          "type": "icon",
+          "weight": 400,
+          "width": 32
+        },
+        {
+          "fill": "#9accffff",
+          "height": 48,
+          "icon": "aperture-thin",
+          "id": "icon3",
+          "library": "phosphor",
+          "name": "Material Icon",
+          "type": "icon",
+          "weight": 700,
+          "width": 48
+        }
+      ],
+      "fill": "#FFFFFF",
+      "gap": 16,
+      "height": 99,
+      "id": "root1",
+      "name": "Icon Font Test",
+      "padding": 16,
+      "type": "frame",
+      "width": 500,
+      "x": 0,
+      "y": 0
+    }
+  ],
+  "version": "2.17"
+}

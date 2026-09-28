@@ -1,0 +1,121 @@
+{
+  "version": "2.9",
+  "children": [
+    {
+      "type": "frame",
+      "id": "root1",
+      "x": 0,
+      "y": 0,
+      "name": "Icon Font Test",
+      "width": 500,
+      "height": 99,
+      "fill": "#FFFFFF",
+      "gap": 16,
+      "padding": 16,
+      "children": [
+        {
+          "type": "icon_font",
+          "id": "icon1",
+          "name": "Bell Icon",
+          "width": 48,
+          "height": 48,
+          "iconFontName": "vpn_lock",
+          "iconFontFamily": "Material Symbols Outlined",
+          "fill": "#000000"
+        },
+        {
+          "type": "icon_font",
+          "id": "xI7eY",
+          "name": "Bell Icon",
+          "width": 48,
+          "height": 48,
+          "iconFontName": "vpn_lock",
+          "iconFontFamily": "Material Symbols Rounded",
+          "fill": "#000000"
+        },
+        {
+          "type": "icon_font",
+          "id": "jAUOk",
+          "name": "Bell Icon",
+          "width": 48,
+          "height": 48,
+          "iconFontName": "vpn_lock",
+          "iconFontFamily": "Material Symbols Sharp",
+          "fill": "#000000"
+        },
+        {
+          "type": "icon_font",
+          "id": "TGJms",
+          "name": "Bell Icon",
+          "width": 24,
+          "height": 24,
+          "iconFontName": "bell",
+          "iconFontFamily": "feather",
+          "fill": "#d90000ff"
+        },
+        {
+          "type": "icon_font",
+          "id": "NzQQK",
+          "name": "Bell Icon",
+          "width": 24,
+          "height": 24,
+          "iconFontName": "bell",
+          "iconFontFamily": "phosphor",
+          "fill": "#d90000ff"
+        },
+        {
+          "type": "icon_font",
+          "id": "EGLFk",
+          "name": "Bell Icon",
+          "width": 12,
+          "height": 24,
+          "iconFontName": "loader",
+          "iconFontFamily": "feather",
+          "fill": "#08ab17ff"
+        },
+        {
+          "type": "icon_font",
+          "id": "G8dfl",
+          "name": "Bell Icon",
+          "width": 12,
+          "height": 24,
+          "iconFontName": "factory",
+          "iconFontFamily": "lucide",
+          "fill": "#0975ffff"
+        },
+        {
+          "type": "icon_font",
+          "id": "rcsOO",
+          "name": "Bell Icon",
+          "width": 32,
+          "height": 32,
+          "iconFontName": "chat-dots-thin",
+          "iconFontFamily": "phosphor",
+          "fill": "#009ddfff"
+        },
+        {
+          "type": "icon_font",
+          "id": "icon2",
+          "name": "Star Icon",
+          "width": 32,
+          "height": 32,
+          "iconFontName": "ellipsis",
+          "iconFontFamily": "lucide",
+          "weight": 400,
+          "fill": "#1900ffff"
+        },
+        {
+          "type": "icon_font",
+          "id": "icon3",
+          "name": "Material Icon",
+          "width": 48,
+          "height": 48,
+          "iconFontName": "aperture-thin",
+          "iconFontFamily": "phosphor",
+          "weight": 700,
+          "fill": "#9accffff"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,170 @@
+{
+  "Allip": {
+    "x": 0,
+    "y": 0,
+    "width": 200,
+    "height": 160
+  },
+  "pE1a2": {
+    "x": 30,
+    "y": 30,
+    "width": 140,
+    "height": 100
+  },
+  "Aolyg": {
+    "x": 300,
+    "y": 0,
+    "width": 200,
+    "height": 160
+  },
+  "pQ1b3": {
+    "x": 30,
+    "y": 30,
+    "width": 140,
+    "height": 100
+  },
+  "Aathx": {
+    "x": 600,
+    "y": 0,
+    "width": 200,
+    "height": 160
+  },
+  "pP1c4": {
+    "x": 30,
+    "y": 30,
+    "width": 140,
+    "height": 100
+  },
+  "Bllip": {
+    "x": 0,
+    "y": 200,
+    "width": 200,
+    "height": 160
+  },
+  "pE2d5": {
+    "x": 30,
+    "y": 30,
+    "width": 140,
+    "height": 100
+  },
+  "Bolyg": {
+    "x": 300,
+    "y": 200,
+    "width": 200,
+    "height": 160
+  },
+  "pQ2e6": {
+    "x": 30,
+    "y": 30,
+    "width": 140,
+    "height": 100
+  },
+  "Bathx": {
+    "x": 600,
+    "y": 200,
+    "width": 200,
+    "height": 160
+  },
+  "pP2f7": {
+    "x": 30,
+    "y": 30,
+    "width": 140,
+    "height": 100
+  },
+  "Cllip": {
+    "x": 0,
+    "y": 400,
+    "width": 200,
+    "height": 160
+  },
+  "pE3i0": {
+    "x": 30,
+    "y": 30,
+    "width": 140,
+    "height": 100
+  },
+  "Colyg": {
+    "x": 300,
+    "y": 400,
+    "width": 200,
+    "height": 160
+  },
+  "pQ3i1": {
+    "x": 30,
+    "y": 30,
+    "width": 140,
+    "height": 100
+  },
+  "Cathx": {
+    "x": 600,
+    "y": 400,
+    "width": 200,
+    "height": 160
+  },
+  "pP3i2": {
+    "x": 30,
+    "y": 30,
+    "width": 140,
+    "height": 100
+  },
+  "Dllip": {
+    "x": 0,
+    "y": 600,
+    "width": 200,
+    "height": 160
+  },
+  "pE4o0": {
+    "x": 30,
+    "y": 30,
+    "width": 140,
+    "height": 100
+  },
+  "Dolyg": {
+    "x": 300,
+    "y": 600,
+    "width": 200,
+    "height": 160
+  },
+  "pQ4o1": {
+    "x": 30,
+    "y": 30,
+    "width": 140,
+    "height": 100
+  },
+  "Dathx": {
+    "x": 600,
+    "y": 600,
+    "width": 200,
+    "height": 160
+  },
+  "pP4o2": {
+    "x": 30,
+    "y": 30,
+    "width": 140,
+    "height": 100
+  },
+  "Enotp": {
+    "x": 0,
+    "y": 800,
+    "width": 200,
+    "height": 160
+  },
+  "pE5n0": {
+    "x": 30,
+    "y": 30,
+    "width": 140,
+    "height": 100
+  },
+  "Eline": {
+    "x": 300,
+    "y": 800,
+    "width": 200,
+    "height": 160
+  },
+  "pL5l1": {
+    "x": 30,
+    "y": 80,
+    "width": 140,
+    "height": 0
+  }
+}

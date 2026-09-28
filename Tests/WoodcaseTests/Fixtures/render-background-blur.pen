@@ -1,0 +1,124 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "bbF01",
+      "name": "flip",
+      "x": 0,
+      "y": 0,
+      "width": 240,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        { "type": "rectangle", "id": "bbF02", "name": "left", "x": 0, "y": 0, "width": 120, "height": 240, "fill": "#FF0000" },
+        { "type": "rectangle", "id": "bbF03", "name": "right", "x": 120, "y": 0, "width": 120, "height": 240, "fill": "#0000FF" },
+        { "type": "rectangle", "id": "bbF04", "name": "band", "x": 0, "y": 0, "width": 240, "height": 40, "fill": "#00FF00" },
+        {
+          "type": "rectangle",
+          "id": "bbF05",
+          "name": "glass",
+          "x": 40,
+          "y": 20,
+          "width": 160,
+          "height": 180,
+          "fill": "#FFFFFF01",
+          "effect": { "type": "background_blur", "radius": 20 }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "bbR01",
+      "name": "r8",
+      "x": 280,
+      "y": 0,
+      "width": 240,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        { "type": "rectangle", "id": "bbR02", "name": "left", "x": 0, "y": 0, "width": 120, "height": 240, "fill": "#FF0000" },
+        { "type": "rectangle", "id": "bbR03", "name": "right", "x": 120, "y": 0, "width": 120, "height": 240, "fill": "#0000FF" },
+        { "type": "rectangle", "id": "bbR04", "name": "band", "x": 0, "y": 200, "width": 240, "height": 40, "fill": "#00FF00" },
+        {
+          "type": "rectangle",
+          "id": "bbR05",
+          "name": "glass",
+          "x": 40,
+          "y": 40,
+          "width": 160,
+          "height": 180,
+          "cornerRadius": 24,
+          "fill": "#FFFFFF33",
+          "effect": { "type": "background_blur", "radius": 8 }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "bbN01",
+      "name": "no-fill",
+      "x": 560,
+      "y": 0,
+      "width": 240,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        { "type": "rectangle", "id": "bbN02", "name": "left", "x": 0, "y": 0, "width": 120, "height": 240, "fill": "#FF0000" },
+        { "type": "rectangle", "id": "bbN03", "name": "right", "x": 120, "y": 0, "width": 120, "height": 240, "fill": "#0000FF" },
+        {
+          "type": "rectangle",
+          "id": "bbN04",
+          "name": "clear",
+          "x": 40,
+          "y": 20,
+          "width": 160,
+          "height": 90,
+          "fill": "#FFFFFF00",
+          "effect": { "type": "background_blur", "radius": 20 }
+        },
+        {
+          "type": "ellipse",
+          "id": "bbN05",
+          "name": "unfilled",
+          "x": 70,
+          "y": 130,
+          "width": 100,
+          "height": 90,
+          "effect": { "type": "background_blur", "radius": 20 }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "bbL01",
+      "name": "layer-blur",
+      "x": 840,
+      "y": 0,
+      "width": 240,
+      "height": 160,
+      "layout": "none",
+      "clip": true,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "bbL02",
+          "name": "blurred",
+          "x": 60,
+          "y": 40,
+          "width": 120,
+          "height": 80,
+          "fill": "#FF0000",
+          "effect": { "type": "blur", "radius": 8 }
+        }
+      ]
+    }
+  ]
+}

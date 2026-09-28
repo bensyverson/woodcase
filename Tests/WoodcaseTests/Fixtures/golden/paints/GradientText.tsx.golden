@@ -1,0 +1,63 @@
+import { cn } from "../lib/cn";
+
+interface GradientTextProps {
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+export function GradientText({
+  className,
+  style,
+}: GradientTextProps) {
+  return (
+    <div
+      className={cn("flex flex-col gap-2", className)}
+      style={{
+        backgroundColor: "#000000",
+        padding: 16,
+        ...style,
+      }}
+    >
+      <p
+        style={{
+          backgroundImage: "linear-gradient(-270deg, #FF0000 0%, #0000FF 100%)",
+          backgroundSize: "100% 100%",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          backgroundClip: "text",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          color: "transparent",
+          fontSize: 48,
+          lineHeight: "normal",
+          fontOpticalSizing: "none",
+          whiteSpace: "pre-wrap",
+          width: 320,
+          overflowWrap: "break-word",
+        }}
+      >
+        Gradient
+      </p>
+      <p
+        style={{
+          backgroundImage: "linear-gradient(-180deg, #FF0000 0%, #0000FF 100%), linear-gradient(#00FF00, #00FF00)",
+          backgroundSize: "100% 100%",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          backgroundBlendMode: "multiply, normal",
+          backgroundClip: "text",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          color: "transparent",
+          width: "fit-content",
+          fontSize: 48,
+          lineHeight: "normal",
+          fontOpticalSizing: "none",
+          whiteSpace: "pre",
+        }}
+      >
+        Stacked
+      </p>
+    </div>
+  );
+}

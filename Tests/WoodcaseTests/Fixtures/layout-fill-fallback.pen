@@ -1,0 +1,39 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "fill": "#FF0000",
+              "height": "fill_container(80)",
+              "id": "fk5zZ",
+              "name": "fill-child",
+              "type": "rectangle",
+              "width": "fill_container(150)",
+              "x": 0,
+              "y": 0
+            }
+          ],
+          "fill": "#F0F0F0",
+          "height": 200,
+          "id": "E9WHw",
+          "layout": "none",
+          "name": "child-no-layout",
+          "type": "frame",
+          "width": 300,
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "fill": "#E0E0E0",
+      "height": 300,
+      "id": "Emt4i",
+      "layout": "none",
+      "name": "layout-fill-fallback",
+      "type": "frame",
+      "width": 400
+    }
+  ],
+  "version": "2.17"
+}

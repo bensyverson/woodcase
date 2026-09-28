@@ -1,0 +1,41 @@
+{
+  "version": "2.17",
+  "children": [
+    {"type": "frame", "id": "TxtPt", "name": "GradientText", "reusable": true, "x": 0, "y": 0,
+     "layout": "vertical", "gap": 8, "fill": "#000000", "padding": 16,
+     "children": [
+       {"type": "text", "id": "TxtLn", "name": "Ramp", "content": "Gradient", "fontSize": 48,
+        "textGrowth": "fixed-width", "width": 320,
+        "fill": {"type": "gradient", "gradientType": "linear", "rotation": 270,
+          "colors": [{"color": "#FF0000", "position": 0}, {"color": "#0000FF", "position": 1}]}},
+       {"type": "text", "id": "TxtSt", "name": "Stack", "content": "Stacked", "fontSize": 48,
+        "fill": ["#00FF00",
+          {"type": "gradient", "gradientType": "linear", "rotation": 180, "blendMode": "multiply",
+           "colors": [{"color": "#FF0000", "position": 0}, {"color": "#0000FF", "position": 1}]}]}
+     ]},
+    {"type": "frame", "id": "RngCd", "name": "RoundedRing", "reusable": true, "x": 400, "y": 0,
+     "layout": "none", "width": 320, "height": 240, "fill": "#000000",
+     "children": [
+       {"type": "rectangle", "id": "RngRc", "name": "Ring", "x": 60, "y": 60, "width": 200, "height": 120,
+        "cornerRadius": 24, "fill": "#222222", "strokeWidth": 16, "strokeAlignment": "outer",
+        "stroke": {"type": "gradient", "gradientType": "linear", "rotation": 270,
+          "colors": [{"color": "#FF0000", "position": 0}, {"color": "#00FF00", "position": 0.5},
+                     {"color": "#0000FF", "position": 1}]}}
+     ]},
+    {"type": "frame", "id": "PthCd", "name": "PathStroke", "reusable": true, "x": 800, "y": 0,
+     "layout": "none", "width": 320, "height": 220, "fill": "#000000",
+     "children": [
+       {"type": "path", "id": "PthZg", "name": "Zig", "x": 60, "y": 60, "width": 200, "height": 100,
+        "geometry": "M0 0 L50 100 L100 0 L150 100 L200 0", "strokeWidth": 12, "strokeAlignment": "center",
+        "stroke": {"type": "gradient", "gradientType": "linear", "rotation": 270,
+          "colors": [{"color": "#FF0000", "position": 0}, {"color": "#0000FF", "position": 1}]}}
+     ]},
+    {"type": "frame", "id": "PsdCd", "name": "PerSideFrame", "reusable": true, "x": 1200, "y": 0,
+     "layout": "none", "width": 320, "height": 240, "fill": "#000000",
+     "children": [
+       {"type": "frame", "id": "PsdFr", "name": "Panel", "x": 60, "y": 60, "width": 200, "height": 120,
+        "layout": "none", "strokeWidth": {"top": 4, "right": 16, "bottom": 24, "left": 8},
+        "stroke": {"type": "image", "url": "./images/uv-map.png", "mode": "stretch"}}
+     ]}
+  ]
+}

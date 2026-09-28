@@ -1,0 +1,63 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "content": "Left section: speaker name and title",
+          "id": "ctx-left",
+          "type": "context"
+        },
+        {
+          "children": [
+            {
+              "content": "$speakerName",
+              "fontSize": 24,
+              "fontWeight": "700",
+              "id": "speaker-name",
+              "type": "text"
+            },
+            {
+              "content": "$speakerTitle",
+              "fontSize": 16,
+              "id": "speaker-title",
+              "type": "text"
+            }
+          ],
+          "gap": 4,
+          "height": "fill_container",
+          "id": "left-section",
+          "layout": "vertical",
+          "type": "frame",
+          "width": "fill_container"
+        },
+        {
+          "content": "Right section: call-to-action, should contrast with background",
+          "id": "ctx-right",
+          "type": "context"
+        },
+        {
+          "children": [
+            {
+              "content": "$ctaText",
+              "fontSize": 14,
+              "id": "cta-text",
+              "type": "text"
+            }
+          ],
+          "fill": "$accentColor",
+          "height": "fill_container",
+          "id": "right-section",
+          "type": "frame",
+          "width": 200
+        }
+      ],
+      "gap": 16,
+      "height": 200,
+      "id": "root",
+      "layout": "horizontal",
+      "type": "frame",
+      "width": 800
+    }
+  ],
+  "version": "2.17"
+}

@@ -1,0 +1,32 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "fill": "#FF0000",
+          "height": 80,
+          "id": "child1",
+          "name": "child-1",
+          "type": "rectangle",
+          "width": 120
+        },
+        {
+          "fill": "#00FF00",
+          "height": 60,
+          "id": "child2",
+          "name": "child-2",
+          "type": "rectangle",
+          "width": 200
+        }
+      ],
+      "fill": "#EEEEEE",
+      "height": 200,
+      "id": "topFC",
+      "layout": "vertical",
+      "name": "top-fill-container",
+      "type": "frame",
+      "width": "fill_container"
+    }
+  ],
+  "version": "2.17"
+}

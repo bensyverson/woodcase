@@ -1,0 +1,302 @@
+#!/usr/bin/env bash
+#
+# pen-validate — validate .pen files against Pen's own validator, as a black
+# box, via the headless `pen` CLI. For each file it round-trips
+# `pen interactive --in <file> --out <scratch>` (a plain `save()`), reports
+# PASS or FAIL with the validator's own messages, and — on a PASS — diffs
+# the file Pen re-saved against the one it was given, so a silent rewrite
+# (a migration, a dropped key, a materialized default) shows up as data
+# instead of going unnoticed. See project/2026-09-26-pen-1.2.14-compatibility.md
+# §"Which engine produced which evidence" and its appendix A2.
+#
+# Pen's engine logs "Document is not valid" and the validator's own error
+# list, then still loads and saves the document, silently dropping whatever
+# it cannot use — so a clean exit code and a non-empty output file are not
+# proof the validator was happy. A FAIL is therefore any of: the CLI exited
+# non-zero, it produced no output, or the transcript's validator error list
+# is non-empty — whichever of those is true, the errors are printed either
+# way. `--allow-unknowns` opts a file out of the last of those three when,
+# and only when, every reported violation is an unrecognized property or an
+# unrecognized enum/node-type value — the shape
+# Tests/WoodcaseTests/Fixtures/parser-unknown-properties.pen and
+# preserved-extras.pen are built to produce, on purpose, to prove Woodcase
+# preserves what Pen itself would drop. Any other violation in the same file
+# still FAILs even with the flag.
+#
+# Hand-run only. The test suite never calls `pen` — it may break or vanish,
+# and consumers cannot be made to install and log in (Ben's ruling, see
+# project/2026-08-29-pen-cli.md and scripts/pen-oracle). This script vendors
+# nothing from Pen: it only drives the installed `pen` CLI and diffs JSON
+# already in the caller's checkout, against a scratch file it deletes itself.
+# scripts/test-pen-validate exercises the classification logic against a
+# stub `pen`, so that suite runs without the real CLI.
+#
+# Usage:
+#   scripts/pen-validate [--allow-unknowns] <file.pen> [<file.pen> ...]
+#
+# Exit codes:
+#   0  every file validated (PASS)
+#   1  at least one file failed validation (FAIL) — a clean negative, not a
+#      script error
+#   2  usage error
+#   4  a named file does not exist or is not a .pen file
+#   5  environment error: `pen` is missing or not authenticated
+#
+# Requires the `pen` CLI (Homebrew; `pen login` once) and the Bash sandbox
+# disabled — see project/agents/harness.md.
+
+set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+usage: pen-validate [--allow-unknowns] <file.pen> [<file.pen> ...]
+
+Round-trips each file through Pen's own headless engine (`pen interactive`)
+and reports PASS/FAIL with the validator's messages. A FAIL covers a load
+failure and a non-empty validator error list alike — Pen's engine can log
+"Document is not valid" and still load and save the file, silently dropping
+whatever it flagged, so a clean exit and a written output are not proof the
+validator was happy. On a PASS, also prints what Pen's own save changed (a
+migration, a dropped key, a materialized default), diffed against the
+input — ignoring the per-session `fileToken`.
+
+--allow-unknowns treats a file's validator errors as non-fatal when every
+one of them is an unrecognized property or an unrecognized enum/node-type
+value (the shape a deliberate-unknowns fixture is built to produce, on
+purpose) — the errors are still printed, but the file PASSes. Any other
+violation in the same file still FAILs even with the flag.
+
+Exit codes: 0 all PASS, 1 any FAIL, 2 usage, 4 missing input, 5 `pen` missing
+or unauthenticated. See scripts/pen-validate's header comment for the full
+contract.
+EOF
+}
+
+if [ "$#" -eq 0 ]; then
+    usage >&2
+    exit 2
+fi
+
+allow_unknowns=0
+inputs=()
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        -h | --help)
+            usage
+            exit 0
+            ;;
+        --allow-unknowns)
+            allow_unknowns=1
+            shift
+            ;;
+        --*)
+            echo "pen-validate: unknown flag '$1' — see 'pen-validate --help'" >&2
+            exit 2
+            ;;
+        *)
+            inputs+=("$1")
+            shift
+            ;;
+    esac
+done
+
+if [ "${#inputs[@]}" -eq 0 ]; then
+    usage >&2
+    exit 2
+fi
+
+for f in "${inputs[@]}"; do
+    case "$f" in
+        *.pen) ;;
+        *)
+            echo "pen-validate: '$f' is not a .pen file" >&2
+            exit 4
+            ;;
+    esac
+    if [ ! -f "$f" ]; then
+        echo "pen-validate: '$f' does not exist" >&2
+        exit 4
+    fi
+done
+
+# ---- environment gate: `pen` present and authenticated ----
+
+if ! command -v pen >/dev/null 2>&1; then
+    echo "pen-validate: 'pen' is not installed (brew install pen, then 'pen login'; see project/2026-08-29-pen-cli.md)" >&2
+    exit 5
+fi
+
+status_output="$(pen status 2>&1 || true)"
+if ! printf '%s' "$status_output" | grep -q 'Active'; then
+    echo "pen-validate: 'pen' is not authenticated — run 'pen login' once (see project/2026-08-29-pen-cli.md)" >&2
+    exit 5
+fi
+
+# ---- print a transcript, stripped of ANSI color codes ----
+# The validator's messages are the reason to run this script at all, so the
+# whole transcript is shown, not just lines starting "[ERROR]" — a schema
+# violation's detail line (the expected/got list) is written without that
+# prefix.
+
+print_transcript() {
+    python3 - "$1" <<'PYEOF'
+import re
+import sys
+
+with open(sys.argv[1], "rb") as f:
+    text = f.read().decode("utf-8", errors="replace")
+text = re.sub(r"\x1b\[[0-9;]*[a-zA-Z]", "", text)
+for line in text.splitlines():
+    if line.strip():
+        print(f"  {line}")
+PYEOF
+}
+
+# ---- pull the validator's own error list out of a transcript ----
+# "[ERROR] Document is not valid:" is followed by one "- /path - message"
+# line per violation; other "[ERROR] …" lines are the load-time consequences
+# (an unsupported fill/effect type, the scene-graph load failure, the fatal
+# "failed to open" that follows an unrecognized top-level node type). All of
+# them, ANSI stripped, with no leading indentation — a Node stack-trace line
+# is indented and never starts either prefix, so it is excluded on its own.
+
+error_lines() {
+    python3 - "$1" <<'PYEOF'
+import re
+import sys
+
+with open(sys.argv[1], "rb") as f:
+    text = f.read().decode("utf-8", errors="replace")
+text = re.sub(r"\x1b\[[0-9;]*[a-zA-Z]", "", text)
+for line in text.splitlines():
+    if line.startswith("[ERROR]") or line.startswith("- /"):
+        print(line)
+PYEOF
+}
+
+# A violation this permissive about is exactly the shape a
+# deliberate-unknowns fixture is built to produce: an unrecognized property,
+# or a value outside a known enum/node-type list (which is how an
+# unrecognized node type is reported, and how its "no type"/"missing child"
+# scene-graph fallout and the resulting "failed to open" are reported too).
+# Anything else — a wrong type, a missing required property, a range
+# violation — still fails even under --allow-unknowns.
+ALLOWED_UNKNOWN_PATTERN='unexpected property, got "|expected one of: .*got "|has no type|has missing child|Unsupported (effect|fill) type:|Failed to open document:|Document is not valid:$'
+
+# ---- the JSON diff, run once per PASS file ----
+# Reports every path where the re-saved file differs from the input, other
+# than the per-session `fileToken` Pen mints on every save. This is a
+# generic structural diff, not a hardcoded check for the shadow/spread
+# migration — whatever Pen's save silently changes shows up here, migration
+# or not.
+
+diff_json() {
+    python3 - "$1" "$2" <<'PYEOF'
+import json
+import sys
+
+before_path, after_path = sys.argv[1], sys.argv[2]
+with open(before_path) as f:
+    before = json.load(f)
+with open(after_path) as f:
+    after = json.load(f)
+
+
+def walk(a, b, path, diffs):
+    if isinstance(a, dict) and isinstance(b, dict):
+        for key in sorted(set(a) | set(b)):
+            if key == "fileToken":
+                continue
+            p = f"{path}/{key}"
+            if key not in a:
+                diffs.append((p, "added", None, b[key]))
+            elif key not in b:
+                diffs.append((p, "removed", a[key], None))
+            else:
+                walk(a[key], b[key], p, diffs)
+    elif isinstance(a, list) and isinstance(b, list):
+        for i in range(max(len(a), len(b))):
+            p = f"{path}/{i}"
+            if i >= len(a):
+                diffs.append((p, "added", None, b[i]))
+            elif i >= len(b):
+                diffs.append((p, "removed", a[i], None))
+            else:
+                walk(a[i], b[i], p, diffs)
+    else:
+        if a != b:
+            diffs.append((path, "changed", a, b))
+
+
+diffs = []
+walk(before, after, "", diffs)
+if not diffs:
+    print("  (byte-for-byte identical besides fileToken)")
+    sys.exit(0)
+for path, kind, old, new in diffs:
+    if kind == "added":
+        print(f"  + {path} = {json.dumps(new)}")
+    elif kind == "removed":
+        print(f"  - {path} (was {json.dumps(old)})")
+    else:
+        print(f"  ~ {path}: {json.dumps(old)} -> {json.dumps(new)}")
+PYEOF
+}
+
+# ---- validate each file ----
+
+work="$(mktemp -d "${TMPDIR:-/tmp}/pen-validate.XXXXXX")"
+trap 'rm -rf "$work"' EXIT
+
+overall=0
+for input in "${inputs[@]}"; do
+    name="$(basename "$input" .pen)"
+    out="$work/$name.out.pen"
+    transcript="$work/$name.transcript.log"
+
+    set +e
+    printf 'save()\nexit()\n' | pen interactive --in "$input" --out "$out" >"$transcript" 2>&1
+    status=$?
+    set -e
+
+    load_failed=0
+    if [ "$status" -ne 0 ] || [ ! -s "$out" ]; then
+        load_failed=1
+    fi
+
+    errors="$(error_lines "$transcript")"
+    all_allowed=0
+    if [ -n "$errors" ] && [ "$allow_unknowns" -eq 1 ]; then
+        if ! printf '%s\n' "$errors" | grep -Ev "$ALLOWED_UNKNOWN_PATTERN" >/dev/null; then
+            all_allowed=1
+        fi
+    fi
+
+    if [ -z "$errors" ] && [ "$load_failed" -eq 0 ]; then
+        echo "PASS $input"
+        diff_json "$input" "$out"
+        continue
+    fi
+
+    if [ "$all_allowed" -eq 1 ]; then
+        echo "PASS $input"
+        error_count="$(printf '%s\n' "$errors" | grep -c .)"
+        echo "  --allow-unknowns: validator reported $error_count error line(s), all unrecognized properties/types — allowed"
+        printf '%s\n' "$errors" | sed 's/^/  /'
+        if [ "$load_failed" -eq 0 ]; then
+            diff_json "$input" "$out"
+        else
+            echo "  (no re-saved output: Pen's engine did not load this document)"
+        fi
+        continue
+    fi
+
+    echo "FAIL $input"
+    if [ -n "$errors" ] && [ "$load_failed" -eq 0 ]; then
+        echo "  Pen's validator reported a non-empty error list even though the document still loaded and saved:"
+    fi
+    print_transcript "$transcript"
+    overall=1
+done
+
+exit "$overall"

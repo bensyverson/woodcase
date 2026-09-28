@@ -1,0 +1,70 @@
+{
+  "children": [
+    {
+      "effect": {
+        "blur": 8,
+        "color": "#00000080",
+        "offset": {
+          "x": 4,
+          "y": 4
+        },
+        "shadowType": "outer",
+        "spread": 2,
+        "type": "shadow"
+      },
+      "height": 100,
+      "id": "outer-shadow",
+      "type": "rectangle",
+      "width": 100
+    },
+    {
+      "effect": {
+        "blur": 4,
+        "color": "#00000040",
+        "offset": {
+          "x": 0,
+          "y": 2
+        },
+        "shadowType": "inner",
+        "type": "shadow"
+      },
+      "height": 100,
+      "id": "inner-shadow",
+      "type": "rectangle",
+      "width": 100
+    },
+    {
+      "effect": {
+        "radius": 10,
+        "type": "blur"
+      },
+      "height": 100,
+      "id": "blur-effect",
+      "type": "rectangle",
+      "width": 100
+    },
+    {
+      "effect": [
+        {
+          "blur": 6,
+          "color": "#00000060",
+          "offset": {
+            "x": 2,
+            "y": 2
+          },
+          "shadowType": "outer",
+          "type": "shadow"
+        },
+        {
+          "radius": 2,
+          "type": "blur"
+        }
+      ],
+      "height": 100,
+      "id": "multiple-effects",
+      "type": "rectangle",
+      "width": 100
+    }
+  ],
+  "version": "2.17"
+}

@@ -1,0 +1,139 @@
+#!/usr/bin/env bash
+#
+# test-swiftui-api — Regression test for scripts/swiftui-api's `audit` verdicts, against a
+# small hand-written corpus rather than Apple's: every branch of the verdict — missing,
+# hard and soft deprecation, above the floor, an `@available` gate, an `@only` platform
+# scope, unavailable on a floor platform — runs deterministically, with no SDK and no
+# local/ corpus. Run directly; it exits non-zero on the first failed assertion.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+API="$SCRIPT_DIR/swiftui-api"
+
+WORKDIR="${TMPDIR:-/tmp}/swiftui-api-test.$$"
+rm -rf "$WORKDIR"
+mkdir -p "$WORKDIR/docs/99.0"
+trap 'rm -rf "$WORKDIR"' EXIT
+export SWIFTUI_DOCS_DIR="$WORKDIR/docs"
+
+fail() {
+    echo "FAIL: $1" >&2
+    exit 1
+}
+
+assert_contains() {
+    # assert_contains <haystack-file> <needle>
+    if ! grep -qF -- "$2" "$1"; then
+        fail "expected output to contain: $2 (got: $(cat "$1"))"
+    fi
+}
+
+assert_exit() {
+    # assert_exit <label> <expected> <actual>
+    if [ "$3" -ne "$2" ]; then
+        fail "$1: expected exit $2, got $3 ($(cat "$WORKDIR/out"))"
+    fi
+}
+
+# ---- the corpus -------------------------------------------------------------
+# iOS / macOS introductions, as the symbol graph records them.
+
+cat > "$WORKDIR/docs/99.0/stamp.json" <<'JSON'
+{"sdkVersion": "99.0", "sdkBuild": "TEST", "date": "2026-09-27", "xcode": "test", "swift": "test", "modules": []}
+JSON
+
+cat > "$WORKDIR/docs/99.0/index.json" <<'JSON'
+{
+  "Old.api": [{"module": "SwiftUI", "kind": "Method", "decl": "old", "doc": "", "availability": [
+    {"domain": "iOS", "introduced": {"major": 13}}, {"domain": "macOS", "introduced": {"major": 10, "minor": 15}}]}],
+  "Soft.api": [{"module": "SwiftUI", "kind": "Method", "decl": "soft", "doc": "", "availability": [
+    {"domain": "iOS", "introduced": {"major": 13}, "deprecated": {"major": 100000}},
+    {"domain": "macOS", "introduced": {"major": 10, "minor": 15}, "deprecated": {"major": 100000}}]}],
+  "Hard.api": [{"module": "SwiftUI", "kind": "Method", "decl": "hard", "doc": "", "availability": [
+    {"domain": "iOS", "introduced": {"major": 13}, "deprecated": {"major": 17}},
+    {"domain": "macOS", "introduced": {"major": 10, "minor": 15}, "deprecated": {"major": 14}}]}],
+  "New.api": [{"module": "SwiftUI", "kind": "Method", "decl": "new", "doc": "", "availability": [
+    {"domain": "iOS", "introduced": {"major": 26}}, {"domain": "macOS", "introduced": {"major": 26}}]}],
+  "Mac.api": [{"module": "SwiftUI", "kind": "Method", "decl": "mac", "doc": "", "availability": [
+    {"domain": "iOS", "isUnconditionallyUnavailable": true}, {"domain": "macOS", "introduced": {"major": 10, "minor": 15}}]}],
+  "MacNew.api": [{"module": "AppKit", "kind": "Method", "decl": "macnew", "doc": "", "availability": [
+    {"domain": "iOS", "isUnconditionallyUnavailable": true}, {"domain": "macOS", "introduced": {"major": 14}}]}]
+}
+JSON
+
+audit() {
+    # audit <list-body> <floor>: writes the output to $WORKDIR/out, returns the exit status
+    printf '%s\n' "$1" > "$WORKDIR/list"
+    set +e
+    "$API" audit "$WORKDIR/list" --floor "$2" > "$WORKDIR/out" 2>&1
+    local status=$?
+    set -e
+    return $status
+}
+
+LOW="ios=18,macos=15"
+HIGH="ios=26,macos=26"
+
+# ---- the plain verdicts -----------------------------------------------------
+
+status=0; audit "Old.api   # a comment" "$LOW" || status=$?
+assert_exit "an old, clean path" 0 $status
+assert_contains "$WORKDIR/out" "OK          Old.api"
+
+status=0; audit "Soft.api" "$LOW" || status=$?
+assert_exit "a soft deprecation" 1 $status
+assert_contains "$WORKDIR/out" "soft-deprecated"
+
+status=0; audit "Hard.api" "$LOW" || status=$?
+assert_exit "a hard deprecation" 1 $status
+
+status=0; audit "Nowhere.api" "$LOW" || status=$?
+assert_exit "a missing path" 1 $status
+assert_contains "$WORKDIR/out" "MISSING     Nowhere.api"
+
+status=0; audit "New.api" "$LOW" || status=$?
+assert_exit "a path above the floor" 1 $status
+assert_contains "$WORKDIR/out" "> floor"
+
+status=0; audit "New.api" "$HIGH" || status=$?
+assert_exit "a path at the floor" 0 $status
+
+# ---- @available: a path reached only inside an #available branch -------------
+
+status=0; audit "New.api  @available ios=26,macos=26" "$LOW" || status=$?
+assert_exit "a gated path above the floor" 0 $status
+assert_contains "$WORKDIR/out" "OK          New.api"
+assert_contains "$WORKDIR/out" "gated ios=26,macos=26"
+
+status=0; audit "New.api  @available ios=18,macos=15" "$LOW" || status=$?
+assert_exit "a gate below the path's introduction" 1 $status
+
+status=0; audit "Soft.api  @available ios=26,macos=26" "$LOW" || status=$?
+assert_exit "a gate does not excuse a deprecation" 1 $status
+
+# ---- @only: a path reached only on some platforms ----------------------------
+
+status=0; audit "Mac.api" "$LOW" || status=$?
+assert_exit "a path unavailable on a floor platform" 1 $status
+assert_contains "$WORKDIR/out" "iOS unavailable"
+
+status=0; audit "Mac.api  @only macos" "$LOW" || status=$?
+assert_exit "a macOS-only path scoped to macOS" 0 $status
+
+status=0; audit "MacNew.api  @only macos" "$HIGH" || status=$?
+assert_exit "a scoped path at the floor" 0 $status
+
+status=0; audit "MacNew.api  @only macos  @available macos=14" "ios=18,macos=13" || status=$?
+assert_exit "scope and gate together" 0 $status
+
+status=0; audit "MacNew.api  @only macos" "ios=18,macos=13" || status=$?
+assert_exit "a scoped path above the floor on its platform" 1 $status
+
+# ---- a malformed annotation is an error, never a silent pass ----------------
+
+status=0; audit "Old.api  @sometimes" "$LOW" || status=$?
+assert_exit "an unknown annotation" 2 $status
+assert_contains "$WORKDIR/out" "@sometimes"
+
+echo "test-swiftui-api: all assertions passed"

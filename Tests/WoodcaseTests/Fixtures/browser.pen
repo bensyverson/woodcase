@@ -1,0 +1,83 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "fill": "#3B82F6",
+          "height": 40,
+          "id": "BrTop",
+          "name": "Top",
+          "type": "rectangle",
+          "width": 300
+        },
+        {
+          "cornerRadius": 12,
+          "height": 120,
+          "id": "BrWeb",
+          "name": "Web",
+          "type": "browser",
+          "url": "example.com",
+          "width": "fill_container"
+        },
+        {
+          "cornerRadius": [
+            16,
+            16,
+            0,
+            0
+          ],
+          "deviceId": "iphone-15",
+          "effect": {
+            "blur": 8,
+            "color": "#00000033",
+            "offset": {
+              "x": 0,
+              "y": 4
+            },
+            "shadowType": "outer",
+            "type": "shadow"
+          },
+          "height": 90,
+          "id": "BrDev",
+          "name": "Device",
+          "scrollX": 0,
+          "scrollY": 240,
+          "stroke": "#10B981",
+          "strokeAlignment": "inner",
+          "strokeWidth": 2,
+          "type": "browser",
+          "url": "pen.dev/docs/for-developers/the-pen-format/a-path-far-too-long-to-fit-in-the-label",
+          "width": 300,
+          "zoom": 0.75
+        },
+        {
+          "height": 60,
+          "id": "BrBlk",
+          "name": "Blank",
+          "type": "browser",
+          "width": 300
+        },
+        {
+          "fill": "#F97316",
+          "height": 20,
+          "id": "BrBot",
+          "name": "Bottom",
+          "type": "rectangle",
+          "width": 300
+        }
+      ],
+      "fill": "#FFFFFF",
+      "gap": 10,
+      "height": "fit_content",
+      "id": "BrRt0",
+      "layout": "vertical",
+      "name": "Root",
+      "padding": 10,
+      "type": "frame",
+      "width": 320,
+      "x": 0,
+      "y": 0
+    }
+  ],
+  "version": "2.19"
+}

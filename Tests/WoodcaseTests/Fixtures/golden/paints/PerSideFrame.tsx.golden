@@ -1,0 +1,61 @@
+import { cn } from "../lib/cn";
+
+interface PerSideFrameProps {
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+export function PerSideFrame({
+  className,
+  style,
+}: PerSideFrameProps) {
+  return (
+    <div
+      className={cn("relative", className)}
+      style={{
+        width: 320,
+        height: 240,
+        backgroundColor: "#000000",
+        ...style,
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          left: 60,
+          top: 60,
+        }}
+      >
+        <div
+          className="relative"
+          style={{
+            width: 200,
+            height: 120,
+            flexShrink: 0,
+          }}
+        >
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              inset: "-2px -8px -12px -4px",
+              borderStyle: "solid",
+              borderColor: "transparent",
+              borderWidth: "2px 8px 12px 4px",
+              padding: "2px 8px 12px 4px",
+              backgroundImage: "url('./images/uv-map.png')",
+              backgroundSize: "100% 100%",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+              backgroundOrigin: "padding-box",
+              WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+              WebkitMaskComposite: "xor",
+              mask: "linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0)",
+              pointerEvents: "none",
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}

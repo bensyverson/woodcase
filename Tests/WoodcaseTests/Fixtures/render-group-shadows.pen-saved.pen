@@ -1,0 +1,438 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "gsO01",
+      "x": 0,
+      "y": 0,
+      "name": "group-outer",
+      "clip": true,
+      "width": 200,
+      "height": 200,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "group",
+          "id": "gsO02",
+          "x": 30,
+          "y": 30,
+          "name": "pair",
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "#000000A0",
+            "offset": {
+              "x": 8,
+              "y": 10
+            },
+            "blur": 12
+          },
+          "children": [
+            {
+              "type": "rectangle",
+              "cornerRadius": 10,
+              "id": "gsO03",
+              "x": 0,
+              "y": 0,
+              "name": "chip",
+              "fill": "#FF8800",
+              "width": 70,
+              "height": 70
+            },
+            {
+              "type": "ellipse",
+              "id": "gsO04",
+              "x": 60,
+              "y": 50,
+              "name": "disc",
+              "fill": "#00AA44",
+              "width": 70,
+              "height": 70
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "gsT01",
+      "x": 240,
+      "y": 0,
+      "name": "group-translucent",
+      "clip": true,
+      "width": 200,
+      "height": 200,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "group",
+          "id": "gsT02",
+          "x": 30,
+          "y": 40,
+          "name": "pair",
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "#000000FF",
+            "offset": {
+              "x": 12,
+              "y": 12
+            },
+            "blur": 8
+          },
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "gsT03",
+              "x": 0,
+              "y": 0,
+              "name": "ghost",
+              "fill": "#FF000040",
+              "width": 80,
+              "height": 80
+            },
+            {
+              "type": "rectangle",
+              "id": "gsT04",
+              "x": 70,
+              "y": 30,
+              "name": "solid",
+              "fill": "#2244CC",
+              "width": 60,
+              "height": 60
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "gsS01",
+      "x": 480,
+      "y": 0,
+      "name": "group-stroke-path",
+      "clip": true,
+      "width": 200,
+      "height": 200,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "group",
+          "id": "gsS02",
+          "x": 30,
+          "y": 30,
+          "name": "mix",
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "#0044FFCC",
+            "offset": {
+              "x": 0,
+              "y": 12
+            },
+            "blur": 6
+          },
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "gsS03",
+              "x": 10,
+              "y": 10,
+              "name": "framed",
+              "fill": "#FFFFFF",
+              "width": 60,
+              "height": 60,
+              "stroke": "#333333",
+              "strokeWidth": 8,
+              "strokeAlignment": "outer"
+            },
+            {
+              "type": "path",
+              "id": "gsS04",
+              "x": 80,
+              "y": 20,
+              "name": "wedge",
+              "geometry": "M0 60l30-60 30 60z",
+              "fill": "#AA00AA",
+              "width": 60,
+              "height": 60
+            },
+            {
+              "type": "line",
+              "id": "gsS05",
+              "x": 10,
+              "y": 110,
+              "name": "rule",
+              "width": 120,
+              "height": 0,
+              "stroke": "#008888",
+              "strokeWidth": 6
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "gsI01",
+      "x": 720,
+      "y": 0,
+      "name": "group-inner",
+      "clip": true,
+      "width": 200,
+      "height": 200,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "group",
+          "id": "gsI02",
+          "x": 30,
+          "y": 30,
+          "name": "pair",
+          "effect": {
+            "type": "shadow",
+            "shadowType": "inner",
+            "color": "#000000FF",
+            "offset": {
+              "x": 6,
+              "y": 6
+            },
+            "blur": 10
+          },
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "gsI03",
+              "x": 0,
+              "y": 0,
+              "name": "chip",
+              "fill": "#DDEEFF",
+              "width": 80,
+              "height": 80
+            },
+            {
+              "type": "ellipse",
+              "id": "gsI04",
+              "x": 60,
+              "y": 60,
+              "name": "disc",
+              "fill": "#FFEEBB",
+              "width": 80,
+              "height": 80
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "gsC01",
+      "x": 960,
+      "y": 0,
+      "name": "group-child-shadow",
+      "clip": true,
+      "width": 200,
+      "height": 200,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "group",
+          "id": "gsC02",
+          "x": 40,
+          "y": 40,
+          "name": "pair",
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "#0000FFFF",
+            "offset": {
+              "x": 14,
+              "y": 14
+            },
+            "blur": 4
+          },
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "gsC03",
+              "x": 0,
+              "y": 0,
+              "name": "chip",
+              "fill": "#EEEEEE",
+              "width": 70,
+              "height": 70,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#FF0000FF",
+                "offset": {
+                  "x": -16,
+                  "y": 0
+                },
+                "blur": 4
+              }
+            },
+            {
+              "type": "ellipse",
+              "id": "gsC04",
+              "x": 50,
+              "y": 50,
+              "name": "disc",
+              "fill": "#888888",
+              "width": 60,
+              "height": 60
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "gsN01",
+      "x": 1200,
+      "y": 0,
+      "name": "group-nested",
+      "clip": true,
+      "width": 200,
+      "height": 200,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "group",
+          "id": "gsN02",
+          "x": 20,
+          "y": 30,
+          "name": "outer",
+          "effect": [
+            {
+              "type": "shadow",
+              "shadowType": "outer",
+              "color": "#00000080",
+              "offset": {
+                "x": 0,
+                "y": 16
+              },
+              "blur": 16
+            },
+            {
+              "type": "shadow",
+              "shadowType": "outer",
+              "color": "#FF880099",
+              "offset": {
+                "x": -10,
+                "y": -6
+              },
+              "blur": 2
+            }
+          ],
+          "children": [
+            {
+              "type": "polygon",
+              "polygonCount": 6,
+              "id": "gsN03",
+              "x": 0,
+              "y": 0,
+              "name": "hex",
+              "fill": "#335577",
+              "width": 70,
+              "height": 70
+            },
+            {
+              "type": "group",
+              "id": "gsN04",
+              "x": 80,
+              "y": 20,
+              "name": "inner",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "gsN05",
+                  "x": 0,
+                  "y": 0,
+                  "name": "bar",
+                  "fill": "#CC3355",
+                  "width": 30,
+                  "height": 100
+                },
+                {
+                  "type": "ellipse",
+                  "id": "gsN06",
+                  "x": 40,
+                  "y": 60,
+                  "name": "dot",
+                  "fill": "#33CC55",
+                  "width": 40,
+                  "height": 40
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "gsF01",
+      "x": 1440,
+      "y": 0,
+      "name": "group-frame-child",
+      "clip": true,
+      "width": 200,
+      "height": 200,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "group",
+          "id": "gsF02",
+          "x": 30,
+          "y": 30,
+          "name": "holder",
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "#000000FF",
+            "offset": {
+              "x": 10,
+              "y": 14
+            },
+            "blur": 4
+          },
+          "children": [
+            {
+              "type": "frame",
+              "id": "gsF03",
+              "x": 0,
+              "y": 0,
+              "name": "card",
+              "width": 80,
+              "height": 80,
+              "fill": "#DDDDDD",
+              "layout": "none",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "gsF04",
+                  "x": 50,
+                  "y": 50,
+                  "name": "overhang",
+                  "fill": "#CC6600",
+                  "width": 70,
+                  "height": 50
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "fileToken": "5b892ce5-a24b-4202-ad8b-ec43ba01ffb5"
+}

@@ -1,0 +1,134 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "id": "Card0",
+      "name": "Card",
+      "type": "frame",
+      "reusable": true,
+      "x": 0,
+      "y": 0,
+      "width": 200,
+      "height": "fit_content",
+      "layout": "vertical",
+      "gap": 8,
+      "padding": 8,
+      "children": [
+        {
+          "id": "CTtl0",
+          "name": "Title",
+          "type": "text",
+          "content": "Card",
+          "fontSize": 16,
+          "fill": "#111111",
+          "width": 160,
+          "height": 20
+        },
+        {
+          "id": "CSlt0",
+          "name": "Body",
+          "type": "frame",
+          "slot": ["text", "frame", "ref"],
+          "layout": "vertical",
+          "gap": 4,
+          "width": "fit_content",
+          "height": "fit_content"
+        },
+        {
+          "id": "CFtr0",
+          "name": "Footer",
+          "type": "frame",
+          "layout": "horizontal",
+          "width": 160,
+          "height": 12
+        }
+      ]
+    },
+    {
+      "id": "Badg0",
+      "name": "Badge",
+      "type": "frame",
+      "reusable": true,
+      "x": 0,
+      "y": 240,
+      "width": 60,
+      "height": 20,
+      "layout": "horizontal",
+      "children": [
+        {
+          "id": "BTxt0",
+          "name": "BadgeText",
+          "type": "text",
+          "content": "badge",
+          "fontSize": 10,
+          "fill": "#ffffff",
+          "width": 40,
+          "height": 12
+        }
+      ]
+    },
+    {
+      "id": "Page0",
+      "name": "Page",
+      "type": "frame",
+      "x": 300,
+      "y": 0,
+      "width": 260,
+      "height": 220,
+      "children": [
+        {
+          "id": "Inst0",
+          "name": "Filled",
+          "type": "ref",
+          "ref": "Card0",
+          "x": 10,
+          "y": 10,
+          "descendants": {
+            "CSlt0": {
+              "children": [
+                {
+                  "id": "Note0",
+                  "name": "Note",
+                  "type": "text",
+                  "content": "filled from the instance",
+                  "fontSize": 12,
+                  "fill": "#333333",
+                  "width": 150,
+                  "height": 16
+                },
+                {
+                  "id": "Tag00",
+                  "name": "Tag",
+                  "type": "ref",
+                  "ref": "Badg0",
+                  "descendants": {
+                    "BTxt0": {
+                      "content": "live"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "Inst1",
+          "name": "Empty",
+          "type": "ref",
+          "ref": "Card0",
+          "x": 10,
+          "y": 130
+        },
+        {
+          "id": "Hole0",
+          "name": "Hole",
+          "type": "frame",
+          "x": 10,
+          "y": 190,
+          "width": "fit_content",
+          "height": "fit_content"
+        }
+      ]
+    }
+  ]
+}

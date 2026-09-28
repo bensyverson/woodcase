@@ -1,0 +1,352 @@
+#!/usr/bin/env bash
+#
+# pen-oracle — run Pen's own engine headless on a .pen file and write what our
+# tests compare against: the layout, PNG exports, and Pen's own
+# canonical re-save.
+#
+# By default the layout and exports are Pen's *first* layout after load, which
+# is not always the one it settles on (a turned child whose height is
+# unresolved when widths are fitted); scripts/pen-settle writes both layouts,
+# and --settle makes this script's exports and layout the settled ones.
+#
+# This is a fixture *generator*, run by hand. The test suite never calls
+# `pen` — Ben's ruling (see project/2026-08-29-pen-cli.md): `pen` may break
+# or vanish, and consumers cannot be made to install and log in. Outputs are
+# committed as fixtures; tests read those files only.
+#
+# Usage:
+#   scripts/pen-oracle <file.pen> [--out <dir>] [--scale <list>] [--accept-invalid] [--no-layout] [--settle]
+#
+# Arguments:
+#   <file.pen>      The fixture to run through headless Pen.
+#
+# Flags:
+#   --out <dir>     Where to write <name>.layout.json, the PNG export(s), and
+#                    <name>.pen-saved.pen. Default: the input file's own
+#                    directory, so regenerating a fixture in place is
+#                    `scripts/pen-oracle Tests/.../Fixtures/some-fixture.pen`.
+#   --scale <list>  Comma-separated export scales, e.g. "1,2". Default: "2"
+#                    — Pen's own default, and the scale every existing
+#                    snapshot/MAE PNG fixture was rendered at. A single
+#                    requested scale writes the plain <name>.png the tests
+#                    already load (PenSnapshotTestHelpers.loadFixtureImage);
+#                    more than one scale writes <name>@1x.png, <name>@2x.png,
+#                    ... instead, to keep filenames unambiguous.
+#   --accept-invalid
+#                   Carry on when Pen reports the document "is not valid", or
+#                    reports an "Invalid override path". Pen still loads, draws
+#                    and saves such a file (it drops the override), and a
+#                    fixture that probes what Pen does with malformed input is
+#                    invalid on purpose. Any other [ERROR] still fails.
+#   --no-layout     Skip the layout and write no <name>.layout.json.
+#                    Pen's own `Get` visitor throws on some documents it draws
+#                    and exports fine — a `ref` node that writes `children` of its
+#                    own is one (pen CLI 0.3.9, 2026-09-26) — so a fixture that
+#                    needs only the PNGs and the re-save can still be generated.
+#   --settle        Relayout before exporting: nudge every frame's `gap` (+1,
+#                    then back) three times, as scripts/pen-settle does, so the
+#                    PNGs and layout.json are Pen's settled layout rather than
+#                    its first pass. Run scripts/pen-settle on the fixture to
+#                    check three rounds converge. The re-save is unchanged.
+#
+# Requires the `pen` CLI (Homebrew; `pen login` once) and the Bash sandbox
+# disabled for both `pen status` and `pen interactive` — see
+# project/agents/harness.md. Exits 5 with nothing written if `pen` is
+# missing or unauthenticated: that is the by-hand gate; there is no
+# test-side skip.
+#
+# A .pen file with more than one top-level node (multiple artboards) gets
+# one PNG per node, named <name>-<node name, sanitized>[@Nx].png. The
+# layout JSON and the canonical re-save always cover the whole file.
+#
+# Every output file is verified non-empty before exiting 0.
+
+set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+usage: pen-oracle <file.pen> [--out <dir>] [--scale <list>] [--accept-invalid] [--no-layout] [--settle]
+
+  <file.pen>        Fixture to run through headless Pen.
+  --out <dir>       Output directory (default: the input file's directory).
+  --scale <list>    Comma-separated export scales (default: "2").
+  --accept-invalid  Allow a file Pen reports "is not valid" or with an invalid override
+                    path (malformed-input probes).
+  --no-layout       Skip the layout (Pen's visitor throws on some documents).
+  --settle          Export and lay out after Pen's settled relayout, not its first pass.
+
+See scripts/pen-oracle's header comment for the full contract, and
+project/2026-08-29-pen-cli.md for how `pen interactive` behaves headless.
+EOF
+}
+
+input=""
+out_dir=""
+scale_list="2"
+accept_invalid=0
+no_layout=0
+settle=0
+
+if [ "$#" -eq 0 ]; then
+    usage >&2
+    exit 2
+fi
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        -h | --help)
+            usage
+            exit 0
+            ;;
+        --out)
+            [ "$#" -ge 2 ] || {
+                echo "pen-oracle: --out needs a directory" >&2
+                exit 2
+            }
+            out_dir="$2"
+            shift 2
+            ;;
+        --scale)
+            [ "$#" -ge 2 ] || {
+                echo "pen-oracle: --scale needs a comma list, e.g. 1,2" >&2
+                exit 2
+            }
+            scale_list="$2"
+            shift 2
+            ;;
+        --accept-invalid)
+            accept_invalid=1
+            shift
+            ;;
+        --no-layout)
+            no_layout=1
+            shift
+            ;;
+        --settle)
+            settle=1
+            shift
+            ;;
+        --*)
+            echo "pen-oracle: unknown flag '$1' — see 'pen-oracle --help'" >&2
+            exit 2
+            ;;
+        *)
+            if [ -n "$input" ]; then
+                echo "pen-oracle: unexpected extra argument '$1' (already have '$input')" >&2
+                exit 2
+            fi
+            input="$1"
+            shift
+            ;;
+    esac
+done
+
+if [ -z "$input" ]; then
+    echo "pen-oracle: no .pen file given — see 'pen-oracle --help'" >&2
+    exit 2
+fi
+
+case "$input" in
+    *.pen) ;;
+    *)
+        echo "pen-oracle: '$input' is not a .pen file" >&2
+        exit 2
+        ;;
+esac
+
+if [ ! -f "$input" ]; then
+    echo "pen-oracle: '$input' does not exist" >&2
+    exit 4
+fi
+
+IFS=',' read -r -a scales <<<"$scale_list"
+for s in "${scales[@]}"; do
+    case "$s" in
+        '' | *[!0-9]*)
+            echo "pen-oracle: --scale '$scale_list' has a non-numeric entry ('$s')" >&2
+            exit 2
+            ;;
+    esac
+done
+
+input_abs="$(cd "$(dirname "$input")" && pwd)/$(basename "$input")"
+name="$(basename "$input" .pen)"
+
+if [ -z "$out_dir" ]; then
+    out_dir="$(dirname "$input_abs")"
+fi
+mkdir -p "$out_dir"
+out_dir_abs="$(cd "$out_dir" && pwd)"
+
+# ---- environment gate: `pen` present and authenticated ----
+
+if ! command -v pen >/dev/null 2>&1; then
+    echo "pen-oracle: 'pen' is not installed (brew install pen, then 'pen login'; see project/2026-08-29-pen-cli.md)" >&2
+    exit 5
+fi
+
+status_output="$(pen status 2>&1 || true)"
+if ! printf '%s' "$status_output" | grep -q 'Active'; then
+    echo "pen-oracle: 'pen' is not authenticated — run 'pen login' once (see project/2026-08-29-pen-cli.md)" >&2
+    exit 5
+fi
+
+# ---- run the headless session in a scratch directory ----
+
+work="$(mktemp -d "${TMPDIR:-/tmp}/pen-oracle.XXXXXX")"
+trap 'rm -rf "$work"' EXIT
+
+session_out="$work/session.pen"
+stdin_file="$work/stdin.txt"
+transcript="$work/transcript.log"
+
+{
+    # Top-level node ids/names: a whole-document visitor that skips into no
+    # children collects one row per node directly under `document`.
+    echo 'execute({input: "topLevel=Get((n,c)=>{c.skipChildren();return {id:n.id,name:n.name}});Print(JSON.stringify(topLevel))"})'
+    if [ "$settle" -eq 1 ]; then
+        # An export waits for the document's web fonts, so text is measured in its
+        # real face before the nudges relay it out (see the layout note below).
+        mkdir -p "$work/warm"
+        echo "execute({input: \"Export(topLevel.map(t=>t.id),'png','$work/warm',{scale:1})\"})"
+        echo 'execute({input: "frames=Get((n,c)=>n.type===\x27frame\x27&&typeof (n.gap??0)===\x27number\x27?{id:n.id,gap:n.gap??0}:null).filter(Boolean)"})'
+        for _ in 1 2 3; do
+            echo 'execute({input: "for(const f of frames){Update(f.id,{gap:f.gap+1});Update(f.id,{gap:f.gap});}"})'
+        done
+    fi
+    for s in "${scales[@]}"; do
+        mkdir -p "$work/scale-$s"
+        echo "execute({input: \"Export(topLevel.map(t=>t.id),'png','$work/scale-$s',{scale:$s})\"})"
+    done
+    # Settled layout for every node, in the [id: {x,y,width,height}] shape
+    # PenLayoutEngineTests reads: ctx.bounds is parent-local, same as PenRect.
+    # It is read *after* the export: Pen loads a document's web fonts
+    # asynchronously, and a `Get` issued first sometimes measures text in a
+    # fallback face (IBM Plex Sans 14: 19 pt lines, not 18) while the export,
+    # which waits for the fonts, draws the real layout — the two disagreed on
+    # three of eight layout-text-* fixtures across four runs (2026-09-26).
+    if [ "$no_layout" -eq 0 ]; then
+        echo 'execute({input: "Print(JSON.stringify(Object.fromEntries(Get((n,c)=>[n.id,{x:c.bounds.x,y:c.bounds.y,width:c.bounds.width,height:c.bounds.height}]))))"})'
+    fi
+    echo 'save()'
+    echo 'exit()'
+} >"$stdin_file"
+
+if ! pen interactive --in "$input_abs" --out "$session_out" <"$stdin_file" >"$transcript" 2>&1; then
+    echo "pen-oracle: 'pen interactive' exited non-zero; transcript follows" >&2
+    cat "$transcript" >&2
+    exit 5
+fi
+
+errors="$(grep '^\[ERROR\]' "$transcript" || true)"
+if [ "$accept_invalid" -eq 1 ]; then
+    # Pen's validation report is one "[ERROR] Document is not valid:" line, and
+    # each override key naming nothing is one "[ERROR] Invalid override path"
+    # line; the file still loads. Only those lines are waived.
+    errors="$(printf '%s\n' "$errors" \
+        | grep -v -e '^\[ERROR\] Document is not valid:' -e '^\[ERROR\] Invalid override path ' || true)"
+fi
+if [ -n "$errors" ]; then
+    echo "pen-oracle: 'pen interactive' reported an error; transcript follows" >&2
+    cat "$transcript" >&2
+    exit 5
+fi
+
+# ---- pull the two Print()'d JSON blobs out of the transcript ----
+# Every execute() response that Prints puts its output on the line right
+# after a "## Print output" header. The topLevel call is the first execute()
+# and the layout call the last, so theirs are the first and the last match;
+# anything the Export calls print in between is ignored here — the files
+# themselves are verified directly below.
+
+expected_prints=$((2 - no_layout))
+mapfile -t print_lines < <(awk '/^## Print output$/{getline; print}' "$transcript")
+if [ "${#print_lines[@]}" -lt "$expected_prints" ]; then
+    echo "pen-oracle: expected at least $expected_prints Print() blocks in the transcript, found ${#print_lines[@]}; transcript follows" >&2
+    cat "$transcript" >&2
+    exit 5
+fi
+top_level_json="${print_lines[0]}"
+
+# ---- write <name>.layout.json ----
+
+written=()
+if [ "$no_layout" -eq 0 ]; then
+    layout_json="${print_lines[${#print_lines[@]} - 1]}"
+    layout_path="$out_dir_abs/$name.layout.json"
+    python3 -c '
+import json, sys
+data = json.loads(sys.argv[1])
+with open(sys.argv[2], "w") as f:
+    json.dump(data, f, indent=2)
+    f.write("\n")
+' "$layout_json" "$layout_path"
+    written+=("$layout_path")
+fi
+
+# ---- rename the PNG export(s) from <nodeId>.png to the fixture's naming ----
+
+mapfile -t top_ids < <(python3 -c '
+import json, sys
+for item in json.loads(sys.argv[1]):
+    print(item["id"])
+' "$top_level_json")
+mapfile -t top_names < <(python3 -c '
+import json, re, sys
+for item in json.loads(sys.argv[1]):
+    n = item.get("name") or item["id"]
+    n = re.sub(r"[^A-Za-z0-9_-]+", "-", n).strip("-") or item["id"]
+    print(n)
+' "$top_level_json")
+
+if [ "${#top_ids[@]}" -eq 0 ]; then
+    echo "pen-oracle: '$input' has no top-level nodes to export" >&2
+    exit 5
+fi
+
+multi_top=0
+[ "${#top_ids[@]}" -gt 1 ] && multi_top=1
+multi_scale=0
+[ "${#scales[@]}" -gt 1 ] && multi_scale=1
+
+png_paths=()
+for s in "${scales[@]}"; do
+    src_dir="$work/scale-$s"
+    for i in "${!top_ids[@]}"; do
+        id="${top_ids[$i]}"
+        src="$src_dir/$id.png"
+        if [ ! -s "$src" ]; then
+            echo "pen-oracle: expected export '$src' was not written" >&2
+            exit 5
+        fi
+        base="$name"
+        [ "$multi_top" -eq 1 ] && base="$name-${top_names[$i]}"
+        if [ "$multi_scale" -eq 1 ]; then
+            dest="$out_dir_abs/$base@${s}x.png"
+        else
+            dest="$out_dir_abs/$base.png"
+        fi
+        cp "$src" "$dest"
+        png_paths+=("$dest")
+    done
+done
+
+# ---- copy the canonical re-save ----
+
+saved_path="$out_dir_abs/$name.pen-saved.pen"
+cp "$session_out" "$saved_path"
+
+# ---- verify everything landed, non-empty ----
+
+for f in "${written[@]}" "$saved_path" "${png_paths[@]}"; do
+    if [ ! -s "$f" ]; then
+        echo "pen-oracle: '$f' was not written" >&2
+        exit 5
+    fi
+done
+
+echo "pen-oracle: wrote"
+for f in "${written[@]}" "${png_paths[@]}"; do
+    echo "  $f"
+done
+echo "  $saved_path"

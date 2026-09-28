@@ -1,0 +1,341 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "pl01f",
+      "x": 300,
+      "y": 0,
+      "name": "fill-gradients",
+      "clip": true,
+      "width": 240,
+      "height": 180,
+      "fill": "#808080",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "pl01n",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 140,
+          "fill": "#333333",
+          "layout": "vertical",
+          "gap": 24,
+          "padding": 20,
+          "children": [
+            {
+              "type": "line",
+              "id": "pl01a",
+              "width": "fill_container",
+              "height": 0,
+              "stroke": {
+                "type": "gradient",
+                "gradientType": "linear",
+                "enabled": true,
+                "rotation": 90,
+                "size": {
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#FF3B30",
+                    "position": 0
+                  },
+                  {
+                    "color": "#34C759",
+                    "position": 0.5
+                  },
+                  {
+                    "color": "#007AFF",
+                    "position": 1
+                  }
+                ]
+              },
+              "strokeWidth": 6
+            },
+            {
+              "type": "line",
+              "id": "pl01b",
+              "width": "fill_container",
+              "height": 0,
+              "stroke": {
+                "type": "gradient",
+                "gradientType": "linear",
+                "enabled": true,
+                "rotation": 270,
+                "size": {
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#FF3B30",
+                    "position": 0
+                  },
+                  {
+                    "color": "#34C759",
+                    "position": 0.5
+                  },
+                  {
+                    "color": "#007AFF",
+                    "position": 1
+                  }
+                ]
+              },
+              "strokeWidth": 12
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "pl02f",
+      "x": 600,
+      "y": 0,
+      "name": "fill-stack",
+      "clip": true,
+      "width": 240,
+      "height": 180,
+      "fill": "#808080",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "pl02n",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 140,
+          "fill": "#333333",
+          "layout": "vertical",
+          "gap": 30,
+          "padding": 24,
+          "children": [
+            {
+              "type": "line",
+              "id": "pl02a",
+              "width": "fill_container",
+              "height": 0,
+              "stroke": [
+                "#FF9500",
+                "#007AFF80"
+              ],
+              "strokeWidth": 10
+            },
+            {
+              "type": "line",
+              "id": "pl02b",
+              "width": "fill_container",
+              "height": 0,
+              "stroke": [
+                {
+                  "type": "gradient",
+                  "gradientType": "linear",
+                  "enabled": true,
+                  "rotation": 90,
+                  "size": {
+                    "height": 1
+                  },
+                  "colors": [
+                    {
+                      "color": "#FFFFFF",
+                      "position": 0
+                    },
+                    {
+                      "color": "#000000",
+                      "position": 1
+                    }
+                  ]
+                },
+                {
+                  "type": "color",
+                  "color": "#FF000080",
+                  "enabled": true,
+                  "blendMode": "multiply"
+                }
+              ],
+              "strokeWidth": 14
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "pl03f",
+      "x": 900,
+      "y": 0,
+      "name": "fill-degenerate",
+      "clip": true,
+      "width": 240,
+      "height": 180,
+      "fill": "#808080",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "pl04n",
+          "x": 20,
+          "y": 20,
+          "width": 200,
+          "height": 140,
+          "fill": "#333333",
+          "layout": "vertical",
+          "gap": 24,
+          "padding": 20,
+          "children": [
+            {
+              "type": "line",
+              "id": "pl04a",
+              "width": "fill_container",
+              "height": 0,
+              "stroke": {
+                "type": "gradient",
+                "gradientType": "linear",
+                "enabled": true,
+                "rotation": 0,
+                "size": {
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#FF3B30",
+                    "position": 0
+                  },
+                  {
+                    "color": "#34C759",
+                    "position": 0.5
+                  },
+                  {
+                    "color": "#007AFF",
+                    "position": 1
+                  }
+                ]
+              },
+              "strokeWidth": 16
+            },
+            {
+              "type": "line",
+              "id": "pl04b",
+              "width": "fill_container",
+              "height": 0,
+              "stroke": {
+                "type": "gradient",
+                "gradientType": "radial",
+                "enabled": true,
+                "rotation": 0,
+                "size": {
+                  "width": 1,
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#FFFFFF",
+                    "position": 0
+                  },
+                  {
+                    "color": "#FF2D55",
+                    "position": 1
+                  }
+                ]
+              },
+              "strokeWidth": 12
+            },
+            {
+              "type": "line",
+              "id": "pl04c",
+              "width": "fill_container",
+              "height": 0,
+              "stroke": {
+                "type": "gradient",
+                "gradientType": "linear",
+                "enabled": true,
+                "rotation": 45,
+                "size": {
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#FF3B30",
+                    "position": 0
+                  },
+                  {
+                    "color": "#34C759",
+                    "position": 0.5
+                  },
+                  {
+                    "color": "#007AFF",
+                    "position": 1
+                  }
+                ]
+              },
+              "strokeWidth": 16
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "pl04f",
+      "x": 1200,
+      "y": 0,
+      "name": "fixed",
+      "clip": true,
+      "width": 240,
+      "height": 180,
+      "fill": "#808080",
+      "layout": "none",
+      "children": [
+        {
+          "type": "line",
+          "id": "pl03a",
+          "x": 30,
+          "y": 50,
+          "width": 180,
+          "height": 0,
+          "stroke": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 90,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#FF3B30",
+                "position": 0
+              },
+              {
+                "color": "#34C759",
+                "position": 0.5
+              },
+              {
+                "color": "#007AFF",
+                "position": 1
+              }
+            ]
+          },
+          "strokeWidth": 10
+        },
+        {
+          "type": "line",
+          "id": "pl03b",
+          "x": 30,
+          "y": 110,
+          "width": 180,
+          "height": 0,
+          "stroke": [
+            "#FF9500",
+            "#007AFF80"
+          ],
+          "strokeWidth": 10
+        }
+      ]
+    }
+  ],
+  "fileToken": "51d19549-86a4-4d77-8f66-765ae04c0347"
+}

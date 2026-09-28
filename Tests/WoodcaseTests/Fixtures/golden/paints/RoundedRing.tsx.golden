@@ -1,0 +1,63 @@
+import { cn } from "../lib/cn";
+
+interface RoundedRingProps {
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+export function RoundedRing({
+  className,
+  style,
+}: RoundedRingProps) {
+  return (
+    <div
+      className={cn("relative", className)}
+      style={{
+        width: 320,
+        height: 240,
+        backgroundColor: "#000000",
+        ...style,
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          left: 60,
+          top: 60,
+        }}
+      >
+        <div
+          style={{
+            width: 200,
+            height: 120,
+            backgroundColor: "#222222",
+            borderRadius: 24,
+            position: "relative",
+            flexShrink: 0,
+          }}
+        >
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              inset: "-16px",
+              borderStyle: "solid",
+              borderColor: "transparent",
+              borderWidth: "16px",
+              borderRadius: 40,
+              backgroundImage: "linear-gradient(-270deg, #FF0000 16px, #00FF00 calc(16px + (100% - 32px) * 0.5), #0000FF calc(100% - 16px))",
+              backgroundSize: "100% 100%",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+              backgroundOrigin: "border-box",
+              WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+              WebkitMaskComposite: "xor",
+              mask: "linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0)",
+              pointerEvents: "none",
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}

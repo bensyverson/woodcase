@@ -1,0 +1,182 @@
+{
+  "SBtn1": {
+    "x": 0,
+    "y": 0,
+    "width": 160,
+    "height": 44
+  },
+  "SLbl1": {
+    "x": 44.5,
+    "y": 12.5,
+    "width": 71,
+    "height": 19
+  },
+  "SBtn2": {
+    "x": 200,
+    "y": 0,
+    "width": 160,
+    "height": 44
+  },
+  "SLbl2": {
+    "x": 44.5,
+    "y": 12.5,
+    "width": 71,
+    "height": 19
+  },
+  "SBtn3": {
+    "x": 400,
+    "y": 0,
+    "width": 160,
+    "height": 44
+  },
+  "SLbl3": {
+    "x": 44.5,
+    "y": 12.5,
+    "width": 71,
+    "height": 19
+  },
+  "SBtn4": {
+    "x": 600,
+    "y": 0,
+    "width": 160,
+    "height": 44
+  },
+  "SLbl4": {
+    "x": 44.5,
+    "y": 12.5,
+    "width": 71,
+    "height": 19
+  },
+  "Swt01": {
+    "x": 0,
+    "y": 100,
+    "width": 52,
+    "height": 32
+  },
+  "Knb01": {
+    "x": 22,
+    "y": 2,
+    "width": 28,
+    "height": 28
+  },
+  "Swt02": {
+    "x": 200,
+    "y": 100,
+    "width": 52,
+    "height": 32
+  },
+  "Knb02": {
+    "x": 2,
+    "y": 2,
+    "width": 28,
+    "height": 28
+  },
+  "Fld01": {
+    "x": 0,
+    "y": 200,
+    "width": 240,
+    "height": 44
+  },
+  "FTx01": {
+    "x": 12,
+    "y": 13,
+    "width": 50,
+    "height": 18
+  },
+  "Fld02": {
+    "x": 300,
+    "y": 200,
+    "width": 240,
+    "height": 44
+  },
+  "FTx02": {
+    "x": 12,
+    "y": 13,
+    "width": 50,
+    "height": 18
+  },
+  "Fld03": {
+    "x": 600,
+    "y": 200,
+    "width": 240,
+    "height": 44
+  },
+  "FTx03": {
+    "x": 12,
+    "y": 13,
+    "width": 50,
+    "height": 18
+  },
+  "Sel01": {
+    "x": 0,
+    "y": 300,
+    "width": 180,
+    "height": 40
+  },
+  "SVal1": {
+    "x": 12,
+    "y": 11.5,
+    "width": 50,
+    "height": 17
+  },
+  "SChv1": {
+    "x": 158,
+    "y": 17,
+    "width": 10,
+    "height": 6
+  },
+  "Sel02": {
+    "x": 300,
+    "y": 300,
+    "width": 180,
+    "height": 40
+  },
+  "SVal2": {
+    "x": 12,
+    "y": 11.5,
+    "width": 50,
+    "height": 17
+  },
+  "SChv2": {
+    "x": 158,
+    "y": 17,
+    "width": 10,
+    "height": 6
+  },
+  "Lnk01": {
+    "x": 0,
+    "y": 400,
+    "width": 45,
+    "height": 25
+  },
+  "LTx01": {
+    "x": 0,
+    "y": 4,
+    "width": 45,
+    "height": 17
+  },
+  "Chp01": {
+    "x": 0,
+    "y": 500,
+    "width": 69,
+    "height": 28
+  },
+  "CTx01": {
+    "x": 12,
+    "y": 6,
+    "width": 45,
+    "height": 16
+  },
+  "Chp02": {
+    "x": 200,
+    "y": 500,
+    "width": 69,
+    "height": 28
+  },
+  "CTx02": {
+    "x": 12,
+    "y": 6,
+    "width": 45,
+    "height": 16
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "rrect",
+      "name": "rrect",
+      "x": 0,
+      "y": 0,
+      "width": 400,
+      "height": 300,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "Ra001",
+          "x": 80,
+          "y": 60,
+          "width": 200,
+          "height": 60,
+          "fill": "#FF0000",
+          "rotation": -20
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "rtxtf",
+      "name": "rtxtf",
+      "x": 500,
+      "y": 0,
+      "width": 400,
+      "height": 300,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "text",
+          "id": "Ta001",
+          "x": 80,
+          "y": 60,
+          "width": 240,
+          "textGrowth": "fixed-width",
+          "content": "MMMM",
+          "fontFamily": "Inter",
+          "fontSize": 48,
+          "fontWeight": "900",
+          "fill": "#FF0000",
+          "rotation": -20
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "rtxta",
+      "name": "rtxta",
+      "x": 1000,
+      "y": 0,
+      "width": 400,
+      "height": 300,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "text",
+          "id": "Ta002",
+          "x": 80,
+          "y": 60,
+          "content": "MMMM",
+          "fontFamily": "Inter",
+          "fontSize": 48,
+          "fontWeight": "900",
+          "fill": "#FF0000",
+          "rotation": -20
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "rtxts",
+      "name": "rtxts",
+      "x": 1500,
+      "y": 0,
+      "width": 400,
+      "height": 300,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "text",
+          "id": "Ta003",
+          "x": 80,
+          "y": 60,
+          "content": "MMMM",
+          "fontFamily": "Inter",
+          "fontSize": 48,
+          "fontWeight": "900",
+          "fill": "#FF0000"
+        }
+      ]
+    }
+  ]
+}

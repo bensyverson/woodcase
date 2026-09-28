@@ -1,0 +1,261 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "fill": "#FF4444",
+                  "height": 120,
+                  "id": "pEAcK",
+                  "name": "overflows-right",
+                  "type": "rectangle",
+                  "width": 120,
+                  "x": 60,
+                  "y": -20
+                },
+                {
+                  "fill": "#4488FF",
+                  "height": 80,
+                  "id": "i34Rf",
+                  "name": "overflows-bottom",
+                  "type": "ellipse",
+                  "width": 80,
+                  "x": 20,
+                  "y": 40
+                }
+              ],
+              "clip": true,
+              "cornerRadius": 12,
+              "fill": "#EEEEEE",
+              "height": 80,
+              "id": "60gsb",
+              "layout": "none",
+              "name": "clipped-overflow",
+              "type": "frame",
+              "width": 120
+            },
+            {
+              "children": [
+                {
+                  "fill": "#FF4444",
+                  "height": 120,
+                  "id": "zzf4H",
+                  "name": "overflows-right",
+                  "type": "rectangle",
+                  "width": 120,
+                  "x": 60,
+                  "y": -20
+                },
+                {
+                  "fill": "#4488FF",
+                  "height": 80,
+                  "id": "gX8Ja",
+                  "name": "overflows-bottom",
+                  "type": "ellipse",
+                  "width": 80,
+                  "x": 20,
+                  "y": 40
+                }
+              ],
+              "cornerRadius": 12,
+              "fill": "#EEEEEE",
+              "height": 80,
+              "id": "y9dgk",
+              "layout": "none",
+              "name": "unclipped-overflow",
+              "type": "frame",
+              "width": 120
+            }
+          ],
+          "gap": 24,
+          "id": "JfJAP",
+          "name": "clipping",
+          "type": "frame"
+        },
+        {
+          "children": [
+            {
+              "fill": {
+                "center": {
+                  "x": 0.2,
+                  "y": 0.2
+                },
+                "colors": [
+                  {
+                    "color": "#FF0000",
+                    "position": 0
+                  },
+                  {
+                    "color": "#0000FF",
+                    "position": 1
+                  }
+                ],
+                "enabled": true,
+                "gradientType": "linear",
+                "rotation": 45,
+                "size": {
+                  "height": 1
+                },
+                "type": "gradient"
+              },
+              "height": 120,
+              "id": "mZ6Hv",
+              "name": "linear-offset-center",
+              "type": "rectangle",
+              "width": 120
+            },
+            {
+              "fill": {
+                "center": {
+                  "x": 0.3,
+                  "y": 0.7
+                },
+                "colors": [
+                  {
+                    "color": "#FFFFFF",
+                    "position": 0
+                  },
+                  {
+                    "color": "#000000",
+                    "position": 1
+                  }
+                ],
+                "enabled": true,
+                "gradientType": "radial",
+                "rotation": 0,
+                "size": {
+                  "height": 0.6,
+                  "width": 0.8
+                },
+                "type": "gradient"
+              },
+              "height": 120,
+              "id": "1mIWA",
+              "name": "radial-offset-center",
+              "type": "rectangle",
+              "width": 120
+            },
+            {
+              "fill": {
+                "center": {
+                  "x": 0.7,
+                  "y": 0.3
+                },
+                "colors": [
+                  {
+                    "color": "#FF0000",
+                    "position": 0
+                  },
+                  {
+                    "color": "#00FF00",
+                    "position": 0.33
+                  },
+                  {
+                    "color": "#0000FF",
+                    "position": 0.66
+                  },
+                  {
+                    "color": "#FF0000",
+                    "position": 1
+                  }
+                ],
+                "enabled": true,
+                "gradientType": "angular",
+                "rotation": 0,
+                "size": {
+                  "height": 1,
+                  "width": 1
+                },
+                "type": "gradient"
+              },
+              "height": 120,
+              "id": "00L0q",
+              "name": "angular-offset-center",
+              "type": "rectangle",
+              "width": 120
+            }
+          ],
+          "gap": 24,
+          "id": "CrgmZ",
+          "name": "gradient-centers",
+          "type": "frame"
+        },
+        {
+          "children": [
+            {
+              "fill": {
+                "colors": [
+                  {
+                    "color": "#FF8800",
+                    "position": 0
+                  },
+                  {
+                    "color": "#8800FF",
+                    "position": 1
+                  }
+                ],
+                "enabled": true,
+                "gradientType": "linear",
+                "rotation": 0,
+                "size": {
+                  "height": 0.5
+                },
+                "type": "gradient"
+              },
+              "height": 120,
+              "id": "E0p3i",
+              "name": "linear-small-size",
+              "type": "rectangle",
+              "width": 120
+            },
+            {
+              "fill": {
+                "colors": [
+                  {
+                    "color": "#FFFF00",
+                    "position": 0
+                  },
+                  {
+                    "color": "#006600",
+                    "position": 1
+                  }
+                ],
+                "enabled": true,
+                "gradientType": "radial",
+                "rotation": 0,
+                "size": {
+                  "height": 0.5,
+                  "width": 1.5
+                },
+                "type": "gradient"
+              },
+              "height": 120,
+              "id": "2LqoP",
+              "name": "radial-wide",
+              "type": "rectangle",
+              "width": 120
+            }
+          ],
+          "gap": 24,
+          "id": "PoLYl",
+          "name": "gradient-sizes",
+          "type": "frame"
+        }
+      ],
+      "fill": "#FFFFFF",
+      "gap": 24,
+      "id": "bmPFZ",
+      "layout": "vertical",
+      "name": "render-clipping-and-gradients",
+      "padding": 24,
+      "type": "frame",
+      "width": 500,
+      "x": 0,
+      "y": 0
+    }
+  ],
+  "version": "2.17"
+}

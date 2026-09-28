@@ -1,0 +1,20 @@
+{"version": "2.17", "children": [
+  {"type":"frame","id":"eA3x2","name":"elide3x2","x":0,"y":0,"width":300,"height":150,"fill":{"type":"mesh_gradient","columns":3,"rows":2,"colors":["#FF0000","#00FF00","#0000FF","#FFFF00","#00FFFF","#FF00FF"],"points":[
+    {"position":[0,0],"leftHandle":[-0.125,0],"rightHandle":[0.125,0],"topHandle":[0,-0.25],"bottomHandle":[0,0.25]},
+    {"position":[0.5,0],"leftHandle":[-0.12509,0],"rightHandle":[0.125,0.00009],"topHandle":[0.00005,-0.25],"bottomHandle":[0,0.25008]},
+    {"position":[1,0],"leftHandle":[-0.125,0],"rightHandle":[0.3,0.1],"topHandle":[0,-0.2502],"bottomHandle":[0,0.25]},
+    {"position":[0.123456789,1]},
+    [0.5,0.987654321],
+    {"position":[1,1],"topHandle":[0.0123456,-0.3333333],"bottomHandle":[0,0.25]}
+  ]}},
+  {"type":"frame","id":"eB2x2","name":"elide2x2","x":400,"y":0,"width":200,"height":200,"fill":{"type":"mesh_gradient","columns":2,"rows":2,"colors":["#FF0000","#00FF00","#0000FF","#FFFF00"],"points":[
+    {"position":[0,0],"rightHandle":[0.25,0]},
+    {"position":[1,0],"leftHandle":[-0.25,0.0002]},
+    [0.00001,1],
+    {"position":[1.00004,0.99996],"leftHandle":[-0.24996,0.00004],"topHandle":[0,-0.25]}
+  ]}},
+  {"type":"frame","id":"eC1x2","name":"elide1col","x":700,"y":0,"width":100,"height":200,"fill":{"type":"mesh_gradient","columns":1,"rows":2,"colors":["#FF0000","#0000FF"],"points":[
+    {"position":[0,0],"leftHandle":[-0.25,0],"rightHandle":[0.25,0],"bottomHandle":[0,0.25]},
+    {"position":[0,1],"leftHandle":[-0.5,0]}
+  ]}}
+]}

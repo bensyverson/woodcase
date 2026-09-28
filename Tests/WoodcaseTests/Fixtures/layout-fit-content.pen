@@ -1,0 +1,29 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "fill": "#FF0000",
+          "height": 60,
+          "id": "RcIll",
+          "name": "child-1",
+          "type": "rectangle",
+          "width": 100
+        },
+        {
+          "fill": "#00FF00",
+          "height": 80,
+          "id": "LlBuh",
+          "name": "child-2",
+          "type": "rectangle",
+          "width": 80
+        }
+      ],
+      "fill": "#F0F0F0",
+      "id": "P9xkX",
+      "name": "layout-fit-content",
+      "type": "frame"
+    }
+  ],
+  "version": "2.17"
+}

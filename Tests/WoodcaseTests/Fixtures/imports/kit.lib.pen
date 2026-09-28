@@ -1,0 +1,52 @@
+{
+  "version": "2.17",
+  "variables": {
+    "accent": { "type": "color", "value": "#FF6600" }
+  },
+  "children": [
+    {
+      "id": "Chip1",
+      "name": "chip",
+      "type": "frame",
+      "reusable": true,
+      "x": 0,
+      "y": 0,
+      "width": 80,
+      "height": 24,
+      "fill": "$accent",
+      "children": [
+        {
+          "id": "Txt01",
+          "name": "label",
+          "type": "text",
+          "x": 8,
+          "y": 4,
+          "content": "Chip",
+          "fill": "#000000",
+          "fontSize": 12
+        }
+      ]
+    },
+    {
+      "id": "Card1",
+      "name": "card",
+      "type": "frame",
+      "reusable": true,
+      "x": 0,
+      "y": 100,
+      "width": 200,
+      "height": 100,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "id": "Cc001",
+          "name": "badge",
+          "type": "ref",
+          "ref": "Chip1",
+          "x": 10,
+          "y": 10
+        }
+      ]
+    }
+  ]
+}

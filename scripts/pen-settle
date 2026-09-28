@@ -1,0 +1,103 @@
+#!/usr/bin/env python3
+"""pen-settle — run Pen's engine headless on a .pen file and write both its first layout
+after load and its settled layout, after every frame has been nudged and relaid out.
+
+Pen fits widths before heights, so on load a turned child whose height is not resolved
+yet (a `fit_content` frame, a cross-axis `fill_container`, a turned main-axis fill in a
+column) is measured at height 0 when its parent's width is fitted; any relayout converges
+elsewhere. `pen-oracle`'s layout.json is that first pass. This script nudges every
+frame's `gap` (+1, then back) and reads the layout again, for as many rounds as asked,
+and says whether the last two rounds agree. Nothing is saved.
+
+Usage:
+    scripts/pen-settle <file.pen> [--out <dir>] [--rounds <n>]
+
+Writes <name>.first.layout.json and <name>.settled.layout.json (parent-relative
+{id: {x, y, width, height}}, the shape pen-oracle writes) into --out (default: the input's
+directory), then prints every rect the two disagree on by more than 0.01 pt. Exits 0 when
+the last two rounds agree, 1 when they do not (raise --rounds), 5 when `pen` fails.
+
+Requires the `pen` CLI, logged in, and the Bash sandbox disabled (project/agents/harness.md).
+Standard library only.
+"""
+import json, os, subprocess, sys, tempfile
+
+# Each layout is printed on one line behind MARK: an export prints output of its own.
+MARK = "@layout@"
+LAYOUT = ("Print('" + MARK + "'+JSON.stringify(Object.fromEntries(Get((n,c)=>[n.id,{x:c.bounds.x,"
+          "y:c.bounds.y,width:c.bounds.width,height:c.bounds.height}]))))")
+FRAMES = ("frames=Get((n,c)=>n.type==='frame'&&typeof (n.gap??0)==='number'"
+          "?{id:n.id,gap:n.gap??0}:null).filter(Boolean)")
+TOP = "top=Get((n,c)=>{c.skipChildren();return n.id})"
+NUDGE = "for(const f of frames){Update(f.id,{gap:f.gap+1});Update(f.id,{gap:f.gap});}"
+
+
+def main(argv):
+    args = argv[1:]
+    if not args or args[0].startswith("-"):
+        print(__doc__.strip().split("\n\n")[2], file=sys.stderr)
+        return 2
+    source = os.path.abspath(args[0])
+    out = os.path.dirname(source)
+    rounds = 3
+    rest = args[1:]
+    while rest:
+        flag = rest.pop(0)
+        if flag == "--out" and rest:
+            out = rest.pop(0)
+        elif flag == "--rounds" and rest:
+            rounds = max(2, int(rest.pop(0)))
+        else:
+            print("pen-settle: unknown or incomplete flag %s" % flag, file=sys.stderr)
+            return 2
+    os.makedirs(out, exist_ok=True)
+    name = os.path.splitext(os.path.basename(source))[0]
+
+    with tempfile.TemporaryDirectory() as work:
+        # Pen loads web fonts asynchronously; an export waits for them, so the first
+        # layout is read after one (as pen-oracle does), or text measures in a fallback.
+        lines = ['execute({input: "%s"})' % TOP,
+                 'execute({input: "Export(top,\'png\',\'%s\',{scale:1})"})' % work,
+                 'execute({input: "%s"})' % LAYOUT, 'execute({input: "%s"})' % FRAMES]
+        for _ in range(rounds):
+            lines.append('execute({input: "%s"})' % NUDGE)
+            lines.append('execute({input: "%s"})' % LAYOUT)
+        lines.append("exit()")
+        result = subprocess.run(
+            ["pen", "interactive", "--in", source, "--out", os.path.join(work, "session.pen")],
+            input="\n".join(lines) + "\n", capture_output=True, text=True)
+    transcript = result.stdout + result.stderr
+    if result.returncode != 0 or "[ERROR]" in transcript:
+        print("pen-settle: 'pen interactive' failed; transcript follows", file=sys.stderr)
+        print(transcript, file=sys.stderr)
+        return 5
+    text = transcript.split("\n")
+    passes = [json.loads(line[len(MARK):]) for line in text if line.startswith(MARK)]
+    if len(passes) != rounds + 1:
+        print("pen-settle: expected %d layouts, found %d; transcript follows" % (rounds + 1, len(passes)),
+              file=sys.stderr)
+        print(transcript, file=sys.stderr)
+        return 5
+
+    first, settled = passes[0], passes[-1]
+    for suffix, layout in (("first", first), ("settled", settled)):
+        with open(os.path.join(out, "%s.%s.layout.json" % (name, suffix)), "w") as f:
+            json.dump(layout, f, indent=1, sort_keys=True)
+
+    keys = ["x", "y", "width", "height"]
+    def differs(a, b):
+        return max(abs(a[k] - b[k]) for k in keys) > 0.01
+    changed = [i for i in first if i in settled and differs(first[i], settled[i])]
+    for i in changed:
+        print("%-8s first %8.2f %8.2f %7.2f %7.2f | settled %8.2f %8.2f %7.2f %7.2f" % (
+            i, *[first[i][k] for k in keys], *[settled[i][k] for k in keys]))
+    print("%d rects, %d move between the first pass and the settled layout" % (len(first), len(changed)))
+    unsettled = [i for i in settled if differs(settled[i], passes[-2].get(i, settled[i]))]
+    if unsettled:
+        print("not settled after %d rounds: %s" % (rounds, ", ".join(unsettled)))
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

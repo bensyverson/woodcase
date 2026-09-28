@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+"""rename-font-family — write a copy of a font under a new family name.
+
+Core Text registration is process-global and irreversible, so exactly one test per
+run may watch a given family go from absent to present (project/gotchas.md,
+2026-09-02). A test that needs its own family gets a renamed copy of an OFL font
+the repository already carries, made with this script.
+
+Usage:
+    scripts/rename-font-family <in.ttf> <out.ttf> "<Family Name>"
+
+Rewrites the name table's family (1, 16), full name (4) and PostScript name (6);
+the copyright (0) and license (13, 14) records are kept, as the SIL Open Font
+License requires of a derivative. Only use it on a font whose license names no
+Reserved Font Name. Needs fontTools (`pip install fonttools`).
+"""
+
+import sys
+
+from fontTools.ttLib import TTFont
+
+
+def main() -> int:
+    if len(sys.argv) != 4:
+        print(__doc__.strip(), file=sys.stderr)
+        return 2
+    source, target, family = sys.argv[1:]
+    font = TTFont(source)
+    subfamily = font["name"].getDebugName(2) or "Regular"
+    postscript = family.replace(" ", "") + "-" + subfamily.replace(" ", "")
+    for record in font["name"].names:
+        if record.nameID in (1, 16):
+            record.string = family
+        elif record.nameID == 4:
+            record.string = f"{family} {subfamily}"
+        elif record.nameID == 6:
+            record.string = postscript
+        elif record.nameID == 3:
+            record.string = f"{postscript};renamed"
+    font.save(target)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

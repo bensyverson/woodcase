@@ -1,0 +1,111 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "id": "Rt001",
+      "name": "Root",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "width": 200,
+      "height": 100,
+      "layout": "none",
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "id": "Rf001",
+          "name": "Chip",
+          "type": "ref",
+          "ref": "Cmp01",
+          "x": 10,
+          "y": 10,
+          "descendants": {
+            "Lbl01": {
+              "content": "Mapped"
+            }
+          }
+        },
+        {
+          "id": "Rf002",
+          "name": "Bare",
+          "type": "ref",
+          "ref": "Cmp02",
+          "x": 10,
+          "y": 50,
+          "descendants": {
+            "Und01": {
+              "content": "Undeclared"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "Cmp01",
+      "name": "Card",
+      "type": "frame",
+      "x": 0,
+      "y": 400,
+      "reusable": true,
+      "layout": "none",
+      "width": 120,
+      "height": 30,
+      "fill": "#EEEEEE",
+      "metadata": {
+        "type": "unknown",
+        "_props": {
+          "title": "Label"
+        }
+      },
+      "children": [
+        {
+          "id": "Lbl01",
+          "name": "Label",
+          "type": "text",
+          "x": 0,
+          "y": 0,
+          "width": 40,
+          "height": 20,
+          "content": "chip",
+          "fill": "#000000"
+        },
+        {
+          "id": "Sub01",
+          "name": "Subtitle",
+          "type": "text",
+          "x": 60,
+          "y": 0,
+          "width": 40,
+          "height": 20,
+          "content": "sub",
+          "fill": "#000000"
+        }
+      ]
+    },
+    {
+      "id": "Cmp02",
+      "name": "Plain",
+      "type": "frame",
+      "x": 0,
+      "y": 500,
+      "reusable": true,
+      "layout": "none",
+      "width": 120,
+      "height": 30,
+      "fill": "#EEEEEE",
+      "children": [
+        {
+          "id": "Und01",
+          "name": "Undeclared",
+          "type": "text",
+          "x": 0,
+          "y": 0,
+          "width": 40,
+          "height": 20,
+          "content": "plain",
+          "fill": "#000000"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,162 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "lhTgt",
+      "name": "tight-wrap",
+      "x": 0,
+      "y": 0,
+      "width": 380,
+      "height": 220,
+      "layout": "none",
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "text",
+          "id": "lhTg1",
+          "name": "t",
+          "x": 40,
+          "y": 40,
+          "width": 300,
+          "textGrowth": "fixed-width",
+          "content": "Tight lines wrap across three rows of type",
+          "fontFamily": "Inter",
+          "fontSize": 32,
+          "fontWeight": "700",
+          "lineHeight": 1,
+          "fill": "#000000"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "lhLse",
+      "name": "loose-wrap",
+      "x": 440,
+      "y": 0,
+      "width": 380,
+      "height": 260,
+      "layout": "none",
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "text",
+          "id": "lhLs1",
+          "name": "t",
+          "x": 40,
+          "y": 40,
+          "width": 300,
+          "textGrowth": "fixed-width",
+          "content": "Loose lines wrap across three rows of type",
+          "fontFamily": "Inter",
+          "fontSize": 24,
+          "fontWeight": "700",
+          "lineHeight": 1.8,
+          "fill": "#000000"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "lhMid",
+      "name": "fixed-middle",
+      "x": 880,
+      "y": 0,
+      "width": 380,
+      "height": 260,
+      "layout": "none",
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "text",
+          "id": "lhMd1",
+          "name": "t",
+          "x": 40,
+          "y": 40,
+          "width": 300,
+          "height": 180,
+          "textGrowth": "fixed-width-height",
+          "textAlignVertical": "middle",
+          "content": "Two lines set\nin the middle",
+          "fontFamily": "Inter",
+          "fontSize": 28,
+          "fontWeight": "700",
+          "lineHeight": 1.5,
+          "fill": ["#E8E8E8", "#000000"]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "lhAut",
+      "name": "auto-tight",
+      "x": 1320,
+      "y": 0,
+      "width": 380,
+      "height": 200,
+      "layout": "none",
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "text",
+          "id": "lhAt1",
+          "name": "t",
+          "x": 40,
+          "y": 40,
+          "content": "Heading\nTwo",
+          "fontFamily": "Inter",
+          "fontSize": 56,
+          "fontWeight": "900",
+          "lineHeight": 0.9,
+          "fill": "#000000"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "lhStk",
+      "name": "stacked",
+      "x": 1760,
+      "y": 0,
+      "width": 380,
+      "layout": "vertical",
+      "padding": 40,
+      "gap": 12,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "text",
+          "id": "lhSk1",
+          "name": "title",
+          "content": "Stacked title",
+          "fontFamily": "Inter",
+          "fontSize": 40,
+          "fontWeight": "900",
+          "lineHeight": 1.1,
+          "fill": "#000000"
+        },
+        {
+          "type": "text",
+          "id": "lhSk2",
+          "name": "body",
+          "width": "fill_container",
+          "textGrowth": "fixed-width",
+          "content": "Body copy at a line height of one and a half wraps under the title.",
+          "fontFamily": "Inter",
+          "fontSize": 16,
+          "lineHeight": 1.5,
+          "fill": "#333333"
+        },
+        {
+          "type": "rectangle",
+          "id": "lhSk3",
+          "name": "rule",
+          "width": "fill_container",
+          "height": 8,
+          "fill": "#FF3300"
+        }
+      ]
+    }
+  ]
+}

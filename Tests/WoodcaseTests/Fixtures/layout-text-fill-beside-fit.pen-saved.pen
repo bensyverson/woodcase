@@ -1,0 +1,54 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "tfC00",
+      "x": 0,
+      "y": 0,
+      "name": "layout-text-fill-beside-fit",
+      "width": 360,
+      "fill": "#F3F4F6",
+      "gap": 12,
+      "padding": 16,
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "text",
+          "id": "tfC01",
+          "name": "fill-text",
+          "fill": "#1F2937",
+          "textGrowth": "fixed-width",
+          "width": "fill_container",
+          "content": "A fill text takes whatever the fit sibling leaves and wraps inside it.",
+          "fontFamily": "IBM Plex Sans",
+          "fontSize": 14,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "frame",
+          "id": "tfC02",
+          "name": "fit-button",
+          "fill": "#DBEAFE",
+          "padding": [
+            8,
+            12
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "tfC03",
+              "name": "button-label",
+              "fill": "#1E3A8A",
+              "content": "Continue",
+              "fontFamily": "IBM Plex Sans",
+              "fontSize": 14,
+              "fontWeight": "600"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "fileToken": "8d9660e0-a638-412d-9fa8-0bc58fd39bcf"
+}

@@ -1,0 +1,114 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "rectangle",
+      "id": "Root1",
+      "name": "rootrect",
+      "x": 100,
+      "y": 100,
+      "width": 200,
+      "height": 60,
+      "fill": "#FF0000",
+      "rotation": -20
+    },
+    {
+      "type": "frame",
+      "id": "Root2",
+      "name": "rootframe",
+      "x": 600,
+      "y": 100,
+      "width": 200,
+      "height": 100,
+      "layout": "none",
+      "fill": "#0000FF",
+      "rotation": 30,
+      "children": [
+        { "type": "rectangle", "id": "R2c", "x": 10, "y": 10, "width": 40, "height": 20, "fill": "#FFFF00" }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Flex1",
+      "name": "flexabs",
+      "x": 0,
+      "y": 400,
+      "width": 400,
+      "height": 300,
+      "layout": "horizontal",
+      "fill": "#000000",
+      "children": [
+        { "type": "rectangle", "id": "F1a", "width": 50, "height": 50, "fill": "#00FF00" },
+        { "type": "rectangle", "id": "F1b", "layoutPosition": "absolute", "x": 100, "y": 100, "width": 120, "height": 40, "fill": "#FF0000", "rotation": 35 },
+        { "type": "rectangle", "id": "F1c", "width": 60, "height": 30, "fill": "#FFFFFF", "rotation": 35 }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Grp1",
+      "name": "grouped",
+      "x": 500,
+      "y": 400,
+      "width": 300,
+      "height": 300,
+      "layout": "none",
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "group",
+          "id": "G1",
+          "x": 60,
+          "y": 10,
+          "children": [
+            { "type": "rectangle", "id": "G1a", "x": 0, "y": 0, "width": 40, "height": 40, "fill": "#00FF00" },
+            { "type": "rectangle", "id": "G1r", "x": 100, "y": 50, "width": 60, "height": 20, "fill": "#FFFF00", "rotation": 45 }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Nest1",
+      "name": "nested",
+      "x": 900,
+      "y": 400,
+      "width": 300,
+      "height": 300,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "frame",
+          "id": "N1f",
+          "x": 100,
+          "y": 50,
+          "width": 120,
+          "height": 80,
+          "layout": "vertical",
+          "fill": "#444444",
+          "rotation": 25,
+          "children": [
+            { "type": "rectangle", "id": "N1c", "width": 40, "height": 20, "fill": "#FF8800" }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Flip1",
+      "name": "flips",
+      "x": 1300,
+      "y": 400,
+      "width": 400,
+      "height": 300,
+      "layout": "none",
+      "fill": "#000000",
+      "children": [
+        { "type": "rectangle", "id": "Fx", "x": 160, "y": 40, "width": 120, "height": 40, "fill": { "type": "gradient", "gradientType": "linear", "colors": [ { "color": "#FF0000", "position": 0 }, { "color": "#0000FF", "position": 1 } ] }, "flipX": true },
+        { "type": "rectangle", "id": "FxR", "x": 160, "y": 150, "width": 120, "height": 40, "fill": { "type": "gradient", "gradientType": "linear", "colors": [ { "color": "#FF0000", "position": 0 }, { "color": "#00FF00", "position": 1 } ] }, "flipX": true, "rotation": 30 },
+        { "type": "rectangle", "id": "FyR", "x": 280, "y": 150, "width": 80, "height": 30, "fill": { "type": "gradient", "gradientType": "linear", "colors": [ { "color": "#FFFF00", "position": 0 }, { "color": "#00FFFF", "position": 1 } ] }, "flipY": true, "rotation": -40 }
+      ]
+    }
+  ]
+}

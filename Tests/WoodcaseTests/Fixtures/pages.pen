@@ -1,0 +1,112 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "id": "Hom01",
+      "name": "Home",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "width": 320,
+      "height": 240,
+      "layout": "vertical",
+      "gap": 12,
+      "padding": 16,
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "id": "Hed01",
+          "name": "Heading",
+          "type": "text",
+          "content": "Today",
+          "fontSize": 20,
+          "fontWeight": "700"
+        },
+        {
+          "id": "Row01",
+          "name": "Row",
+          "type": "frame",
+          "layout": "horizontal",
+          "gap": 8,
+          "width": 288,
+          "height": 96,
+          "children": [
+            {
+              "id": "Ins01",
+              "name": "Revenue",
+              "type": "ref",
+              "ref": "Crd01",
+              "descendants": {
+                "Lbl01": {
+                  "content": "Revenue"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Abt01",
+      "name": "About",
+      "type": "frame",
+      "x": 0,
+      "y": 300,
+      "width": 320,
+      "height": 120,
+      "layout": "vertical",
+      "gap": 8,
+      "padding": 16,
+      "fill": "#F5F5F5",
+      "children": [
+        {
+          "id": "Bio01",
+          "name": "Bio",
+          "type": "text",
+          "content": "A second page, so the emitter writes more than one file.",
+          "fontSize": 14
+        }
+      ]
+    },
+    {
+      "id": "Crd01",
+      "name": "Card",
+      "type": "frame",
+      "x": 0,
+      "y": 500,
+      "reusable": true,
+      "width": 140,
+      "height": 80,
+      "layout": "vertical",
+      "gap": 4,
+      "padding": 8,
+      "fill": "#EEF2FF",
+      "metadata": {
+        "type": "component",
+        "_props": {
+          "label": "Body/Label"
+        }
+      },
+      "children": [
+        {
+          "id": "Bdy01",
+          "name": "Body",
+          "type": "frame",
+          "layout": "vertical",
+          "gap": 4,
+          "width": 124,
+          "height": 64,
+          "children": [
+            {
+              "id": "Lbl01",
+              "name": "Label",
+              "type": "text",
+              "content": "Total",
+              "fontSize": 12
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

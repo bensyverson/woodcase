@@ -1,0 +1,96 @@
+{
+  "children": [
+    {
+      "alignItems": "center",
+      "children": [
+        {
+          "children": [
+            {
+              "content": "Design",
+              "fill": "#1E3A8A",
+              "fontFamily": "IBM Plex Sans",
+              "fontSize": 13,
+              "fontWeight": "500",
+              "id": "tfH02",
+              "name": "chip-1-label",
+              "type": "text"
+            }
+          ],
+          "cornerRadius": 12,
+          "fill": "#DBEAFE",
+          "id": "tfH01",
+          "name": "chip-1",
+          "padding": [
+            4,
+            10
+          ],
+          "type": "frame"
+        },
+        {
+          "children": [
+            {
+              "content": "Engineering",
+              "fill": "#1E3A8A",
+              "fontFamily": "IBM Plex Sans",
+              "fontSize": 13,
+              "fontWeight": "500",
+              "id": "tfH04",
+              "name": "chip-2-label",
+              "type": "text"
+            }
+          ],
+          "cornerRadius": 12,
+          "fill": "#DBEAFE",
+          "id": "tfH03",
+          "name": "chip-2",
+          "padding": [
+            4,
+            10
+          ],
+          "type": "frame"
+        },
+        {
+          "children": [
+            {
+              "content": "Q3 roadmap",
+              "fill": "#1E3A8A",
+              "fontFamily": "IBM Plex Sans",
+              "fontSize": 13,
+              "fontWeight": "500",
+              "id": "tfH06",
+              "name": "chip-3-label",
+              "type": "text"
+            }
+          ],
+          "cornerRadius": 12,
+          "fill": "#DBEAFE",
+          "id": "tfH05",
+          "name": "chip-3",
+          "padding": [
+            4,
+            10
+          ],
+          "type": "frame"
+        },
+        {
+          "content": "+4",
+          "fill": "#6B7280",
+          "fontFamily": "IBM Plex Sans",
+          "fontSize": 13,
+          "fontWeight": "normal",
+          "id": "tfH07",
+          "name": "auto-more",
+          "type": "text"
+        }
+      ],
+      "fill": "#F3F4F6",
+      "gap": 8,
+      "id": "tfH00",
+      "name": "layout-text-chips",
+      "padding": 16,
+      "type": "frame",
+      "width": 360
+    }
+  ],
+  "version": "2.17"
+}

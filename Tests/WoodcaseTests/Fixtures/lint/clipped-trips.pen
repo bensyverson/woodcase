@@ -1,0 +1,38 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "id": "Rt001",
+      "name": "Root",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "width": 200,
+      "height": 100,
+      "layout": "none",
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "id": "Ovr01",
+          "name": "Overflows",
+          "type": "rectangle",
+          "x": 160,
+          "y": 20,
+          "width": 80,
+          "height": 40,
+          "fill": "#00FF00"
+        },
+        {
+          "id": "Out01",
+          "name": "Outside",
+          "type": "rectangle",
+          "x": 260,
+          "y": 120,
+          "width": 20,
+          "height": 20,
+          "fill": "#0000FF"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "type": "frame",
+      "id": "Ut7JJ",
+      "x": 0,
+      "y": 0,
+      "name": "layout-gap",
+      "width": 400,
+      "height": 100,
+      "fill": "#F0F0F0",
+      "gap": 16,
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "2dzC4",
+          "name": "child-1",
+          "fill": "#FF0000",
+          "width": 80,
+          "height": 60
+        },
+        {
+          "type": "rectangle",
+          "id": "bVHUE",
+          "name": "child-2",
+          "fill": "#00FF00",
+          "width": 80,
+          "height": 60
+        },
+        {
+          "type": "rectangle",
+          "id": "OzQi9",
+          "name": "child-3",
+          "fill": "#0000FF",
+          "width": 80,
+          "height": 60
+        }
+      ]
+    }
+  ],
+  "fileToken": "508bf7f8-3a21-489f-badb-fbb29e650e66"
+}

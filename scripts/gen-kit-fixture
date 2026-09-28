@@ -1,0 +1,1121 @@
+#!/usr/bin/env python3
+"""gen-kit-fixture — write Tests/WoodcaseTests/Fixtures/kit.lib.pen, an original
+component library, from this script alone.
+
+The library exists so the import pipeline has a library-scale fixture that owes
+nothing to any bundled design kit: every id, name, token, theme axis, measurement
+and string below is written here, and the output is a pure function of this file.
+Node ids are derived from a stable key per node (`<component>/<part>`) by hashing,
+so they are compact 5-character alphanumerics, never UUIDs, and never change
+unless a key does.
+
+What the library is built to exercise (`--report` prints each count):
+
+- scale: 80+ reusable components in 16 families;
+- three theme axes (`scheme` x `tint` x `contrast`, 2 x 4 x 2), with colour, number
+  and chained (`$accent`) variables that vary along them;
+- ref chains: a reusable component that is itself a ref, two deep
+  (`glyph-action-outline-lg` -> `action-outline-lg` -> `action-solid-lg`);
+- slash-path descendant overrides that cross a nested instance
+  (`field-search-active` reaches `<clear>/<mark>` inside a placed `glyph-action`);
+- per-side strokes (`row-divided`, `grid-row`, `rail`, `side-rail`);
+- disabled children kept out of layout (every `glyph-action` disables the caption
+  of the action it wraps; disabled fills on field labels);
+- shadows, a background blur and a layer blur; lucide icons; slots;
+- one large top-level frame that is not a ref (`kit component sheet`), the
+  `woodcase shot` benchmark target.
+
+Usage:
+    scripts/gen-kit-fixture                 write the library in place
+    scripts/gen-kit-fixture --check         exit 1 if the file on disk differs
+    scripts/gen-kit-fixture --report        print the coverage counts
+    scripts/gen-kit-fixture --sync-host F   copy the library's `variables` and
+                                            `themes` into host document F, which
+                                            keeps its own copy of the tokens
+    scripts/gen-kit-fixture --ids K [K...]  print the id for each node key
+
+Standard library only; runs sandboxed.
+"""
+
+import hashlib
+import json
+import os
+import sys
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUT = os.path.join(ROOT, "Tests", "WoodcaseTests", "Fixtures", "kit.lib.pen")
+
+ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+FONT = "Inter"
+
+# ---------------------------------------------------------------------------
+# Ids
+# ---------------------------------------------------------------------------
+
+_ids = {}
+_taken = {}
+
+
+def kid(key):
+    """The node id for `key`: five characters from a SHA-256 of the key, the
+    first always a letter. A collision rehashes with a counter, so the id of
+    every key is fixed by the order keys are first asked for."""
+    if key in _ids:
+        return _ids[key]
+    salt = 0
+    while True:
+        digest = hashlib.sha256(f"woodcase-kit:{key}:{salt}".encode()).digest()
+        chars = [ALPHABET[digest[0] % 52]] + [ALPHABET[b % 62] for b in digest[1:5]]
+        candidate = "".join(chars)
+        if candidate not in _taken:
+            _taken[candidate] = key
+            _ids[key] = candidate
+            return candidate
+        salt += 1
+
+
+# ---------------------------------------------------------------------------
+# Tokens
+# ---------------------------------------------------------------------------
+
+SCHEMES = ["day", "night"]
+TINTS = ["slate", "sand", "moss", "clay"]
+CONTRASTS = ["normal", "high"]
+
+# name -> {scheme: base, (scheme, tint): value, (scheme, "high"): value}
+COLOR_TOKENS = {
+    "paper": {
+        "day": "#f6f5f2", ("day", "sand"): "#f7f2e9", ("day", "moss"): "#f2f4ee", ("day", "clay"): "#f7f0ec",
+        "night": "#121418", ("night", "sand"): "#16130e", ("night", "moss"): "#0f1410", ("night", "clay"): "#161010",
+    },
+    "paper-raised": {
+        "day": "#ffffff",
+        "night": "#1b1e24", ("night", "sand"): "#201c16", ("night", "moss"): "#171d18", ("night", "clay"): "#201818",
+    },
+    "paper-sunk": {
+        "day": "#eceae5", ("day", "sand"): "#eee6d8", ("day", "moss"): "#e5e9df", ("day", "clay"): "#efe3dc",
+        "night": "#23272e", ("night", "sand"): "#2a251d", ("night", "moss"): "#1f2720", ("night", "clay"): "#2b2020",
+    },
+    "ink": {"day": "#1d1f23", "night": "#eef0f2", ("day", "high"): "#08090b", ("night", "high"): "#ffffff"},
+    "ink-soft": {"day": "#6b6f78", "night": "#9aa0aa", ("day", "high"): "#45484f", ("night", "high"): "#c4c8cf"},
+    "hairline": {"day": "#dddad3", "night": "#ffffff1f", ("day", "high"): "#9c988f", ("night", "high"): "#ffffff52"},
+    "field": {"day": "#cfccc4", "night": "#ffffff29", ("day", "high"): "#8a867d", ("night", "high"): "#ffffff66"},
+    "accent": {
+        "day": "#3d5a80", ("day", "sand"): "#b7791f", ("day", "moss"): "#3f7d4e", ("day", "clay"): "#b5543c",
+        "night": "#8fb0dc", ("night", "sand"): "#e0b062", ("night", "moss"): "#7cc48f", ("night", "clay"): "#e38b72",
+    },
+    "on-accent": {"day": "#ffffff", "night": "#111315"},
+    "accent-wash": {
+        "day": "#e3e9f2", ("day", "sand"): "#f5e8cf", ("day", "moss"): "#e1eedf", ("day", "clay"): "#f6e1da",
+        "night": "#243247", ("night", "sand"): "#3a2e17", ("night", "moss"): "#1f3325", ("night", "clay"): "#3b231c",
+    },
+    "on-accent-wash": {
+        "day": "#22354f", ("day", "sand"): "#6b440c", ("day", "moss"): "#214a2c", ("day", "clay"): "#6e2a19",
+        "night": "#d7e4f5", ("night", "sand"): "#f3dcae", ("night", "moss"): "#cdeccf", ("night", "clay"): "#f6d0c4",
+    },
+    "danger": {"day": "#c2352b", "night": "#f0776b"},
+    "on-danger": {"day": "#ffffff", "night": "#1a0e0c"},
+    "success": {"day": "#2f8a4c", "night": "#6fd08c"},
+}
+
+SIMPLE_TOKENS = {
+    # A chained variable: resolves through another token, per theme.
+    "focus": ("color", "$accent"),
+    "scrim": ("color", "#0b0c0e8c"),
+    "radius-sm": ("number", 3),
+    "radius-md": ("number", 7),
+    "radius-lg": ("number", 12),
+    "radius-pill": ("number", 999),
+    "space-xs": ("number", 4),
+    "space-sm": ("number", 8),
+    "space-md": ("number", 12),
+    "space-lg": ("number", 18),
+}
+
+# A number token that varies along the third axis.
+STROKE_WEIGHT = {"normal": 1, "high": 2}
+
+
+def themed_color(spec):
+    """Expands one colour token into Pen's themed-value list. Order matters: the
+    last matching entry wins, so single-axis entries come before the pairs that
+    refine them, and contrast entries come last."""
+    entries = [{"value": spec["day"]}]
+    for tint in TINTS[1:]:
+        if ("day", tint) in spec:
+            entries.append({"theme": {"tint": tint}, "value": spec[("day", tint)]})
+    if spec.get("night") and spec["night"] != spec["day"]:
+        entries.append({"theme": {"scheme": "night"}, "value": spec["night"]})
+    for tint in TINTS[1:]:
+        if ("night", tint) in spec:
+            entries.append({"theme": {"scheme": "night", "tint": tint}, "value": spec[("night", tint)]})
+        elif ("day", tint) in spec and spec.get("night") != spec["day"]:
+            # A tint refined for day only: night keeps the plain night value.
+            entries.append({"theme": {"scheme": "night", "tint": tint}, "value": spec["night"]})
+    if ("day", "high") in spec:
+        entries.append({"theme": {"contrast": "high"}, "value": spec[("day", "high")]})
+    if ("night", "high") in spec:
+        entries.append({"theme": {"contrast": "high", "scheme": "night"}, "value": spec[("night", "high")]})
+    return {"type": "color", "value": entries}
+
+
+def variables():
+    result = {name: themed_color(spec) for name, spec in COLOR_TOKENS.items()}
+    for name, (kind, value) in SIMPLE_TOKENS.items():
+        result[name] = {"type": kind, "value": value}
+    result["stroke-weight"] = {
+        "type": "number",
+        "value": [{"value": STROKE_WEIGHT["normal"]}, {"theme": {"contrast": "high"}, "value": STROKE_WEIGHT["high"]}],
+    }
+    return result
+
+
+def themes():
+    return {"contrast": CONTRASTS, "scheme": SCHEMES, "tint": TINTS}
+
+
+# ---------------------------------------------------------------------------
+# Node builders. `key` is the stable id key; every builder returns a dict.
+# ---------------------------------------------------------------------------
+
+
+def clean(node):
+    return {k: v for k, v in node.items() if v is not None}
+
+
+def text(key, content, size=13, weight="500", fill="$ink", **kw):
+    name = kw.pop("name", key.rsplit("/", 1)[-1])
+    return clean({
+        "type": "text", "id": kid(key), "name": name, "content": content, "fill": fill,
+        "fontFamily": FONT, "fontSize": size, "fontWeight": weight, **kw,
+    })
+
+
+def icon(key, glyph, size=16, fill="$ink", **kw):
+    name = kw.pop("name", key.rsplit("/", 1)[-1])
+    return clean({
+        "type": "icon", "id": kid(key), "name": name, "icon": glyph, "library": "lucide",
+        "width": size, "height": size, "fill": fill, **kw,
+    })
+
+
+def frame(key, children=None, **kw):
+    name = kw.pop("name", key.rsplit("/", 1)[-1])
+    node = {"type": "frame", "id": kid(key), "name": name, **kw}
+    if children:
+        node["children"] = children
+    return clean(node)
+
+
+def ref(key, target, descendants=None, **kw):
+    """A ref to the component keyed `target`. `descendants` maps node keys (or
+    lists of keys, for a slash path through nested instances) to overrides."""
+    name = kw.pop("name", None)
+    node = {"type": "ref", "id": kid(key), "ref": kid(target), **kw}
+    if name is not None:
+        node["name"] = name
+    if descendants:
+        node["descendants"] = {path(k): v for k, v in descendants.items()}
+    return clean(node)
+
+
+def path(keys):
+    if isinstance(keys, str):
+        return kid(keys)
+    return "/".join(kid(k) for k in keys)
+
+
+def soft_shadow(y=2, blur=6, alpha="14"):
+    return {"type": "shadow", "shadowType": "outer", "offset": {"x": 0, "y": y}, "blur": blur, "color": f"#101216{alpha}"}
+
+
+# ---------------------------------------------------------------------------
+# Components, by family. Each entry: (key, height estimate, builder()).
+# ---------------------------------------------------------------------------
+
+COMPONENTS = []
+
+
+def component(key, height):
+    def register(build):
+        COMPONENTS.append((key, height, build))
+        return build
+    return register
+
+
+# --- action: buttons ---------------------------------------------------------
+
+ACTION_TONES = {
+    # tone: (fill, ink, stroke, effect)
+    "solid": ("$accent", "$on-accent", None, None),
+    "soft": ("$accent-wash", "$on-accent-wash", None, None),
+    "outline": ("$paper-raised", "$ink", "$hairline", soft_shadow(1, 3, "12")),
+    "quiet": (None, "$ink", None, None),
+    "danger": ("$danger", "$on-danger", None, None),
+}
+ACTION_SIZES = {
+    # size: (padding, glyph box, glyph, caption size, caption)
+    "md": ([9, 15], 18, 14, 13, "Continue"),
+    "lg": ([11, 22], 22, 22, 15, "Get started"),
+}
+
+
+def action_frame(tone, size):
+    fill, ink, stroke, effect = ACTION_TONES[tone]
+    pad, box, glyph, caption, words = ACTION_SIZES[size]
+    k = f"action-{tone}-{size}"
+    offset = (box - glyph) / 2
+    offset = int(offset) if offset == int(offset) else offset
+    return frame(
+        k,
+        [
+            frame(f"{k}/glyph", [icon(f"{k}/mark", "arrow-right", glyph, ink, x=offset, y=offset)],
+                  layout="none", width=box, height=box),
+            text(f"{k}/caption", words, caption, "600", ink, textAlign="center", textAlignVertical="middle"),
+        ],
+        name=k, reusable=True, alignItems="center", justifyContent="center", gap=7,
+        cornerRadius="$radius-md", padding=pad, fill=fill, stroke=stroke,
+        strokeWidth=("$stroke-weight" if stroke else None), strokeAlignment=("inner" if stroke else None),
+        effect=effect,
+    )
+
+
+for _size in ACTION_SIZES:
+    for _tone in ACTION_TONES:
+        _key = f"action-{_tone}-{_size}"
+        if _size == "lg" and _tone != "solid":
+            # Large tones are refs to the solid one: the first link of the chain.
+            def _build(tone=_tone, key=_key):
+                fill, ink, stroke, effect = ACTION_TONES[tone]
+                base = "action-solid-lg"
+                return ref(
+                    key, base,
+                    {f"{base}/caption": {"fill": ink}, f"{base}/mark": {"fill": ink}},
+                    name=key, reusable=True, fill=(fill if fill else []), stroke=stroke,
+                    strokeWidth=("$stroke-weight" if stroke else None),
+                    strokeAlignment=("inner" if stroke else None),
+                    effect=(effect if effect else None),
+                )
+        else:
+            def _build(tone=_tone, size=_size):
+                return action_frame(tone, size)
+        component(_key, 48 if _size == "lg" else 40)(_build)
+
+
+# --- glyph-action: icon-only buttons, every one a ref with its caption off ----
+
+for _size in ACTION_SIZES:
+    for _tone in ACTION_TONES:
+        _key = f"glyph-action-{_tone}-{_size}"
+
+        def _build(tone=_tone, size=_size, key=_key):
+            target = f"action-{tone}-{size}"
+            caption_owner = f"action-{tone}-{size}" if size == "md" else "action-solid-lg"
+            return ref(
+                key, target, {f"{caption_owner}/caption": {"enabled": False}},
+                name=key, reusable=True, padding=(9 if size == "md" else 10),
+            )
+        component(_key, 48 if _size == "lg" else 40)(_build)
+
+
+# --- tag: small labels -------------------------------------------------------
+
+
+@component("tag-solid", 24)
+def _tag_solid():
+    return frame(
+        "tag-solid", [text("tag-solid/label", "New", 11, "600", "$on-accent", textAlign="center")],
+        name="tag-solid", reusable=True, alignItems="center", justifyContent="center",
+        cornerRadius="$radius-pill", padding=[3, 9], fill="$accent",
+    )
+
+
+for _key, _fill, _ink, _stroke in [
+    ("tag-soft", "$accent-wash", "$on-accent-wash", None),
+    ("tag-outline", [], "$ink", "$hairline"),
+    ("tag-danger", "$danger", "$on-danger", None),
+    ("tag-success", "$success", "$on-accent", None),
+]:
+    def _build(key=_key, fill=_fill, ink=_ink, stroke=_stroke):
+        return ref(
+            key, "tag-solid", {"tag-solid/label": {"fill": ink}}, name=key, reusable=True, fill=fill,
+            stroke=stroke, strokeWidth=(1 if stroke else None), strokeAlignment=("inner" if stroke else None),
+        )
+    component(_key, 24)(_build)
+
+
+# --- portrait: avatars -------------------------------------------------------
+
+
+@component("portrait-md", 42)
+def _portrait_md():
+    return frame(
+        "portrait-md", [text("portrait-md/initials", "MK", 14, "600", "$ink", textAlign="center")],
+        name="portrait-md", reusable=True, layout="vertical", alignItems="center", justifyContent="center",
+        width=40, height=40, cornerRadius="$radius-pill", fill="$paper-sunk",
+    )
+
+
+for _key, _side, _size in [("portrait-sm", 30, 11), ("portrait-lg", 56, 19)]:
+    def _build(key=_key, side=_side, size=_size):
+        return ref(key, "portrait-md", {"portrait-md/initials": {"fontSize": size}},
+                   name=key, reusable=True, width=side, height=side)
+    component(_key, _side + 2)(_build)
+
+
+@component("portrait-stack", 42)
+def _portrait_stack():
+    k = "portrait-stack"
+    people = [("RB", "$accent-wash"), ("TO", "$paper-sunk"), ("JL", "$accent")]
+    return frame(
+        k,
+        [
+            ref(f"{k}/p{i}", "portrait-md", {"portrait-md/initials": {"content": who}}, fill=fill,
+                stroke="$paper", strokeWidth=2, strokeAlignment="outer")
+            for i, (who, fill) in enumerate(people)
+        ],
+        name=k, reusable=True, alignItems="center", gap=-10,
+    )
+
+
+# --- field: inputs -----------------------------------------------------------
+
+
+def field_label(k, words="Account name"):
+    return frame(
+        f"{k}/label-row",
+        [text(f"{k}/label", words, 13, "500", "$ink", textGrowth="fixed-width", width="fill_container")],
+        fill={"type": "color", "color": "$paper-sunk", "enabled": False}, alignItems="center",
+        width="fill_container",
+    )
+
+
+@component("field-text", 86)
+def _field_text():
+    k = "field-text"
+    return frame(
+        k,
+        [
+            field_label(k),
+            frame(f"{k}/box", [text(f"{k}/value", "e.g. Household", 13, "normal", "$ink-soft")],
+                  alignItems="center", cornerRadius="$radius-md", padding=[9, 11], fill="$paper-raised",
+                  stroke="$field", strokeWidth="$stroke-weight", strokeAlignment="inner", width="fill_container"),
+            text(f"{k}/hint", "Shown on statements.", 12, "normal", "$ink-soft"),
+        ],
+        name=k, reusable=True, layout="vertical", gap=5, width=260,
+    )
+
+
+component("field-text-filled", 86)(lambda: ref(
+    "field-text-filled", "field-text", {"field-text/value": {"content": "Household", "fill": "$ink"}},
+    name="field-text-filled", reusable=True))
+component("field-text-error", 86)(lambda: ref(
+    "field-text-error", "field-text",
+    {"field-text/box": {"stroke": "$danger"}, "field-text/hint": {"content": "That name is taken.", "fill": "$danger"}},
+    name="field-text-error", reusable=True))
+component("field-bare", 44)(lambda: ref(
+    "field-bare", "field-text", {"field-text/label-row": {"enabled": False}, "field-text/hint": {"enabled": False}},
+    name="field-bare", reusable=True))
+
+
+@component("field-area", 128)
+def _field_area():
+    k = "field-area"
+    return frame(
+        k,
+        [
+            field_label(k, "Note to self"),
+            frame(f"{k}/box", [text(f"{k}/value", "Anything worth remembering", 13, "normal", "$ink-soft",
+                                    textGrowth="fixed-width", width="fill_container")],
+                  cornerRadius="$radius-md", padding=[9, 11], fill="$paper-raised", height=88,
+                  stroke="$field", strokeWidth="$stroke-weight", strokeAlignment="inner", width="fill_container"),
+        ],
+        name=k, reusable=True, layout="vertical", gap=5, width=260,
+    )
+
+
+@component("field-pick", 66)
+def _field_pick():
+    k = "field-pick"
+    return frame(
+        k,
+        [
+            field_label(k, "Currency"),
+            frame(f"{k}/box",
+                  [text(f"{k}/value", "Choose one", 13, "normal", "$ink-soft", textGrowth="fixed-width",
+                        width="fill_container"),
+                   icon(f"{k}/caret", "chevrons-up-down", 14, "$ink-soft")],
+                  alignItems="center", justifyContent="space_between", gap=8, cornerRadius="$radius-md",
+                  padding=[9, 11], fill="$paper-raised", stroke="$field", strokeWidth="$stroke-weight",
+                  strokeAlignment="inner", width="fill_container"),
+        ],
+        name=k, reusable=True, layout="vertical", gap=5, width=260,
+    )
+
+
+component("field-pick-filled", 66)(lambda: ref(
+    "field-pick-filled", "field-pick", {"field-pick/value": {"content": "Euro", "fill": "$ink"}},
+    name="field-pick-filled", reusable=True))
+
+
+@component("field-search", 40)
+def _field_search():
+    k = "field-search"
+    return frame(
+        k,
+        [
+            icon(f"{k}/lens", "search", 15, "$ink-soft"),
+            text(f"{k}/value", "Find a payee", 13, "normal", "$ink-soft", textGrowth="fixed-width",
+                 width="fill_container"),
+            # A nested instance: the variants below override *through* it.
+            ref(f"{k}/clear", "glyph-action-quiet-md", padding=2),
+        ],
+        name=k, reusable=True, alignItems="center", gap=8, cornerRadius="$radius-pill", padding=[4, 6, 4, 12],
+        fill="$paper-sunk", width=260,
+    )
+
+
+component("field-search-empty", 40)(lambda: ref(
+    "field-search-empty", "field-search", {"field-search/clear": {"enabled": False}},
+    name="field-search-empty", reusable=True))
+component("field-search-active", 40)(lambda: ref(
+    "field-search-active", "field-search",
+    {
+        "field-search/value": {"content": "Corner bakery", "fill": "$ink"},
+        # Slash path across the nested glyph-action instance.
+        ("field-search/clear", "action-quiet-md/mark"): {"icon": "circle-x", "fill": "$ink-soft"},
+    },
+    name="field-search-active", reusable=True, stroke="$focus", strokeWidth=2, strokeAlignment="outer"))
+
+
+# --- toggle: switch, check, radio -------------------------------------------
+
+
+@component("switch-on", 26)
+def _switch_on():
+    k = "switch-on"
+    return frame(
+        k,
+        [
+            frame(f"{k}/track",
+                  [{"type": "ellipse", "id": kid(f"{k}/knob"), "name": "knob", "width": 18, "height": 18,
+                    "fill": "$paper-raised",
+                    "effect": [soft_shadow(1, 2, "26"), soft_shadow(3, 8, "14")]}],
+                  alignItems="center", justifyContent="end", padding=3, width=40, height=24,
+                  cornerRadius="$radius-pill", fill="$accent"),
+            text(f"{k}/label", "Round-ups", 13, "500", "$ink"),
+        ],
+        name=k, reusable=True, alignItems="center", gap=10,
+    )
+
+
+component("switch-off", 26)(lambda: ref(
+    "switch-off", "switch-on", {"switch-on/track": {"fill": "$field", "justifyContent": "start"}},
+    name="switch-off", reusable=True))
+
+
+@component("check-on", 20)
+def _check_on():
+    k = "check-on"
+    return frame(
+        k,
+        [
+            frame(f"{k}/box", [icon(f"{k}/tick", "check", 12, "$on-accent")], layout="vertical",
+                  alignItems="center", justifyContent="center", width=18, height=18, cornerRadius="$radius-sm",
+                  fill="$accent", stroke="$accent", strokeWidth=1, strokeAlignment="inner"),
+            text(f"{k}/label", "Remember this device", 13, "500", "$ink"),
+        ],
+        name=k, reusable=True, alignItems="center", gap=9,
+    )
+
+
+component("check-off", 20)(lambda: ref(
+    "check-off", "check-on",
+    {"check-on/tick": {"enabled": False}, "check-on/box": {"fill": "$paper-raised", "stroke": "$field"}},
+    name="check-off", reusable=True))
+
+
+@component("radio-on", 20)
+def _radio_on():
+    k = "radio-on"
+    return frame(
+        k,
+        [
+            frame(f"{k}/ring", [{"type": "ellipse", "id": kid(f"{k}/dot"), "name": "dot", "width": 8, "height": 8,
+                                 "fill": "$accent"}],
+                  layout="vertical", alignItems="center", justifyContent="center", width=18, height=18,
+                  cornerRadius="$radius-pill", fill="$paper-raised", stroke="$accent", strokeWidth=1.5,
+                  strokeAlignment="inner"),
+            text(f"{k}/label", "Monthly", 13, "500", "$ink"),
+        ],
+        name=k, reusable=True, alignItems="center", gap=9,
+    )
+
+
+component("radio-off", 20)(lambda: ref(
+    "radio-off", "radio-on", {"radio-on/dot": {"enabled": False}, "radio-on/ring": {"stroke": "$field"}},
+    name="radio-off", reusable=True))
+
+
+# --- row: list rows ----------------------------------------------------------
+
+
+@component("row-plain", 40)
+def _row_plain():
+    k = "row-plain"
+    return frame(
+        k,
+        [
+            frame(f"{k}/lead", [icon(f"{k}/lead-mark", "folder", 16, "$ink-soft"),
+                                text(f"{k}/label", "Documents", 14, "normal", "$ink")],
+                  alignItems="center", gap=10),
+            icon(f"{k}/trail", "chevron-right", 15, "$ink-soft"),
+        ],
+        name=k, reusable=True, alignItems="center", justifyContent="space_between", padding=[10, 12],
+        cornerRadius="$radius-sm", width=280,
+    )
+
+
+component("row-selected", 40)(lambda: ref(
+    "row-selected", "row-plain", {"row-plain/lead-mark": {"fill": "$accent"}, "row-plain/label": {"fontWeight": "600"}},
+    name="row-selected", reusable=True, fill="$accent-wash"))
+component("row-muted", 40)(lambda: ref(
+    "row-muted", "row-plain", {"row-plain/lead-mark": {"enabled": False}, "row-plain/label": {"fill": "$ink-soft"}},
+    name="row-muted", reusable=True, opacity=0.6))
+
+
+@component("row-divided", 46)
+def _row_divided():
+    k = "row-divided"
+    return frame(
+        k,
+        [text(f"{k}/label", "Standing orders", 14, "normal", "$ink", textGrowth="fixed-width", width="fill_container"),
+         text(f"{k}/value", "3 active", 13, "normal", "$ink-soft")],
+        name=k, reusable=True, alignItems="center", gap=12, padding=[13, 2], width=280,
+        # Bottom edge only: the per-side stroke case.
+        stroke="$hairline", strokeWidth={"bottom": 1}, strokeAlignment="inner",
+    )
+
+
+@component("row-heading", 30)
+def _row_heading():
+    k = "row-heading"
+    return frame(
+        k, [text(f"{k}/label", "EARLIER THIS WEEK", 11, "600", "$ink-soft", letterSpacing=0.6)],
+        name=k, reusable=True, padding=[8, 12, 4, 12], width=280,
+    )
+
+
+@component("row-rule", 12)
+def _row_rule():
+    k = "row-rule"
+    return frame(
+        k, [{"type": "line", "id": kid(f"{k}/line"), "name": "line", "width": "fill_container", "height": 0,
+             "stroke": "$hairline", "strokeWidth": 1}],
+        name=k, reusable=True, alignItems="center", padding=[5, 0], width=280,
+    )
+
+
+@component("row-value", 40)
+def _row_value():
+    k = "row-value"
+    return frame(
+        k,
+        [text(f"{k}/label", "Interest rate", 14, "normal", "$ink-soft"),
+         text(f"{k}/value", "2.40%", 14, "600", "$ink", textAlign="right")],
+        name=k, reusable=True, alignItems="center", justifyContent="space_between", padding=[10, 12], width=280,
+    )
+
+
+# --- tab and segment ---------------------------------------------------------
+
+
+@component("tab-on", 36)
+def _tab_on():
+    k = "tab-on"
+    return frame(
+        k, [text(f"{k}/label", "Overview", 13, "600", "$ink")],
+        name=k, reusable=True, padding=[9, 4], stroke="$accent", strokeWidth={"bottom": 2},
+        strokeAlignment="inner",
+    )
+
+
+component("tab-off", 36)(lambda: ref(
+    "tab-off", "tab-on", {"tab-on/label": {"fill": "$ink-soft", "fontWeight": "500"}},
+    name="tab-off", reusable=True, stroke=[]))
+
+
+@component("tab-strip", 38)
+def _tab_strip():
+    k = "tab-strip"
+    labels = [("tab-on", "Overview"), ("tab-off", "Budgets"), ("tab-off", "Goals")]
+    return frame(
+        k,
+        [ref(f"{k}/t{i}", target, {f"tab-on/label": {"content": words}}) for i, (target, words) in enumerate(labels)],
+        name=k, reusable=True, gap=18, stroke="$hairline", strokeWidth={"bottom": 1}, strokeAlignment="inner",
+        slot=[kid("tab-on"), kid("tab-off")],
+    )
+
+
+@component("seg-on", 30)
+def _seg_on():
+    k = "seg-on"
+    return frame(
+        k, [text(f"{k}/label", "Week", 12, "600", "$ink", textAlign="center")],
+        name=k, reusable=True, justifyContent="center", padding=[6, 14], cornerRadius="$radius-sm",
+        fill="$paper-raised", effect=soft_shadow(1, 2, "1f"),
+    )
+
+
+component("seg-off", 30)(lambda: ref(
+    "seg-off", "seg-on", {"seg-on/label": {"fill": "$ink-soft", "fontWeight": "500"}},
+    name="seg-off", reusable=True, fill=[], effect=[]))
+
+
+@component("seg-bar", 38)
+def _seg_bar():
+    k = "seg-bar"
+    labels = [("seg-off", "Day"), ("seg-on", "Week"), ("seg-off", "Month"), ("seg-off", "Year")]
+    return frame(
+        k,
+        [ref(f"{k}/s{i}", target, {"seg-on/label": {"content": words}}) for i, (target, words) in enumerate(labels)],
+        name=k, reusable=True, gap=2, padding=3, cornerRadius="$radius-md", fill="$paper-sunk",
+        slot=[kid("seg-on"), kid("seg-off")],
+    )
+
+
+# --- grid: a table built from row and cell components -----------------------
+
+
+@component("grid-cell", 40)
+def _grid_cell():
+    k = "grid-cell"
+    return frame(
+        k, [text(f"{k}/value", "—", 13, "normal", "$ink")],
+        name=k, reusable=True, alignItems="center", padding=[11, 12], width=140, slot=[],
+    )
+
+
+@component("grid-head", 38)
+def _grid_head():
+    k = "grid-head"
+    return frame(
+        k, [text(f"{k}/label", "Column", 12, "600", "$ink-soft", letterSpacing=0.3)],
+        name=k, reusable=True, alignItems="center", padding=[10, 12], width=140,
+    )
+
+
+@component("grid-row", 42)
+def _grid_row():
+    k = "grid-row"
+    return frame(
+        k, None, name=k, reusable=True, alignItems="center", width=420, height="fit_content(42)",
+        stroke="$hairline", strokeWidth={"bottom": 1}, strokeAlignment="inner", slot=[kid("grid-cell")],
+    )
+
+
+GRID_ROWS = [("Rent", "Housing", "1 250.00"), ("Groceries", "Food", "86.40"), ("Train pass", "Transit", "54.00")]
+
+
+@component("grid", 200)
+def _grid():
+    k = "grid"
+    head = frame(
+        f"{k}/head",
+        [ref(f"{k}/h{i}", "grid-head", {"grid-head/label": {"content": words}})
+         for i, words in enumerate(["Item", "Category", "Amount"])],
+        alignItems="center", width="fill_container", fill="$paper-sunk",
+    )
+    rows = []
+    for r, cells in enumerate(GRID_ROWS):
+        rows.append(ref(
+            f"{k}/r{r}", "grid-row", width="fill_container",
+            children=[ref(f"{k}/r{r}c{c}", "grid-cell", {"grid-cell/value": {"content": value}})
+                      for c, value in enumerate(cells)],
+        ))
+    return frame(
+        k, [head] + rows, name=k, reusable=True, layout="vertical", clip=True, width=420,
+        cornerRadius="$radius-lg", fill="$paper-raised", stroke="$hairline", strokeWidth=1, strokeAlignment="inner",
+    )
+
+
+# --- panel: cards and notices ------------------------------------------------
+
+
+@component("panel", 196)
+def _panel():
+    k = "panel"
+    return frame(
+        k,
+        [
+            frame(f"{k}/top", layout="vertical", gap=4, padding=[18, 18, 6, 18], width="fill_container", slot=[]),
+            frame(f"{k}/body", layout="vertical", gap=8, padding=[6, 18], width="fill_container", slot=[]),
+            frame(f"{k}/foot", alignItems="center", gap=8, padding=[6, 18, 18, 18], width="fill_container", slot=[]),
+        ],
+        name=k, reusable=True, layout="vertical", width=320, cornerRadius="$radius-lg", fill="$paper-raised",
+        stroke="$hairline", strokeWidth=1, strokeAlignment="inner", effect=soft_shadow(2, 10, "10"),
+    )
+
+
+component("panel-stat", 150)(lambda: ref(
+    "panel-stat", "panel",
+    {
+        "panel/top": {"children": [text("panel-stat/title", "Saved this month", 13, "500", "$ink-soft")]},
+        "panel/body": {"children": [text("panel-stat/figure", "412.75", 30, "700", "$ink", letterSpacing=-0.6)]},
+        "panel/foot": {"children": [ref("panel-stat/delta", "tag-success", {"tag-solid/label": {"content": "+8%"}})]},
+    },
+    name="panel-stat", reusable=True))
+component("panel-media", 290)(lambda: ref(
+    "panel-media", "panel",
+    {
+        "panel/top": {"children": [frame("panel-media/art", layout="none", height=120, width="fill_container",
+                                         cornerRadius="$radius-md", fill="$accent-wash")]},
+        "panel/body": {"children": [text("panel-media/title", "Trip fund", 15, "600", "$ink"),
+                                    text("panel-media/caption", "Lisbon, next spring.", 13, "normal", "$ink-soft")]},
+        "panel/foot": {"children": [ref("panel-media/go", "action-solid-md", {"action-solid-md/caption": {"content": "Add money"}})]},
+    },
+    name="panel-media", reusable=True))
+
+
+@component("notice", 76)
+def _notice():
+    k = "notice"
+    return frame(
+        k,
+        [
+            icon(f"{k}/mark", "info", 18, "$accent"),
+            frame(f"{k}/copy",
+                  [text(f"{k}/title", "Heads up", 14, "600", "$ink"),
+                   text(f"{k}/body", "Transfers after six arrive the next working day.", 13, "normal", "$ink-soft",
+                        textGrowth="fixed-width", width="fill_container")],
+                  layout="vertical", gap=3, width="fill_container"),
+        ],
+        name=k, reusable=True, gap=10, padding=14, width=340, cornerRadius="$radius-md", fill="$paper-raised",
+        stroke="$hairline", strokeWidth={"left": 3, "top": 1, "right": 1, "bottom": 1}, strokeAlignment="inner",
+    )
+
+
+component("notice-danger", 76)(lambda: ref(
+    "notice-danger", "notice",
+    {"notice/mark": {"icon": "octagon-alert", "fill": "$danger"},
+     "notice/title": {"content": "Payment failed", "fill": "$danger"}},
+    name="notice-danger", reusable=True, stroke="$danger"))
+
+
+# --- rail: navigation --------------------------------------------------------
+
+
+@component("rail-item-on", 50)
+def _rail_item_on():
+    k = "rail-item-on"
+    return frame(
+        k,
+        [icon(f"{k}/mark", "layout-grid", 20, "$accent"), text(f"{k}/label", "Home", 11, "600", "$accent")],
+        name=k, reusable=True, layout="vertical", alignItems="center", gap=3, padding=[6, 10],
+        cornerRadius="$radius-md",
+    )
+
+
+component("rail-item-off", 50)(lambda: ref(
+    "rail-item-off", "rail-item-on",
+    {"rail-item-on/mark": {"fill": "$ink-soft"}, "rail-item-on/label": {"fill": "$ink-soft", "fontWeight": "500"}},
+    name="rail-item-off", reusable=True))
+
+
+@component("rail", 70)
+def _rail():
+    k = "rail"
+    items = [("rail-item-on", "Home", "layout-grid"), ("rail-item-off", "Pay", "send"),
+             ("rail-item-off", "Cards", "wallet"), ("rail-item-off", "You", "user-round")]
+    return frame(
+        k,
+        [ref(f"{k}/i{i}", target, {"rail-item-on/label": {"content": words}, "rail-item-on/mark": {"icon": glyph}},
+             width="fill_container")
+         for i, (target, words, glyph) in enumerate(items)],
+        name=k, reusable=True, alignItems="center", justifyContent="space_around", padding=[8, 12, 20, 12],
+        width=380, fill="$paper-raised", stroke="$hairline", strokeWidth={"top": 1}, strokeAlignment="inner",
+    )
+
+
+@component("side-item-on", 36)
+def _side_item_on():
+    k = "side-item-on"
+    return frame(
+        k,
+        [icon(f"{k}/mark", "inbox", 16, "$on-accent-wash"), text(f"{k}/label", "Inbox", 13, "600", "$on-accent-wash")],
+        name=k, reusable=True, alignItems="center", gap=10, padding=[8, 10], width="fill_container(220)",
+        cornerRadius="$radius-md", fill="$accent-wash",
+    )
+
+
+component("side-item-off", 36)(lambda: ref(
+    "side-item-off", "side-item-on",
+    {"side-item-on/mark": {"fill": "$ink-soft"}, "side-item-on/label": {"fill": "$ink", "fontWeight": "normal"}},
+    name="side-item-off", reusable=True, fill=[]))
+
+
+@component("side-rail", 250)
+def _side_rail():
+    k = "side-rail"
+    items = [("side-item-on", "Inbox", "inbox"), ("side-item-off", "Scheduled", "calendar-clock"),
+             ("side-item-off", "Archive", "archive"), ("side-item-off", "Settings", "sliders-horizontal")]
+    return frame(
+        k,
+        [text(f"{k}/title", "Ledger", 15, "700", "$ink", letterSpacing=-0.2)]
+        + [ref(f"{k}/i{i}", target, {"side-item-on/label": {"content": words}, "side-item-on/mark": {"icon": glyph}},
+               width="fill_container")
+           for i, (target, words, glyph) in enumerate(items)],
+        name=k, reusable=True, layout="vertical", gap=4, padding=[18, 12], width=240, height=250,
+        fill="$paper-raised", stroke="$hairline", strokeWidth={"right": 1}, strokeAlignment="inner",
+        slot=[kid("side-item-on"), kid("side-item-off")],
+    )
+
+
+# --- sheet: bottom sheet and dialog -----------------------------------------
+
+
+@component("sheet", 230)
+def _sheet():
+    k = "sheet"
+    return frame(
+        k,
+        [
+            frame(f"{k}/grab-row", [frame(f"{k}/grab", layout="none", width=36, height=4,
+                                          cornerRadius="$radius-pill", fill="$field")],
+                  justifyContent="center", width="fill_container"),
+            text(f"{k}/title", "Move money", 18, "700", "$ink"),
+            frame(f"{k}/body", [text(f"{k}/lede", "Pick where it goes. You can undo this for ten minutes.", 13,
+                                     "normal", "$ink-soft", textGrowth="fixed-width", width="fill_container")],
+                  layout="vertical", gap=8, width="fill_container", slot=[kid("field-pick"), kid("field-text")]),
+            frame(f"{k}/actions",
+                  [ref(f"{k}/cancel", "action-quiet-md", {"action-quiet-md/caption": {"content": "Not now"},
+                                                           "action-quiet-md/glyph": {"enabled": False}}),
+                   ref(f"{k}/confirm", "action-solid-md", {"action-solid-md/caption": {"content": "Move"}})],
+                  justifyContent="end", gap=8, width="fill_container"),
+        ],
+        name=k, reusable=True, layout="vertical", gap=12, padding=[10, 20, 22, 20], width=380,
+        cornerRadius=[16, 16, 0, 0], fill="$paper-raised", effect=soft_shadow(-4, 24, "1a"),
+    )
+
+
+component("sheet-confirm", 230)(lambda: ref(
+    "sheet-confirm", "sheet",
+    {"sheet/title": {"content": "Close this pot?"},
+     "sheet/lede": {"content": "Its balance returns to your main account."},
+     ("sheet/confirm", "action-solid-md/caption"): {"content": "Close pot"},
+     "sheet/confirm": {"fill": "$danger"}},
+    name="sheet-confirm", reusable=True))
+component("dialog", 230)(lambda: ref(
+    # A dialog is the sheet, floated and rounded all round: another chain link.
+    "dialog", "sheet", {"sheet/grab-row": {"enabled": False}},
+    name="dialog", reusable=True, cornerRadius="$radius-lg", effect=[soft_shadow(8, 30, "29"), soft_shadow(1, 3, "14")]))
+
+
+# --- meter: progress ---------------------------------------------------------
+
+
+@component("meter", 10)
+def _meter():
+    k = "meter"
+    return frame(
+        k, [{"type": "rectangle", "id": kid(f"{k}/fill"), "name": "fill", "x": 0, "y": 0, "width": 90, "height": 8,
+             "cornerRadius": "$radius-pill", "fill": "$accent"}],
+        name=k, reusable=True, layout="none", clip=True, width=240, height=8, cornerRadius="$radius-pill",
+        fill="$paper-sunk",
+    )
+
+
+component("meter-most", 10)(lambda: ref("meter-most", "meter", {"meter/fill": {"width": 200}},
+                                        name="meter-most", reusable=True))
+component("meter-over", 10)(lambda: ref("meter-over", "meter", {"meter/fill": {"width": 240, "fill": "$danger"}},
+                                        name="meter-over", reusable=True))
+
+
+# --- hint: tooltips ----------------------------------------------------------
+
+
+@component("hint", 32)
+def _hint():
+    k = "hint"
+    return frame(
+        k, [text(f"{k}/label", "Copied", 12, "500", "$ink")],
+        name=k, reusable=True, padding=[6, 10], cornerRadius="$radius-sm", fill="$paper-raised",
+        stroke="$hairline", strokeWidth=1, strokeAlignment="inner",
+        effect=[soft_shadow(2, 6, "1a"), {"type": "background_blur", "radius": 12}],
+    )
+
+
+component("hint-inverse", 32)(lambda: ref(
+    "hint-inverse", "hint", {"hint/label": {"fill": "$paper"}}, name="hint-inverse", reusable=True, fill="$ink",
+    stroke=[]))
+component("hint-ghost", 32)(lambda: ref(
+    # A layer blur on a whole instance.
+    "hint-ghost", "hint", name="hint-ghost", reusable=True, opacity=0.7, effect={"type": "blur", "radius": 2}))
+
+
+# --- crumb: breadcrumbs ------------------------------------------------------
+
+
+@component("crumb", 22)
+def _crumb():
+    k = "crumb"
+    return frame(k, [text(f"{k}/label", "Accounts", 13, "normal", "$ink-soft")], name=k, reusable=True,
+                 alignItems="center")
+
+
+component("crumb-here", 22)(lambda: ref("crumb-here", "crumb", {"crumb/label": {"fill": "$ink", "fontWeight": "600"}},
+                                        name="crumb-here", reusable=True))
+
+
+@component("crumb-sep", 22)
+def _crumb_sep():
+    k = "crumb-sep"
+    return frame(k, [icon(f"{k}/mark", "slash", 12, "$hairline")], name=k, reusable=True, alignItems="center",
+                 justifyContent="center", width=16, height=20)
+
+
+@component("crumb-trail", 22)
+def _crumb_trail():
+    k = "crumb-trail"
+    return frame(
+        k,
+        [ref(f"{k}/a", "crumb"), ref(f"{k}/s1", "crumb-sep"),
+         ref(f"{k}/b", "crumb", {"crumb/label": {"content": "Joint"}}), ref(f"{k}/s2", "crumb-sep"),
+         ref(f"{k}/c", "crumb-here", {"crumb/label": {"content": "Statements"}})],
+        name=k, reusable=True, alignItems="center", gap=4,
+    )
+
+
+# --- pager -------------------------------------------------------------------
+
+
+@component("pager-cell-on", 34)
+def _pager_cell_on():
+    k = "pager-cell-on"
+    return frame(
+        k, [text(f"{k}/label", "4", 13, "600", "$on-accent", textAlign="center")],
+        name=k, reusable=True, alignItems="center", justifyContent="center", width=34, height=34,
+        cornerRadius="$radius-md", fill="$accent",
+    )
+
+
+component("pager-cell", 34)(lambda: ref(
+    "pager-cell", "pager-cell-on", {"pager-cell-on/label": {"fill": "$ink", "fontWeight": "500"}},
+    name="pager-cell", reusable=True, fill=[]))
+
+
+@component("pager", 40)
+def _pager():
+    k = "pager"
+    cells = [("pager-cell", "3"), ("pager-cell-on", "4"), ("pager-cell", "5")]
+    return frame(
+        k,
+        [ref(f"{k}/prev", "action-quiet-md", {"action-quiet-md/caption": {"content": "Back"},
+                                               "action-quiet-md/mark": {"icon": "arrow-left"}})]
+        + [ref(f"{k}/n{i}", target, {"pager-cell-on/label": {"content": words}}) for i, (target, words) in enumerate(cells)]
+        + [ref(f"{k}/next", "action-quiet-md", {"action-quiet-md/caption": {"content": "Next"}})],
+        name=k, reusable=True, alignItems="center", gap=4,
+    )
+
+
+# ---------------------------------------------------------------------------
+# The sheet: every component, stacked in columns, inside one large frame.
+# ---------------------------------------------------------------------------
+
+COLUMN_WIDTH = 460
+COLUMN_HEIGHT = 1400
+MARGIN = 60
+
+
+def build():
+    placed = []
+    x, y = MARGIN, MARGIN
+    tallest_column = 0
+    for key, height, make in COMPONENTS:
+        if y + height > COLUMN_HEIGHT:
+            x += COLUMN_WIDTH
+            y = MARGIN
+        node = make()
+        node["x"], node["y"] = x, y
+        placed.append(node)
+        y += height + 28
+        tallest_column = max(tallest_column, y)
+    sheet = {
+        "type": "frame", "id": kid("sheet-root"), "name": "kit component sheet", "x": 0, "y": 0,
+        "width": x + COLUMN_WIDTH, "height": max(tallest_column, COLUMN_HEIGHT) + MARGIN, "layout": "none",
+        "clip": True, "fill": "$paper",
+        "children": placed,
+    }
+    return {"version": "2.17", "themes": themes(), "variables": variables(), "children": [sheet]}
+
+
+def render(document):
+    return json.dumps(document, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
+
+
+# ---------------------------------------------------------------------------
+# Report: the coverage the library promises, counted off the output.
+# ---------------------------------------------------------------------------
+
+
+def report(document):
+    nodes = []
+
+    def walk(node, depth):
+        nodes.append((node, depth))
+        for child in node.get("children", []) or []:
+            walk(child, depth + 1)
+
+    for child in document["children"]:
+        walk(child, 0)
+    reusable = {n["id"]: n for n, _ in nodes if n.get("reusable")}
+    chains = [n for n in reusable.values() if n["type"] == "ref" and reusable.get(n["ref"], {}).get("type") == "ref"]
+    slash = [k for n, _ in nodes if n["type"] == "ref" for k in (n.get("descendants") or {}) if "/" in k]
+    per_side = [n["name"] for n, _ in nodes if isinstance(n.get("strokeWidth"), dict)]
+    disabled = [k for n, _ in nodes if n["type"] == "ref"
+                for k, v in (n.get("descendants") or {}).items() if v.get("enabled") is False]
+    families = sorted({n["name"].split("-")[0] for n in reusable.values()})
+    print(f"reusable components   {len(reusable)}")
+    print(f"families              {len(families)}  ({', '.join(families)})")
+    print(f"nodes                 {len(nodes)}")
+    print(f"variables             {len(document['variables'])}")
+    print(f"theme axes            " + " x ".join(f"{a}({len(v)})" for a, v in document["themes"].items()))
+    print(f"ref chains            {len(chains)}  ({', '.join(sorted(n['name'] for n in chains))})")
+    print(f"slash-path overrides  {len(slash)}")
+    print(f"per-side strokes      {len(per_side)}  ({', '.join(sorted(set(per_side)))})")
+    print(f"disabled children     {len(disabled)}")
+
+
+def main(argv):
+    document = build()
+    output = render(document)
+    if "--ids" in argv:
+        for key in argv[argv.index("--ids") + 1:]:
+            print(f"{key}\t{_ids.get(key, '?')}")
+        return 0
+    if "--report" in argv:
+        report(document)
+        return 0
+    if "--check" in argv:
+        with open(OUT, encoding="utf-8") as f:
+            same = f.read() == output
+        print("kit.lib.pen is current" if same else "kit.lib.pen differs from the generator; re-run it")
+        return 0 if same else 1
+    if "--sync-host" in argv:
+        host_path = argv[argv.index("--sync-host") + 1]
+        with open(host_path, encoding="utf-8") as f:
+            host = json.load(f)
+        host["variables"] = document["variables"]
+        host["themes"] = document["themes"]
+        with open(host_path, "w", encoding="utf-8") as f:
+            f.write(render(host))
+        print(f"synced variables and themes into {host_path}")
+        return 0
+    with open(OUT, "w", encoding="utf-8") as f:
+        f.write(output)
+    print(f"wrote {os.path.relpath(OUT, ROOT)}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

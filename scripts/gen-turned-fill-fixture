@@ -1,0 +1,82 @@
+#!/usr/bin/env python3
+"""gen-turned-fill-fixture — write render-turned-fill.pen, the render fixture of turned
+`fill_container` flex children (leaf ozlazY): Pen fills a turned child's *unturned* box —
+the main-axis share, or the container's inner cross size — and gives it the bounds of the
+turned result as its slot, so the container grows and later siblings move.
+
+Each board is a white 360×240 `layout: none` frame holding one grey flex container at
+(20, 20): `[A, B, C]`, with A and C fixed 40×40 blue squares and B the turned red fill
+child, so B's slot shows in C's position and in the container's size. No text, so no font
+enters the render.
+
+  row-main-30 / row-main-90    B fills the row's width (row 300 wide), turned 30° / 90°
+  row-main-center-30           the same, alignItems center, so A and C sit on the slot's
+                               centre line
+  row-main-two-30              a second, unturned fill D after C shares the width with B
+  col-main-30 / col-main-90    B fills the column's height (column 200 tall)
+  row-cross-30 / row-cross-90  B fills the row's height (row 120 tall, width fit_content)
+  col-cross-30                 B fills the column's width (column 140 wide)
+  row-both-30 / col-both-60    B fills both axes (row 300×120, column 140×200)
+  row-cross-fit-30             B fills the height of a row whose height fits its content
+
+Usage:
+    scripts/gen-turned-fill-fixture [<out dir>]      (default: Tests/WoodcaseTests/Fixtures)
+    scripts/pen-oracle <out dir>/render-turned-fill.pen --scale 2 --settle
+
+The second command (sandbox disabled, `pen` logged in) writes Pen's settled layout and its
+2x export of each board, taken after the settle, beside the fixture. Standard library only;
+runs sandboxed.
+"""
+
+import json, os, sys
+
+BLUE = "#3366FF"
+RED = "#FF3333"
+GREEN = "#22AA55"
+
+
+def square(id):
+    return {"type": "rectangle", "id": id, "width": 40, "height": 40, "fill": BLUE}
+
+
+def board(index, name, layout, container, turned):
+    prefix = f"tf{index:02d}"
+    b = {"type": "rectangle", "id": f"{prefix}b", "fill": RED}
+    b.update(turned)
+    children = [square(f"{prefix}a"), b, square(f"{prefix}c")]
+    if container.pop("extraFill", False):
+        children.append({"type": "rectangle", "id": f"{prefix}d", "width": "fill_container", "height": 40, "fill": GREEN})
+    parent = {
+        "type": "frame", "id": f"{prefix}p", "x": 20, "y": 20, "layout": layout,
+        "gap": 10, "padding": 10, "fill": "#DDDDDD", "children": children,
+    }
+    parent.update(container)
+    return {
+        "type": "frame", "id": f"{prefix}f", "name": name, "x": (index - 1) * 400, "y": 0,
+        "width": 360, "height": 240, "layout": "none", "clip": True, "fill": "#FFFFFF",
+        "children": [parent],
+    }
+
+
+FILL = "fill_container"
+BOARDS = [
+    ("row-main-30", "horizontal", {"width": 300}, {"width": FILL, "height": 40, "rotation": 30}),
+    ("row-main-90", "horizontal", {"width": 300}, {"width": FILL, "height": 40, "rotation": 90}),
+    ("row-main-center-30", "horizontal", {"width": 300, "alignItems": "center"},
+     {"width": FILL, "height": 40, "rotation": 30}),
+    ("row-main-two-30", "horizontal", {"width": 300, "extraFill": True}, {"width": FILL, "height": 40, "rotation": 30}),
+    ("col-main-30", "vertical", {"height": 200}, {"width": 40, "height": FILL, "rotation": 30}),
+    ("col-main-90", "vertical", {"height": 200}, {"width": 40, "height": FILL, "rotation": 90}),
+    ("row-cross-30", "horizontal", {"height": 120}, {"width": 60, "height": FILL, "rotation": 30}),
+    ("row-cross-90", "horizontal", {"height": 120}, {"width": 60, "height": FILL, "rotation": 90}),
+    ("col-cross-30", "vertical", {"width": 140}, {"width": FILL, "height": 30, "rotation": 30}),
+    ("row-both-30", "horizontal", {"width": 300, "height": 120}, {"width": FILL, "height": FILL, "rotation": 30}),
+    ("col-both-60", "vertical", {"width": 140, "height": 200}, {"width": FILL, "height": FILL, "rotation": 60}),
+    ("row-cross-fit-30", "horizontal", {}, {"width": 60, "height": FILL, "rotation": 30}),
+]
+
+out_dir = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(__file__), "..", "Tests", "WoodcaseTests", "Fixtures")
+boards = [board(i + 1, *spec) for i, spec in enumerate(BOARDS)]
+with open(os.path.join(out_dir, "render-turned-fill.pen"), "w") as f:
+    json.dump({"version": "2.17", "children": boards}, f, indent=2)
+    f.write("\n")

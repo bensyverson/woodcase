@@ -1,0 +1,5 @@
+{
+  "topFC": { "x": 0, "y": 0, "width": 200, "height": 200 },
+  "child1": { "x": 0, "y": 0, "width": 120, "height": 80 },
+  "child2": { "x": 0, "y": 80, "width": 200, "height": 60 }
+}

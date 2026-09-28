@@ -1,0 +1,13 @@
+{
+  "root1": { "x": 0, "y": 0, "width": 500, "height": 99 },
+  "icon1": { "x": 16, "y": 16, "width": 48, "height": 48 },
+  "xI7eY": { "x": 80, "y": 16, "width": 48, "height": 48 },
+  "jAUOk": { "x": 144, "y": 16, "width": 48, "height": 48 },
+  "TGJms": { "x": 208, "y": 16, "width": 24, "height": 24 },
+  "NzQQK": { "x": 248, "y": 16, "width": 24, "height": 24 },
+  "EGLFk": { "x": 288, "y": 16, "width": 12, "height": 24 },
+  "G8dfl": { "x": 316, "y": 16, "width": 12, "height": 24 },
+  "rcsOO": { "x": 344, "y": 16, "width": 32, "height": 32 },
+  "icon2": { "x": 392, "y": 16, "width": 32, "height": 32 },
+  "icon3": { "x": 440, "y": 16, "width": 48, "height": 48 }
+}

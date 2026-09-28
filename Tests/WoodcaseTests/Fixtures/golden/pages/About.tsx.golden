@@ -1,0 +1,33 @@
+import { cn } from "../lib/cn";
+
+interface AboutProps {
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+export function About({ className, style }: AboutProps = {}) {
+  return (
+    <div
+      className={cn("flex flex-col gap-2", className)}
+      style={{
+        width: 320,
+        height: 120,
+        backgroundColor: "#F5F5F5",
+        padding: 16,
+        ...style,
+      }}
+    >
+      <p
+        style={{
+          color: "transparent",
+          fontSize: 14,
+          lineHeight: "normal",
+          fontOpticalSizing: "none",
+          whiteSpace: "pre",
+        }}
+      >
+        A second page, so the emitter writes more than one file.
+      </p>
+    </div>
+  );
+}

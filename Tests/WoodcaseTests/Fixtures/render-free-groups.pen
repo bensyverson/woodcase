@@ -1,0 +1,470 @@
+{
+  "version": "2.19",
+  "children": [
+    {
+      "type": "frame",
+      "id": "Gpos",
+      "name": "pos",
+      "x": 0,
+      "y": 0,
+      "width": 300,
+      "height": 300,
+      "layout": "none",
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "group",
+          "id": "GposG",
+          "x": 50,
+          "y": 50,
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "GposA",
+              "x": 20,
+              "y": 30,
+              "width": 40,
+              "height": 40,
+              "fill": "#00FF00"
+            },
+            {
+              "type": "rectangle",
+              "id": "GposB",
+              "x": 80,
+              "y": 60,
+              "width": 30,
+              "height": 30,
+              "fill": "#FFFF00"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Gneg",
+      "name": "neg",
+      "x": 400,
+      "y": 0,
+      "width": 300,
+      "height": 300,
+      "layout": "none",
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "group",
+          "id": "GnegG",
+          "x": 100,
+          "y": 100,
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "GnegA",
+              "x": -30,
+              "y": -20,
+              "width": 40,
+              "height": 40,
+              "fill": "#00FF00"
+            },
+            {
+              "type": "rectangle",
+              "id": "GnegB",
+              "x": 20,
+              "y": 10,
+              "width": 40,
+              "height": 40,
+              "fill": "#FFFF00"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Gflex",
+      "name": "flex",
+      "x": 800,
+      "y": 0,
+      "width": 300,
+      "height": 300,
+      "layout": "horizontal",
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "GflexA",
+          "x": 0,
+          "y": 0,
+          "width": 40,
+          "height": 40,
+          "fill": "#FF0000"
+        },
+        {
+          "type": "group",
+          "id": "GflexG",
+          "x": 0,
+          "y": 0,
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "GflexGa",
+              "x": -10,
+              "y": -10,
+              "width": 30,
+              "height": 30,
+              "fill": "#00FF00"
+            },
+            {
+              "type": "rectangle",
+              "id": "GflexGb",
+              "x": 20,
+              "y": 20,
+              "width": 30,
+              "height": 30,
+              "fill": "#FFFF00"
+            }
+          ]
+        },
+        {
+          "type": "rectangle",
+          "id": "GflexB",
+          "x": 0,
+          "y": 0,
+          "width": 40,
+          "height": 40,
+          "fill": "#0000FF"
+        }
+      ],
+      "gap": 10,
+      "padding": 20
+    },
+    {
+      "type": "frame",
+      "id": "Grot",
+      "name": "rot",
+      "x": 1200,
+      "y": 0,
+      "width": 300,
+      "height": 300,
+      "layout": "none",
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "group",
+          "id": "GrotG",
+          "x": 100,
+          "y": 100,
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "GrotA",
+              "x": 0,
+              "y": 0,
+              "width": 60,
+              "height": 20,
+              "fill": "#00FF00"
+            },
+            {
+              "type": "rectangle",
+              "id": "GrotB",
+              "x": -20,
+              "y": 30,
+              "width": 40,
+              "height": 40,
+              "fill": "#FFFF00"
+            }
+          ],
+          "rotation": 30
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Gnest",
+      "name": "nest",
+      "x": 1600,
+      "y": 0,
+      "width": 300,
+      "height": 300,
+      "layout": "none",
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "group",
+          "id": "GnestG",
+          "x": 80,
+          "y": 80,
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "GnestA",
+              "x": 0,
+              "y": 0,
+              "width": 20,
+              "height": 20,
+              "fill": "#00FF00"
+            },
+            {
+              "type": "group",
+              "id": "GnestH",
+              "x": -10,
+              "y": 20,
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "GnestHa",
+                  "x": -10,
+                  "y": -10,
+                  "width": 40,
+                  "height": 40,
+                  "fill": "#FFFF00"
+                },
+                {
+                  "type": "rectangle",
+                  "id": "GnestHb",
+                  "x": 30,
+                  "y": 30,
+                  "width": 10,
+                  "height": 10,
+                  "fill": "#00FFFF"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Gfrot",
+      "name": "flexrot",
+      "x": 0,
+      "y": 400,
+      "width": 300,
+      "height": 300,
+      "layout": "horizontal",
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "GfrotA",
+          "x": 0,
+          "y": 0,
+          "width": 40,
+          "height": 40,
+          "fill": "#FF0000"
+        },
+        {
+          "type": "group",
+          "id": "GfrotG",
+          "x": 0,
+          "y": 0,
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "GfrotGa",
+              "x": -10,
+              "y": -10,
+              "width": 30,
+              "height": 30,
+              "fill": "#00FF00"
+            },
+            {
+              "type": "rectangle",
+              "id": "GfrotGb",
+              "x": 20,
+              "y": 20,
+              "width": 30,
+              "height": 30,
+              "fill": "#FFFF00"
+            }
+          ],
+          "rotation": 30
+        },
+        {
+          "type": "rectangle",
+          "id": "GfrotB",
+          "x": 0,
+          "y": 0,
+          "width": 40,
+          "height": 40,
+          "fill": "#0000FF"
+        }
+      ],
+      "gap": 10,
+      "padding": 20
+    },
+    {
+      "type": "frame",
+      "id": "Gflip",
+      "name": "flip",
+      "x": 400,
+      "y": 400,
+      "width": 300,
+      "height": 300,
+      "layout": "none",
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "group",
+          "id": "GflipG",
+          "x": 100,
+          "y": 100,
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "GflipA",
+              "x": -20,
+              "y": 0,
+              "width": 60,
+              "height": 20,
+              "fill": "#00FF00"
+            },
+            {
+              "type": "rectangle",
+              "id": "GflipB",
+              "x": 10,
+              "y": 30,
+              "width": 40,
+              "height": 40,
+              "fill": "#FFFF00"
+            }
+          ],
+          "flipX": true,
+          "rotation": -15
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Gblur",
+      "name": "blur",
+      "x": 800,
+      "y": 400,
+      "width": 300,
+      "height": 300,
+      "layout": "none",
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "group",
+          "id": "GblurG",
+          "x": 100,
+          "y": 100,
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "GblurA",
+              "x": -40,
+              "y": -30,
+              "width": 50,
+              "height": 50,
+              "fill": "#00FF00"
+            },
+            {
+              "type": "rectangle",
+              "id": "GblurB",
+              "x": 30,
+              "y": 20,
+              "width": 50,
+              "height": 30,
+              "fill": "#FFFF00"
+            }
+          ],
+          "effect": {
+            "type": "blur",
+            "radius": 6
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Gshad",
+      "name": "shadow",
+      "x": 1200,
+      "y": 400,
+      "width": 300,
+      "height": 300,
+      "layout": "none",
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "group",
+          "id": "GshadG",
+          "x": 100,
+          "y": 100,
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "GshadA",
+              "x": -40,
+              "y": -30,
+              "width": 50,
+              "height": 50,
+              "fill": "#00FF00"
+            },
+            {
+              "type": "rectangle",
+              "id": "GshadB",
+              "x": 30,
+              "y": 20,
+              "width": 50,
+              "height": 30,
+              "fill": "#FFFF00"
+            }
+          ],
+          "effect": [
+            {
+              "type": "shadow",
+              "shadowType": "outer",
+              "color": "#FFFFFFFF",
+              "offset": {
+                "x": 8,
+                "y": 8
+              },
+              "blur": 6
+            },
+            {
+              "type": "shadow",
+              "shadowType": "inner",
+              "color": "#FF0000FF",
+              "offset": {
+                "x": 4,
+                "y": 4
+              },
+              "blur": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "id": "Groot",
+      "x": 1700,
+      "y": 500,
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "GrootA",
+          "x": -30,
+          "y": -20,
+          "width": 40,
+          "height": 40,
+          "fill": "#00FF00"
+        },
+        {
+          "type": "rectangle",
+          "id": "GrootB",
+          "x": 20,
+          "y": 10,
+          "width": 40,
+          "height": 40,
+          "fill": "#FFFF00"
+        }
+      ],
+      "name": "root"
+    }
+  ]
+}

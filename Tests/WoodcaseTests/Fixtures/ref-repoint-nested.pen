@@ -1,0 +1,87 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "id": "Sht01",
+          "name": "Sheet",
+          "ref": "ShtC",
+          "type": "ref",
+          "x": 20,
+          "y": 20
+        }
+      ],
+      "height": 200,
+      "id": "Page1",
+      "name": "Page",
+      "type": "frame",
+      "width": 400,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "children": [
+        {
+          "id": "Tab01",
+          "name": "Tab",
+          "ref": "PlnC",
+          "type": "ref",
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "height": 40,
+      "id": "ShtC",
+      "layout": "horizontal",
+      "name": "SheetBase",
+      "reusable": true,
+      "type": "frame",
+      "width": 200,
+      "x": 500,
+      "y": 0
+    },
+    {
+      "children": [
+        {
+          "content": "Plain",
+          "fontSize": 12,
+          "id": "Lbl01",
+          "name": "PlainLabel",
+          "type": "text",
+          "x": 4,
+          "y": 4
+        }
+      ],
+      "height": 20,
+      "id": "PlnC",
+      "name": "TabPlain",
+      "reusable": true,
+      "type": "frame",
+      "width": 60,
+      "x": 500,
+      "y": 100
+    },
+    {
+      "children": [
+        {
+          "content": "Current",
+          "fontSize": 12,
+          "id": "Lbl02",
+          "name": "CurrentLabel",
+          "type": "text",
+          "x": 4,
+          "y": 4
+        }
+      ],
+      "height": 24,
+      "id": "CurC",
+      "name": "TabCurrent",
+      "reusable": true,
+      "type": "frame",
+      "width": 90,
+      "x": 500,
+      "y": 200
+    }
+  ],
+  "version": "2.17"
+}

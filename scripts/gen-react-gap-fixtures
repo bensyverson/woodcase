@@ -1,0 +1,162 @@
+#!/usr/bin/env python3
+"""gen-react-gap-fixtures — write the four probe fixtures of React's effect and stroke gaps
+(leaf Mu4JsL, ReactRenderWebViewTests.gapFixtures) into Tests/WoodcaseTests/Fixtures:
+
+  render-angular-shapes.pen   angular gradient fills and strokes on SVG-drawn shapes: polygons,
+                              paths (centre, inner and outer strokes), a line, a donut, an arc
+  render-inner-sides.pen      children of frames with inner per-side strokes (and a uniform and
+                              a centred control): Pen moves no child for the stroke
+  render-unstroked-lines.pen  lines with no stroke paint, fixed and full-width, on grey
+  render-stroke-bands.pen     strokes on 0x0 frames and rectangles, and on sized boxes, with the
+                              outer shadows they cast
+
+Usage:
+    scripts/gen-react-gap-fixtures [<out dir>]     (default: Tests/WoodcaseTests/Fixtures)
+    scripts/pen-oracle Tests/WoodcaseTests/Fixtures/<fixture>.pen --scale 2
+
+The second command (sandbox disabled, `pen` logged in) writes Pen's first-pass layout (pass --settle for the settled one), its 2x
+export of each board and its re-save beside the fixture. Standard library only; runs sandboxed.
+"""
+
+import json, os, sys
+
+def angular(rotation=0):
+    return {
+        "type": "gradient",
+        "gradientType": "angular",
+        "colors": [
+            {"color": "#FF0000", "position": 0},
+            {"color": "#00FF00", "position": 0.33},
+            {"color": "#0000FF", "position": 0.66},
+            {"color": "#FF0000", "position": 1},
+        ],
+        "rotation": rotation,
+    }
+
+def angular_board(index, name, child):
+    return {
+        "type": "frame", "id": f"as{index:02d}f", "name": name,
+        "x": index * 300, "y": 0, "width": 240, "height": 180,
+        "layout": "none", "clip": True, "fill": "#000000",
+        "children": [child],
+    }
+
+angular_shapes = [
+    ("poly-fill", {"type": "polygon", "id": "as01s", "x": 30, "y": 20, "width": 180, "height": 140,
+                   "polygonCount": 6, "fill": angular(30)}),
+    ("poly-stroke", {"type": "polygon", "id": "as02s", "x": 30, "y": 20, "width": 180, "height": 140,
+                     "polygonCount": 5, "fill": "#333333", "stroke": angular(0), "strokeWidth": 12}),
+    ("path-fill", {"type": "path", "id": "as03s", "x": 30, "y": 20, "width": 180, "height": 140,
+                   "geometry": "M0 140 L90 0 L180 140 Z", "fill": angular(0)}),
+    ("path-stroke-inner", {"type": "path", "id": "as04s", "x": 30, "y": 20, "width": 180, "height": 140,
+                           "geometry": "M0 140 L90 0 L180 140 Z", "fill": "#333333", "stroke": angular(60),
+                           "strokeWidth": 16, "strokeAlignment": "inner"}),
+    ("path-stroke-outer", {"type": "path", "id": "as05s", "x": 40, "y": 30, "width": 160, "height": 120,
+                           "geometry": "M0 120 L80 0 L160 120 Z", "fill": "#333333", "stroke": angular(0),
+                           "strokeWidth": 12, "strokeAlignment": "outer"}),
+    ("line", {"type": "line", "id": "as06s", "x": 30, "y": 30, "width": 180, "height": 120,
+              "stroke": angular(0), "strokeWidth": 16}),
+    ("donut-fill", {"type": "ellipse", "id": "as07s", "x": 30, "y": 20, "width": 180, "height": 140,
+                    "innerRadius": 0.5, "fill": angular(45)}),
+    ("arc-stroke", {"type": "ellipse", "id": "as08s", "x": 30, "y": 20, "width": 180, "height": 140,
+                    "startAngle": 0, "sweepAngle": 270, "fill": "#333333", "stroke": angular(0), "strokeWidth": 12}),
+]
+
+SIDES = {"top": 12, "right": 4, "bottom": 20, "left": 24}
+
+def board(prefix, index, name, children, width=240, height=180, fill=None):
+    fill = fill or ("#808080" if prefix == "ul" else "#000000")
+    return {
+        "type": "frame", "id": f"{prefix}{index:02d}f", "name": name,
+        "x": index * 300, "y": 0, "width": width, "height": height,
+        "layout": "none", "clip": True, "fill": fill,
+        "children": children,
+    }
+
+def rects(prefix):
+    return [
+        {"type": "rectangle", "id": f"{prefix}a", "width": 80, "height": 40, "fill": "#FF00FF"},
+        {"type": "rectangle", "id": f"{prefix}b", "width": 60, "height": 30, "fill": "#00FFFF"},
+    ]
+
+def sided(prefix, layout, extra=None, stroke_width=None, alignment="inner"):
+    node = {
+        "type": "frame", "id": f"{prefix}n", "x": 20, "y": 20, "width": 200, "height": 140,
+        "fill": "#333333", "stroke": "#FFFFFF", "strokeWidth": stroke_width or SIDES,
+        "strokeAlignment": alignment, "layout": layout,
+        "children": rects(prefix),
+    }
+    if layout == "none":
+        node["children"][1]["x"] = 90
+        node["children"][1]["y"] = 60
+    node.update(extra or {})
+    return node
+
+inner_sides = [
+    ("col", [sided("is01", "vertical")]),
+    ("row-center", [sided("is02", "horizontal", {"justifyContent": "center", "alignItems": "center"})]),
+    ("none", [sided("is03", "none")]),
+    ("uniform", [sided("is04", "vertical", stroke_width=16)]),
+    ("col-padded", [sided("is05", "vertical", {"padding": 8, "gap": 4})]),
+    ("col-center", [sided("is06", "vertical", alignment="center")]),
+]
+
+lines = [
+    ("fixed", [
+        {"type": "line", "id": "ul01a", "x": 30, "y": 40, "width": 180, "height": 0},
+        {"type": "line", "id": "ul01b", "x": 30, "y": 60, "width": 180, "height": 100, "strokeWidth": 8},
+    ]),
+    ("fill", [{
+        "type": "frame", "id": "ul02n", "x": 20, "y": 20, "width": 200, "height": 140, "layout": "vertical",
+        "gap": 20, "padding": 20, "fill": "#333333",
+        "children": [
+            {"type": "line", "id": "ul02a", "width": "fill_container", "height": 0},
+            {"type": "line", "id": "ul02b", "width": "fill_container", "height": 0, "strokeWidth": 6},
+            {"type": "line", "id": "ul02c", "width": "fill_container", "height": 0, "stroke": "#FF0000", "strokeWidth": 6},
+        ],
+    }]),
+]
+
+def point(prefix, alignment, kind="frame", shadow=True):
+    node = {
+        "type": kind, "id": f"{prefix}n", "x": 120, "y": 90,
+        "fill": "#808080", "stroke": "#00FF00", "strokeWidth": 8, "strokeAlignment": alignment,
+    }
+    if kind == "frame":
+        node["layout"] = "none"
+    else:
+        node["width"] = 0
+        node["height"] = 0
+    if shadow:
+        node["effect"] = {"type": "shadow", "shadowType": "outer", "color": "#FFFFFFFF",
+                          "offset": {"x": 10, "y": 10}, "blur": 8}
+    return node
+
+def box(prefix, alignment):
+    return {
+        "type": "rectangle", "id": f"{prefix}n", "x": 60, "y": 50, "width": 100, "height": 60, "cornerRadius": 10,
+        "fill": "#808080", "stroke": "#00FF00", "strokeWidth": 12, "strokeAlignment": alignment,
+        "effect": {"type": "shadow", "shadowType": "outer", "color": "#FFFFFFFF", "offset": {"x": 16, "y": 16}, "blur": 4},
+    }
+
+points = [
+    ("center", [point("zp01", "center")]),
+    ("inner", [point("zp02", "inner")]),
+    ("rect-outer", [point("zp03", "outer", kind="rectangle")]),
+    ("rect-center", [point("zp04", "center", kind="rectangle", shadow=False)]),
+    ("box-outer", [box("zp05", "outer")]),
+    ("box-center", [box("zp06", "center")]),
+    ("box-inner", [box("zp07", "inner")]),
+]
+
+FIXTURES = {
+    "render-angular-shapes": [angular_board(i + 1, n, c) for i, (n, c) in enumerate(angular_shapes)],
+    "render-inner-sides": [board("is", i + 1, n, c) for i, (n, c) in enumerate(inner_sides)],
+    "render-unstroked-lines": [board("ul", i + 1, n, c) for i, (n, c) in enumerate(lines)],
+    "render-stroke-bands": [board("zp", i + 1, n, c) for i, (n, c) in enumerate(points)],
+}
+
+out_dir = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(__file__), "..", "Tests", "WoodcaseTests", "Fixtures")
+for name, boards in FIXTURES.items():
+    with open(os.path.join(out_dir, name + ".pen"), "w") as f:
+        json.dump({"version": "2.19", "children": boards}, f, indent=2)
