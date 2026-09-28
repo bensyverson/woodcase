@@ -34,6 +34,11 @@ repeatedly on load alone; each such failure was re-run with `--filter` and passe
 | `5817d96` | `KXKtc7` | Instance overrides applied in memory (`PenNodeOverlay`, `AnyCodableDecoder`; the JSON merge stays as fallback and for refusal wording), proven identical over every fixture; the writer's per-line `Regex` replaced by a byte scan. `set` verb 386 → 166 ms in process (budget back to 200 ms), `tree` woodcase-app 268 → 153 ms, expand 104 → 25 ms (loaded, interleaved) |
 | RapidPro `caec71e` | `ncjB79`, `PWxvg7`, `LT1v59` | Text/icon ink (topmost enabled solid; none draws nothing), `textAlignVertical`, icon placement — mirrors of Woodcase internals until `6fu79C` |
 
+> **Correction, 2026-09-28 (`MeFlNF`):** "typecheck dominates the batch" was right, but the cause was wrong. The emitted
+> code is cheap to type-check (whole-module, no body over 91 ms). What cost the time was `swiftc` without `-wmo`, which
+> starts one frontend per file, and each re-parses the whole 334-file module. With `-wmo` in `SwiftUIRenderBatch.compile(floor:)`,
+> the batch built in 41 s and type-checked in 19.5 s (load 18–25), where this leaf measured 140 s and 135 s.
+
 ## Ben's rulings this session
 
 - **MdCEmo:** (a) + (c) — measure roots without a full settle, and budget the verb as a caller sees it. (b), the

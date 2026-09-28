@@ -680,3 +680,12 @@ the flood fills the whole region (0.036). `sleepy shot --scale 2` of the test's 
 ## 2026-09-28 — `swift test --quiet` hides a compile error behind a bare `fatalError`
 
 A test file that does not compile fails the build with `error: fatalError` and nothing else under `--quiet`; without it, the batch lists a dozen innocent files "failed with a nonzero exit code", and the one real diagnostic is in colour, so a plain `grep ': error'` misses it. One agent read nine such failures as disk pressure (the volume *was* low that day, 0.5–7 GiB free) and handed back a test file it believed compiled; the error was `#expect(…, cap)` passing a `String` where Swift Testing wants a `Comment` (leaf `slxqjU`). When a build dies with a bare `fatalError`, rerun without `--quiet` and strip the colour: `sed 's/\x1b\[[0-9;]*m//g' <log> | grep -E '\.swift:[0-9]+:[0-9]+: error'`. Low disk is real too: check `df -h /System/Volumes/Data`, and the integrator frees about 1.7 GB per finished agent by snapshotting its branch (a hooks-off `wip` commit) and removing its worktree. Finder's folder "Size" is logical bytes (45 GB for 5.85 GB on disk here); use `du`.
+
+## 2026-09-28 — `swiftc` over many files without `-wmo` re-parses the module once per file
+
+Handed a few hundred files, `xcrun swiftc` without `-wmo` starts one frontend per file, and each one parses the whole
+module again, so the cost grows with files × module size. The SwiftUI render batch (334 files) spent 731 s
+type-checking that way on a loaded Mac; whole-module, the same sources took 12.6 s of CPU. It looked like slow-to-type-check
+generated code, and a leaf recorded it that way. Pass `-wmo` to any hand-rolled multi-file `swiftc`, and profile with
+`-Xfrontend -warn-long-function-bodies=<ms>` before blaming the code. Cost a
+15-minute suite and a wrong cause on file (`MeFlNF`).

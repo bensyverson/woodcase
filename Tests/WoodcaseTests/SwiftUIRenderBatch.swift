@@ -186,16 +186,22 @@
             """
         }
 
-        /// The compiler invocation for a floor: Swift 6 mode, the floor's macOS target.
+        /// The compiler invocation for a floor: Swift 6 mode, whole-module, the floor's
+        /// macOS target.
         ///
-        /// `-j 3` caps the frontend's own parallelism to match the convention this repo
-        /// uses for `swift build`/`swift test` on this shared 8-core Mac: left at its
-        /// default, the driver spawns up to one job per core for a multi-file build,
-        /// which is exactly the unconstrained-parallel-build pattern `project/gotchas.md`
-        /// ("Ten cold Swift builds at once panic this Mac") warns against when several
-        /// agents are compiling at once.
+        /// `-wmo` makes one frontend compile every file. Without it `swiftc` starts a
+        /// frontend per file and each one parses the whole module again, so the cost grows
+        /// with files × module size: the 334-file render batch spent 731 s type-checking
+        /// that way under load, and 12.6 s of CPU whole-module (measured 2026-09-28,
+        /// `xcrun swiftc -typecheck` over the batch's own sources, load ~55). `-j 3` caps
+        /// the driver's parallelism on this shared 8-core Mac, as `swift build` and
+        /// `swift test` are capped (`project/gotchas.md`, "Ten cold Swift builds at once
+        /// panic this Mac").
         static func compile(floor: SwiftUIEmitter.DeploymentFloor) -> [String] {
-            ["/usr/bin/xcrun", "swiftc", "-j", "3", "-swift-version", "6", "-target", "\(arch)-apple-macos\(floor.macOSVersion)"]
+            [
+                "/usr/bin/xcrun", "swiftc", "-wmo", "-j", "3", "-swift-version", "6",
+                "-target", "\(arch)-apple-macos\(floor.macOSVersion)",
+            ]
         }
 
         /// What a child process produced: it exited on its own, or the batch's own
