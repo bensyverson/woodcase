@@ -110,28 +110,18 @@ struct PerformanceBudget: Friendly {
     /// the minimum of five repetitions does not save a figure whose every repetition
     /// was inflated together — that is how `set` on a 5000-node document reported
     /// 2626 ms against a 2000 ms debug limit on a machine that measured 1767 ms alone.
-    /// Failing there reports the machine, not the code.
+    /// Failing there reports the machine, not the code — however far over: a debug run
+    /// once also failed past 4× the limit, and a loaded soak of the suite tripped that on
+    /// a healthy `tree` (3063 ms against 750 ms, `project/2026-09-28-suite-speed.md`), so
+    /// an advisory run only ever warns.
     static let isStrict: Bool = isOptimized
         || ProcessInfo.processInfo.environment[strictEnvironmentVariable] != nil
-
-    /// How far past ``limit`` an advisory run still fails.
-    ///
-    /// Load inflates a figure; it does not change its order of growth. Four times the
-    /// debug limit is past anything a busy machine has produced here and well under
-    /// what a pipeline that stopped being linear would, so the advisory build still
-    /// catches the regression the suite exists for.
-    static let advisoryMultiplier: Double = 4
-
-    /// The ceiling a measurement fails even when the budget is only advisory.
-    var advisoryCeiling: Duration {
-        limit * Self.advisoryMultiplier
-    }
 
     /// Announces a measurement and records a failure if it is one.
     ///
     /// The one call site a budget test needs: it prints the `BUDGET` line either way,
     /// and decides — by ``isStrict`` — whether being over ``limit`` is a failure or a
-    /// note. See <doc:WoodcasePerformance>.
+    /// note (``advisory(_:)``). See <doc:WoodcasePerformance>.
     ///
     /// - Parameters:
     ///   - sample: The repetitions that were measured.
@@ -141,22 +131,8 @@ struct PerformanceBudget: Friendly {
         guard !admits(sample.best) else { return }
         if Self.isStrict {
             Issue.record(Comment(rawValue: report(sample)), sourceLocation: sourceLocation)
-        } else if sample.best > advisoryCeiling {
-            Issue.record(
-                Comment(rawValue: """
-                \(name) took \(Self.milliseconds(sample.best)), past \
-                \(Self.advisoryMultiplier)× its \(Self.milliseconds(limit)) debug budget. \
-                That is too far to be machine load.
-                \(report(sample))
-                """),
-                sourceLocation: sourceLocation
-            )
         } else {
-            print(
-                "BUDGET-ADVISORY | \(name) | min \(Self.milliseconds(sample.best))"
-                    + " | over its \(Self.milliseconds(limit)) debug limit"
-                    + " | set $\(Self.strictEnvironmentVariable) to fail on this"
-            )
+            print(advisory(sample))
         }
     }
 
@@ -180,6 +156,19 @@ struct PerformanceBudget: Friendly {
           WOODCASE_TEST_PROFILE=1 swift test -c release --filter Performance 2>&1 | grep PROFILE
         See <doc:WoodcasePerformance> for what each budget covers and how it was set.
         """
+    }
+
+    /// The warning an advisory run prints for a measurement over ``limit``: how far over,
+    /// and the run that settles whether the code or the machine is slow.
+    ///
+    /// - Parameter sample: The repetitions that were measured.
+    /// - Returns: One `BUDGET-ADVISORY` line.
+    func advisory(_ sample: PerformanceSample) -> String {
+        let ratio = sample.best / limit
+        return "BUDGET-ADVISORY | \(name) | min \(Self.milliseconds(sample.best))"
+            + " | \(String(format: "%.1f", ratio))× its \(Self.milliseconds(limit)) debug limit"
+            + " | confirm with: swift test -c release --filter Performance"
+            + " (or set $\(Self.strictEnvironmentVariable) to fail on this)"
     }
 
     /// Prints one machine-readable line for a measurement, pass or fail.

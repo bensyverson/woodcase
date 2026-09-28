@@ -11,21 +11,16 @@ import Woodcase
 /// over the limit.
 ///
 /// The decision is the point: on the build the budgets are *stated* for, over is a
-/// failure; on the default debug build it is a note until the overshoot is too large
-/// to be machine load. Nothing here measures anything — these are the rules, asserted
-/// directly, so a change to them is a change somebody chose.
+/// failure; on the default debug build it is only ever a note, however far over, because
+/// a busy machine inflates every repetition together (Ben's ruling, 2026-09-28). Nothing
+/// here measures anything — these are the rules, asserted directly, so a change to them
+/// is a change somebody chose.
 struct PerformanceBudgetAdvisoryTests {
     private let budget = PerformanceBudget(name: "a budget under test", release: .milliseconds(100))
 
     /// A sample whose minimum is exactly `elapsed`.
     private func sample(_ elapsed: Duration) -> PerformanceSample {
         PerformanceSample(elapsed: [elapsed, elapsed * 2])
-    }
-
-    @Test("The advisory ceiling is a multiple of the build's own limit")
-    func ceilingScalesWithTheLimit() {
-        #expect(budget.advisoryCeiling == budget.limit * PerformanceBudget.advisoryMultiplier)
-        #expect(budget.limit < budget.advisoryCeiling)
     }
 
     @Test("A measurement inside the limit records nothing on any build")
@@ -42,7 +37,7 @@ struct PerformanceBudgetAdvisoryTests {
     static let isAdvisoryBuild = !PerformanceBudget.isStrict
 
     @Test(
-        "A debug measurement over the limit but under the ceiling is only a note",
+        "A debug measurement over the limit is only a note",
         .enabled(if: isAdvisoryBuild, "This case is about the advisory build.")
     )
     func overTheLimitIsAdvisoryUnderDebug() {
@@ -50,13 +45,19 @@ struct PerformanceBudgetAdvisoryTests {
     }
 
     @Test(
-        "A debug measurement past the ceiling still fails",
+        "A debug measurement far past the limit is still only a note",
         .enabled(if: isAdvisoryBuild, "This case is about the advisory build.")
     )
-    func pastTheCeilingFails() {
-        withKnownIssue("the overshoot is past what load explains") {
-            budget.check(sample(budget.advisoryCeiling * 2))
-        }
+    func farPastTheLimitIsAdvisoryUnderDebug() {
+        budget.check(sample(budget.limit * 10))
+    }
+
+    @Test("The note says how far over the limit, and how to confirm it on release")
+    func noteSaysHowFarAndWhatToRun() {
+        let note = budget.advisory(sample(budget.limit * 3))
+        #expect(note.hasPrefix("BUDGET-ADVISORY | a budget under test |"))
+        #expect(note.contains("3.0×"))
+        #expect(note.contains("swift test -c release --filter Performance"))
     }
 
     @Test("Strictness follows the build, and the environment can force it on")

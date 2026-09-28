@@ -17,7 +17,7 @@
     /// 2. **Code gen pipeline**: Parse → Analyze → Emit → ReactHarnessBuilder → WebView → CGImage
     ///
     /// The two images are compared using MAE (mean absolute error).
-    @Suite("WebView Regression", .tags(.webViewRegression), .serialized, .hangGuard)
+    @Suite("WebView Regression", .tags(.webViewRegression), .hangGuard)
     @MainActor
     struct WebViewRegressionTests {
         /// Project root — the directory that `loadFileURL` grants read access to,
@@ -258,7 +258,7 @@
             )
             watch.lap("webView")
 
-            let mae = PenSnapshotTestHelpers.meanAbsoluteError(between: woodcaseImage, and: webViewImage)
+            let mae = await PenSnapshotTestHelpers.concurrentMeanAbsoluteError(between: woodcaseImage, and: webViewImage)
             print("  \(componentName) MAE (Woodcase vs WebView): \(String(format: "%.3f", mae))")
             watch.lap("mae")
 
@@ -336,7 +336,7 @@
             )
             watch.lap("webView")
 
-            let mae = PenSnapshotTestHelpers.meanAbsoluteError(between: woodcaseImage, and: webViewImage)
+            let mae = await PenSnapshotTestHelpers.concurrentMeanAbsoluteError(between: woodcaseImage, and: webViewImage)
             print("  \(outputName) screen MAE (Woodcase vs WebView): \(String(format: "%.3f", mae))")
             watch.lap("mae")
 

@@ -63,6 +63,10 @@
         /// one.
         static let defaultBudget: TimeInterval = 60.0
 
+        /// The one gate every render in this process passes, so all the WebView suites
+        /// together keep at most ``WebViewRenderSlots/width(from:)`` pages loading.
+        static let renderSlots = WebViewRenderSlots(width: WebViewRenderSlots.width(from: ProcessInfo.processInfo.environment))
+
         /// Renders an HTML file from disk and returns a screenshot as CGImage.
         ///
         /// - Parameters:
@@ -87,6 +91,9 @@
             timeout: TimeInterval = defaultBudget
         ) async throws -> CGImage {
             var watch = PhaseStopwatch("render:\(fileURL.deletingPathExtension().lastPathComponent)")
+            await Self.renderSlots.acquire()
+            defer { Self.renderSlots.release() }
+            watch.lap("slot")
             let started = Date()
             let host: PageHost = Self.checkOutHost(budget: timeout, viewportSize: viewportSize)
             defer { Self.checkIn(host, budget: timeout) }

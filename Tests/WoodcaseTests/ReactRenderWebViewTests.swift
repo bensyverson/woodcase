@@ -26,7 +26,7 @@
     /// fonts in `Tests/WoodcaseTests/Fonts` — with the committed Google faces in its
     /// `GoogleFonts` folder, which the CG side registers through ``GoogleFontResolver``
     /// (``GoogleFontFacesSnapshotTests/preparation``) — and the bundled icon fonts.
-    @Suite("React render WebView", .tags(.webViewRegression), .serialized, .hangGuard)
+    @Suite("React render WebView", .tags(.webViewRegression), .hangGuard)
     @MainActor
     struct ReactRenderWebViewTests {
         /// Boards held *below* CG + 1.0, keyed like ``baselines``, with the MAE each measured
@@ -121,34 +121,35 @@
             return single + many
         }()
 
-        private static let fixturesDir = SwiftUIFixtures.directory
-        private static let projectRoot = fixturesDir
+        private nonisolated static let fixturesDir = SwiftUIFixtures.directory
+        private nonisolated static let projectRoot = fixturesDir
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
-        private static let fontDir = projectRoot.appendingPathComponent("Tests/WoodcaseTests/Fonts")
-        private static let iconFontDir = projectRoot.appendingPathComponent("Sources/Woodcase/IconFonts/Fonts")
+        private nonisolated static let fontDir = projectRoot.appendingPathComponent("Tests/WoodcaseTests/Fonts")
+        private nonisolated static let iconFontDir = projectRoot.appendingPathComponent("Sources/Woodcase/IconFonts/Fonts")
 
         /// The pixels per point `WebViewTestHarness` captures at.
-        private static let captureScale = 2
+        private nonisolated static let captureScale = 2
 
         private let harness = WebViewTestHarness()
 
+        /// Boards render concurrently. Only the WebKit call runs on the main actor, and
+        /// ``WebViewTestHarness/renderSlots`` bounds how many are in it at once; building
+        /// the page, the Core Graphics render and both pixel diffs run on the shared pool.
         @Test("Each board renders within its gate", arguments: boards)
         func boardMatchesPen(board: SwiftUIRenderBoard) async throws {
             // The CG side measures and draws Inter and IBM Plex Sans, and the Google faces
             // `render-font-faces` declares, which the page loads from the same files.
             TestFontRegistration.registerTestFonts()
             _ = try await GoogleFontFacesSnapshotTests.preparation.value
-            let referenceName = try #require(board.referenceName)
-            let reference = try #require(PenSnapshotTestHelpers.loadFixtureImage(named: referenceName, fixturesDir: Self.fixturesDir))
             let scale = try board.referenceScale()
-            let react = try await render(board, scale: scale)
-            let cg = try #require(try board.renderCG(scale: CGFloat(scale)))
-
-            let mae = PenSnapshotTestHelpers.meanAbsoluteError(between: react, and: reference)
-            let cgMAE = PenSnapshotTestHelpers.meanAbsoluteError(between: cg, and: reference)
-            let size = "\(react.width)x\(react.height) vs \(reference.width)x\(reference.height)"
+            let page = try await Self.page(for: board)
+            let capture = try await harness.render(fileURL: page.url, viewportSize: page.size, allowingReadAccessTo: Self.projectRoot)
+            let measured = try await Self.measure(board, capture: capture, pageSize: page.size, scale: scale)
+            let mae = measured.mae
+            let cgMAE = measured.cgMAE
+            let size = measured.size
             print("React \(board.id): MAE \(String(format: "%.3f", mae)) (CG \(String(format: "%.3f", cgMAE))) \(size)")
 
             let limit: Double = if let baseline = Self.baselines[board.id] {
@@ -165,9 +166,20 @@
 
         // MARK: - Pipeline
 
-        /// Emits the board's frame as a page, renders it in WebKit at the frame's laid-out
-        /// size, and brings the capture to `scale` pixels per point.
-        private func render(_ board: SwiftUIRenderBoard, scale: Int) async throws -> CGImage {
+        /// What one board measured.
+        struct Measurement: Friendly {
+            /// React's MAE against Pen's export.
+            let mae: Double
+            /// The Core Graphics renderer's MAE against the same export.
+            let cgMAE: Double
+            /// The capture's and the reference's sizes, for the log line.
+            let size: String
+        }
+
+        /// Emits the board's frame as a page and writes it to disk, with the size the frame
+        /// lays out at.
+        @concurrent
+        nonisolated static func page(for board: SwiftUIRenderBoard) async throws -> WebViewTestPage {
             let document = try SwiftUIFixtures.document(board.fixture)
             let root = try #require(board.node(in: document))
             let page = try #require(PageAnalyzer.analyze(document).first { $0.id == root.id }, "\(board.id): no page")
@@ -180,7 +192,7 @@
             let pageFile = try #require(files.first { $0.path.hasPrefix("pages/") }, "\(board.id): no page file")
             let pageName = URL(fileURLWithPath: pageFile.path).deletingPathExtension().lastPathComponent
 
-            let resolved = try PenVariableResolver.resolve(PenRefExpander.expand(document))
+            let resolved = PenVariableResolver.resolve(PenRefExpander.expand(document))
             let rect = try #require(PenLayoutEngine.layout(resolved)[root.id], "\(board.id): no layout")
             let size = CGSize(width: rect.width, height: rect.height)
 
@@ -192,24 +204,42 @@
                 jsRelativePath: "../js",
                 imageRelativePath: "../images",
                 fontRelativePath: "../../Fonts",
-                fontDir: Self.fontDir,
+                fontDir: fontDir,
                 iconFontRelativePath: "../../../../Sources/Woodcase/IconFonts/Fonts",
-                iconFontDir: Self.iconFontDir
+                iconFontDir: iconFontDir
             )
-            let tmpDir = Self.fixturesDir.appendingPathComponent("tmp")
+            let tmpDir = fixturesDir.appendingPathComponent("tmp")
             try FileManager.default.createDirectory(at: tmpDir, withIntermediateDirectories: true)
             let htmlURL = tmpDir.appendingPathComponent("render-\(board.id).html")
             try html.write(to: htmlURL, atomically: true, encoding: .utf8)
+            return WebViewTestPage(url: htmlURL, size: size)
+        }
 
-            let capture = try await harness.render(fileURL: htmlURL, viewportSize: size, allowingReadAccessTo: Self.projectRoot)
-            guard scale != Self.captureScale else { return capture }
-            return try #require(Self.resampled(capture, width: Int((size.width * CGFloat(scale)).rounded()),
-                                               height: Int((size.height * CGFloat(scale)).rounded())))
+        /// Brings the capture to the reference's density, renders the board with Core
+        /// Graphics, and measures both against Pen's export.
+        @concurrent
+        nonisolated static func measure(
+            _ board: SwiftUIRenderBoard, capture: CGImage, pageSize: CGSize, scale: Int
+        ) async throws -> Measurement {
+            let referenceName = try #require(board.referenceName)
+            let reference = try #require(PenSnapshotTestHelpers.loadFixtureImage(named: referenceName, fixturesDir: fixturesDir))
+            let react: CGImage = if scale == captureScale {
+                capture
+            } else {
+                try #require(resampled(capture, width: Int((pageSize.width * CGFloat(scale)).rounded()),
+                                       height: Int((pageSize.height * CGFloat(scale)).rounded())))
+            }
+            let cg = try #require(try board.renderCG(scale: CGFloat(scale)))
+            return Measurement(
+                mae: PenSnapshotTestHelpers.meanAbsoluteError(between: react, and: reference),
+                cgMAE: PenSnapshotTestHelpers.meanAbsoluteError(between: cg, and: reference),
+                size: "\(react.width)x\(react.height) vs \(reference.width)x\(reference.height)"
+            )
         }
 
         /// `image` drawn at `width` × `height` pixels with high-quality interpolation: a 2x
         /// capture brought down to a 1x reference's density.
-        private static func resampled(_ image: CGImage, width: Int, height: Int) -> CGImage? {
+        private nonisolated static func resampled(_ image: CGImage, width: Int, height: Int) -> CGImage? {
             guard width > 0, height > 0, let space = CGColorSpace(name: CGColorSpace.sRGB),
                   let context = CGContext(
                       data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,

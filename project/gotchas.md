@@ -689,3 +689,12 @@ type-checking that way on a loaded Mac; whole-module, the same sources took 12.6
 generated code, and a leaf recorded it that way. Pass `-wmo` to any hand-rolled multi-file `swiftc`, and profile with
 `-Xfrontend -warn-long-function-bodies=<ms>` before blaming the code. Cost a
 15-minute suite and a wrong cause on file (`MeFlNF`).
+
+## 2026-09-28 — Swift Testing times a test from when it was queued, not from when it ran
+
+Every test in a run is started up front, so a test waiting for a free thread is charged the wait: one run had 749
+tests, lint findings and CRDT inits among them, all "taking" 74.9–75.1 s. A cluster of trivial tests at one duration is
+a queue. Find what the suite waits on from CPU instead (`ps -o time` of the test host against its wall time, or a
+`sample` across the run) and per-phase timers (`WOODCASE_TEST_PROFILE=1`). Cost a wrong theory, a lock in Swift
+Testing's throw backtraces (`project/2026-09-28-suite-speed.md`).
+

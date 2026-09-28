@@ -10,7 +10,7 @@ it with `set`, and looks at it with `shot`, over and over inside one conversatio
 pipeline that takes a second is a pipeline nobody runs twice. So the three costs are
 budgeted, and the budgets are **tests** — `Tests/WoodcaseTests/Performance/`, run by
 plain `swift test`. On a release build, or under `WOODCASE_BUDGET_STRICT=1`, exceeding
-a budget fails; on the default debug build it is advisory until 4 × the limit, because
+a budget fails; on the default debug build it only ever warns, because
 there the number measures the machine as much as the code (see
 [A debug budget is advisory](#A-debug-budget-is-advisory)).
 
@@ -613,18 +613,22 @@ document reported **2626 ms** against its then-2000 ms debug limit in a four-age
 
 So `PerformanceBudget.check(_:)` decides what being over the limit means:
 
-| build | over `limit` | over 4 × `limit` |
-| --- | --- | --- |
-| release, or `WOODCASE_BUDGET_STRICT=1` | **fails** | fails |
-| default `swift test` | prints `BUDGET-ADVISORY` | **fails** |
+| build | over `limit` |
+| --- | --- |
+| release, or `WOODCASE_BUDGET_STRICT=1` | **fails** |
+| default `swift test` | prints `BUDGET-ADVISORY`: how many times over, and the release run that confirms it |
 
-Load inflates a figure; it does not change its order of growth. Four times the debug
-limit is past anything a busy machine has produced here and far under what a pipeline
-that stopped being linear in the node count would produce, so the advisory build still
-catches the regression the synthetic fixtures exist to find. Every run still prints its
-`BUDGET` line, so the table above is still `swift test --filter Performance 2>&1 | grep
-BUDGET`, and `WOODCASE_BUDGET_STRICT=1 swift test --filter Performance` is the strict
-debug run when you want one.
+Until 2026-09-28 a debug run also failed past 4 × the limit, on the reasoning that load
+inflates a figure without changing its order of growth. A loaded soak disproved the
+premise that 4 × was past anything a busy machine produces: with the WebView suites
+rendering four pages at once, two synthetic busy cores and other sessions' builds (load
+~50), a healthy `tree` of `woodcase-app.pen` measured **3063 ms** against its 750 ms debug
+limit, where it measures 329 ms on a moderately loaded machine
+(`project/2026-09-28-suite-speed.md`). So the debug run warns however far over it is (Ben's
+ruling, 2026-09-28), and the release run is where a budget fails. Every run still prints
+its `BUDGET` line, so the table above is still `swift test --filter Performance 2>&1 | grep
+BUDGET`, and `WOODCASE_BUDGET_STRICT=1 swift test --filter Performance` is the strict debug
+run when you want one.
 
 ### `swift test -c release` and the two `@main`s
 
@@ -687,9 +691,9 @@ The failure message says the number, the limit, and the next command. In order:
 
 1. **Confirm it is real.** Re-run `swift test --filter Performance` on a quiet
    machine and read the *samples* line: a minimum far below the others means the run
-   was contended, not slow. `uptime` before believing a number. A debug run only
-   *fails* at 4 × the limit (see "A debug budget is advisory"), so a failure there is
-   either a strict run or an overshoot far past what load explains.
+   was contended, not slow. `uptime` before believing a number. A debug run never
+   fails a budget (see "A debug budget is advisory"): a failure is a release or strict
+   run, and a `BUDGET-ADVISORY` line is a prompt to run one.
 2. **Find the stage.** `WOODCASE_TEST_PROFILE=1 swift test --filter Performance 2>&1 |
    grep PROFILE` splits a settled read into read / parse / expand / resolve / layout.
    A regression is almost always one line of that table.

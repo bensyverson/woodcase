@@ -22,7 +22,7 @@
     /// The text falls back to the page's serif (the harness names Inter's face after its
     /// file), which is most of each board's MAE; a black icon is the "before", measured in
     /// the same run by pointing the icon's stroke back at `currentColor`.
-    @Suite("React icon paint WebView", .tags(.webViewRegression), .serialized, .hangGuard)
+    @Suite("React icon paint WebView", .tags(.webViewRegression), .hangGuard)
     @MainActor
     struct ReactIconPaintWebViewTests {
         /// One artboard to render and what to hold it to.
@@ -49,17 +49,17 @@
             Board(name: "image", maeLimit: 0.53), // measured 0.271; icon drawn black: 2.708
         ]
 
-        private static let fixturesDir = WebViewRegressionFixture.fixturesDirectory
-        private static let projectRoot = fixturesDir
+        private nonisolated static let fixturesDir = WebViewRegressionFixture.fixturesDirectory
+        private nonisolated static let projectRoot = fixturesDir
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
-        private static let fontDir = projectRoot.appendingPathComponent("Tests/WoodcaseTests/Fonts")
-        private static let scale = 2
+        private nonisolated static let fontDir = projectRoot.appendingPathComponent("Tests/WoodcaseTests/Fonts")
+        private nonisolated static let scale = 2
 
         /// lucide-react's `Square`, as its package draws it, declared after the harness's
         /// stub so this one is the one called.
-        private static let lucideSquare = """
+        private nonisolated static let lucideSquare = """
         function Square({ size = 24, color = "currentColor", strokeWidth = 2, ...props }) {
           return React.createElement("svg", {
             xmlns: "http://www.w3.org/2000/svg", width: size, height: size, viewBox: "0 0 24 24",
@@ -74,9 +74,9 @@
         @Test("An icon's gradient or image is drawn through its glyph, as Pen draws it", arguments: boards)
         func matchesPen(board: Board) async throws {
             let (image, reference) = try await render(board, blackIcon: false)
-            let mae = PenSnapshotTestHelpers.meanAbsoluteError(between: image, and: reference)
+            let mae = await PenSnapshotTestHelpers.concurrentMeanAbsoluteError(between: image, and: reference)
             let black = try await render(board, blackIcon: true).image
-            let blackMAE = PenSnapshotTestHelpers.meanAbsoluteError(between: black, and: reference)
+            let blackMAE = await PenSnapshotTestHelpers.concurrentMeanAbsoluteError(between: black, and: reference)
             print("React icon paint \(board.name) MAE (WebView vs Pen): \(String(format: "%.3f", mae)); "
                 + "black icon \(String(format: "%.3f", blackMAE))")
             #expect(mae < board.maeLimit, "\(board.name): MAE \(mae)")
@@ -88,6 +88,15 @@
 
         /// Emits the board as a component, renders it in WebKit at 2x, and loads Pen's export.
         private func render(_ board: Board, blackIcon: Bool) async throws -> (image: CGImage, reference: CGImage) {
+            let (page, reference) = try await Self.page(board, blackIcon: blackIcon)
+            let image = try await harness.render(fileURL: page.url, viewportSize: page.size, allowingReadAccessTo: Self.projectRoot)
+            return (image, reference)
+        }
+
+        /// Builds the page and loads Pen's export, off the main actor: parsing, emitting and
+        /// writing the page are what a render does besides waiting on WebKit.
+        @concurrent
+        private nonisolated static func page(_ board: Board, blackIcon: Bool) async throws -> (page: WebViewTestPage, reference: CGImage) {
             TestFontRegistration.registerTestFonts()
             let url = Self.fixturesDir.appendingPathComponent("\(Self.fixture).pen")
             var document = try PenParser.parse(Data(contentsOf: url))
@@ -129,12 +138,7 @@
             let htmlURL = tmpDir.appendingPathComponent("icon-paint-\(board.name)-\(blackIcon ? "black" : "painted").html")
             try html.write(to: htmlURL, atomically: true, encoding: .utf8)
 
-            let image = try await harness.render(
-                fileURL: htmlURL,
-                viewportSize: CGSize(width: width, height: height),
-                allowingReadAccessTo: Self.projectRoot
-            )
-            return (image, reference)
+            return (WebViewTestPage(url: htmlURL, size: CGSize(width: width, height: height)), reference)
         }
     }
 

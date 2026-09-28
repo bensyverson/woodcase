@@ -17,7 +17,7 @@
     /// optical size as Pen draws it: `twin-lin-h` measured 3.37 while React wrote no
     /// `font-optical-sizing: none` and WebKit set its 72 pt Inter in the narrower display cut
     /// (leaf Gmh2sB).
-    @Suite("React paint WebView", .tags(.webViewRegression), .serialized, .hangGuard)
+    @Suite("React paint WebView", .tags(.webViewRegression), .hangGuard)
     @MainActor
     struct ReactPaintWebViewTests {
         /// One artboard to render and what to hold it to.
@@ -70,13 +70,13 @@
             Board(fixture: text, name: "twin-lin-h", axis: .x, domain: 40 ... 440, maeLimit: 0.44), // measured 0.189
         ]
 
-        private static let fixturesDir = WebViewRegressionFixture.fixturesDirectory
-        private static let projectRoot = fixturesDir
+        private nonisolated static let fixturesDir = WebViewRegressionFixture.fixturesDirectory
+        private nonisolated static let projectRoot = fixturesDir
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
-        private static let fontDir = projectRoot.appendingPathComponent("Tests/WoodcaseTests/Fonts")
-        private static let scale = 2
+        private nonisolated static let fontDir = projectRoot.appendingPathComponent("Tests/WoodcaseTests/Fonts")
+        private nonisolated static let scale = 2
 
         private let harness = WebViewTestHarness()
 
@@ -84,7 +84,7 @@
         func matchesPen(board: Board) async throws {
             let (image, reference) = try await render(board)
             if let limit = board.maeLimit {
-                let mae = PenSnapshotTestHelpers.meanAbsoluteError(between: image, and: reference)
+                let mae = await PenSnapshotTestHelpers.concurrentMeanAbsoluteError(between: image, and: reference)
                 print("React paint \(board.name) MAE (WebView vs Pen): \(String(format: "%.3f", mae))")
                 #expect(mae < limit, "\(board.name): MAE \(mae)")
                 await MAEReport.shared.record(id: "react-paint-\(board.name)", mae: mae, limit: limit)
@@ -101,6 +101,15 @@
 
         /// Emits the board as a component, renders it in WebKit at 2x, and loads Pen's export.
         private func render(_ board: Board) async throws -> (image: CGImage, reference: CGImage) {
+            let (page, reference) = try await Self.page(board)
+            let image = try await harness.render(fileURL: page.url, viewportSize: page.size, allowingReadAccessTo: Self.projectRoot)
+            return (image, reference)
+        }
+
+        /// Builds the page and loads Pen's export, off the main actor: parsing, emitting and
+        /// writing the page are what a render does besides waiting on WebKit.
+        @concurrent
+        private nonisolated static func page(_ board: Board) async throws -> (page: WebViewTestPage, reference: CGImage) {
             TestFontRegistration.registerTestFonts()
             let url = Self.fixturesDir.appendingPathComponent("\(board.fixture).pen")
             var document = try PenParser.parse(Data(contentsOf: url))
@@ -132,12 +141,7 @@
             let htmlURL = tmpDir.appendingPathComponent("paint-\(board.fixture)-\(board.name).html")
             try html.write(to: htmlURL, atomically: true, encoding: .utf8)
 
-            let image = try await harness.render(
-                fileURL: htmlURL,
-                viewportSize: CGSize(width: width, height: height),
-                allowingReadAccessTo: Self.projectRoot
-            )
-            return (image, reference)
+            return (WebViewTestPage(url: htmlURL, size: CGSize(width: width, height: height)), reference)
         }
     }
 

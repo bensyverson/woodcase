@@ -98,6 +98,14 @@ Creating the host is not the cost — 14 ms. The cost is the cold cache behind i
 
 Deliberately kept on `WebViewRegressionTests`, for a reason the profile does not show. The [SleepyHollow harness finding](2026-08-29-sleepyhollow-harness.md) records that parallel Woodcase renderer work saturating the main actor starved SleepyHollow's `WaitEngine` poll into two timeouts the pages had not earned — which is why the ready signal is page-pushed today. Every phase of this suite is `@MainActor` (WebKit, Core Graphics, the pixel renderer), so unserializing it buys interleaving, not parallelism, at the price of re-opening that flake. The host pool is safe under concurrency either way; that safety is there for `WebViewTestHarnessTests`, which is not serialized, not as a step toward unserializing this one.
 
+> **Superseded, 2026-09-28 (`cWdP3b`):** `.serialized` is gone from the React WebView suites and from this one, replaced by
+> a process-wide bound of four renders in flight (`WebViewRenderSlots`). The premise above, that every phase is
+> `@MainActor` so unserializing buys only interleaving, no longer held: a render spends most of its time waiting on
+> WebKit's content process (page load and fonts, 57 % of a React board), and the page building, CG render and pixel
+> diffs now run off the main actor. The flake this section guarded against came from the old `WaitEngine` poll, since
+> replaced by the page-pushed ready signal; a loaded soak is the evidence. See
+> [2026-09-28-suite-speed.md](2026-09-28-suite-speed.md).
+
 ## The profile, after
 
 Quiet machine, 8.09 s suite.

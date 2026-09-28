@@ -1,0 +1,59 @@
+#!/usr/bin/env python3
+"""suite-times — list the slowest suites and tests of a `swift test` run.
+
+Usage:
+    scripts/suite-times [--top <n>] [<log>]
+
+Reads a `swift test` log (run *without* --quiet, which hides the per-test lines), or
+with no <log> runs `swift test` itself and keeps its log in $TMPDIR. Prints the <n>
+slowest suites and the <n> slowest tests (default 15), from Swift Testing's
+"passed after"/"failed after" lines.
+
+Swift Testing runs suites in parallel, so durations overlap: a suite's time is how
+long it was open, not its share of the wall clock, and the rows do not sum to the run.
+A suite that waits on a shared batch (the SwiftUI render batches) is charged the wait.
+
+Exits 0, or 5 when there is no log to read. Standard library only; running the suite
+needs the sandbox disabled (project/agents/harness.md).
+"""
+import os, re, subprocess, sys, tempfile
+
+LINE = re.compile(r'(Suite|Test) "(.+?)" (?:passed|failed) after ([0-9.]+) seconds')
+
+
+def main(argv):
+    args = argv[1:]
+    top = 15
+    if args[:1] == ["--top"]:
+        top = int(args[1])
+        args = args[2:]
+    if args and args[0] in ("-h", "--help"):
+        print(__doc__.strip())
+        return 0
+    if args:
+        path = args[0]
+    else:
+        path = os.path.join(tempfile.gettempdir(), "suite-times.log")
+        with open(path, "w") as log:
+            subprocess.run(["swift", "test"], stdout=log, stderr=subprocess.STDOUT)
+        print(f"log: {path}", file=sys.stderr)
+    try:
+        text = open(path, encoding="utf-8", errors="replace").read()
+    except OSError as error:
+        print(f"suite-times: {error}", file=sys.stderr)
+        return 5
+    rows = {"Suite": [], "Test": []}
+    for kind, name, seconds in LINE.findall(text):
+        rows[kind].append((float(seconds), name))
+    if not rows["Suite"] and not rows["Test"]:
+        print(f"suite-times: no per-test lines in {path} (was it run with --quiet?)", file=sys.stderr)
+        return 5
+    for kind in ("Suite", "Test"):
+        print(f"Slowest {kind.lower()}s:")
+        for seconds, name in sorted(rows[kind], reverse=True)[:top]:
+            print(f"  {seconds:8.1f} s  {name}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

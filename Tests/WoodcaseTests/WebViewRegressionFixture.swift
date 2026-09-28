@@ -55,7 +55,7 @@
         let screenRects: [String: PenRect]
 
         /// Where `woodcase-app.pen` and the HTML fixtures live.
-        static let fixturesDirectory: URL = .init(fileURLWithPath: #filePath)
+        nonisolated static let fixturesDirectory: URL = .init(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
             .appendingPathComponent("Fixtures")
 

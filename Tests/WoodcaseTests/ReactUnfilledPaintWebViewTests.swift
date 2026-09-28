@@ -19,7 +19,7 @@
     /// the default optical size Pen draws (`font-optical-sizing: none`); every black board
     /// scores the same. The artboards are not components; each is marked reusable here so
     /// the emitter writes it as one.
-    @Suite("React unfilled paint WebView", .tags(.webViewRegression), .serialized, .hangGuard)
+    @Suite("React unfilled paint WebView", .tags(.webViewRegression), .hangGuard)
     @MainActor
     struct ReactUnfilledPaintWebViewTests {
         /// One artboard to render and what to hold it to.
@@ -61,21 +61,21 @@
             Board(name: "disabled-then-solid", unfilled: false, maeLimit: 0.58), // measured 0.327
         ]
 
-        private static let fixturesDir = WebViewRegressionFixture.fixturesDirectory
-        private static let projectRoot = fixturesDir
+        private nonisolated static let fixturesDir = WebViewRegressionFixture.fixturesDirectory
+        private nonisolated static let projectRoot = fixturesDir
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
-        private static let fontDir = projectRoot.appendingPathComponent("Tests/WoodcaseTests/Fonts")
-        private static let iconFontDir = projectRoot.appendingPathComponent("Sources/Woodcase/IconFonts/Fonts")
-        private static let scale = 2
+        private nonisolated static let fontDir = projectRoot.appendingPathComponent("Tests/WoodcaseTests/Fonts")
+        private nonisolated static let iconFontDir = projectRoot.appendingPathComponent("Sources/Woodcase/IconFonts/Fonts")
+        private nonisolated static let scale = 2
 
         private let harness = WebViewTestHarness()
 
         @Test("The emitted text and icon draw as Pen draws them", arguments: boards)
         func matchesPen(board: Board) async throws {
             let (image, reference) = try await render(board)
-            let mae = PenSnapshotTestHelpers.meanAbsoluteError(between: image, and: reference)
+            let mae = await PenSnapshotTestHelpers.concurrentMeanAbsoluteError(between: image, and: reference)
             print("React unfilled \(board.name) MAE (WebView vs Pen): \(String(format: "%.3f", mae))")
             #expect(mae < board.maeLimit, "\(board.name): MAE \(mae)")
             await MAEReport.shared.record(id: "react-unfilled-\(board.name)", mae: mae, limit: board.maeLimit)
@@ -115,6 +115,15 @@
 
         /// Emits the board as a component, renders it in WebKit at 2x, and loads Pen's export.
         private func render(_ board: Board) async throws -> (image: CGImage, reference: CGImage) {
+            let (page, reference) = try await Self.page(board)
+            let image = try await harness.render(fileURL: page.url, viewportSize: page.size, allowingReadAccessTo: Self.projectRoot)
+            return (image, reference)
+        }
+
+        /// Builds the page and loads Pen's export, off the main actor: parsing, emitting and
+        /// writing the page are what a render does besides waiting on WebKit.
+        @concurrent
+        private nonisolated static func page(_ board: Board) async throws -> (page: WebViewTestPage, reference: CGImage) {
             TestFontRegistration.registerTestFonts()
             let url = Self.fixturesDir.appendingPathComponent("\(Self.fixture).pen")
             var document = try PenParser.parse(Data(contentsOf: url))
@@ -152,12 +161,7 @@
             let htmlURL = tmpDir.appendingPathComponent("unfilled-\(board.name).html")
             try html.write(to: htmlURL, atomically: true, encoding: .utf8)
 
-            let image = try await harness.render(
-                fileURL: htmlURL,
-                viewportSize: CGSize(width: width, height: height),
-                allowingReadAccessTo: Self.projectRoot
-            )
-            return (image, reference)
+            return (WebViewTestPage(url: htmlURL, size: CGSize(width: width, height: height)), reference)
         }
     }
 

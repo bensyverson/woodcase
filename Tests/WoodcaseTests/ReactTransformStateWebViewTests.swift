@@ -16,7 +16,7 @@
     /// card is drawn three ways: the component at rest (against Pen's base board), the
     /// component disabled (against Pen's variant board), and the variant board emitted as a
     /// component of its own — the path a node that is simply turned takes.
-    @Suite("React transform state WebView", .tags(.webViewRegression), .serialized, .hangGuard)
+    @Suite("React transform state WebView", .tags(.webViewRegression), .hangGuard)
     @MainActor
     struct ReactTransformStateWebViewTests {
         /// One way of drawing one card, and the Pen export it is held to.
@@ -61,19 +61,19 @@
             Case(card: "TurnFlipCard", mode: .variantBoard, maeLimit: 0.29), // measured 0.039
         ]
 
-        private static let fixturesDir = WebViewRegressionFixture.fixturesDirectory
-        private static let projectRoot = fixturesDir
+        private nonisolated static let fixturesDir = WebViewRegressionFixture.fixturesDirectory
+        private nonisolated static let projectRoot = fixturesDir
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
-        private static let scale = 2
+        private nonisolated static let scale = 2
 
         private let harness = WebViewTestHarness()
 
         @Test("A designer's turned or flipped state draws as Pen draws it", arguments: cases)
         func matchesPen(testCase: Case) async throws {
             let (image, reference) = try await render(testCase)
-            let mae = PenSnapshotTestHelpers.meanAbsoluteError(between: image, and: reference)
+            let mae = await PenSnapshotTestHelpers.concurrentMeanAbsoluteError(between: image, and: reference)
             print("React transform state \(testCase.testDescription) MAE (WebView vs Pen): \(String(format: "%.3f", mae))")
             #expect(mae < testCase.maeLimit, "\(testCase.testDescription): MAE \(mae)")
             await MAEReport.shared.record(
@@ -85,6 +85,15 @@
 
         /// Emits the card, renders it in WebKit at 2x, and loads Pen's export.
         private func render(_ testCase: Case) async throws -> (image: CGImage, reference: CGImage) {
+            let (page, reference) = try await Self.page(testCase)
+            let image = try await harness.render(fileURL: page.url, viewportSize: page.size, allowingReadAccessTo: Self.projectRoot)
+            return (image, reference)
+        }
+
+        /// Builds the page and loads Pen's export, off the main actor: parsing, emitting and
+        /// writing the page are what a render does besides waiting on WebKit.
+        @concurrent
+        private nonisolated static func page(_ testCase: Case) async throws -> (page: WebViewTestPage, reference: CGImage) {
             let url = Self.fixturesDir.appendingPathComponent("\(Self.fixture).pen")
             var document = try PenParser.parse(Data(contentsOf: url))
             let variantName = "\(testCase.card):disabled"
@@ -129,12 +138,7 @@
             let htmlURL = tmpDir.appendingPathComponent("transform-state-\(testCase.card)-\(testCase.mode.rawValue).html")
             try html.write(to: htmlURL, atomically: true, encoding: .utf8)
 
-            let image = try await harness.render(
-                fileURL: htmlURL,
-                viewportSize: CGSize(width: width, height: height),
-                allowingReadAccessTo: Self.projectRoot
-            )
-            return (image, reference)
+            return (WebViewTestPage(url: htmlURL, size: CGSize(width: width, height: height)), reference)
         }
     }
 
