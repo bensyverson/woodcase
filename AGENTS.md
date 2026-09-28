@@ -22,7 +22,7 @@ You are working on Woodcase, a Swift library which allows users to parse and ren
 ## Build and test
 
 - `swift test --quiet` is the full suite; `swiftformat . --lint` (then `swiftformat .`) is the lint.
-- **The pre-commit hook does not run the tests.** It formats staged Swift files and runs `scripts/mae-check`; run the suite yourself before every commit.
+- **The pre-commit hook does not run the tests.** It formats staged Swift files and runs `scripts/mae-check`; run the suite yourself before every commit. It is tracked in `scripts/git-hooks/`; enable it once per clone with `git config core.hooksPath scripts/git-hooks`.
 - The Swift toolchain fails inside the Bash sandbox (`sandbox_apply: Operation not permitted`); re-run `swift build`, `swift test` and `swiftformat` with the sandbox disabled, one call at a time — see `project/agents/harness.md`.
 - If you change the React output format, regenerate the golden fixtures: `UPDATE_GOLDEN=1 swift test --filter "ReactEmitter.*Tests"` — component goldens live in `ReactEmitterTests`, page goldens in `ReactEmitterPageGoldenTests`, and `--filter` is a regex over the Swift type names, so `"ReactEmitterTests"` alone silently skips the pages. Read the rewritten goldens before committing them.
 
