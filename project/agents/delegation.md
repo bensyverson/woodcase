@@ -1,4 +1,4 @@
-<!-- agents:begin delegation@c20af4 -->
+<!-- agents:begin delegation@1a3401 -->
 # Delegating to subagents
 
 Every rule here was paid for. Five hold even if you read nothing else:
