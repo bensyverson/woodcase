@@ -14,7 +14,7 @@
 #     2. push main, then tag v<version> (annotated) and push the tag  (unless origin has it)
 #     3. hash GitHub's tarball of the tag, rewrite the formula's url
 #        and sha256 in the tap, commit and push the tap                (unless the formula has it)
-#     4. update Homebrew's copy of the tap, build from source,
+#     4. update Homebrew's copy of the tap, install or reinstall,
 #        brew test and brew audit --strict                             (always; --no-verify skips)
 #
 # Both repos must be clean, on main and not behind origin. The tap defaults to
@@ -128,7 +128,7 @@ if $dry_run; then
         say "would push main, then tag ${tag} and push it"
     fi
     $formula_done || say "would point ${formula} at ${tag}, with the tarball's sha256, and push the tap"
-    $verify && say "would build ${formula_ref} from source, then brew test and brew audit"
+    $verify && say "would install ${formula_ref} through Homebrew, then brew test and brew audit"
     exit 0
 fi
 
@@ -196,10 +196,12 @@ if [[ -d "${brew_tap}/.git" ]]; then
 else
     brew tap "$tap_name" || die 5 "could not tap ${tap_name}"
 fi
+# No --build-from-source: the formula has no bottles, so Homebrew builds it anyway, and
+# the flag only adds a "building from source is not supported" warning.
 if brew list --versions woodcase >/dev/null 2>&1; then
-    brew reinstall --build-from-source "$formula_ref" || die 5 "the Homebrew build failed"
+    brew reinstall "$formula_ref" || die 5 "the Homebrew build failed"
 else
-    brew install --build-from-source "$formula_ref" || die 5 "the Homebrew build failed"
+    brew install "$formula_ref" || die 5 "the Homebrew build failed"
 fi
 brew test "$formula_ref" || die 5 "brew test failed"
 brew audit --strict "$formula_ref" || die 5 "brew audit failed"

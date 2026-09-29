@@ -61,7 +61,7 @@ cat >"${stubs}/brew" <<'EOF'
 echo "brew $*" >>"$STUB_LOG"
 case "$1" in
     --repository) echo "$STUB_BREW_TAP" ;;
-    list) exit 1 ;;
+    list) [[ -n "${STUB_BREW_INSTALLED:-}" ]] ;;
 esac
 EOF
 chmod +x "${stubs}"/*
@@ -110,7 +110,7 @@ setup() {
     git clone -q "${root}/tap.git" "$STUB_BREW_TAP"
     export STUB_LOG="${root}/stub.log"
     : >"$STUB_LOG"
-    unset STUB_SWIFT_EXIT
+    unset STUB_SWIFT_EXIT STUB_BREW_INSTALLED
 }
 
 write_version() {
@@ -158,7 +158,10 @@ assert_released() {
     remote_formula | grep -qF "sha256 \"$(sha_of "$(tarball "$v")")\"" || fail "formula sha256 wrong"
     [[ -z "$(git -C "$wc" status --porcelain)" ]] || fail "repo left dirty"
     [[ -z "$(git -C "$tap" status --porcelain)" ]] || fail "tap left dirty"
-    assert_log "brew install --build-from-source bensyverson/tap/woodcase"
+    assert_log "brew install bensyverson/tap/woodcase"
+    # The formula has no bottles, so Homebrew builds from source anyway; the flag only
+    # adds a "building from source is not supported" warning.
+    refute_log "--build-from-source"
     assert_log "brew test bensyverson/tap/woodcase"
     assert_log "brew audit --strict bensyverson/tap/woodcase"
     git -C "$STUB_BREW_TAP" log -1 --format=%s | grep -qF "$v" || fail "brew's tap clone not updated"
@@ -278,6 +281,14 @@ release 5 0.1.1
 [[ -z "$(git -C "$wc" status --porcelain)" ]] || fail "repo left dirty"
 [[ -z "$(remote_tag 0.1.1)" ]] || fail "tagged despite failing tests"
 refute_log "curl"
+
+case_name="already installed: reinstalls"
+setup 0.1.1
+export STUB_BREW_INSTALLED=1
+release 0
+assert_log "brew reinstall bensyverson/tap/woodcase"
+refute_log "brew install"
+refute_log "--build-from-source"
 
 case_name="--skip-tests and --no-verify"
 setup 0.1.1
