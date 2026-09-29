@@ -10,9 +10,10 @@ import Woodcase
 ///
 /// SwiftPM does not hand a package its own version at build time — a tag is a property
 /// of the repository, not of the source — so the number lives here, as one constant,
-/// and is bumped by hand in the commit that tags a release. That is the whole of the
+/// and is bumped in the commit that tags a release. That is the whole of the
 /// maintenance rule: **a release commit changes this file**. Nothing derives it, so
-/// nothing can derive it wrongly.
+/// nothing can derive it wrongly. `scripts/release <version>` makes that commit, tags it
+/// and moves the Homebrew formula; `scripts/release` alone publishes what this says.
 ///
 /// The line pairs the tool's own version with the .pen format it writes, because those
 /// are the two numbers a caller acts on: the first says whether a verb or flag is

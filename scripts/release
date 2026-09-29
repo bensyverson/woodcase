@@ -1,0 +1,206 @@
+#!/usr/bin/env bash
+# release — publish a Woodcase version to Homebrew in one command, resuming wherever an
+# earlier release stopped.
+#
+# Usage:
+#     scripts/release [<X.Y.Z>] [--dry-run] [--skip-tests] [--no-verify] [--tap <dir>]
+#
+# With no version it releases what WoodcaseVersion.current already says; with one it
+# bumps the source to it first. Every step checks whether it is already done, so a
+# release that was bumped and pushed but never tagged, or tagged but never put in the
+# formula, picks up where it stopped:
+#
+#     1. bump WoodcaseVersion.current, lint, run the suite, commit   (unless the source says it)
+#     2. push main, then tag v<version> (annotated) and push the tag  (unless origin has it)
+#     3. hash GitHub's tarball of the tag, rewrite the formula's url
+#        and sha256 in the tap, commit and push the tap                (unless the formula has it)
+#     4. update Homebrew's copy of the tap, build from source,
+#        brew test and brew audit --strict                             (always; --no-verify skips)
+#
+# Both repos must be clean, on main and not behind origin. The tap defaults to
+# ../homebrew-tap beside this checkout. --dry-run prints the plan and changes nothing.
+#
+# Exits 0 on success, 2 on a usage error, 3 when a precondition fails or the state
+# conflicts (a tag on another version, a dirty tree) — nothing has changed then — and 5
+# when a step fails. Needs the Bash sandbox disabled (the Swift toolchain, the pushes).
+set -euo pipefail
+
+tap_name="bensyverson/tap"
+formula_ref="${tap_name}/woodcase"
+version_file="Sources/WoodcaseCommandCore/Verbs/WoodcaseVersion.swift"
+
+die() {
+    echo "release: $2" >&2
+    exit "$1"
+}
+say() { echo "==> $*"; }
+
+target=""
+dry_run=false
+skip_tests=false
+verify=true
+tap=""
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --dry-run) dry_run=true; shift ;;
+        --skip-tests) skip_tests=true; shift ;;
+        --no-verify) verify=false; shift ;;
+        --tap)
+            [[ $# -ge 2 ]] || die 2 "--tap needs a directory"
+            tap="$2"
+            shift 2
+            ;;
+        -h|--help) sed -n '2,27p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        -*) die 2 "unknown flag '$1' (try --help)" ;;
+        *)
+            [[ -z "$target" ]] || die 2 "one version only (got '$target' and '$1')"
+            target="$1"
+            shift
+            ;;
+    esac
+done
+
+repo="$(cd "$(dirname "$0")/.." && pwd)"
+tap="${tap:-${repo}/../homebrew-tap}"
+formula="${tap}/Formula/woodcase.rb"
+[[ -f "${repo}/${version_file}" ]] || die 3 "no ${version_file} in ${repo}"
+[[ -f "$formula" ]] || die 3 "no formula at ${formula} (clone bensyverson/homebrew-tap there, or pass --tap)"
+
+source_version="$(sed -n 's/.*static let current = "\(.*\)".*/\1/p' "${repo}/${version_file}")"
+formula_url="$(sed -n 's/^ *url "\(.*\)"$/\1/p' "$formula")"
+formula_version="$(sed -n 's|.*/v\([0-9][0-9.]*\)\.tar\.gz$|\1|p' <<<"$formula_url")"
+[[ -n "$source_version" && -n "$formula_version" ]] ||
+    die 3 "could not read the version from ${version_file} or the formula's url"
+
+target="${target:-$source_version}"
+[[ "$target" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || die 2 "the version must be X.Y.Z (got '${target}')"
+older="$(printf '%s\n%s\n' "$target" "$source_version" | sort -V | head -1)"
+[[ "$target" == "$source_version" || "$older" == "$source_version" ]] ||
+    die 2 "${target} is older than ${source_version}, which the source already says"
+
+# --- Preconditions: nothing below this block changes anything until they all hold. ----
+
+for dir in "$repo" "$tap"; do
+    [[ -z "$(git -C "$dir" status --porcelain --untracked-files=no)" ]] ||
+        die 3 "${dir} has uncommitted changes; commit or stash them first"
+    [[ "$(git -C "$dir" symbolic-ref --short HEAD)" == main ]] || die 3 "${dir} is not on main"
+    git -C "$dir" fetch -q origin main || die 3 "could not fetch origin in ${dir}"
+    git -C "$dir" merge-base --is-ancestor origin/main HEAD ||
+        die 3 "${dir} is behind origin/main; pull first"
+done
+
+tag="v${target}"
+bump=false
+[[ "$source_version" == "$target" ]] || bump=true
+
+# The commit a ref names, peeled through an annotated tag; empty when there is none.
+remote_tag_commit="$(git -C "$repo" ls-remote --tags origin "refs/tags/${tag}" "refs/tags/${tag}^{}" |
+    sort -k2 | tail -1 | cut -f1)" || die 3 "could not list origin's tags"
+local_tag_commit="$(git -C "$repo" rev-parse -q --verify "refs/tags/${tag}^{commit}" || true)"
+
+if $bump && [[ -n "${remote_tag_commit}${local_tag_commit}" ]]; then
+    die 3 "${tag} already exists, but the source says ${source_version}; it was tagged by hand?"
+fi
+if [[ -n "$remote_tag_commit" && -n "$local_tag_commit" && "$remote_tag_commit" != "$local_tag_commit" ]]; then
+    die 3 "${tag} names ${local_tag_commit:0:7} here but ${remote_tag_commit:0:7} on origin"
+fi
+if [[ -z "$remote_tag_commit" && -n "$local_tag_commit" ]] &&
+    ! git -C "$repo" show "${tag}:${version_file}" | grep -qF "\"${target}\""; then
+    die 3 "the local tag ${tag} is on a commit whose source does not say ${target}"
+fi
+if [[ "$formula_version" == "$target" && -z "$remote_tag_commit" ]]; then
+    die 3 "the formula already points at ${tag}, but origin has no such tag"
+fi
+
+tagged=false
+[[ -n "$remote_tag_commit" ]] && tagged=true
+formula_done=false
+[[ "$formula_version" == "$target" ]] && formula_done=true
+
+if $tagged && $formula_done; then
+    say "${target} is already released. To release a new version: scripts/release <version>"
+fi
+
+if $dry_run; then
+    $bump && say "would bump ${version_file} from ${source_version} to ${target} and commit it"
+    if ! $tagged; then
+        $skip_tests || say "would run swiftformat --lint and swift test"
+        say "would push main, then tag ${tag} and push it"
+    fi
+    $formula_done || say "would point ${formula} at ${tag}, with the tarball's sha256, and push the tap"
+    $verify && say "would build ${formula_ref} from source, then brew test and brew audit"
+    exit 0
+fi
+
+# --- 1. Bump, lint, test, commit ------------------------------------------------------
+
+if ! $tagged; then
+    if $bump; then
+        say "Bumping ${source_version} → ${target}"
+        sed "s/static let current = \"${source_version}\"/static let current = \"${target}\"/" \
+            "${repo}/${version_file}" >"${repo}/${version_file}.new"
+        mv "${repo}/${version_file}.new" "${repo}/${version_file}"
+    fi
+    if ! $skip_tests; then
+        say "Linting and running the suite"
+        if ! (cd "$repo" && swiftformat . --lint && swift test --quiet); then
+            $bump && git -C "$repo" checkout -q -- "$version_file"
+            die 5 "lint or tests failed; nothing was committed or pushed"
+        fi
+    fi
+    if $bump; then
+        git -C "$repo" commit -q -m "Bumps the version to ${target}" -- "$version_file"
+    fi
+
+    # --- 2. Push, tag, push the tag -----------------------------------------------------
+
+    say "Pushing main and ${tag}"
+    git -C "$repo" push -q origin main || die 5 "could not push main"
+    [[ -n "$local_tag_commit" ]] || git -C "$repo" tag -a "$tag" -m "Woodcase ${target}"
+    git -C "$repo" push -q origin "$tag" || die 5 "could not push ${tag}"
+fi
+
+# --- 3. Point the formula at the tag --------------------------------------------------
+
+if ! $formula_done; then
+    url="${formula_url/\/v${formula_version}.tar.gz//${tag}.tar.gz}"
+    say "Hashing ${url}"
+    tarball="$(mktemp "${TMPDIR:-/tmp}/woodcase-release.XXXXXX")"
+    trap 'rm -f "$tarball"' EXIT
+    # GitHub can take a moment to serve the archive of a tag it has just received.
+    for attempt in 1 2 3 4 5; do
+        curl -fsSL -o "$tarball" "$url" && break
+        [[ $attempt -lt 5 ]] || die 5 "could not download ${url}; rerun scripts/release to resume"
+        sleep 3
+    done
+    sha="$(shasum -a 256 "$tarball" | cut -d' ' -f1)"
+
+    sed -e "s|^\( *url \"\).*\"$|\1${url}\"|" -e "s|^\( *sha256 \"\)[0-9a-f]*\"$|\1${sha}\"|" \
+        "$formula" >"${formula}.new"
+    mv "${formula}.new" "$formula"
+    grep -qF "url \"${url}\"" "$formula" && grep -qF "sha256 \"${sha}\"" "$formula" ||
+        die 5 "could not rewrite the url and sha256 in ${formula}"
+
+    say "Pushing the formula at ${tag}"
+    git -C "$tap" commit -q -m "Bumps woodcase to ${target}" -- Formula/woodcase.rb
+    git -C "$tap" push -q origin main || die 5 "could not push the tap; rerun scripts/release to resume"
+fi
+
+# --- 4. Check it the way a user gets it -----------------------------------------------
+
+$verify || exit 0
+say "Checking ${formula_ref} through Homebrew"
+brew_tap="$(brew --repository "$tap_name")"
+if [[ -d "${brew_tap}/.git" ]]; then
+    git -C "$brew_tap" pull -q --ff-only || die 5 "could not update Homebrew's copy of the tap at ${brew_tap}"
+else
+    brew tap "$tap_name" || die 5 "could not tap ${tap_name}"
+fi
+if brew list --versions woodcase >/dev/null 2>&1; then
+    brew reinstall --build-from-source "$formula_ref" || die 5 "the Homebrew build failed"
+else
+    brew install --build-from-source "$formula_ref" || die 5 "the Homebrew build failed"
+fi
+brew test "$formula_ref" || die 5 "brew test failed"
+brew audit --strict "$formula_ref" || die 5 "brew audit failed"
+say "Released woodcase ${target}"
