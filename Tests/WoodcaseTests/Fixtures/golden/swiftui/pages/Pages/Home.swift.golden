@@ -16,6 +16,7 @@ public struct Home: View {
                 .fixedSize()
             HStack(alignment: .top, spacing: 8) {
                 Card(label: "Revenue")
+                    .frame(width: 140, height: 80)
             }
             .frame(width: 288, height: 96, alignment: .topLeading)
         }

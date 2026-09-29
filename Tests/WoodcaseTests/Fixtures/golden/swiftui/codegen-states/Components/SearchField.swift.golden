@@ -36,7 +36,7 @@ public struct SearchField: View {
                 .foregroundStyle(Color(hex: 0x94A3B8))
         }
         .padding(.horizontal, 12)
-        .frame(width: 240, height: 44, alignment: .leading)
+        .frame(minWidth: 0, idealWidth: 240, maxWidth: .infinity, minHeight: 0, idealHeight: 44, maxHeight: .infinity, alignment: .leading)
         .background {
             RoundedRectangle(cornerRadius: 8, style: .circular)
                 .strokeBorder(Color(hex: 0xCBD5E1), lineWidth: 1)
@@ -54,7 +54,7 @@ public struct SearchField: View {
                 .foregroundStyle(Color(hex: 0xCBD5E1))
         }
         .padding(.horizontal, 12)
-        .frame(width: 240, height: 44, alignment: .leading)
+        .frame(minWidth: 0, idealWidth: 240, maxWidth: .infinity, minHeight: 0, idealHeight: 44, maxHeight: .infinity, alignment: .leading)
         .background {
             RoundedRectangle(cornerRadius: 8, style: .circular)
                 .strokeBorder(Color(hex: 0xE2E8F0), lineWidth: 1)
@@ -65,14 +65,17 @@ public struct SearchField: View {
 
 #Preview {
     SearchField()
+        .frame(width: 240, height: 44)
 }
 
 #Preview("disabled") {
     SearchField()
+        .frame(width: 240, height: 44)
         .disabled(true)
 }
 
 #Preview("focused") {
     SearchField()
+        .frame(width: 240, height: 44)
         .penControlState(.focused)
 }

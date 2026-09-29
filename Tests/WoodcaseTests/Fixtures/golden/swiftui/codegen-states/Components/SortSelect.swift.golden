@@ -55,7 +55,7 @@ public struct SortSelect: View {
                 .frame(width: 10, height: 6)
         }
         .padding(.horizontal, 12)
-        .frame(width: 180, height: 40, alignment: .leading)
+        .frame(minWidth: 0, idealWidth: 180, maxWidth: .infinity, minHeight: 0, idealHeight: 40, maxHeight: .infinity, alignment: .leading)
         .background {
             RoundedRectangle(cornerRadius: 8, style: .circular)
                 .strokeBorder(Color(hex: 0xCBD5E1), lineWidth: 1)
@@ -76,7 +76,7 @@ public struct SortSelect: View {
                 .frame(width: 10, height: 6)
         }
         .padding(.horizontal, 12)
-        .frame(width: 180, height: 40, alignment: .leading)
+        .frame(minWidth: 0, idealWidth: 180, maxWidth: .infinity, minHeight: 0, idealHeight: 40, maxHeight: .infinity, alignment: .leading)
         .background {
             RoundedRectangle(cornerRadius: 8, style: .circular)
                 .strokeBorder(Color(hex: 0x2563EB), lineWidth: 1)
@@ -108,18 +108,22 @@ public struct SortSelect: View {
 
 #Preview {
     SortSelect()
+        .frame(width: 180, height: 40)
 }
 
 #Preview("open") {
     SortSelect(variant: .open)
+        .frame(width: 180, height: 40)
 }
 
 #Preview("focused") {
     SortSelect()
+        .frame(width: 180, height: 40)
         .penControlState(.focused)
 }
 
 #Preview("disabled") {
     SortSelect()
+        .frame(width: 180, height: 40)
         .disabled(true)
 }

@@ -10,6 +10,10 @@ struct SwiftUIComponentScope: Friendly {
     /// The components the module declares a view struct for, by component id.
     var components: [String: SwiftUIComponent] = [:]
 
+    /// The reusable variants the module draws as a state of a component's view (a tab bar's
+    /// `TabBar:home`), by the variant's id.
+    var variants: [String: Variant] = [:]
+
     /// Every reusable node in the document, by id: what an instance is inlined from, which
     /// includes reusable nodes that are no analyzed component (a state variant).
     var reusable: [String: PenNode] = [:]
@@ -45,7 +49,20 @@ struct SwiftUIComponentScope: Friendly {
         for definition in components {
             let name = typeNames[definition.id] ?? definition.name
             self.components[definition.id] = SwiftUIComponent(definition, typeName: name, theme: theme)
+            for state in definition.states {
+                guard let id = definition.variantIDs[state.name], let node = state.variantNode, node.id == id else { continue }
+                variants[id] = Variant(componentID: definition.id, state: state)
+            }
         }
+    }
+
+    /// A reusable variant drawn as one state of a component's view.
+    struct Variant: Friendly {
+        /// The id of the component whose view draws it.
+        var componentID: String
+
+        /// The state it is; its ``StateDefinition/variantNode`` is the variant's own tree.
+        var state: StateDefinition
     }
 
     /// This scope inside `component`'s body: its props and slots bound, it on the chain.

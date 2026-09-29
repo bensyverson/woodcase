@@ -81,10 +81,10 @@ struct SwiftUIEmitterStateTests {
     @Test("Each state has a preview that pins it")
     func statePreviews() throws {
         let file = try Self.file("StatesButton")
-        #expect(file.contains("#Preview {\n    StatesButton()\n}"))
-        #expect(file.contains("#Preview(\"pressed\") {\n    StatesButton()\n        .penControlState(.pressed)\n}"))
-        #expect(file.contains("#Preview(\"hover\") {\n    StatesButton()\n        .penControlState(.hovered)\n}"))
-        #expect(file.contains("#Preview(\"disabled\") {\n    StatesButton()\n        .disabled(true)\n}"))
+        #expect(file.contains("#Preview {\n    StatesButton()\n        .frame(width: 160, height: 44)\n}"))
+        #expect(file.contains("#Preview(\"pressed\") {\n    StatesButton()\n        .frame(width: 160, height: 44)\n        .penControlState(.pressed)\n}"))
+        #expect(file.contains("#Preview(\"hover\") {\n    StatesButton()\n        .frame(width: 160, height: 44)\n        .penControlState(.hovered)\n}"))
+        #expect(file.contains("#Preview(\"disabled\") {\n    StatesButton()\n        .frame(width: 160, height: 44)\n        .disabled(true)\n}"))
     }
 
     // MARK: - Toggle
@@ -98,7 +98,7 @@ struct SwiftUIEmitterStateTests {
         #expect(file.contains("    private struct Style: ToggleStyle {"))
         #expect(file.contains("if !configuration.isOn {\n                        view.offFace\n                    } else {\n                        view.face\n                    }"))
         #expect(file.contains(".onTapGesture {\n                configuration.isOn.toggle()\n            }"))
-        #expect(file.contains("#Preview(\"off\") {\n    Switch(isOn: .constant(false))\n}"))
+        #expect(file.contains("#Preview(\"off\") {\n    Switch(isOn: .constant(false))\n        .frame(width: 52, height: 32)\n}"))
     }
 
     @Test("A disabled toggle fades and stops taking the pointer")
@@ -153,7 +153,7 @@ struct SwiftUIEmitterStateTests {
         #expect(select.contains("    public enum Variant: String, CaseIterable, Sendable {\n        case open\n    }"))
         #expect(select.contains("    public let variant: Variant?\n"))
         #expect(select.contains("if view.variant == .open {"))
-        #expect(select.contains("#Preview(\"open\") {\n    SortSelect(variant: .open)\n}"))
+        #expect(select.contains("#Preview(\"open\") {\n    SortSelect(variant: .open)\n        .frame(width: 180, height: 40)\n}"))
         let chip = try Self.file("Chip")
         #expect(chip.contains("public init(variant: Variant? = nil) {"))
         #expect(chip.contains("if variant == .selected {\n                selectedFace\n            } else {\n                face\n            }"))

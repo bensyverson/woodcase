@@ -23,11 +23,12 @@ public struct Card: View {
             .frame(width: 124, height: 64, alignment: .topLeading)
         }
         .padding(8)
-        .frame(width: 140, height: 80, alignment: .topLeading)
+        .frame(minWidth: 0, idealWidth: 140, maxWidth: .infinity, minHeight: 0, idealHeight: 80, maxHeight: .infinity, alignment: .topLeading)
         .background(Color(hex: 0xEEF2FF))
     }
 }
 
 #Preview {
     Card()
+        .frame(width: 140, height: 80)
 }

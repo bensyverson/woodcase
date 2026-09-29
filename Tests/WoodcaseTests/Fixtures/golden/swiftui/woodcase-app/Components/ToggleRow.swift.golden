@@ -22,21 +22,25 @@ public struct ToggleRow: View {
                 .fixedSize()
             Spacer(minLength: 0)
             ToggleView()
+                .frame(width: 44, height: 26)
         }
-        .frame(width: 354, alignment: .leading)
+        .frame(minWidth: 0, idealWidth: 354, maxWidth: .infinity, alignment: .leading)
     }
 }
 
 #Preview {
     ToggleRow()
+        .frame(width: 354)
 }
 
 #Preview("density: compact") {
     ToggleRow()
+        .frame(width: 354)
         .penTheme(density: .compact)
 }
 
 #Preview("mode: dark") {
     ToggleRow()
+        .frame(width: 354)
         .penTheme(mode: .dark)
 }

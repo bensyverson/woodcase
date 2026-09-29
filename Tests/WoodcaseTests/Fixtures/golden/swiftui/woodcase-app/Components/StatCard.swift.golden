@@ -29,7 +29,7 @@ public struct StatCard: View {
                 .fixedSize()
         }
         .padding(theme.spacingMd)
-        .frame(width: 120, alignment: .top)
+        .frame(minWidth: 0, idealWidth: 120, maxWidth: .infinity, alignment: .top)
         .background(theme.bgCard, in: .rect(cornerRadius: theme.cardRadius, style: .circular))
         .penDropShadow(RoundedRectangle(cornerRadius: theme.cardRadius, style: .circular), color: theme.shadow, radius: 10, x: 0, y: 4)
     }
@@ -37,14 +37,17 @@ public struct StatCard: View {
 
 #Preview {
     StatCard()
+        .frame(width: 120)
 }
 
 #Preview("density: compact") {
     StatCard()
+        .frame(width: 120)
         .penTheme(density: .compact)
 }
 
 #Preview("mode: dark") {
     StatCard()
+        .frame(width: 120)
         .penTheme(mode: .dark)
 }

@@ -27,7 +27,7 @@ public struct Switch: View {
                 .frame(width: 28, height: 28)
                 .offset(x: 22, y: 2)
         }
-        .frame(width: 52, height: 32, alignment: .topLeading)
+        .frame(minWidth: 0, idealWidth: 52, maxWidth: .infinity, minHeight: 0, idealHeight: 32, maxHeight: .infinity, alignment: .topLeading)
         .background(Color(hex: 0x22C55E), in: .rect(cornerRadius: 16, style: .circular))
     }
 
@@ -39,7 +39,7 @@ public struct Switch: View {
                 .frame(width: 28, height: 28)
                 .offset(x: 2, y: 2)
         }
-        .frame(width: 52, height: 32, alignment: .topLeading)
+        .frame(minWidth: 0, idealWidth: 52, maxWidth: .infinity, minHeight: 0, idealHeight: 32, maxHeight: .infinity, alignment: .topLeading)
         .background(Color(hex: 0xCBD5E1), in: .rect(cornerRadius: 16, style: .circular))
     }
 
@@ -70,18 +70,22 @@ public struct Switch: View {
 
 #Preview {
     Switch()
+        .frame(width: 52, height: 32)
 }
 
 #Preview("off") {
     Switch(isOn: .constant(false))
+        .frame(width: 52, height: 32)
 }
 
 #Preview("disabled") {
     Switch()
+        .frame(width: 52, height: 32)
         .disabled(true)
 }
 
 #Preview("focused") {
     Switch()
+        .frame(width: 52, height: 32)
         .penControlState(.focused)
 }

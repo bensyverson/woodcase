@@ -81,6 +81,9 @@ tolerance 0.5. The text field compiles at both floors but is not rendered: `Imag
    (each variant is a whole bar), so the bar cannot select on a tap; the caller drives it, as React's `selected` prop.
    A `TabView` would draw the system's bar, not the design's. Screens that place `TabBar:home` still inline it: their
    instances resize the bar's root (`fill_container` against the variant's fixed 402), which only a copy can draw.
+
+   > **Superseded 2026-09-28 (leaf `RNSV2z`):** the screens call `TabBar(selected: .home)` now; a fixed root is the
+   > view's ideal size and the call frames it. See [SwiftUI instance calls](2026-09-28-swiftui-instance-calls.md).
 9. **States are pinned through the environment.** `.penControlState(.pressed)` pins hovered, pressed and focused for
    every generated control below it; `.disabled(true)` stays SwiftUI's own. That is what the previews and the render
    test use, and it is public, so an app's snapshot tests can use it too.

@@ -12,16 +12,8 @@ public struct ScreenWishlist: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // woodcase: inlined from StatusBar
-            HStack(spacing: 0) {
-                Text("9:41")
-                    .penFont(theme.fontPrimary, size: 16, weight: 600)
-                    .foregroundStyle(theme.textPrimary)
-                    .fixedSize()
-            }
-            .padding(.horizontal, 24)
-            .frame(height: 62)
-            .frame(minWidth: 0, maxWidth: .infinity)
+            StatusBar()
+                .frame(height: 62)
             HStack(spacing: 0) {
                 Text("Wishlist")
                     .tracking(-0.5)
@@ -235,69 +227,9 @@ public struct ScreenWishlist: View {
             .padding(.horizontal, 24)
             .padding(.vertical, 20)
             .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .topLeading)
-            // woodcase: inlined from TabBar:wishlist
-            HStack(alignment: .top, spacing: 0) {
-                HStack(alignment: .top, spacing: 0) {
-                    VStack(spacing: 4) {
-                        PenIconShape(file: "lucide.ttf", glyph: 0xE0F5)
-                            .fill(theme.tabInactive)
-                            .frame(width: 18, height: 18)
-                        Text("HOME")
-                            .tracking(0.5)
-                            .penFont(theme.fontPrimary, size: 10, weight: 500)
-                            .foregroundStyle(theme.tabInactive)
-                            .fixedSize()
-                    }
-                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
-                    VStack(spacing: 4) {
-                        PenIconShape(file: "lucide.ttf", glyph: 0xE05F)
-                            .fill(theme.tabInactive)
-                            .frame(width: 18, height: 18)
-                        Text("LOG")
-                            .tracking(0.5)
-                            .penFont(theme.fontPrimary, size: 10, weight: 500)
-                            .foregroundStyle(theme.tabInactive)
-                            .fixedSize()
-                    }
-                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
-                    VStack(spacing: 4) {
-                        PenIconShape(file: "lucide.ttf", glyph: 0xE176)
-                            .fill(theme.tabInactive)
-                            .frame(width: 18, height: 18)
-                        Text("RATINGS")
-                            .tracking(0.5)
-                            .penFont(theme.fontPrimary, size: 10, weight: 500)
-                            .foregroundStyle(theme.tabInactive)
-                            .fixedSize()
-                    }
-                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
-                    VStack(spacing: 4) {
-                        PenIconShape(file: "lucide.ttf", glyph: 0xE0F2)
-                            .fill(theme.white)
-                            .frame(width: 18, height: 18)
-                        Text("WISHLIST")
-                            .tracking(0.5)
-                            .penFont(theme.fontPrimary, size: 10, weight: 500)
-                            .foregroundStyle(theme.white)
-                            .fixedSize()
-                    }
-                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
-                    .background(theme.accent, in: .rect(cornerRadius: 26, style: .circular))
-                }
-                .padding(4)
-                .frame(height: 62, alignment: .topLeading)
-                .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
-                .background {
-                    RoundedRectangle(cornerRadius: 36, style: .circular)
-                        .strokeBorder(theme.borderDefault, lineWidth: 1)
-                }
-                .background(theme.bgCard, in: .rect(cornerRadius: 36, style: .circular))
-                .penDropShadow(RoundedRectangle(cornerRadius: 36, style: .circular), color: theme.shadow, radius: 10, x: 0, y: 4)
-            }
-            .padding(EdgeInsets(top: 12, leading: 21, bottom: 21, trailing: 21))
-            .frame(minWidth: 0, maxWidth: .infinity, alignment: .top)
+            TabBar(selected: .wishlist)
         }
-        .frame(width: 402, height: 874, alignment: .topLeading)
+        .frame(minWidth: 0, idealWidth: 402, maxWidth: .infinity, minHeight: 0, idealHeight: 874, maxHeight: .infinity, alignment: .topLeading)
         .clipped()
         .background(theme.bgPage)
     }
@@ -305,14 +237,17 @@ public struct ScreenWishlist: View {
 
 #Preview {
     ScreenWishlist()
+        .frame(width: 402, height: 874)
 }
 
 #Preview("density: compact") {
     ScreenWishlist()
+        .frame(width: 402, height: 874)
         .penTheme(density: .compact)
 }
 
 #Preview("mode: dark") {
     ScreenWishlist()
+        .frame(width: 402, height: 874)
         .penTheme(mode: .dark)
 }

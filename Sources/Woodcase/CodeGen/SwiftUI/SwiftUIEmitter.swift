@@ -126,7 +126,7 @@ public enum SwiftUIEmitter {
             "    public init() {}",
             "",
         ]
-        lines += bodyLines(body, emitter: emitter, preview: type)
+        lines += bodyLines(body, emitter: emitter, specimens: [Specimen(name: nil, call: ["\(type)()"])])
         return lines.joined(separator: "\n") + "\n"
     }
 
@@ -146,9 +146,9 @@ public enum SwiftUIEmitter {
 
     /// A view struct's `body` and closing brace — after the environment's theme, when the
     /// body reads it outside every `PenThemeReader` — then `trailer`, the shapes its
-    /// emitter declared, and the previews of `preview()`, one per theme variant
+    /// emitter declared, and a preview of each of `specimens`, one per theme variant
     /// (``previewLines(_:theme:)``).
-    static func bodyLines(_ body: SwiftUIViewCode, emitter: SwiftUINodeEmitter, preview: String, trailer: [String] = []) -> [String] {
+    static func bodyLines(_ body: SwiftUIViewCode, emitter: SwiftUINodeEmitter, specimens: [Specimen], trailer: [String] = []) -> [String] {
         var lines: [String] = []
         if emitter.themeReads.count > 0 {
             lines += ["    @Environment(\\.penTheme) private var theme", ""]
@@ -164,7 +164,7 @@ public enum SwiftUIEmitter {
         for declaration in emitter.shapes.declarations {
             lines.append(contentsOf: declaration.lines + [""])
         }
-        lines += previewLines([Specimen(name: nil, call: ["\(preview)()"])], theme: emitter.scope.theme)
+        lines += previewLines(specimens, theme: emitter.scope.theme)
         return lines
     }
 }

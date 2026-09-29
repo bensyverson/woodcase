@@ -21,6 +21,7 @@ public struct ProfileCard: View {
                         .fixedSize()
                 }
             }
+            .frame(width: 240)
         }
         .padding(20)
         .frame(width: 280, alignment: .topLeading)

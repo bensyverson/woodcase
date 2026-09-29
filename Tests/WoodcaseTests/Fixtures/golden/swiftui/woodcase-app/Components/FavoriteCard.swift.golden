@@ -52,7 +52,7 @@ public struct FavoriteCard: View {
             .frame(minWidth: 0, maxWidth: .infinity, alignment: .topTrailing)
         }
         .padding(EdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 0))
-        .frame(width: 160, alignment: .topLeading)
+        .frame(minWidth: 0, idealWidth: 160, maxWidth: .infinity, alignment: .topLeading)
         .background(theme.bgCard, in: .rect(cornerRadius: theme.cardRadius, style: .circular))
         .penDropShadow(RoundedRectangle(cornerRadius: theme.cardRadius, style: .circular), color: theme.shadow, radius: 10, x: 0, y: 4)
     }
@@ -60,14 +60,17 @@ public struct FavoriteCard: View {
 
 #Preview {
     FavoriteCard()
+        .frame(width: 160)
 }
 
 #Preview("density: compact") {
     FavoriteCard()
+        .frame(width: 160)
         .penTheme(density: .compact)
 }
 
 #Preview("mode: dark") {
     FavoriteCard()
+        .frame(width: 160)
         .penTheme(mode: .dark)
 }

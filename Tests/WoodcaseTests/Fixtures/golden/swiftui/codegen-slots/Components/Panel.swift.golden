@@ -30,7 +30,7 @@ public struct Panel<HeaderContent: View, FooterContent: View>: View {
             .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
         }
         .padding(12)
-        .frame(width: 260, alignment: .topLeading)
+        .frame(minWidth: 0, idealWidth: 260, maxWidth: .infinity, alignment: .topLeading)
         .background(Color(hex: 0xFFFFFF), in: .rect(cornerRadius: 8, style: .circular))
     }
 }
@@ -56,4 +56,5 @@ public struct PanelFooterDefault: View {
 
 #Preview {
     Panel()
+        .frame(width: 260)
 }

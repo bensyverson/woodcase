@@ -59,6 +59,12 @@ default content when the slot frame has children of its own (a nested `struct <S
    API no SwiftUI view has; the other, dropping a component's fixed root size, loses the component's own size in its
    preview. Revisit if copies prove too many: most `woodcase-app` copies are exactly this case, where the fill and the
    fixed size agree.
+
+   > **Reversed 2026-09-28 (leaf `RNSV2z`, Ben's ruling):** copies did prove too many — 30 against 10 calls in
+   > `woodcase-app`. A component's fixed root size is now its *ideal* size (`.frame(minWidth: 0, idealWidth: 140,
+   > maxWidth: .infinity, …)`) and the call states the instance's size; the preview keeps the component's own size by
+   > framing it too, which answers the objection above. See
+   > [SwiftUI instance calls](2026-09-28-swiftui-instance-calls.md).
 6. **A turned or flipped instance inlines**, because the turn is framed to the node's box, which the call site does
    not know.
 7. **A component's root is sized as its instances are placed** (`Container.component`): `fill_container` is
@@ -71,6 +77,9 @@ default content when the slot frame has children of its own (a nested `struct <S
 
    > **Updated 2026-09-27 (leaf `wXirUH`):** roles and states are emitted now — see
    > [SwiftUI roles and states](2026-09-27-swiftui-roles-and-states.md). A `ref` to a state variant is still inlined.
+
+   > **Updated 2026-09-28 (leaf `RNSV2z`):** a `ref` to a state variant is a call pinning the state
+   > (`TabBar(selected: .home)`); see [SwiftUI instance calls](2026-09-28-swiftui-instance-calls.md).
 
 ## Measured
 

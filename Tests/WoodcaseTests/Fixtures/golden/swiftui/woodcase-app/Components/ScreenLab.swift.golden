@@ -12,16 +12,8 @@ public struct ScreenLab: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // woodcase: inlined from StatusBar
-            HStack(spacing: 0) {
-                Text("9:41")
-                    .penFont(theme.fontPrimary, size: 16, weight: 600)
-                    .foregroundStyle(theme.textPrimary)
-                    .fixedSize()
-            }
-            .padding(.horizontal, 24)
-            .frame(height: 62)
-            .frame(minWidth: 0, maxWidth: .infinity)
+            StatusBar()
+                .frame(height: 62)
             HStack(alignment: .top, spacing: 0) {
                 Text("Lab")
                     .penFont(theme.fontPrimary, size: 36, weight: 600)
@@ -270,7 +262,7 @@ public struct ScreenLab: View {
             .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .topLeading)
             .clipped()
         }
-        .frame(width: 402, height: 1249, alignment: .topLeading)
+        .frame(minWidth: 0, idealWidth: 402, maxWidth: .infinity, minHeight: 0, idealHeight: 1249, maxHeight: .infinity, alignment: .topLeading)
         .clipped()
         .background(theme.bgPage)
     }
@@ -361,14 +353,17 @@ private struct DashedStrokeShape: Shape {
 
 #Preview {
     ScreenLab()
+        .frame(width: 402, height: 1249)
 }
 
 #Preview("density: compact") {
     ScreenLab()
+        .frame(width: 402, height: 1249)
         .penTheme(density: .compact)
 }
 
 #Preview("mode: dark") {
     ScreenLab()
+        .frame(width: 402, height: 1249)
         .penTheme(mode: .dark)
 }

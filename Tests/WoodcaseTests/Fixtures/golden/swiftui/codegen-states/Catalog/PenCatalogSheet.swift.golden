@@ -41,66 +41,82 @@ public struct PenCatalogSheet: View {
                 PenCatalogEntry("SearchField") {
                     PenCatalogSpecimen("default") {
                         SearchField()
+                            .frame(width: 240, height: 44)
                     }
                     PenCatalogSpecimen("disabled") {
                         SearchField()
+                            .frame(width: 240, height: 44)
                             .disabled(true)
                     }
                     PenCatalogSpecimen("focused") {
                         SearchField()
+                            .frame(width: 240, height: 44)
                             .penControlState(.focused)
                     }
                 }
                 PenCatalogEntry("SortSelect") {
                     PenCatalogSpecimen("default") {
                         SortSelect()
+                            .frame(width: 180, height: 40)
                     }
                     PenCatalogSpecimen("open") {
                         SortSelect(variant: .open)
+                            .frame(width: 180, height: 40)
                     }
                     PenCatalogSpecimen("focused") {
                         SortSelect()
+                            .frame(width: 180, height: 40)
                             .penControlState(.focused)
                     }
                     PenCatalogSpecimen("disabled") {
                         SortSelect()
+                            .frame(width: 180, height: 40)
                             .disabled(true)
                     }
                 }
                 PenCatalogEntry("StatesButton") {
                     PenCatalogSpecimen("default") {
                         StatesButton()
+                            .frame(width: 160, height: 44)
                     }
                     PenCatalogSpecimen("disabled") {
                         StatesButton()
+                            .frame(width: 160, height: 44)
                             .disabled(true)
                     }
                     PenCatalogSpecimen("pressed") {
                         StatesButton()
+                            .frame(width: 160, height: 44)
                             .penControlState(.pressed)
                     }
                     PenCatalogSpecimen("hover") {
                         StatesButton()
+                            .frame(width: 160, height: 44)
                             .penControlState(.hovered)
                     }
                     PenCatalogSpecimen("focused") {
                         StatesButton()
+                            .frame(width: 160, height: 44)
                             .penControlState(.focused)
                     }
                 }
                 PenCatalogEntry("Switch") {
                     PenCatalogSpecimen("default") {
                         Switch()
+                            .frame(width: 52, height: 32)
                     }
                     PenCatalogSpecimen("off") {
                         Switch(isOn: .constant(false))
+                            .frame(width: 52, height: 32)
                     }
                     PenCatalogSpecimen("disabled") {
                         Switch()
+                            .frame(width: 52, height: 32)
                             .disabled(true)
                     }
                     PenCatalogSpecimen("focused") {
                         Switch()
+                            .frame(width: 52, height: 32)
                             .penControlState(.focused)
                     }
                 }

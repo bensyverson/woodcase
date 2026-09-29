@@ -12,16 +12,8 @@ public struct ScreenSettings: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // woodcase: inlined from StatusBar
-            HStack(spacing: 0) {
-                Text("9:41")
-                    .penFont(theme.fontPrimary, size: 16, weight: 600)
-                    .foregroundStyle(theme.textPrimary)
-                    .fixedSize()
-            }
-            .padding(.horizontal, 24)
-            .frame(height: 62)
-            .frame(minWidth: 0, maxWidth: .infinity)
+            StatusBar()
+                .frame(height: 62)
             HStack(spacing: 0) {
                 Text("Settings")
                     .tracking(-0.5)
@@ -42,48 +34,8 @@ public struct ScreenSettings: View {
                         .penFont(theme.fontPrimary, size: 12, weight: 600)
                         .foregroundStyle(theme.textSecondary)
                         .fixedSize()
-                    // woodcase: inlined from TextInput
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Display Name")
-                            .penFont(theme.fontPrimary, size: 12, weight: 500)
-                            .foregroundStyle(theme.textSecondary)
-                            .fixedSize()
-                        HStack(alignment: .top, spacing: 0) {
-                            Text("Your name")
-                                .penFont(theme.fontPrimary, size: 14)
-                                .foregroundStyle(theme.textMuted)
-                                .fixedSize()
-                        }
-                        .padding(theme.spacingSm)
-                        .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
-                        .background {
-                            RoundedRectangle(cornerRadius: 10, style: .circular)
-                                .strokeBorder(theme.borderDefault, lineWidth: 1)
-                        }
-                        .background(theme.bgWarm, in: .rect(cornerRadius: 10, style: .circular))
-                    }
-                    .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
-                    // woodcase: inlined from TextInput
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Email")
-                            .penFont(theme.fontPrimary, size: 12, weight: 500)
-                            .foregroundStyle(theme.textSecondary)
-                            .fixedSize()
-                        HStack(alignment: .top, spacing: 0) {
-                            Text(verbatim: "you@example.com")
-                                .penFont(theme.fontPrimary, size: 14)
-                                .foregroundStyle(theme.textMuted)
-                                .fixedSize()
-                        }
-                        .padding(theme.spacingSm)
-                        .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
-                        .background {
-                            RoundedRectangle(cornerRadius: 10, style: .circular)
-                                .strokeBorder(theme.borderDefault, lineWidth: 1)
-                        }
-                        .background(theme.bgWarm, in: .rect(cornerRadius: 10, style: .circular))
-                    }
-                    .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
+                    TextInput(label: "Display Name", placeholder: "Your name")
+                    TextInput(label: "Email", placeholder: "you@example.com")
                 }
                 .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
                 VStack(alignment: .leading, spacing: theme.spacingSm) {
@@ -92,44 +44,9 @@ public struct ScreenSettings: View {
                         .penFont(theme.fontPrimary, size: 12, weight: 600)
                         .foregroundStyle(theme.textSecondary)
                         .fixedSize()
-                    // woodcase: inlined from ToggleRow
-                    HStack(spacing: 0) {
-                        Text("Dark Mode")
-                            .penFont(theme.fontPrimary, size: 14, weight: 500)
-                            .foregroundStyle(theme.textPrimary)
-                            .fixedSize()
-                        Spacer(minLength: 0)
-                        ToggleView()
-                    }
-                    .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
-                    // woodcase: inlined from ToggleRow
-                    HStack(spacing: 0) {
-                        Text("Notifications")
-                            .penFont(theme.fontPrimary, size: 14, weight: 500)
-                            .foregroundStyle(theme.textPrimary)
-                            .fixedSize()
-                        Spacer(minLength: 0)
-                        ToggleView()
-                    }
-                    .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
-                    // woodcase: inlined from SelectRow
-                    HStack(spacing: 0) {
-                        Text("Default Grade")
-                            .penFont(theme.fontPrimary, size: 14, weight: 500)
-                            .foregroundStyle(theme.textPrimary)
-                            .fixedSize()
-                        Spacer(minLength: 0)
-                        HStack(spacing: 4) {
-                            Text("HB")
-                                .penFont(theme.fontPrimary, size: 14)
-                                .foregroundStyle(theme.textSecondary)
-                                .fixedSize()
-                            PenIconShape(file: "lucide.ttf", glyph: 0xE06F)
-                                .fill(theme.textMuted)
-                                .frame(width: 16, height: 16)
-                        }
-                    }
-                    .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+                    ToggleRow(label: "Dark Mode")
+                    ToggleRow(label: "Notifications")
+                    SelectRow(label: "Default Grade", value: "HB")
                 }
                 .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
                 VStack(alignment: .leading, spacing: theme.spacingSm) {
@@ -138,26 +55,8 @@ public struct ScreenSettings: View {
                         .penFont(theme.fontPrimary, size: 12, weight: 600)
                         .foregroundStyle(theme.textSecondary)
                         .fixedSize()
-                    // woodcase: inlined from ToggleRow
-                    HStack(spacing: 0) {
-                        Text("Show Ratings")
-                            .penFont(theme.fontPrimary, size: 14, weight: 500)
-                            .foregroundStyle(theme.textPrimary)
-                            .fixedSize()
-                        Spacer(minLength: 0)
-                        ToggleView()
-                    }
-                    .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
-                    // woodcase: inlined from ToggleRow
-                    HStack(spacing: 0) {
-                        Text("Auto-sort")
-                            .penFont(theme.fontPrimary, size: 14, weight: 500)
-                            .foregroundStyle(theme.textPrimary)
-                            .fixedSize()
-                        Spacer(minLength: 0)
-                        ToggleView()
-                    }
-                    .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+                    ToggleRow(label: "Show Ratings")
+                    ToggleRow(label: "Auto-sort")
                 }
                 .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
                 VStack(alignment: .leading, spacing: theme.spacingSm) {
@@ -166,16 +65,7 @@ public struct ScreenSettings: View {
                         .penFont(theme.fontPrimary, size: 12, weight: 600)
                         .foregroundStyle(theme.textSecondary)
                         .fixedSize()
-                    // woodcase: inlined from ActionButton
-                    HStack(spacing: 0) {
-                        Text("Export Data")
-                            .penFont(theme.fontPrimary, size: 14, weight: 600)
-                            .foregroundStyle(theme.white)
-                            .fixedSize()
-                    }
-                    .padding(.vertical, 14)
-                    .frame(minWidth: 0, maxWidth: .infinity)
-                    .background(theme.accent, in: .rect(cornerRadius: 12, style: .circular))
+                    ActionButton(label: "Export Data")
                     // woodcase: inlined from ActionButton
                     HStack(spacing: 0) {
                         Text("Delete Account")
@@ -206,7 +96,7 @@ public struct ScreenSettings: View {
             .clipped()
             TabBar()
         }
-        .frame(width: 402, height: 874, alignment: .topLeading)
+        .frame(minWidth: 0, idealWidth: 402, maxWidth: .infinity, minHeight: 0, idealHeight: 874, maxHeight: .infinity, alignment: .topLeading)
         .clipped()
         .background(theme.bgPage)
     }
@@ -214,14 +104,17 @@ public struct ScreenSettings: View {
 
 #Preview {
     ScreenSettings()
+        .frame(width: 402, height: 874)
 }
 
 #Preview("density: compact") {
     ScreenSettings()
+        .frame(width: 402, height: 874)
         .penTheme(density: .compact)
 }
 
 #Preview("mode: dark") {
     ScreenSettings()
+        .frame(width: 402, height: 874)
         .penTheme(mode: .dark)
 }

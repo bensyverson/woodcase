@@ -20,6 +20,7 @@ public struct FilledCard: View {
                     .foregroundStyle(Color(hex: 0x111827))
                     .fixedSize()
             }
+            .frame(width: 240)
         }
         .padding(20)
         .frame(width: 280, alignment: .topLeading)

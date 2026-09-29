@@ -32,7 +32,7 @@ public struct ActionButton: View {
                 .fixedSize()
         }
         .padding(.vertical, 14)
-        .frame(width: 354)
+        .frame(minWidth: 0, idealWidth: 354, maxWidth: .infinity)
         .background(theme.accent, in: .rect(cornerRadius: 12, style: .circular))
     }
 
@@ -56,82 +56,97 @@ public struct ActionButton: View {
 
 #Preview {
     ActionButton()
+        .frame(width: 354)
 }
 
 #Preview("hover") {
     ActionButton()
+        .frame(width: 354)
         .penControlState(.hovered)
 }
 
 #Preview("pressed") {
     ActionButton()
+        .frame(width: 354)
         .penControlState(.pressed)
 }
 
 #Preview("disabled") {
     ActionButton()
+        .frame(width: 354)
         .disabled(true)
 }
 
 #Preview("focused") {
     ActionButton()
+        .frame(width: 354)
         .penControlState(.focused)
 }
 
 #Preview("density: compact") {
     ActionButton()
+        .frame(width: 354)
         .penTheme(density: .compact)
 }
 
 #Preview("hover, density: compact") {
     ActionButton()
+        .frame(width: 354)
         .penControlState(.hovered)
         .penTheme(density: .compact)
 }
 
 #Preview("pressed, density: compact") {
     ActionButton()
+        .frame(width: 354)
         .penControlState(.pressed)
         .penTheme(density: .compact)
 }
 
 #Preview("disabled, density: compact") {
     ActionButton()
+        .frame(width: 354)
         .disabled(true)
         .penTheme(density: .compact)
 }
 
 #Preview("focused, density: compact") {
     ActionButton()
+        .frame(width: 354)
         .penControlState(.focused)
         .penTheme(density: .compact)
 }
 
 #Preview("mode: dark") {
     ActionButton()
+        .frame(width: 354)
         .penTheme(mode: .dark)
 }
 
 #Preview("hover, mode: dark") {
     ActionButton()
+        .frame(width: 354)
         .penControlState(.hovered)
         .penTheme(mode: .dark)
 }
 
 #Preview("pressed, mode: dark") {
     ActionButton()
+        .frame(width: 354)
         .penControlState(.pressed)
         .penTheme(mode: .dark)
 }
 
 #Preview("disabled, mode: dark") {
     ActionButton()
+        .frame(width: 354)
         .disabled(true)
         .penTheme(mode: .dark)
 }
 
 #Preview("focused, mode: dark") {
     ActionButton()
+        .frame(width: 354)
         .penControlState(.focused)
         .penTheme(mode: .dark)
 }

@@ -26,7 +26,7 @@ public struct Card<Content: View>: View {
             .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
         }
         .padding(16)
-        .frame(width: 240, alignment: .topLeading)
+        .frame(minWidth: 0, idealWidth: 240, maxWidth: .infinity, alignment: .topLeading)
         .background(Color(hex: 0xFFFFFF), in: .rect(cornerRadius: 12, style: .circular))
     }
 }
@@ -52,4 +52,5 @@ public struct CardContentDefault: View {
 
 #Preview {
     Card()
+        .frame(width: 240)
 }

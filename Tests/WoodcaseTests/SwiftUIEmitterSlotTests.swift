@@ -34,7 +34,7 @@ struct SwiftUIEmitterSlotTests {
         #expect(card.contains("public struct CardContentDefault: View {"))
         // The default text is drawn once, by the default view, not by the card's body.
         #expect(card.components(separatedBy: "Text(\"Nothing here yet\")").count == 2)
-        #expect(card.contains("#Preview {\n    Card()\n}"))
+        #expect(card.contains("#Preview {\n    Card()\n        .frame(width: 240)\n}"))
     }
 
     @Test("Two slots are two generics in order, and an empty slot's default is EmptyView")

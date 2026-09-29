@@ -18,90 +18,109 @@ public struct PenCatalogSheet: View {
                 PenCatalogEntry("ActionButton") {
                     PenCatalogSpecimen("default") {
                         ActionButton()
+                            .frame(width: 354)
                     }
                     PenCatalogSpecimen("hover") {
                         ActionButton()
+                            .frame(width: 354)
                             .penControlState(.hovered)
                     }
                     PenCatalogSpecimen("pressed") {
                         ActionButton()
+                            .frame(width: 354)
                             .penControlState(.pressed)
                     }
                     PenCatalogSpecimen("disabled") {
                         ActionButton()
+                            .frame(width: 354)
                             .disabled(true)
                     }
                     PenCatalogSpecimen("focused") {
                         ActionButton()
+                            .frame(width: 354)
                             .penControlState(.focused)
                     }
                 }
                 PenCatalogEntry("ActivityLogRow") {
                     PenCatalogSpecimen("default") {
                         ActivityLogRow()
+                            .frame(width: 354)
                     }
                 }
                 PenCatalogEntry("CollectionRow") {
                     PenCatalogSpecimen("default") {
                         CollectionRow()
+                            .frame(width: 354)
                     }
                 }
                 PenCatalogEntry("FavoriteCard") {
                     PenCatalogSpecimen("default") {
                         FavoriteCard()
+                            .frame(width: 160)
                     }
                 }
                 PenCatalogEntry("HomeCollection") {
                     PenCatalogSpecimen("default") {
                         HomeCollection()
+                            .frame(width: 402, height: 874)
                     }
                 }
                 PenCatalogEntry("PencilListItem") {
                     PenCatalogSpecimen("default") {
                         PencilListItem()
+                            .frame(width: 354)
                     }
                 }
                 PenCatalogEntry("ScreenLab") {
                     PenCatalogSpecimen("default") {
                         ScreenLab()
+                            .frame(width: 402, height: 1249)
                     }
                 }
                 PenCatalogEntry("ScreenRatings") {
                     PenCatalogSpecimen("default") {
                         ScreenRatings()
+                            .frame(width: 402, height: 874)
                     }
                 }
                 PenCatalogEntry("ScreenSettings") {
                     PenCatalogSpecimen("default") {
                         ScreenSettings()
+                            .frame(width: 402, height: 874)
                     }
                 }
                 PenCatalogEntry("ScreenWishlist") {
                     PenCatalogSpecimen("default") {
                         ScreenWishlist()
+                            .frame(width: 402, height: 874)
                     }
                 }
                 PenCatalogEntry("SelectRow") {
                     PenCatalogSpecimen("default") {
                         SelectRow()
+                            .frame(width: 354)
                     }
                     PenCatalogSpecimen("focused") {
                         SelectRow()
+                            .frame(width: 354)
                             .penControlState(.focused)
                     }
                     PenCatalogSpecimen("disabled") {
                         SelectRow()
+                            .frame(width: 354)
                             .disabled(true)
                     }
                 }
                 PenCatalogEntry("StatCard") {
                     PenCatalogSpecimen("default") {
                         StatCard()
+                            .frame(width: 120)
                     }
                 }
                 PenCatalogEntry("StatusBar") {
                     PenCatalogSpecimen("default") {
                         StatusBar()
+                            .frame(width: 402, height: 62)
                     }
                 }
                 PenCatalogEntry("TabBar") {
@@ -124,32 +143,39 @@ public struct PenCatalogSheet: View {
                 PenCatalogEntry("TextInput") {
                     PenCatalogSpecimen("default") {
                         TextInput()
+                            .frame(width: 354)
                     }
                 }
                 PenCatalogEntry("Toggle") {
                     PenCatalogSpecimen("default") {
                         ToggleView()
+                            .frame(width: 44, height: 26)
                     }
                     PenCatalogSpecimen("off") {
                         ToggleView(isOn: .constant(false))
+                            .frame(width: 44, height: 26)
                     }
                     PenCatalogSpecimen("disabled") {
                         ToggleView()
+                            .frame(width: 44, height: 26)
                             .disabled(true)
                     }
                     PenCatalogSpecimen("focused") {
                         ToggleView()
+                            .frame(width: 44, height: 26)
                             .penControlState(.focused)
                     }
                 }
                 PenCatalogEntry("ToggleRow") {
                     PenCatalogSpecimen("default") {
                         ToggleRow()
+                            .frame(width: 354)
                     }
                 }
                 PenCatalogEntry("UsageLog") {
                     PenCatalogSpecimen("default") {
                         UsageLog()
+                            .frame(width: 402, height: 874)
                     }
                 }
             }

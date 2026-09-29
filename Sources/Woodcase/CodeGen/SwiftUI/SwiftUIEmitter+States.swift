@@ -78,7 +78,7 @@ extension SwiftUIEmitter {
         for declaration in emitter.shapes.declarations {
             lines.append(contentsOf: declaration.lines + [""])
         }
-        lines += previewLines(specimens(control, type: type), theme: scope.theme)
+        lines += previewLines(specimens(of: component), theme: scope.theme)
         return lines.joined(separator: "\n") + "\n"
     }
 

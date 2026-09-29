@@ -36,20 +36,23 @@ public struct TextInput: View {
             }
             .background(theme.bgWarm, in: .rect(cornerRadius: 10, style: .circular))
         }
-        .frame(width: 354, alignment: .topLeading)
+        .frame(minWidth: 0, idealWidth: 354, maxWidth: .infinity, alignment: .topLeading)
     }
 }
 
 #Preview {
     TextInput()
+        .frame(width: 354)
 }
 
 #Preview("density: compact") {
     TextInput()
+        .frame(width: 354)
         .penTheme(density: .compact)
 }
 
 #Preview("mode: dark") {
     TextInput()
+        .frame(width: 354)
         .penTheme(mode: .dark)
 }

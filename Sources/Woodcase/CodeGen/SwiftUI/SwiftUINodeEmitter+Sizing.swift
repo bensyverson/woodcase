@@ -19,6 +19,10 @@ extension SwiftUINodeEmitter {
 
         /// The content's own size: no frame at all.
         case fit
+
+        /// This many points unless the parent offers otherwise: `minWidth: 0, idealWidth:
+        /// 140, maxWidth: .infinity`. A component's fixed root, so each call sizes it.
+        case ideal(Double)
     }
 
     /// The axis of a size.
@@ -36,6 +40,8 @@ extension SwiftUINodeEmitter {
 
     /// How `sizing` reads inside `container`.
     ///
+    /// A fixed size in a component's body is the component's ideal size: the caller frames
+    /// it to the size the instance sits at (``SwiftUINodeEmitter/instance(_:data:in:)``).
     /// `fill_container` has nothing to fill in a page root or a `layout: none` parent, so
     /// there it is its fallback when it has one. `fit_content(N)` is at least `N`. A node
     /// with no content to size it (`empty`: a shape, a placeholder, a frame with no
@@ -45,7 +51,7 @@ extension SwiftUINodeEmitter {
     func dimension(_ sizing: PenSizing, in container: Container, empty: Bool = false) -> Dimension {
         switch sizing {
         case let .fixed(value):
-            return .fixed(value)
+            return container == .component ? .ideal(value) : .fixed(value)
         case let .fillContainer(fallback):
             if container == .root || container == .absolute, let fallback {
                 return .fixed(fallback)
@@ -76,6 +82,8 @@ extension SwiftUINodeEmitter {
                 // floor and grows past its room; Pen's flex item shrinks and overflows.
                 flexible += ["min\(axis): 0", "max\(axis): .infinity"]
             case let .minimum(value): flexible.append("min\(axis): \(SwiftUILiteral.number(value))")
+            case let .ideal(value):
+                flexible += ["min\(axis): 0", "ideal\(axis): \(SwiftUILiteral.number(value))", "max\(axis): .infinity"]
             case .fit: break
             }
         }
@@ -85,7 +93,7 @@ extension SwiftUINodeEmitter {
             modifiers.append(.init(".frame(\((fixed + aligned).joined(separator: ", ")))"))
         }
         if !flexible.isEmpty {
-            // SwiftUI's parameter order is minWidth, maxWidth, minHeight, maxHeight.
+            // SwiftUI's parameter order is minWidth, idealWidth, maxWidth, minHeight, ….
             let ordered = flexible.sorted { order($0) < order($1) }
             modifiers.append(.init(".frame(\((ordered + aligned).joined(separator: ", ")))"))
         }
@@ -93,7 +101,8 @@ extension SwiftUINodeEmitter {
     }
 
     private func order(_ argument: String) -> Int {
-        ["minWidth", "maxWidth", "minHeight", "maxHeight"].firstIndex { argument.hasPrefix($0) } ?? 4
+        let order = ["minWidth", "idealWidth", "maxWidth", "minHeight", "idealHeight", "maxHeight"]
+        return order.firstIndex { argument.hasPrefix($0) } ?? order.count
     }
 
     /// Warn when `node`'s size names a document variable, which this slice does not

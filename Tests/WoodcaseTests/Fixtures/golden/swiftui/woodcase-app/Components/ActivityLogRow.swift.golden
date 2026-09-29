@@ -40,20 +40,23 @@ public struct ActivityLogRow: View {
                 .fixedSize()
         }
         .padding(theme.spacingMd)
-        .frame(width: 354, alignment: .leading)
+        .frame(minWidth: 0, idealWidth: 354, maxWidth: .infinity, alignment: .leading)
     }
 }
 
 #Preview {
     ActivityLogRow()
+        .frame(width: 354)
 }
 
 #Preview("density: compact") {
     ActivityLogRow()
+        .frame(width: 354)
         .penTheme(density: .compact)
 }
 
 #Preview("mode: dark") {
     ActivityLogRow()
+        .frame(width: 354)
         .penTheme(mode: .dark)
 }

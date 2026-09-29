@@ -47,7 +47,7 @@ public struct PencilListItem: View {
             }
         }
         .padding(theme.spacingMd)
-        .frame(width: 354, alignment: .leading)
+        .frame(minWidth: 0, idealWidth: 354, maxWidth: .infinity, alignment: .leading)
         .background(theme.bgCard, in: .rect(cornerRadius: theme.cardRadius, style: .circular))
         .penDropShadow(RoundedRectangle(cornerRadius: theme.cardRadius, style: .circular), color: theme.shadow, radius: 10, x: 0, y: 4)
     }
@@ -55,14 +55,17 @@ public struct PencilListItem: View {
 
 #Preview {
     PencilListItem()
+        .frame(width: 354)
 }
 
 #Preview("density: compact") {
     PencilListItem()
+        .frame(width: 354)
         .penTheme(density: .compact)
 }
 
 #Preview("mode: dark") {
     PencilListItem()
+        .frame(width: 354)
         .penTheme(mode: .dark)
 }

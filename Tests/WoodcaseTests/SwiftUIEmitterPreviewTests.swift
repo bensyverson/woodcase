@@ -13,9 +13,9 @@ struct SwiftUIEmitterPreviewTests {
     @Test("A themed component is previewed under each non-default option, one axis at a time")
     func themedComponentVariants() throws {
         let file = try component("StatCard", in: "woodcase-app")
-        #expect(file.contains("#Preview {\n    StatCard()\n}"))
-        #expect(file.contains("#Preview(\"density: compact\") {\n    StatCard()\n        .penTheme(density: .compact)\n}"))
-        #expect(file.contains("#Preview(\"mode: dark\") {\n    StatCard()\n        .penTheme(mode: .dark)\n}"))
+        #expect(file.contains("#Preview {\n    StatCard()\n        .frame(width: 120)\n}"))
+        #expect(file.contains("#Preview(\"density: compact\") {\n    StatCard()\n        .frame(width: 120)\n        .penTheme(density: .compact)\n}"))
+        #expect(file.contains("#Preview(\"mode: dark\") {\n    StatCard()\n        .frame(width: 120)\n        .penTheme(mode: .dark)\n}"))
         // One axis at a time, not their product.
         #expect(!file.contains("density: .compact, mode: .dark"))
     }
@@ -23,10 +23,10 @@ struct SwiftUIEmitterPreviewTests {
     @Test("Every state's preview is repeated under each theme variant")
     func statesTimesThemes() throws {
         let file = try component("ToggleView", in: "woodcase-app")
-        #expect(file.contains("#Preview(\"off\") {\n    ToggleView(isOn: .constant(false))\n}"))
-        #expect(file.contains("#Preview(\"off, mode: dark\") {\n    ToggleView(isOn: .constant(false))\n        .penTheme(mode: .dark)\n}"))
+        #expect(file.contains("#Preview(\"off\") {\n    ToggleView(isOn: .constant(false))\n        .frame(width: 44, height: 26)\n}"))
+        #expect(file.contains("#Preview(\"off, mode: dark\") {\n    ToggleView(isOn: .constant(false))\n        .frame(width: 44, height: 26)\n        .penTheme(mode: .dark)\n}"))
         #expect(file.contains(
-            "#Preview(\"disabled, density: compact\") {\n    ToggleView()\n        .disabled(true)\n        .penTheme(density: .compact)\n}"
+            "#Preview(\"disabled, density: compact\") {\n    ToggleView()\n        .frame(width: 44, height: 26)\n        .disabled(true)\n        .penTheme(density: .compact)\n}"
         ))
     }
 

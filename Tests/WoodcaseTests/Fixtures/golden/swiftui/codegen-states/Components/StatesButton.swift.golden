@@ -29,7 +29,7 @@ public struct StatesButton: View {
                 .foregroundStyle(Color(hex: 0xFFFFFF))
                 .fixedSize()
         }
-        .frame(width: 160, height: 44)
+        .frame(minWidth: 0, idealWidth: 160, maxWidth: .infinity, minHeight: 0, idealHeight: 44, maxHeight: .infinity)
         .background(Color(hex: 0x2563EB), in: .rect(cornerRadius: 10, style: .circular))
     }
 
@@ -41,7 +41,7 @@ public struct StatesButton: View {
                 .foregroundStyle(Color(hex: 0x64748B))
                 .fixedSize()
         }
-        .frame(width: 160, height: 44)
+        .frame(minWidth: 0, idealWidth: 160, maxWidth: .infinity, minHeight: 0, idealHeight: 44, maxHeight: .infinity)
         .background(Color(hex: 0xCBD5E1), in: .rect(cornerRadius: 10, style: .circular))
     }
 
@@ -53,7 +53,7 @@ public struct StatesButton: View {
                 .foregroundStyle(Color(hex: 0xBFDBFE))
                 .fixedSize()
         }
-        .frame(width: 160, height: 44)
+        .frame(minWidth: 0, idealWidth: 160, maxWidth: .infinity, minHeight: 0, idealHeight: 44, maxHeight: .infinity)
         .background(Color(hex: 0x1E3A8A), in: .rect(cornerRadius: 10, style: .circular))
     }
 
@@ -65,7 +65,7 @@ public struct StatesButton: View {
                 .foregroundStyle(Color(hex: 0xFFFFFF))
                 .fixedSize()
         }
-        .frame(width: 160, height: 44)
+        .frame(minWidth: 0, idealWidth: 160, maxWidth: .infinity, minHeight: 0, idealHeight: 44, maxHeight: .infinity)
         .background(Color(hex: 0x3B82F6), in: .rect(cornerRadius: 10, style: .circular))
     }
 
@@ -95,24 +95,29 @@ public struct StatesButton: View {
 
 #Preview {
     StatesButton()
+        .frame(width: 160, height: 44)
 }
 
 #Preview("disabled") {
     StatesButton()
+        .frame(width: 160, height: 44)
         .disabled(true)
 }
 
 #Preview("pressed") {
     StatesButton()
+        .frame(width: 160, height: 44)
         .penControlState(.pressed)
 }
 
 #Preview("hover") {
     StatesButton()
+        .frame(width: 160, height: 44)
         .penControlState(.hovered)
 }
 
 #Preview("focused") {
     StatesButton()
+        .frame(width: 160, height: 44)
         .penControlState(.focused)
 }

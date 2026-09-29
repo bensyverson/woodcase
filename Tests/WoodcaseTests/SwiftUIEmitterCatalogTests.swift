@@ -49,8 +49,8 @@ struct SwiftUIEmitterCatalogTests {
     @Test("The sheet draws every component in each state a caller can pin")
     func sheetDrawsEveryState() throws {
         let sheet = try file("Sources/PenUI/Catalog/PenCatalogSheet.swift", in: "codegen-states")
-        #expect(sheet.contains("PenCatalogSpecimen(\"default\") {\n                        StatesButton()\n                    }"))
-        #expect(sheet.contains("PenCatalogSpecimen(\"pressed\") {\n                        StatesButton()\n                            .penControlState(.pressed)\n                    }"))
+        #expect(sheet.contains("PenCatalogSpecimen(\"default\") {\n                        StatesButton()\n                            .frame(width: 160, height: 44)\n                    }"))
+        #expect(sheet.contains("PenCatalogSpecimen(\"pressed\") {\n                        StatesButton()\n                            .frame(width: 160, height: 44)\n                            .penControlState(.pressed)\n                    }"))
         #expect(sheet.contains("Switch(isOn: .constant(false))"))
         #expect(sheet.contains("SortSelect(variant: .open)"))
         #expect(sheet.contains("PenCatalogEntry(\"Chip\")"))

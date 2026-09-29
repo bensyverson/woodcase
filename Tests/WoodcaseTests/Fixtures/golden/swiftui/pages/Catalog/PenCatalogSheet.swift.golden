@@ -16,6 +16,7 @@ public struct PenCatalogSheet: View {
                 PenCatalogEntry("Card") {
                     PenCatalogSpecimen("default") {
                         Card()
+                            .frame(width: 140, height: 80)
                     }
                 }
             }

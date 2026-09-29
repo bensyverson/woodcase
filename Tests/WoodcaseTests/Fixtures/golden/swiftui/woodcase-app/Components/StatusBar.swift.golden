@@ -22,20 +22,23 @@ public struct StatusBar: View {
                 .fixedSize()
         }
         .padding(.horizontal, 24)
-        .frame(width: 402, height: 62)
+        .frame(minWidth: 0, idealWidth: 402, maxWidth: .infinity, minHeight: 0, idealHeight: 62, maxHeight: .infinity)
     }
 }
 
 #Preview {
     StatusBar()
+        .frame(width: 402, height: 62)
 }
 
 #Preview("density: compact") {
     StatusBar()
+        .frame(width: 402, height: 62)
         .penTheme(density: .compact)
 }
 
 #Preview("mode: dark") {
     StatusBar()
+        .frame(width: 402, height: 62)
         .penTheme(mode: .dark)
 }

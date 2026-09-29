@@ -29,7 +29,7 @@ public struct ToggleView: View {
                 .frame(width: 22, height: 22)
                 .offset(x: 20, y: 2)
         }
-        .frame(width: 44, height: 26, alignment: .topLeading)
+        .frame(minWidth: 0, idealWidth: 44, maxWidth: .infinity, minHeight: 0, idealHeight: 26, maxHeight: .infinity, alignment: .topLeading)
         .background(theme.accent, in: .rect(cornerRadius: 13, style: .circular))
     }
 
@@ -41,7 +41,7 @@ public struct ToggleView: View {
                 .frame(width: 22, height: 22)
                 .offset(x: 2, y: 2)
         }
-        .frame(width: 44, height: 26, alignment: .topLeading)
+        .frame(minWidth: 0, idealWidth: 44, maxWidth: .infinity, minHeight: 0, idealHeight: 26, maxHeight: .infinity, alignment: .topLeading)
         .background(theme.textSecondary, in: .rect(cornerRadius: 13, style: .circular))
     }
 
@@ -72,62 +72,74 @@ public struct ToggleView: View {
 
 #Preview {
     ToggleView()
+        .frame(width: 44, height: 26)
 }
 
 #Preview("off") {
     ToggleView(isOn: .constant(false))
+        .frame(width: 44, height: 26)
 }
 
 #Preview("disabled") {
     ToggleView()
+        .frame(width: 44, height: 26)
         .disabled(true)
 }
 
 #Preview("focused") {
     ToggleView()
+        .frame(width: 44, height: 26)
         .penControlState(.focused)
 }
 
 #Preview("density: compact") {
     ToggleView()
+        .frame(width: 44, height: 26)
         .penTheme(density: .compact)
 }
 
 #Preview("off, density: compact") {
     ToggleView(isOn: .constant(false))
+        .frame(width: 44, height: 26)
         .penTheme(density: .compact)
 }
 
 #Preview("disabled, density: compact") {
     ToggleView()
+        .frame(width: 44, height: 26)
         .disabled(true)
         .penTheme(density: .compact)
 }
 
 #Preview("focused, density: compact") {
     ToggleView()
+        .frame(width: 44, height: 26)
         .penControlState(.focused)
         .penTheme(density: .compact)
 }
 
 #Preview("mode: dark") {
     ToggleView()
+        .frame(width: 44, height: 26)
         .penTheme(mode: .dark)
 }
 
 #Preview("off, mode: dark") {
     ToggleView(isOn: .constant(false))
+        .frame(width: 44, height: 26)
         .penTheme(mode: .dark)
 }
 
 #Preview("disabled, mode: dark") {
     ToggleView()
+        .frame(width: 44, height: 26)
         .disabled(true)
         .penTheme(mode: .dark)
 }
 
 #Preview("focused, mode: dark") {
     ToggleView()
+        .frame(width: 44, height: 26)
         .penControlState(.focused)
         .penTheme(mode: .dark)
 }

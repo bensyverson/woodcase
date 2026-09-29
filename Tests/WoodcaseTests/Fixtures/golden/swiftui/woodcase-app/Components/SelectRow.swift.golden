@@ -57,7 +57,7 @@ public struct SelectRow: View {
                     .frame(width: 16, height: 16)
             }
         }
-        .frame(width: 354, alignment: .leading)
+        .frame(minWidth: 0, idealWidth: 354, maxWidth: .infinity, alignment: .leading)
     }
 
     /// Draws the picker's label in each state: the designer's frame where there is one, the
@@ -78,48 +78,57 @@ public struct SelectRow: View {
 
 #Preview {
     SelectRow()
+        .frame(width: 354)
 }
 
 #Preview("focused") {
     SelectRow()
+        .frame(width: 354)
         .penControlState(.focused)
 }
 
 #Preview("disabled") {
     SelectRow()
+        .frame(width: 354)
         .disabled(true)
 }
 
 #Preview("density: compact") {
     SelectRow()
+        .frame(width: 354)
         .penTheme(density: .compact)
 }
 
 #Preview("focused, density: compact") {
     SelectRow()
+        .frame(width: 354)
         .penControlState(.focused)
         .penTheme(density: .compact)
 }
 
 #Preview("disabled, density: compact") {
     SelectRow()
+        .frame(width: 354)
         .disabled(true)
         .penTheme(density: .compact)
 }
 
 #Preview("mode: dark") {
     SelectRow()
+        .frame(width: 354)
         .penTheme(mode: .dark)
 }
 
 #Preview("focused, mode: dark") {
     SelectRow()
+        .frame(width: 354)
         .penControlState(.focused)
         .penTheme(mode: .dark)
 }
 
 #Preview("disabled, mode: dark") {
     SelectRow()
+        .frame(width: 354)
         .disabled(true)
         .penTheme(mode: .dark)
 }

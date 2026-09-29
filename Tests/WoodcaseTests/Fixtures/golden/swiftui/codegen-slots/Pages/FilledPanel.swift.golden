@@ -28,6 +28,7 @@ public struct FilledPanel: View {
                     .foregroundStyle(Color(hex: 0x2563EB))
                     .fixedSize()
             }
+            .frame(width: 260)
         }
         .padding(20)
         .frame(width: 300, alignment: .topLeading)

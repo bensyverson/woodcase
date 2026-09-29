@@ -15,14 +15,17 @@ import Foundation
 /// `enabled` — and ``PropMapper`` finds a value in it. It **changes nothing** when patching
 /// it onto the node leaves the node as it was, when it sizes the node the way it was
 /// already sized (`fit_content` over an unset height), or when it is an `x` or `y` on a
-/// node its parent lays out, which Pen ignores. The `children` an override writes into a
+/// node its parent lays out, which Pen ignores. The instance's own `width` and `height`,
+/// where they size the root differently, are its ``rootWidth`` and ``rootHeight``: whether
+/// a call can place a resized root is the target's to say. The `children` an override writes into a
 /// frame the emitter declares as a slot are that slot's **fill**, which a call passes as
 /// the slot's content. Anything else — a path into a nested instance, a whole-node
 /// replacement, children written anywhere else, a node the component does not hold — is
 /// **unmapped**.
 ///
 /// Target-neutral: it reads the document model and ``PropMapper`` and formats nothing.
-/// ``SwiftUIEmitter`` inlines an instance with anything unmapped. React is looser: it
+/// ``SwiftUIEmitter`` inlines an instance with anything unmapped, or a resized root no
+/// frame at the call can size. React is looser: it
 /// inlines only for a key no prop names, and drops the other properties of a key one
 /// does.
 struct InstanceOverrides: Friendly {
@@ -37,6 +40,14 @@ struct InstanceOverrides: Friendly {
     /// The nodes the overrides write into the component's slots, by slot frame id.
     var slotFills: [String: [PenNode]] = [:]
 
+    /// The sizing the instance's own `width` gives the component's root, when it sizes it
+    /// differently; the target places the resized root or refuses it.
+    var rootWidth: PenSizing?
+
+    /// The sizing the instance's own `height` gives the component's root, when it sizes it
+    /// differently.
+    var rootHeight: PenSizing?
+
     /// Sort `data`'s overrides against `component`, whose ``ComponentDefinition/props``
     /// are the props its emitted code can take and whose frames `slots`, by id, the slots
     /// its emitted code can fill.
@@ -44,7 +55,12 @@ struct InstanceOverrides: Friendly {
         let root = component.sourceNode
         var unmapped: Set<String> = []
         for (key, value) in data.rootOverrides ?? [:] where !Self.isNoOp(key, value, on: root, inFlow: false) {
-            unmapped.insert(key)
+            let resized = PenNodePatcher.patchNode(root, with: [key: value])
+            switch key {
+            case PropertyKey.width: rootWidth = PenLayoutEngine.widthSizing(of: resized)
+            case PropertyKey.height: rootHeight = PenLayoutEngine.heightSizing(of: resized)
+            default: unmapped.insert(key)
+            }
         }
 
         let descendants = data.descendants ?? [:]

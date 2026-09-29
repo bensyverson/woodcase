@@ -165,7 +165,7 @@ public struct TabBar: View {
             .penDropShadow(RoundedRectangle(cornerRadius: 36, style: .circular), color: theme.shadow, radius: 10, x: 0, y: 4)
         }
         .padding(EdgeInsets(top: 12, leading: 21, bottom: 21, trailing: 21))
-        .frame(width: 402, alignment: .top)
+        .frame(minWidth: 0, idealWidth: 402, maxWidth: .infinity, alignment: .top)
     }
 
     /// The "log" state, as the "TabBar:log" frame draws it.
@@ -229,7 +229,7 @@ public struct TabBar: View {
             .penDropShadow(RoundedRectangle(cornerRadius: 36, style: .circular), color: theme.shadow, radius: 10, x: 0, y: 4)
         }
         .padding(EdgeInsets(top: 12, leading: 21, bottom: 21, trailing: 21))
-        .frame(width: 402, alignment: .top)
+        .frame(minWidth: 0, idealWidth: 402, maxWidth: .infinity, alignment: .top)
     }
 
     /// The "ratings" state, as the "TabBar:ratings" frame draws it.
@@ -293,7 +293,7 @@ public struct TabBar: View {
             .penDropShadow(RoundedRectangle(cornerRadius: 36, style: .circular), color: theme.shadow, radius: 10, x: 0, y: 4)
         }
         .padding(EdgeInsets(top: 12, leading: 21, bottom: 21, trailing: 21))
-        .frame(width: 402, alignment: .top)
+        .frame(minWidth: 0, idealWidth: 402, maxWidth: .infinity, alignment: .top)
     }
 
     /// The "wishlist" state, as the "TabBar:wishlist" frame draws it.
@@ -357,7 +357,7 @@ public struct TabBar: View {
             .penDropShadow(RoundedRectangle(cornerRadius: 36, style: .circular), color: theme.shadow, radius: 10, x: 0, y: 4)
         }
         .padding(EdgeInsets(top: 12, leading: 21, bottom: 21, trailing: 21))
-        .frame(width: 402, alignment: .top)
+        .frame(minWidth: 0, idealWidth: 402, maxWidth: .infinity, alignment: .top)
     }
 }
 
