@@ -45,6 +45,15 @@ enum BoundedWait {
     /// How long a job may run before it is abandoned and the wait fails.
     static let budget: Duration = .seconds(30)
 
+    /// Where every deadline fires.
+    ///
+    /// Not a task, and not a global queue: both draw on the threads Swift's cooperative
+    /// pool uses, so under a saturated suite the timer could not run until the job had —
+    /// `sleep 20` under a one-second deadline once came back as a normal exit after 180 s
+    /// (`BoundedWaitSaturatedPoolTests`). A private serial queue is overcommit: Dispatch
+    /// gives it a thread even when every pool thread is busy.
+    private static let timerQueue = DispatchQueue(label: "BoundedWait.deadline")
+
     /// The failure a job that outstays its budget reports.
     struct Expired: Error, CustomStringConvertible {
         /// What was being waited for, when the caller named it.
@@ -87,10 +96,11 @@ enum BoundedWait {
                         race.settle(.failure(error))
                     }
                 })
-                race.hold(Task {
-                    try? await Task.sleep(for: budget)
+                // Left to fire even once the job has won: settling a decided race is a
+                // no-op, and the closure it keeps until then is all it costs.
+                timerQueue.asyncAfter(deadline: .now() + .nanoseconds(Int(budget / .nanoseconds(1)))) {
                     race.settle(.failure(Expired(job: job, budget: budget)))
-                })
+                }
             }
         } onCancel: {
             race.settle(.failure(CancellationError()))
@@ -171,7 +181,7 @@ enum BoundedWait {
             }
         }
 
-        /// Cancels every racer still running: the job, if it listens, and the timer.
+        /// Cancels the job's task, if it is still running and listens.
         private func cancelRacers() {
             let held: [Task<Void, Never>] = books.withLock { books in
                 defer { books.racers = [] }

@@ -698,3 +698,11 @@ a queue. Find what the suite waits on from CPU instead (`ps -o time` of the test
 `sample` across the run) and per-phase timers (`WOODCASE_TEST_PROFILE=1`). Cost a wrong theory, a lock in Swift
 Testing's throw backtraces (`project/2026-09-28-suite-speed.md`).
 
+## 2026-09-28 — A timer on a Task or a global queue cannot fire while the cooperative pool is saturated
+
+`Task.sleep` resumes on a pool thread, and `DispatchQueue.global()` shares its worker limit, so with every pool thread
+busy neither runs: `BoundedWait`'s deadline let `sleep 20` under a one-second budget come back as a normal exit after
+180 s, and a test that released its pool-blockers from `DispatchQueue.global().asyncAfter` hung for good. A private
+serial queue (`DispatchQueue(label:)`) is overcommit and gets a thread anyway; `BoundedWait` fires its deadlines there
+now (`BoundedWaitSaturatedPoolTests`). Cost a hung test run and a flaky `SwiftUIRenderBatchRunAsyncTests` (`ko3YrZ`).
+

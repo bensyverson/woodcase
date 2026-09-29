@@ -26,6 +26,10 @@
         @Test("A host whose call was abandoned is discarded rather than reused")
         func abandonedHostIsDiscarded() async throws {
             try #require(!WebViewTestHarness.isPoolingDisabled, "the pool is switched off in this run")
+            // A load like any render's: it takes a slot, or the suites' renders crowd it
+            // past its short budget.
+            await WebViewTestHarness.renderSlots.acquire()
+            defer { WebViewTestHarness.renderSlots.release() }
             let host = WebViewTestHarness.checkOutHost(budget: Self.budget, viewportSize: Self.viewport)
             _ = try await host.load(#require(URL(string: "about:blank")))
 
