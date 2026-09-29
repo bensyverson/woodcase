@@ -12,7 +12,7 @@ extension PenNode {
     static let sharedKeys: Set<String> = Set(["id", "type"])
         .union(NodePropertyCodec.commonPaths.map(NodePropertyCodec.rawKey(for:)))
 
-    /// Every key a node of each modelled type claims.
+    /// Every key a node of each modeled type claims.
     ///
     /// Read off the property vocabulary ``PropertyDiff/allKindKeys(_:)-(PenNode.NodeType)``
     /// already keeps — the one `set` and `woodcase schema` answer from — in the file's own
@@ -33,7 +33,7 @@ extension PenNode {
     /// whose keys are all ``Kind/unknown(typeName:properties:)`` properties.
     ///
     /// - Parameters:
-    ///   - type: The node's modelled type.
+    ///   - type: The node's modeled type.
     ///   - decoder: The decoder positioned at the node object.
     /// - Returns: The node's extras.
     /// - Throws: `DecodingError` for an unclaimed key in ``PenDecodingMode/authoring``.

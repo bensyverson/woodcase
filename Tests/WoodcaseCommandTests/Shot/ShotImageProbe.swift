@@ -7,7 +7,7 @@ import Foundation
 import PixelPeeper
 
 /// A PNG written by `shot`, decoded into RGBA bytes so a test can ask what
-/// colour a given pixel is.
+/// color a given pixel is.
 ///
 /// `shot --outline` and `shot --grid` are judged on *geometry* — did the box land on
 /// the node's rect, did the image grow by exactly the gutter — and geometry is only
@@ -58,7 +58,7 @@ struct ShotImageProbe {
     ///
     /// PixelPeeper paints that band `(17, 17, 20)` at full alpha. A small tolerance
     /// absorbs any rounding a PNG round-trip introduces without letting a genuinely
-    /// different colour through — the fixture's own fills are `#F0F0F0`, `#E23B3B`
+    /// different color through — the fixture's own fills are `#F0F0F0`, `#E23B3B`
     /// and `#3B6FE2`, none of them near this.
     ///
     /// - Parameters:

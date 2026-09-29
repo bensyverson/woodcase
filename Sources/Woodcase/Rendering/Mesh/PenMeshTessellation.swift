@@ -5,7 +5,7 @@
 
 import Foundation
 
-/// A mesh gradient as plain triangles with per-vertex colours, in device pixels.
+/// A mesh gradient as plain triangles with per-vertex colors, in device pixels.
 ///
 /// This is the vertex buffer a GPU draws with Gouraud shading, and what
 /// ``PenMeshRasterizer`` draws on the CPU. Positions are measured from the top-left
@@ -14,7 +14,7 @@ import Foundation
 ///
 /// The vertices form one lattice over the whole grid: patch column `c` owns
 /// ``columnSubdivisions``[c] cells across and patch row `r` owns ``rowSubdivisions``[r]
-/// cells down, so neighbouring patches share every vertex along their common edge. The
+/// cells down, so neighboring patches share every vertex along their common edge. The
 /// mesh is therefore watertight by construction: no T-junctions, no cracks. Vertex
 /// `(i, j)` of the lattice is at index `j * latticeColumns + i`.
 ///
@@ -26,7 +26,7 @@ public struct PenMeshTessellation: Friendly {
     ///
     /// - Parameters:
     ///   - positions: One position per vertex, in device pixels.
-    ///   - colors: One unpremultiplied colour per vertex.
+    ///   - colors: One unpremultiplied color per vertex.
     ///   - indices: Three vertex indices per triangle.
     ///   - columnSubdivisions: The cell count across each patch column.
     ///   - rowSubdivisions: The cell count down each patch row.
@@ -47,7 +47,7 @@ public struct PenMeshTessellation: Friendly {
     /// One position per vertex, in device pixels from the box's top-left corner.
     public var positions: [SIMD2<Double>]
 
-    /// One unpremultiplied, sRGB-encoded colour per vertex. Premultiply before
+    /// One unpremultiplied, sRGB-encoded color per vertex. Premultiply before
     /// interpolating, as ``PenMeshRasterizer`` does.
     public var colors: [PenMeshColor]
 

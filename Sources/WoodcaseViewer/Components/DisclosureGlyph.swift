@@ -20,7 +20,7 @@ import Foundation
 /// own open state. See the shared `.v-disclosure-glyph` rule in ``ViewerStylesheet``.
 ///
 /// Carries no styling of its own beyond that shared rule — no panel-specific class, no
-/// inline colour — so any pane can reuse it unchanged; the Outline pane is next.
+/// inline color — so any pane can reuse it unchanged; the Outline pane is next.
 public struct DisclosureGlyph: HTML {
     /// Creates a glyph.
     public init() {}

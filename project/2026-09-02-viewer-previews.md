@@ -74,12 +74,12 @@ ordinary, crowded, wrong, mid-flight — and there is deliberately no matrix gen
 > preview.** Three were declared because DESIGN.md names the case (a kind mark on a node
 > with no role, a theme picker on a file with no axes, the artboard stepper on a file with
 > one artboard); each produced an empty box and a question. What they assert is a markup
-> fact, and a picture is the wrong instrument for a fact — the behaviour tests hold it.
+> fact, and a picture is the wrong instrument for a fact — the behavior tests hold it.
 > They were removed. Eight booleans are already 256 states; the catalog shows the ones a
 > reviewer can grade.
 
 > Ruling 2026-09-02, in the same round: **a state that renders the same picture as its
-> neighbour is not a preview either.** `id-chip/outline` (the chip wearing a caller's
+> neighbor is not a preview either.** `id-chip/outline` (the chip wearing a caller's
 > extra class) and `pane-grip/rows` (the horizontal seam) each varied only an attribute,
 > and drew a picture indistinguishable from the state above it. Both were removed with
 > their goldens; the markup claims they stood for are held by `OutlinePreviewTests` and
@@ -147,9 +147,9 @@ to check a component. The index and the canvas are themselves components, with p
 `PreviewCatalog.all`: for every component and every state, render, compare with
 `Fixtures/golden/<component>/<state>.html`, bless with `UPDATE_GOLDEN=1`. The 34 existing
 goldens are renamed to the catalog's slugs and re-blessed; the diff after the rename must
-be **empty**, which is how the move proves it carried every state verbatim. The behaviour
+be **empty**, which is how the move proves it carried every state verbatim. The behavior
 tests in the same files (a chip carries `data-copy-id`, four identities cap at three) stay
-where they are — they test behaviour, not pictures.
+where they are — they test behavior, not pictures.
 
 ## Plan
 
@@ -193,7 +193,7 @@ tasks:
           DESIGN.md; `woodcase preview` in WoodcaseCommandCore as serve-with-no-files,
           with --list, --list --json, --port and --open; WoodcaseViewer.md and
           WoodcaseCLI.md. A browser test proves one state page renders through the
-          real stylesheet in both colour schemes.
+          real stylesheet in both color schemes.
         criteria:
           - "`woodcase preview --list --json` prints every component and every state with its URL, and exits 0 with nothing on disk"
           - Every state URL renders the state inside the frame it declares, through the real stylesheet and script

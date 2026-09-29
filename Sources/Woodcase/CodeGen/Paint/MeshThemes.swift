@@ -6,9 +6,9 @@
 /// Which themes a mesh gradient fill changes under, and the fill resolved under each.
 ///
 /// Codegen keeps variables symbolic, but a mesh is not something any target can paint
-/// from symbols alone: React bakes it to a raster, SwiftUI writes literal colours into a
+/// from symbols alone: React bakes it to a raster, SwiftUI writes literal colors into a
 /// `MeshGradient`. So the mesh is resolved once per theme it can depend on, and the
-/// emitter switches between the results the way it switches a themed colour.
+/// emitter switches between the results the way it switches a themed color.
 enum MeshThemes {
     /// One theme a mesh is resolved under.
     struct Theme: Friendly {
@@ -21,7 +21,7 @@ enum MeshThemes {
     }
 
     /// The themes a mesh must be resolved under: one per combination of the options of
-    /// every axis its colours (or opacity) can depend on, through variable chains too. A
+    /// every axis its colors (or opacity) can depend on, through variable chains too. A
     /// mesh with no themed variable needs exactly one, the default.
     static func themes(for fill: PenFill.PenMeshGradientFill, in manifest: ThemeManifest) -> [Theme] {
         let axes = axes(for: fill, in: manifest)

@@ -8,7 +8,7 @@ import Testing
 @testable import Woodcase
 
 /// What a text or icon with no enabled fill becomes: nothing visible, as Pen draws it
-/// (`pen` export of `swiftui-color-scheme.pen`, 2026-09-27), whatever the colour scheme.
+/// (`pen` export of `swiftui-color-scheme.pen`, 2026-09-27), whatever the color scheme.
 /// Left unstyled, SwiftUI would draw the text in `.primary` — black in light, white in
 /// dark. ``SwiftUIRenderTests`` renders the fixture's `unfilled` board in both schemes.
 struct SwiftUIEmitterUnfilledPaintTests {

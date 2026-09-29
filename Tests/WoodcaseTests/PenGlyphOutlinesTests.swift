@@ -42,8 +42,8 @@ struct PenGlyphOutlinesTests {
         #expect(underlined.path.boundingBoxOfPath.maxY > plain.path.boundingBoxOfPath.maxY)
     }
 
-    @Test("A colour glyph is kept aside, not outlined")
-    func colourGlyphsKeptAside() {
+    @Test("A color glyph is kept aside, not outlined")
+    func colorGlyphsKeptAside() {
         let outlines = PenGlyphOutlines(lines: [(Self.line("M😀"), CGPoint(x: 0, y: 20))], textSpace: Self.textSpace)
         #expect(outlines.colorRuns.count == 1)
         #expect(!outlines.path.isEmpty)

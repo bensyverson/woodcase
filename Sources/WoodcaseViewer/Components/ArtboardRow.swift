@@ -78,7 +78,7 @@ public struct ArtboardRow: HTML {
         )
     }
 
-    /// The colour of the bar down a touched row's left edge — the first editor's, as an
+    /// The color of the bar down a touched row's left edge — the first editor's, as an
     /// outline row does it, so two agents on one artboard do not make it flicker.
     var editorColor: String {
         ActorColor(name: editors.first ?? "").css

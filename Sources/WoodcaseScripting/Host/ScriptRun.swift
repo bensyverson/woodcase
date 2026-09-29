@@ -136,7 +136,7 @@
             /// The run wrote, and the new bytes are on disk.
             case wrote
 
-            /// The run made no change — a read-only script, or writes that cancelled out.
+            /// The run made no change — a read-only script, or writes that canceled out.
             case unchanged
 
             /// `--dry-run`: everything ran and nothing was written, on purpose.

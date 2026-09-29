@@ -9,7 +9,7 @@ public extension ActivityReader {
     /// Follows the log, yielding matching events as they are appended.
     ///
     /// The first poll happens immediately, so events already in the log arrive without
-    /// waiting. Ending the iteration — a `break`, or cancelling the surrounding task —
+    /// waiting. Ending the iteration — a `break`, or canceling the surrounding task —
     /// stops the polling. Read errors while following are transient by nature (a log
     /// mid-rotation) and are skipped rather than ending the feed.
     ///
@@ -60,7 +60,7 @@ public extension ActivityReader {
     ///
     /// A `Follow` has nothing to leak. It holds no task and starts no work; the polling
     /// *is* the consuming task, which means it exists exactly as long as somebody is
-    /// asking for events, it stops the moment that task is cancelled, and it can never
+    /// asking for events, it stops the moment that task is canceled, and it can never
     /// run ahead of a consumer that has stopped consuming. Iterating one twice is two
     /// independent walks from the same offset, not the leftovers of the first.
     ///
@@ -140,11 +140,11 @@ public extension ActivityReader {
 
             /// The next matching event, waiting for one if the log is quiet.
             ///
-            /// Cancellation is the only ending: a cancelled task gets `nil` on its next
+            /// Cancellation is the only ending: a canceled task gets `nil` on its next
             /// call, and gets it promptly, because the wait between reads is a
-            /// cancellable sleep rather than a deadline the loop has to reach.
+            /// cancelable sleep rather than a deadline the loop has to reach.
             ///
-            /// - Returns: The next event, or `nil` once the consuming task is cancelled.
+            /// - Returns: The next event, or `nil` once the consuming task is canceled.
             public mutating func next() async -> ActivityEvent? {
                 while true {
                     if let event = pending.popFirst() { return event }

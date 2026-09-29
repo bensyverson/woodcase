@@ -90,7 +90,7 @@ struct PenInnerShadow<S: Shape>: View {
     /// The shape the shadow falls inside.
     var shape: S
 
-    /// The shadow's colour.
+    /// The shadow's color.
     var color: Color
 
     /// The Gaussian's sigma, in points.

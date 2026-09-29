@@ -88,7 +88,7 @@ struct SwiftUIEmitterEffectsTests {
         )
         #expect(code.contains(".shadow(color: Color(hex: 0x000000), radius: 2, x: 1, y: 2)"))
         #expect(code.contains(".penTextFill(innerShadows: [PenShadowStyle(color: Color(hex: 0x000000), radius: 2)]) {"))
-        // The glyphs cast the shadow unpainted, so the colour is a layer, not a foreground style.
+        // The glyphs cast the shadow unpainted, so the color is a layer, not a foreground style.
         #expect(!code.contains(".foregroundStyle(Color(hex: 0xFF0000))"))
         #expect(code.contains("Color(hex: 0xFF0000)"))
         #expect(!diagnostics.diagnostics.contains { $0.nodeID == "t" })
@@ -112,14 +112,14 @@ struct SwiftUIEmitterEffectsTests {
         #expect(!code.contains(".foregroundStyle(.clear)"))
     }
 
-    /// Themed colours are read through `PenTheme` now (SwiftUIEmitterThemeReadTests); only a
+    /// Themed colors are read through `PenTheme` now (SwiftUIEmitterThemeReadTests); only a
     /// variable the document does not define is left out, and it is named.
-    @Test("A shadow whose colour is a variable the document lacks is a warning, and is not drawn")
+    @Test("A shadow whose color is a variable the document lacks is a warning, and is not drawn")
     func shadowVariable() throws {
         let diagnostics = PenDiagnosticCollector()
         let code = try body(child: rect(##""effect": {"type": "shadow", "color": "$shade", "blur": 4}"##), diagnostics: diagnostics)
         #expect(!code.contains("penDropShadow"))
-        #expect(diagnostics.diagnostics.contains { $0.nodeID == "r" && $0.message.contains("the colour variable $shade") })
+        #expect(diagnostics.diagnostics.contains { $0.nodeID == "r" && $0.message.contains("the color variable $shade") })
     }
 
     /// Effect numbers are read through `PenTheme` now (SwiftUIEmitterThemeReadTests); only a

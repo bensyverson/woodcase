@@ -10,7 +10,7 @@ import Foundation
 ///
 /// An instance is a call to its component exactly when every override is one of the
 /// first two. A property an override sets is **carried** when a prop reads it — a text
-/// prop the node's `content`, a colour or image prop its `fill` (a node of one fill: the
+/// prop the node's `content`, a color or image prop its `fill` (a node of one fill: the
 /// override replaces them all, the prop only the one it reads), a boolean prop its
 /// `enabled` — and ``PropMapper`` finds a value in it. It **changes nothing** when patching
 /// it onto the node leaves the node as it was, when it sizes the node the way it was
@@ -94,7 +94,7 @@ struct InstanceOverrides: Friendly {
     private enum PropertyKey {
         /// A text node's copy, which a text prop reads.
         static let content = "content"
-        /// A node's paints, which a colour or image prop reads.
+        /// A node's paints, which a color or image prop reads.
         static let fill = "fill"
         /// A node's switch, which a boolean prop reads.
         static let enabled = "enabled"

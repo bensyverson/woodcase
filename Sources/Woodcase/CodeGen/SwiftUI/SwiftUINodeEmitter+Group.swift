@@ -12,7 +12,7 @@ extension SwiftUINodeEmitter {
     /// `.offset`, so the child overhangs the anchor. Nothing there reads the group's size,
     /// and its turn pivots at that origin (``transformed(_:_:in:)``), as Pen's does. In a
     /// stack the group's size is its slot, which Pen makes its children's true union, turned
-    /// when it turns, so the group is a `PenGroupFlow` and turns about its centre.
+    /// when it turns, so the group is a `PenGroupFlow` and turns about its center.
     ///
     /// Layer effects are the group's as a whole: its shadows are cast by its descendants'
     /// silhouette (``groupSilhouette(_:flow:)``), its blur blurs everything in it, and a group
@@ -68,7 +68,7 @@ extension SwiftUINodeEmitter {
     /// A group placed by its own `x`/`y` is a top-leading `ZStack` whose origin is the
     /// anchor, which the group's offset puts where Pen does; a child reaching left of or above
     /// it overhangs. A group in a stack (`flow`) is a `PenGroupFlow`: Pen sizes its slot to the
-    /// children's true union — turned, when the group turns — and draws the union centred in
+    /// children's true union — turned, when the group turns — and draws the union centered in
     /// it (`render-free-groups.pen`'s `flex` and `flexrot`).
     ///
     /// - Parameters:

@@ -10,7 +10,7 @@ import Testing
 
 /// Pins that a mesh gradient reaches a PDF as a raster image, at twice the page's scale.
 ///
-/// A PDF has no primitive CoreGraphics can write for a mesh, so the fill is rasterised.
+/// A PDF has no primitive CoreGraphics can write for a mesh, so the fill is rasterized.
 /// A PDF context's device space is its point space, and a 1x raster of a gradient is
 /// soft when zoomed; Pen's own PDF export carries a 2x image (a 200 pt page, a 400 px
 /// XObject; `project/2026-09-26-mesh-gradients.md` §3), and Ben ruled that Woodcase

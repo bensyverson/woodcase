@@ -7,7 +7,7 @@ into Tests/WoodcaseTests/Fixtures:
                                   two shadows, a blended one, a gradient fill), a donut and an
                                   arc, and on Lucide and Material Symbols icons
   render-painted-lines.pen        lines whose stroke is a gradient or a stack of fills, full-width
-                                  (fill_container) and fixed, on grey; `fill-degenerate` holds the
+                                  (fill_container) and fixed, on gray; `fill-degenerate` holds the
                                   ramps a zero-height box collapses, which Pen paints as a
                                   split or black
 
@@ -108,7 +108,7 @@ painted_lines = [
         ],
     }]),
     # Ramps with a component across the line, which a zero-height box collapses: Pen paints
-    # a slanted ramp as its two end colours split at the line, and a vertical or radial one
+    # a slanted ramp as its two end colors split at the line, and a vertical or radial one
     # black.
     ("fill-degenerate", full_width_board("pl04", [
         full_width("pl04a", linear(0), width=16),

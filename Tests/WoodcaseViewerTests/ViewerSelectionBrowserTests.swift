@@ -77,7 +77,7 @@
             /// of the arithmetic the script will ever see: `MouseEvent`'s `clientX` is an
             /// integer, and the stage is drawn at a fraction of life size, so a
             /// fractional coordinate is truncated and then divided by that fraction — an
-            /// error the script magnifies into a neighbouring box. Aiming in layout
+            /// error the script magnifies into a neighboring box. Aiming in layout
             /// points instead put a click meant for a label two levels up the tree.
             ///
             /// The point is chosen so the *smallest* box containing it is the intended

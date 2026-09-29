@@ -53,7 +53,7 @@ signature to read, which is precisely its signature.
 The bystander was worth fixing on its own terms. `ActivityReader.follow` returned an
 `AsyncStream` whose producer was an unstructured `Task` created inside the stream's
 builder closure. Its lifetime was therefore governed by object-graph reachability —
-`onTermination` firing when the stream is dropped or its consumer cancelled — rather
+`onTermination` firing when the stream is dropped or its consumer canceled — rather
 than by structured concurrency. Three ordinary situations leave that poll loop running
 for the life of the process:
 
@@ -69,7 +69,7 @@ for the life of the process:
 
 `ActivityReader.Follow` is now a value. It holds no task and starts no work; the polling
 *is* the consuming task. It exists exactly as long as somebody is asking for events, it
-ends the moment that task is cancelled, and it cannot run ahead of a consumer that has
+ends the moment that task is canceled, and it cannot run ahead of a consumer that has
 stopped consuming — the log file, not a buffer in memory, holds what a slow reader has
 not reached. There is nothing left to leak.
 
@@ -86,8 +86,8 @@ it is two independent walks from the same offset.
 The budget is 30 s — a *not hung* guard, deliberately nowhere near the interval under
 test, because `project/gotchas.md` records a 10 ms sleep taking twelve seconds to resume
 under this suite. Never assert on how long a job took; assert on what it produced. The
-limit is honest and worth stating: a deadline works by cancelling, so it bounds any job
-that honours cancellation and cannot bound one that does not.
+limit is honest and worth stating: a deadline works by canceling, so it bounds any job
+that honors cancellation and cannot bound one that does not.
 
 ## Verification
 

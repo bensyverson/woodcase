@@ -56,7 +56,7 @@ struct SwiftUIEmitterCatalogTests {
         #expect(sheet.contains("PenCatalogEntry(\"Chip\")"))
     }
 
-    @Test("The sheet shows each colour token as a swatch and each other token as its value")
+    @Test("The sheet shows each color token as a swatch and each other token as its value")
     func sheetShowsTokens() throws {
         let sheet = try file("Sources/PenUI/Catalog/PenCatalogSheet.swift", in: "woodcase-app")
         #expect(sheet.contains("@Environment(\\.penTheme) private var theme"))

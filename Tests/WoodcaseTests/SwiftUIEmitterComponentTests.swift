@@ -41,8 +41,8 @@ struct SwiftUIEmitterComponentTests {
         #expect(file.contains("    public init() {}"))
     }
 
-    @Test("A colour prop is a Color defaulted to the fill, and the shape fills with it")
-    func colourProp() throws {
+    @Test("A color prop is a Color defaulted to the fill, and the shape fills with it")
+    func colorProp() throws {
         let file = try #require(try emit([swatch]).files["Sources/PenUI/Components/Swatch.swift"])
         #expect(file.contains("    public let tint: Color\n"))
         #expect(file.contains("public init(tint: Color = Color(hex: 0xFF0000))"))
@@ -110,7 +110,7 @@ struct SwiftUIEmitterComponentTests {
         #expect(code.contains("Card()"))
     }
 
-    @Test("A colour and an image override are Swift values in the call; the image is bundled")
+    @Test("A color and an image override are Swift values in the call; the image is bundled")
     func typedArguments() throws {
         let emitted = try emit([swatch, photo, page(##"""
         {"type": "ref", "id": "i", "ref": "W", "descendants": {"D": {"fill": "#00FF00"}}},
@@ -222,7 +222,7 @@ struct SwiftUIEmitterComponentTests {
                    "children": [{"type": "text", "id": "L", "name": "Label", "content": "Total", "fontSize": 12}]}]}
     """##
 
-    /// A swatch whose `tint` prop reads a rectangle's colour.
+    /// A swatch whose `tint` prop reads a rectangle's color.
     private let swatch = ##"""
     {"type": "frame", "id": "W", "name": "Swatch", "reusable": true, "metadata": {"_props": {"tint": "Dot"}},
      "children": [{"type": "rectangle", "id": "D", "name": "Dot", "width": 10, "height": 10, "fill": "#FF0000"}]}

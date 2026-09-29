@@ -12,17 +12,17 @@ struct PenFillsVisibilityTests {
         ]
     )
 
-    @Test("A solid colour with any alpha is visible", arguments: ["#FFFFFF01", "#FFFFFF", "#FFF", "#00000080"])
+    @Test("A solid color with any alpha is visible", arguments: ["#FFFFFF01", "#FFFFFF", "#FFF", "#00000080"])
     func visibleSolid(hex: String) {
         #expect(PenFills.single(.shorthand(hex)).hasVisiblePaint)
     }
 
-    @Test("A fully transparent or unreadable colour is not", arguments: ["#FFFFFF00", "#0000", "$glass", "nonsense"])
+    @Test("A fully transparent or unreadable color is not", arguments: ["#FFFFFF00", "#0000", "$glass", "nonsense"])
     func invisibleSolid(hex: String) {
         #expect(!PenFills.single(.shorthand(hex)).hasVisiblePaint)
     }
 
-    @Test("A disabled or fully transparent colour fill is not visible")
+    @Test("A disabled or fully transparent color fill is not visible")
     func colorFill() {
         let disabled = PenFill.color(PenFill.PenColorFill(enabled: .literal(false), color: .literal("#FFFFFF")))
         let clear = PenFill.color(PenFill.PenColorFill(color: .literal("#FFFFFF00")))

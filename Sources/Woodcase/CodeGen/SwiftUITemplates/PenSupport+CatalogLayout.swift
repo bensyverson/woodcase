@@ -28,7 +28,7 @@ enum PenCatalogMetrics {
 
 extension View {
     /// The sheet's page: its margins, filling at least the room it is given, on the
-    /// background of the theme's colour scheme.
+    /// background of the theme's color scheme.
     func penCatalogPage() -> some View {
         padding(PenCatalogMetrics.margin)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)

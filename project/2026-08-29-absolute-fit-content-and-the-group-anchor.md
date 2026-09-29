@@ -58,7 +58,7 @@ layout, expanded to the rotated bounding box when it is rotated. So:
 ## The finding: a group is an anchor, not a box
 
 Giving a group a real size moves the render, because `PenTransformBuilder`
-pivots rotation at the centre of the node's rect. That would have broken the
+pivots rotation at the center of the node's rect. That would have broken the
 `blur2`/`blur2-no-bg` snapshots, which sit at MAE `7.658` and **`0.000`** — a
 pixel-perfect match with Pen's own PNG. So Pen's group cannot be a box the
 rotation pivots through the middle of.
@@ -66,19 +66,19 @@ rotation pivots through the middle of.
 `blur2.pen`'s group is the proof. It stores `x: -111.42492757477771`,
 `y: 100.00000000000004`, `rotation: -315`, and its two children form a 299×299
 square. Those coordinates are exactly where the group's **local origin** lands
-when a 299×299 group at `(-49.5, -49.5)` — centred in the 200×200 frame — is
-swung 45° about its own centre:
+when a 299×299 group at `(-49.5, -49.5)` — centered in the 200×200 frame — is
+swung 45° about its own center:
 
 ```
 $ python3 - <<'EOF'
 import math
 ROT, UNION = -315.0, 299.0
 origin = (-49.5, -49.5)
-centre = (origin[0] + UNION / 2, origin[1] + UNION / 2)
+center = (origin[0] + UNION / 2, origin[1] + UNION / 2)
 rad = -ROT * math.pi / 180              # the renderer's screen rotation
 c, s = math.cos(rad), math.sin(rad)
-v = (origin[0] - centre[0], origin[1] - centre[1])
-print(centre[0] + v[0]*c - v[1]*s, centre[1] + v[0]*s + v[1]*c)
+v = (origin[0] - center[0], origin[1] - center[1])
+print(center[0] + v[0]*c - v[1]*s, center[1] + v[0]*s + v[1]*c)
 EOF
 -111.42492757477771 100.00000000000006
 ```
@@ -86,21 +86,21 @@ EOF
 That agrees with the stored `x`/`y` to `1.4e-14` — Pen's own float noise (the
 same noise appears in the fixture's child `y: 1.2434497875801753e-14`).
 
-So: **when a user rotates a group, Pen pivots at the centre of the group's
+So: **when a user rotates a group, Pen pivots at the center of the group's
 bounds and then bakes the result into the group's `x`/`y`, rewriting it to where
 the group's local origin landed.** The persisted `x`/`y` is the anchor of the
 children's coordinate system, not the corner of a bounding box. At render time
 the rotation replays about that anchor. The rival model — `x`/`y` as the union's
-top-left with a centre pivot — puts the diamond's centre at `(38.08, 249.50)`
+top-left with a center pivot — puts the diamond's center at `(38.08, 249.50)`
 instead of `(100, 100)`, i.e. almost entirely outside the 200×200 artboard;
-`blur2-no-bg.png` shows a full-bleed diagonal split, so it is centred.
+`blur2-no-bg.png` shows a full-bleed diagonal split, so it is centered.
 
 Two consequences, both implemented:
 
 - `applyRotationExpansion` exempts a `group`. Its rect is the **un-rotated**
   union, because its `x`/`y` is not the corner of a bounding box to anchor.
 - `PenTransformBuilder.buildTransform` pivots a `group` at `(0, 0)` of its rect
-  rather than the centre.
+  rather than the center.
 
 Together these keep the rendered output bit-identical while the group's rect
 becomes its true bounds. Every MAE in `PenSnapshotTests` is unchanged to the
@@ -114,7 +114,7 @@ top-left corner."* `project/gotchas.md` already records that this describes the
 at `(0,0)` moves `render-transforms-and-effects` from MAE 1.12 to 10.77. Both
 readings are true at once, of different node kinds — a sized node's declared
 `x`/`y` is the top-left of its **rotated bounding box** and its pivot is the
-box's centre; a group's declared `x`/`y` is a **point**, and the pivot is that
+box's center; a group's declared `x`/`y` is a **point**, and the pivot is that
 point. The prose is not a rule you can apply uniformly.
 
 > **Correction, 2026-09-27 (leaf `nAuBKh`, F4 of `2026-09-27-fidelity-gaps.md`): the
@@ -124,9 +124,9 @@ point. The prose is not a rule you can apply uniformly.
 > the result, which reach left of or above the anchor: `render-rotated-free.pen`'s
 > 200×60 rectangle at `(80, 60)`, turned −20°, settles at `(59.479, 60)`, and a
 > `flipX` node settles its whole width left of its anchor (`render-transformed-free.pen`,
-> both Pen-oracle fixtures). The centre pivot that scored 1.12 on
+> both Pen-oracle fixtures). The center pivot that scored 1.12 on
 > `render-transforms-and-effects` was right only because that fixture's turned node is a
-> **flex child**, whose slot Pen grows to the turned bounds. The centre pivot is still what
+> **flex child**, whose slot Pen grows to the turned bounds. The center pivot is still what
 > the renderer uses, now inside bounds the layout has moved to where the anchor turn puts
 > them, which draws the same picture. The group half stands.
 

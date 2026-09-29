@@ -8,7 +8,7 @@ import Foundation
 /// The key table an `effect` value takes, declared beside the decoder that reads it.
 ///
 /// The spelling an agent gets wrong here is `background_blur` — a blur *behind* a node
-/// is not `backdrop`, and the only defence against inventing a name is printing the
+/// is not `backdrop`, and the only defense against inventing a name is printing the
 /// three the decoder takes. `PenSchemaTests` checks each variant's keys against the
 /// payload's own stored properties with `Mirror`.
 public extension PenEffect {

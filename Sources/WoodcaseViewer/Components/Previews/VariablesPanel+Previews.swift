@@ -11,13 +11,13 @@ public extension VariablesPanel {
     static let previews = PreviewComponent(
         slug: "variables-panel",
         title: "Variables panel",
-        blurb: "The file's variables under the outline: swatches for colours, a pill for booleans, and a variant table behind each disclosure.",
+        blurb: "The file's variables under the outline: swatches for colors, a pill for booleans, and a variant table behind each disclosure.",
         source: "Sources/WoodcaseViewer/Components/VariablesPanel.swift",
         states: [
             PreviewState(
                 slug: "default",
                 name: "Every variable type",
-                note: "Colour, themed colour, number, themed number, string and boolean. Only colours get a swatch; the two attributed rows carry a relative age, one recent and one two days old.",
+                note: "Color, themed color, number, themed number, string and boolean. Only colors get a swatch; the two attributed rows carry a relative age, one recent and one two days old.",
                 frame: .leftPane
             ) {
                 VariablesPanel(

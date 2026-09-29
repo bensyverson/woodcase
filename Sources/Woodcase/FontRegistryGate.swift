@@ -7,7 +7,7 @@ import Foundation
 
 /// Lets one thread at a time into Core Text's font *registry*.
 ///
-/// `CTFontCreateWithFontDescriptor` and its neighbours do not resolve a family name
+/// `CTFontCreateWithFontDescriptor` and its neighbors do not resolve a family name
 /// in the calling process. They send a **synchronous XPC message to `fontd`** and
 /// block the calling thread on the reply — `__NSXPCCONNECTION_IS_WAITING_FOR_A_SYNCHRONOUS_REPLY__`,
 /// `mach_msg`, no timeout, no cancellation. That is fine once. It is not fine from

@@ -15,7 +15,7 @@
     /// function expression the other opens — and closes it — and everything the first half
     /// defines is in scope here.
     ///
-    /// The division of labour is real even if the seam is textual. The first half is the
+    /// The division of labor is real even if the seam is textual. The first half is the
     /// *vocabulary*: what a member is, what an argument must be, what a mistake earns. This
     /// half is the *surface*: thirteen writes and five reads, each one a few lines that
     /// check their arguments through that vocabulary and hand a JSON string to a native.

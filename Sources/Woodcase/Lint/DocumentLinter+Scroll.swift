@@ -36,7 +36,7 @@ private enum DeclaredScrollAxis {
 /// per child when nothing says the overflow is designed, so `--exclude clipped`
 /// continues to exclude all of it with no second id for a caller to remember.
 ///
-/// ## The three behaviours
+/// ## The three behaviors
 ///
 /// A row's parent must be a `frame` with `clip:true` for any of this to apply — a
 /// `group` has no `clip` flag, and a frame that does not clip shows every pixel of an
@@ -55,7 +55,7 @@ private enum DeclaredScrollAxis {
 ///    and every overflowing child keeps its own finding.
 /// 3. **An invalid `_scroll`.** Whatever kind of node carries it, a `_scroll` value
 ///    that is not `"vertical"` or `"horizontal"` is its own finding, on top of
-///    whichever of the two behaviours above applies as if it were absent.
+///    whichever of the two behaviors above applies as if it were absent.
 extension DocumentLinter {
     /// Findings for the ``LintCheck/clipped`` check, keyed by the row each is
     /// reported on.

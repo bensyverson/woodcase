@@ -159,11 +159,11 @@ extension ReactEmitter {
 
     // MARK: - Line
 
-    /// Emits a line: a `<div>` with a top border at full width — or, for a stroke a colour
+    /// Emits a line: a `<div>` with a top border at full width — or, for a stroke a color
     /// cannot carry, a band as tall as the stroke, painted by its fills — otherwise an SVG
     /// `<line>` from the box's top-left corner to its bottom-right, as the renderer draws it.
     ///
-    /// Pen centres a line's stroke on the line, so half of it lies above a flat line's
+    /// Pen centers a line's stroke on the line, so half of it lies above a flat line's
     /// `y`. Neither form lets the stroke move the layout: the SVG is grown by half the
     /// stroke on every side and pulled back by negative margins of the same, and the
     /// border's margins hand back the height it takes. A line with no stroke paint draws
@@ -194,7 +194,7 @@ extension ReactEmitter {
             if strokeRoute == .none {
                 styles.append(("height", cssNumber(nodeHeight)))
             } else if let paintedStroke = strokeRoute.layeredFills {
-                // A border takes one colour: a painted band is the stroke's own box.
+                // A border takes one color: a painted band is the stroke's own box.
                 styles.append(("height", cssNumber(strokeWidth)))
                 styles.append(contentsOf: emitFillStyles(
                     .multiple(paintedStroke), box: FillBox(width: nil, height: strokeWidth), ctx: ctx

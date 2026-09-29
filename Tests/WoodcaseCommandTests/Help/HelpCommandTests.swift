@@ -198,7 +198,7 @@ struct HelpCommandTests {
     // MARK: - The codegen topic
 
     /// `woodcase help codegen` is the only place the CLI says how to build a component
-    /// the React emitter recognises, so it is held to the recipes topic's bar: every bare
+    /// the React emitter recognizes, so it is held to the recipes topic's bar: every bare
     /// `  woodcase …` line in it is extracted and run, in order, against one scratch file.
     /// A line that is a *form* rather than a step — one carrying a placeholder, or a
     /// pointer at another verb — is written in backticks, which is what keeps it out of
@@ -260,7 +260,7 @@ struct HelpCommandTests {
             ("the state-variant naming convention", "{state}"),
             ("reading the parameters back", "woodcase get design.pen Button"),
             ("that an uncovered override inlines", "Customized from"),
-            ("the neighbouring topic", "help design"),
+            ("the neighboring topic", "help design"),
             ("the verb's own flags", "generate react --help"),
             ("where these become a report", "codegen-unmapped-override"),
         ]

@@ -7,9 +7,9 @@ public extension PenFills {
     /// The renderer asks this before blurring a backdrop, and every other renderer should
     /// ask the same question rather than restate it.
     ///
-    /// A colour that does not parse — an unresolved `$variable`, say — paints nothing. A
+    /// A color that does not parse — an unresolved `$variable`, say — paints nothing. A
     /// gradient, image, mesh or shader fill paints unless it is disabled or at opacity 0,
-    /// whatever its colours; a fill type this build does not know is assumed to paint.
+    /// whatever its colors; a fill type this build does not know is assumed to paint.
     var hasVisiblePaint: Bool {
         all.contains(where: \.paints)
     }

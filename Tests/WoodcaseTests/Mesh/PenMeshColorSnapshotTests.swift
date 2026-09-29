@@ -8,10 +8,10 @@ import Foundation
 import Testing
 @testable import Woodcase
 
-/// Pins the renderer's reading of mesh colours against Pen's own exports.
+/// Pins the renderer's reading of mesh colors against Pen's own exports.
 ///
-/// `render-mesh-colors.pen` holds one 40×40 frame per colour string: a `#00FF00` fill
-/// under a 2×2 mesh of that colour at every vertex, so a colour Pen reads as nothing
+/// `render-mesh-colors.pen` holds one 40×40 frame per color string: a `#00FF00` fill
+/// under a 2×2 mesh of that color at every vertex, so a color Pen reads as nothing
 /// shows green. The references are Pen's PNG exports:
 ///
 /// ```
@@ -23,7 +23,7 @@ import Testing
 struct PenMeshColorSnapshotTests {
     private static let fixture = "render-mesh-colors"
 
-    /// Every artboard, one colour string each.
+    /// Every artboard, one color string each.
     private static let artboards = [
         "control", "badhex", "word", "rgba", "rgba-half", "five", "empty", "prefix", "minus", "space", "plus",
         "zerox", "short-bad", "short-minus", "trailing-hash", "double-hash", "hash-only", "no-hash", "lower",
@@ -32,7 +32,7 @@ struct PenMeshColorSnapshotTests {
     ]
 
     /// The pin: every board measured 0.00 on 2026-09-27
-    /// (`swift test --filter PenMeshColorSnapshotTests`); a flat colour leaves nothing but
+    /// (`swift test --filter PenMeshColorSnapshotTests`); a flat color leaves nothing but
     /// 8-bit rounding to disagree about.
     private static let limit = 0.05
 
@@ -44,7 +44,7 @@ struct PenMeshColorSnapshotTests {
         #expect(names == Self.artboards)
     }
 
-    @Test("Each mesh colour paints as Pen paints it", arguments: artboards)
+    @Test("Each mesh color paints as Pen paints it", arguments: artboards)
     func matchesPen(artboard: String) async throws {
         let directory = PenMeshMalformedPointSnapshotTests.fixturesDir
         let rendered = try #require(try PenSnapshotTestHelpers.renderArtboard(

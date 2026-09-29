@@ -72,7 +72,7 @@ Do not cd into the main checkout. Do not commit. Do not run job done.
 TASK: <goal, in one paragraph>
 VERIFIED FACTS: <real counts, timestamps, invariants that must hold — not just the goal>
 DO NOT BUILD: <explicit exclusions>; <files owned by other agents>
-TDD: red first; if a new test is green on first run, say so — that is a claim about rigour.
+TDD: red first; if a new test is green on first run, say so — that is a claim about rigor.
 
 Your report must include:
 1. A summary of what changed and why — not the diff; the branch carries it.

@@ -3,7 +3,7 @@ import CoreGraphics
 /// Builds `CGAffineTransform` from a node's rotation and flip properties.
 ///
 /// Transform order: translate to pivot → rotate → flip X/Y → translate back from pivot.
-/// The pivot is the centre of the node's unturned box; see ``buildTransform(for:rect:)``.
+/// The pivot is the center of the node's unturned box; see ``buildTransform(for:rect:)``.
 ///
 /// Public because it is the oracle for downstream renderers: RapidPro's
 /// `RenderNodeProducer` must place a node exactly where this transform does, and
@@ -14,13 +14,13 @@ public enum PenTransformBuilder {
     /// The rect should be zero-origin (position is handled separately by the renderer).
     /// Returns `.identity` if the node has no rotation or flip properties.
     ///
-    /// Rotation and flip pivot at the centre of the node's unturned box, `rect`. Pen turns
-    /// a node placed by its own `x`/`y` about that anchor, not its centre; the renderer
+    /// Rotation and flip pivot at the center of the node's unturned box, `rect`. Pen turns
+    /// a node placed by its own `x`/`y` about that anchor, not its center; the renderer
     /// draws the same picture because the layout has already moved the node's turned bounds
     /// to where the anchor turn puts them (``PenLayoutEngine/freeRect(of:x:y:box:)``), and
-    /// `rect` is the unturned box centred in them. A `group` is no exception: its box is
+    /// `rect` is the unturned box centered in them. A `group` is no exception: its box is
     /// its children's union (``PenLayoutEngine/unturnedBox(of:rect:layoutRects:)``),
-    /// which the renderer centres in the group's rect in the same way before it moves to the
+    /// which the renderer centers in the group's rect in the same way before it moves to the
     /// group's anchor, the origin its children are placed from. See `PenRendering.md`,
     /// *Transforms*.
     public static func buildTransform(for node: PenNode, rect: PenRect) -> CGAffineTransform {

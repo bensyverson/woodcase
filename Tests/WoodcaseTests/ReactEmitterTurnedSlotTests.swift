@@ -8,7 +8,7 @@ import Testing
 @testable import Woodcase
 
 /// A turned child of a flex flow takes a slot the size of its turned bounds, as Pen's
-/// layout gives it, with its unturned box centred and turned inside (leaf Mu4JsL,
+/// layout gives it, with its unturned box centered and turned inside (leaf Mu4JsL,
 /// `render-transforms-and-effects`): margins grow — or, for a box turned onto its side,
 /// shrink — the flex item by half the difference on each side.
 struct ReactEmitterTurnedSlotTests {

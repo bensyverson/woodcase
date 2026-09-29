@@ -62,8 +62,8 @@ struct PenZeroSizeStrokeTests {
         #expect(!painted(alphas, 59, 50))
     }
 
-    @Test("A centred stroke on a 0×0 box is a square its own width about the point")
-    func centredStrokeIsASquare() throws {
+    @Test("A centered stroke on a 0×0 box is a square its own width about the point")
+    func centeredStrokeIsASquare() throws {
         let alphas = try alphas(pointFrame(alignment: .center))
         #expect(painted(alphas, 46, 46))
         #expect(painted(alphas, 53, 53))

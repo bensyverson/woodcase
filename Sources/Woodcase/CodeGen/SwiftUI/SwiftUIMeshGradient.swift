@@ -17,19 +17,19 @@ import Foundation
 /// a `MeshGradient`.
 ///
 /// Handed Pen's grid directly, `MeshGradient` interpolates its own way — not Pen's bicubic
-/// patches and smoothstep-eased, unpremultiplied colours — and measured MAE 0.4–3.2 on
+/// patches and smoothstep-eased, unpremultiplied colors — and measured MAE 0.4–3.2 on
 /// smooth meshes, 5.0 on a translucent one and 7.1 on a folded one. So the style splits
-/// each Pen cell into 8 × 8 cells whose corners, tangents and colours it takes from Pen's
+/// each Pen cell into 8 × 8 cells whose corners, tangents and colors it takes from Pen's
 /// patch, which brings every `render-mesh-gradients` board, the fold included, to within
 /// 0.9 of Pen's export. A fold still overdraws in SwiftUI's order rather than Pen's;
 /// lint's `mesh-gradient-distorted` warns about it.
 enum SwiftUIMeshGradient {
     /// The mesh's paint, or `nil` when it paints nothing: Pen would not draw it (a missing
-    /// field, a count that does not match the grid, a single row or column), or a colour
+    /// field, a count that does not match the grid, a single row or column), or a color
     /// names a variable `color` cannot write (reported in `unemitted`).
     ///
-    /// A colour variable is read through the theme (`theme.brand`), so `PenMeshGradient`
-    /// resolves it in the view's environment; a colour string is written as Pen's mesh
+    /// A color variable is read through the theme (`theme.brand`), so `PenMeshGradient`
+    /// resolves it in the view's environment; a color string is written as Pen's mesh
     /// reads it (``PenMeshColor/hexColor(penMesh:)``), a malformed one included.
     static func content(
         _ fill: PenFill.PenMeshGradientFill, color: SwiftUIGradient.ColorCode, unemitted: inout [String]

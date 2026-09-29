@@ -230,7 +230,7 @@ state of its own.
 The look is a quiet developer-tool surface: paper-warm neutrals, hairline
 seams, one green accent that has to be earned. Dense the way a good inspector
 is dense — 11px monospace facts, two-pixel row rhythm — but calm, because
-almost everything is grey until something happens. The personality is a
+almost everything is gray until something happens. The personality is a
 precise instrument next to a workbench, not a dashboard: no status chrome, no
 decoration, nothing that moves unless the file did.
 
@@ -255,7 +255,7 @@ borrow from each other.
   means exactly two things: *liveness* (the live badge, the follow-resume
   pill) and *selection* (outline boxes, focused rows via `select`, the
   focused map frame, the copied-state flash). It never decorates.
-- **Warn** (`warn`, burnt orange) is the attention axis: clipped nodes, a lost
+- **Warn** (`warn`, burned orange) is the attention axis: clipped nodes, a lost
   connection, unread dots, a file that failed to parse. It is a fact color,
   not an error state — the viewer has nothing to enforce.
 - **Marks** — the component vocabulary: purple for a reusable component
@@ -525,7 +525,7 @@ passes through the second for as long as its first frame takes. Both carry
 the stream replaces them: the page that answers next is a *different* page,
 so the update is a reload, not a fragment swap.
 
-**Loading shimmer.** A slow `chrome` band travelling across a `panel` ground,
+**Loading shimmer.** A slow `chrome` band traveling across a `panel` ground,
 on the frame of a map thumbnail whose render has not arrived. It is a
 background *behind* the image, so a loaded PNG covers it with no help from
 JavaScript; the script drops the class when the image lands or fails, so

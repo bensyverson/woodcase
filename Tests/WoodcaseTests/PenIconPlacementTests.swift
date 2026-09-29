@@ -104,7 +104,7 @@ struct PenIconPlacementTests {
         // max(measured×1.5, measured+0.25) over the worst case (`phosphor`, 0.804; the others 0.62–0.79,
         // swift test -j 3 --filter PenIconPlacementTests, 2026-09-27, leaf 6vLFNQ). The Material boards
         // scored 0.86–0.88 while Core Text drew them in the optical cut of their point size, where Pen
-        // keeps the font's default (PenIconFonts.md, "Which cut of the glyph"); what is left is rasterisation.
+        // keeps the font's default (PenIconFonts.md, "Which cut of the glyph"); what is left is rasterization.
         #expect(mae < 1.21, "\(artboard): MAE \(mae)")
     }
 }

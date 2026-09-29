@@ -17,7 +17,7 @@ public extension ArtboardMap {
             PreviewState(
                 slug: "default",
                 name: "Three artboards, one just written to",
-                note: "Names sit under the boxes and never scale with the map; the reusable root keeps its collapsed kind mark, and the touched frame is border-tinted in its editor's colour.",
+                note: "Names sit under the boxes and never scale with the map; the reusable root keeps its collapsed kind mark, and the touched frame is border-tinted in its editor's color.",
                 frame: .canvas
             ) {
                 ArtboardMap(

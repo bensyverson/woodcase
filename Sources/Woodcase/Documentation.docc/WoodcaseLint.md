@@ -23,7 +23,7 @@ anything to report, so `woodcase lint design.pen && woodcase render design.pen`
 renders only a file that passed.
 
 Two reads are about the *checks* rather than about one file. `lint --list` prints the
-catalogue — every ``LintCheck`` with its severity and its ``LintCheck/summary`` — and
+catalog — every ``LintCheck`` with its severity and its ``LintCheck/summary`` — and
 reads no file at all, so an agent can discover the rules before it has a document:
 
 ```text
@@ -77,7 +77,7 @@ no document, so accepting any of those would be accepting an argument it ignores
 | `codegen-role` | error | A `_role` value is outside ``ComponentRole`` |
 | `codegen-unmapped-override` | warning | An instance overrides a descendant no declared prop reads |
 | `mesh-gradient-dropped` | error | A mesh gradient's `points` or `colors` do not number `columns × rows`, one of the four is missing, the grid is under 2×2, or a point is malformed in a way Pen cannot place: Pen paints nothing |
-| `mesh-gradient-distorted` | warning | A mesh gradient has a colour Pen's mesh misreads (4-digit `#RGBA`, a word), a patch that folds over itself, or a malformed point Pen places its own way |
+| `mesh-gradient-distorted` | warning | A mesh gradient has a color Pen's mesh misreads (4-digit `#RGBA`, a word), a patch that folds over itself, or a malformed point Pen places its own way |
 | `text-style-stripped` | warning | A text node carries a stroke, `underline: true` or `strikethrough: true`, which Pen strips on load and never draws |
 | `shader-not-drawn` | warning | An enabled shader fill, in a node's fills or its stroke, which Pen runs and Woodcase does not draw on any target |
 | `per-side-stroke-on-shape` | warning | An ellipse, polygon, path or line with a stroke paint and a per-side `strokeWidth` whose sides differ from its `top`, or that has no `top`: Pen draws the `top` width alone, all round |
@@ -184,7 +184,7 @@ the fold and keeps its own individual finding instead. A freeform frame
 overflowing child is reported on its own, exactly as before `_scroll` existed.
 
 **An invalid `_scroll` value** — anything but `"vertical"` or `"horizontal"` — is its
-own finding, on whatever node carries it, on top of whichever behaviour above applies
+own finding, on whatever node carries it, on top of whichever behavior above applies
 as though the key were absent:
 
 ```text
@@ -359,7 +359,7 @@ stored under a dotted path (`"kind.content"`) instead of the raw .pen key
 (`"content"`) a merge reads. Every `override` since d893dd0 rekeys through
 ``NodePropertyCodec/rawKeyed(_:)`` before it is stored, so only a file written before
 that fix carries the literal path — and a dotted key decodes as a harmless
-unrecognised field, so the merge succeeds and the override is dropped with no error at
+unrecognized field, so the merge succeeds and the override is dropped with no error at
 all. ``PenNodePatcher/patched(_:with:)`` has nothing to catch it with, which is why
 this check reads the key itself rather than judging a merge.
 
@@ -379,7 +379,7 @@ linted once, at every `ref` node that carries one, wherever in the document it s
 
 ## What Pen does to the file
 
-Five checks describe **Pen's** behaviour rather than Woodcase's, so a file Woodcase
+Five checks describe **Pen's** behavior rather than Woodcase's, so a file Woodcase
 writes is never one Pen opens badly. Each was observed with Pen itself — the 1.2.14 desktop app
 and the headless `pen` CLI — by loading a probe file, reading back what Pen kept, and
 exporting what it draws (`project/2026-09-26-what-pen-drops-from-a-file.md`).
@@ -393,12 +393,12 @@ array (<doc:PenMeshGradients>, "Malformed points"): Pen keeps the fill and paint
 it. The finding names each such vertex and quotes what the file wrote.
 
 `mesh-gradient-distorted` is a warning, for a mesh Pen paints but not as authored. A
-colour Pen's mesh cannot read paints as nothing: after one leading `#`, Pen's mesh reads
+color Pen's mesh cannot read paints as nothing: after one leading `#`, Pen's mesh reads
 3, 6 or 8 digits and nothing else, so 4-digit `#RGBA`, a 5-digit typo and an empty string
 are all transparent there; the finding names each one and spells `#RGBA` out as
-`#RRGGBBAA`. A colour of a readable length with a digit that is not hex — `red`,
+`#RRGGBBAA`. A color of a readable length with a digit that is not hex — `red`,
 `#eGeGeG` — paints as whatever Pen makes of it (`#00EEDD`, `#00000E`; see
-``PenMeshColor/hexColor(penMesh:)``), and the finding names that colour. And a patch
+``PenMeshColor/hexColor(penMesh:)``), and the finding names that color. And a patch
 whose handles fold it over itself overdraws its own paint and leaves part of the box
 bare. `MeshFoldDetector` samples each patch's Jacobian at 33 × 33 parameters and
 reports a patch whose most negative sample is deeper than 5% of its mean — deep enough
@@ -413,8 +413,8 @@ check's case, and its fix is the same kind: the finding quotes the point and the
 Pen draws, which is the value to write. A disabled mesh is skipped.
 
 ```text
-error mesh-gradient-dropped  Hero (Msh01)  has a mesh gradient fill with 3 points for a 2×2 grid of 4 vertices; Pen removes the whole fill when it opens the file. Write `columns × rows` points and colours, at least 2×2.
-warning mesh-gradient-distorted  Hero (Msh01)  has a mesh gradient fill Pen paints wrong: colours Pen's mesh reads as nothing (it reads 3, 6 or 8 hex digits), at vertex 2 `#0F0F` (write `#00FF00FF`).
+error mesh-gradient-dropped  Hero (Msh01)  has a mesh gradient fill with 3 points for a 2×2 grid of 4 vertices; Pen removes the whole fill when it opens the file. Write `columns × rows` points and colors, at least 2×2.
+warning mesh-gradient-distorted  Hero (Msh01)  has a mesh gradient fill Pen paints wrong: colors Pen's mesh reads as nothing (it reads 3, 6 or 8 hex digits), at vertex 2 `#0F0F` (write `#00FF00FF`).
 error mesh-gradient-dropped  Hero (Msh01)  has a mesh gradient fill with vertex 2 `[1]`, which Pen cannot read as a position or handle; Pen keeps the fill and paints nothing. Write each point as `[x, y]` or `{"position": [x, y], …}` with two-number handles.
 warning mesh-gradient-distorted  Hero (Msh01)  has a mesh gradient fill Pen paints wrong: points in neither `[x, y]` nor object form, which Pen draws its own way and rewrites on save: vertex 2 `"oops"` as `[0.5,0]`; write what Pen draws.
 ```
@@ -510,7 +510,7 @@ key, which merges one key rather than overwriting the object and silently droppi
 ``ComponentRole`` is a closed vocabulary — `button`, `link`, `toggle`, `textInput`,
 `select`, `tabBar` — and an unknown value is read and dropped without a word:
 `ComponentRole(rawValue:)` answers `nil` on a component's root, and a descendant with an
-unrecognised role gets no default action and no binding. What generates is a plain
+unrecognized role gets no default action and no binding. What generates is a plain
 `<div>` with no semantic element, no `wc-*` class and no state rules.
 
 ```text
@@ -538,7 +538,7 @@ warning codegen-unmapped-override  Root/Chip (Rf001)  overrides `Sub01` (Subtitl
 
 Two silences are deliberate. **A definition that declares no `_props` at all is never a
 finding** — nothing was declared, so nothing failed to map, and a component nobody has
-parameterised yet is a stage of a design rather than a fault. And **a key naming no
+parameterized yet is a stage of a design rather than a fault. And **a key naming no
 descendant of the definition is `override-target-not-found` instead**, which says the
 more specific thing; reporting both would be one fault twice.
 
@@ -564,7 +564,7 @@ the emitter does produce a correct rendering for it. Only the shape of the code 
 ## What it does not check
 
 **Text fonts.** Whether a font family is a typo or a Google font waiting to be
-downloaded cannot be decided offline, and no local catalogue exists to decide it from.
+downloaded cannot be decided offline, and no local catalog exists to decide it from.
 A lint never asks. A caller that has already run
 ``GoogleFontResolver/prepareFonts(for:diagnostics:)`` — `render` does — passes the
 collector's diagnostics in as `diagnostics:`, and they arrive as `pipeline` findings

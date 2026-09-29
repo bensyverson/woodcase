@@ -9,7 +9,7 @@ import Testing
 @testable import Woodcase
 
 /// The renderer draws a `browser` node as a quiet placeholder — a light neutral fill,
-/// a thin border and the URL as a small grey label, all clipped to the corner radius —
+/// a thin border and the URL as a small gray label, all clipped to the corner radius —
 /// and never loads the page. A node's own stroke and effects replace or add to the
 /// placeholder's defaults.
 ///
@@ -26,7 +26,7 @@ struct PenBrowserRenderTests {
     /// The placeholder's look, pinned here so a change to it is a change to a test.
     private static let fill = RGB(0xF4, 0xF4, 0xF5)
     private static let border = RGB(0xD4, 0xD4, 0xD8)
-    private static let labelGrey = RGB(0xA1, 0xA1, 0xAA)
+    private static let labelGray = RGB(0xA1, 0xA1, 0xAA)
 
     /// Renders the browser fixture's root frame at @2x.
     private func render() throws -> CGImage {
@@ -110,17 +110,17 @@ struct PenBrowserRenderTests {
         #expect(below.red < 250, "no shadow under the browser: \(below)")
     }
 
-    @Test("The URL is a small grey label centred in the node", arguments: [
+    @Test("The URL is a small gray label centered in the node", arguments: [
         ("Web", 160.0, 120.0),
         ("Device", 160.0, 235.0),
         ("Blank", 160.0, 320.0),
     ])
-    func label(name: String, centreX: Double, centreY: Double) throws {
+    func label(name: String, centerX: Double, centerY: Double) throws {
         let pixels = try Pixels(render(), scale: Self.scale)
-        let band = pixels.darkest(xs: centreX - 20 ... centreX + 20, ys: centreY - 5 ... centreY + 5)
-        #expect(band.red < 200, "\(name) has no label at its centre")
-        #expect(band.red >= Self.labelGrey.red, "\(name)'s label is darker than the label grey")
-        let above = pixels.darkest(xs: centreX - 20 ... centreX + 20, ys: centreY - 20 ... centreY - 12)
+        let band = pixels.darkest(xs: centerX - 20 ... centerX + 20, ys: centerY - 5 ... centerY + 5)
+        #expect(band.red < 200, "\(name) has no label at its center")
+        #expect(band.red >= Self.labelGray.red, "\(name)'s label is darker than the label gray")
+        let above = pixels.darkest(xs: centerX - 20 ... centerX + 20, ys: centerY - 20 ... centerY - 12)
         #expect(above.red > 230, "\(name)'s label is taller than a small label")
     }
 
@@ -140,7 +140,7 @@ struct PenBrowserRenderTests {
 // MARK: - Pixel probing
 
 extension PenBrowserRenderTests {
-    /// An sRGB colour, 8 bits per channel.
+    /// An sRGB color, 8 bits per channel.
     struct RGB: Equatable, CustomStringConvertible {
         let red: UInt8
         let green: UInt8
@@ -185,7 +185,7 @@ extension PenBrowserRenderTests {
             bytes = buffer
         }
 
-        /// The colour at a point, measured from the top-left.
+        /// The color at a point, measured from the top-left.
         func rgb(x: Double, y: Double) -> RGB {
             let column = min(width - 1, Int(x * Double(scale)))
             let row = min(height - 1, Int(y * Double(scale)))
@@ -200,8 +200,8 @@ extension PenBrowserRenderTests {
             while y <= ys.upperBound {
                 var x = xs.lowerBound
                 while x <= xs.upperBound {
-                    let colour = rgb(x: x, y: y)
-                    if colour.red < darkest.red { darkest = colour }
+                    let color = rgb(x: x, y: y)
+                    if color.red < darkest.red { darkest = color }
                     x += 0.5
                 }
                 y += 0.5

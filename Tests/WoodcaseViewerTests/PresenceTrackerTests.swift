@@ -26,7 +26,7 @@ struct PresenceTrackerTests {
         #expect(tracker.snapshot().identities.isEmpty)
     }
 
-    @Test("Identities are ordered by first appearance, which is what the page colours by")
+    @Test("Identities are ordered by first appearance, which is what the page colors by")
     func ordersByFirstAppearance() {
         var tracker = PresenceTracker()
         tracker.record(event("ana", at: 10))

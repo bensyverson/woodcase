@@ -10,7 +10,7 @@ import Testing
 /// `mesh-gradient-dropped` and `mesh-gradient-distorted`: a mesh fill Pen paints
 /// nothing for, and one it paints but not as authored.
 ///
-/// The Pen behaviour each case names was observed with the headless `pen` CLI
+/// The Pen behavior each case names was observed with the headless `pen` CLI
 /// (`project/2026-09-26-what-pen-drops-from-a-file.md`); these tests hold the lint to it, and never run Pen.
 @MainActor
 struct DocumentLinterMeshGradientTests {
@@ -27,7 +27,7 @@ struct DocumentLinterMeshGradientTests {
         return try EditableDocument(from: PenParser.parse(json))
     }
 
-    /// A mesh fill with the given grid, colours and points, all as written.
+    /// A mesh fill with the given grid, colors and points, all as written.
     private func mesh(columns: Int? = 2, rows: Int? = 2, colors: String?, points: String?, extra: String = "")
         -> String
     {
@@ -79,13 +79,13 @@ struct DocumentLinterMeshGradientTests {
         #expect(finding.message.contains("removes"))
     }
 
-    @Test("Fewer colours than columns × rows is a dropped fill")
+    @Test("Fewer colors than columns × rows is a dropped fill")
     func colorCountMismatch() throws {
         let colors = ##"["#FF0000", "#00FF00", "#0000FF"]"##
         let doc = try board(fill: mesh(colors: colors, points: Self.fourPoints))
         let found = try findings(doc, .meshGradientDropped)
         #expect(found.count == 1)
-        #expect(found.first?.message.contains("3 colours") == true)
+        #expect(found.first?.message.contains("3 colors") == true)
     }
 
     @Test("A mesh missing its points is a dropped fill")
@@ -136,9 +136,9 @@ struct DocumentLinterMeshGradientTests {
         #expect(try meshFindings(doc).isEmpty)
     }
 
-    // MARK: - Distorted: colours
+    // MARK: - Distorted: colors
 
-    @Test("A 4-digit #RGBA colour is a distorted mesh, naming the colour")
+    @Test("A 4-digit #RGBA color is a distorted mesh, naming the color")
     func rgbaColor() throws {
         let colors = ##"["#FF0000", "#0F0F", "#0000FF", "#FFFF00"]"##
         let doc = try board(fill: mesh(colors: colors, points: Self.fourPoints))
@@ -150,7 +150,7 @@ struct DocumentLinterMeshGradientTests {
     }
 
     @Test(
-        "A colour of any other length is a distorted mesh Pen paints nothing at",
+        "A color of any other length is a distorted mesh Pen paints nothing at",
         arguments: ["#FF000", "", "#", "#FF00000", "#FF0000FFF", "##F00", "F00#"]
     )
     func otherLengthColor(_ color: String) throws {
@@ -164,7 +164,7 @@ struct DocumentLinterMeshGradientTests {
     }
 
     @Test(
-        "A colour of a readable length with a digit that is not hex names the colour Pen reads",
+        "A color of a readable length with a digit that is not hex names the color Pen reads",
         arguments: [("red", "#00EEDD"), ("#GGGGGG", "#000000"), ("#eGeGeG", "#00000E"), ("#FF0000FG", "#0FF0000F")]
     )
     func nonHexDigits(_ color: String, _ read: String) throws {
@@ -176,7 +176,7 @@ struct DocumentLinterMeshGradientTests {
         #expect(message.contains("vertex 4 `\(color)` as `\(read)`"), "\(message)")
     }
 
-    @Test("3-, 6- and 8-digit hex colours are what Pen reads, and are clean")
+    @Test("3-, 6- and 8-digit hex colors are what Pen reads, and are clean")
     func otherHexFormsAreClean() throws {
         let colors = ##"["#F00", "00FF00", "#0000ff80", "#FF0"]"##
         let doc = try board(fill: mesh(colors: colors, points: Self.fourPoints))
@@ -200,7 +200,7 @@ struct DocumentLinterMeshGradientTests {
 
     @Test("A fold in one patch of a 3×3 names that patch alone")
     func foldNamesItsPatch() throws {
-        // The centre vertex is dragged past its right-hand neighbour, so the two
+        // The center vertex is dragged past its right-hand neighbor, so the two
         // right-hand patches fold and the two left-hand ones only stretch.
         let colors = ##"["#000","#111","#222","#333","#444","#555","#666","#777","#888"]"##
         let points = "[[0,0],[0.5,0],[1,0],[0,0.5],[1.3,0.5],[1,0.5],[0,1],[0.5,1],[1,1]]"

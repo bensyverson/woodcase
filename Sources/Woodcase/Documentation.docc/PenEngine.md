@@ -206,7 +206,7 @@ can carry one conforms to ``PenStrokable``:
 `fill` → `stroke`, `thickness` → `strokeWidth`, `join` → `strokeLinejoin`,
 `cap` → `strokeLinecap` (with the retired `none` becoming `butt`), and
 `align` → `strokeAlignment` with `inside`/`outside` renamed to `inner`/`outer`.
-Two behaviours copy version 1.2.7 of the format's own editor, whose own re-saves
+Two behaviors copy version 1.2.7 of the format's own editor, whose own re-saves
 are the oracle for the migration: a value equal to the default is written as
 nothing at all, and a stroke
 object with no `fill` is dropped entirely — it had no paint, so it drew nothing.
@@ -395,7 +395,7 @@ The details worth stating, because they are all askable questions:
   left of its anchor — and a `flipX` node settles its whole width left of it
   (`render-transformed-free.pen`; both are Pen-oracle fixtures, and
   `PenTransformedFreeTests` holds every rect within 0.5 pt of Pen's). The renderer
-  draws the unturned box centred in that rect and pivots at its centre, which is
+  draws the unturned box centered in that rect and pivots at its center, which is
   the same picture. A child in a **flex flow** is different: Pen grows its slot to
   the turned bounds and the child sits in it, so its rect is the rotated bounding
   box at the flow's cursor. Either way the bounds do not say what size the node is
@@ -414,7 +414,7 @@ The details worth stating, because they are all askable questions:
   > a sized node the layout rect is the rotated bounding box anchored at the
   > declared `x`/`y`", and that a flipped child contributes its declared box. Both
   > were wrong for a node placed by its own coordinates: the box's corner was pinned
-  > at the anchor while the render turned it about the box's centre, so turned free
+  > at the anchor while the render turned it about the box's center, so turned free
   > nodes drew up to 20 pt from where Pen draws them (CG MAE 2.6–7.3 on
   > `render-rotated-free` and `render-text-fills`' `txt-rotated`, now 0.02–0.14).
   > The rule was inferred from `render-transforms-and-effects`, whose turned node is a
@@ -429,7 +429,7 @@ The details worth stating, because they are all askable questions:
   the group turns and flips about its anchor like any free node, and its rect is
   the bounds of the union turned (``PenLayoutEngine/freeRect(of:x:y:box:)``); in a
   flex flow its slot is the union's size, grown to the turned bounds when it turns,
-  with the union centred in it. `render-free-groups.pen` is the Pen-oracle fixture:
+  with the union centered in it. `render-free-groups.pen` is the Pen-oracle fixture:
   a group at `(50, 50)` with children at `(20, 30)` and `(80, 60)` settles at
   `(70, 80)`, 90×60, and `PenFreeGroupTests` holds every rect within 0.5 pt of Pen's.
 
@@ -468,22 +468,22 @@ sibling, a `fit_content` parent or a group's union, turned or not, and not even 
 | (iii) Painted extent | What may carry ink: the box grown by its stroke band, unclipped children, shadows and blur | ``PenLayoutEngine/paintedExtent(of:rect:layoutRects:)``, ``PenLayoutEngine/canvasPaintedExtent(of:in:layoutRects:)`` | Export and render canvas size; `shot --extent painted`; the render tests that place Pen's references; viewport culling; dirty-rect invalidation; stroke-band hit-testing |
 
 The placement's map sends the box to the quad the node is drawn as, and that quad's
-bounds are (i). Woodcase spells the map as the box centred in the bounds, flipped and
-turned about its centre; Pen's is translate-to-anchor · turn · flip. They draw the same
-quad, because a turned rectangle's bounds are centred on its centre.
+bounds are (i). Woodcase spells the map as the box centered in the bounds, flipped and
+turned about its center; Pen's is translate-to-anchor · turn · flip. They draw the same
+quad, because a turned rectangle's bounds are centered on its center.
 
 The painted extent is Pen's `getVisualLocalBounds`, reproduced. In the node's own
 coordinates it starts from the geometry — a frame's box, a shape's fill outline (a
 `viewBox` path can reach outside its box: `viewbox-experiment`'s triangle paints 40 pt
 above its frame) — and adds the stroke band: nothing for an inner stroke, half the width
-for a centred one, all of it for an outer one, per side on a frame or rectangle, a line's
+for a centered one, all of it for an outer one, per side on a frame or rectangle, a line's
 caps and a sharp polygon's miters counted. An unclipped frame and a group add each
 enabled child's painted extent through the child's placement; a clipping frame adds none,
 and a group has no box of its own to start from. Then each enabled outer shadow adds a
 copy of that extent moved by its offset and grown by 1.5 × its blur — Pen does not count
 the spread — and each layer blur grows the whole by 1.5 × its radius; a background blur
 and an inner shadow add nothing. Last, the extent is mapped through the node's placement
-corner by corner, so a turned node's mitred band reaches past its bounds: the probe's
+corner by corner, so a turned node's mitered band reaches past its bounds: the probe's
 100×60 rectangle with a 12 pt outer stroke turned 30° paints 149.39×134.75 pt, where its
 bounds are 116.60×101.96. Pen's export of a node is its painted extent: drawn from the
 extent's exact corner, fractional or not, at a pixel size rounded up
@@ -520,7 +520,7 @@ let size = PenTextMeasurer.measure(
 
 **Supported properties:** font family, size, weight (CSS names and numeric values), style (italic), letter spacing, line height multiplier, and max width for wrapping. Defaults to SF Pro at 16pt.
 
-**Line height.** Every line is set at one fixed pitch, and a text's height is its line count times that pitch (``PenTextMeasurer/linePitch(lineHeight:fontSize:font:)``). An explicit `lineHeight` is `lineHeight × fontSize` rounded to a whole point, half up, *per line*: three lines of 14 pt at 1.25 are 54 points tall, not 52.5 rounded up (`Tests/WoodcaseTests/Fixtures/text-line-height-rounding.layout.json`, Pen's own). With no `lineHeight`, the pitch is the font's ascent + descent + leading rounded to a whole point, as Pen rounds it (``PenTextMeasurer/naturalLineHeight(of:)``) — not Core Text's own natural line height, which rounds differently: Inter at 16 pt is 19.36 pt, which Pen sets as 19 and a bare `CTFramesetter` as 20. The renderer sets lines at the same pitch, so a box's vertical alignment centres the block of lines layout measured, and it places each line itself rather than leaving it to Core Text (see Text in <doc:PenRendering>). The figures are Pen's own, from `Tests/WoodcaseTests/Fixtures/text-natural-line-height.layout.json` (`scripts/pen-oracle`). Measuring typesets a text once: the line count and the width both come from one pass of Core Text's typesetter (a frame, for a justified paragraph, whose lines a frame stretches) — the width is the widest line's typographic width less its trailing whitespace, which is exactly what `CTFramesetterSuggestFrameSizeWithConstraints` returns, bit for bit, over 54,432 cases of six faces, sizes, wrapping widths, letter spacings, alignments and strings with trailing, leading and only whitespace, hard breaks, CJK, emoji and right-to-left text (`PenTextMeasurerTypesettingTests`), and the line count is a frame's. Asking for the suggested size and a frame typeset every text twice (<doc:WoodcasePerformance>).
+**Line height.** Every line is set at one fixed pitch, and a text's height is its line count times that pitch (``PenTextMeasurer/linePitch(lineHeight:fontSize:font:)``). An explicit `lineHeight` is `lineHeight × fontSize` rounded to a whole point, half up, *per line*: three lines of 14 pt at 1.25 are 54 points tall, not 52.5 rounded up (`Tests/WoodcaseTests/Fixtures/text-line-height-rounding.layout.json`, Pen's own). With no `lineHeight`, the pitch is the font's ascent + descent + leading rounded to a whole point, as Pen rounds it (``PenTextMeasurer/naturalLineHeight(of:)``) — not Core Text's own natural line height, which rounds differently: Inter at 16 pt is 19.36 pt, which Pen sets as 19 and a bare `CTFramesetter` as 20. The renderer sets lines at the same pitch, so a box's vertical alignment centers the block of lines layout measured, and it places each line itself rather than leaving it to Core Text (see Text in <doc:PenRendering>). The figures are Pen's own, from `Tests/WoodcaseTests/Fixtures/text-natural-line-height.layout.json` (`scripts/pen-oracle`). Measuring typesets a text once: the line count and the width both come from one pass of Core Text's typesetter (a frame, for a justified paragraph, whose lines a frame stretches) — the width is the widest line's typographic width less its trailing whitespace, which is exactly what `CTFramesetterSuggestFrameSizeWithConstraints` returns, bit for bit, over 54,432 cases of six faces, sizes, wrapping widths, letter spacings, alignments and strings with trailing, leading and only whitespace, hard breaks, CJK, emoji and right-to-left text (`PenTextMeasurerTypesettingTests`), and the line count is a frame's. Asking for the suggested size and a frame typeset every text twice (<doc:WoodcasePerformance>).
 
 ### Font resolution and registration
 
@@ -539,7 +539,7 @@ CTFontManagerRegisterGraphicsFont(font, nil)      // anything else
 PenFontRegistry.didRegisterFonts()
 ```
 
-As a second line of defence Woodcase also observes `kCTFontManagerRegisteredFontsChangedNotification`, which Core Text posts whenever anyone changes the font set. That covers a registrar that forgets the call, but only in a process that runs a run loop — Core Text delivers it on the run loop, not during the registering call — so it supplements the explicit call rather than replacing it. It is not posted for a file Core Text already has (measured 2026-09-27), so it never moves the generation for a no-op either.
+As a second line of defense Woodcase also observes `kCTFontManagerRegisteredFontsChangedNotification`, which Core Text posts whenever anyone changes the font set. That covers a registrar that forgets the call, but only in a process that runs a run loop — Core Text delivers it on the run loop, not during the registering call — so it supplements the explicit call rather than replacing it. It is not posted for a file Core Text already has (measured 2026-09-27), so it never moves the generation for a no-op either.
 
 ## Stage 6: Rendering
 
@@ -556,7 +556,7 @@ let image = PenRenderer.render(expanded, layoutRects: rects, size: CGSize(width:
 - **Fills:** Solid colors, linear/radial/angular gradients. Each fill respects enabled state, blend mode, and opacity. Colors are parsed from hex strings by ``PenColorParser``.
 - **Text:** Rendered via Core Text. Supports horizontal alignment (left/center/right/justify), vertical alignment (top/middle/bottom), letter spacing, line height, underline and strikethrough. Style is node-level: 2.17 has no styled runs.
 - **Icon fonts:** Six bundled icon font families (Lucide, Feather, Phosphor, Material Symbols Outlined/Rounded/Sharp) are auto-registered with CoreText on first use. Icon glyphs are rendered as single Unicode characters, centered in their bounding rect. Material Symbols supports variable weight via the `wght` OpenType variation axis.
-- **Transforms:** Rotation, horizontal/vertical flip, applied around the center of each node's unturned box, centred in its layout rect — which, for a node placed by its own `x`/`y`, the layout has already moved to where turning about that anchor puts it. A group's box is its children's union, measured from its anchor.
+- **Transforms:** Rotation, horizontal/vertical flip, applied around the center of each node's unturned box, centered in its layout rect — which, for a node placed by its own `x`/`y`, the layout has already moved to where turning about that anchor puts it. A group's box is its children's union, measured from its anchor.
 - **Compositing:** Node-level opacity uses transparency layers to composite children correctly. Per-fill and per-node blend modes are supported.
 - **Coordinate system:** CoreGraphics' bottom-left origin is flipped once at context creation so all drawing uses top-left coordinates matching the .pen format.
 
@@ -589,7 +589,7 @@ Ref descendant overrides are applied by encoding the target node to `[String: An
 The .pen format evolves independently of Woodcase. The library handles unknown data gracefully:
 
 - **Unknown node types** decode as `.unknown(typeName:properties:)`, preserving all properties as `[String: AnyCodable]`. The layout engine reads `width` and `height` back out of them — a number or a sizing keyword — and places the node as an inert box of that size, so its siblings stay where Pen put them; the renderer draws nothing for it.
-- **Unknown keys** are kept verbatim as ``PenExtras``: on the document root (``PenDocument/extras``), on a node of a known type (``PenNode/extras``), on each fill, stroke paint and effect payload, on each ``PenFontDeclaration``, and on every object nested inside those that the model decodes into a struct of its own — a gradient's stops (``PenFill/PenGradientStop``), centre and size, a shadow's ``PenEffect/PenOffset``, a mesh vertex written as an object (``PenMeshPoint/Object``), a connection's endpoints, a per-side `strokeWidth` object (``PenStrokeWidth/Sides``), and a ``PenVariable`` and each of its ``PenThemedValue``s. A stroke in .pen is five sibling keys on the node, so its unknown keys are node extras, and its paint's are fill extras. The `themes` and `imports` maps and a themed value's `theme` are maps of data, not structs: every key in them is a value and always survives.
+- **Unknown keys** are kept verbatim as ``PenExtras``: on the document root (``PenDocument/extras``), on a node of a known type (``PenNode/extras``), on each fill, stroke paint and effect payload, on each ``PenFontDeclaration``, and on every object nested inside those that the model decodes into a struct of its own — a gradient's stops (``PenFill/PenGradientStop``), center and size, a shadow's ``PenEffect/PenOffset``, a mesh vertex written as an object (``PenMeshPoint/Object``), a connection's endpoints, a per-side `strokeWidth` object (``PenStrokeWidth/Sides``), and a ``PenVariable`` and each of its ``PenThemedValue``s. A stroke in .pen is five sibling keys on the node, so its unknown keys are node extras, and its paint's are fill extras. The `themes` and `imports` maps and a themed value's `theme` are maps of data, not structs: every key in them is a value and always survives.
 - **Unknown fill and effect types** decode as ``PenFill/unknown(typeName:payload:)`` and ``PenEffect/unknown(typeName:payload:)``. Nothing renders or emits code for them; they are written back as read.
 
 Extras are **write-through only**. Layout, rendering and code generation never read them; `set`, `cp`, `mv`, `override` and undo carry them along, `rm` removes them with the node, and `replace` gives the node its replacement's — which authored input never has. No verb writes one: `set` on a preserved key is refused with ``EditingError/unknownProperty(nodeID:key:nodeType:)``, and the refusal says the key is kept. In a collaborative session a node's extras are one last-writer-wins register (`CRDTDocument.extrasProperty`). Revisions hash a node's canonical encoding, which includes its extras; the document revision adds the root's.

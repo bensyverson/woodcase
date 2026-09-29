@@ -58,8 +58,8 @@ struct ReactEmitterTransformTests {
         #expect(output.contains("transformOrigin: \"0 0\""))
     }
 
-    @Test("A turned node in a flex flow keeps CSS's centre pivot")
-    func flowTurnKeepsCentrePivot() {
+    @Test("A turned node in a flex flow keeps CSS's center pivot")
+    func flowTurnKeepsCenterPivot() {
         let output = emit(parentLayout: .vertical, child: PenNodeCommon(rotation: .literal(25)))
         #expect(output.contains("transform: \"rotate(-25deg)\""))
         #expect(!output.contains("transformOrigin"))

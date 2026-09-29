@@ -13,7 +13,7 @@
 /// starved (`project/2026-08-29-test-suite-speed.md`, section 4). The time a render waits
 /// here is not charged to its load budget, which starts once it has a host.
 ///
-/// Waiters are served in arrival order. Cancellation is not honoured: a test that stops
+/// Waiters are served in arrival order. Cancellation is not honored: a test that stops
 /// waiting still takes its slot and releases it.
 @MainActor
 final class WebViewRenderSlots {

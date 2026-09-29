@@ -54,7 +54,7 @@ public struct ArtboardSteps: HTML {
     /// Which way a step goes.
     ///
     /// A typed pair rather than a signed number, because the two differ in three ways at
-    /// once — the glyph, the word in the hover, and which neighbour they mean — and a
+    /// once — the glyph, the word in the hover, and which neighbor they mean — and a
     /// `-1` at the call site says none of them.
     public enum Direction: String, Friendly, CaseIterable {
         /// The artboard before this one in document order.
@@ -97,9 +97,9 @@ public struct ArtboardSteps: HTML {
     /// The artboard one step away, when there is one.
     ///
     /// - Parameter direction: Which way to look.
-    /// - Returns: The neighbour, or `nil` at either end — the ends clamp rather than
+    /// - Returns: The neighbor, or `nil` at either end — the ends clamp rather than
     ///   wrapping, so ten `›` presses never quietly return you to where you started.
-    public func neighbour(_ direction: Direction) -> Artboard? {
+    public func neighbor(_ direction: Direction) -> Artboard? {
         guard let index else { return nil }
         let wanted = index + direction.offset
         guard wanted >= 0, wanted < artboards.count else { return nil }
@@ -109,9 +109,9 @@ public struct ArtboardSteps: HTML {
     public var body: some HTML {
         if hasSteps, let index {
             nav(.class("v-steps"), .id("v-artboard-steps")) {
-                Step(file: file, direction: .previous, to: neighbour(.previous), state: state)
+                Step(file: file, direction: .previous, to: neighbor(.previous), state: state)
                 span(.class("v-mono v-step-count")) { "\(index + 1) of \(artboards.count)" }
-                Step(file: file, direction: .next, to: neighbour(.next), state: state)
+                Step(file: file, direction: .next, to: neighbor(.next), state: state)
             }
         }
     }

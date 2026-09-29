@@ -42,7 +42,7 @@ public extension PenLayoutEngine {
     /// the rect's own size otherwise. Nothing is solved for — the layout sized the node
     /// before it turned it, and the rect keeps that size. A group's box is its children's
     /// union (``groupBox(of:in:)``), which may start anywhere. A renderer draws this box
-    /// centred in the layout rect and turns and flips it about its centre; the children
+    /// centered in the layout rect and turns and flips it about its center; the children
     /// are drawn from the box's coordinates.
     ///
     /// - Parameters:

@@ -15,8 +15,8 @@ public extension PenFileTransaction {
     /// Creates a .pen file holding `document`, and records it as the file's first event.
     ///
     /// This is `woodcase new`'s write. The file never exists unlocked or half written:
-    /// the encoded document goes to a temporary neighbour, the lock is taken on that, and
-    /// the neighbour is then hard-linked into place — `link(2)` refuses an existing path,
+    /// the encoded document goes to a temporary neighbor, the lock is taken on that, and
+    /// the neighbor is then hard-linked into place — `link(2)` refuses an existing path,
     /// so creating is atomic and never overwrites. A transaction that opens the new path
     /// a moment later waits on the same lock until the ``ActivityEvent/Kind/new`` event
     /// is appended, so the file's history starts with its creation.

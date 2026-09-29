@@ -161,7 +161,7 @@ struct PreviewCommandTests {
         #expect(run.stdout.isEmpty)
     }
 
-    @Test("--list with a component named is refused rather than half-honoured")
+    @Test("--list with a component named is refused rather than half-honored")
     func listAndATargetIsUsage() throws {
         let fixture = try CommandFixture(fixture: "batch.pen")
         let run = try fixture.run(["preview", "--list", PreviewCatalog.all[0].slug], environment: Self.noOverride)

@@ -102,8 +102,8 @@ struct ScriptDocTests {
         #expect(error.message.contains("doc.tree(null, { … })"))
     }
 
-    @Test("an unknown lint check names the catalogue")
-    func anUnknownLintCheckNamesTheCatalogue() throws {
+    @Test("an unknown lint check names the catalog")
+    func anUnknownLintCheckNamesTheCatalog() throws {
         let error = try failure(of: "doc.lint(null, { exclude: ['clipped', 'nonsense'] })")
         #expect(error.code == ScriptErrorCode.badArgument)
         #expect(error.message.contains("clipped"))

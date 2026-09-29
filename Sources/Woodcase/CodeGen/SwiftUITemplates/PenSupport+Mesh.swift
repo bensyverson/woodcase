@@ -15,13 +15,13 @@ import SwiftUI
 struct PenMeshVertex: ExpressibleByArrayLiteral {
     /// Where the vertex sits, from `[0, 0]` (top left) to `[1, 1]` (bottom right).
     var position: SIMD2<Float>
-    /// The handle towards the previous column, or `nil` for the default.
+    /// The handle toward the previous column, or `nil` for the default.
     var left: SIMD2<Float>?
-    /// The handle towards the next column, or `nil` for the default.
+    /// The handle toward the next column, or `nil` for the default.
     var right: SIMD2<Float>?
-    /// The handle towards the previous row, or `nil` for the default.
+    /// The handle toward the previous row, or `nil` for the default.
     var top: SIMD2<Float>?
-    /// The handle towards the next row, or `nil` for the default.
+    /// The handle toward the next row, or `nil` for the default.
     var bottom: SIMD2<Float>?
 
     /// A vertex at `position`, with the handles that differ from the grid's defaults.
@@ -46,16 +46,16 @@ struct PenMeshVertex: ExpressibleByArrayLiteral {
     }
 }
 
-/// A Pen mesh gradient: `columns × rows` vertices, row-major, one colour each, drawn as
+/// A Pen mesh gradient: `columns × rows` vertices, row-major, one color each, drawn as
 /// SwiftUI's `MeshGradient` over the box it fills.
 ///
 /// SwiftUI's mesh is not Pen's: Pen shapes each cell as a bicubic patch through its
-/// corners' handles and blends the corners' colours, eased by smoothstep, on their
+/// corners' handles and blends the corners' colors, eased by smoothstep, on their
 /// unpremultiplied sRGB values; SwiftUI interpolates its own way, premultiplied. So each
 /// Pen cell is handed to SwiftUI as `subdivisions × subdivisions` smaller ones, their
-/// corners, tangents and colours taken from Pen's patch — within a cell that small the two
-/// interpolations agree. Colours resolve in the view's environment, so a colour that
-/// changes with it (a theme, the colour scheme) changes the mesh too.
+/// corners, tangents and colors taken from Pen's patch — within a cell that small the two
+/// interpolations agree. Colors resolve in the view's environment, so a color that
+/// changes with it (a theme, the color scheme) changes the mesh too.
 struct PenMeshGradient: ShapeStyle {
     /// The vertex count across.
     var columns: Int
@@ -63,13 +63,13 @@ struct PenMeshGradient: ShapeStyle {
     var rows: Int
     /// The vertices, row-major.
     var points: [PenMeshVertex]
-    /// One colour per vertex.
+    /// One color per vertex.
     var colors: [Color]
 
     /// How many SwiftUI cells each Pen cell becomes along each axis.
     static let subdivisions = 8
 
-    /// The `MeshGradient` this mesh draws as, its colours resolved in `environment`.
+    /// The `MeshGradient` this mesh draws as, its colors resolved in `environment`.
     func resolve(in environment: EnvironmentValues) -> MeshGradient {
         let patchColumns = columns - 1, patchRows = rows - 1
         let resolved = colors.map { $0.resolve(in: environment) }
@@ -147,7 +147,7 @@ struct PenMeshGradient: ShapeStyle {
         return Patch(net: net, corners: corners)
     }
 
-    /// One Pen cell: a bicubic Bézier patch and its four corner colours.
+    /// One Pen cell: a bicubic Bézier patch and its four corner colors.
     private struct Patch {
         /// The 4 × 4 control net, row-major: rows follow `v`, columns `u`.
         var net: [SIMD2<Float>]
@@ -169,7 +169,7 @@ struct PenMeshGradient: ShapeStyle {
             evaluate(Self.bernstein(u), Self.derivative(v))
         }
 
-        /// Pen's colour: the corners blended by smoothstep-eased parameters, on their
+        /// Pen's color: the corners blended by smoothstep-eased parameters, on their
         /// unpremultiplied, gamma-encoded sRGB channels.
         func color(_ u: Float, _ v: Float) -> Color {
             let s = u * u * (3 - 2 * u), t = v * v * (3 - 2 * v)

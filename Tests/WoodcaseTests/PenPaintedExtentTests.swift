@@ -25,7 +25,7 @@ struct PenPaintedExtentTests {
         #expect(try Self.extent(Self.rectangle(""), "r") == PenRect(x: 10, y: 20, width: 100, height: 60))
     }
 
-    @Test("An inner stroke adds nothing, a centred one half its width, an outer one all of it")
+    @Test("An inner stroke adds nothing, a centered one half its width, an outer one all of it")
     func strokeAlignment() throws {
         let stroke = ##""stroke": "#00FF00", "strokeWidth": 12"##
         #expect(try Self.extent(Self.rectangle(stroke + ##", "strokeAlignment": "inner""##), "r")
@@ -101,7 +101,7 @@ struct PenPaintedExtentTests {
         #expect(try Self.extent(json, "t") == PenRect(x: 10, y: 20, width: 40, height: 15))
     }
 
-    @Test("A turned node's band is mapped corner by corner, so its mitred corners reach past its bounds")
+    @Test("A turned node's band is mapped corner by corner, so its mitered corners reach past its bounds")
     func turnedBand() throws {
         let keys = ##""stroke": "#00FF00", "strokeWidth": 12, "strokeAlignment": "outer", "rotation": 90"##
         // 124×84 band about the anchor (10, 20), turned 90° counter-clockwise: x ↦ y, y ↦ −x.
@@ -180,7 +180,7 @@ struct PenPaintedExtentTests {
     }
 
     /// A triangle inscribed in a 100×100 box: apex (50, 0), base corners (50 ± 43.30, 75).
-    /// A 10 pt outer band mitres each 60° corner to 20 pt out along its bisector, and
+    /// A 10 pt outer band miters each 60° corner to 20 pt out along its bisector, and
     /// bevels it to the edges' offset ends.
     @Test("A sharp polygon's band counts its miters, or its bevels")
     func polygonJoins() throws {
@@ -193,8 +193,8 @@ struct PenPaintedExtentTests {
         }
         let half = 50 * sin(Double.pi / 3)
         let miter = try Self.extent(triangle("miter"), "t")
-        let mitreX = 50 + half + 20 * cos(Double.pi / 6)
-        #expect(Self.close(miter, PenRect(x: 100 - mitreX, y: -20, width: 2 * mitreX - 100, height: 105)), "\(miter)")
+        let miterX = 50 + half + 20 * cos(Double.pi / 6)
+        #expect(Self.close(miter, PenRect(x: 100 - miterX, y: -20, width: 2 * miterX - 100, height: 105)), "\(miter)")
         let bevel = try Self.extent(triangle("bevel"), "t")
         let bevelX = 50 + half + 10 * cos(Double.pi / 6)
         #expect(Self.close(bevel, PenRect(x: 100 - bevelX, y: -5, width: 2 * bevelX - 100, height: 90)), "\(bevel)")

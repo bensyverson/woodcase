@@ -15,12 +15,12 @@ struct PenShapeOutline: Friendly {
         /// the line from `tangent1End` to `tangent2End`, preceded by a straight line to the
         /// arc's start — `addArc(tangent1End:tangent2End:radius:)`.
         case tangentArc(tangent1End: PenPoint, tangent2End: PenPoint, radius: Double)
-        /// An arc of the ellipse centred on `center` with radii `radiusX` × `radiusY`, from
+        /// An arc of the ellipse centered on `center` with radii `radiusX` × `radiusY`, from
         /// `startAngle` to `endAngle` (radians, measured on the unit circle before the
         /// ellipse's scale, in the y-down drawing space), preceded by a straight line from
         /// the current point to its start when there is one. `clockwise` has the meaning of
         /// the flag of `addArc(center:radius:startAngle:endAngle:clockwise:transform:)`,
-        /// which draws it as a unit-circle arc scaled by the radii and moved to the centre.
+        /// which draws it as a unit-circle arc scaled by the radii and moved to the center.
         case ellipticalArc(
             center: PenPoint,
             radiusX: Double,

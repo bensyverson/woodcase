@@ -4,15 +4,15 @@
 //
 //  The pieces the generated catalog (`Catalog/PenCatalogSheet.swift`) is built from: a
 //  section, an entry per component or page, a captioned specimen per state or text style,
-//  a swatch per colour token, a value per other token and a column per theme; the flow that
+//  a swatch per color token, a value per other token and a column per theme; the flow that
 //  wraps them into rows and the window's scrolling are `PenSupport+CatalogLayout.swift`.
-//  They draw in the system's own type and colours, so the catalog's chrome never passes for
+//  They draw in the system's own type and colors, so the catalog's chrome never passes for
 //  the design it shows.
 //
 
 import SwiftUI
 
-/// A titled part of the catalog: the components, the pages, the colours, the type.
+/// A titled part of the catalog: the components, the pages, the colors, the type.
 struct PenCatalogSection<Content: View>: View {
     private let title: String
     private let content: Content
@@ -75,7 +75,7 @@ struct PenCatalogSpecimen<Content: View>: View {
     }
 }
 
-/// A colour token: a chip of the colour beside the variable's name.
+/// A color token: a chip of the color beside the variable's name.
 struct PenCatalogSwatch: View {
     private let name: String
     private let color: Color
@@ -99,7 +99,7 @@ struct PenCatalogSwatch: View {
     }
 }
 
-/// A token that is not a colour: the variable's name and what it reads.
+/// A token that is not a color: the variable's name and what it reads.
 struct PenCatalogValue: View {
     private let name: String
     private let value: String

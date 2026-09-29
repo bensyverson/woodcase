@@ -24,14 +24,14 @@ extension Generate {
 
             Every view ends with a #Preview per state and theme. The package also carries \
             a catalog of the kit -- every component in its states, every page, the \
-            theme's colours, tokens and type, with a picker per theme axis -- under \
+            theme's colors, tokens and type, with a picker per theme axis -- under \
             Sources/<name>/Catalog, and an executable that opens it: \
             `swift run <name>Catalog` (macOS), `swift run <name>Catalog --snapshot \
             kit.png` to render it under every theme, or `swift run <name>Catalog \
             --fonts` to list the bundled fonts and whether each registered.
 
             Frames, rectangles, ellipses, arcs, polygons, paths, lines, icons and text \
-            are written with their paints -- colours, gradients, images (copied into \
+            are written with their paints -- colors, gradients, images (copied into \
             Sources/<name>/Resources), stacks, blend modes and opacity -- their strokes \
             and their effects. Icon fonts, and the files of every text family the OS \
             does not ship -- the document's declared fonts, else Google Fonts through \

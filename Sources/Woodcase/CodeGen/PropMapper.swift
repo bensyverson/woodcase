@@ -22,7 +22,7 @@ public enum PropMapper {
         /// A text node's content.
         case string(String)
 
-        /// A solid fill's colour: a literal such as `#FF5500`, or a document variable.
+        /// A solid fill's color: a literal such as `#FF5500`, or a document variable.
         case color(PenValue<String>)
 
         /// A node's `enabled` flag.
@@ -96,7 +96,7 @@ public enum PropMapper {
 
     private static func extractColor(from override: PenDescendantOverride) -> Value? {
         switch override.properties["fill"] {
-        // Shorthand: a bare colour string like "#FF5500" or "$varName"
+        // Shorthand: a bare color string like "#FF5500" or "$varName"
         case let .string(value):
             .color(colorValue(value))
         // Object fill: { type: "color", color: "#hex" or "$var" }
@@ -107,7 +107,7 @@ public enum PropMapper {
         }
     }
 
-    /// A colour as the document spells it: `$name` is a variable, anything else a literal.
+    /// A color as the document spells it: `$name` is a variable, anything else a literal.
     private static func colorValue(_ spelling: String) -> PenValue<String> {
         spelling.hasPrefix("$") ? .variable(String(spelling.dropFirst())) : .literal(spelling)
     }

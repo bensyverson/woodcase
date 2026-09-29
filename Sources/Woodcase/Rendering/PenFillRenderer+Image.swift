@@ -42,8 +42,8 @@ extension PenFillRenderer {
     /// Where an image of `imageSize` lands inside `domain` under `mode`.
     ///
     /// - `stretch` fills the domain exactly, ignoring the aspect ratio.
-    /// - `fill` scales to cover the domain, centred, overflowing on one axis.
-    /// - `fit` scales to fit inside the domain, centred, leaving bands on one axis.
+    /// - `fill` scales to cover the domain, centered, overflowing on one axis.
+    /// - `fit` scales to fit inside the domain, centered, leaving bands on one axis.
     static func imageRect(mode: PenImageFillMode, imageSize: CGSize, in domain: CGRect) -> CGRect {
         guard imageSize.width > 0, imageSize.height > 0 else { return domain }
         let scaleX = domain.width / imageSize.width

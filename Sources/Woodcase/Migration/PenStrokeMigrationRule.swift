@@ -25,10 +25,10 @@ import Foundation
 /// `cap` → `strokeLinecap`, `align` → `strokeAlignment` with `inside`/`outside` renamed to
 /// `inner`/`outer`. The legacy cap `none` becomes `butt`.
 ///
-/// Two behaviours copy version 1.2.7 of the format's own editor exactly, because its own
+/// Two behaviors copy version 1.2.7 of the format's own editor exactly, because its own
 /// re-saves of our fixtures are the oracle for this migration:
 ///
-/// - **Defaults are omitted.** A centred alignment, a mitred join and a butt cap are written
+/// - **Defaults are omitted.** A centered alignment, a mitered join and a butt cap are written
 ///   as nothing at all, so a migrated tree compares equal to that editor's own save.
 /// - **A stroke with no `fill` is dropped entirely** — width, join and all. Such a stroke has
 ///   no paint and draws nothing, and that editor discards it rather than carrying a widow width.

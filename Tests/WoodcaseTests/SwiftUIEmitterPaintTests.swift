@@ -17,7 +17,7 @@ struct SwiftUIEmitterPaintTests {
 
     // MARK: - Linear
 
-    @Test("A default linear gradient runs bottom to top, in device colour space")
+    @Test("A default linear gradient runs bottom to top, in device color space")
     func linearDefault() throws {
         let code = try body(child: rect(fill: gradient("linear")))
         #expect(code.contains(".fill(.linearGradient(\(Self.stops), startPoint: .bottom, endPoint: .top))"))
@@ -128,7 +128,7 @@ struct SwiftUIEmitterPaintTests {
         let stretch = try body(child: rect(fill: ##"{"type": "image", "url": "https://example.com/a.png"}"##))
         #expect(stretch.contains(".resizable()"))
         #expect(!stretch.contains(".scaledTo"))
-        // stretch is not centred in a Color.clear overlay — no second Color.clear beyond AsyncImage's placeholder.
+        // stretch is not centered in a Color.clear overlay — no second Color.clear beyond AsyncImage's placeholder.
         #expect(stretch.components(separatedBy: "Color.clear").count == 2)
     }
 

@@ -13,7 +13,7 @@ struct PenMeshTessellatorTests {
 
     private let tessellator = PenMeshTessellator()
 
-    /// A 3×3 mesh whose middle vertex is pulled off-centre with long handles, like the
+    /// A 3×3 mesh whose middle vertex is pulled off-center with long handles, like the
     /// report's `mwarp` artboard.
     private func warped() throws -> PenMeshGrid {
         let navy = PenMeshColor(red: 0.12, green: 0.23, blue: 0.54)
@@ -98,7 +98,7 @@ struct PenMeshTessellatorTests {
         }
     }
 
-    @Test("A flat, single-colour mesh with straight handles needs one cell per patch")
+    @Test("A flat, single-color mesh with straight handles needs one cell per patch")
     func flatNeedsOneCell() throws {
         let grid = try Support.regularGrid(
             columns: 3,
@@ -122,7 +122,7 @@ struct PenMeshTessellatorTests {
         #expect(large.v > small.v)
     }
 
-    @Test("Colour contrast asks for cells even when the geometry is flat")
+    @Test("Color contrast asks for cells even when the geometry is flat")
     func colorNeedsCells() throws {
         let grid = try Support.fourColor(handles: Support.thirdHandles(columns: 2, rows: 2))
         let subdivision = tessellator.subdivision(for: grid.patch(column: 0, row: 0), width: 10, height: 10)

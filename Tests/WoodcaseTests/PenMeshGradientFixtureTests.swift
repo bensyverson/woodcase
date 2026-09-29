@@ -16,7 +16,7 @@ import Testing
 /// - `render-mesh-gradients.pen` — the eight-artboard probe from
 ///   `project/2026-09-26-mesh-gradients.md`, Appendix A.
 /// - `mesh-point-elision.pen` — points written with default, near-default and
-///   unrounded handles, to pin which ones Pen's serialiser drops.
+///   unrounded handles, to pin which ones Pen's serializer drops.
 ///
 /// Tests only read these files; they never run `pen`.
 struct PenMeshGradientFixtureTests {
@@ -60,7 +60,7 @@ struct PenMeshGradientFixtureTests {
     }
 
     /// Whether two points have the same wire form, the same handles present, and
-    /// values within Pen's serialisation precision.
+    /// values within Pen's serialization precision.
     private func sameCanonicalPoint(_ lhs: PenMeshPoint, _ rhs: PenMeshPoint) -> Bool {
         func close(_ a: PenMeshPoint.Vector?, _ b: PenMeshPoint.Vector?) -> Bool {
             switch (a, b) {
@@ -132,7 +132,7 @@ struct PenMeshGradientFixtureTests {
     // MARK: - Pen's canonical form
 
     @Test(
-        "Canonicalising a fixture's points reproduces Pen's re-save to 1e-4",
+        "Canonicalizing a fixture's points reproduces Pen's re-save to 1e-4",
         arguments: ["render-mesh-gradients", "mesh-point-elision"]
     )
     func canonicalPointsMatchPen(fixtureName: String) throws {

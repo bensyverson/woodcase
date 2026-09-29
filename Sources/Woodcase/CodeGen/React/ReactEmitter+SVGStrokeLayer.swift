@@ -8,7 +8,7 @@ extension ReactEmitter {
     struct StrokeLayer: Friendly {
         /// How a layer is painted.
         enum Paint: Friendly {
-            /// A `stroke` value: a colour, or `url(#…)` of a paint server.
+            /// A `stroke` value: a color, or `url(#…)` of a paint server.
             case server(String)
             /// An angular gradient, drawn as a conic layer masked by the stroke.
             case conic(PenFill.PenGradientFill)

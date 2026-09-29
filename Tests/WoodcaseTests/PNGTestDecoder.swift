@@ -12,7 +12,7 @@
     ///
     /// Reads the decoded image's own backing bytes rather than drawing it into a context,
     /// so the channels come back exactly as the PNG stored them: straight (not
-    /// premultiplied) alpha, no colour conversion.
+    /// premultiplied) alpha, no color conversion.
     struct PNGTestDecoder {
         /// The decoded width in pixels.
         let width: Int

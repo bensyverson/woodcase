@@ -4,7 +4,7 @@
 //
 
 extension SwiftUILiteral {
-    /// A point in the normalised box as a `UnitPoint`: one of SwiftUI's named points
+    /// A point in the normalized box as a `UnitPoint`: one of SwiftUI's named points
     /// (`.top`, `.bottomTrailing`) where it is one, `UnitPoint(x:y:)` otherwise.
     ///
     /// Coordinates are rounded to nine places, so the sine of a quarter turn writes as

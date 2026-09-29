@@ -9,7 +9,7 @@ extension ReactEmitter {
     struct PaintLayer: Friendly {
         /// Which of the element's boxes a layer is sized and placed against.
         enum Origin: String, Friendly {
-            /// The whole element: a flat colour, or a gradient whose geometry has already
+            /// The whole element: a flat color, or a gradient whose geometry has already
             /// been pulled back onto the node's box (``ReactEmitter/cssGradient(_:box:outsets:)``).
             case borderBox = "border-box"
             /// The node's box: an image or a mesh raster, drawn there and nowhere else, as
@@ -29,8 +29,8 @@ extension ReactEmitter {
         /// The CSS blend mode against the layers beneath it.
         var blendMode: String
 
-        /// The `background-position` value: centred, unless a gradient's tile sits off
-        /// the element's centre (``ReactEmitter/tilePosition(outsets:)``).
+        /// The `background-position` value: centered, unless a gradient's tile sits off
+        /// the element's center (``ReactEmitter/tilePosition(outsets:)``).
         var position: String = CSSGradient.centered
 
         /// The size of a layer that fills its box.

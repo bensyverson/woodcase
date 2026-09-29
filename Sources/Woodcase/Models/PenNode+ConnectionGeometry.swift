@@ -9,7 +9,7 @@ public extension PenNode.ConnectionData.Anchor {
     /// Where this anchor lands on a box.
     ///
     /// - Parameter rect: The node's box.
-    /// - Returns: The box's centre, or the middle of the edge the anchor names.
+    /// - Returns: The box's center, or the middle of the edge the anchor names.
     func point(on rect: PenRect) -> PenNode.ConnectionData.AnchorPoint {
         let midX = rect.x + rect.width / 2
         let midY = rect.y + rect.height / 2

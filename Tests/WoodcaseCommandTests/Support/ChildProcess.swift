@@ -27,7 +27,7 @@ import Testing
 ///   until somebody notices. ``waitForExit(within:)`` polls against a deadline instead,
 ///   so the worst case is a recorded failure, not a hang.
 /// - **Never leave the child behind.** An orphaned `woodcase` keeps polling and keeps a
-///   lock-holding neighbour's file busy; the failure lands in whichever *later* test
+///   lock-holding neighbor's file busy; the failure lands in whichever *later* test
 ///   touches that file, which is as far from the cause as a failure can get.
 ///   ``withChild(_:arguments:environment:standardOutput:_:)`` stops the child however the
 ///   body ends, and ``deinit`` is the backstop that `SIGKILL`s one that got past that.

@@ -136,7 +136,7 @@ public enum ArtboardPageBuilder {
     ///
     /// The node-level markers the render draws are too fine for a thumbnail 24 pixels
     /// across, so the map marks the *artboard* instead: same log, same recency window,
-    /// same colour, one level up. It is the map's answer to "where is the work
+    /// same color, one level up. It is the map's answer to "where is the work
     /// happening".
     ///
     /// - Parameters:

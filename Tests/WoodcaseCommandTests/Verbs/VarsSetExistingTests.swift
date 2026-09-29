@@ -10,7 +10,7 @@ import Testing
 /// What `vars set` says when the name it was given already exists.
 ///
 /// `vars set` is add-or-change and printed the same outline either way, so a request to
-/// "add" a token that was already there silently recoloured every reference. One line
+/// "add" a token that was already there silently recolored every reference. One line
 /// before the outline names what was displaced and how much of the document was looking
 /// at it; a fresh name gets nothing extra, because there is nothing to say.
 @Suite("`vars set` over a name that already exists")

@@ -6,7 +6,7 @@
 import Foundation
 
 extension ReactEmitter {
-    /// A typed prop value as a JSX attribute value: a quoted string, a colour as its
+    /// A typed prop value as a JSX attribute value: a quoted string, a color as its
     /// literal or `var(--name)`, a boolean in braces.
     static func jsxAttributeValue(_ value: PropMapper.Value) -> String {
         switch value {

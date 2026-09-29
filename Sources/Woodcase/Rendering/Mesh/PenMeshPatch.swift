@@ -5,8 +5,8 @@
 
 import Foundation
 
-/// One cell of a mesh gradient: a bicubic tensor-product Bézier patch whose colour is a
-/// smoothstep-eased bilinear blend of its four corner colours.
+/// One cell of a mesh gradient: a bicubic tensor-product Bézier patch whose color is a
+/// smoothstep-eased bilinear blend of its four corner colors.
 ///
 /// Parameters run `u` left to right and `v` top to bottom, each over `0...1`. The
 /// geometry is `B(v; B(u; row₀), …, B(u; row₃))` over the 4×4 ``controlPoints``, built
@@ -19,11 +19,11 @@ import Foundation
 /// row 3:  BL            BL+BL.right              BR+BR.left              BR
 /// ```
 ///
-/// The four interior points take the zero-twist (parallelogram) rule. The colour follows
-/// the *parameters*, not the position: moving a point warps the colour field with it.
+/// The four interior points take the zero-twist (parallelogram) rule. The color follows
+/// the *parameters*, not the position: moving a point warps the color field with it.
 /// Both rules are what Pen's exports show; `project/2026-09-26-mesh-gradients.md` §1.
 public struct PenMeshPatch: Friendly {
-    /// Creates the patch spanned by four neighbouring grid vertices.
+    /// Creates the patch spanned by four neighboring grid vertices.
     ///
     /// - Parameters:
     ///   - topLeft: The corner at `(u, v) = (0, 0)`.
@@ -57,16 +57,16 @@ public struct PenMeshPatch: Friendly {
     /// where the row follows `v` and the column follows `u`.
     public let controlPoints: [PenMeshPoint.Vector]
 
-    /// The colour at `(u, v) = (0, 0)`.
+    /// The color at `(u, v) = (0, 0)`.
     public let topLeftColor: PenMeshColor
 
-    /// The colour at `(1, 0)`.
+    /// The color at `(1, 0)`.
     public let topRightColor: PenMeshColor
 
-    /// The colour at `(0, 1)`.
+    /// The color at `(0, 1)`.
     public let bottomLeftColor: PenMeshColor
 
-    /// The colour at `(1, 1)`.
+    /// The color at `(1, 1)`.
     public let bottomRightColor: PenMeshColor
 
     /// The point on the patch at the given parameters, in the node's unit space.
@@ -96,19 +96,19 @@ public struct PenMeshPatch: Friendly {
 
     /// The four cubic Bernstein weights at `t`. At `t = 0` and `t = 1` they are exactly
     /// `(1, 0, 0, 0)` and `(0, 0, 0, 1)`, so a patch edge evaluates to the same bits from
-    /// either neighbouring patch.
+    /// either neighboring patch.
     static func bernstein(_ t: Double) -> [Double] {
         let s = 1 - t
         return [s * s * s, 3 * t * s * s, 3 * t * t * s, t * t * t]
     }
 
-    /// The colour at the given parameters: the corners blended bilinearly by
+    /// The color at the given parameters: the corners blended bilinearly by
     /// ``ease(_:)`` of each parameter, on unpremultiplied sRGB-encoded channels.
     ///
     /// - Parameters:
     ///   - u: The horizontal parameter, `0...1`.
     ///   - v: The vertical parameter, `0...1`.
-    /// - Returns: The blended colour.
+    /// - Returns: The blended color.
     public func color(u: Double, v: Double) -> PenMeshColor {
         let s = Self.ease(u)
         let t = Self.ease(v)

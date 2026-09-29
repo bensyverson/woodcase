@@ -30,7 +30,7 @@ struct SwiftUIVocabulary: Friendly {
         /// The last component's name: `frame`, `topLeading`, `init`, `CTFontGetAscent`.
         var name: String
 
-        /// The last component's labels, `_` for an unlabelled parameter, or `nil` for a
+        /// The last component's labels, `_` for an unlabeled parameter, or `nil` for a
         /// path that is not a function: `["width", "height", "alignment"]`.
         var labels: [String]?
     }

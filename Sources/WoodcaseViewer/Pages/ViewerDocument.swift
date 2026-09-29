@@ -35,13 +35,13 @@ public struct ViewerDocument<Content: HTML>: HTMLDocument {
     /// A named layout rather than a set of classes each page assembles: three pages, three
     /// shapes, and the stylesheet owns what each one means.
     public enum Layout: String, Friendly {
-        /// The cross-file dashboard: one centred column.
+        /// The cross-file dashboard: one centered column.
         case dashboard
-        /// One artboard: outline left, render centre, activity right.
+        /// One artboard: outline left, render center, activity right.
         case artboard
-        /// Nothing to show yet: one centred card.
+        /// Nothing to show yet: one centered card.
         case empty
-        /// The preview catalog: one centred column of components or of framed states.
+        /// The preview catalog: one centered column of components or of framed states.
         ///
         /// The dashboard's shape rather than a shape of its own, because the catalog is
         /// read the way the dashboard is — top to bottom, one column — and a second

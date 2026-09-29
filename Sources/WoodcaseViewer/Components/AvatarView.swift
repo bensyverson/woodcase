@@ -7,10 +7,10 @@ import Elementary
 import Foundation
 import Woodcase
 
-/// One identity, as a coloured disc with its initial.
+/// One identity, as a colored disc with its initial.
 ///
 /// The primitive every other identity display is built from — activity rows, edit tags,
-/// the presence stack, the variables list — so an agent is one recognisable mark
+/// the presence stack, the variables list — so an agent is one recognizable mark
 /// wherever it appears, and the same mark it has in the Jobs dashboard.
 ///
 /// ```swift
@@ -18,10 +18,10 @@ import Woodcase
 /// AvatarView(identity: "ben", size: .medium)  // a 20 px disc
 /// ```
 ///
-/// The colour is written as the `--v-actor` custom property rather than as a class,
+/// The color is written as the `--v-actor` custom property rather than as a class,
 /// because it is hashed and there is no finite set of classes to write. It is also the
-/// *only* place — with the edit markers — that an identity's colour is allowed: a hashed
-/// hue collides with the accent green often enough that coloured text would read as a
+/// *only* place — with the edit markers — that an identity's color is allowed: a hashed
+/// hue collides with the accent green often enough that colored text would read as a
 /// link.
 ///
 /// `--v-actor-ink` rides beside it, because a disc's initial cannot be white on every
@@ -58,7 +58,7 @@ public struct AvatarView: HTML {
     /// How big to draw it.
     public let size: Size
 
-    /// The identity's hashed colour.
+    /// The identity's hashed color.
     public var color: ActorColor {
         ActorColor(name: identity)
     }

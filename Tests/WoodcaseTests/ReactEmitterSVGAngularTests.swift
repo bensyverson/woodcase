@@ -101,7 +101,7 @@ struct ReactEmitterSVGAngularTests {
         {"type": "polygon", "id": "Poly1", "width": 100, "height": 100, "polygonCount": 4,
          "stroke": \(Self.angular), "strokeWidth": 10}
         """)
-        // A centred 10 pt stroke: an overhang of twice the drawn width plus one, as the paint servers use.
+        // A centered 10 pt stroke: an overhang of twice the drawn width plus one, as the paint servers use.
         #expect(content.contains(##"<foreignObject x="-21" y="-21" width="142" height="142""##), "\(content)")
         #expect(content.contains(##"width: "100%""##), "\(content)")
     }

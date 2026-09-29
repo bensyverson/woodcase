@@ -53,7 +53,7 @@ struct PenRefExpanderChainTests {
         #expect(Self.color(data.fills) == "#ffffff")
     }
 
-    /// A solid fill's colour, however the JSON spelled it.
+    /// A solid fill's color, however the JSON spelled it.
     private static func color(_ fills: PenFills?) -> String? {
         switch fills?.all.first {
         case let .shorthand(value): value

@@ -15,7 +15,7 @@ import SwiftUI
 
 /// A Pen gradient, drawn through Pen's own map from the gradient's unit space into the box.
 ///
-/// In its own space a gradient is centred on the origin with unit extent (y down): a linear
+/// In its own space a gradient is centered on the origin with unit extent (y down): a linear
 /// one runs from stop 0 at `(0, 0.5)` to stop 1 at `(0, -0.5)`; a radial one from the origin
 /// to the circle of radius ½; an angular one starts pointing up and sweeps clockwise. That
 /// space is scaled by `width` and `height`, turned counter-clockwise by `rotation` degrees,
@@ -31,9 +31,9 @@ struct PenGradient: View {
 
     /// Linear, radial or angular.
     var kind: Kind
-    /// The stops, in the colour space they interpolate in.
+    /// The stops, in the color space they interpolate in.
     var gradient: AnyGradient
-    /// The gradient's centre in the box.
+    /// The gradient's center in the box.
     var center: UnitPoint
     /// The scale along the gradient's own x axis.
     var width: CGFloat

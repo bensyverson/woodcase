@@ -145,14 +145,14 @@ struct PenStrokeMigrationRuleTests {
     func miterAngleIsDiscarded() {
         let diagnostics = PenDiagnosticCollector()
         let node = migrated(
-            rectangle(id: "mitred", stroke: ["fill": .string("#000"), "miterAngle": .int(45)]),
+            rectangle(id: "mitered", stroke: ["fill": .string("#000"), "miterAngle": .int(45)]),
             diagnostics: diagnostics
         )
         #expect(node["miterAngle"] == nil)
 
         let reported = diagnostics.diagnostics.filter { $0.message.contains("miterAngle") }
         #expect(reported.count == 1)
-        #expect(reported.first?.nodeID == "mitred")
+        #expect(reported.first?.nodeID == "mitered")
         #expect(reported.first?.stage == .migration)
     }
 

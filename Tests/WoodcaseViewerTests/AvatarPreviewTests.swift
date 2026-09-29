@@ -11,7 +11,7 @@ import Woodcase
 
 /// How the identity primitives behave. Their pictures are in the preview catalog.
 struct AvatarPreviewTests {
-    @Test("An avatar carries the hashed colour as a custom property, never as a class")
+    @Test("An avatar carries the hashed color as a custom property, never as a class")
     func avatarCarriesCustomProperty() {
         let html = AvatarView(identity: "claude-a").render()
         #expect(html.contains("--v-actor: hsl(152 85% 48%)"))
@@ -19,7 +19,7 @@ struct AvatarPreviewTests {
         #expect(html.contains(">C<"))
     }
 
-    @Test("An avatar carries the ink its own colour needs, beside the colour")
+    @Test("An avatar carries the ink its own color needs, beside the color")
     func avatarCarriesItsInk() {
         // A bright disc and a dark one, so the pair proves the property pivots rather
         // than being written once and copied.
@@ -27,7 +27,7 @@ struct AvatarPreviewTests {
         #expect(AvatarView(identity: "claude-b").render().contains("--v-actor-ink: #FFFFFF"))
     }
 
-    @Test("The stylesheet takes the initial's colour from that property, not from white")
+    @Test("The stylesheet takes the initial's color from that property, not from white")
     func avatarInkComesFromTheProperty() {
         #expect(ViewerStylesheet.css.contains("color: var(--v-actor-ink, #FFFFFF)"))
         // The `+N` disc is filled with `faint`, not a hashed hue, so it names its own.

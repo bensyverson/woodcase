@@ -6,7 +6,7 @@ import CoreGraphics
 /// A shadow's `blur` is twice its Gaussian's sigma, which is also what CoreGraphics' own
 /// shadow blur means, so it passes straight through, scaled to device pixels.
 enum PenEffectRenderer {
-    /// The shadow colour Pen draws when a shadow names none: black at half alpha.
+    /// The shadow color Pen draws when a shadow names none: black at half alpha.
     static let defaultShadowColor = CGColor(
         colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!, components: [0, 0, 0, 0.5]
     )!
@@ -177,7 +177,7 @@ enum PenEffectRenderer {
 
     // MARK: - Shared
 
-    /// The shadow's colour, or ``defaultShadowColor`` when it names none that parses.
+    /// The shadow's color, or ``defaultShadowColor`` when it names none that parses.
     private static func color(of shadow: PenEffect.PenShadowEffect) -> CGColor {
         shadow.color?.literalValue.flatMap { PenColorParser.parse($0) } ?? defaultShadowColor
     }

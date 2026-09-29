@@ -15,7 +15,7 @@ import Foundation
 /// the cache, downloaded into it first when it lacks one — and no file of a face nothing
 /// draws. A family installed on this machine but not shipped with the OS is
 /// still taken from Google Fonts, never copied from the machine's own fonts: a person's
-/// licensed font is not the package's to redistribute, and a Google family's licence
+/// licensed font is not the package's to redistribute, and a Google family's license
 /// lets it travel.
 ///
 /// Nothing here registers a font; the files are the caller's to copy.

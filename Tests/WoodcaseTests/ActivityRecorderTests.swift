@@ -181,7 +181,7 @@ struct ActivityRecorderTests {
         }
     }
 
-    // MARK: - Labelling
+    // MARK: - Labeling
 
     @Test("A caller-supplied kind labels the event, so undo can name itself")
     func callerSuppliedKindLabelsTheEvent() async throws {

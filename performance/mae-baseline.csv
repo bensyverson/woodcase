@@ -190,7 +190,7 @@ react-render-gradient-geometry-ang-wide-r0,0.25,1.1
 react-render-gradient-geometry-ang-wide-r0-stops,0.26,1.0
 react-render-gradient-geometry-ang-wide-r210,0.25,1.1
 react-render-gradient-geometry-ang-wide-r45,0.25,1.1
-react-render-gradient-geometry-ang-wide-r45-centre,0.23,1.1
+react-render-gradient-geometry-ang-wide-r45-center,0.23,1.1
 react-render-gradient-geometry-ang-wide-r90,0.25,1.1
 react-render-gradient-geometry-lin-sq-r0,0.12,1.1
 react-render-gradient-geometry-lin-sq-r135,0.10,1.1
@@ -207,11 +207,11 @@ react-render-gradient-geometry-lin-tall-r90,0.13,1.1
 react-render-gradient-geometry-lin-wide-r0,0.14,1.1
 react-render-gradient-geometry-lin-wide-r135,0.11,1.1
 react-render-gradient-geometry-lin-wide-r210,0.13,1.1
-react-render-gradient-geometry-lin-wide-r30-centre,0.12,1.1
-react-render-gradient-geometry-lin-wide-r315-centre-size,0.11,1.1
+react-render-gradient-geometry-lin-wide-r30-center,0.12,1.1
+react-render-gradient-geometry-lin-wide-r315-center-size,0.11,1.1
 react-render-gradient-geometry-lin-wide-r45,0.11,1.1
 react-render-gradient-geometry-lin-wide-r90,0.10,1.1
-react-render-gradient-geometry-rad-sq-r30-centre-size,0.09,1.1
+react-render-gradient-geometry-rad-sq-r30-center-size,0.09,1.1
 react-render-gradient-geometry-rad-wide-r45-size,0.22,1.2
 react-render-gradients-gradient-extras,0.05,1.0
 react-render-gradients-render-gradients,0.17,1.1
@@ -505,7 +505,7 @@ swiftui-render-gradient-geometry-ang-wide-r0,0.14,1.1
 swiftui-render-gradient-geometry-ang-wide-r0-stops,0.09,1.0
 swiftui-render-gradient-geometry-ang-wide-r210,0.14,1.1
 swiftui-render-gradient-geometry-ang-wide-r45,0.14,1.1
-swiftui-render-gradient-geometry-ang-wide-r45-centre,0.14,1.1
+swiftui-render-gradient-geometry-ang-wide-r45-center,0.14,1.1
 swiftui-render-gradient-geometry-ang-wide-r90,0.14,1.1
 swiftui-render-gradient-geometry-lin-sq-r0,0.13,1.1
 swiftui-render-gradient-geometry-lin-sq-r135,0.13,1.1
@@ -522,11 +522,11 @@ swiftui-render-gradient-geometry-lin-tall-r90,0.13,1.1
 swiftui-render-gradient-geometry-lin-wide-r0,0.13,1.1
 swiftui-render-gradient-geometry-lin-wide-r135,0.13,1.1
 swiftui-render-gradient-geometry-lin-wide-r210,0.13,1.1
-swiftui-render-gradient-geometry-lin-wide-r30-centre,0.12,1.1
-swiftui-render-gradient-geometry-lin-wide-r315-centre-size,0.11,1.1
+swiftui-render-gradient-geometry-lin-wide-r30-center,0.12,1.1
+swiftui-render-gradient-geometry-lin-wide-r315-center-size,0.11,1.1
 swiftui-render-gradient-geometry-lin-wide-r45,0.12,1.1
 swiftui-render-gradient-geometry-lin-wide-r90,0.13,1.1
-swiftui-render-gradient-geometry-rad-sq-r30-centre-size,0.07,1.1
+swiftui-render-gradient-geometry-rad-sq-r30-center-size,0.07,1.1
 swiftui-render-gradient-geometry-rad-wide-r45-size,0.08,1.2
 swiftui-render-gradients-gradient-extras,0.08,1.0
 swiftui-render-gradients-render-gradients,0.13,1.1

@@ -58,10 +58,10 @@ struct HTTPServerStartupTests {
         #expect("\(error)".contains(String(describing: reported)))
     }
 
-    @Test("a listener cancelled before it is ready fails rather than hangs")
-    func cancelledFails() {
+    @Test("a listener canceled before it is ready fails rather than hangs")
+    func canceledFails() {
         guard case .failed = HTTPServer.outcome(of: .cancelled) else {
-            Issue.record("a cancelled listener must resolve the start")
+            Issue.record("a canceled listener must resolve the start")
             return
         }
     }

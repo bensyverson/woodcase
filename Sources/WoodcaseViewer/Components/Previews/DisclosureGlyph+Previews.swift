@@ -17,7 +17,7 @@ public extension DisclosureGlyph {
             PreviewState(
                 slug: "default",
                 name: "Pointing down — the open orientation",
-                note: "One state, because the component has one: it always ships pointing down and each caller rotates it in CSS from its own open state. Look at the box around it — the visible triangle is a few pixels, the click target is 18 px — and at `currentColor`, which is what lets it sit in a header and in a row without a colour of its own. There is no second disclosure control anywhere; if this one looks wrong, everything that discloses is wrong.",
+                note: "One state, because the component has one: it always ships pointing down and each caller rotates it in CSS from its own open state. Look at the box around it — the visible triangle is a few pixels, the click target is 18 px — and at `currentColor`, which is what lets it sit in a header and in a row without a color of its own. There is no second disclosure control anywhere; if this one looks wrong, everything that discloses is wrong.",
                 frame: .strip
             ) { DisclosureGlyph() },
         ]

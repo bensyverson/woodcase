@@ -24,7 +24,7 @@ import Foundation
 ///
 /// Acquisition never calls a blocking `flock`. It polls with `LOCK_NB` and
 /// suspends between attempts with `Task.sleep`, so a caller that waits does not
-/// occupy a thread and a caller that is cancelled stops waiting. When the timeout
+/// occupy a thread and a caller that is canceled stops waiting. When the timeout
 /// expires the attempt fails with ``PenFileError/lockTimeout(url:timeout:)`` — never
 /// a hang.
 ///

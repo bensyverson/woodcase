@@ -67,8 +67,8 @@ tolerance 0.5. The text field compiles at both floors but is not rendered: `Imag
    the known idiom for a custom-looking picker. The component takes `selection: Binding<String>` and
    `options: [String]`; its text props stay separate, so a caller passes the chosen value's label too. Mapping a text
    prop to the selection would need the design to say which text is the value.
-5. **A text input's `TextField` replaces its first text**, the copy its prompt, drawn in the text's colour — the design
-   gives one colour, so typed text and placeholder share it. A designer's `focused` or `filled` frame is drawn as the
+5. **A text input's `TextField` replaces its first text**, the copy its prompt, drawn in the text's color — the design
+   gives one color, so typed text and placeholder share it. A designer's `focused` or `filled` frame is drawn as the
    smart default instead, with a warning: a branch swap makes a new `TextField`, which drops the focus the swap was
    reacting to. **Open:** drawing those frames would need the field kept outside the branch (an overlay placed by an
    anchor preference from each face's text) — worth it only if designs draw focus as more than a border.

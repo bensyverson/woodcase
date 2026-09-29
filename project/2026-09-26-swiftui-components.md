@@ -43,8 +43,8 @@ default content when the slot frame has children of its own (a nested `struct <S
 3. **A prop is declared only where the body reads it.** A `_props` entry whose node the body cannot bind (a text prop on
    a frame, a path that names nothing) is left out with a warning rather than declared and ignored. The prop's *type*
    is the analyzer's, shared with React, and it reads the component's own paint: `woodcase-app`'s Pencil List Item
-   has an `image` prop typed `Color`, because its thumbnail's own fill is a colour and only the instances set images.
-   Every instance of it is therefore a copy (an image fill is no colour argument). Fixing that is the document's
+   has an `image` prop typed `Color`, because its thumbnail's own fill is a color and only the instances set images.
+   Every instance of it is therefore a copy (an image fill is no color argument). Fixing that is the document's
    (give the thumbnail an image) or the analyzer's (a type hint in `_props`), not the emitter's.
 4. **A call only when the call draws what Pen draws; otherwise inline.** The decision is `InstanceOverrides`
    (target-neutral, in `CodeGen/`): every property of every override must be carried by a prop or change nothing (an
@@ -87,7 +87,7 @@ layout:
 - **A `fill_container` frame has no zero minimum.** The frame emitter writes `.frame(maxWidth: .infinity)`; SwiftUI then
   takes the child's ideal size as the frame's minimum, so content larger than its room grows the frame. Pen's flex item
   shrinks to its room and lets the content overflow (React writes `flex: 1; minHeight: 0` for the same reason). On
-  Home, the favourites row (three 160-point cards in 354 points) widens the whole screen and pushes the bell, the badge
+  Home, the favorites row (three 160-point cards in 354 points) widens the whole screen and pushes the bell, the badge
   and the stars out of view; on Ratings the content column grows and pushes the tab bar below the screen. The likely fix
   is `minWidth: 0` / `minHeight: 0` beside `max…: .infinity` in `frameModifiers`; it touches every layout golden, so it
   is not in this leaf.

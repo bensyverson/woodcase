@@ -64,8 +64,8 @@ enum SwiftUIFixtures {
 
     /// The paint and stroke fixtures: several frames each, every exported frame a render board
     /// (``SwiftUIRenderBoard``) and every page pinned by one golden per fixture.
-    /// `swiftui-color-scheme` holds the paints a colour scheme can move: unfilled text and
-    /// icons, and a mesh of theme colours; `render-mesh-colors` a mesh per colour string
+    /// `swiftui-color-scheme` holds the paints a color scheme can move: unfilled text and
+    /// icons, and a mesh of theme colors; `render-mesh-colors` a mesh per color string
     /// Pen's mesh reads its own way.
     static let paintFixtures = [
         "render-gradients", "render-gradient-geometry", "render-text-fills", "render-per-side-strokes", "render-stroke-fills",

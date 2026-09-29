@@ -78,8 +78,8 @@ struct SwiftUIEmitterSlotTests {
         #expect(!page.contains("Card(title: \"Inbox\") {"))
     }
 
-    @Test("Filling two slots is labelled trailing closures; a slot left alone passes its default")
-    func labelledClosures() throws {
+    @Test("Filling two slots is labeled trailing closures; a slot left alone passes its default")
+    func labeledClosures() throws {
         let filled = try Self.file("Pages/FilledPanel.swift")
         #expect(filled.contains(/Panel \{\n\s+Text\("Settings"\)/))
         #expect(filled.contains(/\} footer: \{\n\s+Text\("Cancel"\)/))

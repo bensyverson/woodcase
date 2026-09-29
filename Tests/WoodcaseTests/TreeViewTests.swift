@@ -49,7 +49,7 @@ struct TreeViewTests {
         }
     }
 
-    @Test("Rows are pre-order, depth-labelled, and report their child count")
+    @Test("Rows are pre-order, depth-labeled, and report their child count")
     func preOrderWithDepths() throws {
         let rows = try TreeView.rows(of: document("tree-overflow.pen"))
         #expect(rows.map(\.id) == ["Card1", "Fit01", "Ovr01", "Out01"])

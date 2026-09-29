@@ -10,17 +10,17 @@ public extension PenBrowserPlaceholder {
     /// Woodcase-based renderer reads, so their placeholders cannot drift apart.
     ///
     /// ``standard`` is what ``PenRenderer`` draws. A renderer that draws a browser
-    /// itself (a GPU renderer, say) takes its colours, sizes and fallback label from
+    /// itself (a GPU renderer, say) takes its colors, sizes and fallback label from
     /// here rather than keeping a copy.
     struct Style: Friendly {
         /// Creates a style.
         ///
         /// - Parameters:
-        ///   - fillHex: The placeholder's fill, as a .pen hex colour.
-        ///   - borderHex: The border drawn when the node declares no stroke, as a hex colour.
+        ///   - fillHex: The placeholder's fill, as a .pen hex color.
+        ///   - borderHex: The border drawn when the node declares no stroke, as a hex color.
         ///   - borderWidth: That border's width, in points.
         ///   - borderAlignment: Where that border sits relative to the node's edge.
-        ///   - labelHex: The label's colour, as a hex colour.
+        ///   - labelHex: The label's color, as a hex color.
         ///   - labelSize: The label's font size, in points.
         ///   - labelInset: The space kept clear between the label and each side, in points.
         ///   - emptyLabel: What the label says when the node has no URL.
@@ -44,11 +44,11 @@ public extension PenBrowserPlaceholder {
             self.emptyLabel = emptyLabel
         }
 
-        /// The placeholder's fill, as a .pen hex colour. A browser takes no fill of its
+        /// The placeholder's fill, as a .pen hex color. A browser takes no fill of its
         /// own in the format, so this is always drawn.
         public var fillHex: String
 
-        /// The border drawn when the node declares no stroke, as a .pen hex colour. A
+        /// The border drawn when the node declares no stroke, as a .pen hex color. A
         /// declared stroke replaces it entirely.
         public var borderHex: String
 
@@ -58,7 +58,7 @@ public extension PenBrowserPlaceholder {
         /// Where the default border sits relative to the node's edge.
         public var borderAlignment: PenStrokeAlign
 
-        /// The label's colour, as a .pen hex colour.
+        /// The label's color, as a .pen hex color.
         public var labelHex: String
 
         /// The label's font size, in points, set in the default font family.

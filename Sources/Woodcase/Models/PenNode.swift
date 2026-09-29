@@ -123,7 +123,7 @@ public extension PenNode {
     }
 
     /// Decodes a node and everything under it: each node's shared properties, its type's
-    /// data, and — for a modelled type — every key that type does not claim, into
+    /// data, and — for a modeled type — every key that type does not claim, into
     /// ``extras``.
     ///
     /// The subtree is decoded from a work list rather than by each node decoding its
@@ -131,7 +131,7 @@ public extension PenNode {
     /// ``decodedTree(from:)``.
     ///
     /// - Parameter decoder: The decoder to read from. In ``PenDecodingMode/authoring`` an
-    ///   unclaimed key on a modelled type is refused rather than kept.
+    ///   unclaimed key on a modeled type is refused rather than kept.
     /// - Throws: `DecodingError` for a missing `id` or `type`, a property of the wrong
     ///   shape, or — in authoring mode — an unclaimed key or a `type` this build does not
     ///   model.
@@ -175,7 +175,7 @@ public extension PenNode {
 // MARK: - Refusing an unknown type
 
 extension PenNode {
-    /// The refusal an authored node of an unmodelled type earns.
+    /// The refusal an authored node of an unmodeled type earns.
     ///
     /// Names the type as written and every real one, because a caller who wrote
     /// `video_clip` needs the list more than a restatement of the guess.

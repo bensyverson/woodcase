@@ -15,11 +15,11 @@ import Foundation
 ///
 /// - ``geometricTolerance``, in device pixels: the largest distance between a point of
 ///   a triangle and the patch point it stands for. Its default, a quarter of a pixel, is
-///   below what a pixel-centre sampler can show.
+///   below what a pixel-center sampler can show.
 /// - ``colorTolerance``, in channel units (`1` is a full channel): the largest
-///   difference between a premultiplied colour interpolated across a triangle and the
-///   true one. Its default, half of one 8-bit step, means the interpolated colour rounds
-///   to the exact colour's step or its neighbour.
+///   difference between a premultiplied color interpolated across a triangle and the
+///   true one. Its default, half of one 8-bit step, means the interpolated color rounds
+///   to the exact color's step or its neighbor.
 ///
 /// The bound is the one for piecewise-linear interpolation of a smooth surface over a
 /// triangulated grid (Filip, Magedson and Markot, 1986): with cell sizes `hᵤ`, `hᵥ`,
@@ -29,11 +29,11 @@ import Foundation
 /// ```
 ///
 /// where the `M`s bound the second derivatives over the patch. For the geometry they come
-/// from the control net's second differences, scaled to device pixels; for the colour,
-/// from the corner colours and smoothstep's derivatives. Since `2hᵤhᵥ ≤ hᵤ² + hᵥ²`, the
+/// from the control net's second differences, scaled to device pixels; for the color,
+/// from the corner colors and smoothstep's derivatives. Since `2hᵤhᵥ ≤ hᵤ² + hᵥ²`, the
 /// tessellator gives each axis half of the tolerance and solves for its cell count.
 /// Geometry is the size-dependent part, so the count grows with the square root of the
-/// patch's size in pixels; colour alone never asks for more than about 60 cells.
+/// patch's size in pixels; color alone never asks for more than about 60 cells.
 ///
 /// Every patch in a column shares the largest count any of them asks for across, and
 /// every patch in a row the largest count down, so shared edges line up exactly.
@@ -42,7 +42,7 @@ public struct PenMeshTessellator: Friendly {
     ///
     /// - Parameters:
     ///   - geometricTolerance: The largest position error, in device pixels.
-    ///   - colorTolerance: The largest premultiplied colour error, in channel units.
+    ///   - colorTolerance: The largest premultiplied color error, in channel units.
     ///   - maximumSubdivisions: The most cells along one axis of one patch.
     public init(
         geometricTolerance: Double = 0.25,
@@ -59,7 +59,7 @@ public struct PenMeshTessellator: Friendly {
     public var geometricTolerance: Double
 
     /// The largest difference, in channel units, between an interpolated premultiplied
-    /// colour and the patch's own.
+    /// color and the patch's own.
     public var colorTolerance: Double
 
     /// The most cells along one axis of one patch: a guard against absurd handles, not a

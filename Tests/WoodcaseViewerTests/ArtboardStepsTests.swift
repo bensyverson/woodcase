@@ -25,8 +25,8 @@ struct ArtboardStepsTests {
     func middleStepsBothWays() {
         let control = steps(current: "Brd01")
         #expect(control.index == 1)
-        #expect(control.neighbour(.previous)?.id == "Cnv01")
-        #expect(control.neighbour(.next)?.id == "Cmp01")
+        #expect(control.neighbor(.previous)?.id == "Cnv01")
+        #expect(control.neighbor(.next)?.id == "Cmp01")
 
         let html = control.render()
         #expect(html.contains(">2 of 3<"))
@@ -36,8 +36,8 @@ struct ArtboardStepsTests {
 
     @Test("Either end clamps rather than wrapping, and keeps its glyph")
     func endsClamp() {
-        #expect(steps(current: "Cnv01").neighbour(.previous) == nil)
-        #expect(steps(current: "Cmp01").neighbour(.next) == nil)
+        #expect(steps(current: "Cnv01").neighbor(.previous) == nil)
+        #expect(steps(current: "Cmp01").neighbor(.next) == nil)
 
         let last = steps(current: "Cmp01").render()
         #expect(last.contains("<span class=\"v-step is-end\" title=\"No next artboard\">›</span>"))

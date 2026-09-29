@@ -12,13 +12,13 @@
 # (com.apple.dnssd.service denied) and IP egress only to localhost. HTTPS_PROXY names the
 # proxy as `localhost`, as the harness does.
 #
-# Expected: the proxy log shows one unauthorised CONNECT (the 407 challenge) and one
-# authorised one, the render prints no font warning, and the family's TTF is in the
+# Expected: the proxy log shows one unauthorized CONNECT (the 407 challenge) and one
+# authorized one, the render prints no font warning, and the family's TTF is in the
 # cache. --deny-trustd also denies com.apple.trustd.agent, reproducing what the real
 # harness does unless `sandbox.enableWeakerNetworkIsolation` is set: URLSession then cannot
 # check the certificate, and on macOS the curl fallback (CurlDataFetcher) fetches instead,
 # so the render still prints no warning and the proxy log shows each URL twice — once
-# from URLSession (407, then authorised), once from curl (authorised up front). See
+# from URLSession (407, then authorized), once from curl (authorized up front). See
 # project/2026-09-26-sandbox-font-downloads.md.
 
 set -euo pipefail

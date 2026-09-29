@@ -4,7 +4,7 @@
 //
 
 extension IconLibraryMapping {
-    /// How a library's React component draws its glyph, which a paint that is not a colour
+    /// How a library's React component draws its glyph, which a paint that is not a color
     /// has to know: every supported library renders an `<svg>`, but they differ in the
     /// attribute the glyph is painted with and the user space it is drawn in.
     struct Glyph: Friendly {

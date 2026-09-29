@@ -30,7 +30,7 @@ struct PenMeshGridTests {
         }
     }
 
-    @Test("A complete fill builds a grid with the fill's positions and colours")
+    @Test("A complete fill builds a grid with the fill's positions and colors")
     func complete() throws {
         let grid = try PenMeshGrid(fill())
         #expect(grid.columns == 2)
@@ -56,7 +56,7 @@ struct PenMeshGridTests {
         #expect(grid.vertices[1].handles == expected)
     }
 
-    @Test("An unresolved variable is opaque black; a colour is read as Pen's mesh reads it")
+    @Test("An unresolved variable is opaque black; a color is read as Pen's mesh reads it")
     func unreadableColors() throws {
         let colors: [PenValue<String>] = [.variable("brand"), .literal("#1234"), .literal("red"), .literal("#FF000080")]
         let grid = try PenMeshGrid(fill(colors: colors))
@@ -86,8 +86,8 @@ struct PenMeshGridTests {
         #expect(invalidity(fill(columns: -2, rows: -2)) == .nonPositiveDimension(columns: -2, rows: -2))
     }
 
-    @Test("The vertex initialiser validates the count too")
-    func vertexInitialiser() {
+    @Test("The vertex initializer validates the count too")
+    func vertexInitializer() {
         let vertex = PenMeshGrid.Vertex(position: Vector(0, 0), handles: .defaults(columns: 2, rows: 2), color: .black)
         #expect(throws: PenMeshGrid.Invalidity.countMismatch(expected: 4, points: 1, colors: 1)) {
             try PenMeshGrid(columns: 2, rows: 2, vertices: [vertex])

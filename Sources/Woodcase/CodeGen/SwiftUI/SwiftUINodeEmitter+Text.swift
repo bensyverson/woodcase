@@ -6,9 +6,9 @@
 extension SwiftUINodeEmitter {
     /// A text node: `Text` in the support file's `penFont` (which pins optical sizing off
     /// and carries the line height), a frame for its growth mode, and its paint — one plain
-    /// colour as `foregroundStyle`, anything else as layers seen through its glyphs
+    /// color as `foregroundStyle`, anything else as layers seen through its glyphs
     /// (`penTextFill`). A text with no enabled fill is `.foregroundStyle(.clear)`: Pen
-    /// draws it as nothing, in either colour scheme. A text with inner shadows always takes
+    /// draws it as nothing, in either color scheme. A text with inner shadows always takes
     /// the layers, which draw the shadows inside its glyphs over its paint.
     ///
     /// `auto` text sizes to its content and never wraps, so it is `.fixedSize()`: left
@@ -44,7 +44,7 @@ extension SwiftUINodeEmitter {
         if horizontal != .leading {
             view = view.modified(".multilineTextAlignment(.\(horizontal == .center ? "center" : "trailing"))")
         }
-        // Where a plain colour's `foregroundStyle` goes: before the growth frame.
+        // Where a plain color's `foregroundStyle` goes: before the growth frame.
         let styleIndex = view.modifiers.count
         let growth = data.textGrowth ?? .auto
         var width = Dimension.fit
@@ -72,7 +72,7 @@ extension SwiftUINodeEmitter {
         let layers = paintLayers(data.fills, box: fillBox(width: width, height: height), of: node.id, unemitted: &unemitted)
         let innerShadows = effects(data.effects).inner
         if !innerShadows.isEmpty {
-            // The glyphs cast an inner shadow unpainted, so even one colour is a layer here,
+            // The glyphs cast an inner shadow unpainted, so even one color is a layer here,
             // and a text with no paint still shows its shadow over nothing.
             let paint = layers.isEmpty ? [SwiftUIViewCode(head: "Color.clear")] : layers.map(\.view)
             view.modifiers.append(SwiftUIViewCode.Modifier(
@@ -85,7 +85,7 @@ extension SwiftUINodeEmitter {
             view.modifiers.append(SwiftUIViewCode.Modifier(".penTextFill", content: layers.map(\.view)))
         } else if !(data.fills?.all ?? []).contains(where: \.isEnabled) {
             // Pen draws a text with no enabled paint as nothing; left unstyled, SwiftUI
-            // would draw it in `.primary`, black or white by the colour scheme.
+            // would draw it in `.primary`, black or white by the color scheme.
             view.modifiers.insert(SwiftUIViewCode.Modifier(".foregroundStyle(.clear)"), at: styleIndex)
         }
         warnUnemitted(node, unemitted)

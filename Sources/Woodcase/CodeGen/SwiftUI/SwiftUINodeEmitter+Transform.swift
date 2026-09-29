@@ -13,10 +13,10 @@ extension SwiftUINodeEmitter {
     /// them — is offset to that anchor, so it turns and flips about its top-leading corner
     /// and lands where Pen puts it, whatever its size. A node in a stack is placed by the
     /// stack instead, and Pen's layout grows its slot to the turned bounding box; so it
-    /// turns about its centre, and a node of fixed size — a turned fill child included, when
-    /// ``turnedFillsSized(_:of:)`` fixed its box — is framed to that box, centred in
-    /// it as the renderer centres it. A group in a stack sizes itself to that box
-    /// (`PenGroupFlow`) and turns about its centre too. `rotationEffect` moves pixels but not layout, which is
+    /// turns about its center, and a node of fixed size — a turned fill child included, when
+    /// ``turnedFillsSized(_:of:)`` fixed its box — is framed to that box, centered in
+    /// it as the renderer centers it. A group in a stack sizes itself to that box
+    /// (`PenGroupFlow`) and turns about its center too. `rotationEffect` moves pixels but not layout, which is
     /// why the frame is needed there.
     ///
     /// Pen's rotation is counter-clockwise and SwiftUI's clockwise, so the angle is negated.

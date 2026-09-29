@@ -12,12 +12,12 @@ extension PenRect {
         )
     }
 
-    /// The horizontal centre.
+    /// The horizontal center.
     var midX: Double {
         x + width / 2
     }
 
-    /// The vertical centre.
+    /// The vertical center.
     var midY: Double {
         y + height / 2
     }

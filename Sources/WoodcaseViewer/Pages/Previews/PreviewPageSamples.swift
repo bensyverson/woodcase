@@ -27,13 +27,13 @@ enum PreviewPageSamples {
     static let atom = PreviewComponent(
         slug: "avatar",
         title: "Avatar",
-        blurb: "One identity as a coloured disc with its initial — the atom every other identity display is built from.",
+        blurb: "One identity as a colored disc with its initial — the atom every other identity display is built from.",
         source: "Sources/WoodcaseViewer/Components/AvatarView.swift",
         states: [
             PreviewState(
                 slug: "small",
                 name: "Small — 15 px",
-                note: "The size a table row uses. The initial should sit dead centre.",
+                note: "The size a table row uses. The initial should sit dead center.",
                 frame: .strip
             ) { AvatarView(identity: "claude-a", size: .small) },
             PreviewState(

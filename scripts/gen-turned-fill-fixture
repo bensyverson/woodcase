@@ -4,14 +4,14 @@
 the main-axis share, or the container's inner cross size — and gives it the bounds of the
 turned result as its slot, so the container grows and later siblings move.
 
-Each board is a white 360×240 `layout: none` frame holding one grey flex container at
+Each board is a white 360×240 `layout: none` frame holding one gray flex container at
 (20, 20): `[A, B, C]`, with A and C fixed 40×40 blue squares and B the turned red fill
 child, so B's slot shows in C's position and in the container's size. No text, so no font
 enters the render.
 
   row-main-30 / row-main-90    B fills the row's width (row 300 wide), turned 30° / 90°
   row-main-center-30           the same, alignItems center, so A and C sit on the slot's
-                               centre line
+                               center line
   row-main-two-30              a second, unturned fill D after C shares the width with B
   col-main-30 / col-main-90    B fills the column's height (column 200 tall)
   row-cross-30 / row-cross-90  B fills the row's height (row 120 tall, width fit_content)

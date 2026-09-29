@@ -24,19 +24,19 @@ font, as the first round of this note had left open.
 A second pass, at Ben's request, audited Pen's whole bundled Google table (1,899 families)
 against what Woodcase's Google font resolver picks: the resolver's file selection agrees with
 Pen for every family both know; the rest is google/fonts' main branch having moved on from
-Pen's pinned catalogue (see *Every family*).
+Pen's pinned catalog (see *Every family*).
 
 ## How the face was established
 
 1. **Pen's font source.** Pen's editor JavaScript in
-   `/Applications/Pen.app/Contents/Resources/app.asar` carries its Google font catalogue as a
+   `/Applications/Pen.app/Contents/Resources/app.asar` carries its Google font catalog as a
    literal table. IBM Plex Sans has two styles, both variable:
    `https://fonts.gstatic.com/s/ibmplexsans/v23/zYXgKVElMYYaJe8bpLHnCwDKtdbUFI5NadY.ttf`
    (weight 400, axes `wdth` 75–100, `wght` 100–700) and `.../zYX-KVElMYYaJe8bpLHnCwDKhdTeEKxIedbzDw.ttf`
    (the italic). Found with `LC_ALL=C grep -a -o '{name:"IBM Plex Sans",styles:.\{600\}' app.asar`;
    `scripts/pen-font-table.py` prints the whole table as JSON.
 2. **The file.** The gstatic v23 file (sha1 `3bd98f63…`, 532,740 bytes) is what is committed as
-   `Tests/WoodcaseTests/Fonts/IBMPlexSans[wdth,wght].ttf`, with its OFL licence staying in
+   `Tests/WoodcaseTests/Fonts/IBMPlexSans[wdth,wght].ttf`, with its OFL license staying in
    `LICENSES/ibm-plex-sans-LICENSE`. The Google font resolver's copy from the google/fonts
    repository (`~/.woodcase/fonts/ibmplexsans/IBMPlexSans[wdth,wght].ttf`, sha1 `105e2a89…`) is
    the same release, Version 3.201: gstatic's is subset by four glyphs (`IJacute`, `Jacute` and
@@ -86,15 +86,15 @@ None of the 25 disagreements is the resolver choosing badly among the files goog
 
 - **Not found (18).** Nine are Material Icons and Material Symbols, which google/fonts does not
   host; Woodcase draws those from its bundled icon fonts, not the resolver. The other nine were
-  renamed or replaced in google/fonts after Pen's catalogue was cut: `BBH Sans Bartle`, `Bogle`
+  renamed or replaced in google/fonts after Pen's catalog was cut: `BBH Sans Bartle`, `Bogle`
   and `Hegarty` are `BBH Bartle`… there now, and the six `Edu … Cursive/Hand/Hand Pre` families
   became `Edu AU VIC WA NT Hand`, `Edu QLD Beginner` and their siblings.
 - **Variable for static (6)** — Capriola, Castoro, Grenze, Libre Baskerville, Libre Caslon Text,
   Noto Sans Myanmar: google/fonts' main branch ships only a variable file now, where Pen's pinned
-  catalogue still serves the static cuts. There is no static file to pick.
+  catalog still serves the static cuts. There is no static file to pick.
 - **Axes (1)** — Akshar: google/fonts added a `CTRS` axis beside `wght` 300–700.
 
-So the only disagreement is **catalogue drift**: Pen pins each family to a fonts.gstatic.com
+So the only disagreement is **catalog drift**: Pen pins each family to a fonts.gstatic.com
 version (`v23` for IBM Plex Sans, `v20` for Inter) from its bundled table, and the resolver reads
 google/fonts' main branch. For the families the suites draw it is nil: IBM Plex Sans, Inter
 (upright and italic), IBM Plex Mono, Spectral, Lora and Instrument Serif — seven files — were
@@ -107,7 +107,7 @@ source to Pen's gstatic URLs would buy exact version parity for 16 of 1,899 fami
 static-for-variable, Akshar, the nine renames) and would tie Woodcase to a table baked into
 Pen's app build, which it cannot read at run time without Pen installed. The cheaper hedge, if
 the renames ever matter to a user: teach the resolver the nine old names (an alias table), and
-rerun this audit when Pen's catalogue or google/fonts moves.
+rerun this audit when Pen's catalog or google/fonts moves.
 
 ## Gates moved
 

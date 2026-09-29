@@ -48,7 +48,7 @@ struct RelativeAgeTests {
         #expect(RelativeAge.text(from: now.addingTimeInterval(30), to: now, style: .long) == "just now")
     }
 
-    @Test("Recency is the 30-second window the outline colours rows by")
+    @Test("Recency is the 30-second window the outline colors rows by")
     func recencyWindow() {
         #expect(RelativeAge.isRecent(now.addingTimeInterval(-29), now: now))
         #expect(!RelativeAge.isRecent(now.addingTimeInterval(-31), now: now))

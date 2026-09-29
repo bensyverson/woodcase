@@ -13,7 +13,7 @@ extension PenLayoutEngine {
     /// geometry in.
     ///
     /// Pen's icon node overrides `computeVisualLocalBounds` to return `fillPath.bounds`
-    /// — its vector glyph, fitted to the box by its *shorter* side and centred, then
+    /// — its vector glyph, fitted to the box by its *shorter* side and centered, then
     /// measured tightly — not the box (`project/2026-09-28-geometry-model.md`, "Pen's
     /// own code" for the icon class, `DJt`). This measures the exact glyph
     /// ``Woodcase/PenIconGlyph`` builds for ``Woodcase/PenIconFontRenderer`` to draw —

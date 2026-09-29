@@ -44,8 +44,8 @@ struct PropertyAssignmentTests {
 
     // MARK: - Strings
 
-    @Test("A #hex colour stays the string the file wants")
-    func hexColour() throws {
+    @Test("A #hex color stays the string the file wants")
+    func hexColor() throws {
         #expect(try PropertyAssignment.parse("kind.fills=#ff8800").value == .string("#ff8800"))
     }
 

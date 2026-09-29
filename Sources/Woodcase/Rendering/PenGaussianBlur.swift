@@ -25,7 +25,7 @@ enum PenGaussianBlur {
     /// Sigmas below this many pixels change nothing an 8-bit image can show.
     static let minimumSigma: CGFloat = 0.25
 
-    /// The weights of a normalised Gaussian of `sigma` pixels, reaching three sigmas each way.
+    /// The weights of a normalized Gaussian of `sigma` pixels, reaching three sigmas each way.
     ///
     /// - Parameter sigma: The standard deviation, in pixels; positive.
     /// - Returns: An odd number of weights summing to 1, symmetric about the middle one.
@@ -42,7 +42,7 @@ enum PenGaussianBlur {
     ///
     /// - Parameters:
     ///   - image: An image to blur; it is redrawn as premultiplied 8-bit RGBA in its own
-    ///     colour space (sRGB when it has none).
+    ///     color space (sRGB when it has none).
     ///   - sigma: The standard deviation, in pixels. Below ``minimumSigma`` the image comes
     ///     back as it is.
     ///   - edges: What the kernel reads past the image's edges.

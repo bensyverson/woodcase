@@ -188,8 +188,8 @@ struct ActivityReaderTests {
         }
     }
 
-    @Test("Tail honours the filters")
-    func tailHonoursFilters() async throws {
+    @Test("Tail honors the filters")
+    func tailHonorsFilters() async throws {
         try await withTemporaryHome { home in
             let log = ActivityLog(home: home)
             try await log.append([
@@ -275,8 +275,8 @@ struct ActivityReaderTests {
         }
     }
 
-    @Test("Cancelling the task that is following ends the iteration")
-    func cancellingTheConsumerEndsTheFollow() async throws {
+    @Test("Canceling the task that is following ends the iteration")
+    func cancelingTheConsumerEndsTheFollow() async throws {
         try await withTemporaryHome { home in
             let log = ActivityLog(home: home)
             try await log.append([Self.event(revision: "r1")])

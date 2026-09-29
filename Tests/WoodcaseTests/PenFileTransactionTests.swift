@@ -38,7 +38,7 @@ struct PenFileTransactionTests {
     /// ``concurrentTransactionsSerialize`` failed a loaded soak with a genuine
     /// ``PenFileError/lockTimeout(url:timeout:)`` (leaf `YfptE`). Bounded at "not hung"
     /// scale instead, per `project/gotchas.md`. Tests that expect the timeout *itself*
-    /// keep their own short budget — that is the behaviour they assert.
+    /// keep their own short budget — that is the behavior they assert.
     private static let lockBudget: Duration = .seconds(60)
 
     private enum FixtureLoadError: Error {

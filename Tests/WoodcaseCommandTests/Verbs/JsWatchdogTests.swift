@@ -9,7 +9,7 @@ import Testing
 import Woodcase
 @testable import WoodcaseCommandCore
 
-/// The last line of defence: a script that never calls back into Swift.
+/// The last line of defense: a script that never calls back into Swift.
 ///
 /// The host's deadline is checked by every bridged call, so it bounds every script that
 /// does work. `while (true) {}` does no work the host can see, and JavaScriptCore

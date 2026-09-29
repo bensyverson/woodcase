@@ -104,4 +104,4 @@ suggest `migrate` (it fails through the same gate); `python3 -m json.tool` is th
   Until that is fixed, only the plain `swift test --quiet` verdict counts.
 - A worktree agent's "based on `0158471`" in its report was wrong twice; `git merge-base
   main <branch>` said `06f2e40`/`93dd088`. Verify, don't read.
-- `##"…"##` for any Swift raw string holding a `"#RRGGBB"` colour.
+- `##"…"##` for any Swift raw string holding a `"#RRGGBB"` color.

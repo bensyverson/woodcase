@@ -8,14 +8,14 @@ import CoreGraphics
 extension PenStrokeRenderer {
     /// How a uniform stroke is drawn: width, alignment, join and cap.
     struct Style: Friendly {
-        /// The mitre limit both the solid and the painted path use — CoreGraphics' default.
+        /// The miter limit both the solid and the painted path use — CoreGraphics' default.
         static let miterLimit: CGFloat = 10
 
         /// The stroke's width in points.
         let width: CGFloat
         /// Where the stroke sits relative to the outline.
         let alignment: PenStrokeAlign
-        /// The line join, `nil` meaning mitre.
+        /// The line join, `nil` meaning miter.
         let penJoin: PenStrokeJoin?
         /// The line cap, `nil` meaning butt.
         let penCap: PenStrokeCap?
@@ -38,7 +38,7 @@ extension PenStrokeRenderer {
             }
         }
 
-        /// The width the path is stroked at: the stroke's own for a centred stroke, twice
+        /// The width the path is stroked at: the stroke's own for a centered stroke, twice
         /// it for inner and outer, whose other half the alignment clip removes.
         var outlineWidth: CGFloat {
             alignment == .center ? width : width * 2
@@ -51,7 +51,7 @@ extension PenStrokeRenderer {
         }
     }
 
-    /// The colour of a stroke that is exactly one solid paint with no blend mode, or `nil`
+    /// The color of a stroke that is exactly one solid paint with no blend mode, or `nil`
     /// when the stroke needs the general paint path (a gradient, an image, a stack, a blend).
     static func singleSolidColor(_ fills: PenFills) -> CGColor? {
         let all = fills.all

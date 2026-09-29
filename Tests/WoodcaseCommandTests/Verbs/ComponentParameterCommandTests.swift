@@ -45,7 +45,7 @@ struct ComponentParameterCommandTests {
     }
 
     @Test("A parameter whose target takes a fill is written as that node's fill")
-    func aColourParameterWritesAFill() throws {
+    func aColorParameterWritesAFill() throws {
         let fixture = try CommandFixture(fixture: "component-props.pen")
 
         let run = try fixture.run("override", fixture.file.path, "Page/Card", "tint=#112233")

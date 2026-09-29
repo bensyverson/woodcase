@@ -13,7 +13,7 @@
     /// handful of helpers Swift keeps a handle on.
     ///
     /// Every native takes one JSON string and returns one JSON string. Uniform on
-    /// purpose: one marshalling road to test, no `JSExport` protocol to keep in step with
+    /// purpose: one marshaling road to test, no `JSExport` protocol to keep in step with
     /// a Swift signature, and no `toDictionary()` walking an object graph a second time.
     enum ScriptContext {
         /// The name the native bridge is installed under while the prelude runs, and

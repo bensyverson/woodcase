@@ -15,10 +15,10 @@ import Foundation
 ///   of the four: Pen removes the whole fill when it opens the file.
 /// - fewer than two columns or two rows: Pen keeps the fill and paints nothing, since
 ///   no patch spans a single row or column.
-/// - a colour of any length but 3, 6 or 8 digits after one leading `#` — 4-digit `#RGBA`,
+/// - a color of any length but 3, 6 or 8 digits after one leading `#` — 4-digit `#RGBA`,
 ///   a 5-digit typo, an empty string: Pen keeps it and its mesh paints it as nothing.
-/// - a colour of a readable length with a digit that is not hex (`red`, `#eGeGeG`): Pen
-///   paints another colour, the one ``PenMeshColor/hexColor(penMesh:)`` reads.
+/// - a color of a readable length with a digit that is not hex (`red`, `#eGeGeG`): Pen
+///   paints another color, the one ``PenMeshColor/hexColor(penMesh:)`` reads.
 /// - a patch whose handles fold it over itself: Pen paints it, overlapping itself and
 ///   leaving part of the box bare. See ``MeshFoldDetector`` for the test.
 /// - a point written in neither `[x, y]` nor object form
@@ -27,7 +27,7 @@ import Foundation
 ///   says. See `DocumentLinter+MeshPoint.swift`.
 ///
 /// Counts, a grid under 2×2 and an unplaceable point are ``LintCheck/meshGradientDropped``
-/// errors; a colour Pen misreads, a fold and a point Pen places anyway are
+/// errors; a color Pen misreads, a fold and a point Pen places anyway are
 /// ``LintCheck/meshGradientDistorted`` warnings. A disabled paint is skipped: nothing
 /// is painted either way. The Woodcase ruling behind all of them is that Woodcase never
 /// writes a file Pen renders badly, whatever Woodcase's own renderer makes of it.
@@ -36,7 +36,7 @@ extension DocumentLinter {
     ///
     /// - Parameters:
     ///   - row: The row the node renders at, for the finding's id and path.
-    ///   - node: The node as it renders — see `Context.resolved(_:)` — so a `$colour`
+    ///   - node: The node as it renders — see `Context.resolved(_:)` — so a `$color`
     ///     is judged on the value it resolves to.
     /// - Returns: At most one dropped finding per paint; when a paint is not dropped, at
     ///   most one distorted finding for it.
@@ -47,7 +47,7 @@ extension DocumentLinter {
                 return [finding(
                     .meshGradientDropped, row,
                     "has a mesh gradient \(label) \(reason) Write `columns × rows` points and "
-                        + "colours, at least 2×2."
+                        + "colors, at least 2×2."
                 )]
             }
             if let unplaceable = unplaceablePointsReason(paint.fill) {
@@ -85,7 +85,7 @@ extension DocumentLinter {
         if points.count != vertices || colors.count != vertices {
             var counts: [String] = []
             if points.count != vertices { counts.append("\(points.count) points") }
-            if colors.count != vertices { counts.append("\(colors.count) colours") }
+            if colors.count != vertices { counts.append("\(colors.count) colors") }
             return "with \(counts.joined(separator: " and ")) for a \(grid) grid of \(vertices) vertices; "
                 + "Pen removes the whole fill when it opens the file."
         }
@@ -98,8 +98,8 @@ extension DocumentLinter {
 
     // MARK: - Distorted
 
-    /// What Pen paints wrong in a well-formed mesh: colours it reads as nothing or as
-    /// another colour, points it places anyway, then folds.
+    /// What Pen paints wrong in a well-formed mesh: colors it reads as nothing or as
+    /// another color, points it places anyway, then folds.
     private static func distortions(_ fill: PenFill.PenMeshGradientFill) -> [String] {
         var problems: [String] = []
 
@@ -112,7 +112,7 @@ extension DocumentLinter {
         }
         if !unread.isEmpty {
             problems.append(
-                "colours Pen's mesh reads as nothing (it reads 3, 6 or 8 hex digits), at "
+                "colors Pen's mesh reads as nothing (it reads 3, 6 or 8 hex digits), at "
                     + unread.joined(separator: ", ")
             )
         }
@@ -123,7 +123,7 @@ extension DocumentLinter {
             return "vertex \(color.vertex) `\(color.text)` as `\(hexString(PenMeshColor.hexColor(penMesh: color.text), digits: digits.count))`"
         }
         if !coerced.isEmpty {
-            problems.append("colours that are not hex, which Pen's mesh reads as another colour: " + coerced.joined(separator: ", "))
+            problems.append("colors that are not hex, which Pen's mesh reads as another color: " + coerced.joined(separator: ", "))
         }
 
         if let repaired = repairedPointsProblem(fill) {
@@ -142,12 +142,12 @@ extension DocumentLinter {
         return problems
     }
 
-    /// Whether a colour is 4-digit hex: `#` and exactly four hex digits.
+    /// Whether a color is 4-digit hex: `#` and exactly four hex digits.
     private static func isRGBAHex(_ color: String) -> Bool {
         color.count == 5 && color.hasPrefix("#") && color.dropFirst().allSatisfy(\.isHexDigit)
     }
 
-    /// A colour as `#RRGGBB`, or `#RRGGBBAA` when it was read from eight digits.
+    /// A color as `#RRGGBB`, or `#RRGGBBAA` when it was read from eight digits.
     private static func hexString(_ color: PenHexColor, digits: Int) -> String {
         let channels = digits == 8 ? [color.red, color.green, color.blue, color.alpha] : [color.red, color.green, color.blue]
         return "#" + channels.map { String(format: "%02X", $0) }.joined()

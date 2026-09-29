@@ -15,7 +15,7 @@ Woodcase, in order:
 | `8d8ed71` | `OBkh9G` | SwiftUI effects, transforms, node blend modes (`PenSupport+Effects.swift`); the render test runs over `SwiftUIRenderBoard.all` |
 | `ff04c15` | `US7HZU` | eight `layout-text-*` Plex fixtures, all within CG + 1.0, no baselines; auto text is `.fixedSize()`; `pen-oracle` reads layout after the export ([finding](2026-09-26-swiftui-text-in-flex.md)) |
 | `a9303d8` | `Sus1Pt` | one gradient map: `frameTransform(in:)` is built on `GradientGeometry.affineComponents`; 72 MAEs byte-identical |
-| `d73ce6b` | `DpQmXu` | every call into a test page has a deadline; `BoundedWait` abandons non-cancellable jobs; 8-minute `.hangGuard` on 32 suites ([finding](2026-09-26-the-page-that-never-answers.md)) |
+| `d73ce6b` | `DpQmXu` | every call into a test page has a deadline; `BoundedWait` abandons non-cancelable jobs; 8-minute `.hangGuard` on 32 suites ([finding](2026-09-26-the-page-that-never-answers.md)) |
 | `ad81290` | `zl2U6G` | SwiftUI gradients, images, stacked fills, paints on text (`PenSupport+Paint.swift`); render-transforms-and-effects gates at CG + 1.0 (0.31, CG 0.89) |
 | `223122a` | `PJwhm2`, `MFvCPv` | `PenNode.Kind` is `indirect` (272-byte nodes); expansion walks iteratively (`PenTreeRewrite`), 16 nested instances 3.9 MB → 100 KB of debug stack; override keys follow Pen: nested-instance paths handed down, own-slot-content keys dropped / refused / linted ([finding](2026-09-26-debug-stack-depth.md), [override keys](2026-09-26-slot-override-keys.md)) |
 
@@ -39,12 +39,12 @@ Woodcase, in order:
    is duplicated in two test targets until then.
 4. Effects: background blur is a Material plus a warning; shadow spread is not emitted (the 2.19 format has none).
 5. Paints: images ship as package resources loaded through `Image(penResource:bundle:)`; stops interpolate in
-   device colour space.
+   device color space.
 
 ## Open questions for Ben
 
 - **Own-slot-content overrides** (decision leaf `caIi4g`): should `woodcase override <instance>/<own slot content> …` be rewritten into the
-  slot's `children` (keeping the old convenience, producing files Pen honours) instead of refused?
+  slot's `children` (keeping the old convenience, producing files Pen honors) instead of refused?
 
 ## Parked agents (stopped by the panic, not resumed per Ben's pause)
 

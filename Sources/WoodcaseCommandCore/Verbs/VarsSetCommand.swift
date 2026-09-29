@@ -30,7 +30,7 @@ import Woodcase
 ///
 /// Several `name=value` pairs go through **one** transaction, with `--theme` and
 /// `--type` applying to every one of them, so a token layer is one call rather than one
-/// process launch per colour. Each variable is still its own `var` event in the
+/// process launch per color. Each variable is still its own `var` event in the
 /// activity log, sharing the call's batch id, so `activity` reads as it always did and
 /// one `undo` takes the whole call back.
 ///
@@ -44,7 +44,7 @@ struct VarsSet: AsyncParsableCommand {
         abstract: "Write: add variables or change them, optionally for one theme.",
         discussion: """
         The value is typed by --type, else by the variable's existing type, else by \
-        what it looks like: #RGB/#RRGGBB/#RRGGBBAA is a colour, true/false a boolean, \
+        what it looks like: #RGB/#RRGGBB/#RRGGBBAA is a color, true/false a boolean, \
         a number a number, anything else a string. A value beginning with $ is a \
         reference to another variable.
 
@@ -214,7 +214,7 @@ struct VarsSet: AsyncParsableCommand {
     /// The one line a name that already existed earns, before the outline.
     ///
     /// The outline `set` prints is the same whether the name was new or not, so a
-    /// caller told to "add `--warn`" could recolour nine live references and read a
+    /// caller told to "add `--warn`" could recolor nine live references and read a
     /// clean success. This says what was there: the type, every option's value for a
     /// themed variable — all of them, because the caller is about to replace one and
     /// keep the rest — and how many things were resolving through it.

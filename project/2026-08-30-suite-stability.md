@@ -125,7 +125,7 @@ Two changes, because the premise was wrong on both sides. The generation is now 
 while the thread was queued counts as having happened before the resolution it really
 did affect. And each case in that suite runs its window again if a registration landed
 inside it, which is what makes its count a measurement of the cache rather than of its
-neighbours.
+neighbors.
 
 ## 3. The orphan: `--follow` had no reason to stop
 
@@ -152,7 +152,7 @@ a failure at each escalation, and `SIGKILL`s any survivor in `deinit`.
 
 ## 4. The wall clocks
 
-Three budgets in tests measured the machine rather than the behaviour, and all three
+Three budgets in tests measured the machine rather than the behavior, and all three
 are now bounded at "not hung" scale per `project/gotchas.md`:
 
 | where | was | now |

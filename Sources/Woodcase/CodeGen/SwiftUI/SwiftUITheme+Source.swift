@@ -16,7 +16,7 @@ extension SwiftUITheme {
             "public struct PenTheme: Hashable, Sendable {",
         ]
         for axis in axes {
-            let bridge = axis.bridgesColorScheme ? ", which follows the colour scheme" : ""
+            let bridge = axis.bridgesColorScheme ? ", which follows the color scheme" : ""
             lines.append("    /// The `\(axis.name)` axis\(bridge).")
             lines.append("    public enum \(axis.typeName): String, CaseIterable, Hashable, Sendable {")
             for option in axis.options {

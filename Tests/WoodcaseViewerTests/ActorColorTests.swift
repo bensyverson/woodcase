@@ -7,9 +7,9 @@ import Foundation
 import Testing
 @testable import WoodcaseViewer
 
-/// The identity colour, pinned against the Jobs dashboard's own values.
+/// The identity color, pinned against the Jobs dashboard's own values.
 ///
-/// The whole point of porting the hash is that an agent is the same colour in both
+/// The whole point of porting the hash is that an agent is the same color in both
 /// tools, so these two rows are a contract with `jobs/internal/web/render/actor_color.go`
 /// and not merely a regression guard.
 struct ActorColorTests {
@@ -56,7 +56,7 @@ struct ActorColorTests {
         #expect(ActorColor(name: "9lives").initial == "9")
     }
 
-    @Test("An empty name still yields a colour and a placeholder initial")
+    @Test("An empty name still yields a color and a placeholder initial")
     func emptyNameIsSafe() {
         let color = ActorColor(name: "")
         #expect(color.initial == "?")
@@ -103,7 +103,7 @@ struct ActorColorTests {
     }
 
     /// WCAG 2.x relative luminance, written out here rather than borrowed from the
-    /// type under test: a test that reuses the implementation's own maths proves the
+    /// type under test: a test that reuses the implementation's own math proves the
     /// two agree, not that either is right.
     ///
     /// - Parameters:

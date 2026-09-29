@@ -147,7 +147,7 @@ struct ViewerEndpointsTests {
     }
 
     @Test("?node= and ?depth= narrow the tree the way the verb's flags do")
-    func treeHonoursNodeAndDepth() async throws {
+    func treeHonorsNodeAndDepth() async throws {
         let bench = try Bench()
         defer { bench.clean() }
 

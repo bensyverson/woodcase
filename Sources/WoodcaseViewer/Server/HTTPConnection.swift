@@ -217,7 +217,7 @@ actor HTTPConnection {
     ///
     /// - Parameter data: The bytes to write.
     /// - Returns: `false` if the client did not take them, including when it stopped
-    ///   taking them altogether — the connection is cancelled in that case, because a
+    ///   taking them altogether — the connection is canceled in that case, because a
     ///   peer that has not read a byte in ``sendBudget`` is not coming back.
     private func send(_ data: Data) async -> Bool {
         await ResumeOnce.value(

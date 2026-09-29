@@ -305,7 +305,7 @@ struct PenLayoutEngineSubtreeTests {
         // a flex container; see 2205818), so the ceiling here is a real-time budget, not
         // an arbitrary micro-benchmark: it must complete well under one frame at 120Hz
         // (8.3ms). A raw wall-clock `#expect` on one sample is exactly what
-        // project/gotchas.md warns is unreliable in the parallel suite — a neighbour's
+        // project/gotchas.md warns is unreliable in the parallel suite — a neighbor's
         // `swift build` can inflate a single measurement several-fold. `PerformanceBudget`
         // takes the minimum of several in-process repetitions instead, and is only
         // strict on an optimized build (or with $WOODCASE_BUDGET_STRICT set); a debug

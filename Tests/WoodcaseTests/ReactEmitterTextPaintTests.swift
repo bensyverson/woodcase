@@ -7,7 +7,7 @@ import Foundation
 import Testing
 @testable import Woodcase
 
-/// How the React emitter paints a text node whose fills are more than one plain colour:
+/// How the React emitter paints a text node whose fills are more than one plain color:
 /// every enabled fill becomes a background layer over the text's own box, shown only
 /// through the glyphs with `background-clip: text` — Pen's domain for a text paint is the
 /// node box (`project/2026-09-26-text-and-stroke-fills.md`, finding 1).
@@ -45,17 +45,17 @@ struct ReactEmitterTextPaintTests {
         ##"color: "transparent","##,
     ]
 
-    // MARK: - The plain-colour route
+    // MARK: - The plain-color route
 
     /// Green on its first run: it pins today's output, which the change must keep.
-    @Test("A lone solid colour stays a plain color declaration")
+    @Test("A lone solid color stays a plain color declaration")
     func loneSolidStaysColor() throws {
         let content = try card(fill: "\"#123456\"")
         #expect(content.contains(##"color: "#123456","##))
         #expect(!content.contains("backgroundClip"))
     }
 
-    @Test("A lone solid colour with a blend mode blends the text element")
+    @Test("A lone solid color with a blend mode blends the text element")
     func blendedSolidBlendsElement() throws {
         let content = try card(fill: ##"{"type": "color", "color": "#123456", "blendMode": "multiply"}"##)
         #expect(content.contains(##"color: "#123456","##))
@@ -120,7 +120,7 @@ struct ReactEmitterTextPaintTests {
         #expect(content.contains(##"backgroundPosition: "center","##))
     }
 
-    @Test("A variable colour in a stack is a flat gradient of the variable")
+    @Test("A variable color in a stack is a flat gradient of the variable")
     func variableSolidLayer() throws {
         let content = try card(fill: "[\"$ink\", \(Self.ramp)]")
         #expect(content.contains("linear-gradient(var(--ink), var(--ink))"))
@@ -140,7 +140,7 @@ struct ReactEmitterTextPaintTests {
     @Test("A shader alone paints nothing, as on shapes")
     func shaderAlonePaintsNothing() throws {
         // A shader is never emitted, and must not clip the text to an empty background.
-        // Writing no colour at all used to leave the glyphs the page's black, which is not
+        // Writing no color at all used to leave the glyphs the page's black, which is not
         // nothing; they are transparent, as the Core Graphics renderer leaves them.
         let content = try card(fill: ##"{"type": "shader", "url": "./shaders/uv.frag"}"##)
         #expect(!content.contains("backgroundClip"))

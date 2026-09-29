@@ -93,7 +93,7 @@ struct ScriptRunReport: Friendly {
     /// One event of the timeline, in the shape `--json` prints it.
     ///
     /// A rendering of ``WoodcaseScripting/ScriptRun/Event`` rather than the enum
-    /// itself: Swift's synthesized `Codable` for an enum with an unlabelled payload
+    /// itself: Swift's synthesized `Codable` for an enum with an unlabeled payload
     /// writes `{"write":{"_0":…}}`, and `_0` is not a key a caller should have to know.
     /// This is the CLI's wire shape, the way ``Woodcase/BatchReport``'s rows are — one
     /// discriminator and the fields that kind carries.

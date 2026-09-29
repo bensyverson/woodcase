@@ -39,7 +39,7 @@ let image = PenRenderer.render(
 
 Only the `http` and `https` schemes. Everything else — a bare relative path, a `./`-prefixed one — belongs to the file provider and keeps resolving against the `.pen` file's directory, unchanged.
 
-Fills are collected from every node kind that has them: rectangle, ellipse, polygon, path, frame, icon and text, recursing through frame and group children. Stroke paints are *not* collected: they are typed as fills in the model, but the renderer only ever resolves a stroke to a solid colour, so an image stroke fill can never reach a pixel.
+Fills are collected from every node kind that has them: rectangle, ellipse, polygon, path, frame, icon and text, recursing through frame and group children. Stroke paints are *not* collected: they are typed as fills in the model, but the renderer only ever resolves a stroke to a solid color, so an image stroke fill can never reach a pixel.
 
 ## Caching
 
@@ -69,7 +69,7 @@ Bytes that arrive but are not an image — an error page served with a 200 — a
 
 ## Custom Configuration
 
-The default ``RemoteImageResolver/shared`` uses ``StandardDataFetcher/make(environment:)`` — ``URLSessionDataFetcher``, which honours `HTTPS_PROXY`, `HTTP_PROXY` and `NO_PROXY`, with a curl fallback on macOS for a sandbox that cannot reach the certificate-trust service, as <doc:PenGoogleFonts> describes — and `$WOODCASE_HOME/images`. For tests or custom networking, build a resolver with its own cache and ``RemoteDataFetching`` implementation, and hand it to the provider:
+The default ``RemoteImageResolver/shared`` uses ``StandardDataFetcher/make(environment:)`` — ``URLSessionDataFetcher``, which honors `HTTPS_PROXY`, `HTTP_PROXY` and `NO_PROXY`, with a curl fallback on macOS for a sandbox that cannot reach the certificate-trust service, as <doc:PenGoogleFonts> describes — and `$WOODCASE_HOME/images`. For tests or custom networking, build a resolver with its own cache and ``RemoteDataFetching`` implementation, and hand it to the provider:
 
 ```swift
 let resolver = RemoteImageResolver(

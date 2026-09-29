@@ -36,7 +36,7 @@ public struct PaneGrip: HTML {
         }
     }
 
-    /// Which of the grip's two neighbours the custom property sizes.
+    /// Which of the grip's two neighbors the custom property sizes.
     ///
     /// Not cosmetic: it decides which way a drag runs. Widening the left column means
     /// dragging *right*; widening the right column means dragging *left*, because the
@@ -54,7 +54,7 @@ public struct PaneGrip: HTML {
     ///   - name: What to remember it as — the `localStorage` key's last component.
     ///   - property: The custom property on the grip's parent it writes.
     ///   - axis: Which way it moves.
-    ///   - edge: Which neighbour the property sizes.
+    ///   - edge: Which neighbor the property sizes.
     public init(name: String, property: String, axis: Axis, edge: Edge) {
         self.name = name
         self.property = property
@@ -71,7 +71,7 @@ public struct PaneGrip: HTML {
     /// Which way it moves.
     public let axis: Axis
 
-    /// Which neighbour the property sizes.
+    /// Which neighbor the property sizes.
     public let edge: Edge
 
     public var body: some HTML {

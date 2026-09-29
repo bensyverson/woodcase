@@ -115,9 +115,9 @@ public enum LintCheck: String, Friendly, CaseIterable {
     /// two vertices on an axis, or a point is malformed in a way Pen cannot place.
     case meshGradientDropped = "mesh-gradient-dropped"
 
-    /// A `mesh_gradient` paint Pen paints, but not as authored: a colour Pen's mesh reads
+    /// A `mesh_gradient` paint Pen paints, but not as authored: a color Pen's mesh reads
     /// as nothing (any length but 3, 6 or 8 hex digits, `#RGBA` included) or as another
-    /// colour (a digit that is not hex), a patch that folds over itself, or a malformed
+    /// color (a digit that is not hex), a patch that folds over itself, or a malformed
     /// point Pen places its own way.
     case meshGradientDistorted = "mesh-gradient-distorted"
 
@@ -231,9 +231,9 @@ public enum LintCheck: String, Friendly, CaseIterable {
         case .codegenUnmappedOverride:
             "An instance overrides a descendant no declared prop reads, so codegen inlines the component."
         case .meshGradientDropped:
-            "A mesh gradient whose points or colours do not fill its grid, whose grid is under 2×2, or with a point Pen cannot read: Pen paints nothing."
+            "A mesh gradient whose points or colors do not fill its grid, whose grid is under 2×2, or with a point Pen cannot read: Pen paints nothing."
         case .meshGradientDistorted:
-            "A mesh gradient with a colour Pen misreads (such as #RGBA), a patch that folds over itself, or a malformed point Pen repairs: Pen paints it wrong."
+            "A mesh gradient with a color Pen misreads (such as #RGBA), a patch that folds over itself, or a malformed point Pen repairs: Pen paints it wrong."
         case .textStyleStripped:
             "A text node with a stroke, underline or strikethrough, which Pen strips on load and never draws."
         case .shaderNotDrawn:

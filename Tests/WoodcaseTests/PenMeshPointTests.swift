@@ -8,7 +8,7 @@ import Testing
 @testable import Woodcase
 
 /// Covers ``PenMeshPoint``: the two wire forms a mesh vertex takes, the default handles
-/// Pen gives an omitted one, and the canonical form Pen's serialiser writes.
+/// Pen gives an omitted one, and the canonical form Pen's serializer writes.
 ///
 /// The canonical-form expectations here are single cases; the evidence that they are
 /// *Pen's* rule is `PenMeshGradientFixtureTests`, which compares against Pen's own

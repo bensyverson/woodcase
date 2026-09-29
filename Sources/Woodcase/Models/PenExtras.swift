@@ -18,7 +18,7 @@ import Foundation
 /// ``PenDecodingMode/authoring``, where an unclaimed key is refused rather than kept,
 /// so a typo such as `"fil"` is caught instead of carried along.
 ///
-/// By construction an extra never shadows a modelled key: a key the model claims is
+/// By construction an extra never shadows a modeled key: a key the model claims is
 /// decoded into its typed property and never reaches here. When a later build models a
 /// key, it simply stops being an extra.
 ///

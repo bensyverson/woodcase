@@ -13,11 +13,11 @@ import Woodcase
 /// state lives in the query, so the row works with the script off, the URL describes
 /// what you are looking at, and back and forward do the obvious thing. The script
 /// intercepts the click to swap fragments instead of navigating; that is an
-/// optimisation, not the mechanism.
+/// optimization, not the mechanism.
 ///
-/// A row touched inside the last 30 seconds carries its editors' colour as a bar down
+/// A row touched inside the last 30 seconds carries its editors' color as a bar down
 /// its left edge — the only other place, with the render's edit markers, an identity
-/// colour is allowed.
+/// color is allowed.
 ///
 /// The row carries no x/y or w/h: a node's settled rect belongs to the Details pane,
 /// which shows it beside every other property, not the outline, which is a listing of
@@ -78,10 +78,10 @@ public struct OutlineRow: HTML {
         row.name ?? "#\(row.id)"
     }
 
-    /// The colour of the bar down a touched row's left edge.
+    /// The color of the bar down a touched row's left edge.
     ///
     /// The first editor's, because ``editors`` is in the log's order of first
-    /// appearance: when two agents touch one node the bar keeps the colour it had
+    /// appearance: when two agents touch one node the bar keeps the color it had
     /// rather than flickering between them, and the full list is on `data-editors`.
     var editorColor: String {
         ActorColor(name: editors.first ?? "").css
@@ -152,7 +152,7 @@ public struct OutlineRow: HTML {
     ///
     /// Its own glyph replaces the plain type glyph rather than sitting beside it: a
     /// component or instance row already told you what role it plays, and a bare "◇"
-    /// repeated next to a labelled "◇ instance" badge is noise, not information.
+    /// repeated next to a labeled "◇ instance" badge is noise, not information.
     var mark: KindMark {
         KindMark(isReusable: row.isReusable, isInstance: row.isInstance, isSlot: row.isSlot)
     }
@@ -160,7 +160,7 @@ public struct OutlineRow: HTML {
     /// Whether the render draws a child inside this row's box, and so whether the row
     /// gets a working disclosure control rather than a blank spacer.
     ///
-    /// Read straight off the row rather than by looking at neighbouring rows in the
+    /// Read straight off the row rather than by looking at neighboring rows in the
     /// list: the outline is always rendered fully expanded (a collapsed row is
     /// client-only state, applied after the fact), so a row's own ``TreeRow/childCount``
     /// already answers it without walking anything.

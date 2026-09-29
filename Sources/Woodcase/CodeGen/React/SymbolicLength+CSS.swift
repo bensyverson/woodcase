@@ -29,7 +29,7 @@ extension SymbolicLength {
         return "calc(\(parts.joined(separator: " + ")))"
     }
 
-    /// The length as an operand inside another `calc()`, parenthesised when compound.
+    /// The length as an operand inside another `calc()`, parenthesized when compound.
     var operand: String {
         let parts = cssParts
         if parts.isEmpty { return "0px" }

@@ -70,7 +70,7 @@ struct SwiftUIEmitterGroupTests {
         #expect(!code.contains(".offset(x: -10"))
     }
 
-    @Test("A turned group in a stack grows its slot to the turned union and turns about its centre")
+    @Test("A turned group in a stack grows its slot to the turned union and turns about its center")
     func turnedGroupInAStack() throws {
         let code = try body(
             child: group(keys: ##""rotation": 30"##, children: [rect(id: "a", x: 0, y: 0)]), layout: "vertical"

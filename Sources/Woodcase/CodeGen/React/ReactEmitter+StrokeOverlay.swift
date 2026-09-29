@@ -16,10 +16,10 @@ extension ReactEmitter {
     private static let ringMaskLayers = "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)"
 
     /// The style of the element that draws a box's stroke when it is more than one plain
-    /// colour or a plain colour on per-side widths, or `nil` when a plain declaration
+    /// color or a plain color on per-side widths, or `nil` when a plain declaration
     /// (``emitStroke(_:)``) draws it or nothing does.
     ///
-    /// CSS borders, outlines and box-shadows take one colour, so the stroke is an absolutely
+    /// CSS borders, outlines and box-shadows take one color, so the stroke is an absolutely
     /// positioned overlay whose three boxes line up with the stroke's geometry:
     ///
     /// - its **border box** is the stroke's outer edge — the node's box grown by the
@@ -82,7 +82,7 @@ extension ReactEmitter {
     }
 
     /// The layers an overlay paints for `stroke`, or `nil` when a plain declaration draws
-    /// it: every layer of a painted stroke, or a plain colour on per-side widths. A CSS
+    /// it: every layer of a painted stroke, or a plain color on per-side widths. A CSS
     /// border cannot draw those even inside the box: it would move the children, which
     /// Pen's stroke does not (`render-inner-sides`), and paint over them.
     private static func overlayFills(_ stroke: any PenStrokable) -> [PenFill]? {
@@ -128,7 +128,7 @@ extension ReactEmitter {
 
     /// The overlay's corner radii: the node's, grown by the outset on each side, so the
     /// outer edge stays concentric with the node's corners. A sharp corner stays sharp,
-    /// as a mitred stroke's is.
+    /// as a mitered stroke's is.
     private static func overlayRadius(_ shape: StrokeOverlayShape, outsets: EdgeLengths) -> String? {
         switch shape {
         case .ellipse:

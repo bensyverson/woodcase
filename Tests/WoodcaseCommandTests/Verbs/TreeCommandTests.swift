@@ -113,7 +113,7 @@ struct TreeCommandTests {
         #expect(run.stdoutLines[3].contains("Chi01/Lbl01"))
     }
 
-    @Test("--props adds a labelled column per property path")
+    @Test("--props adds a labeled column per property path")
     func propertyColumns() throws {
         let fixture = try CommandFixture(fixture: "batch.pen")
         let run = try fixture.run("tree", fixture.file.path, "--props", "kind.content,common.name")

@@ -34,7 +34,7 @@ import Foundation
 ///
 /// - `"kind.type"` is not a path. ``PropertyDiff`` emits it to mark a whole-kind
 ///   swap; changing a node's type is ``EditOperation/updateKind(_:)``'s job.
-/// - A node of an unrecognised type (``PenNode/Kind/unknown(typeName:properties:)``)
+/// - A node of an unrecognized type (``PenNode/Kind/unknown(typeName:properties:)``)
 ///   is the one node whose vocabulary is open: ``paths(for:)`` lists the keys it
 ///   already carries, but any `kind.*` key can be written, because Woodcase has
 ///   no schema for that type to check one against.
@@ -134,7 +134,7 @@ public enum NodePropertyCodec {
 
     /// Validates a `kind.*` path against a kind's vocabulary and returns its field name.
     ///
-    /// A node of an unrecognised type is the one open case: Woodcase has no schema
+    /// A node of an unrecognized type is the one open case: Woodcase has no schema
     /// to check a key against, it keeps whatever keys the file carried, and a peer
     /// must be able to replicate a key this replica has not seen yet — so any
     /// `kind.*` path is accepted there.

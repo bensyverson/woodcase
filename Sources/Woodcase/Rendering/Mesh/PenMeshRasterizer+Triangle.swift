@@ -14,9 +14,9 @@ extension PenMeshRasterizer {
     /// Keeps every edge-function product well inside `Int64`.
     static let coordinateLimit = 1_048_576.0
 
-    /// One triangle corner: a snapped fixed-point position and a premultiplied colour.
+    /// One triangle corner: a snapped fixed-point position and a premultiplied color.
     struct Corner {
-        /// Snaps a position and premultiplies its colour, or fails for a non-finite
+        /// Snaps a position and premultiplies its color, or fails for a non-finite
         /// position.
         init?(_ position: SIMD2<Double>, color: PenMeshColor) {
             guard position.x.isFinite, position.y.isFinite else { return nil }
@@ -39,7 +39,7 @@ extension PenMeshRasterizer {
         /// The vertical position, in sub-pixel steps, `y` down.
         let y: Int64
 
-        /// The premultiplied colour, RGBA.
+        /// The premultiplied color, RGBA.
         let color: SIMD4<Double>
     }
 
@@ -50,7 +50,7 @@ extension PenMeshRasterizer {
     }
 
     /// Whether `a → b` is a top or left edge of a positively wound triangle (`y` down):
-    /// a pixel centre exactly on such an edge is inside.
+    /// a pixel center exactly on such an edge is inside.
     static func isTopLeft(_ a: Corner, _ b: Corner) -> Bool {
         b.y < a.y || (b.y == a.y && b.x > a.x)
     }
@@ -81,15 +81,15 @@ extension PenMeshRasterizer {
         let step2 = -(v1.y - v0.y) * subpixelSteps
         let inverseArea = 1 / Double(area)
         // Interpolating as c₂ + w₀(c₀ − c₂) + w₁(c₁ − c₂) keeps the weights summing to
-        // exactly one, so a uniform colour stays exactly uniform.
+        // exactly one, so a uniform color stays exactly uniform.
         let delta0 = v0.color - v2.color
         let delta1 = v1.color - v2.color
         let firstX = xStart * subpixelSteps + half
         for y in yStart ... yEnd {
-            let centreY = y * subpixelSteps + half
-            var e0 = edge(v1, v2, firstX, centreY)
-            var e1 = edge(v2, v0, firstX, centreY)
-            var e2 = edge(v0, v1, firstX, centreY)
+            let centerY = y * subpixelSteps + half
+            var e0 = edge(v1, v2, firstX, centerY)
+            var e1 = edge(v2, v0, firstX, centerY)
+            var e2 = edge(v0, v1, firstX, centerY)
             var offset = (Int(y) * width + Int(xStart)) * 4
             for _ in xStart ... xEnd {
                 if e0 + bias0 > 0, e1 + bias1 > 0, e2 + bias2 > 0 {

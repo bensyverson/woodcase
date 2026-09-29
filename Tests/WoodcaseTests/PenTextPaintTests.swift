@@ -13,7 +13,7 @@ import Testing
 ///
 /// The gates are geometric, because Woodcase measures text differently from Pen (about 5%
 /// on these faces): the fitted ramp's stops must sit on the node box's edges, and a twin's
-/// text must show the same colour its rectangle shows at the same place in the box. The MAE
+/// text must show the same color its rectangle shows at the same place in the box. The MAE
 /// against Pen is printed and held to a ceiling, but it is bounded by the glyph mismatch.
 struct PenTextPaintTests {
     /// Every board sets Inter; without it they measure the fallback face, not the paint.
@@ -38,7 +38,7 @@ struct PenTextPaintTests {
 
     /// Boards whose glyphs span too little of the box along the ramp for an end-stop fit: one
     /// 72 pt line in a 300 pt box puts the fitted stops five times further out than the data,
-    /// and a level of quantisation there moves them by a point (Pen's own render of
+    /// and a level of quantization there moves them by a point (Pen's own render of
     /// `txt-lin-v-fwh-middle` fits to 39.96 → 340.02 only because its ramp dithers less).
     /// The per-band residual still pins the domain on these.
     private static let shortSpans: Set<String> = ["txt-lin-v-fwh-top", "txt-lin-v-fwh-middle"]
@@ -73,7 +73,7 @@ struct PenTextPaintTests {
         ("txt-lin-h-fixed-left", 0.26), ("txt-lin-v-multiline", 0.28), ("twin-lin-h", 0.33),
         ("twin-radial", 0.34), ("twin-image-stretch", 0.31), ("icon-grad", 0.30),
         // Turned 20° about its anchor (F4, leaf nAuBKh): measured 0.017; 7.33 while the layout
-        // pinned the turned box's corner at the anchor and the renderer pivoted at the box's centre.
+        // pinned the turned box's corner at the anchor and the renderer pivoted at the box's center.
         ("txt-rotated", 0.27),
     ]
 
@@ -104,7 +104,7 @@ struct PenTextPaintTests {
         }
     }
 
-    @Test("A twin's text shows the colour its rectangle shows at the same place in the box", arguments: twins)
+    @Test("A twin's text shows the color its rectangle shows at the same place in the box", arguments: twins)
     func textMatchesItsRectangleTwin(artboard: String) throws {
         let interior = try Self.glyphInterior()
         let pixels = try #require(PenFillDomainTests.RGBA(Self.render(artboard).image))

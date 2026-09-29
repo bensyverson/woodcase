@@ -59,7 +59,7 @@ public extension ArtboardPageBuilder {
     ///
     /// Everything that moves: the image, the edit markers, the selection box and the
     /// footer. It is a fragment rather than JavaScript because the markers need an
-    /// identity's hashed colour and the boxes need absolute rects, and re-deriving either
+    /// identity's hashed color and the boxes need absolute rects, and re-deriving either
     /// on the client would be a second implementation of a component.
     ///
     /// - Parameter request: The request to render for.

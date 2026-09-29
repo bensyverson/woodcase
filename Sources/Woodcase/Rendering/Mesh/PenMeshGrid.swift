@@ -6,13 +6,13 @@
 import Foundation
 
 /// A mesh gradient ready to tessellate: a validated `columns × rows` grid of vertices,
-/// each with its position, all four handles and a colour resolved.
+/// each with its position, all four handles and a color resolved.
 ///
 /// Build one from a fill with ``init(_:)``, which applies Pen's rules for when a fill is
 /// drawn at all, or directly with ``init(columns:rows:vertices:)``. Positions and handles
 /// are in the node's unit space; the tessellator scales them to device pixels.
 ///
-/// Each run of four neighbouring vertices is one ``PenMeshPatch``, so a grid of one
+/// Each run of four neighboring vertices is one ``PenMeshPatch``, so a grid of one
 /// column or one row has no patches and paints nothing.
 public struct PenMeshGrid: Friendly {
     /// Creates a grid from its vertices.
@@ -70,7 +70,7 @@ public struct PenMeshGrid: Friendly {
     ///   - column: The patch column, `0..<patchColumns`.
     ///   - row: The patch row, `0..<patchRows`.
     /// - Returns: The patch spanning that vertex and its right, lower and diagonal
-    ///   neighbours.
+    ///   neighbors.
     public func patch(column: Int, row: Int) -> PenMeshPatch {
         PenMeshPatch(
             topLeft: vertex(column: column, row: row),
@@ -87,7 +87,7 @@ public struct PenMeshGrid: Friendly {
         /// - Parameters:
         ///   - position: Where the vertex sits, in the node's unit space.
         ///   - handles: All four handles, relative to `position`.
-        ///   - color: The vertex colour.
+        ///   - color: The vertex color.
         public init(position: PenMeshPoint.Vector, handles: PenMeshPoint.Handles, color: PenMeshColor) {
             self.position = position
             self.handles = handles
@@ -100,7 +100,7 @@ public struct PenMeshGrid: Friendly {
         /// All four handles, relative to ``position``.
         public var handles: PenMeshPoint.Handles
 
-        /// The vertex colour.
+        /// The vertex color.
         public var color: PenMeshColor
     }
 }

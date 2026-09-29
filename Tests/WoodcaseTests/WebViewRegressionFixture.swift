@@ -59,7 +59,7 @@
             .deletingLastPathComponent()
             .appendingPathComponent("Fixtures")
 
-        /// The build, memoised. Nothing here is worth recomputing, and a
+        /// The build, memoized. Nothing here is worth recomputing, and a
         /// failure is not cached: a fixture that could not be read should be
         /// re-reported to every test that asks, not silently swallowed once.
         private static var cached: WebViewRegressionFixture?

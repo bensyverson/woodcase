@@ -52,10 +52,10 @@ after-shots for the ink pivot, the fade and the permalink.
 
 ## Rulings made today, so nobody re-argues them
 
-- **A state that renders nothing is not a preview.** A markup fact wants a behaviour
+- **A state that renders nothing is not a preview.** A markup fact wants a behavior
   test, not a picture. (`0b695df`; in the design doc as a block quote.)
 - **Representative, not exhaustive.** Eight booleans are 256 states; the catalog shows
-  the ones a reviewer can grade. A state that differs from its neighbour only by an
+  the ones a reviewer can grade. A state that differs from its neighbor only by an
   attribute with no visible effect is dropped (id-chip/outline, pane-grip/rows).
 - **AA (4.5:1) for text that carries meaning; `faint` exempt as scaffolding.** The palette
   moved, not the components. DESIGN.md § Colors carries the before/after table and
@@ -65,7 +65,7 @@ after-shots for the ink pivot, the fade and the permalink.
 - **White on a fixed accent fill is fine for a flash, not for a persistent element.**
   The copied chip keeps it; the true pill and the selection box tag must reach AA
   (issue `wRxjaB`, with the DESIGN.md exception to narrow in the same commit).
-- **Handles are mono.** An identity is an `--as` address; the presence line now honours
+- **Handles are mono.** An identity is an `--as` address; the presence line now honors
   it (`721aa5a`).
 - **`preview --list` prints paths.** It binds no port, so it has no URL to name; join with
   the base the running verb's `--json` reports.
@@ -107,7 +107,7 @@ tasks:
           verb and age spill outside the pill and vanish in light (vHmA5e); unattributed
           writers render as a blank name outside the avatar (JFazoq); the theme picker
           with no axes emits an empty flex item (MqMUlS); the Export and Code panels ship
-          literal backticks (MwBN6D); every non-colour variable row draws an empty swatch
+          literal backticks (MwBN6D); every non-color variable row draws an empty swatch
           (ZIaKPF) and numbers are not right-aligned (NMfyci); the Export number field is
           wider than its selects (7ga8KN); the artboard row truncates the name rather
           than shedding the rect (lg6hBh); the live badge reads "connecting" not
@@ -146,9 +146,9 @@ tasks:
 - **Briefs that list issues by id only** make the agent re-read them all; paste the
   bodies, or say "read them".
 - **The three-way prior trap**: the unread dot was neither a preview bug, a stylesheet
-  bug nor a shot artefact; it was the client script. Ask "what else could undo this?"
+  bug nor a shot artifact; it was the client script. Ask "what else could undo this?"
 - **The Go dashboard shares `ActorColor`'s formula.** Anything that changes hue,
-  saturation or lightness changes an agent's colour across tools; the ink is ours.
+  saturation or lightness changes an agent's color across tools; the ink is ours.
 - **Merge order for two agents editing `PreviewCatalog.all`**: one inserts into groups,
   the other appends at the end under a comment. It merged clean twice.
 - The `agents` repo has three uncommitted module edits (`modules/web.md`,

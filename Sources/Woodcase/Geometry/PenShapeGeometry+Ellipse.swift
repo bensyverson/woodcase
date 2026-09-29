@@ -40,7 +40,7 @@ extension PenShapeGeometry {
         )
 
         guard inner > 0 else {
-            // A pie slice: the arc, closed through the centre.
+            // A pie slice: the arc, closed through the center.
             return PenShapeOutline(elements: [.command(.move(to: center)), outerArc, .command(.close)])
         }
         // An arc donut: one closed ring — the outer arc over the sweep, a straight cut along

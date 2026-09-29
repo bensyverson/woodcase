@@ -17,7 +17,7 @@ import Foundation
 /// and a design with a dozen such instances generates a dozen copies of one component.
 ///
 /// **A definition that declares no `_props` is never a finding.** Nothing was declared,
-/// so nothing failed to map, and a component nobody has parameterised yet is a normal
+/// so nothing failed to map, and a component nobody has parameterized yet is a normal
 /// stage of a design rather than a fault — reporting it would fire the check at every
 /// instance of every plain component in the file.
 ///

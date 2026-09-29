@@ -41,7 +41,7 @@ enum PerformanceFixture {
     ///
     /// Copied rather than opened in place so the timed transaction is free to write,
     /// and into a fresh directory so the atomic rename has somewhere to put its
-    /// temporary neighbour without racing another test.
+    /// temporary neighbor without racing another test.
     ///
     /// - Parameter url: The file to copy.
     /// - Returns: The copy. Delete its parent directory when the test is done.

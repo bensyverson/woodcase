@@ -97,7 +97,7 @@ within 60 seconds") instead; that sentence is what would prove or refute this se
   `host.evaluate(` in that target.
 - **`WebViewTestHarness.render` bounds each page call** at the harness budget plus 60 s.
 - **Suites that await a page, a server or a feed carry `.hangGuard`**, an eight-minute
-  `.timeLimit`. Because `BoundedWait` now honours cancellation, the limit *ends* a test
+  `.timeLimit`. Because `BoundedWait` now honors cancellation, the limit *ends* a test
   stuck in a page call rather than only reporting it; a test stuck in some other await it
   does not know about still gets named in the log when the limit passes.
 

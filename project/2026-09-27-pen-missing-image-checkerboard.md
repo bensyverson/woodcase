@@ -30,7 +30,7 @@ transparency). Sampled with Pillow (`Image.getpixel`):
 | (30, 30), (150, 100) — inside the rectangle, one checker phase | (26, 255, 26, 255) |
 | (150, 30), (30, 100), (270, 170) — inside the rectangle, the other phase | (0, 230, 0, 255) |
 
-Both in-rectangle colours are the green frame colour with a translucent checker square blended over it: a white
+Both in-rectangle colors are the green frame color with a translucent checker square blended over it: a white
 square at roughly 10% opacity (0,255,0 → 26,255,26: solving `255×a = 26` gives `a ≈ 0.10`) and a black square at
 roughly the same opacity (0,255,0 → 0,230,0: `255×(1−a) = 230` gives `a ≈ 0.10`). That is the classic
 light/dark transparency-grid pattern, rendered as real opaque pixels — a placeholder Pen draws *over whatever is
@@ -43,6 +43,6 @@ here; a dead remote URL is a different failure path but there is no reason to ex
 once the fetch fails). Woodcase's renderers do not reproduce this anywhere — the Core Graphics renderer, the
 bundled-image SwiftUI path, and now the `AsyncImage` path all draw nothing (`Color.clear` or an empty `Image`)
 for an unloadable image, and that gap is being kept on purpose (class b, per `project/2026-09-27-fidelity-gaps.md`'s
-scheme) rather than built now: a checkerboard placeholder is a real feature (size, colours, pattern all
+scheme) rather than built now: a checkerboard placeholder is a real feature (size, colors, pattern all
 unverified beyond "roughly 10% opacity, alternating"), and no fixture in the repo currently measures against it.
 If a future fidelity pass wants to close this gap, this probe fixture and its numbers are the starting evidence.

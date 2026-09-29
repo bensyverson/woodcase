@@ -15,8 +15,8 @@ extension PenLayoutEngine {
     /// of the result. So the rect is the turned bounding box moved by where the transform
     /// sends the box's leftmost and topmost corners: a 200×60 rectangle at `(80, 60)` turned
     /// by −20° lands at `(59.48, 60)`, 60 × sin 20° left of its anchor, and a `flipX` node
-    /// lands its whole width left of it. The renderer draws the unturned box centred in this
-    /// rect and turns it about the centre, which is the same picture as turning it about the
+    /// lands its whole width left of it. The renderer draws the unturned box centered in this
+    /// rect and turns it about the center, which is the same picture as turning it about the
     /// anchor. A node in a flex flow is not placed here: Pen grows its slot to the turned
     /// bounds (``applyRotationExpansion(width:height:node:)``).
     ///

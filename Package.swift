@@ -33,7 +33,7 @@ let package = Package(
         // to an exact version: it is a 0.x package, so a minor bump may break the API.
         // WoodcaseViewer is its only consumer; the Woodcase library never sees it.
         .package(url: "https://github.com/sliemeobn/elementary", exact: "0.8.1"),
-        // The overlay helpers behind `shot --grid` and `shot --outline`: labelled
+        // The overlay helpers behind `shot --grid` and `shot --outline`: labeled
         // rulers and boxes drawn in layout points. A repo we own, so it follows
         // `main` (Ben's ruling, 2026-08-29). WoodcaseCommand is its only consumer;
         // the Woodcase library never sees it.

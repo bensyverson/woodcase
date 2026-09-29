@@ -323,7 +323,7 @@ vocabulary the refusal above lists, read from the same decoders, and it needs no
 
 ```text
 $ woodcase schema text
-text — a run of text, with its font, growth behaviour and alignment
+text — a run of text, with its font, growth behavior and alignment
 
   path                    .pen key           value
   kind.content            content            string | $string
@@ -340,7 +340,7 @@ and `--json` on either for the machine form. See <doc:WoodcaseCLI> for the verb.
 
 ## How a value is typed
 
-A command line carries only strings; a .pen file carries numbers, booleans, colours,
+A command line carries only strings; a .pen file carries numbers, booleans, colors,
 references and whole objects. The rules are few and total, and every mutating verb
 prints them in its `--help`:
 
@@ -353,7 +353,7 @@ prints them in its `--help`:
 | `"…"` | the string inside the quotes, whatever it looks like |
 | anything else | a string |
 
-The last row is the one that matters: a colour (`#ff8800`), a variable reference
+The last row is the one that matters: a color (`#ff8800`), a variable reference
 (`$brand`) and the sizing keywords (`fill_container`, `fit_content`) are all *strings*
 in a .pen file, so they need no syntax of their own. The quoted form is the escape
 hatch for the rare string that looks like something else — `common.name='"42"'` is the
@@ -378,7 +378,7 @@ variable name that itself begins with a dash needs `vars`'s end-of-options marke
 the parser reads it as an option: `woodcase vars rm design.pen -- --legacy-brand`.
 
 A string property can itself need to hold a `$` — showing the token name
-`$v-muted` rather than the colour it resolves to. `\$` is the escape:
+`$v-muted` rather than the color it resolves to. `\$` is the escape:
 `kind.content='\$v-muted'` (single-quote it, so the shell keeps the backslash)
 stores the literal `$v-muted`, and a `\$` **anywhere else in the string** loses its
 backslash the same way, so `kind.content='Total: \$30'` draws `Total: $30`. Only a
@@ -722,7 +722,7 @@ pins what that frame renders; there is nothing separate to pin.
 
 > Until 2026-08-31 this was the documented exception: a definition edit moved no
 > instance's rev, and callers were told to pin the definition separately. It is not the
-> behaviour any more, and a caller who pinned both is simply pinning one thing twice.
+> behavior any more, and a caller who pinned both is simply pinning one thing twice.
 
 Three consequences worth relying on. It is **state-based**, so a node touched and put
 back reads as unchanged, which is the honest answer to "has this moved since I looked?"
@@ -1469,9 +1469,9 @@ design.pen` lists each alias with the number of nodes that reach into its namesp
 in the same sentence while a `ref` or a `$V:` binding still needs it.
 
 The type follows `--type` if given, else the variable's existing type, else the
-literal's shape: `#RGB`/`#RRGGBB`/`#RRGGBBAA` is a colour, `true`/`false` a boolean, a
+literal's shape: `#RGB`/`#RRGGBB`/`#RRGGBBAA` is a color, `true`/`false` a boolean, a
 number a number, everything else a string. `--type` exists because without it a string
-variable whose value *looks* like a colour is unreachable.
+variable whose value *looks* like a color is unreachable.
 
 ## Lint before you render
 
@@ -1578,7 +1578,7 @@ No node given — rendering the whole document risks a giant, misleading image. 
 ```
 
 `--grid` overlays a coordinate grid — which grows the image past `--max` by the
-gutters it adds, by design — and `--outline <node>` draws a labelled box around a
+gutters it adds, by design — and `--outline <node>` draws a labeled box around a
 node's rect, for pointing at one thing in a busy screen.
 
 `--scale <multiplier>` renders at exactly that many pixels per layout point, and —

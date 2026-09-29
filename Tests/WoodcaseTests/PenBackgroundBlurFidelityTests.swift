@@ -3,10 +3,10 @@ import Foundation
 import Testing
 @testable import Woodcase
 
-/// Background-blur behaviours that an MAE against a symmetric backdrop cannot see: which
+/// Background-blur behaviors that an MAE against a symmetric backdrop cannot see: which
 /// way up the backdrop comes back, which nodes blur at all, and node opacity.
 ///
-/// Each case renders a 100×100 canvas built in code, so a failure names one behaviour.
+/// Each case renders a 100×100 canvas built in code, so a failure names one behavior.
 struct PenBackgroundBlurFidelityTests {
     private static let canvas = CGSize(width: 100, height: 100)
 

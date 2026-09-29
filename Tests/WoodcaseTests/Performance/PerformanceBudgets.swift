@@ -10,7 +10,7 @@ import Testing
 /// A timing test measures the machine as much as the code, so two of them running at
 /// once measure each other. Under the default parallel run the six budgets here
 /// inflated one another by about a third — `tree` of the synthetic document reported
-/// 1507 ms beside its neighbours and 1115 ms alone, on the same build in the same
+/// 1507 ms beside its neighbors and 1115 ms alone, on the same build in the same
 /// minute. ``Testing/Trait/serialized`` applies to a suite *and everything nested
 /// inside it*, so declaring it once here is what makes every figure below a
 /// measurement of the pipeline rather than of the scheduler.

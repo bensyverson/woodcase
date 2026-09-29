@@ -22,7 +22,7 @@ public extension PenFormatVersion {
         /// The same major, an older minor.
         case older
 
-        /// Exactly the modelled version.
+        /// Exactly the modeled version.
         case current
 
         /// The same major, a newer minor: a newer Pen wrote it, and the model is a
@@ -42,7 +42,7 @@ public extension PenFormatVersion {
         }
     }
 
-    /// This version's relation to a modelled version.
+    /// This version's relation to a modeled version.
     ///
     /// - Parameter model: The version Woodcase models. Defaults to ``current``.
     /// - Returns: Where this version stands against it.

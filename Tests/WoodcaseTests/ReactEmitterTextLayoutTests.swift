@@ -168,8 +168,8 @@ struct ReactEmitterTextLayoutTests {
 
     // MARK: - Vertical alignment (RgeMUN)
 
-    @Test("Middle vertical alignment centres the lines in the box")
-    func middleCentres() throws {
+    @Test("Middle vertical alignment centers the lines in the box")
+    func middleCenters() throws {
         let content = try card(
             ##""content": "Mid", "textGrowth": "fixed-width-height", "width": 200, "height": 80, "textAlignVertical": "middle""##
         )

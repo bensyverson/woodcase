@@ -228,7 +228,7 @@ would be left holding an unresolved `$name`.
 
 ## Commands
 
-The reading and editing verbs are summarised here; <doc:WoodcaseEditor> is the guide
+The reading and editing verbs are summarized here; <doc:WoodcaseEditor> is the guide
 that puts them together into a working loop, with a real transcript for each.
 
 ### `tree`
@@ -538,7 +538,7 @@ Values are typed by how they are written: `240` and `0.5` are numbers, `true`/`f
 booleans, `null` clears the property, `[8,16]` and `[{"type":"color","color":"#FFD166"}]`
 are JSON, and
 `"42"` is the string `42`. Anything else is a string — which is what a `#ff8800`
-colour, a `$variable` reference and the `fill_container` / `fit_content` keywords
+color, a `$variable` reference and the `fill_container` / `fit_content` keywords
 already are. Only the first `=` splits.
 
 ### `replace`
@@ -1100,7 +1100,7 @@ woodcase generate swiftui myfile.pen --output ./AcmeUI --name AcmeUI
 
 It writes `Package.swift` (only when absent), one `public struct <Page>: View` per top-level frame under `Sources/<name>/Pages/`, and the helpers under `Sources/<name>/Support/` (`PenSupport.swift` and its `PenSupport+<Concern>.swift` siblings). `--name` is the module and must be a Swift identifier (default `PenUI`). `--floor ios26` (the default) or `--floor ios18` sets the platforms the manifest declares; the views are the same at both. `--force` clears the output directory first.
 
-This slice writes frames, rectangles, ellipses and text with solid colours, laid out as idiomatic stacks. Every other node becomes a marked placeholder, and components are not written yet; each gap is printed on stderr as `warning: <id>: …` (or `notice:`), and the exit code stays 0.
+This slice writes frames, rectangles, ellipses and text with solid colors, laid out as idiomatic stacks. Every other node becomes a marked placeholder, and components are not written yet; each gap is printed on stderr as `warning: <id>: …` (or `notice:`), and the exit code stays 0.
 
 ### `themes`
 

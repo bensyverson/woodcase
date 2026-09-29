@@ -6,7 +6,7 @@
 extension ReactEmitter {
     /// `color` with its alpha multiplied by `opacity`, as CSS.
     ///
-    /// A hex colour (`#RGB`, `#RGBA`, `#RRGGBB`, `#RRGGBBAA`) becomes `#RRGGBBAA`; anything
+    /// A hex color (`#RGB`, `#RGBA`, `#RRGGBB`, `#RRGGBBAA`) becomes `#RRGGBBAA`; anything
     /// else — a `var()` — is mixed with `transparent`, which scales its alpha the same way.
     /// An opacity of 1 or more returns `color` unchanged.
     static func cssColor(_ color: String, opacity: Double) -> String {
@@ -19,7 +19,7 @@ extension ReactEmitter {
         return "#" + (channels.prefix(3) + [alpha]).map { hexByte($0) }.joined()
     }
 
-    /// The red, green, blue and alpha bytes of a hex colour, or `nil` when it is not one.
+    /// The red, green, blue and alpha bytes of a hex color, or `nil` when it is not one.
     static func hexChannels(_ color: String) -> [Int]? {
         guard color.hasPrefix("#") else { return nil }
         let digits = Array(color.dropFirst())

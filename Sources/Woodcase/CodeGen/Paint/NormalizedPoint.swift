@@ -3,7 +3,7 @@
 //  Woodcase
 //
 
-/// A point in a node's normalised box: `(0, 0)` is the top-left corner and `(1, 1)` the
+/// A point in a node's normalized box: `(0, 0)` is the top-left corner and `(1, 1)` the
 /// bottom-right, whatever the box's size, with y growing downward.
 ///
 /// Pen lays out every paint in this box and only then stretches it to the node, so a

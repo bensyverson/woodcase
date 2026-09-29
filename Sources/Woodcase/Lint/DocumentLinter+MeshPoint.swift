@@ -17,7 +17,7 @@ import Foundation
 ///   two numbers — is painted, but from Pen's repair rather than from what the file says,
 ///   and Pen rewrites it on save. That is a mesh Pen paints but not as authored, the
 ///   definition of **distorted**, so it is a warning there rather than a check of its own:
-///   its fix, like a `#RGBA` colour's, is to write the value Pen already draws, which the
+///   its fix, like a `#RGBA` color's, is to write the value Pen already draws, which the
 ///   finding names.
 extension DocumentLinter {
     /// Why Pen paints nothing for a mesh whose grid is well formed: the points it cannot

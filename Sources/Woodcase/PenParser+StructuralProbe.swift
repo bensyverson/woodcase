@@ -16,7 +16,7 @@ extension PenParser {
     /// - the root is an object with a `children` array;
     /// - every node, at every depth, is an object with a string `id` and `type`;
     /// - at least one node is of a type this build models;
-    /// - the whole document decodes with the modelled decoder, which is where a key
+    /// - the whole document decodes with the modeled decoder, which is where a key
     ///   this build models but that now holds a differently shaped value is caught.
     ///
     /// An unknown node type is not a conflict — the decoder keeps it as
@@ -47,11 +47,11 @@ extension PenParser {
             guard case let .dictionary(object) = root, case let .array(children)? = object["children"] else {
                 throw refuse("it has no \"children\" array")
             }
-            var modelled = 0
-            if let failure = firstFailure(in: children, at: "children", modelled: &modelled) {
+            var modeled = 0
+            if let failure = firstFailure(in: children, at: "children", modeled: &modeled) {
                 throw refuse(failure)
             }
-            guard modelled > 0 else {
+            guard modeled > 0 else {
                 throw refuse("it holds no node of a type this build models")
             }
             do {
@@ -67,11 +67,11 @@ extension PenParser {
         /// - Parameters:
         ///   - nodes: A `children` array.
         ///   - path: The array's path, for the description.
-        ///   - modelled: Incremented once for each node whose type this build models.
+        ///   - modeled: Incremented once for each node whose type this build models.
         private static func firstFailure(
             in nodes: [AnyCodable],
             at path: String,
-            modelled: inout Int
+            modeled: inout Int
         ) -> String? {
             for (index, node) in nodes.enumerated() {
                 let nodePath = "\(path)[\(index)]"
@@ -85,10 +85,10 @@ extension PenParser {
                     return "\(nodePath) has no string \"type\""
                 }
                 if PenNode.NodeType(rawValue: type) != nil {
-                    modelled += 1
+                    modeled += 1
                 }
                 if case let .array(children)? = fields["children"],
-                   let failure = firstFailure(in: children, at: "\(nodePath).children", modelled: &modelled)
+                   let failure = firstFailure(in: children, at: "\(nodePath).children", modeled: &modeled)
                 {
                     return failure
                 }

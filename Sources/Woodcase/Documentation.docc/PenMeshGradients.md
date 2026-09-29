@@ -4,7 +4,7 @@ How Woodcase turns a `mesh_gradient` fill into triangles and pixels, without Cor
 
 ## Overview
 
-A mesh gradient is a `columns × rows` grid of coloured vertices joined by Bézier
+A mesh gradient is a `columns × rows` grid of colored vertices joined by Bézier
 patches (``PenFill/PenMeshGradientFill``, ``PenMeshPoint``). The mesh core in
 `Sources/Woodcase/Rendering/Mesh/` is pure Swift and Foundation, so it builds on Linux,
 and it has three stages that each return plain data:
@@ -20,12 +20,12 @@ Or in one call: `PenMeshRasterizer.rasterize(grid, width: 400, height: 400)`.
 - ``PenMeshGrid`` applies Pen's rules for whether a fill is drawn at all. A missing
   `columns`, `rows`, `points` or `colors`, or a count that is not `columns × rows`, is a
   ``PenMeshGrid/Invalidity`` and the fill paints nothing. Omitted handles take the grid's
-  defaults. A colour string is read as Pen's mesh reads it (see "Colours" below), and a
-  colour that is still a variable becomes opaque black: resolve variables first with
+  defaults. A color string is read as Pen's mesh reads it (see "Colors" below), and a
+  color that is still a variable becomes opaque black: resolve variables first with
   ``PenVariableResolver``. A malformed point is placed as
   Pen places it, or makes the fill paint nothing; see "Malformed points" below.
 - ``PenMeshTessellation`` is a vertex buffer: positions in device pixels, one
-  unpremultiplied colour per vertex, and triangle indices. A GPU renderer can upload it
+  unpremultiplied color per vertex, and triangle indices. A GPU renderer can upload it
   unchanged and draw it with Gouraud shading.
 - ``PenMeshRaster`` is premultiplied RGBA8 in sRGB, ready to wrap in a `CGImage` or
   encode as a PNG with ``PenMeshRaster/pngData()``, which uses ``PortablePNGEncoder``
@@ -34,13 +34,13 @@ Or in one call: `PenMeshRasterizer.rasterize(grid, width: 400, height: 400)`.
 
 The fill's `opacity`, blend mode and clip to the node's path are the caller's: the core
 paints the node's whole box (`width × height`, not the path's bounding box).
-``PenRenderer`` is one such caller: it rasterises at the context's device scale (at
+``PenRenderer`` is one such caller: it rasterizes at the context's device scale (at
 least 2x in a PDF, as Pen's own PDF export does), wraps the raster as a `CGImage`, and
 draws it over the node's box through the fill's clip.
 
-## Colours
+## Colors
 
-Pen's mesh does not read its colours by ``PenHexColor``'s grammar, and neither does
+Pen's mesh does not read its colors by ``PenHexColor``'s grammar, and neither does
 ``PenMeshColor/init(penMesh:)``. Pen drops one leading `#`, then goes by how many UTF-16
 code units are left:
 
@@ -55,15 +55,15 @@ code units are left:
   black: that vertex paints nothing, and blends toward nothing.
 
 Measured 2026-09-27 against Pen's exports of `render-mesh-colors.pen`, one 2×2 mesh of
-one colour string per frame over a `#00FF00` fill (`scripts/pen-oracle
+one color string per frame over a `#00FF00` fill (`scripts/pen-oracle
 Tests/WoodcaseTests/Fixtures/render-mesh-colors.pen --scale 1 --accept-invalid
 --no-layout`, `pen` CLI 0.3.9); `PenMeshColorSnapshotTests` pins every frame and
-`PenMeshColorTests` every row. The SwiftUI emitter writes the same colours
+`PenMeshColorTests` every row. The SwiftUI emitter writes the same colors
 (``PenMeshColor/hexColor(penMesh:)``), and `woodcase lint`'s `mesh-gradient-distorted`
-names every colour Pen reads as nothing or as another colour.
+names every color Pen reads as nothing or as another color.
 
-> Correction, 2026-09-27: this page said a colour Pen cannot read becomes opaque black.
-> That was wrong for every malformed colour but a six-digit one with no hex prefix;
+> Correction, 2026-09-27: this page said a color Pen cannot read becomes opaque black.
+> That was wrong for every malformed color but a six-digit one with no hex prefix;
 > most read as transparent.
 
 ## Malformed points
@@ -96,9 +96,9 @@ what Pen draws. The lint reports both kinds (<doc:WoodcaseLint>).
 
 Each patch is a bicubic tensor-product Bézier surface. Its 4×4 control net comes from the
 corner positions and handles, with the four interior points on the zero-twist
-(parallelogram) rule; see ``PenMeshPatch``. Its colour is a bilinear blend of the four
-corner colours at *smoothstep-eased* parameters, `t²(3 − 2t)`, on unpremultiplied
-sRGB-encoded channels. The colour follows the parameters, not the position, and the
+(parallelogram) rule; see ``PenMeshPatch``. Its color is a bilinear blend of the four
+corner colors at *smoothstep-eased* parameters, `t²(3 − 2t)`, on unpremultiplied
+sRGB-encoded channels. The color follows the parameters, not the position, and the
 default handles are a quarter of a cell, not a third. Both rules match Pen's exports,
 measured in `project/2026-09-26-mesh-gradients.md`.
 
@@ -120,26 +120,26 @@ are held to it:
 
 | Quantity | Tolerance | Why |
 |---|---|---|
-| Position, in device pixels | ¼ px (``PenMeshTessellator/geometricTolerance``) | Below what sampling at pixel centres can show |
-| Premultiplied colour | ½ of an 8-bit step (``PenMeshTessellator/colorTolerance``) | The interpolated colour rounds to the exact colour's step or its neighbour |
+| Position, in device pixels | ¼ px (``PenMeshTessellator/geometricTolerance``) | Below what sampling at pixel centers can show |
+| Premultiplied color | ½ of an 8-bit step (``PenMeshTessellator/colorTolerance``) | The interpolated color rounds to the exact color's step or its neighbor |
 
 The geometric term comes from the control net's second differences scaled to pixels, so
-its cell count grows with the square root of the patch's size on screen. The colour term
+its cell count grows with the square root of the patch's size on screen. The color term
 does not depend on size, and never asks for more than about 60 cells. A flat,
-single-colour patch gets one cell. Every patch in a column shares that column's largest
+single-color patch gets one cell. Every patch in a column shares that column's largest
 count, and every patch in a row shares that row's, so the whole mesh is one lattice with
 no T-junctions.
 
 ## No seams
 
 ``PenMeshRasterizer`` snaps positions to 1/256 px and evaluates edge functions in exact
-integer arithmetic, with the top-left fill rule. A pixel centre on an edge two triangles
+integer arithmetic, with the top-left fill rule. A pixel center on an edge two triangles
 share is therefore covered by exactly one of them. For a translucent mesh this means no
 doubled pixels (darker lines) and no missing ones (cracks) along patch or cell edges;
 `PenMeshSeamTests` holds the rasterizer to that.
 
-Colour is computed in `Double` and rounded once, when it is written. Pen quantises the
-blended vertex colours to 8 bits first, by truncation; skipping that step is worth at
+Color is computed in `Double` and rounded once, when it is written. Pen quantizes the
+blended vertex colors to 8 bits first, by truncation; skipping that step is worth at
 most one 8-bit step. This is a deliberate difference, not a gap to close (ruling, Ben,
 2026-09-26: where Woodcase is more correct than Pen, keep it and accept the small error).
 It is most of the 0.23–0.38 mean absolute error the Pen-reference tests allow on opaque

@@ -6,8 +6,8 @@ import Testing
 /// Pins the Core Graphics renderer's outer shadows of stroked nodes against Pen's exports.
 ///
 /// `render-stroke-shadows.pen` (format 2.19, `scripts/gen-stroke-shadows-fixture`) has one
-/// board per case: a grey node stroked green 12 pt wide casting a white outer shadow —
-/// outside, centred and inside, rounded, translucent, per side, on a frame with a child, an
+/// board per case: a gray node stroked green 12 pt wide casting a white outer shadow —
+/// outside, centered and inside, rounded, translucent, per side, on a frame with a child, an
 /// ellipse, a polygon, a path and two lines — and an inside stroke over an inner shadow.
 /// Pen casts the shadow from the silhouette the stroke band grows, knocks it out under the
 /// band, and casts nothing from a line. The references are Pen's 2x exports

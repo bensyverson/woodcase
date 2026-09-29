@@ -16,7 +16,7 @@ import Foundation
 ///    `/preview` page: a preview is a declared state, and the stream would repaint it.
 /// 2. **Swap.** Every update is a fragment the *server* rendered, replacing the element
 ///    with the same id. There is no template, no state and no component here — an edit
-///    marker's colour is a hash and a box's position is a layout rect, and re-deriving
+///    marker's color is a hash and a box's position is a layout rect, and re-deriving
 ///    either on the client would be a second implementation of something Swift already
 ///    owns.
 /// 3. **Intercept.** An outline row, a click on the render and the footer's `‹`/`›` steps
@@ -49,7 +49,7 @@ import Foundation
 /// re-requests, which outline fragment goes with it, and which rows of the key table a
 /// keypress can match.
 ///
-/// Eleven pieces of genuine client behaviour ride alongside the five above: the overlay's
+/// Eleven pieces of genuine client behavior ride alongside the five above: the overlay's
 /// *timing* (an edit marker fades seven seconds after it appears, and clicking its tag
 /// pins it), where the outline is *scrolled to* (a property of the panel's box on this
 /// screen, not of the document), an id chip's *copy* (clicking one copies its id and —
@@ -284,7 +284,7 @@ public enum ViewerScript {
 
       window.addEventListener("resize", fitStage);
 
-      // The boxes arrive server-rendered, with the right colours and the right rects.
+      // The boxes arrive server-rendered, with the right colors and the right rects.
       // All the client owns is when they go: fade after MARKER_LIFETIME, unless pinned.
       function armMarkers(scope) {
         for (const box of scope.querySelectorAll(".v-box.is-edit")) {
@@ -1071,7 +1071,7 @@ public enum ViewerScript {
 
       // ==== BEGIN follow + unread (MehU9) ==================================
       //
-      // Two pieces of behaviour the server cannot hold. *Follow* is view state and
+      // Two pieces of behavior the server cannot hold. *Follow* is view state and
       // lives in the query, but acting on it needs an event the server has already
       // sent and a history entry only the browser can push. *Unread* is per viewer
       // and per browser by definition — it starts at this page load, not at the
@@ -1323,7 +1323,7 @@ public enum ViewerScript {
 
       // ==== BEGIN right pane + resize (k92mT) ===============================
       //
-      // Four pieces of behaviour, and every one of them is a *fallback* rather
+      // Four pieces of behavior, and every one of them is a *fallback* rather
       // than the mechanism: with this block deleted the tabs are still links,
       // the language picker is still a form, the export button still downloads
       // and the panes still have their default widths. What it adds is not

@@ -234,7 +234,7 @@ struct PenSchemaTests {
             == ##""auto", "fixed-width", or "fixed-width-height""##)
     }
 
-    /// A colour property takes a `$variable` and always did — the decoder reads
+    /// A color property takes a `$variable` and always did — the decoder reads
     /// ``PenFill/shorthand(_:)`` from any string, and the resolver treats a leading `$`
     /// as a reference. The refusal never said so, which is exactly the gap typing the
     /// forms exposed: a form the decoder accepts and the prose omitted.

@@ -153,7 +153,7 @@ extension DocumentLinter {
     /// A property keyed by a dotted path (`"kind.content"`) instead of the raw .pen
     /// name (`"content"`) the merge reads.
     ///
-    /// This one decodes without error — an unrecognised JSON key is simply not part of
+    /// This one decodes without error — an unrecognized JSON key is simply not part of
     /// any field the decoder reads back — so it is not something
     /// ``PenNodePatcher/patched(_:with:)`` can be asked to judge; catching it takes a
     /// direct look at the key itself. A .pen wire key is never a dotted path, only

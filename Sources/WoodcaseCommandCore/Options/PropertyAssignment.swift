@@ -9,7 +9,7 @@ import Woodcase
 /// One `key=value` a mutating verb was given, with the value already typed.
 ///
 /// A command line carries only strings, and a .pen file carries numbers, booleans,
-/// colours, variable references and whole objects. Somewhere the one has to become
+/// colors, variable references and whole objects. Somewhere the one has to become
 /// the other, and guessing wrongly writes a *plausible wrong value* into a design —
 /// `"240"` where `240` belongs. So the rules are few, total, and printed in every
 /// verb's help as ``valueRules``:
@@ -23,7 +23,7 @@ import Woodcase
 /// | `"…"` | the string inside the quotes, whatever it looks like |
 /// | anything else | a string — `#ff8800`, `$brand`, `fill_container`, `Hello there` |
 ///
-/// The last row is the important one: a colour, a variable reference and a sizing
+/// The last row is the important one: a color, a variable reference and a sizing
 /// keyword are all *strings* in a .pen file, so they need no syntax of their own. The
 /// quoting row is the escape hatch for the rare case where a string looks like
 /// something else — a node named `42`, or the text `true`.
@@ -64,7 +64,7 @@ struct PropertyAssignment: Friendly {
         false are booleans, null clears the property it is written to (in an override \
         it is stored, and `override --unset` is what removes one), [8,16] and \
         \(fillExample) are JSON, and "42" is the string 42. Anything else is a string \
-        — which is what a #ff8800 colour, a $variable reference and the \
+        — which is what a #ff8800 color, a $variable reference and the \
         fill_container / fit_content keywords already are.
         """
     }

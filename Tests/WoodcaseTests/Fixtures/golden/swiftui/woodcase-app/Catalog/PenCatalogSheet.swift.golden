@@ -153,7 +153,7 @@ public struct PenCatalogSheet: View {
                     }
                 }
             }
-            PenCatalogSection("Colours") {
+            PenCatalogSection("Colors") {
                 PenCatalogFlow {
                         PenCatalogSwatch("$accent", color: theme.accent)
                         PenCatalogSwatch("$accent-soft", color: theme.accentSoft)

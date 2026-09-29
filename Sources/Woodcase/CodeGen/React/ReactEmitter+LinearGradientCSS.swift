@@ -11,16 +11,16 @@ extension ReactEmitter {
 
     /// A linear gradient at Pen's geometry.
     ///
-    /// Pen lays the ramp out in the normalised box, so its isolines are fixed there and
+    /// Pen lays the ramp out in the normalized box, so its isolines are fixed there and
     /// slant with the box's proportions; a CSS angle is fixed on screen instead, and its
     /// line runs corner to corner. Two forms state Pen's ramp exactly on a box of any size:
     ///
-    /// - a ramp along one axis keeps its angle, and its stops move to where Pen's centre
+    /// - a ramp along one axis keeps its angle, and its stops move to where Pen's center
     ///   and size put them on that axis;
     /// - an off-axis ramp uses a corner keyword (`to top left`), whose isolines CSS lays
     ///   parallel to the tile's other diagonal — an affine rule, so a tile of the right
     ///   proportions *in the box's own percentages* carries Pen's slant at any size. The
-    ///   tile is centred on the box and at least covers it; the stops are placed along its
+    ///   tile is centered on the box and at least covers it; the stops are placed along its
     ///   line where Pen's ramp puts them.
     static func cssLinearGradient(
         _ geometry: GradientGeometry,
@@ -29,9 +29,9 @@ extension ReactEmitter {
         outsets: EdgeLengths
     ) -> CSSGradient? {
         guard let ramp = geometry.linearRamp else { return nil }
-        let centre = ramp.position(at: .center)
+        let center = ramp.position(at: .center)
         if abs(ramp.du) < flatSlope || abs(ramp.dv) < flatSlope {
-            return axisLinearGradient(ramp, rotation: geometry.rotation, centre: centre, stops: stops, outsets: outsets)
+            return axisLinearGradient(ramp, rotation: geometry.rotation, center: center, stops: stops, outsets: outsets)
         }
 
         let slope = max(abs(ramp.du), abs(ramp.dv))
@@ -40,7 +40,7 @@ extension ReactEmitter {
         // A corner ramp crosses its tile from one corner's isoline to the opposite's, which
         // on this tile is twice the steeper slope, grown with the tile.
         let span = 2 * slope * growth
-        let list = stops.map { "\($0.color) \(cssPercent(0.5 + ($0.position - centre) / span))" }
+        let list = stops.map { "\($0.color) \(cssPercent(0.5 + ($0.position - center) / span))" }
         return CSSGradient(
             image: "linear-gradient(\(keyword), \(list.joined(separator: ", ")))",
             size: tileSize(
@@ -58,7 +58,7 @@ extension ReactEmitter {
     private static func axisLinearGradient(
         _ ramp: GradientGeometry.LinearRamp,
         rotation: Double,
-        centre: Double,
+        center: Double,
         stops: GradientStops,
         outsets: EdgeLengths
     ) -> CSSGradient {
@@ -66,7 +66,7 @@ extension ReactEmitter {
         let slope = vertical ? ramp.dv : ramp.du
         let angle = cssAxisAngle(vertical ? (slope > 0 ? 180 : 0) : (slope > 0 ? 90 : 270), rotation: rotation)
         // The fraction of the node box's side, from the line's start, at each stop.
-        let fractions = stops.map { 0.5 + ($0.position - centre) / abs(slope) }
+        let fractions = stops.map { 0.5 + ($0.position - center) / abs(slope) }
         let list: [String]
         if outsets.isZero {
             list = zip(stops, fractions).map { "\($0.color) \(cssPercent($1))" }

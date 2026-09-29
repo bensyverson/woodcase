@@ -35,7 +35,7 @@ import Synchronization
 /// deadline already gave up on it. The box takes the continuation and its expiry together
 /// under one lock, so the first answer wins, every later one is dropped, and the expiry's
 /// side effect runs only when the deadline is what resumed. A connection is therefore
-/// never cancelled out from under a callback that already succeeded, and an ordinary
+/// never canceled out from under a callback that already succeeded, and an ordinary
 /// write — of which the viewer makes thousands — lets go of its connection the instant it
 /// completes rather than at the end of the budget.
 @available(macOS 15, iOS 18, *)

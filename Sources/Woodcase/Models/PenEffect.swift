@@ -19,7 +19,7 @@ public enum PenEffect: Friendly {
 
     case shadow(PenShadowEffect)
 
-    /// An effect whose `type` this build does not recognise, kept verbatim.
+    /// An effect whose `type` this build does not recognize, kept verbatim.
     ///
     /// Only a file decode produces it; authoring input with an unknown `type` is refused.
     /// Nothing draws it or emits code for it: it is written back exactly as read.
@@ -118,7 +118,7 @@ public enum PenEffect: Friendly {
         public var offset: PenOffset?
         /// The blur radius, in points; the Gaussian's sigma is half of it.
         public var blur: PenValue<Double>?
-        /// The shadow's colour.
+        /// The shadow's color.
         public var color: PenValue<String>?
         /// How the shadow composites with what is below it.
         public var blendMode: PenBlendMode?
@@ -195,7 +195,7 @@ public enum PenEffects: Friendly {
     ///
     /// The array is tried by *shape* rather than by success, so a misspelled `type`
     /// inside element 0 is reported as exactly that rather than being discarded in
-    /// favour of "this is not an object" from the single-effect decode.
+    /// favor of "this is not an object" from the single-effect decode.
     ///
     /// - Parameter decoder: The decoder to read from.
     /// - Throws: The `DecodingError` the effect, or the element of the array, raised.

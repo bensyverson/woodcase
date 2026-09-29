@@ -111,7 +111,7 @@ moved between repetitions in either case, while a single sample was off by 20×.
 
 **One at a time.** Every budget lives under one `@Suite(.serialized)` parent,
 `PerformanceBudgets`. Run in parallel, the six of them inflated one another by about a
-third — `tree` of the synthetic document reported 1507 ms beside its neighbours and
+third — `tree` of the synthetic document reported 1507 ms beside its neighbors and
 1115 ms alone, on the same build in the same minute. A timing test measures the
 machine as much as the code, so two of them at once measure each other.
 

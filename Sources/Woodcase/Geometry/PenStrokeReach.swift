@@ -10,7 +10,7 @@ import Foundation
 /// caps, and the miters at a sharp polygon's corners.
 ///
 /// `reach` is how far the band extends from the geometry on its outer side: half the
-/// width for a centred stroke, the whole width for an outer one (Pen strokes an outer
+/// width for a centered stroke, the whole width for an outer one (Pen strokes an outer
 /// band at twice the width and clips the inside away, so its outline reaches as far).
 enum PenStrokeReach {
     /// The miter limit Pen strokes with: Skia's default, the longest miter as a multiple
@@ -50,7 +50,7 @@ enum PenStrokeReach {
     ///
     /// At every corner the band has each edge's offset ends; a round join adds a disc of
     /// the reach about the corner, and a miter join the miter's tip, unless the miter is
-    /// longer than ``miterLimit`` times the width, where it is bevelled.
+    /// longer than ``miterLimit`` times the width, where it is beveled.
     ///
     /// - Parameters:
     ///   - points: The corners, in order; the last joins the first.

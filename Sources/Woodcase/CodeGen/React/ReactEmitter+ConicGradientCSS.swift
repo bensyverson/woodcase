@@ -9,15 +9,15 @@ extension ReactEmitter {
     /// How many equal turns a bent angular gradient is sampled at, besides its own stops.
     static let conicSamples = 90
 
-    /// An angular gradient at Pen's geometry, as a `conic-gradient` about Pen's centre.
+    /// An angular gradient at Pen's geometry, as a `conic-gradient` about Pen's center.
     ///
     /// Pen measures the turn in the gradient's own space and then stretches it to the box
     /// (``GradientGeometry/angularBearing(atTurn:width:height:)``). Where that map keeps
     /// angles — a square box and an even `size` — the turns are the bearings, started
     /// `from` Pen's turn 0. Elsewhere the stretch bends them, which a conic gradient cannot
     /// express, so the gradient is sampled at its stops and ``conicSamples`` equal turns,
-    /// each placed at its bearing with the colour Pen's ramp has there; CSS interpolates
-    /// linearly between neighbours. A box with a side that is not fixed counts as square.
+    /// each placed at its bearing with the color Pen's ramp has there; CSS interpolates
+    /// linearly between neighbors. A box with a side that is not fixed counts as square.
     static func cssConicGradient(
         _ geometry: GradientGeometry,
         stops: GradientStops,
@@ -31,7 +31,7 @@ extension ReactEmitter {
             (1.0, 1.0)
         }
         let start = geometry.angularBearing(atTurn: 0, width: width, height: height)
-        let at = gradientCentre(geometry.center, outsets: outsets)
+        let at = gradientCenter(geometry.center, outsets: outsets)
         let list: [String] = if geometry.keepsAngles(width: width, height: height) {
             stops.map { "\($0.color) \(cssPercent($0.position))" }
         } else {
@@ -74,9 +74,9 @@ extension ReactEmitter {
             .map { "\($0.color) \(cssNumber($0.bearing, decimals: 3))deg" }
     }
 
-    /// The colour of Pen's ramp at `position`: the end colours past the first and last
+    /// The color of Pen's ramp at `position`: the end colors past the first and last
     /// stops, as Pen pads them, and between two stops their mix, channel by channel as
-    /// the renderer interpolates — or `color-mix()` when a colour is not a hex literal.
+    /// the renderer interpolates — or `color-mix()` when a color is not a hex literal.
     static func colorOnRamp(_ stops: GradientStops, at position: Double) -> String {
         guard let first = stops.first, let last = stops.last else { return "transparent" }
         if position <= first.position { return first.color }

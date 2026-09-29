@@ -149,7 +149,7 @@ enum ViewerHosting {
     /// killing it is exactly what would leave open sockets and half-written state
     /// behind. A verb waits for the first element and then stops the server properly.
     ///
-    /// - Returns: The stream. Cancelling it cancels the underlying sources.
+    /// - Returns: The stream. Canceling it cancels the underlying sources.
     static func interruptions() -> AsyncStream<Int32> {
         AsyncStream { continuation in
             let sources = Sources()

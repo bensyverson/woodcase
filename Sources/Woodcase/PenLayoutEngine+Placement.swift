@@ -11,10 +11,10 @@ public extension PenLayoutEngine {
     ///
     /// The box is ``unturnedBox(of:rect:layoutRects:)``: `0, 0` at the size the layout gave
     /// the node before it turned it, or, for a group, its children's union measured from
-    /// its anchor. The map draws that box centred in the layout rect, flipped, then turned
-    /// by Pen's counter-clockwise degrees about that centre — which draws the same quad as
+    /// its anchor. The map draws that box centered in the layout rect, flipped, then turned
+    /// by Pen's counter-clockwise degrees about that center — which draws the same quad as
     /// Pen's own `translate(x, y) · turn · flip` about the anchor, because a turned box's
-    /// bounds are centred on its centre. So the map sends the box's corners to the quad the
+    /// bounds are centered on its center. So the map sends the box's corners to the quad the
     /// node is drawn as, and the quad's bounds (``PenPlacement/bounds``) are `rect`'s.
     ///
     /// Every placement-aware reader composes this one answer: ``absoluteRects(under:in:layoutRects:)``

@@ -51,7 +51,7 @@ private extension RemoteImageResolver {
     /// A node's fills, for every kind that has them.
     ///
     /// Strokes are deliberately not walked. They are typed `PenFills` in the model, but
-    /// ``PenStrokeRenderer`` only ever resolves a stroke to a solid colour — an image
+    /// ``PenStrokeRenderer`` only ever resolves a stroke to a solid color — an image
     /// stroke fill is never drawn — so downloading for one would be work with no
     /// possible effect on the output.
     static func fills(of node: PenNode) -> PenFills? {

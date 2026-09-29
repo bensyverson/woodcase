@@ -78,11 +78,11 @@ warning: [fontResolution] font "Lobster" is not installed and could not be downl
 warning: [fontResolution] font "Lobstre" is not installed, and Google Fonts has no family named "Lobstre"; text in it falls back to SF Pro.
 ```
 
-The resolver used to swallow every fetch error and end in "not found", so a blocked network looked like a misspelt font.
+The resolver used to swallow every fetch error and end in "not found", so a blocked network looked like a misspelled font.
 
 ## Proxies and sandboxes
 
-``URLSessionDataFetcher`` honours the conventional proxy variables — `HTTPS_PROXY`, `HTTP_PROXY`, `ALL_PROXY` and `NO_PROXY`, in either case — the way curl does; ``ProxyEnvironment`` documents the rules. With no proxy variables set it is plain `URLSession.shared`, and the system's proxy settings apply. Once one is set the environment is authoritative. A request goes through its scheme's proxy by an HTTP `CONNECT` tunnel, carrying the Basic credentials from the variable's `user:password@`, or goes direct when `NO_PROXY` excludes its host. A proxy host of `localhost` is dialled as `127.0.0.1`, because a sandbox without name resolution cannot look up even that.
+``URLSessionDataFetcher`` honors the conventional proxy variables — `HTTPS_PROXY`, `HTTP_PROXY`, `ALL_PROXY` and `NO_PROXY`, in either case — the way curl does; ``ProxyEnvironment`` documents the rules. With no proxy variables set it is plain `URLSession.shared`, and the system's proxy settings apply. Once one is set the environment is authoritative. A request goes through its scheme's proxy by an HTTP `CONNECT` tunnel, carrying the Basic credentials from the variable's `user:password@`, or goes direct when `NO_PROXY` excludes its host. A proxy host of `localhost` is dialed as `127.0.0.1`, because a sandbox without name resolution cannot look up even that.
 
 This is what an agent sandbox needs: the Claude Code Bash sandbox's only egress is an authenticated proxy on localhost. It is not *all* it needs. That sandbox also denies the system certificate-trust service (`com.apple.trustd.agent`), so no Apple TLS client inside it can verify an HTTPS server. The fetcher detects this by re-evaluating the server's trust, and classifies the failure as ``NetworkFailure/Reason/certificateTrustUnavailable``.
 
@@ -94,7 +94,7 @@ The trust-service warning therefore reaches a reader only where there is no fall
 
 ``GoogleFontResolver/prepareCachedFonts(for:diagnostics:)`` is the same chain with step 3 removed: system faces and every file the on-disk cache holds for the family, never a download. A face the cache lacks while its family is placed is not reported — the text draws in the family's nearest face until a render fetches the right one. It is synchronous, because nothing in it can block on a network, and ``SettledTree`` runs it before every layout — so `tree`, `lint` and the write verbs that print a settled tree measure text in the same faces `shot` and `render` draw with.
 
-It has to run, rather than being an optimisation: registration happens *inside* the resolver, so a face sitting in the cache is invisible to CoreText until something asks for it. That is why `tree` used to report a Google font's width in SF Pro while `shot` reported the real one, and the two disagreed about every text box in a file.
+It has to run, rather than being an optimization: registration happens *inside* the resolver, so a face sitting in the cache is invisible to CoreText until something asks for it. That is why `tree` used to report a Google font's width in SF Pro while `shot` reported the real one, and the two disagreed about every text box in a file.
 
 Reads stay offline on purpose. A read that downloaded a font would be a read that hangs behind a captive portal, and `lint` promises in its own help that it never goes to the network. Instead, a family it cannot place is reported — one warning per family, to the ``PenDiagnosticCollector`` when a caller passes one and to standard error when it does not, never both:
 
@@ -163,7 +163,7 @@ Caching is best-effort. If that directory cannot be created or written — a rea
 
 ## Custom Configuration
 
-The default ``GoogleFontResolver/shared`` instance uses ``StandardDataFetcher/make(environment:)`` — ``URLSessionDataFetcher``, which honours the proxy environment, with the curl fallback on macOS; see above — and `$WOODCASE_HOME/fonts`. For testing or custom networking, create a resolver with a custom ``RemoteDataFetching`` implementation:
+The default ``GoogleFontResolver/shared`` instance uses ``StandardDataFetcher/make(environment:)`` — ``URLSessionDataFetcher``, which honors the proxy environment, with the curl fallback on macOS; see above — and `$WOODCASE_HOME/fonts`. For testing or custom networking, create a resolver with a custom ``RemoteDataFetching`` implementation:
 
 ```swift
 let resolver = GoogleFontResolver(

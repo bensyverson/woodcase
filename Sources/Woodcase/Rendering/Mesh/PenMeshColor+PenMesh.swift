@@ -5,7 +5,7 @@
 
 import Foundation
 
-/// Pen's own reading of a mesh vertex colour, which is not ``PenHexColor``'s grammar.
+/// Pen's own reading of a mesh vertex color, which is not ``PenHexColor``'s grammar.
 ///
 /// Measured against Pen's exports of `render-mesh-colors.pen` (`scripts/pen-oracle`,
 /// `pen` CLI 0.3.9, 2026-09-27): Pen drops one leading `#`, then reads the rest by its
@@ -16,21 +16,21 @@ import Foundation
 /// split into bytes: `RRGGBB` opaque, or `RRGGBBAA` (`#eGeGeG` is `#00000E`, `#-f-f-f` is
 /// `#FFFFF1`). Any other length, `#RGBA` included, is transparent.
 public extension PenMeshColor {
-    /// Transparent black: what Pen paints for a vertex colour whose length it cannot read.
+    /// Transparent black: what Pen paints for a vertex color whose length it cannot read.
     static let transparent = PenMeshColor(red: 0, green: 0, blue: 0, alpha: 0)
 
-    /// Reads a vertex colour string as Pen's mesh reads it (``hexColor(penMesh:)``).
+    /// Reads a vertex color string as Pen's mesh reads it (``hexColor(penMesh:)``).
     ///
-    /// - Parameter penMesh: The colour string, as the file writes it.
+    /// - Parameter penMesh: The color string, as the file writes it.
     init(penMesh: String) {
         let unit = Self.hexColor(penMesh: penMesh).unitComponents
         self.init(red: unit[0], green: unit[1], blue: unit[2], alpha: unit[3])
     }
 
-    /// A vertex colour string's channels as Pen's mesh reads them; every string reads as
-    /// some colour.
+    /// A vertex color string's channels as Pen's mesh reads them; every string reads as
+    /// some color.
     ///
-    /// - Parameter string: The colour string, as the file writes it.
+    /// - Parameter string: The color string, as the file writes it.
     /// - Returns: The channels, transparent black for a length Pen cannot read.
     static func hexColor(penMesh string: String) -> PenHexColor {
         guard let digits = penMeshDigits(string) else { return PenHexColor(red: 0, green: 0, blue: 0, alpha: 0) }
@@ -50,7 +50,7 @@ public extension PenMeshColor {
 }
 
 extension PenMeshColor {
-    /// A colour string's UTF-16 code units after one leading `#`, when they number 3, 6
+    /// A color string's UTF-16 code units after one leading `#`, when they number 3, 6
     /// or 8 — the lengths Pen's mesh reads; `nil` for any other, which paints nothing.
     static func penMeshDigits(_ string: String) -> [UInt16]? {
         var units = Array(string.utf16)

@@ -162,8 +162,8 @@ struct ReactEmitterEffectsTests {
         #expect(!content.contains("filter"))
     }
 
-    @Test("A shadow with no colour is Pen's default, black at half alpha")
-    func defaultShadowColour() throws {
+    @Test("A shadow with no color is Pen's default, black at half alpha")
+    func defaultShadowColor() throws {
         let content = try card(##"{"type": "rectangle", "id": "R1", "name": "Box", "width": 80, "height": 80, "fill": "#FFFFFF", "effect": {"type": "shadow", "shadowType": "outer", "blur": 4}}"##)
         #expect(content.contains(##"boxShadow: "0px 0px 4px #00000080","##))
     }

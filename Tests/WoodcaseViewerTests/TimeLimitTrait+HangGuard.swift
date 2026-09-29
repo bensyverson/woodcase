@@ -7,7 +7,7 @@ import Testing
 
 extension Trait where Self == TimeLimitTrait {
     /// The per-test time limit on every suite that awaits a page, a server or a feed:
-    /// a test stuck past it is cancelled and fails by name instead of wedging the run.
+    /// a test stuck past it is canceled and fails by name instead of wedging the run.
     ///
     /// Sized against two numbers. A healthy test's wall time is not its own work: every
     /// browser test runs on the main actor, interleaved with every other, so the

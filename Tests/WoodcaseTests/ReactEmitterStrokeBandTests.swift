@@ -89,8 +89,8 @@ struct ReactEmitterStrokeBandTests {
         #expect(!content.contains("outline"), "\(content)")
     }
 
-    @Test("A centred stroke grows the node's shadows by half its width")
-    func centredStrokeSpread() throws {
+    @Test("A centered stroke grows the node's shadows by half its width")
+    func centeredStrokeSpread() throws {
         let content = try card(child: """
         {"type": "rectangle", "id": "Box01", "name": "Box", "width": 100, "height": 60,
          "stroke": "#00FF00", "strokeWidth": 12, \(Self.shadow)}

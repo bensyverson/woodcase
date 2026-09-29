@@ -54,8 +54,8 @@ public extension PenLayoutEngine {
         }
 
         /// Where a node's own coordinates land in its parent's: the node's box drawn
-        /// centred in its layout rect, flipped, then turned by Pen's counter-clockwise
-        /// degrees, about that centre — the renderer's placement (`PenRenderer.enter`).
+        /// centered in its layout rect, flipped, then turned by Pen's counter-clockwise
+        /// degrees, about that center — the renderer's placement (`PenRenderer.enter`).
         ///
         /// - Parameters:
         ///   - node: The node, for its rotation and flips.

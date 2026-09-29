@@ -198,7 +198,7 @@ public enum TreeView {
         // the prefix — so the rect and the children live one level deeper than the id.
         // Which component that is depends on the instances the node sits inside: one
         // of them may have repointed it, and the expansion this rect map came from
-        // honoured that. A ref back to a component on the chain is left as written.
+        // honored that. A ref back to a component on the chain is left as written.
         let placement = placement(of: source, in: entry.scope, document: context.document)
         let componentRoot = placement.componentRootID
         let rectID = componentRoot.map { "\(settledID)\(separator)\($0)" } ?? settledID

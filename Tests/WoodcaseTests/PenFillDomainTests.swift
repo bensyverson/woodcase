@@ -68,7 +68,7 @@ struct PenFillDomainTests {
     @Test("An even-odd outline draws a gradient through its ring and leaves its hole empty")
     func evenOddHoleIsEmpty() throws {
         let pixels = try #require(try RGBA(render("donut-h")))
-        // The ring, left of the hole on the centre row, shows the ramp near its red end:
+        // The ring, left of the hole on the center row, shows the ramp near its red end:
         // t = (40.5 - 20) / 200 ≈ 0.10.
         let ring = pixels.rgba(atPoint: 40, 80, scale: Self.scale)
         #expect(ring.r > 220 && ring.b > 15 && ring.b < 40, "ring pixel \(ring)")
@@ -125,7 +125,7 @@ struct PenFillDomainTests {
         // Outside the clip: nothing.
         #expect(pixels.alpha(atPoint: 60, 20, scale: 1) == 0)
         #expect(pixels.alpha(atPoint: 140, 20, scale: 1) == 0)
-        // Inside it, t is the pixel centre's fraction of the 200-pt domain, not of the 40-pt clip.
+        // Inside it, t is the pixel center's fraction of the 200-pt domain, not of the 40-pt clip.
         for x in [80, 90, 100, 119] {
             let expected = (Double(x) + 0.5) / 200 * 255
             let blue = Double(pixels.rgba(atPoint: x, 20, scale: 1).b)
@@ -199,7 +199,7 @@ struct PenFillDomainTests {
     /// Where a red→blue ramp's stops sit along one axis, fitted from the covered pixels.
     ///
     /// On a fully covered pixel of the ramp `R + B = 255` and `G = 0`, so `t = B / 255`.
-    /// A least-squares line of position (points, pixel centres) against `t`, over pixels
+    /// A least-squares line of position (points, pixel centers) against `t`, over pixels
     /// strictly inside the ramp, gives the positions of `t = 0` and `t = 1`.
     struct RampFit {
         let stop0: Double

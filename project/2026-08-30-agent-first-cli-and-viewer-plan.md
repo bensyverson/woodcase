@@ -53,7 +53,7 @@ Checked against the binary at `b6c54aa` and the 360 `.pen` files in the repo.
 - **`serve` autoincrements from 7333** until a port binds, like `job serve`. A sandbox
   `EPERM` is reported as the sandbox, not as a busy port.
 - **Artboards do not overlap.** A root added without coordinates is placed with a
-  margin from every existing root (already the behaviour; the margin becomes explicit
+  margin from every existing root (already the behavior; the margin becomes explicit
   and tested). A root added or moved *with* coordinates that overlaps another root
   prints a warning on the write and is an `artboard-overlap` lint finding.
 - **A write carries no theme, so follow mode never changes the viewer's theme.**
@@ -138,7 +138,7 @@ must refresh the artboard list and the outline binding, not only the render regi
 The outline and the artboard strip mark a `reusable` definition, a `ref` instance and
 a `slot` frame with a glyph and a label. Ids are styled as in the Jobs dashboard and
 click-to-copy. The Variables pane renders every type — string values as text, numbers
-with their themed variants, booleans, colours as swatches — scrolls, and collapses.
+with their themed variants, booleans, colors as swatches — scrolls, and collapses.
 Multiple theme axes already render one control per axis; unchanged.
 
 ### Bird's-eye view
@@ -281,7 +281,7 @@ tasks:
               - Clicking a node in the third artboard selects it and its outline row scrolls into view
           - title: Marks for components, instances and slots; id chips; full Variables pane
             desc: |
-              Outline rows and artboard entries mark reusable definitions, ref instances and slot frames with a glyph and label. Ids styled as in the Jobs dashboard, click-to-copy. Variables renders every type (string as text, number with themed variants, boolean, colour swatch), scrolls, and collapses.
+              Outline rows and artboard entries mark reusable definitions, ref instances and slot frames with a glyph and label. Ids styled as in the Jobs dashboard, click-to-copy. Variables renders every type (string as text, number with themed variants, boolean, color swatch), scrolls, and collapses.
             criteria:
               - woodcase-app.pen's outline shows definition, instance and slot marks
               - A string variable and a themed number variable render with their values

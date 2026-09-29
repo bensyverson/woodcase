@@ -19,13 +19,13 @@ extension SwiftUINodeEmitter {
         return token
     }
 
-    /// A colour's code, and whether it is opaque under every theme; `nil` for one this
+    /// A color's code, and whether it is opaque under every theme; `nil` for one this
     /// emitter cannot write (reported in `unemitted`).
     func colorCode(_ color: PenValue<String>, unemitted: inout [String]) -> (code: String, opaque: Bool)? {
         switch color {
         case let .literal(hex):
             guard let parsed = PenHexColor(hex) else {
-                unemitted.append("the colour \(SwiftUILiteral.string(hex))")
+                unemitted.append("the color \(SwiftUILiteral.string(hex))")
                 return nil
             }
             return (SwiftUILiteral.color(parsed), parsed.alpha == 255)
@@ -61,7 +61,7 @@ extension SwiftUINodeEmitter {
         }
     }
 
-    /// `value`, set by an instance's override, as `prop`'s argument: a colour variable is
+    /// `value`, set by an instance's override, as `prop`'s argument: a color variable is
     /// the caller's read of the theme (`Swatch(tint: theme.accent)`); `nil` when it cannot
     /// be written.
     func argument(_ value: PropMapper.Value, to prop: SwiftUIProp) -> String? {
@@ -105,7 +105,7 @@ private extension PenVariableType {
     /// The type as a diagnostic names it.
     var noun: String {
         switch self {
-        case .color: "colour"
+        case .color: "color"
         case .number: "number"
         case .string: "string"
         case .boolean: "boolean"

@@ -142,7 +142,7 @@ public struct TreeRow: Friendly {
     ///
     /// Empty exactly when ``clip`` is ``Clip/none``. Computed alongside ``clip`` by
     /// the same comparison in ``TreeView``, so a check that reads it — the `clipped`
-    /// check's scroll-aware behaviour — never re-derives the geometry with
+    /// check's scroll-aware behavior — never re-derives the geometry with
     /// different arithmetic.
     ///
     /// An array, not a `Set`, in ``OverflowAxis``'s case order — horizontal before

@@ -32,7 +32,7 @@ struct SwiftUIComponent: Friendly {
     var slotted: [PropDefinition]
 
     /// The component `definition`, named `typeName`, its props bound where its tree lets
-    /// the body read them; a colour prop may default to a variable of `theme`.
+    /// the body read them; a color prop may default to a variable of `theme`.
     init(_ definition: ComponentDefinition, typeName: String, theme: SwiftUITheme? = nil) {
         self.definition = definition
         self.typeName = typeName

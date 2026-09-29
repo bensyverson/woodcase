@@ -38,8 +38,8 @@ struct BoundedWaitTests {
         #expect(error?.description.contains("a callback nobody calls") == true)
     }
 
-    @Test("Cancelling the waiter ends the wait even while its job ignores cancellation")
-    func cancellingTheWaiterEndsTheWait() async {
+    @Test("Canceling the waiter ends the wait even while its job ignores cancellation")
+    func cancelingTheWaiterEndsTheWait() async {
         let waiter = Task {
             try await BoundedWait.value(within: .seconds(600)) { await Parked.forever() }
         }
@@ -48,8 +48,8 @@ struct BoundedWaitTests {
         #expect(throws: CancellationError.self) { try outcome.get() }
     }
 
-    @Test("A waiter cancelled before it starts waiting still ends")
-    func alreadyCancelledWaiterEnds() async {
+    @Test("A waiter canceled before it starts waiting still ends")
+    func alreadyCanceledWaiterEnds() async {
         let waiter = Task {
             withUnsafeCurrentTask { $0?.cancel() }
             return try await BoundedWait.value(within: .seconds(600)) { await Parked.forever() }
@@ -59,7 +59,7 @@ struct BoundedWaitTests {
     }
 }
 
-/// A thrown error the test can recognise by type.
+/// A thrown error the test can recognize by type.
 private struct Refusal: Error {}
 
 /// A job that suspends on a continuation nobody ever resumes, and does not listen for

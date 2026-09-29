@@ -30,7 +30,7 @@ public enum PreviewFrame: String, Friendly, CaseIterable {
     /// The render column between the two panes, where an artboard or the map is drawn.
     case canvas
 
-    /// The dashboard's centred body column, where the file cards sit.
+    /// The dashboard's centered body column, where the file cards sit.
     ///
     /// Its own surface rather than ``canvas``: the two are both "the middle", but the
     /// canvas is a pane sized by the window between two fixed columns and painted on

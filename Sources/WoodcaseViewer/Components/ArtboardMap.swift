@@ -244,7 +244,7 @@ public struct ArtboardMap: HTML {
         /// Who touched something inside this artboard recently.
         let editors: [String]
 
-        /// The colour of the recently-edited outline: the first editor's, matching the
+        /// The color of the recently-edited outline: the first editor's, matching the
         /// bar an outline row grows for the same reason.
         var editorColor: String {
             ActorColor(name: editors.first ?? "").css
@@ -289,7 +289,7 @@ public struct ArtboardMap: HTML {
                 }
             }
             // Elementary merges a second `style` onto the first, so this adds the actor
-            // colour to the placement above rather than replacing it.
+            // color to the placement above rather than replacing it.
             .attributes(
                 .class("is-touched"),
                 .style("--v-actor: \(editorColor)"),

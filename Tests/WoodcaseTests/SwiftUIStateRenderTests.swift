@@ -21,7 +21,7 @@
         ///
         /// The error is the text, not the state. Every text's box is its size rounded up to
         /// whole points, as Pen measures it (`PenLineBox`); before, the `fit_content` chip and
-        /// link rendered a pixel narrower at 2x and a `fit_content` label centred in a fixed
+        /// link rendered a pixel narrower at 2x and a `fit_content` label centered in a fixed
         /// button sat half a point off (the chip 3.13, selected 4.68, the link 5.96, the
         /// button 2.38–2.64). What is left on the chip and the link is Core Text's glyphs
         /// themselves: they cover more than Pen's — on the link's transparent board the mean

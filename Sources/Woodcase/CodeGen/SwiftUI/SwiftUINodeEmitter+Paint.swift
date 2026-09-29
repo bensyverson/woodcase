@@ -8,16 +8,16 @@ import Foundation
 extension SwiftUINodeEmitter {
     /// `fills`' enabled layers, bottom to top, laid out over a box of `box`'s size.
     ///
-    /// Colours, gradients (``SwiftUIGradient``), meshes (``SwiftUIMeshGradient``) and local
-    /// images are painted, each with its own opacity and blend mode; an opaque colour of
-    /// normal blend hides everything under it, so those layers are left out. A colour
-    /// variable, in a colour, a gradient stop or a mesh vertex, is read through the theme
+    /// Colors, gradients (``SwiftUIGradient``), meshes (``SwiftUIMeshGradient``) and local
+    /// images are painted, each with its own opacity and blend mode; an opaque color of
+    /// normal blend hides everything under it, so those layers are left out. A color
+    /// variable, in a color, a gradient stop or a mesh vertex, is read through the theme
     /// (``colorCode(_:unemitted:)``), and a gradient stop's position variable through it too
     /// (``number(_:unemitted:)``). A shader, a
-    /// variable the theme has no colour or number for, a remote image and a malformed colour
+    /// variable the theme has no color or number for, a remote image and a malformed color
     /// are named in `unemitted`.
     ///
-    /// In a component's body, the paint a colour or image prop of the node `nodeID` reads
+    /// In a component's body, the paint a color or image prop of the node `nodeID` reads
     /// (``SwiftUIProp/boundFillIndex(_:)``) is the prop: the `Color`, or the `Image` placed
     /// by the fill's mode.
     func paintLayers(_ fills: PenFills?, box: FillBox, of nodeID: String? = nil, unemitted: inout [String]) -> [SwiftUIPaintLayer] {
@@ -33,7 +33,7 @@ extension SwiftUINodeEmitter {
             let bindsImage = index == boundIndex && image != nil
             switch fill {
             case .shorthand where bindsColor, .color where bindsColor:
-                // A colour an instance passes may be translucent, so nothing under it is dropped.
+                // A color an instance passes may be translucent, so nothing under it is dropped.
                 if color?.themedDefault != nil { themeReads.note() }
                 content = color.map { .style($0.themedRead) }
             case let .image(fill) where bindsImage:
@@ -132,7 +132,7 @@ private extension PenFill {
     /// The fill's kind, as a diagnostic names it.
     var kindName: String {
         switch self {
-        case .shorthand, .color: "colour"
+        case .shorthand, .color: "color"
         case .gradient: "gradient"
         case .image: "image"
         case .meshGradient: "mesh gradient"

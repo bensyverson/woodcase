@@ -17,7 +17,7 @@ import Foundation
 /// So the value is filled in at the one place the command line is still a plain array:
 /// the entry point, before the parser runs. This is deliberately a table of one. An
 /// option belongs here only when writing it bare is a request the verb can answer, and
-/// the answer is written in the option's own help so the behaviour is discoverable
+/// the answer is written in the option's own help so the behavior is discoverable
 /// rather than magic.
 public enum BareOptionValue {
     /// Option spelling → the value to supply when it is written bare.

@@ -13,7 +13,7 @@ extension SwiftUINodeEmitter {
     struct Effects: Friendly {
         /// One shadow, in SwiftUI's terms.
         struct Shadow: Friendly {
-            /// The colour expression.
+            /// The color expression.
             var color: String
             /// The Gaussian's sigma, in points; a literal or a theme read.
             var radius: SwiftUINumber
@@ -56,8 +56,8 @@ extension SwiftUINodeEmitter {
         var unemitted: [String] = []
     }
 
-    /// Sort `effects` by kind, dropping the disabled ones and naming any that uses a colour
-    /// or number variable the theme lacks, or a type this build does not know. A colour or
+    /// Sort `effects` by kind, dropping the disabled ones and naming any that uses a color
+    /// or number variable the theme lacks, or a type this build does not know. A color or
     /// number variable that the theme has is read through it.
     func effects(_ effects: PenEffects?) -> Effects {
         var result = Effects()
@@ -185,9 +185,9 @@ extension SwiftUINodeEmitter {
         return view
     }
 
-    /// A drawn shadow, or `nil` when a number or colour it needs cannot be written (reported
+    /// A drawn shadow, or `nil` when a number or color it needs cannot be written (reported
     /// in `unemitted`): a blur or offset naming a variable the theme has no number for, or a
-    /// colour variable it has no colour for. A number the theme has is read through it.
+    /// color variable it has no color for. A number the theme has is read through it.
     private func shadow(_ shadow: PenEffect.PenShadowEffect, unemitted: inout [String]) -> Effects.Shadow? {
         guard let blur = number(shadow.blur, unemitted: &unemitted) else { return nil }
         let x: SwiftUINumber?
@@ -205,7 +205,7 @@ extension SwiftUINodeEmitter {
             guard let read = colorCode(.variable(name), unemitted: &unemitted) else { return nil }
             color = read.code
         case let .literal(hex)?:
-            // A colour that does not parse draws the default, as the renderer does.
+            // A color that does not parse draws the default, as the renderer does.
             guard let parsed = PenHexColor(hex) ?? PenHexColor(Self.defaultShadowColor) else { return nil }
             color = SwiftUILiteral.color(parsed)
         case nil:
@@ -216,6 +216,6 @@ extension SwiftUINodeEmitter {
         return Effects.Shadow(color: color, radius: blur.halved, x: x, y: y, blendMode: blendMode)
     }
 
-    /// The colour of a shadow that names none: half-transparent black, the renderer's.
+    /// The color of a shadow that names none: half-transparent black, the renderer's.
     private static let defaultShadowColor = "#00000080"
 }

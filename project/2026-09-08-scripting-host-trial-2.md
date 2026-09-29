@@ -47,11 +47,11 @@ Sentences that were not enough, in the agents' words:
 2. **`line 1 is not a batch operation: The given data was not valid JSON — run 'woodcase apply --help' for the grammar`** on a pretty-printed batch (N). *"Named the line and the fault, not the cause (an op may not span lines)."*
 3. **`--props: no node in this listing has "kind.content". Property paths are prefixed — "common.name", "kind.content", "kind.fill".`** on `tree <ref> --props kind.content` (A, C). The row is a component instance with no children listed; the fix is `--expand`, and the sentence restates the path grammar instead. A: *"the single sentence in this whole session that didn't tell me what to do next."*
 4. **`The predicate, line 1: Can't find variable: r`** on a `find` predicate written as an expression rather than an arrow function (N). *"Named the symptom rather than the shape it wanted."*
-5. **`error unresolved-variable … still refers to '$30.00 · Unlock all photos →'`** (N) — exact and fixable, but it exposed that a leading `$` is forgiven in text content, refused through an instance override, and prints a literal backslash when escaped mid-string. *"Three behaviours for one character, split by which verb wrote it."*
+5. **`error unresolved-variable … still refers to '$30.00 · Unlock all photos →'`** (N) — exact and fixable, but it exposed that a leading `$` is forgiven in text content, refused through an instance override, and prints a literal backslash when escaped mid-string. *"Three behaviors for one character, split by which verb wrote it."*
 6. **The font-fallback notice** — already issue `B0LkWL` from round one.
 7. **`command not found: woodcase`** — three agents, not the tool's sentence: Ben reinstalled the binary while they ran. Each recovered (a retry, a poll loop, the release build in the checkout). Recorded so nobody hunts for it.
 
-## Developer experience, synthesised
+## Developer experience, synthesized
 
 The verbatim reports are long; this is what they add up to, most-cited first. Each agent's full DX section is in its log directory's report and quoted where it carries the point.
 
@@ -63,7 +63,7 @@ The verbatim reports are long; this is what they add up to, most-cited first. Ea
 
 **4. `vars set` on a name that exists says nothing.** C caught that my change request called `--warn` "new" when it existed with nine references, only because it ran `vars list` defensively first: *"if I'd trusted the word 'new' … I'd have silently reflowed 9 existing UI elements."* Its fix: `vars set` on an existing name prints the old value and the reference count. (The brief's error was mine.)
 
-**5. No bulk route for the token layer.** N: *"17 colours × 2 options is 34 process launches through a shell loop because `apply`'s `var` op only takes the flat `{type,value}` shape. The token layer is the first thing you write in any design file, and it is the one part of the tool with no bulk route."*
+**5. No bulk route for the token layer.** N: *"17 colors × 2 options is 34 process launches through a shell loop because `apply`'s `var` op only takes the flat `{type,value}` shape. The token layer is the first thing you write in any design file, and it is the one part of the tool with no bulk route."*
 
 **6. Filling existing rows from data.** B: *"a bulk-override mechanism for existing nodes analogous to `cp --each` (which is only for placing new copies) — I ended up hand-rolling a JSONL `apply` batch."* Its proposal is `override --each rows.jsonl`. This is the one place round two's instinct data argues for a *verb*: two agents copied a whole list and then populated its rows, and `cp --each` does not fit that shape because the rows already exist.
 
@@ -98,7 +98,7 @@ tasks:
     desc: |
       Text content forgives a bare `$name` that matches no variable and keeps the literal;
       the same string through an instance override is an `unresolved-variable` error; and
-      escaping it as `\$` mid-string prints a literal backslash. Three behaviours for one
+      escaping it as `\$` mid-string prints a literal backslash. Three behaviors for one
       character, split by which verb wrote it (Nanoshoot N, three prices). The rule to adopt
       everywhere is content's rule exactly: forgive a `$name` **only when no variable of
       that name exists** in the document, so a `$name` that matches a real variable still
@@ -128,7 +128,7 @@ tasks:
   - title: "`vars set` on an existing name says so"
     desc: |
       `vars set` is add-or-change and prints the same outline either way, so a request to
-      "add" a variable that already exists silently recolours every reference (round two C:
+      "add" a variable that already exists silently recolors every reference (round two C:
       `--warn`, nine references, caught only by a defensive `vars list`). On an existing
       name, print one line naming the old value and the reference count before the outline,
       in both text and `--json`. Finding: DX item 4 of
@@ -154,8 +154,8 @@ tasks:
       - "Each of the four sentences has a CLI test asserting the new wording, and `get --help` names the `node` key"
   - title: Batch `var` op takes the themed value shape, and `vars set` takes several pairs
     desc: |
-      Themed colours cannot go through `apply`: the `var` op refuses anything but
-      `{type,value}`, so a 17-colour, two-option token layer is 34 process launches through
+      Themed colors cannot go through `apply`: the `var` op refuses anything but
+      `{type,value}`, so a 17-color, two-option token layer is 34 process launches through
       a shell loop (Nanoshoot N). Let the op carry the themed form `vars set --theme`
       accepts, and let `vars set` take several `name=value` pairs in one call. Finding: DX
       item 5 of project/2026-09-08-scripting-host-trial-2.md. Extends WoodcaseBatches.md.

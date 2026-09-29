@@ -20,8 +20,8 @@ extension PenEffect {
 
     /// Decodes an effect object.
     ///
-    /// Each modelled payload keeps the keys it does not claim in its `extras`. An
-    /// unrecognised `type` becomes ``unknown(typeName:payload:)`` in
+    /// Each modeled payload keeps the keys it does not claim in its `extras`. An
+    /// unrecognized `type` becomes ``unknown(typeName:payload:)`` in
     /// ``PenDecodingMode/file`` and stays a decoding error in ``PenDecodingMode/authoring``,
     /// where it is almost always a misspelling.
     ///
@@ -72,7 +72,7 @@ extension PenEffect {
 
     // MARK: - Private
 
-    /// Decodes the payload a modelled `type` selects, with its extras.
+    /// Decodes the payload a modeled `type` selects, with its extras.
     private static func decode(_ type: EffectType, from decoder: Decoder) throws -> PenEffect {
         switch type {
         case .blur:

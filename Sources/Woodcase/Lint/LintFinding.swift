@@ -10,7 +10,7 @@ import Foundation
 ///
 /// A finding names its node twice — by ``path``, which is what a later command should
 /// pass, and by ``nodeID``, which is what the file stores — because the path is what a
-/// reader recognises and the id is what survives a rename. A finding about the document
+/// reader recognizes and the id is what survives a rename. A finding about the document
 /// as a whole (a version-gate warning, say) carries neither.
 ///
 /// ``LintFormatter`` renders findings; the `lint` verb prints them and exits 1 when

@@ -8,7 +8,7 @@ import Testing
 import Woodcase
 @testable import WoodcaseViewer
 
-/// Previews and behaviour for the bird's-eye artboard map, now a page of its own.
+/// Previews and behavior for the bird's-eye artboard map, now a page of its own.
 struct ArtboardMapTests {
     /// `batch.pen`'s three roots, at the canvas positions the file gives them.
     private let artboards = [
@@ -82,12 +82,12 @@ struct ArtboardMapTests {
         #expect(!html.contains("node=Ttl01"))
     }
 
-    @Test("An artboard written to recently is marked in its editor's colour")
+    @Test("An artboard written to recently is marked in its editor's color")
     func recentlyEditedArtboardsAreMarked() {
         let html = map(editors: ["Brd01": ["claude-a", "ben"]]).render()
         #expect(html.contains("--v-actor: \(ActorColor(name: "claude-a").css)"))
         #expect(html.contains("data-editors=\"claude-a ben\""))
-        // The placement is not lost when the colour is added on top of it.
+        // The placement is not lost when the color is added on top of it.
         #expect(html.contains("--v-board-x: 500; --v-board-y: 40; --v-board-w: 200; --v-board-h: 100;"))
     }
 
@@ -129,14 +129,14 @@ struct ArtboardMapTests {
         #expect(ViewerStylesheet.css.contains("grid-template-rows: minmax(0, 1fr);"))
     }
 
-    @Test("A hovered box's frame borrows the selected state's colour, not one a light artboard swallows")
+    @Test("A hovered box's frame borrows the selected state's color, not one a light artboard swallows")
     func hoverBorrowsTheSelectionColor() {
-        // `--v-muted` is a low-contrast grey that disappears against a light thumbnail;
+        // `--v-muted` is a low-contrast gray that disappears against a light thumbnail;
         // `--v-accent` is what the focused (selected) box's own outline uses two lines
-        // below, so hover and selection now read as the same colour family.
+        // below, so hover and selection now read as the same color family.
         #expect(!ViewerStylesheet.css.contains(".v-map-board:hover .v-map-frame { border-color: var(--v-muted); }"))
         #expect(ViewerStylesheet.css.contains(".v-map-board:hover .v-map-frame { border-color: var(--v-accent); }"))
-        #expect(ViewerStylesheet.css.contains("outline: 2px solid var(--v-accent);"), "the selected state's own colour")
+        #expect(ViewerStylesheet.css.contains("outline: 2px solid var(--v-accent);"), "the selected state's own color")
     }
 
     @Test("The map's kind badge is a fixed round bubble around the glyph, not the label pill's padding")
@@ -148,8 +148,8 @@ struct ArtboardMapTests {
 
     @Test("The map's kind glyph reads larger than the general pill's 8px, and centers on its own line-height")
     func mapGlyphIsLargerAndCentered() {
-        // The nudge is measured, not decorative: with the em box flex-centred the glyph's
-        // ink still sat ~1px low and ~0.25px left of the bubble's centre (the mono font's
+        // The nudge is measured, not decorative: with the em box flex-centered the glyph's
+        // ink still sat ~1px low and ~0.25px left of the bubble's center (the mono font's
         // baseline placement and asymmetric side bearings), verified against a crosshair
         // overlay at 16x zoom on 2026-08-30.
         #expect(ViewerStylesheet.css.contains(

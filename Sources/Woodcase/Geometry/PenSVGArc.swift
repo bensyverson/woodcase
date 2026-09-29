@@ -3,7 +3,7 @@ import Foundation
 /// An SVG elliptical arc in endpoint form, resolved to cubic Béziers.
 ///
 /// Follows the W3C SVG 1.1 implementation notes (Appendix F.6): out-of-range radii are
-/// corrected, the endpoint form is converted to a centre and angles, and the sweep is split
+/// corrected, the endpoint form is converted to a center and angles, and the sweep is split
 /// into segments of at most 90°, each approximated by one cubic.
 struct PenSVGArc: Friendly {
     /// The current point the arc starts from.
@@ -51,7 +51,7 @@ struct PenSVGArc: Friendly {
         let rxSq = rx * rx
         let rySq = ry * ry
 
-        // F.6.5.2: the centre, in the unrotated frame.
+        // F.6.5.2: the center, in the unrotated frame.
         var sq = (rxSq * rySq - rxSq * y1pSq - rySq * x1pSq) / (rxSq * y1pSq + rySq * x1pSq)
         if sq < 0 { sq = 0 }
         var root = sqrt(sq)
@@ -59,7 +59,7 @@ struct PenSVGArc: Friendly {
         let cxp = root * rx * y1p / ry
         let cyp = -root * ry * x1p / rx
 
-        // F.6.5.3: the centre, in drawing space.
+        // F.6.5.3: the center, in drawing space.
         let cx = cosPhi * cxp - sinPhi * cyp + (from.x + to.x) / 2
         let cy = sinPhi * cxp + cosPhi * cyp + (from.y + to.y) / 2
 

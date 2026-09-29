@@ -106,7 +106,7 @@ struct CopyTimesTests {
         #expect(run.status == ExitCode.usage.rawValue)
         #expect(run.stdout.isEmpty)
         #expect(run.stderr.contains("--times"))
-        #expect(!run.stderr.contains("Unknown option"), "the flag itself must be recognised")
+        #expect(!run.stderr.contains("Unknown option"), "the flag itself must be recognized")
     }
 
     @Test("Each copy logs the same events one cp with a name would, and they share one batch")

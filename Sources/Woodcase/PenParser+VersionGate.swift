@@ -28,7 +28,7 @@ extension PenParser {
         /// version — `nil` for a document that declares none, read as legacy.
         case migrate(PenFormatVersion?)
         /// Another major, as declared: read it only if ``StructuralProbe`` says it is
-        /// still a document of the modelled major's shape.
+        /// still a document of the modeled major's shape.
         case probeDifferentMajor(String)
     }
 

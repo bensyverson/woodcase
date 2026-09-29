@@ -172,7 +172,7 @@ struct BatchApplierCreationTests {
         #expect(doc.node(id: "Hero1")?.common.name == "Renamed")
     }
 
-    @Test("An add honours its index")
+    @Test("An add honors its index")
     func addAtIndex() throws {
         let doc = try makeDocument()
         let report = try apply(#"""

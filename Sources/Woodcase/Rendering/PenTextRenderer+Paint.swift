@@ -5,8 +5,8 @@ import Foundation
 extension PenTextRenderer {
     /// Draws fills through glyph outlines, laid out over the node's box.
     ///
-    /// Glyphs from a colour font (emoji) have no outline to clip to; they are drawn as Core
-    /// Text draws them, in their own colours, before the paint goes over the rest.
+    /// Glyphs from a color font (emoji) have no outline to clip to; they are drawn as Core
+    /// Text draws them, in their own colors, before the paint goes over the rest.
     ///
     /// - Parameters:
     ///   - fills: The fills to draw.

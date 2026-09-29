@@ -179,7 +179,7 @@ public enum StateEmitter {
         case .fills:
             return extractFirstFillColor(from: node)
         case .textColor:
-            // The colour the text is emitted with at rest, by the same rule.
+            // The color the text is emitted with at rest, by the same rule.
             if case let .text(data) = node.kind {
                 return ReactEmitter.glyphColor(data.fills)
             }

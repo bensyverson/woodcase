@@ -38,7 +38,7 @@ struct PenShapeOutlineSVGTests {
         #expect(try data(.ellipse(), Self.box) == "M200 60 A100 60 0 1 1 0 60 A100 60 0 1 1 200 60 Z")
     }
 
-    @Test("A pie slice runs from the centre, out along the start angle, round the arc and home")
+    @Test("A pie slice runs from the center, out along the start angle, round the arc and home")
     func pieSlice() throws {
         #expect(try data(.ellipse(startAngle: 0, sweepAngle: 90), Self.box) == "M100 60 L200 60 A100 60 0 0 0 100 0 Z")
     }

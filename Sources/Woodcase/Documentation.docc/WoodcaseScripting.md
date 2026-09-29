@@ -378,7 +378,7 @@ does work.
 It does not bound `while (true) {}`, which calls nothing. The public JavaScriptCore
 headers on macOS 15 carry no execution-time limit and no interrupt to ask for — checked
 2026-09-07, `grep -ri 'TimeLimit\|Interrupt'` over the framework's `Headers` finds only
-licence text — so the CLI adds the last resort. `ScriptWatchdog` is a thread (not a
+license text — so the CLI adds the last resort. `ScriptWatchdog` is a thread (not a
 `Task`: a spinning `JSContext` never yields, so a cooperative-pool task beside it may
 never run) that outlives the deadline by a two-second grace, says what happened, and ends
 the process with exit 3:
@@ -431,7 +431,7 @@ predicate is an arrow function of one row, and the everyday mistake is typing th
 own body instead — `r.type === "text"` for `r => r.type === "text"`. Evaluating a
 function literal never runs its body, so evaluating that text on its own throws
 JavaScriptCore's own `ReferenceError`, "Can't find variable: r" — accurate about what
-broke, and silent about what to do next. The host recognises the shape rather than
+broke, and silent about what to do next. The host recognizes the shape rather than
 repeating the raw error: any `ReferenceError` thrown by evaluating the whole predicate
 text, on its own, can only mean the text is not a function literal at all, whatever
 identifier it names.

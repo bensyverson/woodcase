@@ -219,7 +219,7 @@
               retired: {
                 summary: '`--summary` counts the findings the CLI prints; count them '
                   + 'yourself with `doc.lint().length`',
-                list: '`--list` is the catalogue of checks and reads no document'
+                list: '`--list` is the catalog of checks and reads no document'
               }
             },
             schema: { kind: 'call', address: 'typeName', options: {} },

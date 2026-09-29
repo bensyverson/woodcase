@@ -6,7 +6,7 @@
 extension ReactEmitter {
     /// What paints an icon's glyph.
     enum IconPaint: Friendly {
-        /// A CSS colour, passed as the component's `color` prop.
+        /// A CSS color, passed as the component's `color` prop.
         case color(String)
 
         /// A paint server: `attribute="url(#…)"` on the component, naming a definition in

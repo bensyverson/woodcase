@@ -11,7 +11,7 @@ import Testing
 /// own override map has had its say.
 ///
 /// The flat store holds the component's *authored* wiring; an instance may repoint
-/// one of its nested refs, and ``PenRefExpander`` honours that. Everything that
+/// one of its nested refs, and ``PenRefExpander`` honors that. Everything that
 /// reads the tree has to agree with the expander, or it looks up a rect that the
 /// expansion never produced.
 @MainActor

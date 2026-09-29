@@ -9,7 +9,7 @@ import Testing
 
 /// Covers ``PenExtras`` at the model: a file decode keeps every key the typed model
 /// does not claim — at the root, on a node, on each fill and effect, and on a stroke's
-/// paint — and every `type` it does not recognise, and writes them back unchanged.
+/// paint — and every `type` it does not recognize, and writes them back unchanged.
 /// Authoring input, decoded in ``PenDecodingMode/authoring``, refuses the same keys.
 struct PenExtrasDecodingTests {
     // MARK: - Helpers
@@ -111,13 +111,13 @@ struct PenExtrasDecodingTests {
         #expect(backdrop.extras.values == ["futureBackdropKey": 2])
     }
 
-    @Test("An unrecognised fill type is kept verbatim as .unknown")
+    @Test("An unrecognized fill type is kept verbatim as .unknown")
     func unknownFillType() throws {
         let fills = try #require(try Self.board(in: Self.fixture()).fills?.all)
         #expect(fills[1] == .unknown(typeName: "hologram", payload: PenExtras(["shimmer": 0.5])))
     }
 
-    @Test("An unrecognised effect type is kept verbatim as .unknown, not fatal")
+    @Test("An unrecognized effect type is kept verbatim as .unknown, not fatal")
     func unknownEffectType() throws {
         let effects = try #require(try Self.board(in: Self.fixture()).effects?.all)
         #expect(effects[3] == .unknown(typeName: "glow", payload: PenExtras(["radius": 9, "spreadColor": "#FF00FF"])))
@@ -147,8 +147,8 @@ struct PenExtrasDecodingTests {
             == JSONSerialization.jsonObject(with: Data(json.utf8)) as? NSArray)
     }
 
-    @Test("A node carrying only modelled keys has no extras")
-    func modelledKeysAreNeverExtras() throws {
+    @Test("A node carrying only modeled keys has no extras")
+    func modeledKeysAreNeverExtras() throws {
         let json = """
         {"id":"F","type":"frame","name":"F","x":1,"y":2,"rotation":3,"opacity":0.5,"enabled":true,
          "flipX":false,"flipY":false,"reusable":false,"theme":{"mode":"dark"},"context":"c",

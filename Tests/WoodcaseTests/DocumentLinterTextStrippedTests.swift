@@ -10,7 +10,7 @@ import Testing
 /// `text-style-stripped`: a text node carrying a stroke, an underline or a
 /// strikethrough, which Pen strips when it opens the file and never draws.
 ///
-/// Pen's behaviour was confirmed in Pen.app 1.2.14 and the headless `pen` CLI
+/// Pen's behavior was confirmed in Pen.app 1.2.14 and the headless `pen` CLI
 /// (`project/2026-09-26-what-pen-drops-from-a-file.md`); these tests hold the lint to
 /// it, and never run Pen.
 @MainActor

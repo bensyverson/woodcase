@@ -34,7 +34,7 @@ public extension OutlineRow {
             PreviewState(
                 slug: "selected",
                 name: "Selected, clipped, and touched by two agents",
-                note: "Everything a row can carry at once. The `⚠` says the node falls outside its parent; the 3 px left bar is the *first* editor's colour, never the second's, so two agents on one node do not make it flicker; and the `href` deselects — clicking the selected row clears the selection rather than re-selecting it.",
+                note: "Everything a row can carry at once. The `⚠` says the node falls outside its parent; the 3 px left bar is the *first* editor's color, never the second's, so two agents on one node do not make it flicker; and the `href` deselects — clicking the selected row clears the selection rather than re-selecting it.",
                 frame: .leftPane
             ) {
                 OutlineRow(
@@ -65,7 +65,7 @@ public extension OutlineRow {
             PreviewState(
                 slug: "instance",
                 name: "An instance, with its child count",
-                note: "The kind mark *replaces* the type glyph rather than sitting beside it — a bare `◇` next to a labelled `◇ instance` is noise. `+4` is the count of what the instance expands to, and it is drawn only for an instance, because for anything else the disclosure control already says there is more.",
+                note: "The kind mark *replaces* the type glyph rather than sitting beside it — a bare `◇` next to a labeled `◇ instance` is noise. `+4` is the count of what the instance expands to, and it is drawn only for an instance, because for anything else the disclosure control already says there is more.",
                 frame: .leftPane
             ) {
                 OutlineRow(

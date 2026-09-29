@@ -19,7 +19,7 @@ struct SwiftUIAPIScannerTests {
         ])
     }
 
-    @Test("A trailing closure counts as one argument after the labelled ones")
+    @Test("A trailing closure counts as one argument after the labeled ones")
     func trailingClosure() {
         #expect(uses("ZStack(alignment: .topLeading) { Text(title) }") == [
             "ZStack(alignment:{})", ".topLeading", "Text(_:)",

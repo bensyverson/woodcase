@@ -8,7 +8,7 @@ extension SwiftUITheme {
     /// modifier a context node writes, and `PenThemeReader`, which hands a subtree the theme
     /// its context node set.
     ///
-    /// When an axis's options are light and dark it *is* the colour scheme: the environment
+    /// When an axis's options are light and dark it *is* the color scheme: the environment
     /// reads it from `colorScheme` and writing it sets `colorScheme`, so an app in dark mode
     /// draws the dark theme, and a subtree set dark draws SwiftUI's own controls dark too.
     var environmentSource: String {
@@ -65,14 +65,14 @@ extension SwiftUITheme {
         return lines.joined(separator: "\n") + "\n"
     }
 
-    /// The environment value whose `axis` is the colour scheme, and the axis's mapping to it.
+    /// The environment value whose `axis` is the color scheme, and the axis's mapping to it.
     private func bridgedEnvironment(_ axis: Axis) -> [String] {
         let type = "PenTheme.\(axis.typeName)"
         let dark = axis.options.first { $0.value.lowercased() == "dark" }?.member ?? ".dark"
         let light = axis.options.first { $0.value.lowercased() == "light" }?.member ?? ".light"
         return [
             "public extension EnvironmentValues {",
-            "    /// The theme views draw with. Its `\(axis.name)` is the colour scheme: reading it reads",
+            "    /// The theme views draw with. Its `\(axis.name)` is the color scheme: reading it reads",
             "    /// `colorScheme`, and setting it sets `colorScheme`.",
             "    var penTheme: PenTheme {",
             "        get {",
@@ -88,17 +88,17 @@ extension SwiftUITheme {
             "}",
             "",
             "extension EnvironmentValues {",
-            "    /// The theme as last set; ``penTheme`` reads its `\(axis.name)` from the colour scheme instead.",
+            "    /// The theme as last set; ``penTheme`` reads its `\(axis.name)` from the color scheme instead.",
             "    @Entry var penThemeAxes = PenTheme()",
             "}",
             "",
             "public extension \(type) {",
-            "    /// The option a colour scheme selects.",
+            "    /// The option a color scheme selects.",
             "    init(_ colorScheme: ColorScheme) {",
             "        self = colorScheme == .dark ? \(dark) : \(light)",
             "    }",
             "",
-            "    /// The colour scheme this option draws in.",
+            "    /// The color scheme this option draws in.",
             "    var colorScheme: ColorScheme {",
             "        self == \(dark) ? .dark : .light",
             "    }",

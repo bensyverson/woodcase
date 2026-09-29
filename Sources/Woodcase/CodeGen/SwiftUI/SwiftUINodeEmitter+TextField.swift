@@ -5,7 +5,7 @@
 
 extension SwiftUINodeEmitter {
     /// A text input's text as its `TextField`: the text node drawn as ``text(_:data:in:)``
-    /// draws it, the copy become the prompt in the text's colour, bound to the component's
+    /// draws it, the copy become the prompt in the text's color, bound to the component's
     /// `text` and focused by its `isFocused`.
     ///
     /// The field fills the room its row gives it, where the text sized to its copy.

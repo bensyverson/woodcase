@@ -10,9 +10,9 @@ established from its **renders** (`pen` CLI 0.3.9, headless, format 2.19), never
 
 The fills report's finding 2 holds on the new fixture board for board: a stroke's paint is laid out over the
 **node's box** for every alignment and every shape. A gradient pads beyond the box (so an outer stroke's outer band
-shows the end colours), and an image is drawn only where the placed image is: an outer stroke painted with a
+shows the end colors), and an image is drawn only where the placed image is: an outer stroke painted with a
 `stretch` or `fit` image draws nothing, and with a `fill` image only the side bands the covering image overhangs show
-(the image covers x 40…280 of a 200 × 120 box at x 60…260; the top and bottom bands fall outside it). A centred image
+(the image covers x 40…280 of a 200 × 120 box at x 60…260; the top and bottom bands fall outside it). A centered image
 stroke shows only its inner half, for the same reason.
 
 ## What changed in Woodcase
@@ -20,18 +20,18 @@ stroke shows only its inner half, for the same reason.
 - `PenStrokeRenderer.renderStroke(_:path:rect:roundedBox:in:imageProvider:)` takes the node's box (`rect`) as the
   paint domain and the renderer's image provider. Its region is a filled path handed to
   `PenFillRenderer.renderFills(_:clip:fillRule:domain:in:imageProvider:)`:
-  - uniform width: `path.copy(strokingWithWidth:)` at the width (centre) or twice it (inner, outer), mitre limit 10,
+  - uniform width: `path.copy(strokingWithWidth:)` at the width (center) or twice it (inner, outer), miter limit 10,
     filled non-zero, inside the same alignment clip the solid path uses (the shape for inner, its even-odd complement
-    for outer — its bounds widened to take in the outline's mitre tips);
+    for outer — its bounds widened to take in the outline's miter tips);
   - per-side width on a box: the ring from `PenStrokeRenderer+PerSide`, filled even-odd;
   - per-side width on any other shape: the old inner-bands fallback, now a union of band rectangles clipped to the
     shape (so a translucent paint no longer double-covers the corners).
-- A stroke that is **exactly one solid colour with no blend mode** keeps `strokePath()`, so its pixels do not move.
+- A stroke that is **exactly one solid color with no blend mode** keeps `strokePath()`, so its pixels do not move.
   Everything else — gradients, images, stacks, a disabled layer, a blended solid — goes through the fill seam, which
-  draws every enabled fill bottom to top. Before, only the first solid colour of a stroke was drawn at all.
+  draws every enabled fill bottom to top. Before, only the first solid color of a stroke was drawn at all.
 - Lines pass their box too (`renderLine`), and the browser placeholder passes its rect.
 - **A seam bug, fixed in `PenFillRenderer+Gradient`:** the angular gradient's bitmap covered only the domain, so an
-  angular paint seen through a clip that reaches past the box (an outer or centred stroke) was cut off at the box
+  angular paint seen through a clip that reaches past the box (an outer or centered stroke) was cut off at the box
   (`rect-angular-center` MAE 6.86). The bitmap now covers the domain grown by the clip's path bounds
   (`boundingBoxOfPath`, so curve control points do not grow it); for every shape fill the clip lies inside the domain
   and the bitmap is unchanged.
@@ -47,14 +47,14 @@ on x, ≈ 60.47 / 179.53 on y).
 
 | Board | MAE before → after (2x) | Woodcase stop 0 → 1 | Pen stop 0 → 1 |
 |---|---|---|---|
-| rect-lin-h inner / centre / outer | 7.65 / 8.50 / 9.35 → 0.02 / 0.01 / 0.01 | 59.98→260.01 / 60.01→259.98 / 60.00→260.00 | 59.99→260.00 / 60.00→259.99 / 60.00→259.99 |
+| rect-lin-h inner / center / outer | 7.65 / 8.50 / 9.35 → 0.02 / 0.01 / 0.01 | 59.98→260.01 / 60.01→259.98 / 60.00→260.00 | 59.99→260.00 / 60.00→259.99 / 60.00→259.99 |
 | rect-lin-v-outer (y) | 9.35 → 0.00 | 60.00 → 179.99 | 59.98 → 179.98 |
 | rect-lin-h-outer-radius | 8.62 → 0.02 | 59.99 → 260.00 | 60.00 → 259.99 |
 | rect-lin-h-center-filled | 8.48 → 0.01 | 60.01 → 259.98 | 60.00 → 259.99 |
 | ellipse-lin-h-outer | 7.45 → 0.07 | 59.99 → 260.00 | 60.00 → 260.00 |
 | path-lin-h-center | 4.44 → 0.03 | 59.98 → 260.04 | 59.99 → 260.02 |
 | frame-perside-lin-h unset / inner / outer | 7.04 / 6.48 / 7.60 → 0.01 each | 59.99→260.00 / 60.00→260.00 / 60.00→259.99 | 60.00→259.99 / 60.00→260.00 / 60.00→259.99 |
-| rect-uv inner / centre | 7.65 / 4.04 → 0.01 / 0.00 | u 60.35→259.61 / 60.34→259.59 | u 60.37→259.59 / 60.34→259.59 |
+| rect-uv inner / center | 7.65 / 4.04 → 0.01 / 0.00 | u 60.35→259.61 / 60.34→259.59 | u 60.37→259.59 / 60.34→259.59 |
 | ellipse-uv-center, path-uv-center | 5.41, 4.14 → 0.04, 0.02 | u 60.36→259.60, 60.37→259.59 | u 60.37→259.59, 60.37→259.59 |
 | frame-perside-uv, -uv-radius | 4.24, 4.40 → 0.00, 0.00 | u 60.37→259.58, 60.36→259.59 | u 60.38→259.58, 60.37→259.58 |
 | rect-uv-outer, rect-uv-fit-outer | 0.00 → 0.00 | nothing drawn | nothing drawn |
@@ -80,6 +80,6 @@ WebView comparisons failed to start in the before run (`WKErrorDomain Code=1` un
   > **Correction (2026-09-26):** `PenFillRenderer` already drew meshes (`a679ff1`) when this landed, so mesh strokes
   > draw through the seam today (checked with `woodcase render` on a 20 pt inner mesh stroke). Shader strokes still
   > draw nothing. No Pen reference pins mesh strokes yet.
-- An outer *solid* stroke's complement clip still spans the path's box grown by twice the width, so a very sharp mitre
+- An outer *solid* stroke's complement clip still spans the path's box grown by twice the width, so a very sharp miter
   tip beyond that is clipped — kept for pixel identity; the painted path widens the clip to the outline's bounds.
 - Per-side widths on ellipses, paths and polygons remain the fallback bands (finding 8 of the geometry follow-up).

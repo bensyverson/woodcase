@@ -14,7 +14,7 @@ Four states of `woodcase serve`, 1440×900, in
    activity feed beneath.
 2. `2-artboard.png` — one artboard: outline panel left (type glyph, name, rect in the
    parent's space, id; a `⚠` rect for a clipped node; unnamed nodes as `#id` in muted
-   text; the document revision in the header), the render centre with a scale line,
+   text; the document revision in the header), the render center with a scale line,
    activity feed right, filtered to this file.
 3. `3-selected-node.png` — a row selected: the node outlined in the render with a name
    tag, and a footer line with the name path, id, rect, clip note, revision and a
@@ -23,8 +23,8 @@ Four states of `woodcase serve`, 1440×900, in
 
 5. `5-concurrent-edits.png` — the same artboard while three identities work on it (Ben
    asked whether concurrent edits should be visible; yes): a presence strip in the top
-   bar (one colour per identity, last-seen age), an identity-coloured bar on every
-   outline row touched in the last 30 s, and a labelled outline (`claude-a · set 4s`)
+   bar (one color per identity, last-seen age), an identity-colored bar on every
+   outline row touched in the last 30 s, and a labeled outline (`claude-a · set 4s`)
    on the render for each recent edit, fading out; click pins one. All of it derives
    from the activity log's identity and node ids — no new server state.
 
@@ -34,11 +34,11 @@ mid-session; it cost one `Copy` per screen).
 
 Design: quiet developer-tool surface, one accent (blue-green `#2FBF6F`, Ben's pick over
 the first draft's orange) reserved for liveness and selection; identities use the Jobs
-dashboard's actor primitive — a round avatar whose colour is `hsl(fnv1a32(name+"u") % 360,
+dashboard's actor primitive — a round avatar whose color is `hsl(fnv1a32(name+"u") % 360,
 fnv1a32(name+"zzzzzzzz") % 50 + 50, 48%)` with the name's initial at 20 px+ and a 6 px dot
 below that (`jobs/internal/web/render/actor_color.go`, `DESIGN.md` § Actor identity), so an
-agent is the same colour in both tools. Because a hashed hue can land on the accent's green
-(`claude-a` and `ben` both do), the Jobs rule applies here too: identity colour lives only
+agent is the same color in both tools. Because a hashed hue can land on the accent's green
+(`claude-a` and `ben` both do), the Jobs rule applies here too: identity color lives only
 in the avatar disc and the edit markers, never in text or chrome; Inter for prose, JetBrains Mono for anything an agent would
 paste. Tokens are themed (`mode=light/dark`) on `v-*` variables. Built from three
 components (`FileRow`, `OutlineRow`, `ActivityRow`) instanced with `descendants`

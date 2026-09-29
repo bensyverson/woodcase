@@ -27,7 +27,7 @@ grep '^PROFILE' run.log | awk '{s[$3]+=$4; n[$3]++} END {for (k in s) printf "%-
 
 ## A warning about every number below
 
-Four other agents were building in sibling worktrees on this machine for the first half of this work, and the effect is larger than the effect being measured. The same unchanged suite measured **50.1 s, 33.6 s, 25.7 s, 18.7 s, 18.9 s** over half an hour as the machine drained. **Only the last two are the suite; the first three are the neighbours.** Every before/after pair below is either a minimum over several runs, or an A/B taken back-to-back in the same minute.
+Four other agents were building in sibling worktrees on this machine for the first half of this work, and the effect is larger than the effect being measured. The same unchanged suite measured **50.1 s, 33.6 s, 25.7 s, 18.7 s, 18.9 s** over half an hour as the machine drained. **Only the last two are the suite; the first three are the neighbors.** Every before/after pair below is either a minimum over several runs, or an A/B taken back-to-back in the same minute.
 
 This also corrects the premise this leaf was filed on. The leaf recorded "~95 s full suite, ~78 s for `WebViewRegression`, measured 2026-08-29". Those were load-inflated: the true pre-change figure on a quiet machine is **18.7 s** for the suite, **~26 s** for the full run. The work was still worth doing — it is a 2.2× cut — but it was never a 78 s suite.
 
@@ -61,11 +61,11 @@ The shape is unambiguous: **43 % of the suite was re-deriving the same fixture**
 
 ### 1. The fixture is derived once (the bulk of the saving)
 
-New: `Tests/WoodcaseTests/WebViewRegressionFixture.swift`. One `@MainActor` struct holding `raw` / `resolvedOnly` / `expanded`, the three analyses, both emit results (components-only and components+pages, kept separate because `compareComponent` and `compareScreen` genuinely emit different file sets), and both layouts. Built on first use, memoised in a `private static var`; main-actor isolation is what makes the lazy build safe without a lock.
+New: `Tests/WoodcaseTests/WebViewRegressionFixture.swift`. One `@MainActor` struct holding `raw` / `resolvedOnly` / `expanded`, the three analyses, both emit results (components-only and components+pages, kept separate because `compareComponent` and `compareScreen` genuinely emit different file sets), and both layouts. Built on first use, memoized in a `private static var`; main-actor isolation is what makes the lazy build safe without a lock.
 
 `WebViewRegressionTests.loadDocuments()` is gone. Measured after: the whole derivation is **810 ms, once** (`parse` 29, `resolve` 3, `expand` 515, `analyze` 6, `emit` 93, `layout` 164) against 20.4 s + 2.3 s + 1.6 s + 0.2 s spread across eleven tests before.
 
-A failure is deliberately *not* memoised: a fixture that could not be read should be re-reported to every test that asks, not swallowed once.
+A failure is deliberately *not* memoized: a fixture that could not be read should be re-reported to every test that asks, not swallowed once.
 
 ### 2. Page hosts are pooled and reused (−1.6 s)
 
@@ -75,7 +75,7 @@ Now the harness keeps a pool of idle hosts keyed by load budget, checks one out 
 
 - **Reuse is safe.** `PageHost.load` is built for repeated calls: `isLoading` refuses only a *concurrent* load, and `navigateAndSettle` resets `facts`, `navigationFailure` and `contentProcessFailure` per navigation. The injected scripts (ready-on-error, ready-signal, SleepyHollow's own console capture) are WebKit *user scripts* installed at `init`, so they re-run on every document; `window.__READY__` and the console capture's buffer are page globals, so they die with the document. `messages(named:)` sinks are removed when their stream terminates, so subscribing per render does not accumulate.
 - **A pool, not one host.** Two reasons. `PageHost` refuses a concurrent load on one host, and `WebViewTestHarnessTests` is *not* serialized — three of its tests share a 30 s budget and one shares the regression suite's 5 s budget, so a single shared host would have thrown `SleepyError(.usage)` the moment two overlapped. A checked-out host is simply absent from the pool.
-- **Keyed by budget** because `PageHost.budget` is `options.budget`, fixed at `init`. A host built for 30 s cannot honour a caller asking to fail after 2. See the SleepyHollow finding below — this is the one thing that forces the pool to be a pool of more than one.
+- **Keyed by budget** because `PageHost.budget` is `options.budget`, fixed at `init`. A host built for 30 s cannot honor a caller asking to fail after 2. See the SleepyHollow finding below — this is the one thing that forces the pool to be a pool of more than one.
 
 A/B, quiet machine, back to back, everything else identical (`WOODCASE_TEST_NO_HOST_POOL=1` vs not):
 

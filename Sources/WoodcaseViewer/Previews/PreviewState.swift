@@ -19,12 +19,12 @@ import Woodcase
 /// PreviewState(
 ///     slug: "small",
 ///     name: "Small",
-///     note: "The row-sized disc. The initial is centred and the hue is the identity's.",
+///     note: "The row-sized disc. The initial is centered and the hue is the identity's.",
 ///     frame: .strip
 /// ) { AvatarView(identity: "claude-a", size: .small) }
 /// ```
 ///
-/// The component is type-erased behind the closure the initialiser captures, which is
+/// The component is type-erased behind the closure the initializer captures, which is
 /// why this is `Sendable` but not `Friendly`: a closure is neither `Codable` nor
 /// `Equatable`. Everything a reader — or a JSON listing — needs is in ``metadata``,
 /// which is both. Write the closure so it captures nothing: build the props inside it
@@ -33,7 +33,7 @@ import Woodcase
 public struct PreviewState: Sendable {
     /// A state's describable half: everything about it except the markup.
     ///
-    /// Split out so the catalog can be listed, compared and serialised without the
+    /// Split out so the catalog can be listed, compared and serialized without the
     /// closure that renders it.
     public struct Metadata: Friendly {
         /// Creates a state's metadata.

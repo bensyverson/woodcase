@@ -51,7 +51,7 @@ suspended can be shown.
 ## The seam, audited
 
 `Sources/WoodcaseViewer/Server/` made exactly three `withCheckedContinuation` calls, and
-every one of them was unbounded and uncancellable:
+every one of them was unbounded and uncancelable:
 
 | Where | Awaited | Resumed by |
 |---|---|---|
@@ -70,7 +70,7 @@ path, and no `stop()` that could reach it — `ViewerServer.stop()` is guarded o
 which is not set until `start` returns.
 
 **Nothing bounded any of them.** `withCheckedContinuation` does not observe task
-cancellation, so `BoundedWait`, a cancelled test, and teardown were all powerless. The
+cancellation, so `BoundedWait`, a canceled test, and teardown were all powerless. The
 sends matter most: `SSEHub` broadcasts to its clients one at a time *from inside its own
 actor*, so one stream whose peer stopped reading — TCP send window full, completion
 correctly not firing — holds the hub, and therefore holds every `ViewerServer.stop()`
@@ -83,8 +83,8 @@ of the coordinators that `stop()` never got to cancel: exactly the sample above.
 figures can be re-run:
 
 - `NWConnection.send`'s `.contentProcessed` completion **does** fire when the connection
-  is cancelled in flight (`S1`), and **does** fire when `send` is called on an
-  already-cancelled connection (`S2`). So the send seam is not unresumable *by
+  is canceled in flight (`S1`), and **does** fire when `send` is called on an
+  already-canceled connection (`S2`). So the send seam is not unresumable *by
   cancellation* — the brief's lead that it might be is wrong. It is unresumable by a peer
   that simply stops reading, which no code in the viewer could interrupt.
 - The 2026-08-30 `NWListener` `EINVAL` gotcha is **root-caused and was mis-documented**:

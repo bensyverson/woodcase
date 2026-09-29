@@ -5,7 +5,7 @@
 
 /// One enabled fill as SwiftUI: its paint, and the fill's own opacity and blend mode.
 ///
-/// A paint is a `ShapeStyle` where SwiftUI has one (a colour, one of its gradients), and a
+/// A paint is a `ShapeStyle` where SwiftUI has one (a color, one of its gradients), and a
 /// view where it does not (an image placed by its mode, the support file's `PenGradient`).
 /// A stack of styles keeps SwiftUI's idiom, `.fill(top)` over `.background(lower, in:)`;
 /// one view in the stack makes every layer a view (``view``), in a `ZStack` clipped to
@@ -29,11 +29,11 @@ struct SwiftUIPaintLayer: Friendly {
     /// The fill's blend mode as SwiftUI names it (`.multiply`), when not normal.
     var blendMode: String?
 
-    /// Whether the paint is a plain colour, which text painted with it alone keeps as
+    /// Whether the paint is a plain color, which text painted with it alone keeps as
     /// `foregroundStyle`.
     var isColor = false
 
-    /// Whether the layer is an opaque colour of normal blend, which nothing under it shows
+    /// Whether the layer is an opaque color of normal blend, which nothing under it shows
     /// through.
     var covers = false
 

@@ -269,7 +269,7 @@
         /// which is the transaction's to know. A caller running the host inside a
         /// ``Woodcase/PenFileTransaction`` — the `js` verb — has the real outcome in
         /// ``Woodcase/PenFileTransaction/Outcome/commit`` and maps it over this one: a
-        /// dry run reports ``ScriptRun/Commit/previewed``, and writes that cancelled out
+        /// dry run reports ``ScriptRun/Commit/previewed``, and writes that canceled out
         /// so the bytes did not change report ``ScriptRun/Commit/unchanged``, which the
         /// host cannot see because it never encodes the file.
         private func finish(result: AnyCodable?) -> ScriptRun {

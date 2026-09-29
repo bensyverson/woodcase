@@ -28,7 +28,7 @@ import Foundation
 /// is dropped, and no line ever ends in a space, so the output is byte-stable.
 ///
 /// Requested property columns follow the id, and — only then — a header line names
-/// every column, because an unlabelled value column teaches nothing.
+/// every column, because an unlabeled value column teaches nothing.
 ///
 /// ## Coordinates
 ///

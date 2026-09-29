@@ -25,8 +25,8 @@ import Testing
 ///
 /// Woodcase does not reproduce Pen's pixels exactly, on purpose: Pen cuts every patch
 /// into a fixed 32 × 32 cells, and Woodcase subdivides adaptively to a quarter pixel and
-/// half a colour step (<doc:PenMeshGradients>, the ruling on leaf `OHdROl`), and it rounds
-/// colours where Pen truncates. So each artboard's MAE is pinned at what it measures, plus
+/// half a color step (<doc:PenMeshGradients>, the ruling on leaf `OHdROl`), and it rounds
+/// colors where Pen truncates. So each artboard's MAE is pinned at what it measures, plus
 /// a small margin, and a rise past the pin is a regression. ``expectedMAE`` says why each
 /// value is what it is.
 struct PenMeshFillSnapshotTests {
@@ -46,8 +46,8 @@ struct PenMeshFillSnapshotTests {
     ///
     /// Measured 2026-09-26 with `swift test --filter PenMeshFillSnapshotTests` (the values
     /// it prints; `pen` CLI 0.3.9 references). Almost all of it is one rule, not the
-    /// tessellation: the mesh core rounds each colour to the nearest 8-bit step where Pen
-    /// truncates (<doc:PenMeshGradients>, "No seams"), so about half of all colour samples
+    /// tessellation: the mesh core rounds each color to the nearest 8-bit step where Pen
+    /// truncates (<doc:PenMeshGradients>, "No seams"), so about half of all color samples
     /// read one step brighter than Pen's and almost none darker. That is a signed error of +0.5 on
     /// each of red, green and blue and none on alpha, so an MAE of 3 × 0.5 / 4 ≈ 0.37 on
     /// every opaque board, at either scale. Differences of two steps or more are a few
@@ -62,8 +62,8 @@ struct PenMeshFillSnapshotTests {
     ///   and Skia's edge coverage disagree.
     /// - `mfold`: the rounding bias, less over the area the fold leaves transparent in both
     ///   renders, plus a few dozen pixels on the fold's edges, which neither
-    ///   renderer anti-aliases, that differ by up to 252 steps where the two rasterisers
-    ///   disagree about which patch covers a pixel centre (0.33 at 1x, 0.37 at 2x).
+    ///   renderer anti-aliases, that differ by up to 252 steps where the two rasterizers
+    ///   disagree about which patch covers a pixel center (0.33 at 1x, 0.37 at 2x).
     private static let expectedMAE: [String: [Int: Double]] = [
         "m2x2": [1: 0.3784, 2: 0.3775],
         "m3x3": [1: 0.3686, 2: 0.3696],
@@ -101,15 +101,15 @@ struct PenMeshFillSnapshotTests {
         #expect(mae <= limit, "\(artboard) @\(scale)x: MAE \(mae), pinned at \(limit)")
     }
 
-    @Test("Each corner vertex's colour lands in its corner of the box", arguments: scales)
-    func cornerColoursLandAtCorners(scale: Int) throws {
+    @Test("Each corner vertex's color lands in its corner of the box", arguments: scales)
+    func cornerColorsLandAtCorners(scale: Int) throws {
         let image = try #require(try PenSnapshotTestHelpers.renderArtboard(
             named: "m2x2", in: Self.fixture, fixturesDir: Self.fixturesDir, scale: CGFloat(scale)
         ))
         let pixels = try #require(PenFillDomainTests.RGBA(image))
         let last = 200 * scale - 1
-        // Colour eases with smoothstep, so a pixel centre half a pixel in from a corner is
-        // within a fraction of a level of that corner's vertex colour.
+        // Color eases with smoothstep, so a pixel center half a pixel in from a corner is
+        // within a fraction of a level of that corner's vertex color.
         let corners: [(Int, Int, PenFillDomainTests.RGBA.Pixel)] = [
             (0, 0, .init(r: 255, g: 0, b: 0, a: 255)),
             (last, 0, .init(r: 0, g: 255, b: 0, a: 255)),

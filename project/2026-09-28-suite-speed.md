@@ -45,7 +45,7 @@ With the batch fixed, `WoodcaseTests` still took 255–286 s. Two traps cost tim
   255 s, which is noise. The ladder is still waste (leaf `NQxgi0`).
 
 The honest measure was CPU: the test process used 350 s of CPU over about 287 s of wall, 1.2 of 8 cores
-(`ps -o time` at the end of a run). The suite was waiting. Its wall time equalled its slowest suite,
+(`ps -o time` at the end of a run). The suite was waiting. Its wall time equaled its slowest suite,
 `React render WebView`: 283 boards rendered strictly one at a time (`.serialized`, `@MainActor`), 148 s alone (load
 11–17). Per board, from `WOODCASE_TEST_PROFILE` (283 boards, load 11–17):
 

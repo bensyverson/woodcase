@@ -9,13 +9,13 @@
 // For every `icon` node on every top-level frame of <fixture.pen> it reads the frame's
 // Pen export (`<fixture>-<frame name>.png` in <png dir>, default the fixture's directory,
 // as `scripts/pen-oracle` names them), then searches for the glyph origin — pen x and
-// baseline y, in points from the box's top-left — whose Core Text rasterisation best
+// baseline y, in points from the box's top-left — whose Core Text rasterization best
 // matches Pen's pixels in the box (least MAE over the box and a margin around it). It
 // prints that fit beside what each candidate placement rule predicts:
 //
-//   ink      the glyph's outline bounds centred in the box (Woodcase's rule before VMKixs)
-//   advance  the advance width centred across the box
-//   line     the line box (hhea ascent + descent) centred down the box
+//   ink      the glyph's outline bounds centered in the box (Woodcase's rule before VMKixs)
+//   advance  the advance width centered across the box
+//   line     the line box (hhea ascent + descent) centered down the box
 //   pen      the same line box with ascent and descent each rounded to a whole point at
 //            14 pt first: Pen's rule (PenIconFontRenderer.glyphOrigin)
 //
@@ -249,10 +249,10 @@ for icon in icons {
     let startX = inkX + penCentroid.x - ownCentroid.x, startY = inkY + penCentroid.y - ownCentroid.y
     var best = (x: startX, y: startY, mae: mae(startX, startY))
     for step in [0.5, 0.125, 1.0 / 32] as [CGFloat] {
-        let centre = best
+        let center = best
         for i in -6 ... 6 {
             for j in -6 ... 6 {
-                let x = centre.x + CGFloat(i) * step, y = centre.y + CGFloat(j) * step
+                let x = center.x + CGFloat(i) * step, y = center.y + CGFloat(j) * step
                 let m = mae(x, y)
                 if m < best.mae { best = (x, y, m) }
             }

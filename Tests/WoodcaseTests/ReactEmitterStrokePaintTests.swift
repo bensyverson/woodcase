@@ -8,7 +8,7 @@ import Testing
 @testable import Woodcase
 
 /// How the React emitter paints a stroke on a box (rectangle, frame, CSS ellipse) that is
-/// more than one plain colour: an absolutely positioned overlay the size of the stroke's
+/// more than one plain color: an absolutely positioned overlay the size of the stroke's
 /// outer edge, whose transparent border puts its padding box on the node's box (Pen's
 /// paint domain, `project/2026-09-26-text-and-stroke-fills.md` finding 2), whose padding
 /// puts its content box on the stroke's inner edge, and whose mask cuts the content box
@@ -50,12 +50,12 @@ struct ReactEmitterStrokePaintTests {
         ##"mask: "linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0)","##,
     ]
 
-    // MARK: - The plain-colour route
+    // MARK: - The plain-color route
 
     @Test("A lone solid stroke stays box-shadows, with no overlay")
     func solidStaysBoxShadow() throws {
         let content = try rectangle(stroke: "\"#FF0000\"")
-        // Centred: half inside the edge, half outside (ReactEmitterStrokePlacementTests).
+        // Centered: half inside the edge, half outside (ReactEmitterStrokePlacementTests).
         #expect(content.contains(##"boxShadow: "inset 0 0 0 4px #FF0000, 0 0 0 4px #FF0000","##))
         #expect(!content.contains("aria-hidden"))
     }
@@ -87,8 +87,8 @@ struct ReactEmitterStrokePaintTests {
         #expect(!content.contains("boxShadow"))
     }
 
-    @Test("A centred stroke straddles the edge and pads the gradient out to the node box")
-    func centreGradientOverlay() throws {
+    @Test("A centered stroke straddles the edge and pads the gradient out to the node box")
+    func centerGradientOverlay() throws {
         let content = try rectangle(stroke: Self.ramp)
         #expect(content.contains(##"inset: "-4px","##))
         #expect(content.contains(##"borderStyle: "solid","##))
@@ -129,8 +129,8 @@ struct ReactEmitterStrokePaintTests {
         #expect(content.contains("linear-gradient(-180deg, #FF0000 2px, #0000FF calc(100% - 12px))"))
     }
 
-    @Test("Per-side widths are centred by default, each side on its own")
-    func perSideCentred() throws {
+    @Test("Per-side widths are centered by default, each side on its own")
+    func perSideCentered() throws {
         let content = try rectangle(stroke: Self.ramp, width: ##"{"top": 4, "right": 16, "bottom": 24, "left": 8}"##)
         #expect(content.contains(##"inset: "-2px -8px -12px -4px","##))
         #expect(content.contains(##"borderWidth: "2px 8px 12px 4px","##))

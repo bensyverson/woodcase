@@ -5,7 +5,7 @@
 
 import Foundation
 
-/// Recognises an operation refused by a sandbox, and gives every verb that can hit one
+/// Recognizes an operation refused by a sandbox, and gives every verb that can hit one
 /// — binding a port, writing the activity log, writing the font cache — the same
 /// sentence.
 ///

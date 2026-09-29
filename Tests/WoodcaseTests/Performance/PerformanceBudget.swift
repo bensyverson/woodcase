@@ -27,7 +27,7 @@ import Woodcase
 /// checked against ``PerformanceSample/best``, the minimum of several in-process
 /// repetitions. A loaded machine inflates a single run several-fold (see
 /// `project/gotchas.md`, "A timing measured while agents build is not a timing"), and
-/// the minimum is the figure that survives a neighbour building in another worktree.
+/// the minimum is the figure that survives a neighbor building in another worktree.
 struct PerformanceBudget: Friendly {
     /// How much slower the same pipeline is when built without optimization.
     ///

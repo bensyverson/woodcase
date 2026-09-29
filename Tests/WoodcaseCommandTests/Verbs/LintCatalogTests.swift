@@ -1,5 +1,5 @@
 //
-//  LintCatalogueTests.swift
+//  LintCatalogTests.swift
 //  WoodcaseCommandTests
 //
 
@@ -11,10 +11,10 @@ import Woodcase
 /// `lint --list` and `lint --summary`: the two reads that are about the checks rather
 /// than about one file's findings.
 ///
-/// `--list` is the catalogue — every check id with the one line saying what it looks
+/// `--list` is the catalog — every check id with the one line saying what it looks
 /// for — and it has no preconditions, so it answers with no file at all. `--summary`
 /// is the same run of the same checks reported as counts instead of lines.
-struct LintCatalogueTests {
+struct LintCatalogTests {
     // MARK: - --list
 
     @Test("--list prints every check, one per line, with no file")
@@ -75,7 +75,7 @@ struct LintCatalogueTests {
 
     // MARK: - Refusals
 
-    @Test("--list with a file is a usage error: the catalogue reads no file")
+    @Test("--list with a file is a usage error: the catalog reads no file")
     func listWithAFileIsAUsageError() throws {
         let fixture = try CommandFixture(fixture: "lint/clean.pen")
         let run = try fixture.run("lint", fixture.file.path, "--list")

@@ -71,7 +71,7 @@ public enum PenStrokeAlign: String, Friendly, CaseIterable {
 
 /// Stroke line join style — the .pen `strokeLinejoin` key.
 ///
-/// The format's own editor omits the key for a mitred join, so an absent value means ``miter``.
+/// The format's own editor omits the key for a mitered join, so an absent value means ``miter``.
 public enum PenStrokeJoin: String, Friendly, CaseIterable {
     case miter
     case bevel

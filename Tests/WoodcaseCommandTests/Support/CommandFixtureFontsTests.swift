@@ -86,7 +86,7 @@ struct CommandFixtureFontsTests {
     /// `@Test` is judged only against the verbs that same test runs.
     ///
     /// Text before the first marker (imports, the suite's doc comment) and any helper
-    /// functions after the last `@Test` are folded into the neighbouring chunk; neither
+    /// functions after the last `@Test` are folded into the neighboring chunk; neither
     /// constructs a fixture in this codebase today, so this stays a guard rather than a
     /// parser.
     ///
@@ -146,7 +146,7 @@ struct CommandFixtureFontsTests {
 
     @Test("Every fixture a shot/render/generate swiftui CLI test loads names no fontFamily it does not seed")
     func shotAndRenderFixturesNameNoFont() throws {
-        var offences: [String] = []
+        var offenses: [String] = []
         for source in try Self.sources() {
             for chunk in Self.testChunks(in: source.code) where chunk.contains(Self.networkVerbRun) && !chunk.contains(Self.seedsFontCache) {
                 var names = Set(chunk.matches(of: Self.fixtureConstruction).map { String($0.name) })
@@ -154,7 +154,7 @@ struct CommandFixtureFontsTests {
                 for name in names.sorted() {
                     let families = try Self.fontFamilies(in: name)
                     guard !families.isEmpty else { continue }
-                    offences.append(
+                    offenses.append(
                         "\(source.path) shoots/renders \(name), which names fontFamily "
                             + "\(families.sorted()) — a fresh CommandFixture subprocess has "
                             + "no font cache and no CoreText registration, so this downloads"
@@ -162,6 +162,6 @@ struct CommandFixtureFontsTests {
                 }
             }
         }
-        #expect(offences.isEmpty, "\(offences.joined(separator: "\n"))")
+        #expect(offenses.isEmpty, "\(offenses.joined(separator: "\n"))")
     }
 }

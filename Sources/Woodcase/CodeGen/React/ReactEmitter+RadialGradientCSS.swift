@@ -8,13 +8,13 @@ import Foundation
 extension ReactEmitter {
     /// A radial gradient at Pen's geometry.
     ///
-    /// Pen's radial gradient reaches radius ½ of its `size` in the normalised box, around
+    /// Pen's radial gradient reaches radius ½ of its `size` in the normalized box, around
     /// `center`, turned by `rotation`. While that ellipse keeps to the box's axes
     /// (``GradientGeometry/axisAlignedRadii``) it is a CSS `radial-gradient` ellipse —
     /// `closest-side` for the default one. A CSS ellipse cannot turn, so a turned one is an
-    /// SVG paint server in the normalised box, stretched over it
+    /// SVG paint server in the normalized box, stretched over it
     /// (``svgRadialGradient(_:stops:box:outsets:)``); an SVG image cannot read the page's
-    /// custom properties, so a turned ellipse with a variable colour keeps the unturned CSS
+    /// custom properties, so a turned ellipse with a variable color keeps the unturned CSS
     /// ellipse.
     static func cssRadialGradient(
         _ geometry: GradientGeometry,
@@ -28,7 +28,7 @@ extension ReactEmitter {
         }
         let (radiusX, radiusY) = radii ?? (geometry.radiusX, geometry.radiusY)
         let list = stops.map { "\($0.color) \(cssPercent($0.position))" }.joined(separator: ", ")
-        let at = gradientCentre(geometry.center, outsets: outsets)
+        let at = gradientCenter(geometry.center, outsets: outsets)
         let shape: String
         if outsets.isZero {
             shape = radiusX == 0.5 && radiusY == 0.5 && at.isEmpty
@@ -42,9 +42,9 @@ extension ReactEmitter {
         return CSSGradient(image: "radial-gradient(\(shape), \(list))")
     }
 
-    /// A turned radial gradient as an SVG image: the normalised box as its view box,
+    /// A turned radial gradient as an SVG image: the normalized box as its view box,
     /// stretched to the tile with `preserveAspectRatio="none"`, and Pen's map as the
-    /// gradient's transform — or `nil` when a stop's colour is not a hex literal an SVG
+    /// gradient's transform — or `nil` when a stop's color is not a hex literal an SVG
     /// image can carry.
     private static func svgRadialGradient(
         _ geometry: GradientGeometry,

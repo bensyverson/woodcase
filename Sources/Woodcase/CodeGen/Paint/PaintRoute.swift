@@ -5,7 +5,7 @@
 
 /// How a text's fills or a node's stroke reach the emitted code.
 ///
-/// A lone solid colour keeps the plain declaration its target has for it (React's
+/// A lone solid color keeps the plain declaration its target has for it (React's
 /// `color`, a box-shadow, an SVG `stroke` attribute), so plain output does not move.
 /// Anything more — a gradient, an image, a mesh, a stack — is painted as layers over the
 /// node's box. Disabled fills are gone before the choice is made.
@@ -13,7 +13,7 @@ enum PaintRoute: Friendly {
     /// Nothing enabled to paint.
     case none
 
-    /// Exactly one enabled fill, a colour — a literal or a document variable — with its
+    /// Exactly one enabled fill, a color — a literal or a document variable — with its
     /// blend mode.
     case solid(color: PenValue<String>, blendMode: PenBlendMode?)
 
@@ -32,7 +32,7 @@ enum PaintRoute: Friendly {
         }
     }
 
-    /// The fills to paint as layers when the route is not a plain colour: every fill of
+    /// The fills to paint as layers when the route is not a plain color: every fill of
     /// a painted route, or a blended solid (whose blend mode the plain declaration
     /// cannot carry). `nil` for nothing, or for a solid of normal blend.
     var layeredFills: [PenFill]? {
@@ -48,7 +48,7 @@ enum PaintRoute: Friendly {
         }
     }
 
-    /// The plain colour, when the route is a solid of normal blend.
+    /// The plain color, when the route is a solid of normal blend.
     var plainColor: PenValue<String>? {
         guard case let .solid(color, blendMode) = self, blendMode.map({ $0 == .normal }) ?? true else {
             return nil

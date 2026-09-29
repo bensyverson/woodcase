@@ -24,7 +24,7 @@ struct PortablePNGEncoderTests {
         let opaque = [UInt8](PortablePNGEncoder.encode(premultipliedRGBA: [9, 9, 9, 255], width: 1, height: 1))
         let translucent = [UInt8](PortablePNGEncoder.encode(premultipliedRGBA: [9, 9, 9, 128], width: 1, height: 1))
         try #require(opaque.count > 26 && translucent.count > 26)
-        // IHDR data: width(4) height(4) depth(1) colour type(1) …
+        // IHDR data: width(4) height(4) depth(1) color type(1) …
         #expect(opaque[25] == 2)
         #expect(translucent[25] == 6)
     }
@@ -51,7 +51,7 @@ struct PortablePNGEncoderTests {
         @Test("Premultiplied input is written with straight alpha")
         func unpremultiplies() throws {
             // Premultiplied (128, 0, 64, 128) is straight (255, 0, 128, 128);
-            // fully transparent pixels carry no colour.
+            // fully transparent pixels carry no color.
             let pixels: [UInt8] = [128, 0, 64, 128, 0, 0, 0, 0]
             let png = PortablePNGEncoder.encode(premultipliedRGBA: pixels, width: 2, height: 1)
             let decoded = try #require(PNGTestDecoder(png))

@@ -8,8 +8,8 @@ import Testing
 @testable import Woodcase
 
 /// Where the emitted React puts a stroke relative to the node's edge, as Pen does: a
-/// centred box stroke half inside and half outside, a centre or outer per-side stroke
-/// outside the box, a line's stroke centred on the line — none of it moving the layout —
+/// centered box stroke half inside and half outside, a center or outer per-side stroke
+/// outside the box, a line's stroke centered on the line — none of it moving the layout —
 /// and an ellipse's arc drawn from the renderer's own geometry.
 struct ReactEmitterStrokePlacementTests {
     /// The emitted `Card` component: a vertical frame holding `child`, given as JSON.
@@ -33,24 +33,24 @@ struct ReactEmitterStrokePlacementTests {
         """)
     }
 
-    // MARK: - Centred box strokes (50MfO5)
+    // MARK: - Centered box strokes (50MfO5)
 
-    @Test("A centred solid stroke is half an inset box-shadow and half an outer one")
-    func centredStraddlesTheEdge() throws {
+    @Test("A centered solid stroke is half an inset box-shadow and half an outer one")
+    func centeredStraddlesTheEdge() throws {
         let content = try rectangle(width: "8")
         #expect(content.contains(##"boxShadow: "inset 0 0 0 4px #FF0000, 0 0 0 4px #FF0000","##), "\(content)")
         #expect(!content.contains("outline"), "\(content)")
     }
 
-    @Test("A centred stroke of a variable width halves the variable")
-    func centredVariableWidth() throws {
+    @Test("A centered stroke of a variable width halves the variable")
+    func centeredVariableWidth() throws {
         let content = try rectangle(width: "\"$w\"")
         #expect(content.contains(
             ##"boxShadow: "inset 0 0 0 calc(var(--w) * 0.5) #FF0000, 0 0 0 calc(var(--w) * 0.5) #FF0000","##
         ), "\(content)")
     }
 
-    @Test("A stroke with no width is drawn at Pen's default of 1, centred")
+    @Test("A stroke with no width is drawn at Pen's default of 1, centered")
     func defaultWidth() throws {
         let content = try card(child: """
         {"type": "rectangle", "id": "Rect1", "name": "Box", "width": 200, "height": 120, "stroke": "#FF0000"}
@@ -58,8 +58,8 @@ struct ReactEmitterStrokePlacementTests {
         #expect(content.contains(##"boxShadow: "inset 0 0 0 0.5px #FF0000, 0 0 0 0.5px #FF0000","##), "\(content)")
     }
 
-    @Test("A CSS ellipse's centred stroke straddles its edge too")
-    func centredEllipse() throws {
+    @Test("A CSS ellipse's centered stroke straddles its edge too")
+    func centeredEllipse() throws {
         let content = try card(child: """
         {"type": "ellipse", "id": "Ell01", "name": "Dot", "width": 200, "height": 120, "stroke": "#FF0000", "strokeWidth": 6}
         """)
@@ -81,8 +81,8 @@ struct ReactEmitterStrokePlacementTests {
 
     private static let mixed = ##"{"top": 4, "right": 16, "bottom": 24, "left": 8}"##
 
-    @Test("A centred solid per-side stroke is an overlay reaching half of each side past the box")
-    func perSideCentred() throws {
+    @Test("A centered solid per-side stroke is an overlay reaching half of each side past the box")
+    func perSideCentered() throws {
         let content = try rectangle(width: Self.mixed)
         #expect(content.contains(##"aria-hidden="true""##), "\(content)")
         #expect(content.contains(##"inset: "-2px -8px -12px -4px","##), "\(content)")
@@ -107,8 +107,8 @@ struct ReactEmitterStrokePlacementTests {
         try card(child: ##"{"type": "line", "id": "Line1", "name": "Rule", "width": 140, "height": 0, \##(keys)}"##)
     }
 
-    @Test("A line's SVG is grown by half the stroke on every side and pulled back by margins, so the stroke centres on the line")
-    func lineCentredOnItsY() throws {
+    @Test("A line's SVG is grown by half the stroke on every side and pulled back by margins, so the stroke centers on the line")
+    func lineCenteredOnItsY() throws {
         let content = try line(##""stroke": "#FF0000", "strokeWidth": 12"##)
         #expect(content.contains(##"<svg width={152} height={12} viewBox="-6 -6 152 12" overflow="visible""##), "\(content)")
         #expect(content.contains("margin: -6,"), "\(content)")
@@ -129,7 +129,7 @@ struct ReactEmitterStrokePlacementTests {
     }
 
     @Test("A full-width line's border straddles its y and takes no height")
-    func fullWidthLineCentred() throws {
+    func fullWidthLineCentered() throws {
         let content = try card(child: ##"{"type": "line", "id": "Line1", "name": "Rule", "width": "fill_container", "height": 0, "stroke": "#FF0000", "strokeWidth": 4}"##)
         #expect(content.contains(##"borderTop: "4px solid #FF0000","##), "\(content)")
         #expect(content.contains("marginTop: -2,"), "\(content)")

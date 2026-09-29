@@ -123,17 +123,17 @@ extension ReactEmitter {
         // Multiple fills → layer backgrounds
         var backgrounds: [String] = []
         var blendModes: [String] = []
-        var colourLayers: Set<Int> = []
+        var colorLayers: Set<Int> = []
         for fill in enabledFills.reversed() {
             if let bg = emitFillAsBackgroundLayer(fill, box: box, ctx: ctx) {
-                if fill.solidColor != nil { colourLayers.insert(backgrounds.count) }
+                if fill.solidColor != nil { colorLayers.insert(backgrounds.count) }
                 backgrounds.append(bg)
                 blendModes.append(fill.blendMode.map(blendModeToCSSValue) ?? "normal")
             }
         }
-        // CSS takes a bare colour only in the bottom layer; anywhere else it drops the whole
-        // declaration, so a colour above another layer is a flat gradient.
-        for index in backgrounds.indices.dropLast() where colourLayers.contains(index) {
+        // CSS takes a bare color only in the bottom layer; anywhere else it drops the whole
+        // declaration, so a color above another layer is a flat gradient.
+        for index in backgrounds.indices.dropLast() where colorLayers.contains(index) {
             backgrounds[index] = "linear-gradient(\(backgrounds[index]), \(backgrounds[index]))"
         }
 

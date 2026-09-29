@@ -21,7 +21,7 @@ struct SwiftUIAlignment: Friendly {
     /// The vertical part.
     var vertical: Vertical
 
-    /// Centred on both axes: SwiftUI's default, which the emitter leaves unwritten.
+    /// Centered on both axes: SwiftUI's default, which the emitter leaves unwritten.
     static let center = SwiftUIAlignment(horizontal: .center, vertical: .center)
 
     /// The `Alignment` spelling: `.topLeading`, `.bottom`, `.center`.

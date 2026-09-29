@@ -13,7 +13,7 @@ For the in-process release figures, run the budgets themselves:
 
 Every timing is the minimum of several runs, for the same reason the budgets
 are: one sample on a loaded machine is several times the true figure, and the
-minimum is what survives a neighbour building in another worktree.
+minimum is what survives a neighbor building in another worktree.
 
     scripts/perf-binary --config release
     scripts/perf-binary --config debug --reps 7

@@ -35,7 +35,7 @@ public extension PenFill.PenGradientStop {
 }
 
 public extension PenFill.PenFillPosition {
-    /// Decodes a gradient's centre, keeping any key it does not claim.
+    /// Decodes a gradient's center, keeping any key it does not claim.
     ///
     /// - Parameter decoder: The decoder to read from.
     /// - Throws: `DecodingError` for a malformed coordinate, or — in
@@ -45,11 +45,11 @@ public extension PenFill.PenFillPosition {
         try self.init(
             x: container.decodeIfPresent(Double.self, forKey: .x),
             y: container.decodeIfPresent(Double.self, forKey: .y),
-            extras: PenExtras.capture(from: decoder, claiming: CodingKeys.self, describing: "a gradient centre")
+            extras: PenExtras.capture(from: decoder, claiming: CodingKeys.self, describing: "a gradient center")
         )
     }
 
-    /// Encodes the centre, extras included.
+    /// Encodes the center, extras included.
     ///
     /// - Parameter encoder: The encoder to write to.
     /// - Throws: Whatever the encoder throws.

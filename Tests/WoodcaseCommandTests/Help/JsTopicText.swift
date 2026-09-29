@@ -177,7 +177,7 @@ enum JsTopicText {
     }
 
     /// The lines with the indentation every non-blank one shares removed, and trailing
-    /// whitespace dropped — the only normalisation the declaration comparison allows.
+    /// whitespace dropped — the only normalization the declaration comparison allows.
     private static func dedented(_ lines: ArraySlice<String>) -> [String] {
         let indent = lines
             .filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }

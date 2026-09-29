@@ -12,13 +12,13 @@ import Woodcase
 struct SandboxDenialTests {
     // MARK: - Raw POSIX errors
 
-    @Test("Recognises EPERM as a POSIXError")
-    func recognisesPOSIXEPERM() {
+    @Test("Recognizes EPERM as a POSIXError")
+    func recognizesPOSIXEPERM() {
         #expect(SandboxDenial.matches(POSIXError(.EPERM)))
     }
 
-    @Test("Recognises EACCES as a POSIXError")
-    func recognisesPOSIXEACCES() {
+    @Test("Recognizes EACCES as a POSIXError")
+    func recognizesPOSIXEACCES() {
         #expect(SandboxDenial.matches(POSIXError(.EACCES)))
     }
 
@@ -30,15 +30,15 @@ struct SandboxDenialTests {
     // MARK: - Errors that carry only rendered text
 
     @Test("Falls back to the rendered text for an error with no raw errno, like PenFileError")
-    func recognisesPenFileErrorText() {
+    func recognizesPenFileErrorText() {
         let error = PenFileError.cannotOpen(
             url: URL(fileURLWithPath: "/tmp/x"), reason: "Operation not permitted"
         )
         #expect(SandboxDenial.matches(error))
     }
 
-    @Test("Recognises Permission denied text too")
-    func recognisesPermissionDeniedText() {
+    @Test("Recognizes Permission denied text too")
+    func recognizesPermissionDeniedText() {
         let error = PenFileError.writeFailed(
             url: URL(fileURLWithPath: "/tmp/x"), reason: "Permission denied"
         )

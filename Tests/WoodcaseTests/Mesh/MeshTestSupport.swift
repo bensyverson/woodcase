@@ -16,7 +16,7 @@ enum MeshTestSupport {
     static let yellow = PenMeshColor(red: 1, green: 1, blue: 0)
 
     /// Handles a third of a cell long: with evenly spaced vertices these make every
-    /// Bézier edge a uniformly parametrised straight line.
+    /// Bézier edge a uniformly parametrized straight line.
     static func thirdHandles(columns: Int, rows: Int) -> PenMeshPoint.Handles {
         let dx = 1.0 / 3 / Double(columns - 1)
         let dy = 1.0 / 3 / Double(rows - 1)
@@ -27,7 +27,7 @@ enum MeshTestSupport {
     ///
     /// - Parameters:
     ///   - handles: The handles every vertex takes; the grid defaults when `nil`.
-    ///   - colors: One colour per vertex, row-major.
+    ///   - colors: One color per vertex, row-major.
     static func regularGrid(
         columns: Int,
         rows: Int,
@@ -73,7 +73,7 @@ enum MeshTestSupport {
         t * t * (3 - 2 * t)
     }
 
-    /// The bilinear blend of four colours at `(s, t)`.
+    /// The bilinear blend of four colors at `(s, t)`.
     static func bilinear(_ tl: PenMeshColor, _ tr: PenMeshColor, _ bl: PenMeshColor, _ br: PenMeshColor, s: Double, t: Double) -> PenMeshColor {
         func mix(_ a: Double, _ b: Double, _ c: Double, _ d: Double) -> Double {
             a * (1 - s) * (1 - t) + b * s * (1 - t) + c * (1 - s) * t + d * s * t

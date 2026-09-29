@@ -39,13 +39,13 @@ struct PenMeshMalformedPointSnapshotTests {
 
     /// The pin for a painted board, measured 2026-09-26 with
     /// `swift test --filter PenMeshMalformedPointSnapshotTests` (0.30–0.35 at 1x and 2x):
-    /// the mesh core's colour-rounding bias against Pen's truncation, as
+    /// the mesh core's color-rounding bias against Pen's truncation, as
     /// `PenMeshFillSnapshotTests` explains, with room for the edge where the moved
     /// vertex bares part of the box.
     private static let paintedLimit = 0.40
 
     /// `booleans` measures 0.62 at 1x and 0.60 at 2x. Its `[true, false]` vertex lands
-    /// on `[1, 0]`, on top of its right-hand neighbour, so patch (1, 0) collapses and
+    /// on `[1, 0]`, on top of its right-hand neighbor, so patch (1, 0) collapses and
     /// patch (0, 0) overlaps it — the same disagreement over which patch covers a pixel
     /// that `mfold` shows. The placement itself is Pen's: Pen's export of this board is
     /// identical (MAE 0) to its export of the same mesh with the vertex written `[1, 0]`

@@ -10,7 +10,7 @@ public extension LiveBadge {
     /// The connection indicator in each of the three states it can be read in.
     ///
     /// A closed set of three, so all three are here: the badge's whole job is that the
-    /// word and the colour agree, and the only way to see that is side by side.
+    /// word and the color agree, and the only way to see that is side by side.
     static let previews = PreviewComponent(
         slug: "live-badge",
         title: "Live badge",

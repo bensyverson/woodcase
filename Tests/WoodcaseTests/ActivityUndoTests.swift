@@ -10,7 +10,7 @@ import Testing
 /// Exercises undo as library API: a caller holding a transaction and a log reverses an
 /// edit without going through the CLI, and a step is one whole transaction.
 ///
-/// The step being a transaction is a **behaviour change**, ruled on 2026-09-07: a
+/// The step being a transaction is a **behavior change**, ruled on 2026-09-07: a
 /// command that logged forty events used to take forty undos, which is not what undo
 /// means to the person who ran the command once.
 struct ActivityUndoTests {

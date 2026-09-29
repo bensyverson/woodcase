@@ -44,7 +44,7 @@ struct SwiftUIViewCode: Friendly {
     /// The body closure's parameters (`theme` writes `{ theme in`), or `nil` for none.
     var parameters: String?
 
-    /// The labelled closures after the body's (`} footer: { … }`), empty for most views.
+    /// The labeled closures after the body's (`} footer: { … }`), empty for most views.
     var trailingClosures: [TrailingClosure] = []
 
     /// The modifiers, in application order.

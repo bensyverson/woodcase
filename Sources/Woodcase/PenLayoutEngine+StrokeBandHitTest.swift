@@ -18,11 +18,11 @@ public extension PenLayoutEngine {
     /// inside the corner itself — correctly misses.
     ///
     /// Alignment changes what "inside the band" means, not the outline's width alone: a
-    /// centred stroke's doubled-width outline already *is* the band; an inner or outer
+    /// centered stroke's doubled-width outline already *is* the band; an inner or outer
     /// stroke's is cut to the half that alignment keeps, against the shape's own fill
     /// (`PenStrokeRenderer.renderPainted`'s clip, read back as a test instead of a draw).
     /// A line has no fill to cut against, so its band ignores alignment and is always
-    /// centred on the segment, with its own caps — matching
+    /// centered on the segment, with its own caps — matching
     /// ``Woodcase/PenLayoutEngine/ownInk(of:box:)``'s treatment of a line's *reach*, which
     /// this generalizes from a bounding rect to the true capsule.
     ///
@@ -81,7 +81,7 @@ public extension PenLayoutEngine {
     /// A line's band: the true stroked capsule of the segment from the box's top-left
     /// corner to its bottom-right, with `strokeLinecap`'s caps. Alignment plays no part —
     /// a line has no interior for "inner" or "outer" to cut against, so its band is
-    /// always centred on the segment, as ``ownInk(of:box:)``'s `lineBand` already treats
+    /// always centered on the segment, as ``ownInk(of:box:)``'s `lineBand` already treats
     /// its bounding rect.
     private static func lineBandContains(_ point: CGPoint, stroke: any PenStrokable, box: PenRect) -> Bool {
         guard let width = stroke.uniformStrokeWidth, width > 0 else { return false }

@@ -430,7 +430,7 @@ public enum PenFileTransaction {
         }
     }
 
-    /// Writes `data` over the locked file: a temporary neighbour, then a rename.
+    /// Writes `data` over the locked file: a temporary neighbor, then a rename.
     static func write(_ data: Data, replacing lock: FileLock) throws {
         let url = lock.url
         let temporary = url

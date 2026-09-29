@@ -9,7 +9,7 @@ import Testing
 
 /// What a stroked node's outer shadow is cast by in emitted SwiftUI: Pen casts it from the
 /// node's silhouette, its shape grown by the part of the stroke band outside it — outside
-/// and centred strokes, per side, on every shape kind — never from a line, and knocks it out
+/// and centered strokes, per side, on every shape kind — never from a line, and knocks it out
 /// under the whole silhouette. ``SwiftUIRenderTests`` measures the same against Pen's exports
 /// of `render-stroke-shadows` and `render-sizeless-frames`.
 struct SwiftUIEmitterStrokeShadowTests {
@@ -23,10 +23,10 @@ struct SwiftUIEmitterStrokeShadowTests {
         ))
     }
 
-    @Test("A centred stroke casts with its shape, as does one with no alignment")
-    func centredStroke() throws {
-        let centred = try body(child: rect(##""stroke": "#00FF00", "strokeWidth": 6, "strokeAlignment": "center""##))
-        #expect(centred.contains(".penDropShadow(PenSilhouette(Rectangle(), stroke: Rectangle().penStroke(.center, lineWidth: 6)), "))
+    @Test("A centered stroke casts with its shape, as does one with no alignment")
+    func centeredStroke() throws {
+        let centered = try body(child: rect(##""stroke": "#00FF00", "strokeWidth": 6, "strokeAlignment": "center""##))
+        #expect(centered.contains(".penDropShadow(PenSilhouette(Rectangle(), stroke: Rectangle().penStroke(.center, lineWidth: 6)), "))
         let unset = try body(child: rect(##""stroke": "#00FF00""##))
         #expect(unset.contains(".penDropShadow(PenSilhouette(Rectangle(), stroke: Rectangle().penStroke(.center, lineWidth: 1)), "))
     }

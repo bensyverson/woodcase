@@ -42,7 +42,7 @@ public extension ArtboardRow {
             PreviewState(
                 slug: "touched",
                 name: "A definition, being written to",
-                note: "The kind mark takes the glyph column and the row wears its first editor's colour as a left bar. Both at once is the crowded case: the mark's own tint and the actor bar must stay distinguishable, since one is a fact about the file and the other a fact about right now.",
+                note: "The kind mark takes the glyph column and the row wears its first editor's color as a left bar. Both at once is the crowded case: the mark's own tint and the actor bar must stay distinguishable, since one is a fact about the file and the other a fact about right now.",
                 frame: .leftPane
             ) {
                 ArtboardRow(

@@ -129,7 +129,7 @@ public struct VariablesPanel: HTML {
 
     /// A variable's value, styled by its declared type.
     ///
-    /// A colour already carries its meaning in the swatch beside it, so its value stays
+    /// A color already carries its meaning in the swatch beside it, so its value stays
     /// plain text; a boolean reads better as a pill than as the bare word "true", and a
     /// number gets its own class so a stylesheet can right-align or tabular-figure it
     /// without also catching every other value column.

@@ -14,12 +14,12 @@
     /// The preview host's acceptance test: a real browser over a real server, proving
     /// that a state page and a canvas render through the *production* stylesheet.
     ///
-    /// One case per colour scheme and nothing more. Everything else about these pages is
+    /// One case per color scheme and nothing more. Everything else about these pages is
     /// markup, and `PreviewRoutesTests` reads markup faster than WebKit can load it; the
     /// one claim only a layout engine can settle is that a state is shown at the
     /// production surface's geometry, so the assertion is a *computed* width. Taking it
     /// in both schemes is what proves the frame rule does not live inside one of them —
-    /// and the ground colour is asserted per scheme, or the two cases would be one test
+    /// and the ground color is asserted per scheme, or the two cases would be one test
     /// run twice.
     ///
     /// Serialized, one bench per case: a headless WebKit page plus a live server is
@@ -90,7 +90,7 @@
 
         @MainActor
         @Test(
-            "A state page and a canvas render through the real stylesheet, in both colour schemes",
+            "A state page and a canvas render through the real stylesheet, in both color schemes",
             arguments: [ColorTheme.light, ColorTheme.dark]
         )
         func previewPagesWearTheRealStylesheet(theme: ColorTheme) async throws {

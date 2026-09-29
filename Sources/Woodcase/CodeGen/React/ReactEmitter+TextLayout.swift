@@ -23,7 +23,7 @@ extension ReactEmitter {
     ///   width is set — a fixed-width growth, or a width that is not `fit_content` — as
     ///   `PenLayoutEngine` measures it; an auto-width text is one line per newline (`pre`),
     ///   any other wraps too (`pre-wrap`).
-    /// - `textAlignVertical`: `middle` and `bottom` make the element a column that centres
+    /// - `textAlignVertical`: `middle` and `bottom` make the element a column that centers
     ///   or sinks its lines; `top` is the normal flow.
     /// - A top-aligned text whose font is known here is moved so its first baseline lands
     ///   where Pen puts it (``baselineCorrection(_:theme:)``).

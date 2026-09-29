@@ -66,7 +66,7 @@ struct PenInnerShadowShapesSnapshotTests {
     }
 
     /// Pen lays a flat line's stroke paint over its zero-height box and collapses a ramp
-    /// across the line — a slanted one to its two end colours split at the line, a vertical
+    /// across the line — a slanted one to its two end colors split at the line, a vertical
     /// or radial one to black; the renderer paints the ramp over the stroke's band, a kept
     /// divergence (<doc:PenInteroperability>, *Kept Divergences*). The board is pinned at its
     /// measured MAE + 0.5 so the choice cannot drift unseen: 7.974 before the band, when the

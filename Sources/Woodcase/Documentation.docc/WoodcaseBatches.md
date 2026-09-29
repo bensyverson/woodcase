@@ -62,7 +62,7 @@ A `var`'s `value` is what the `.pen` file stores — `{"type":TYPE,"value":VALUE
 `VALUE` is either one value or the themed list the format also takes: one
 `{"value":V,"theme":{AXIS:OPTION}}` per option, plus an optional entry with no `theme`
 as the fallback the resolver falls back to. So a two-mode token is one line, and a
-seventeen-colour token layer is seventeen lines through one `apply` rather than
+seventeen-color token layer is seventeen lines through one `apply` rather than
 thirty-four process launches:
 
 ```jsonl

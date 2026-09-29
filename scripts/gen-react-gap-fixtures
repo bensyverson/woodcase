@@ -3,10 +3,10 @@
 (leaf Mu4JsL, ReactRenderWebViewTests.gapFixtures) into Tests/WoodcaseTests/Fixtures:
 
   render-angular-shapes.pen   angular gradient fills and strokes on SVG-drawn shapes: polygons,
-                              paths (centre, inner and outer strokes), a line, a donut, an arc
+                              paths (center, inner and outer strokes), a line, a donut, an arc
   render-inner-sides.pen      children of frames with inner per-side strokes (and a uniform and
-                              a centred control): Pen moves no child for the stroke
-  render-unstroked-lines.pen  lines with no stroke paint, fixed and full-width, on grey
+                              a centered control): Pen moves no child for the stroke
+  render-unstroked-lines.pen  lines with no stroke paint, fixed and full-width, on gray
   render-stroke-bands.pen     strokes on 0x0 frames and rectangles, and on sized boxes, with the
                               outer shadows they cast
 

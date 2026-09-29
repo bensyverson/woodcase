@@ -39,8 +39,8 @@ struct SwiftUIEmitterThemeReadTests {
         #expect(!page.content.contains("penTheme"))
     }
 
-    @Test("Colour variables paint fills, strokes, text, gradient stops and shadows")
-    func colours() throws {
+    @Test("Color variables paint fills, strokes, text, gradient stops and shadows")
+    func colors() throws {
         let child = ##"""
         {"type": "rectangle", "id": "r", "width": 20, "height": 20, "fill": "$bg", "stroke": "$ink", "strokeWidth": 1, "strokeAlignment": "center",
          "effect": {"type": "shadow", "color": "$veil", "blur": 4}},
@@ -58,7 +58,7 @@ struct SwiftUIEmitterThemeReadTests {
         #expect(!diagnostics.diagnostics.contains { $0.message.contains("variable") })
     }
 
-    @Test("A translucent themed colour keeps the fills under it; an opaque one covers them")
+    @Test("A translucent themed color keeps the fills under it; an opaque one covers them")
     func themedOpacity() throws {
         let covered = try Self.board(##"{"type": "rectangle", "id": "r", "width": 20, "height": 20, "fill": ["#FF0000", "$bg"]}"##)
         #expect(covered.contains(".fill(theme.bg)") && !covered.contains("0xFF0000"))
@@ -150,7 +150,7 @@ struct SwiftUIEmitterThemeReadTests {
         let diagnostics = PenDiagnosticCollector()
         let page = try Self.board(##"{"type": "rectangle", "id": "r", "width": 20, "height": 20, "fill": "$space"}"##, diagnostics: diagnostics)
         #expect(!page.contains("theme.space"))
-        #expect(diagnostics.diagnostics.contains { $0.message.contains("the number variable $space as a colour") })
+        #expect(diagnostics.diagnostics.contains { $0.message.contains("the number variable $space as a color") })
     }
 
     // MARK: - Context nodes
@@ -187,7 +187,7 @@ struct SwiftUIEmitterThemeReadTests {
 
     // MARK: - Components
 
-    @Test("A colour prop that defaults to a variable is optional, and the paint falls back to the theme")
+    @Test("A color prop that defaults to a variable is optional, and the paint falls back to the theme")
     func themedPropDefault() throws {
         let swatch = ##"""
         {"type": "frame", "id": "W", "name": "Swatch", "reusable": true, "metadata": {"_props": {"tint": "Dot"}},

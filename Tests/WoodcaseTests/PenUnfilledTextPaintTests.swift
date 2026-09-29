@@ -9,13 +9,13 @@ import Testing
 /// board, both carrying the board's fill shape. The references are Pen's 2x exports
 /// (`scripts/pen-oracle Tests/WoodcaseTests/Fixtures/render-text-unfilled.pen --scale 2
 /// --no-layout --accept-invalid`, pen CLI 0.3.9, 2026-09-27; `--accept-invalid` because
-/// `bad-hex` is not a valid colour). What Pen drew:
+/// `bad-hex` is not a valid color). What Pen drew:
 ///
-/// - no `fill` key, `fill: []`, only a disabled colour, only a disabled gradient, and a fully
-///   transparent colour: nothing — the export is the plain grey board;
+/// - no `fill` key, `fill: []`, only a disabled color, only a disabled gradient, and a fully
+///   transparent color: nothing — the export is the plain gray board;
 /// - `#000000` (the control), an unparseable hex and an unresolved `$variable`: black, byte
 ///   for byte the same export — an *enabled* solid that fails to parse still paints black;
-/// - a gradient, an image, and a disabled colour under an enabled one: the enabled paint.
+/// - a gradient, an image, and a disabled color under an enabled one: the enabled paint.
 ///
 /// A shader fill draws its shader in Pen; the Core Graphics renderer does not execute
 /// shaders, so that shape is not a board here.
@@ -32,7 +32,7 @@ struct PenUnfilledTextPaintTests {
     private static let scale = 2
 
     /// The board's own fill, which is all an unfilled board may show.
-    private static let grey = PenFillDomainTests.RGBA.Pixel(r: 128, g: 128, b: 128, a: 255)
+    private static let gray = PenFillDomainTests.RGBA.Pixel(r: 128, g: 128, b: 128, a: 255)
 
     /// Boards whose text and icon have no enabled paint.
     private static let unfilled = ["no-fill", "empty-list", "disabled", "disabled-gradient", "transparent"]
@@ -47,7 +47,7 @@ struct PenUnfilledTextPaintTests {
     /// 0.000 on every unfilled board (8.947 before the fix, when the glyphs drew black);
     /// 0.681 on `control`, `bad-hex` and `missing-variable`; 0.677 on `disabled-then-solid`;
     /// 0.053 on `gradient`; 0.040 on `image`. The solids' 0.68 is Core Text's glyph
-    /// rasterisation against Pen's, the same on every black board.
+    /// rasterization against Pen's, the same on every black board.
     private static let maeCeilings: [(String, Double)] = [
         ("no-fill", 0.25), ("empty-list", 0.25), ("disabled", 0.25), ("disabled-gradient", 0.25),
         ("transparent", 0.25), ("control", 1.03), ("bad-hex", 1.03), ("missing-variable", 1.03),
@@ -59,11 +59,11 @@ struct PenUnfilledTextPaintTests {
         let pixels = try #require(PenFillDomainTests.RGBA(Self.render(artboard)))
         var inked = 0
         for py in 0 ..< pixels.height {
-            for px in 0 ..< pixels.width where pixels.pixel(px, py) != Self.grey {
+            for px in 0 ..< pixels.width where pixels.pixel(px, py) != Self.gray {
                 inked += 1
             }
         }
-        #expect(inked == 0, "\(artboard): \(inked) pixels differ from the board's grey")
+        #expect(inked == 0, "\(artboard): \(inked) pixels differ from the board's gray")
     }
 
     @Test("A text and icon whose one solid does not parse draw black, as Pen does", arguments: unparsed)

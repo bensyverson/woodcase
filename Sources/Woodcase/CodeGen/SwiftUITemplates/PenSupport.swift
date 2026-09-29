@@ -11,8 +11,8 @@ import CoreText
 import SwiftUI
 
 public extension Color {
-    /// An sRGB colour from a `0xRRGGBB` literal, the way the .pen file wrote it. Public,
-    /// because a component's colour prop defaults to one and a caller passes one.
+    /// An sRGB color from a `0xRRGGBB` literal, the way the .pen file wrote it. Public,
+    /// because a component's color prop defaults to one and a caller passes one.
     init(hex: UInt32, opacity: Double = 1) {
         self.init(
             .sRGB,
@@ -65,7 +65,7 @@ struct PenFontModifier: ViewModifier {
         let ascent = CTFontGetAscent(font)
         let descent = CTFontGetDescent(font)
         let natural = ascent + descent + CTFontGetLeading(font)
-        // Pen rounds a set line height to a whole point per line, and centres the glyphs in
+        // Pen rounds a set line height to a whole point per line, and centers the glyphs in
         // it with the baseline on a whole point; its natural line keeps its first baseline at
         // the rounded ascent, where SwiftUI's own natural line does.
         let points = lineHeight.map { (face.size * $0).rounded() } ?? natural.rounded()

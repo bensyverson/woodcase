@@ -14,7 +14,7 @@ import Foundation
 ///
 /// ## Why it re-arms
 ///
-/// ``PenFileTransaction`` commits by writing a temporary neighbour and `rename(2)`-ing
+/// ``PenFileTransaction`` commits by writing a temporary neighbor and `rename(2)`-ing
 /// it over the original — the only way to leave a reader either the whole old file or
 /// the whole new one. That means the file descriptor a watcher holds stops being the
 /// file at that path: it sees `.rename`/`.delete` and then goes quiet forever, watching

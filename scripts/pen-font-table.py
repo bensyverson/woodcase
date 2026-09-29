@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Extracts Pen's bundled Google font table from Pen.app's app.asar, as JSON.
 
-Pen's editor JavaScript carries the Google Fonts catalogue it offers as a literal array of
+Pen's editor JavaScript carries the Google Fonts catalog it offers as a literal array of
 `{name:"Family",styles:[{url:"https://fonts.gstatic.com/s/<dir>/v<N>/<hash>.ttf",weight:400,
 italic:!0,axes:[{tag:"wght",start:100,end:700}]}, ...]}` objects. This reads the archive
 read-only, finds every such object and prints one JSON object per family:

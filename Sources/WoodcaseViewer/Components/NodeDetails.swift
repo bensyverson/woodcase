@@ -222,7 +222,7 @@ public struct NodeDetails: Friendly, Identifiable {
     ///
     /// A reference is a string beginning with `$` — the resolver's own test — and it can
     /// be anywhere in the value, not only at the top of it: a fill object holds its
-    /// colour under a key, and an effect array holds one per entry.
+    /// color under a key, and an effect array holds one per entry.
     ///
     /// - Parameter value: The authored value.
     /// - Returns: The names, without their `$`.

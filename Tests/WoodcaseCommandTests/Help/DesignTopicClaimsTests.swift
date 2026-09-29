@@ -14,7 +14,7 @@ import Testing
 /// it is *true* — and the Quill run's most expensive hour went on a message that was
 /// there and false. So each test here does both halves: it asserts the topic still makes
 /// the claim, and then it runs the claim's own command against a fixture and checks the
-/// promised outcome. A behaviour that changes under the topic breaks this file.
+/// promised outcome. A behavior that changes under the topic breaks this file.
 ///
 /// The component half — instances, overrides, slots — is in
 /// ``DesignTopicComponentClaimsTests``.
@@ -131,7 +131,7 @@ struct DesignTopicClaimsTests {
         let dirty = try fixture.run("lint", fixture.file.path)
         #expect(
             dirty.stdout.contains("unresolved-variable"),
-            "a dangling reference in a colour property was not linted"
+            "a dangling reference in a color property was not linted"
         )
     }
 

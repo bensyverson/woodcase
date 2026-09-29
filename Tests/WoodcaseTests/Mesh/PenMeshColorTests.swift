@@ -7,8 +7,8 @@ import Foundation
 import Testing
 @testable import Woodcase
 
-/// Pen's mesh colour parse, row by row as `render-mesh-colors.pen` measured it (Pen's
-/// exports of each colour over `#00FF00`; `PenMeshColorSnapshotTests` holds the renderer
+/// Pen's mesh color parse, row by row as `render-mesh-colors.pen` measured it (Pen's
+/// exports of each color over `#00FF00`; `PenMeshColorSnapshotTests` holds the renderer
 /// to them): an optional leading `#` dropped, then three digits read one by one, six or
 /// eight read as one JavaScript `parseInt(…, 16)` and split into bytes, and any other
 /// length transparent.
@@ -69,7 +69,7 @@ struct PenMeshColorTests {
         ))
     }
 
-    @Test("The colour's channels are its hex colour's, over 255")
+    @Test("The color's channels are its hex color's, over 255")
     func unitChannels() {
         #expect(PenMeshColor(penMesh: "#-f-f-f") == PenMeshColor(red: 1, green: 1, blue: 241.0 / 255))
     }

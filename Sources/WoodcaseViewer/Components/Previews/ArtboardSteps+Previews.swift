@@ -17,7 +17,7 @@ public extension ArtboardSteps {
             PreviewState(
                 slug: "middle",
                 name: "Two of five",
-                note: "Both arrows are real links carrying the whole view state, which is what makes stepping work with the script off and what lets the keyboard implement ← and → by clicking them rather than re-deriving the order. Each carries `data-artboard`, so an unread neighbour shows its dot on the arrow that leads to it.",
+                note: "Both arrows are real links carrying the whole view state, which is what makes stepping work with the script off and what lets the keyboard implement ← and → by clicking them rather than re-deriving the order. Each carries `data-artboard`, so an unread neighbor shows its dot on the arrow that leads to it.",
                 frame: .canvas
             ) {
                 ArtboardSteps(

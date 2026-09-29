@@ -40,7 +40,7 @@ arms), `85b6f30` (reads `PenBrowserPlaceholder.Style`). Penumbra: `740f812` (pus
    enum.
 3. **Unknown node *types* in authoring input** are still accepted (`add` of `{"type":"video_clip"}` works) while
    unknown keys and fill/effect types are now refused. Refuse them too?
-4. **Mesh colour rounding.** The ~0.37 MAE against Pen on opaque meshes is the core *rounding* where Pen
+4. **Mesh color rounding.** The ~0.37 MAE against Pen on opaque meshes is the core *rounding* where Pen
    *truncates* (half the samples one step brighter), not the adaptive tessellation your ruling anticipated. Keep
    rounding (better) or truncate for parity?
 5. **Viewer:** `jNpws2` (`connecting` or `connecting…`), `4GVELx` (how to preview the selection bar's 560 px shed: a
@@ -55,7 +55,7 @@ arms), `85b6f30` (reads `PenBrowserPlaceholder.Style`). Penumbra: `740f812` (pus
    `project/agents/*`, in RapidPro and Penumbra) are not ours and were left alone.
 2. `PenColorParser` now refuses a signed hex string (`#+12345`), which it used to accept by accident; the two parsers
    disagreed and the stricter reading won.
-3. Text with two stacked solid fills now composites both (Pen's behaviour); `render-text.pen`'s `middle-vertical`
+3. Text with two stacked solid fills now composites both (Pen's behavior); `render-text.pen`'s `middle-vertical`
    board changed bytes and moved closer to Pen.
 4. The viewer agent's reversible choices (Needs Ben 5) were accepted into `aa4f0dd` rather than held back.
 5. A "`/tmp/design.pen` is locked" failure one agent saw was not filed: no test writes that path, so there is no

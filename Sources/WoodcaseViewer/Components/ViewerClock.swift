@@ -57,7 +57,7 @@ public struct ViewerClock: Friendly {
         RelativeAge.text(from: date, to: now, style: style)
     }
 
-    /// Whether a moment is inside the 30-second window a touched row is coloured for.
+    /// Whether a moment is inside the 30-second window a touched row is colored for.
     ///
     /// - Parameter date: The moment to test.
     /// - Returns: `true` while it is still recent.

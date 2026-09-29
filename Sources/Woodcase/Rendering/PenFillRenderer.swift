@@ -1,7 +1,7 @@
 import CoreGraphics
 import Foundation
 
-/// Renders fills — solid colours, gradients, mesh gradients and images — through a clip,
+/// Renders fills — solid colors, gradients, mesh gradients and images — through a clip,
 /// over a paint domain.
 ///
 /// A fill has two geometric inputs, and they are deliberately separate:
@@ -14,7 +14,7 @@ import Foundation
 ///   over the node's layout box whatever the outline inside it — a hexagon, a quarter
 ///   pie, glyphs or a stroke band all show a slice of the paint the box would show.
 ///
-/// Outside the domain a gradient pads with its end colours; an image draws nothing there.
+/// Outside the domain a gradient pads with its end colors; an image draws nothing there.
 enum PenFillRenderer {
     /// Renders all enabled fills, bottom to top, each clipped to `clip` and laid out over `domain`.
     ///
@@ -98,7 +98,7 @@ enum PenFillRenderer {
         }
     }
 
-    /// A solid colour covers the whole domain, so it is filled straight through the outline
+    /// A solid color covers the whole domain, so it is filled straight through the outline
     /// rather than clipped — the same pixels, with the path's own anti-aliasing.
     private static func renderSolid(
         _ color: CGColor,

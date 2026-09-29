@@ -57,8 +57,8 @@ extension PenLayoutEngine {
         return PenRect(x: Double(union.minX), y: Double(union.minY), width: Double(union.width), height: Double(union.height))
     }
 
-    /// The colour ``textInkBounds(of:box:)`` builds its measuring string with. Never
-    /// drawn — any opaque colour answers the same glyph geometry — so a plain black
+    /// The color ``textInkBounds(of:box:)`` builds its measuring string with. Never
+    /// drawn — any opaque color answers the same glyph geometry — so a plain black
     /// keeps the call site from having to invent one.
     private static let inkMeasuringColor = CGColor(gray: 0, alpha: 1)
 }

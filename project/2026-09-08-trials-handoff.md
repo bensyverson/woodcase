@@ -15,7 +15,7 @@ The scripting host plan (root `6vdq3j`) is closed: all fifteen leaves. Landed to
 | `ed7df56` | Test PNGs to a per-process temporary directory |
 | `c7e617e` | [Round one of the trial](2026-09-08-scripting-host-trial.md): primed Sonnet agent chose `js`, log accounts for every byte |
 | `fe9265a` | Ben's ruling: `apply` and `cp --each` stay — the wire form for shell scripts and workflows that do not want JavaScript |
-| `8019d81` | [Round two](2026-09-08-scripting-host-trial-2.md): three unprimed Sonnet agents chose verbs and `apply`, never `js`; the Opus greenfield run used every route by shape; DX synthesised; seven tasks imported |
+| `8019d81` | [Round two](2026-09-08-scripting-host-trial-2.md): three unprimed Sonnet agents chose verbs and `apply`, never `js`; the Opus greenfield run used every route by shape; DX synthesized; seven tasks imported |
 | `e446603` | Font and image caches under `$WOODCASE_HOME` (`WoodcaseHome`); the fallback notice split into never-downloaded and cannot-read; `help design` names the cache |
 
 The Nanoshoot mobile design — twelve screens, fourteen components, forty-one themed variables, lint clean in both themes — is at `/Users/ben/git/nanoshoot/design/` with `shots/`, uncommitted there.

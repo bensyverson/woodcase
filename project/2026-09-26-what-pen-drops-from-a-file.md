@@ -43,19 +43,19 @@ load (`Get`), after `save()`, and in a 1× export:
 
 | Probe | What Pen kept | What it drew |
 |---|---|---|
-| 2×2, four 6-digit colours | kept | the four-colour mesh |
-| colours as `#F00F` (4-digit `#RGBA`) | kept verbatim | nothing (transparent) |
-| colours as `#F00` (3-digit) | kept | identical to the 6-digit control |
+| 2×2, four 6-digit colors | kept | the four-color mesh |
+| colors as `#F00F` (4-digit `#RGBA`) | kept verbatim | nothing (transparent) |
+| colors as `#F00` (3-digit) | kept | identical to the 6-digit control |
 | 3 points on a 2×2 grid | **the whole fill removed** | nothing |
-| 3 colours on a 2×2 grid | **the whole fill removed** | nothing |
-| `rows: 1` (2 points, 2 colours) | kept | nothing |
+| 3 colors on a 2×2 grid | **the whole fill removed** | nothing |
+| `rows: 1` (2 points, 2 colors) | kept | nothing |
 | one point written `[1]` | kept, as `[1, null]` | nothing |
 | one point written `"oops"` | replaced by its default grid position | like the control |
 | the mesh report's folded `mfold` | kept | the folded, partly bare shape |
 
 `mesh-gradient-dropped` (error) reports the count mismatches, a missing `columns`,
 `rows`, `points` or `colors` (inferred from the same removal, not probed separately),
-and a grid under 2×2. `mesh-gradient-distorted` (warning) reports `#RGBA` colours and
+and a grid under 2×2. `mesh-gradient-distorted` (warning) reports `#RGBA` colors and
 folds.
 
 ### What counts as a fold
@@ -69,7 +69,7 @@ the report's Appendix A meshes gave:
 | Mesh, patch | Most negative sample | Mean | Share of samples negative |
 |---|---|---|---|
 | `mfold` (0,0) | −1.28 | 0.62 | 43% |
-| centre vertex of a 3×3 dragged to x = 1.3, patches (1,0) and (1,1) | −0.27 | 0.054 | 34% |
+| center vertex of a 3×3 dragged to x = 1.3, patches (1,0) and (1,1) | −0.27 | 0.054 | 34% |
 | `mwarp` (0,1) | −0.0008 | 0.13 | 0.3% |
 | every other patch of `mwarp`, `mcurve`, `m4x3` | ≥ +0.029 | — | 0% |
 

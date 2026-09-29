@@ -12,8 +12,8 @@
     ///
     /// Every board is an Inter 44 bold "Ink" and a lucide square on a #808080 frame, both
     /// carrying the board's fill shape. Pen draws the text and icon of an unfilled board —
-    /// no `fill` key, `fill: []`, a disabled colour, a disabled gradient, a transparent
-    /// colour — as nothing, and the text and icon of an unparseable enabled solid as black
+    /// no `fill` key, `fill: []`, a disabled color, a disabled gradient, a transparent
+    /// color — as nothing, and the text and icon of an unparseable enabled solid as black
     /// (`PenUnfilledTextPaintTests` has the full list). The page loads the lucide icon font
     /// and the test fonts the way `WebViewRegressionTests` does, so the text draws Inter, at
     /// the default optical size Pen draws (`font-optical-sizing: none`); every black board
@@ -26,7 +26,7 @@
         struct Board: CustomTestStringConvertible {
             /// The artboard's name.
             let name: String
-            /// Whether Pen draws nothing but the board's grey.
+            /// Whether Pen draws nothing but the board's gray.
             let unfilled: Bool
             /// The largest MAE against Pen's export.
             let maeLimit: Double
@@ -81,7 +81,7 @@
             await MAEReport.shared.record(id: "react-unfilled-\(board.name)", mae: mae, limit: board.maeLimit)
             if board.unfilled {
                 let inked = try Self.inkedPixels(image)
-                #expect(inked == 0, "\(board.name): \(inked) pixels differ from the board's grey")
+                #expect(inked == 0, "\(board.name): \(inked) pixels differ from the board's gray")
             }
         }
 
@@ -94,7 +94,7 @@
             #expect(board.bytes == control.bytes, "\(artboard) does not draw as the #000000 control does")
         }
 
-        /// How many pixels differ from the board's own colour, read at its top-left corner,
+        /// How many pixels differ from the board's own color, read at its top-left corner,
         /// by more than a rounding step.
         private static func inkedPixels(_ image: CGImage) throws -> Int {
             let pixels = try #require(PenFillDomainTests.RGBA(image))

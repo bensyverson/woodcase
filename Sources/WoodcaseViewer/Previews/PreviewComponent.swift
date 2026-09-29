@@ -17,7 +17,7 @@ import Woodcase
 /// ordinary, crowded, wrong, mid-flight — and there is deliberately no matrix generator.
 ///
 /// Like ``PreviewState``, this is `Sendable` rather than `Friendly`: its states hold the
-/// closures that render them. ``metadata`` is the serialisable half.
+/// closures that render them. ``metadata`` is the serializable half.
 public struct PreviewComponent: Sendable {
     /// A component's describable half: everything except the markup its states render.
     public struct Metadata: Friendly {

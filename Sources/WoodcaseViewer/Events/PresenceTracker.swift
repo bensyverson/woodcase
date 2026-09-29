@@ -22,7 +22,7 @@ public struct PresenceTracker: Friendly {
         var files: [String]
     }
 
-    /// Identities in order of first appearance — the order the page colours by.
+    /// Identities in order of first appearance — the order the page colors by.
     private var order: [String] = []
 
     /// The tally per identity.

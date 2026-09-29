@@ -24,10 +24,10 @@ repeatedly on load alone; each such failure was re-run with `--filter` and passe
 | `43f6158` | `onFiTm` | PenInteroperability.md's stroked-path "Pen bitmap offset" cause marked wrong (stale reference) |
 | `9df1eb9` | `MdCEmo` | Root overlap measured from the roots alone (`EditableDocument.rootRects`, exact vs a full settle over 185 fixtures); instance roots now counted (bug). `set`: tirekick 836 → 289 ms; woodcase-app 416 → 352 ms release. Verb budget held at a measured 550 ms until `KXKtc7` |
 | `3d55f33` | `DAmmQF` | Google fonts resolve per face (`PenFontFace`, CSS face matching from cached METADATA); bold/italic boards 7–16 → 2.2–2.7 |
-| `e55c44b` | `ILBcZv`, `GInRSg`, `dYIzYU` | React icons painted with gradients/images via SVG paint servers; SVG shapes honour enabled fills; components numbered case-insensitively; `shader-not-drawn` lint + render/shot/React warnings |
+| `e55c44b` | `ILBcZv`, `GInRSg`, `dYIzYU` | React icons painted with gradients/images via SVG paint servers; SVG shapes honor enabled fills; components numbered case-insensitively; `shader-not-drawn` lint + render/shot/React warnings |
 | `a04ec23` | `nAuBKh` | Free nodes turn and flip about their x/y anchor (`freeRect`) in layout, CG and SwiftUI; `txt-rotated` 7.33 → 0.017 |
 | `b52fb32` | `vXVtb1`, `5y8hO5` | WebKit harness names fonts by family; `ReactRenderWebViewTests` measures React on 221 renderer boards against Pen |
-| `8f142c9` | `VMKixs` | Icons placed by font metrics (advance centred; hhea line box rounded at 14 pt); `icon-font-test` 5.25 → 1.24 |
+| `8f142c9` | `VMKixs` | Icons placed by font metrics (advance centered; hhea line box rounded at 14 pt); `icon-font-test` 5.25 → 1.24 |
 | `d58e708` | `vVgtB2` | CG and SwiftUI draw text inner shadows (CG drew none); SwiftUI text boxes round up to whole points |
 | `c573ade` | `46XAVC` | SwiftUI remote images via `AsyncImage` at draw time |
 | `2d248ec` | `bLU8nV`, `Qfm8i8` | Per-side widths on sideless shapes stroke at the top width with the node's alignment (`PenStrokable.drawn(on:)`); React SVG fills painted; paths without a viewBox map their tight bounds |
@@ -65,7 +65,7 @@ repeatedly on load alone; each such failure was re-run with `--filter` and passe
 
 ## Still open
 
-- **Fidelity (`LxFb4C`):** `0M8jRo` React effects → `3Xbv46` React natural line height; `50MfO5` centred box
+- **Fidelity (`LxFb4C`):** `0M8jRo` React effects → `3Xbv46` React natural line height; `50MfO5` centered box
   strokes inside the box; `SctC0l` SVG line hangs; `cqBw2i` group union with negative offsets; `INL8Zi`
   `absoluteRects` under turned frames; `Jg0BOv` 0×0 `layout: none` frame (**classify first**, may be Ben's call);
   `BpaSrF` which Plex face Pen draws (run alone — it moves many gates); `QP5E24` SwiftUI themed numbers (last).
@@ -96,6 +96,6 @@ repeatedly on load alone; each such failure was re-run with `--filter` and passe
   use absolute paths or `git -C`.
 - **A RapidPro root auto-closes when its last leaf closes**, before follow-ups are added; add follow-ups first,
   or check `job ls` after.
-- **Briefs were wrong in the usual places:** CG did not draw text inner shadows; "centred" per-side strokes follow
+- **Briefs were wrong in the usual places:** CG did not draw text inner shadows; "centered" per-side strokes follow
   the node's alignment; icon metrics round at 14 pt; the React harness floor was optical size, not the fallback
   font; the default SwiftUI floor is 26/26. Every agent answered the brief-errors question.

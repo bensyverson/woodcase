@@ -75,7 +75,7 @@ struct PenIconFontSnapshotTests {
         print("  icon-font-test MAE vs Pencil: \(String(format: "%.2f", mae))")
         // max(measured×1.5, measured+0.25); measured 0.89 (swift test -j 3 --filter PenIconFontSnapshotTests,
         // 2026-09-27, leaf 6vLFNQ). 1.24 while Core Text moved Material Symbols' `opsz` axis to the point size
-        // (leaf VMKixs); 5.25 while glyphs were centred by their ink rather than placed by the font's metrics.
+        // (leaf VMKixs); 5.25 while glyphs were centered by their ink rather than placed by the font's metrics.
         #expect(mae < 1.34, "Icon font MAE \(String(format: "%.2f", mae)) exceeds threshold")
     }
 }

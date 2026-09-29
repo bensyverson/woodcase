@@ -168,7 +168,7 @@ tops = [
          content="Hello world", fontSize=30),
     # x8-x9: an icon's painted extent is its glyph ink too (Pen's DJt icon class returns
     # its own `fillPath.bounds` from `computeVisualLocalBounds`) -- the vector glyph
-    # scaled to fit the box by its *shorter* side and centred, then measured tightly, not
+    # scaled to fit the box by its *shorter* side and centered, then measured tightly, not
     # the box itself. x8: a wide box (60x20) makes the fitted glyph much narrower than
     # the box. x9: a square box around a glyph ("minus") that does not fill its own
     # em-square even when fitted.

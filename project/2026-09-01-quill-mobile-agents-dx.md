@@ -44,12 +44,12 @@ Python generators woodcase cannot read, lint or attribute.
 
 **(a) Repetition with a per-item payload.** All four. 15 meeting rows and 20 company rows (`lists`);
 24 form rows, 7 group titles, 3 checklist lines (`detail A`); six update blocks of 13 nodes and
-twenty bullets of 3 nodes, *"~250 of my ~430 operations"* (`detail B`); 24 colour swatches by 4
+twenty bullets of 3 nodes, *"~250 of my ~430 operations"* (`detail B`); 24 color swatches by 4
 fields and 17 type-ramp rows by 7 fields (`atoms`). `cp --times N` exists and **not one of the four
 used it once**, for the same reason each time. `detail A`: *"It cannot vary the content, which is
 the only thing that differs between my rows."*
 
-**(b) No design-level vocabulary for a parameterised component.** `detail A`: *"there is no way for
+**(b) No design-level vocabulary for a parameterized component.** `detail A`: *"there is no way for
 the atom's author to declare its parameters. So every consumer of the atom re-derives which of the
 12 descendant ids are the two you actually set."* It kept a 40-entry hand-maintained id table at the
 head of its generator and calls that table *"a symptom"*. `detail B` arrived from the other side:
@@ -80,7 +80,7 @@ string, `tree --json`, read the widths, trim, repeat. That is an absurd thing to
 |---|---|---|---|---|
 | 1 | N copies with N payloads | `cp <file> <src> <parent> --each rows.jsonl` (optionally `--bind path={field}`) | **all four**, independently, in three spellings | atoms ~110 lines plus 58 lines of tables moved to data; lists *"the bulk of the code"*; detail A *"~60% of my generator"*; detail B no code at all for its bullets and update rows |
 | 2 | rendered text metrics as a read | `woodcase measure <file> --font F --size N --weight W --text S [--max-width N --ellipsis] --json` | lists, detail B, atoms | lists' 40-line harness, 25-line fitting loop and ruler `.pen`; atoms' ~15 magic numbers and 2 probe artboards; detail B's `dots()` constant |
-| 3 | parameterised components (named params, and a slot that can hold a ref) | `woodcase def slots <file> <comp> label=<id>.content …`, then `cp … --set label=City`; `{"type":"ref","params":{…}}` in an `add` subtree | detail A (its #1), detail B (its #3), lists, atoms | detail A's id table and ~90 minutes; detail B's 6 update blocks and 7 checklist lines rebuilt locally |
+| 3 | parameterized components (named params, and a slot that can hold a ref) | `woodcase def slots <file> <comp> label=<id>.content …`, then `cp … --set label=City`; `{"type":"ref","params":{…}}` in an `add` subtree | detail A (its #1), detail B (its #3), lists, atoms | detail A's id table and ~90 minutes; detail B's 6 update blocks and 7 checklist lines rebuilt locally |
 | 4 | document `enabled=false` as the variant mechanism | a **VARIANTS** section in `help design`, an example in `override --help` | atoms (its #1 by ratio), detail A (asked for it, not knowing it exists) | atoms ~180 lines: `form_row` 64, `update_block` 45, `button` 18, `rail` 11, `mark` 11, `toggle` 10, `tickbox` 8, `pill` 7, `tag` 6 |
 | 5 | document that a `ref` may be written inside an `add` subtree | one paragraph in `help design` and `add --help` | detail A (found by guessing) | detail A: *"'one `cp` per instance, ~90 commands' into three `add` commands for three whole artboards"* |
 | 6 | fix `apply`'s `cp` props (D3) | no new surface: route the op through the verb's assignment path | lists, detail B | detail B ~180 JSONL lines and its `place()` helper; lists ~40 lines and half of every batch |
@@ -89,13 +89,13 @@ string, `tree --json`, read the widths, trim, repeat. That is an absurd thing to
 | 9 | a broadcast edit | `set <file> --match 'name:Button * Text' kind.fontSize=14`, printing the match count | atoms | zero lines directly; removes *the reason the generator exists* |
 | 10 | re-run a batch over an existing root | `apply … --replace-root "Meeting Candidate Update"` (rm, re-apply, keep x/y) | detail B, lists (as `pack` / `--at-x`) | detail B's `rm`+`apply`+recompute-x loop; lists' five hand-computed `set common.x=` calls |
 | 11 | copy with rename | `cp … --rename-prefix "Pre "="Gate "`, or `--prefix` on a deep copy's descendants | detail A, detail B | detail A's whole board-3 generator path; detail B's two extra lines per copy |
-| 12 | document-level style defaults | a `defaults` block, or `vars` past colour so `"fontFamily":"$--sans"` resolves | atoms | atoms' `txt()` helper, repeated across ~600 text nodes |
+| 12 | document-level style defaults | a `defaults` block, or `vars` past color so `"fontFamily":"$--sans"` resolves | atoms | atoms' `txt()` helper, repeated across ~600 text nodes |
 
 Example invocations, as the agents proposed them (1 twice, because the two spellings differ):
 
 ```bash
-woodcase cp mobile.pen "Swatch" "Tok Colours Body" --each colours.jsonl --as atoms
-#   colours.jsonl, keys exactly as the cp verb takes on argv, one object per copy:
+woodcase cp mobile.pen "Swatch" "Tok Colors Body" --each colors.jsonl --as atoms
+#   colors.jsonl, keys exactly as the cp verb takes on argv, one object per copy:
 #   {"common.name":"Swatch --paper","Chip/kind.fills":"$--paper","Name/kind.content":"--paper"}
 
 woodcase cp design.pen "Ledger Row" "Meetings List/Rows" --each rows.jsonl \
@@ -174,7 +174,7 @@ praise: *"The generator worked because the file format is plain canonical JSON, 
 with no session or daemon, and `add` takes a whole subtree on stdin … Do not add a templating or
 scripting layer; you already have the right composition seam."* The other three converge on that
 seam. `lists` wants its deliverable to become *"`rows.jsonl` plus one command anybody can"* rather
-than a Python script only it can re-run, and names **derivation** (sorting, pluralising, truncating)
+than a Python script only it can re-run, and names **derivation** (sorting, pluralizing, truncating)
 as the residue that belongs outside a design tool. `detail A` and `detail B` say they would write
 **no** Python for a job this size given features 1, 2, 3 and 8; `atoms` says it would still write
 ~150 lines for arithmetic alone, and thinks that is correct.
@@ -317,7 +317,7 @@ line 0  failed   Section Head/Section Head Line/Section Head Title/kind.content 
 ```
 
 `lists` hit it on all 8 of its components in its first batch (8 failed, 13 cascaded, 6 applied),
-same error, different transient id (`#ZEF5Z`). Both note that `apply --help` **asserts the behaviour
+same error, different transient id (`#ZEF5Z`). Both note that `apply --help` **asserts the behavior
 the code refuses**: *"props are the same paths, applied to the copy, never to the source."*
 `detail B`: *"Both path forms fail, with and without the component root's name as the first segment,
 so there is no form to discover by experiment."*
@@ -350,9 +350,9 @@ same bug. Fix: accept it as a synonym.
 > an instance replaces a slot frame's children through a `children` entry in `descendants`,
 > nested refs with their own overrides included. Verified live during the audit. What every agent
 > hit was the divergence check's message "*the override is stored but nothing will read it*",
-> printed because its accepted-key list omits `children` while the patcher honours it. The lie was
+> printed because its accepted-key list omits `children` while the patcher honors it. The lie was
 > the bug; the capability was never missing. Fix and teaching in [the follow-up plan](2026-09-02-teach-the-cli-what-it-does.md) (leaves "Slot filling
-> honoured end to end" and "help design").
+> honored end to end" and "help design").
 
 Known: the [2026-08-31 report](2026-08-31-woodcase-concurrent-dx.md) format-level findings,
 *"Instances take no new children, so a container component is chrome only"* and *"`kind.slot` looks
@@ -362,7 +362,7 @@ telling downstream agents to rebuild it by hand** (*"a component library with a 
 `detail A` re-drew four rows of ~12 nodes because the atom it needed was the atom it had plus a red
 asterisk; `detail B` rebuilt six update blocks locally because a slot could not hold a ref, *"the
 one place my boards deviate most from 'instance the atoms'"*; `lists` would have made `Page Column`
-an atom. Second-order damage: burned by this, `atoms` generalised to *"refs are for leaves"* and
+an atom. Second-order damage: burned by this, `atoms` generalized to *"refs are for leaves"* and
 deep-built every composite in Python, which is part of why it did not find `enabled=false`.
 
 ### D6: `set` and `override` each name the other for a property neither will set. **High. detail B. KNOWN, parked.**
@@ -508,14 +508,14 @@ notes every cycle mutates a file two other agents are writing.
 ### D16 to D19: minor, one line each
 
 - **woodcase edits the repo's `.gitignore`** (atoms; KNOWN and deliberate, specified in
-  [the agent-first plan](2026-08-30-agent-first-cli-and-viewer-plan.md)). The behaviour is
+  [the agent-first plan](2026-08-30-agent-first-cli-and-viewer-plan.md)). The behavior is
   defensible and the comment is well written, but an agent under "touch no repo file but your own"
   spent a `git diff` and a `git log` working out whether it had broken that rule. Ask: print one
   line when you do it, and offer `--no-gitignore`. *"Do it once, loudly, rather than never
   mentioning it."*
 - **A `--props` advisory is printed inside a table row** (detail B; PARTLY KNOWN, 173Ys), breaking
   column alignment for the rest of the table, and it is the only signal that `kind.fill` is wrong
-  without giving the right spelling, `kind.fills`. `lists` files the same behaviour as a severity
+  without giving the right spelling, `kind.fills`. `lists` files the same behavior as a severity
   complaint: on a collapsed ref it reads as a failure when it is a hint that `--expand` was
   forgotten. Fix: stderr, or after the table.
 
@@ -608,14 +608,14 @@ Each named unprompted by two or more agents.
   singles out `--expand` printing `Name +2` for a ref's override count.
 - **Whole-subtree `add` with nested `children`.** `atoms`: *"three JSON files, three roots, three
   commands … the difference between a tractable generator and a nightmare; **do not deprecate this in
-  favour of batch-only**."* `detail A` used it in place of `apply` entirely.
+  favor of batch-only**."* `detail A` used it in place of `apply` entirely.
 - **`apply`'s batch protocol where it is used.** `@tag` forward references (`detail B`: *"the best
   thing in the tool … a 196-line batch that creates a whole artboard is one command"*), the per-line
   report, and cascade attribution: *"No other batch tool I have used explains a skip by naming the tag
   that was never minted. Keep it, and keep `--retry <report.json>`."*
 - **Variables, including alpha.** `atoms`: *"`vars list` shows a live reference count per variable.
   This is the mechanism that lets me hand a component library to three downstream agents and be
-  confident none of them writes a stray hex."* Colour alpha composites correctly over every ground,
+  confident none of them writes a stray hex."* Color alpha composites correctly over every ground,
   *"the whole reason the file is faithful rather than approximate"*. `detail B` singles out the
   divergence sentences on a write as *"cheap, unprompted, exactly the fact I wanted."*
 - **`shot --scale` beating `--max`** (three of four used it as their real review tool), **the lock and
@@ -635,7 +635,7 @@ Ranked by time saved across the four agents, not by size of change.
    diagnosable by anyone. (§1.2 #2)
 4. **`cp --each <rows.jsonl>`**: the one verb all four proposed independently, turning the repetitive
    80% of a screen into a data file plus one command. (§1.2 #1)
-5. **Parameterised components, and a slot that accepts children including a ref**: all four; today an
+5. **Parameterized components, and a slot that accepts children including a ref**: all four; today an
    atom's interface is its anatomy plus a prose note. (§3 D5, §1.2 #3)
 
 > **Correction, 2026-09-02.** The slot half already works (see D5). The parameter half
@@ -661,7 +661,7 @@ one sentence in `cp --help` about override paths being rooted at the copy, and a
 
 > **Amended after the second wave (§9), which covers three editing agents.** Two entries outrank
 > items on the list above, so the ten now reads: **1** `apply` `cp` path-keyed props, **2** one
-> text-measurement path, **3** `woodcase measure`, **4** `cp --each`, **5** parameterised components
+> text-measurement path, **3** `woodcase measure`, **4** `cp --each`, **5** parameterized components
 > and slots, **6 (new)** *document that overrides are id-keyed, and that `replace` on a live
 > definition silently drops the overrides whose ids it does not carry forward* (§9.1), **7** document
 > `enabled=false`, **8** document `ref`-in-`add`, **9 (promoted from §1.2 #11)** `cp --rename-prefix`
@@ -891,7 +891,7 @@ that the right default for guard-less writes and names the real gap:
   zero instances, which is exactly the question you ask before you edit that definition."*
 - **One thing to keep, and to document because it is not obvious**: a twelve-line `set common.x`
   re-space batch produced **no** transient `artboard-overlap` warnings even though intermediate states
-  overlapped, *"because layout settles once at the end. That is the right behaviour and I would
+  overlapped, *"because layout settles once at the end. That is the right behavior and I would
   document it, because it makes reordering safe."*
 
 > **Partly answered by `fixes2`, later the same day.** The gap above is real for a long session of
@@ -1067,7 +1067,7 @@ clicking through 15 boards, which is the whole point."* Its verdict on what it n
   ancestor, which for a 3300pt board is a 6600px PNG I then crop in Pillow."* Ask: `shot --crop
   x,y,w,h` in the rendered node's own coordinate space, or `shot A --and B` boxing the union of two
   nodes plus padding.
-- **`lint` has no way to group or summarise a mass-produced finding** (`fixes2`, NEW): see §9.5.
+- **`lint` has no way to group or summarize a mass-produced finding** (`fixes2`, NEW): see §9.5.
   Ask: `lint --group-by rule`, or a roll-up line.
 
 ## 9.8 Their ranked top fives, as filed
@@ -1080,7 +1080,7 @@ null warning; (4) put `activity` in the read-write-verify loop with `--since <re
 
 `detailc`: (1) `cp --rename-prefix old=new`; (2) fix the `override`-on-an-instance error message;
 (3) a first-class dotted rule node or correct U+00B7 advance; (4) `shot` legible by default; (5) bulk
-content read. Honourable mentions: `arrange`/`pack`, a root-scoped guard, `rm --dry-run`, and a
+content read. Honorable mentions: `arrange`/`pack`, a root-scoped guard, `rm --dry-run`, and a
 one-line summary from a clean `lint`.
 
 `fixes2`: (1) `cp --rename-prefix <s>` (and/or `--rename <from>=<to>`), *"the single highest-value
@@ -1088,7 +1088,7 @@ fix"*, because copying a root *"is how you make a state board, and today it is g
 the document lint-dirty in proportion to the subtree's size"*; (2) absolute rects out of `tree`;
 (3) `shot --crop`, or a two-node union framing; (4) a `find`/`query` read verb, with `vars --where`
 as its miniature; (5) quiet the "does not set `enabled`" note, and give `lint` a grouped or
-summarised mode *"so 78 instances of one mass-produced warning do not bury a real one"*.
+summarized mode *"so 78 instances of one mass-produced warning do not bury a real one"*.
 
 `fixes2` also files the clearest short list of what to keep: `apply` batches with per-line status and
 cascade semantics; **guards**, used successfully (§9.4); the refusal that lists every property a node
@@ -1112,7 +1112,7 @@ already names, with a third spelling added: *"`get` prints the property as `fill
   and unusable as a session-long gate.
 - **Whether `duplicate-name` is calibrated correctly** (D11). The first wave split on whether `cp`
   should disambiguate copy names; `detailc` adds the data point that one root copy produces ~90
-  warnings, which makes the check's current behaviour a blocking cost rather than a nuisance.
+  warnings, which makes the check's current behavior a blocking cost rather than a nuisance.
 - **What `replace` is for.** §1.2 #10 and D14 proposed `apply --replace-root` and `replace` as the
   idempotent rebuild primitive, on the build agents' reading. `fixes` shows that on a *reusable
   definition* it is the dangerous verb. Both can be true, since one targets a root with no instances

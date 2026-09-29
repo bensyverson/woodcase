@@ -88,7 +88,7 @@
         static let fixedBoxMargin = 1.0
 
         /// The paint fixtures measured here: SwiftUI's, less the stroke and text fills
-        /// ``ReactPaintWebViewTests`` measures and the colour-scheme fixture, plus the
+        /// ``ReactPaintWebViewTests`` measures and the color-scheme fixture, plus the
         /// malformed mesh points.
         nonisolated static let paintFixtures: [String] = SwiftUIFixtures.paintFixtures.filter {
             !["render-text-fills", "render-stroke-fills", "swiftui-color-scheme"].contains($0)

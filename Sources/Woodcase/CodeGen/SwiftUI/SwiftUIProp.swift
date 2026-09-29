@@ -8,7 +8,7 @@
 /// draws, and the node whose paint or text reads it.
 ///
 /// A prop is bound only where the body can read it: a text prop on a `text` node (its
-/// `Text` reads the `String`), a colour prop on a node whose first paint is a solid colour
+/// `Text` reads the `String`), a color prop on a node whose first paint is a solid color
 /// (that layer is the `Color`), an image prop on a node whose first paint is a local image
 /// (that layer draws the `Image`, resizable, placed by the fill's mode). Callers pass an
 /// `Image` rather than a URL, so a view is free to hand in any image, not only a bundled one.
@@ -17,7 +17,7 @@ struct SwiftUIProp: Friendly {
     enum Kind: String, Friendly {
         /// A text node's copy: `String`.
         case text
-        /// A solid colour: `Color`.
+        /// A solid color: `Color`.
         case color
         /// An image fill: `Image`.
         case image
@@ -44,13 +44,13 @@ struct SwiftUIProp: Friendly {
     /// The parameter's default: what the component draws when no instance overrides it.
     var defaultValue: String
 
-    /// The theme's colour a colour prop defaults to, when its default is a variable: the
+    /// The theme's color a color prop defaults to, when its default is a variable: the
     /// prop is then optional, and the body reads ``themedRead``.
     var themedDefault: SwiftUITheme.Token?
 
     /// The prop `definition` becomes on `target`, the node its path names, or `nil` when
-    /// the body cannot read it there. A colour default that names a variable of `theme` is
-    /// `nil`, read through the theme; one the emitter cannot write (a malformed colour, a
+    /// the body cannot read it there. A color default that names a variable of `theme` is
+    /// `nil`, read through the theme; one the emitter cannot write (a malformed color, a
     /// variable the theme lacks) is named in `unemitted` and falls back to clear.
     init?(_ definition: PropDefinition, target: PenNode?, theme: SwiftUITheme? = nil, unemitted: inout [String]) {
         guard let target, let kind = Self.kind(of: definition.type, on: target) else { return nil }
@@ -69,7 +69,7 @@ struct SwiftUIProp: Friendly {
                 return
             }
             defaultValue = Self.color(color) ?? {
-                unemitted.append("the \(definition.name) default \(spelling ?? "colour") (drawn clear)")
+                unemitted.append("the \(definition.name) default \(spelling ?? "color") (drawn clear)")
                 return "Color.clear"
             }()
         case .image:
@@ -83,7 +83,7 @@ struct SwiftUIProp: Friendly {
         themedDefault == nil ? kind.swiftType : kind.swiftType + "?"
     }
 
-    /// What the body reads: the prop, or — when it defaults to the theme's colour — the prop
+    /// What the body reads: the prop, or — when it defaults to the theme's color — the prop
     /// falling back to the theme: `tint ?? theme.accent`.
     var themedRead: String {
         themedDefault.map { "\(name) ?? \($0.read)" } ?? name
@@ -110,7 +110,7 @@ struct SwiftUIProp: Friendly {
     }
 
     /// `value`, set by an instance's override, as this prop's argument; `nil` when it
-    /// cannot be written (a colour variable, a remote image).
+    /// cannot be written (a color variable, a remote image).
     func argument(_ value: PropMapper.Value) -> String? {
         switch (kind, value) {
         case let (.text, .string(text)): SwiftUILiteral.string(text)
@@ -122,7 +122,7 @@ struct SwiftUIProp: Friendly {
 
     // MARK: - Spellings
 
-    /// A colour the support file's `Color(hex:)` writes, or `nil` for a variable or a
+    /// A color the support file's `Color(hex:)` writes, or `nil` for a variable or a
     /// malformed literal.
     private static func color(_ value: PenValue<String>?) -> String? {
         guard case let .literal(hex)? = value, let parsed = PenHexColor(hex) else { return nil }
@@ -149,8 +149,8 @@ struct SwiftUIProp: Friendly {
         }
     }
 
-    /// The index in `fills.all` of the paint a colour or image prop reads — the first
-    /// solid colour or image with a URL, as ``ComponentAnalyzer`` infers it.
+    /// The index in `fills.all` of the paint a color or image prop reads — the first
+    /// solid color or image with a URL, as ``ComponentAnalyzer`` infers it.
     static func boundFillIndex(_ fills: PenFills?) -> Int? {
         fills?.all.firstIndex { fill in
             switch fill {
@@ -161,7 +161,7 @@ struct SwiftUIProp: Friendly {
         }
     }
 
-    /// The paint a colour or image prop on `node` reads.
+    /// The paint a color or image prop on `node` reads.
     private static func boundFill(of node: PenNode) -> PenFill? {
         let fills: PenFills? = switch node.kind {
         case let .frame(data): data.fills

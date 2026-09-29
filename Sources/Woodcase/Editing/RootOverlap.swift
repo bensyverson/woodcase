@@ -65,7 +65,7 @@ public struct RootOverlap: Friendly {
         /// Its settled rect, in canvas coordinates.
         public let rect: PenRect
 
-        /// The root as a reader recognises it: its name, or its id marker.
+        /// The root as a reader recognizes it: its name, or its id marker.
         public var label: String {
             name ?? NodeAddress.marker(forID: id)
         }

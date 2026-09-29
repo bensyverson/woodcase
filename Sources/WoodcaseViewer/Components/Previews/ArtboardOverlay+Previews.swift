@@ -42,7 +42,7 @@ public extension ArtboardOverlay {
             PreviewState(
                 slug: "shared-node",
                 name: "Two identities on one node",
-                note: "One marker, not two: two boxes on the same rect is a rendering bug, not information. The tag carries both avatars and both names, and `--v-actor` is the *first* editor's colour, so the box does not flicker as the second one writes. `data-editors` carries the whole list for the script.",
+                note: "One marker, not two: two boxes on the same rect is a rendering bug, not information. The tag carries both avatars and both names, and `--v-actor` is the *first* editor's color, so the box does not flicker as the second one writes. `data-editors` carries the whole list for the script.",
                 frame: .canvas
             ) {
                 ArtboardOverlay(

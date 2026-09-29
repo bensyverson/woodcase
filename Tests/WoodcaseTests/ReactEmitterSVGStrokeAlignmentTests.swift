@@ -7,12 +7,12 @@ import Foundation
 import Testing
 @testable import Woodcase
 
-/// A plain-colour stroke on a shape React writes as SVG — a polygon, a path, an arc or a
+/// A plain-color stroke on a shape React writes as SVG — a polygon, a path, an arc or a
 /// donut — placed as Pen places it.
 ///
-/// Pen draws a centred or outer stroke past the node's box, and an inner or outer one on
+/// Pen draws a centered or outer stroke past the node's box, and an inner or outer one on
 /// one side of the outline only (`render-per-side-shapes.pen`'s inner and outer boards,
-/// `render-strokes-and-paths.pen`). An SVG's `stroke` is always centred and an SVG clips to
+/// `render-strokes-and-paths.pen`). An SVG's `stroke` is always centered and an SVG clips to
 /// its viewport, so the SVG is drawn with `overflow="visible"` and an aligned stroke is
 /// drawn as a painted stroke is: twice the width, clipped to the shape or masked by it.
 struct ReactEmitterSVGStrokeAlignmentTests {
@@ -29,8 +29,8 @@ struct ReactEmitterSVGStrokeAlignmentTests {
         return try #require(files.first { $0.path == "components/Card.tsx" }).content
     }
 
-    @Test("A centred plain stroke lets the SVG draw past its box", arguments: ReactEmitterSVGFillTests.shapes)
-    func centredOverflows(shape: String) throws {
+    @Test("A centered plain stroke lets the SVG draw past its box", arguments: ReactEmitterSVGFillTests.shapes)
+    func centeredOverflows(shape: String) throws {
         let content = try card(shape: shape, keys: ##""fill": "#DDDDDD", "stroke": "#FF0000", "strokeWidth": 4"##)
         #expect(content.contains(##"overflow="visible""##), "\(content)")
         #expect(content.contains(##"stroke="#FF0000" strokeWidth="4""##), "\(content)")

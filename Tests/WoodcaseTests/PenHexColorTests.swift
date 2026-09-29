@@ -42,8 +42,8 @@ struct PenHexColorTests {
         #expect(color.unitComponents == [1, 0, 0.2, 0.4])
     }
 
-    /// Pen's mesh reads a malformed colour its own way (``PenMeshColor/hexColor(penMesh:)``),
-    /// but every form the grammar accepts means the same colour to both.
+    /// Pen's mesh reads a malformed color its own way (``PenMeshColor/hexColor(penMesh:)``),
+    /// but every form the grammar accepts means the same color to both.
     @Test("PenColorParser and PenMeshColor agree on every accepted form", arguments: accepted.map(\.0))
     func entryPointsAgree(hex: String) throws {
         let cg = try #require(PenColorParser.parse(hex)?.components)

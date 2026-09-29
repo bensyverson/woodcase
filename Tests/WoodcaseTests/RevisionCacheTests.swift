@@ -264,7 +264,7 @@ struct RevisionCacheTests {
         #expect(document.documentRevision != documentBefore)
         // A ref's revision folds in the revision of the component it renders, so a
         // definition edit moves the instance and everything above it. **This is the
-        // deliberate reversal** of the authored-only behaviour this test asserted when
+        // deliberate reversal** of the authored-only behavior this test asserted when
         // the cache landed: a rev is a rendered-premise pin, so that one token on a
         // frame covers what the frame draws. See ``TreeRow/rev`` and
         // `RevisionFoldTests`.

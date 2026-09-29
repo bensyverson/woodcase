@@ -13,7 +13,7 @@ public extension PenNode {
     ///
     /// Pen draws a snapshot of the page it loads. Woodcase never loads it: the layout
     /// engine sizes the node like a rectangle, the renderer draws a neutral placeholder
-    /// labelled with ``url`` (see <doc:PenRendering>), and the React emitter writes an
+    /// labeled with ``url`` (see <doc:PenRendering>), and the React emitter writes an
     /// `<iframe>` pointing at ``pageURL``.
     ///
     /// The keys are exactly those of Pen's 2.19 format. A browser takes a stroke

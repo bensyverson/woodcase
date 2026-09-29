@@ -36,7 +36,7 @@ struct PenLayoutUnknownNodeTests {
         #expect(rects["G"]?.width == 200)
     }
 
-    @Test("An unknown node honours a sizing keyword")
+    @Test("An unknown node honors a sizing keyword")
     func sizingKeyword() throws {
         let rects = try layout("""
         {"version":"2.17","children":[{"id":"Row","type":"frame","width":300,"height":50,"layout":"horizontal","children":[

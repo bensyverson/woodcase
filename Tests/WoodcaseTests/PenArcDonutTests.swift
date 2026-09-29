@@ -8,7 +8,7 @@ import Testing
 /// Pen draws such an "arc donut" as one closed ring: the outer arc over the sweep, a
 /// straight cut along the end angle to the inner ellipse, the inner arc back over the same
 /// sweep, and a straight cut along the start angle. Both cuts lie on lines through the
-/// centre, at the ellipse's *parametric* angle (the unit-circle angle before the ellipse's
+/// center, at the ellipse's *parametric* angle (the unit-circle angle before the ellipse's
 /// non-uniform scale), and the inner ellipse is never drawn outside the sweep.
 ///
 /// `render-arc-donut.pen` has one artboard per case, a white 200×120 ellipse at (20, 20)
@@ -52,7 +52,7 @@ struct PenArcDonutTests {
             named: "quarter", in: Self.fixture, fixturesDir: Self.fixturesDir, scale: CGFloat(Self.scale)
         ))
         let pixels = try #require(PenFillDomainTests.RGBA(rendered))
-        // The quarter sweeps 0°→90° (right to top); the inner ellipse is centred at
+        // The quarter sweeps 0°→90° (right to top); the inner ellipse is centered at
         // (120, 80) with radii 50 × 30. (100, 90) is inside it, in the lower-left quadrant.
         #expect(pixels.rgba(atPoint: 100, 90, scale: Self.scale) == .init(r: 0, g: 0, b: 0, a: 255))
         // The ring itself, inside the sweep, is filled.
@@ -70,8 +70,8 @@ struct PenArcDonutTests {
             if element.pointee.type == .moveToPoint { subpaths += 1 }
         }
         #expect(subpaths == 1)
-        // The start cut runs along the centre row from the inner (x 150) to the outer (x 200)
-        // ellipse; the end cut up the centre column from y 30 to y 0 (y down).
+        // The start cut runs along the center row from the inner (x 150) to the outer (x 200)
+        // ellipse; the end cut up the center column from y 30 to y 0 (y down).
         for rule in [CGPathFillRule.evenOdd, .winding] {
             #expect(path.contains(CGPoint(x: 175, y: 55), using: rule))
             #expect(!path.contains(CGPoint(x: 140, y: 55), using: rule))

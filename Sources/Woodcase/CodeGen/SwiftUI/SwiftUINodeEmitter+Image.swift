@@ -7,7 +7,7 @@ import Foundation
 
 extension SwiftUINodeEmitter {
     /// An image fill as a view that fills the box it is offered: the image, stretched, or
-    /// scaled to fill or fit and centred — `fill` overflows the box, and the node's clip
+    /// scaled to fill or fit and centered — `fill` overflows the box, and the node's clip
     /// cuts it, as Pen draws it. A local file (beside the .pen file) is bundled into the
     /// package; a remote (`http`/`https`) one is fetched at *draw* time by `AsyncImage`,
     /// never downloaded while generating.
@@ -65,7 +65,7 @@ extension SwiftUINodeEmitter {
     ///
     /// The resizable + scale modifiers apply inside the loaded `Image`'s own closure —
     /// `AsyncImage` itself carries none, since only `Image` has them — and `fill`/`fit`
-    /// centre the whole `AsyncImage` in a `Color.clear` overlay, exactly as a bundled image's
+    /// center the whole `AsyncImage` in a `Color.clear` overlay, exactly as a bundled image's
     /// modes do.
     private static func asyncImageView(url: String, mode: PenImageFillMode) -> SwiftUIViewCode {
         var content = SwiftUIViewCode(head: "image").modified(".resizable()")
@@ -86,7 +86,7 @@ extension SwiftUINodeEmitter {
         }
     }
 
-    /// `image` centred in the box it is offered, whatever size it takes itself.
+    /// `image` centered in the box it is offered, whatever size it takes itself.
     private static func placed(_ image: SwiftUIViewCode) -> SwiftUIViewCode {
         var view = SwiftUIViewCode(head: "Color.clear")
         view.modifiers.append(SwiftUIViewCode.Modifier(".overlay", content: [image]))

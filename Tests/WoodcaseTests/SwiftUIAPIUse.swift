@@ -36,7 +36,7 @@ struct SwiftUIAPIUse: Friendly, CustomStringConvertible {
     /// How the name is reached.
     var access: Access
 
-    /// The argument labels of a call, `_` for an unlabelled one, or `nil` when the name is
+    /// The argument labels of a call, `_` for an unlabeled one, or `nil` when the name is
     /// not called.
     var labels: [String]?
 

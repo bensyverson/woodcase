@@ -10,7 +10,7 @@ import Testing
 /// Turning what the transport threw into a reason a reader can act on.
 ///
 /// The codes here are the ones observed in the Claude Code Bash sandbox on 2026-09-26
-/// (see project/2026-09-26-sandbox-font-downloads.md), plus their ordinary neighbours.
+/// (see project/2026-09-26-sandbox-font-downloads.md), plus their ordinary neighbors.
 @Suite("Network failure classification")
 struct NetworkFailureTests {
     /// errSecInternalComponent: what `SecTrustEvaluateWithError` answers when the process

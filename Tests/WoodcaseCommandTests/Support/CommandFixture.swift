@@ -131,7 +131,7 @@ final class CommandFixture: Sendable {
         return run
     }
 
-    /// The phrase the outside-write note is recognisable by, wherever it is printed.
+    /// The phrase the outside-write note is recognizable by, wherever it is printed.
     ///
     /// Not the whole sentence and not the bare `note  ` marker: the marker is shared
     /// with ``Woodcase/WriteDivergence``'s own notes, which are a normal part of a
@@ -172,7 +172,7 @@ final class CommandFixture: Sendable {
     }
 
     /// Starts the binary without waiting for it to exit, for a verb like `serve` that
-    /// only stops when it is signalled.
+    /// only stops when it is signaled.
     ///
     /// - Parameters:
     ///   - arguments: The command line, without the program name.

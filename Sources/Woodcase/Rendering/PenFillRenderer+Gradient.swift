@@ -52,7 +52,7 @@ extension PenFillRenderer {
             )
         case .angular:
             // An angular gradient is defined everywhere, so the bitmap must reach wherever the
-            // clip does — past the domain for an outer or centred stroke.
+            // clip does — past the domain for an outer or centered stroke.
             let bounds = target.domain.union(target.clip.boundingBoxOfPath)
             drawAngularGradient(gradient, frame: frame, bounds: bounds, in: context)
         }

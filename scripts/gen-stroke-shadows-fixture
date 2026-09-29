@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """gen-stroke-shadows-fixture — write Tests/WoodcaseTests/Fixtures/render-stroke-shadows.pen:
-one 240x200 black board per case of a grey node, stroked green 12 pt wide, casting a white
+one 240x200 black board per case of a gray node, stroked green 12 pt wide, casting a white
 outer shadow (offset 10,10, blur 8) — so each board shows whether the stroke band casts the
 shadow and whether it knocks the shadow out underneath (leaf vPZ0ia).
 
-Cases: a rectangle stroked outside, centred and inside; a rounded one outside; a translucent
+Cases: a rectangle stroked outside, centered and inside; a rounded one outside; a translucent
 outside stroke (the shadow must not show through the band); a frame with a width per side,
-outside and centred; a frame with a child, outside; an ellipse, a polygon and a closed path,
+outside and centered; a frame with a child, outside; an ellipse, a polygon and a closed path,
 outside; a diagonal and a flat line; and an inside stroke under an inner shadow.
 
 Usage:
@@ -19,7 +19,7 @@ exports and its re-save beside the fixture. Standard library only; runs sandboxe
 
 import json, sys
 
-GREY, GREEN, WHITE = "#808080", "#00FF00", "#FFFFFFFF"
+GRAY, GREEN, WHITE = "#808080", "#00FF00", "#FFFFFFFF"
 SHADOW = {"type": "shadow", "shadowType": "outer", "color": WHITE, "offset": {"x": 10, "y": 10}, "blur": 8}
 
 nodes = []
@@ -35,7 +35,7 @@ def node(i, kind, alignment="outer", width=12, stroke=GREEN, effect=SHADOW, **ke
     d = {"type": kind, "id": i, "x": 50, "y": 50, "width": 120, "height": 80,
          "stroke": stroke, "strokeWidth": width, "effect": effect}
     if kind != "line":
-        d["fill"] = GREY
+        d["fill"] = GRAY
     if alignment:
         d["strokeAlignment"] = alignment
     if kind == "frame":

@@ -22,7 +22,7 @@ import Foundation
 ///
 /// A handle the file omits takes its default, a quarter of a cell along its axis; see
 /// ``Handles/defaults(columns:rows:)`` and ``handles(defaults:)``.
-/// ``canonicalized(defaults:)`` rewrites a point the way Pen's own serialiser would.
+/// ``canonicalized(defaults:)`` rewrites a point the way Pen's own serializer would.
 ///
 /// A file can also hold a vertex in neither form — `"oops"`, `[1]`, an object whose
 /// `position` is not two numbers. Pen opens such a file, so a file decode keeps the
@@ -133,10 +133,10 @@ public enum PenMeshPoint: Friendly {
         ///
         /// - Parameters:
         ///   - position: Where the vertex sits.
-        ///   - leftHandle: The handle towards the previous column, or `nil` for the default.
-        ///   - rightHandle: The handle towards the next column, or `nil` for the default.
-        ///   - topHandle: The handle towards the previous row, or `nil` for the default.
-        ///   - bottomHandle: The handle towards the next row, or `nil` for the default.
+        ///   - leftHandle: The handle toward the previous column, or `nil` for the default.
+        ///   - rightHandle: The handle toward the next column, or `nil` for the default.
+        ///   - topHandle: The handle toward the previous row, or `nil` for the default.
+        ///   - bottomHandle: The handle toward the next row, or `nil` for the default.
         ///   - extras: Keys a file wrote on the vertex that the model does not claim.
         public init(
             position: Vector,
@@ -157,16 +157,16 @@ public enum PenMeshPoint: Friendly {
         /// Where the vertex sits, in the node's unit space.
         public var position: Vector
 
-        /// The handle towards the previous column, relative to ``position``.
+        /// The handle toward the previous column, relative to ``position``.
         public var leftHandle: Vector?
 
-        /// The handle towards the next column, relative to ``position``.
+        /// The handle toward the next column, relative to ``position``.
         public var rightHandle: Vector?
 
-        /// The handle towards the previous row, relative to ``position``.
+        /// The handle toward the previous row, relative to ``position``.
         public var topHandle: Vector?
 
-        /// The handle towards the next row, relative to ``position``.
+        /// The handle toward the next row, relative to ``position``.
         public var bottomHandle: Vector?
 
         /// Keys the file wrote on this vertex that the model does not claim. See ``PenExtras``.
@@ -185,10 +185,10 @@ public enum PenMeshPoint: Friendly {
         /// Creates a full set of handles.
         ///
         /// - Parameters:
-        ///   - left: The handle towards the previous column.
-        ///   - right: The handle towards the next column.
-        ///   - top: The handle towards the previous row.
-        ///   - bottom: The handle towards the next row.
+        ///   - left: The handle toward the previous column.
+        ///   - right: The handle toward the next column.
+        ///   - top: The handle toward the previous row.
+        ///   - bottom: The handle toward the next row.
         public init(left: Vector, right: Vector, top: Vector, bottom: Vector) {
             self.left = left
             self.right = right
@@ -196,22 +196,22 @@ public enum PenMeshPoint: Friendly {
             self.bottom = bottom
         }
 
-        /// The handle towards the previous column.
+        /// The handle toward the previous column.
         public var left: Vector
 
-        /// The handle towards the next column.
+        /// The handle toward the next column.
         public var right: Vector
 
-        /// The handle towards the previous row.
+        /// The handle toward the previous row.
         public var top: Vector
 
-        /// The handle towards the next row.
+        /// The handle toward the next row.
         public var bottom: Vector
 
         /// The fraction of a cell a default handle reaches along its axis.
         ///
-        /// A quarter, not the third a uniform Bézier parametrisation would use, so even
-        /// an undistorted grid is not parametrised uniformly.
+        /// A quarter, not the third a uniform Bézier parametrization would use, so even
+        /// an undistorted grid is not parametrized uniformly.
         public static let defaultReach = 0.25
 
         /// The handles Pen gives a vertex that names none, for a grid of this size.

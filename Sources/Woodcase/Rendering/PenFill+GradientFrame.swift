@@ -8,10 +8,10 @@ import CoreGraphics
 extension PenFill.PenGradientFill {
     /// The map from the gradient's own unit space into user space, for a node whose box is `bounds`.
     ///
-    /// Pen lays out every gradient type in the node's *normalised* box, the unit square
+    /// Pen lays out every gradient type in the node's *normalized* box, the unit square
     /// that is then stretched to the box — established from its renders
     /// (`project/2026-09-26-gradient-geometry-and-per-side-strokes.md`). In the
-    /// gradient's own space the gradient is centred on the origin with unit extent:
+    /// gradient's own space the gradient is centered on the origin with unit extent:
     ///
     /// - a **linear** gradient runs from stop 0 at `(0, 0.5)` to stop 1 at `(0, -0.5)`,
     ///   bottom to top (y grows downward);
@@ -26,7 +26,7 @@ extension PenFill.PenGradientFill {
     ///
     /// Built on ``GradientGeometry``'s CG-free map (``GradientGeometry/affineComponents``)
     /// so the renderer and the code emitters share one computation of the gradient's scale,
-    /// rotation and centre; this adds only the final stretch from the normalised box to
+    /// rotation and center; this adds only the final stretch from the normalized box to
     /// `bounds`.
     ///
     /// - Parameter bounds: The node's box in user space: the domain the paint is laid out over.

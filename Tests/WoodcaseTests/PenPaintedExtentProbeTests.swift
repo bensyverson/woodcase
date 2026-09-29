@@ -41,7 +41,7 @@ struct PenPaintedExtentProbeTests {
 
     /// The painted extents the finding derived from Pen's exports, exactly: x1's outer
     /// band (−12…112) and its shadow's copy (+10, ±12); x2's 124×84 band turned 30°; x3's
-    /// blur inflating 15; x4's centred band inflating 6.
+    /// blur inflating 15; x4's centered band inflating 6.
     @Test("The top-level probes' painted extents are the ones Pen's exports imply")
     func topLevelSizes() throws {
         let (document, rects) = try Self.probe()
@@ -64,7 +64,7 @@ struct PenPaintedExtentProbeTests {
     }
 
     /// The `free` board is 720×360 at (1200, 500); r6's flipped per-side band reaches 24 pt
-    /// left of it and r5's mitred band, turned 30° and flipped, 41.03 pt above it.
+    /// left of it and r5's mitered band, turned 30° and flipped, 41.03 pt above it.
     @Test("An unclipped board's painted extent reaches its children's bands")
     func freeBoard() throws {
         let (document, rects) = try Self.probe()
@@ -141,7 +141,7 @@ struct PenPaintedExtentProbeTests {
 
     /// x8-x9 are icons: Pen's `computeVisualLocalBounds` for its icon class (`DJt`)
     /// returns `fillPath.bounds` — the vector glyph, fitted to the box by its *shorter*
-    /// side and centred, then measured tightly — not the box
+    /// side and centered, then measured tightly — not the box
     /// (`project/2026-09-28-geometry-model.md`, "Pen's own code" for the icon class).
     /// x8's box (60×20) is far wider than its glyph fits; x9 is a "minus", a bar far
     /// flatter than its 40×40 box. ``Woodcase/PenLayoutEngine/iconInkBounds(of:box:)``

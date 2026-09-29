@@ -9,7 +9,7 @@
 /// emitter *computes* from them — a mesh gradient baked to a raster once per theme — is
 /// declared the same way: under `:root` for the default theme and under a
 /// `[data-axis="option"]` selector for each other one, so the element that uses it only
-/// has to say `var(--name)` and the theme switch works exactly as it does for colours.
+/// has to say `var(--name)` and the theme switch works exactly as it does for colors.
 struct ThemedCustomProperty: Friendly {
     /// The property's name without its leading `--`, as `theme.css` spells variable names.
     var name: String

@@ -32,7 +32,7 @@
         ///
         /// Keyed by budget because the budget is fixed at `PageHost.init` and
         /// is what bounds a load: a host built for
-        /// ``WebViewTestHarness/defaultBudget`` cannot honour a caller asking to
+        /// ``WebViewTestHarness/defaultBudget`` cannot honor a caller asking to
         /// fail after 2. There are two keys in practice — every render that
         /// expects a page to work takes the default, and the one test that
         /// expects a timeout asks for a short budget of its own.

@@ -32,7 +32,7 @@ struct Get: AsyncParsableCommand {
         instance appears with the component's subtree under it, overrides applied, \
         every id prefixed by the instance's own. Those descendant ids \
         (`Nav01/Bdg01/Cnt01`) are addresses every other verb accepts; the instance's \
-        own root is an expansion artefact (`Nav01/Btn01`) and is still addressed as \
+        own root is an expansion artifact (`Nav01/Btn01`) and is still addressed as \
         the ref, which is what the header line prints. An address that points \
         *inside* an instance is always answered this way, because it names no stored \
         node; its revision is the instance's, since that is where an override to it \

@@ -99,14 +99,14 @@ extension SwiftUINodeEmitter {
         )
     }
 
-    /// A rectangle: its outline filled with its colours, at its size, stroked.
+    /// A rectangle: its outline filled with its colors, at its size, stroked.
     func rectangle(_ node: PenNode, data: PenNode.RectangleData, in container: Container) -> SwiftUIViewCode {
         var unemitted: [String] = []
         let shape = outline(data.cornerRadius, unemitted: &unemitted)
         return filledShape(node, shape: shape, fills: data.fills, stroke: data, effects: data.effects, in: container, unemitted: unemitted)
     }
 
-    /// An ellipse: filled with its colours, at its size, stroked. An arc or a donut is a
+    /// An ellipse: filled with its colors, at its size, stroked. An arc or a donut is a
     /// shape of its own (``geometry(_:in:)``).
     func ellipse(_ node: PenNode, data: PenNode.EllipseData, in container: Container) -> SwiftUIViewCode {
         if isArc(data) {

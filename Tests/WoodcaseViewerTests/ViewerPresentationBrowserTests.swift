@@ -133,7 +133,7 @@
             #expect(await bench.ask("return getComputedStyle(document.querySelector('.v-render')).display;") != "none")
 
             // The artboard's background is the whole screen: the canvas covers the
-            // viewport, so there is no strip of chrome-coloured nothing at any edge.
+            // viewport, so there is no strip of chrome-colored nothing at any edge.
             #expect(await bench.ask("""
             const box = document.querySelector('.v-canvas').getBoundingClientRect();
             const full = box.width >= innerWidth - 1 && box.height >= innerHeight - 1

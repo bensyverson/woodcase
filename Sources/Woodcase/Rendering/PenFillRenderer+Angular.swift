@@ -4,10 +4,10 @@ import Foundation
 extension PenFillRenderer {
     /// Draws an angular gradient as a bitmap computed per device pixel.
     ///
-    /// Each pixel's centre is taken back into gradient space through `frame`; its angle
+    /// Each pixel's center is taken back into gradient space through `frame`; its angle
     /// there, measured clockwise on screen from straight up, is the stop position. The
     /// bitmap covers `bounds` — the paint domain, grown to take in the clip where the clip
-    /// reaches past it — at the context's device resolution, so the seam and the colour
+    /// reaches past it — at the context's device resolution, so the seam and the color
     /// ramp are as sharp at 2x as at 1x.
     static func drawAngularGradient(
         _ gradient: PenFill.PenGradientFill,
@@ -93,7 +93,7 @@ extension PenFillRenderer {
         context.restoreGState()
     }
 
-    /// RGBA at position `t` between pre-extracted stops, padding with the end colours
+    /// RGBA at position `t` between pre-extracted stops, padding with the end colors
     /// outside the first and last stop, as Pen does.
     static func interpolateRGBA(
         at t: CGFloat,

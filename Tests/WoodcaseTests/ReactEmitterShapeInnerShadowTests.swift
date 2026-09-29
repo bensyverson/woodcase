@@ -8,7 +8,7 @@ import Testing
 @testable import Woodcase
 
 /// React draws the inner shadows of SVG shapes and icons with an SVG filter — the inverted
-/// silhouette offset, blurred, coloured and kept inside the silhouette — and warns at most
+/// silhouette offset, blurred, colored and kept inside the silhouette — and warns at most
 /// once per unsupported shadow (leaf 4fZZ38; `render-inner-shadow-shapes`).
 struct ReactEmitterShapeInnerShadowTests {
     private static let inner = ##"{"type": "shadow", "shadowType": "inner", "color": "#000000CC", "offset": {"x": 2, "y": 2}, "blur": 4}"##

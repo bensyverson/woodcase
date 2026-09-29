@@ -162,7 +162,7 @@ enum SwiftUIAPIScanner {
         return String(chars[start ..< end])
     }
 
-    /// The labels of the argument list opening at `open` (`_` for an unlabelled argument),
+    /// The labels of the argument list opening at `open` (`_` for an unlabeled argument),
     /// and the index of its closing parenthesis.
     static func arguments(_ chars: [Character], openingAt open: Int) -> (labels: [String], close: Int) {
         var depth = 0

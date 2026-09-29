@@ -65,7 +65,7 @@ final class ScriptWatchdog: Sendable {
         let thread = Thread { [self] in
             while ContinuousClock.now < deadline {
                 Thread.sleep(forTimeInterval: Self.pollInterval)
-                if cancelled.withLock({ $0 }) { return }
+                if canceled.withLock({ $0 }) { return }
             }
             fire()
         }
@@ -79,24 +79,24 @@ final class ScriptWatchdog: Sendable {
     /// fire holds it until the process is gone, so `cancel` can never arrive between the
     /// decision and the exit.
     func cancel() {
-        cancelled.withLock { $0 = true }
+        canceled.withLock { $0 = true }
     }
 
     // MARK: - Private
 
-    /// How often the thread wakes to notice it has been cancelled.
+    /// How often the thread wakes to notice it has been canceled.
     ///
     /// Fast enough that a finished run's process is not held open by it, slow enough to
     /// cost nothing over a long script.
     private static let pollInterval: TimeInterval = 0.05
 
     /// Whether the run finished before the deadline.
-    private let cancelled = Mutex(false)
+    private let canceled = Mutex(false)
 
     /// Says what happened and ends the process, unless the run beat it to the line.
     private func fire() {
-        cancelled.withLock { cancelled in
-            guard !cancelled else { return }
+        canceled.withLock { canceled in
+            guard !canceled else { return }
             StandardError.write(sentence)
             exit(ExitCode.conflict.rawValue)
         }

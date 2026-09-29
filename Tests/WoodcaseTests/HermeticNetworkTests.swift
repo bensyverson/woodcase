@@ -57,7 +57,7 @@ struct HermeticNetworkTests {
             exercises PenRenderer.imageProvider, whose remote half is the synchronous \
             RemoteImageResolver.cachedImage(for:) — a disk read. No fetch is ever \
             issued, so this is the one place the real fetcher stands in as filler for \
-            an initialiser argument that is never used.
+            an initializer argument that is never used.
             """
         ),
         Exemption(
@@ -92,7 +92,7 @@ struct HermeticNetworkTests {
     /// Every Swift file under `Tests`, with its code — comment lines removed.
     ///
     /// Whole-line comments go because a doc comment that *names* the forbidden shape in
-    /// order to warn about it is not an offence, and the file that explains the rule is
+    /// order to warn about it is not an offense, and the file that explains the rule is
     /// exactly the file most likely to spell it. Only lines whose first non-space
     /// characters are `//` are dropped; a trailing comment is left alone, since
     /// stripping to end-of-line would also cut a `https://` inside a string literal and
@@ -120,13 +120,13 @@ struct HermeticNetworkTests {
     @Test("No test names a network-backed fetcher or resolver outside the allowlist")
     func noTestReachesTheNetwork() throws {
         let allowed = Set(Self.exemptions.map(\.file))
-        var offences: [String] = []
+        var offenses: [String] = []
         for source in try Self.sources() where !allowed.contains(source.name) {
             for rule in Self.forbidden where source.code.contains(rule.needle) {
-                offences.append("\(source.path) names \(rule.needle) — \(rule.remedy)")
+                offenses.append("\(source.path) names \(rule.needle) — \(rule.remedy)")
             }
         }
-        #expect(offences.isEmpty, "\(offences.joined(separator: "\n"))")
+        #expect(offenses.isEmpty, "\(offenses.joined(separator: "\n"))")
     }
 
     @Test("Every RenderCache a test builds names the resolvers it renders through")
@@ -135,18 +135,18 @@ struct HermeticNetworkTests {
         // so a bare `RenderCache()` in a test is the leak this suite is about — and it
         // reads like nothing at all. Naming them is the whole guard.
         let construction = /RenderCache\((?<arguments>[^)]*)\)/
-        var offences: [String] = []
+        var offenses: [String] = []
         for source in try Self.sources() where source.name != "HermeticNetworkTests.swift" {
             for match in source.code.matches(of: construction)
                 where !match.arguments.contains("fonts:")
             {
-                offences.append(
+                offenses.append(
                     "\(source.path) builds RenderCache(\(match.arguments)) without `fonts:`; "
                         + "use ViewerFixtures.renders() or pass offline resolvers"
                 )
             }
         }
-        #expect(offences.isEmpty, "\(offences.joined(separator: "\n"))")
+        #expect(offenses.isEmpty, "\(offenses.joined(separator: "\n"))")
     }
 
     @Test("No library code settles through the shared font resolver unless a caller names it")
@@ -161,8 +161,8 @@ struct HermeticNetworkTests {
         // line allowed to spell it.
         let sources = Self.testsDirectory.deletingLastPathComponent().appendingPathComponent("Sources")
         let libraries = ["Woodcase", "WoodcaseScripting"]
-        let offence = /GoogleFontResolver\??\s*=\s*\.shared|GoogleFontResolver\.shared|fontResolver:\s*\.shared|fonts:\s*\.shared/
-        var offences: [String] = []
+        let offense = /GoogleFontResolver\??\s*=\s*\.shared|GoogleFontResolver\.shared|fontResolver:\s*\.shared|fonts:\s*\.shared/
+        var offenses: [String] = []
         for library in libraries {
             let enumerator = try #require(FileManager.default.enumerator(
                 at: sources.appendingPathComponent(library), includingPropertiesForKeys: nil
@@ -170,14 +170,14 @@ struct HermeticNetworkTests {
             for case let url as URL in enumerator where url.pathExtension == "swift" {
                 let lines = try String(contentsOf: url, encoding: .utf8).split(separator: "\n")
                 for line in lines where !line.trimmingCharacters(in: .whitespaces).hasPrefix("//") {
-                    guard line.contains(offence), !line.contains("static let shared = GoogleFontResolver(") else {
+                    guard line.contains(offense), !line.contains("static let shared = GoogleFontResolver(") else {
                         continue
                     }
-                    offences.append("\(library)/\(url.lastPathComponent): \(line.trimmingCharacters(in: .whitespaces))")
+                    offenses.append("\(library)/\(url.lastPathComponent): \(line.trimmingCharacters(in: .whitespaces))")
                 }
             }
         }
-        #expect(offences.isEmpty, "name the resolver at the call site instead:\n\(offences.joined(separator: "\n"))")
+        #expect(offenses.isEmpty, "name the resolver at the call site instead:\n\(offenses.joined(separator: "\n"))")
     }
 
     @Test("Every allowlist entry names a file that exists and says why")

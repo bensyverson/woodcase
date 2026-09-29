@@ -6,7 +6,7 @@
 extension ReactEmitter {
     /// The declarations that paint a text node's glyphs.
     ///
-    /// A lone solid colour is `color`, as it always was. Anything more is painted the way
+    /// A lone solid color is `color`, as it always was. Anything more is painted the way
     /// Pen paints it (`project/2026-09-26-text-and-stroke-fills.md`, findings 1 and 6):
     /// every enabled fill is a background layer laid out over the text's own box, top fill
     /// first, shown only through the glyphs by `background-clip: text` with the glyph fill
@@ -15,7 +15,7 @@ extension ReactEmitter {
     /// that the box the paint spans is the text's, not its container's.
     ///
     /// No enabled paint — or only paint the emitter cannot draw, a shader — writes a
-    /// transparent colour, since an element with none inherits the page's black and Pen
+    /// transparent color, since an element with none inherits the page's black and Pen
     /// draws such a text as nothing. A solid is written by ``glyphColor(_:)``.
     ///
     /// - Parameters:
@@ -60,11 +60,11 @@ extension ReactEmitter {
         }
     }
 
-    /// The CSS colour that draws a text's or an icon's glyphs as nothing.
+    /// The CSS color that draws a text's or an icon's glyphs as nothing.
     static let noGlyphPaint = "transparent"
 
-    /// The CSS colour for glyphs painted `color`: a literal as written, a variable as its
-    /// custom property — except a literal that is not a colour, which Pen paints black and
+    /// The CSS color for glyphs painted `color`: a literal as written, a variable as its
+    /// custom property — except a literal that is not a color, which Pen paints black and
     /// so is `#000000` (CSS would drop it and inherit, and an SVG `stroke` would draw
     /// nothing).
     static func glyphColor(_ color: PenValue<String>) -> String {
@@ -74,10 +74,10 @@ extension ReactEmitter {
         return cssColorReference(color)
     }
 
-    /// The one CSS colour for glyphs painted `fills`, where only a colour can be written (a
-    /// state's colour; an icon paints more, by ``iconPaint(_:family:nodeID:ctx:)``):
+    /// The one CSS color for glyphs painted `fills`, where only a color can be written (a
+    /// state's color; an icon paints more, by ``iconPaint(_:family:nodeID:ctx:)``):
     /// ``noGlyphPaint`` when nothing is enabled, else the topmost enabled solid by
-    /// `glyphColor(_:)`. `nil` when every enabled fill is paint a colour cannot carry (a
+    /// `glyphColor(_:)`. `nil` when every enabled fill is paint a color cannot carry (a
     /// gradient, an image).
     static func glyphColor(_ fills: PenFills?) -> String? {
         let enabled = fills?.all.filter(\.isEnabled) ?? []

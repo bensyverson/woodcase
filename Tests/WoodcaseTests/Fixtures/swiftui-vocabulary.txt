@@ -272,7 +272,7 @@ Font.monospaced()
 Font.weight(_:)
 Font.Weight.semibold
 
-# MARK: - Colour, paint and blending
+# MARK: - Color, paint and blending
 
 Color
 Color.init(_:red:green:blue:opacity:)

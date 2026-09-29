@@ -30,7 +30,7 @@ struct ProductionFontWiringTests {
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .appendingPathComponent("Sources")
-        var offences: [String] = []
+        var offenses: [String] = []
         for target in ["WoodcaseCommandCore", "WoodcaseViewer"] {
             let enumerator = try #require(FileManager.default.enumerator(
                 at: sources.appendingPathComponent(target), includingPropertiesForKeys: nil
@@ -41,10 +41,10 @@ struct ProductionFontWiringTests {
                     .filter { !$0.trimmingCharacters(in: .whitespaces).hasPrefix("//") }
                     .joined(separator: "\n")
                 for match in code.matches(of: Self.transaction) where !match.arguments.contains("fonts:") {
-                    offences.append("\(target)/\(url.lastPathComponent): PenFileTransaction(\(match.arguments))")
+                    offenses.append("\(target)/\(url.lastPathComponent): PenFileTransaction(\(match.arguments))")
                 }
             }
         }
-        #expect(offences.isEmpty, "pass fonts: .shared (or the viewer's resolver):\n\(offences.joined(separator: "\n"))")
+        #expect(offenses.isEmpty, "pass fonts: .shared (or the viewer's resolver):\n\(offenses.joined(separator: "\n"))")
     }
 }

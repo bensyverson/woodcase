@@ -51,11 +51,11 @@ public extension PenLayoutEngine {
     /// ## Turned ancestors and groups
     ///
     /// A node's children are measured in its own coordinates, which are not always its
-    /// rect's: a turned or flipped node draws its unturned box centred in its rect (the
-    /// bounds of the turned box) and turns it about that centre, and a group's children are
+    /// rect's: a turned or flipped node draws its unturned box centered in its rect (the
+    /// bounds of the turned box) and turns it about that center, and a group's children are
     /// measured from its anchor, which its rect — their union — need not start at. So the
     /// walk composes each node's placement (``placement(of:rect:layoutRects:)``: its
-    /// ``unturnedBox(of:rect:layoutRects:)`` centred, turned and flipped, as ``PenRenderer``
+    /// ``unturnedBox(of:rect:layoutRects:)`` centered, turned and flipped, as ``PenRenderer``
     /// draws it) down the tree, and answers
     /// with the **axis-aligned bounds** of each node's unturned box under everything above
     /// it. For a node under no turn that is exactly its box; under a turned ancestor its

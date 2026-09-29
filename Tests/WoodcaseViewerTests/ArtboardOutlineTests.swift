@@ -63,8 +63,8 @@ struct ArtboardOutlineTests {
         #expect(row.render().contains("/artboards/YGJ0d%2FnSNTs"))
     }
 
-    @Test("A recently written artboard carries its first editor's colour and lists them all")
-    func touchedRowsCarryColour() {
+    @Test("A recently written artboard carries its first editor's color and lists them all")
+    func touchedRowsCarryColor() {
         let html = outline(editors: ["nSNTs": ["claude-a", "ben"]]).render()
         #expect(html.contains("is-touched"))
         #expect(html.contains("--v-actor: \(ActorColor(name: "claude-a").css)"))

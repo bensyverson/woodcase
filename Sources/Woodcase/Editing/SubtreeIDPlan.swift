@@ -24,7 +24,7 @@ import Foundation
 ///
 /// - ``keeping(_:avoiding:)`` is what `add` uses. An id an agent wrote is the id
 ///   the node gets; an id it left out is drawn. Agents are not required to invent
-///   ids, but one they do invent is honoured rather than silently discarded.
+///   ids, but one they do invent is honored rather than silently discarded.
 /// - ``regenerating(_:avoiding:)`` is what `cp` and ``PenID/remapIDs(in:)`` use.
 ///   Every id is drawn afresh, whatever the subtree carries, because a copy that
 ///   kept its source's ids would collide with the source.
@@ -58,7 +58,7 @@ public struct SubtreeIDPlan: Friendly {
 
     // MARK: - Planning
 
-    /// Plans the ids for a subtree whose supplied ids are to be honoured.
+    /// Plans the ids for a subtree whose supplied ids are to be honored.
     ///
     /// - Parameters:
     ///   - node: The authored subtree. A node whose `id` is empty supplied none.
@@ -75,7 +75,7 @@ public struct SubtreeIDPlan: Friendly {
 
     /// Plans a fresh id for every node in a subtree, supplied or not.
     ///
-    /// Nothing here can be refused: no supplied id is honoured, so none is judged.
+    /// Nothing here can be refused: no supplied id is honored, so none is judged.
     ///
     /// - Parameters:
     ///   - node: The subtree to renumber.
@@ -104,7 +104,7 @@ public struct SubtreeIDPlan: Friendly {
 
     // MARK: - What a plan does with a supplied id
 
-    /// Whether a supplied id is honoured or thrown away.
+    /// Whether a supplied id is honored or thrown away.
     private enum Policy {
         /// Keep an id the subtree supplied; draw one for a node that supplied none.
         case keepSupplied

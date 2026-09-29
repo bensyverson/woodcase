@@ -8,7 +8,7 @@ import Foundation
 /// One HTTP proxy, as an `HTTPS_PROXY`-style variable names it: host, port and optional
 /// Basic credentials.
 ///
-/// Only plain `http://` proxies are modelled — the kind the Claude Code sandbox and most
+/// Only plain `http://` proxies are modeled — the kind the Claude Code sandbox and most
 /// corporate egress hand out, and the kind an HTTP `CONNECT` tunnel speaks to. A value
 /// with any other scheme (`socks5h://`, `https://`) is not an HTTP proxy and parses to
 /// `nil`, so the request falls through to the next variable or goes direct.
@@ -19,7 +19,7 @@ public struct ProxyEndpoint: Friendly, CustomStringConvertible {
     /// The port curl assumes when a proxy variable names none.
     public static let defaultPort = 1080
 
-    /// The loopback literal a proxy host of `localhost` is dialled as.
+    /// The loopback literal a proxy host of `localhost` is dialed as.
     ///
     /// Inside a sandbox with no name resolution — the Claude Code Bash sandbox denies the
     /// `mDNSResponder` service — even `localhost` cannot be looked up, and the proxy is

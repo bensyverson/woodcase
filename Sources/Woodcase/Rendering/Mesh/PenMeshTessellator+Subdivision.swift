@@ -92,7 +92,7 @@ public extension PenMeshTessellator {
     /// Each channel is bilinear in the eased parameters `s = S(u)`, `t = S(v)`, with
     /// `|S′| ≤ 3/2` and `|S″| ≤ 6`, so for a bilinear `g` with corner differences `Gₛ`,
     /// `Gₜ` and twist `Gₛₜ`: `|gᵤ| ≤ 1.5 Gₛ`, `|gᵤᵤ| ≤ 6 Gₛ`, `|gᵤᵥ| ≤ 2.25 Gₛₜ`. The
-    /// product rule combines colour and alpha, both bounded by 1.
+    /// product rule combines color and alpha, both bounded by 1.
     private static func colorBounds(_ patch: PenMeshPatch) -> Curvature {
         let corners = [patch.topLeftColor, patch.topRightColor, patch.bottomLeftColor, patch.bottomRightColor]
         let alpha = Differences(corners.map(\.alpha))

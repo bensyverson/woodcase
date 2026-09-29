@@ -7,7 +7,7 @@ import Foundation
 
 /// Finds the patches of a mesh gradient that fold over themselves.
 ///
-/// A patch is the bicubic Bézier surface between four neighbouring vertices, built
+/// A patch is the bicubic Bézier surface between four neighboring vertices, built
 /// from their positions and handles the way Pen builds it (the control net and its
 /// zero-twist interior points are in `project/2026-09-26-mesh-gradients.md` §1). It
 /// **folds** where the surface turns over: where the map from the patch's own
@@ -28,13 +28,13 @@ import Foundation
 /// report's `mwarp` probe mesh, which Pen draws cleanly, has a patch whose Jacobian
 /// dips to −0.0008 against a mean of 0.13 at 3 of its 1,089 samples: a fold, strictly,
 /// but a sliver no export shows. Real folds sit far past the threshold — the report's
-/// `mfold` reaches −1.28 against a mean of 0.62, a vertex dragged past its neighbour
+/// `mfold` reaches −1.28 against a mean of 0.62, a vertex dragged past its neighbor
 /// −0.27 against 0.05. (Figures from a scratch Python port of this test, run over the
 /// meshes in `project/2026-09-26-mesh-gradients.md` Appendix A.)
 ///
 /// Sampling is a practical test, not a proof: a fold narrower than one sample step
 /// (1/32 of a patch) can slip between samples, and two patches that overlap each
-/// other without either turning over — a vertex dragged across a whole neighbouring
+/// other without either turning over — a vertex dragged across a whole neighboring
 /// patch — are not reported. Both are rarer than a handle dragged too far, which is
 /// the case this exists for.
 enum MeshFoldDetector {

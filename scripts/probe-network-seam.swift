@@ -15,9 +15,9 @@
 //      newConnectionHandler.  (Observed 2026-08-31, macOS 26.5.2: .failed(POSIXErrorCode
 //      22), every time — this is the whole of the old "NWListener EINVAL" mystery.)
 //   L2 The same listener with a newConnectionHandler set before start.  (.ready.)
-//   S1 Does a send's .contentProcessed completion fire when the connection is cancelled
+//   S1 Does a send's .contentProcessed completion fire when the connection is canceled
 //      while the send is in flight?  (Yes.)
-//   S2 Does it fire for a send issued on an already-cancelled connection?  (Yes.)
+//   S2 Does it fire for a send issued on an already-canceled connection?  (Yes.)
 //
 // A "no" from S1 or S2 would mean HTTPConnection's writes can be unresumable by
 // cancellation, which would change where the viewer's give-up budget has to live.
@@ -171,9 +171,9 @@ func probeCancelInFlight() {
         )
         queue.asyncAfter(deadline: .now() + 0.3) { connection.cancel() }
         if done.wait(timeout: .now() + 8) == .timedOut {
-            verdict("S1", "completion NEVER fired for a send cancelled in flight")
+            verdict("S1", "completion NEVER fired for a send canceled in flight")
         } else {
-            verdict("S1", "completion fired for a send cancelled in flight")
+            verdict("S1", "completion fired for a send canceled in flight")
         }
     }
 }
@@ -188,9 +188,9 @@ func probeSendAfterCancel() {
             completion: .contentProcessed { _ in done.signal() }
         )
         if done.wait(timeout: .now() + 8) == .timedOut {
-            verdict("S2", "completion NEVER fired for a send on a cancelled connection")
+            verdict("S2", "completion NEVER fired for a send on a canceled connection")
         } else {
-            verdict("S2", "completion fired for a send on a cancelled connection")
+            verdict("S2", "completion fired for a send on a canceled connection")
         }
     }
 }

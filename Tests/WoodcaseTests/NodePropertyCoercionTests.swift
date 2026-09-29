@@ -92,7 +92,7 @@ struct NodePropertyCoercionTests {
         #expect(try value("kind.fontSize", of: patched) == .int(18))
     }
 
-    @Test("A node of an unrecognised type keeps the number it was given")
+    @Test("A node of an unrecognized type keeps the number it was given")
     func unknownKindKeepsTheNumber() throws {
         let node = PenNode(
             id: "u1",

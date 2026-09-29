@@ -6,7 +6,7 @@
 import Foundation
 
 /// Swift source spellings of the values the SwiftUI emitter writes: numbers, strings and
-/// colours.
+/// colors.
 enum SwiftUILiteral {
     /// A number as a reader would write it: `80`, `0.5`, `-12`.
     ///
@@ -41,8 +41,8 @@ enum SwiftUILiteral {
         return "\"\(escaped)\""
     }
 
-    /// A colour through the support file's `Color(hex:opacity:)`: `Color(hex: 0xE0E0E0)`,
-    /// with the opacity only when the colour is not opaque.
+    /// A color through the support file's `Color(hex:opacity:)`: `Color(hex: 0xE0E0E0)`,
+    /// with the opacity only when the color is not opaque.
     static func color(_ color: PenHexColor) -> String {
         let hex = String(format: "0x%02X%02X%02X", color.red, color.green, color.blue)
         guard color.alpha < 255 else { return "Color(hex: \(hex))" }

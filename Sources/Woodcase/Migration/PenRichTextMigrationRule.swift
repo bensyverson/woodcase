@@ -10,7 +10,7 @@ import Foundation
 /// Flattens a legacy rich text node's styled runs into one plain string.
 ///
 /// Up to 2.10 a text node's `content` could be an array of styled runs, each with its
-/// own font, weight, colour and decorations. 2.17 dropped the array: `content` is a
+/// own font, weight, color and decorations. 2.17 dropped the array: `content` is a
 /// string or a `$variable` and nothing else.
 ///
 /// ```json

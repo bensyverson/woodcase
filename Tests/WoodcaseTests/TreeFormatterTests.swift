@@ -38,7 +38,7 @@ struct TreeFormatterTests {
         #expect(TreeFormatter.text(rows) == expected)
     }
 
-    @Test("Property columns are labelled by a header line")
+    @Test("Property columns are labeled by a header line")
     func textWithPropertyColumns() throws {
         let rows = try TreeView.rows(of: document("tree-overflow.pen"), properties: ["kind.width"])
         let expected = """

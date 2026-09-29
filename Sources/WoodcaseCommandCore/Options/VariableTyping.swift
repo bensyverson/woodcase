@@ -9,7 +9,7 @@ import Woodcase
 /// Turns a command line's `name=value` literal into a typed .pen variable value.
 ///
 /// A `.pen` variable declares a type, and the same characters mean different things
-/// under different ones — `16` is a number or the string `"16"`, `#FF6600` is a colour
+/// under different ones — `16` is a number or the string `"16"`, `#FF6600` is a color
 /// or a string. ``VarsSet`` settles the type first (`--type`, else the variable's
 /// existing declaration, else ``inferredType(of:)``) and then asks ``value(of:as:)``
 /// for the literal *as that type*, so the type a variable's references depend on never
@@ -23,10 +23,10 @@ import Woodcase
 enum VariableTyping {
     /// The type a literal reads as with nothing else to go on.
     ///
-    /// In order: a hex colour, `true`/`false`, a finite number, else a string. `rgba()`
-    /// and other CSS colour functions are *not* colours — the 2.17 schema's `Color` is
+    /// In order: a hex color, `true`/`false`, a finite number, else a string. `rgba()`
+    /// and other CSS color functions are *not* colors — the 2.17 schema's `Color` is
     /// `#RGB`, `#RRGGBB` or `#RRGGBBAA` and nothing else reads back, so they fall
-    /// through to string rather than being written as a colour Pen cannot render.
+    /// through to string rather than being written as a color Pen cannot render.
     ///
     /// - Parameter literal: The text on the right of the equals sign.
     /// - Returns: The inferred type, or `nil` for a `$reference`, which takes its type
@@ -69,11 +69,11 @@ enum VariableTyping {
         }
     }
 
-    /// Whether a literal is a hex colour the .pen format can hold.
+    /// Whether a literal is a hex color the .pen format can hold.
     ///
     /// - Parameter literal: The text to test.
     /// - Returns: `true` for `#RGB`, `#RRGGBB` and `#RRGGBBAA`, in either case. The
-    ///   `#` is required: without it `abc` would be a colour rather than a string.
+    ///   `#` is required: without it `abc` would be a color rather than a string.
     static func isHexColor(_ literal: String) -> Bool {
         guard literal.hasPrefix("#") else { return false }
         let digits = literal.dropFirst()
@@ -97,6 +97,6 @@ enum VariableTyping {
         }
     }
 
-    /// The digit counts of the schema's three colour widths.
+    /// The digit counts of the schema's three color widths.
     private static let hexColorWidths: Set<Int> = [3, 6, 8]
 }

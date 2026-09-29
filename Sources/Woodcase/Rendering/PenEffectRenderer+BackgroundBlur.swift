@@ -54,7 +54,7 @@ extension PenEffectRenderer {
         context.saveGState()
         context.addPath(clipPath)
         context.clip()
-        // Back to device pixels; the clip, already rasterised, stays where it was. An image
+        // Back to device pixels; the clip, already rasterized, stays where it was. An image
         // drawn into a bottom-up rect lands upright, so no flip is needed here.
         context.concatenate(context.ctm.inverted())
         context.setBlendMode(.copy)

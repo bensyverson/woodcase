@@ -7,7 +7,7 @@ import Foundation
 import Testing
 @testable import Woodcase
 
-/// What the React emitter writes for an icon painted with something a colour cannot carry.
+/// What the React emitter writes for an icon painted with something a color cannot carry.
 ///
 /// Pen draws an icon's gradient or image fill through the glyph, laid out over the node's
 /// box (`render-text-unfilled.pen`, the `gradient` and `image` boards). Every icon library
@@ -67,12 +67,12 @@ struct ReactEmitterIconPaintTests {
         ("phosphor", "square", "fill", " 128 128)"),
         ("Material Symbols Outlined", "home", "fill", " 480 -480)"),
     ])
-    func gradientDomain(library: String, name: String, attribute: String, centre: String) throws {
+    func gradientDomain(library: String, name: String, attribute: String, center: String) throws {
         let content = try icon(fill: Self.ramp, library: library, name: name)
         let server = try paintServer(in: content, attribute: attribute)
         #expect(server.defined, "\(library): \(content)")
         let transform = try #require(content.firstMatch(of: /gradientTransform="(matrix\([^)]*\))"/)?.output.1)
-        #expect(transform.hasSuffix(centre), "\(library): \(transform)")
+        #expect(transform.hasSuffix(center), "\(library): \(transform)")
     }
 
     @Test("The paint server sits in a hidden SVG of no size, so it takes no room in the layout")
@@ -96,22 +96,22 @@ struct ReactEmitterIconPaintTests {
 
     // MARK: - Choosing the paint
 
-    @Test("A gradient over a colour paints the gradient: Pen paints the top fill over the other")
-    func gradientOverColour() throws {
+    @Test("A gradient over a color paints the gradient: Pen paints the top fill over the other")
+    func gradientOverColor() throws {
         let content = try icon(fill: "[\"#00FF00\", \(Self.ramp)]")
         _ = try paintServer(in: content, attribute: "stroke")
         #expect(!content.contains("#00FF00"), "\(content)")
     }
 
-    @Test("A colour over a gradient stays a colour")
-    func colourOverGradient() throws {
+    @Test("A color over a gradient stays a color")
+    func colorOverGradient() throws {
         let content = try icon(fill: "[\(Self.ramp), \"#00FF00\"]")
         #expect(content.contains(##"color="#00FF00""##), "\(content)")
         #expect(!content.contains("<linearGradient"))
     }
 
-    @Test("A disabled gradient over a colour paints the colour")
-    func disabledGradientOverColour() throws {
+    @Test("A disabled gradient over a color paints the color")
+    func disabledGradientOverColor() throws {
         let disabled = Self.ramp.replacingOccurrences(of: "\"rotation\": 270", with: "\"rotation\": 270, \"enabled\": false")
         let content = try icon(fill: "[\"#00FF00\", \(disabled)]")
         #expect(content.contains(##"color="#00FF00""##), "\(content)")

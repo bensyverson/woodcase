@@ -10,7 +10,7 @@ extension SwiftUINodeEmitter {
     /// number for is read through it.
     ///
     /// The stroke is painted like a fill, over the node's box (``paintLayers(_:box:unemitted:)``),
-    /// through the region it covers. A centred stroke of one paint is SwiftUI's own
+    /// through the region it covers. A centered stroke of one paint is SwiftUI's own
     /// `.stroke`, and an inside one on a rectangle whose corners are at least half the width
     /// is `.strokeBorder`, which then draws exactly Pen's band. Everything else is a support
     /// shape — `penStroke(_:lineWidth:)` for an alignment SwiftUI does not draw, a stack of
@@ -70,13 +70,13 @@ extension SwiftUINodeEmitter {
         }
         let name = SwiftUIStrokeAlignment(alignment).rawValue
         let region = "\(shape.view).penStroke(.\(name), \(style))"
-        // A mitre can reach half the mitre limit's widths past the outline's corner.
+        // A miter can reach half the miter limit's widths past the outline's corner.
         let joinReach = (stroke.strokeLinejoin ?? .miter) == .miter ? Self.miterLimit : 2
         let reach = width * Self.outsideShare(alignment) * joinReach
         return painted(Outline(view: region, argument: region), layers: layers, reach: reach)
     }
 
-    /// SwiftUI's and Core Graphics' default mitre limit, which Pen's strokes are drawn with.
+    /// SwiftUI's and Core Graphics' default miter limit, which Pen's strokes are drawn with.
     private static let miterLimit = 10.0
 
     /// How much of a stroke's width lies outside the outline.
@@ -101,7 +101,7 @@ extension SwiftUINodeEmitter {
     }
 
     /// The width and style arguments: `lineWidth: 2`, or a `StrokeStyle` naming the cap and
-    /// join where they are not SwiftUI's defaults, which are Pen's (butt, mitre).
+    /// join where they are not SwiftUI's defaults, which are Pen's (butt, miter).
     func strokeStyle(_ width: String, cap: PenStrokeCap?, join: PenStrokeJoin?) -> String {
         var parts = ["lineWidth: \(width)"]
         if let cap, cap != .butt {

@@ -12,7 +12,7 @@ import Woodcase
 /// Repointing a nested instance at a sibling component — the natural way to say
 /// "this tab is the current one" — driven through the binary.
 ///
-/// The expander has always honoured such an override; the *reads* did not, so a
+/// The expander has always honored such an override; the *reads* did not, so a
 /// repointed instance came back with no rect and its old component's children, and
 /// every address inside it stopped resolving. This suite pins the round trip:
 /// repoint, read the new component's geometry and children, edit through them, then

@@ -42,8 +42,8 @@ struct OutlinePreviewTests {
         #expect(OutlineRow(row: row, file: file, artboard: "Cnv01", state: ViewState(node: "Dashboard/Header/Title")).isSelected)
     }
 
-    @Test("A recently touched row carries its first editor's colour and lists them all")
-    func touchedRowCarriesColour() {
+    @Test("A recently touched row carries its first editor's color and lists them all")
+    func touchedRowCarriesColor() {
         let html = OutlineRow(
             row: PreviewFixtures.row(id: "Ttl01", name: "Title"),
             file: file,
@@ -56,8 +56,8 @@ struct OutlinePreviewTests {
         #expect(html.contains("data-editors=\"claude-a ben\""))
     }
 
-    @Test("An untouched row carries no colour at all")
-    func untouchedRowHasNoColour() {
+    @Test("An untouched row carries no color at all")
+    func untouchedRowHasNoColor() {
         let html = OutlineRow(row: PreviewFixtures.row(id: "Ttl01", name: "Title"), file: file, artboard: "Cnv01", state: ViewState()).render()
         #expect(!html.contains("--v-actor"))
         #expect(!html.contains("is-touched"))
@@ -121,8 +121,8 @@ struct OutlinePreviewTests {
         #expect(OutlineRow.Glyph.of(PreviewFixtures.row(id: "a", type: "sparkle")) == .other)
     }
 
-    @Test("A definition, an instance and a slot each carry a distinct, labelled mark")
-    func kindMarksAreDistinctAndLabelled() {
+    @Test("A definition, an instance and a slot each carry a distinct, labeled mark")
+    func kindMarksAreDistinctAndLabeled() {
         let component = KindMark(isReusable: true, isInstance: false, isSlot: false)
         let instance = KindMark(isReusable: false, isInstance: true, isSlot: false)
         let slot = KindMark(isReusable: false, isInstance: false, isSlot: true)
@@ -143,7 +143,7 @@ struct OutlinePreviewTests {
     }
 
     @Test("A definition mark wins over an instance or slot mark on the same node")
-    func kindMarkPrecedenceFavoursTheDefinition() {
+    func kindMarkPrecedenceFavorsTheDefinition() {
         #expect(KindMark(isReusable: true, isInstance: true, isSlot: true).kind == .component)
         #expect(KindMark(isReusable: false, isInstance: true, isSlot: true).kind == .instance)
     }
@@ -169,7 +169,7 @@ struct OutlinePreviewTests {
         #expect(OutlinePanel.shortRevision("short") == "short")
     }
 
-    @Test("A colour variable gets a swatch; a string does not")
+    @Test("A color variable gets a swatch; a string does not")
     func swatchesFollowType() {
         let document = PenDocument(version: "2.17", variables: [
             "accent": PenVariable(type: .color, value: .simple("#2FBF6F")),
@@ -214,7 +214,7 @@ struct OutlinePreviewTests {
         #expect(rows[0].lastEditor == "ben")
     }
 
-    @Test("A boolean variable renders as a labelled pill")
+    @Test("A boolean variable renders as a labeled pill")
     func booleansRenderAsAPill() {
         let html = VariablesPanel.VariableRow(
             variable: ViewerVariable(name: "dark-mode", type: .boolean, value: "true"),
@@ -261,8 +261,8 @@ struct OutlinePreviewTests {
         ])
     }
 
-    @Test("A themed colour variable's variants each carry a swatch; a themed number's carry none")
-    func onlyColourVariantsCarrySwatches() throws {
+    @Test("A themed color variable's variants each carry a swatch; a themed number's carry none")
+    func onlyColorVariantsCarrySwatches() throws {
         let document = PenDocument(version: "2.17", variables: [
             "bg": PenVariable(type: .color, value: .themed([
                 PenThemedValue(value: "#F6F5F1", theme: ["mode": "light"]),
@@ -316,8 +316,8 @@ struct OutlinePreviewTests {
         #expect(html.contains("<summary class=\"v-variable-summary\"><span class=\"v-disclosure-glyph\""))
     }
 
-    @Test("A themed colour variable expands to one table row per axis, each carrying its own swatch")
-    func themedColourExpandsToATableWithSwatches() {
+    @Test("A themed color variable expands to one table row per axis, each carrying its own swatch")
+    func themedColorExpandsToATableWithSwatches() {
         let html = VariablesPanel.VariableRow(
             variable: ViewerVariable(
                 name: "bg", type: .color, value: "#F6F5F1", swatch: "#F6F5F1",
@@ -360,7 +360,7 @@ struct OutlinePreviewTests {
         #expect(!html.contains("v-swatch\" style"))
     }
 
-    @Test("An unthemed colour variable still expands to a one-row table, its axis reading `*`")
+    @Test("An unthemed color variable still expands to a one-row table, its axis reading `*`")
     func unthemedVariableGetsAOneRowTable() {
         let html = VariablesPanel.VariableRow(
             variable: ViewerVariable(name: "accent", type: .color, value: "#2FBF6F", swatch: "#2FBF6F"),

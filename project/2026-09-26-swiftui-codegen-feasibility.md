@@ -56,7 +56,7 @@ bindings), `ComponentAnalyzer+DescendantPath`, `PageAnalyzer`, `ThemeAnalyzer`/`
    `.onHover`, `@Environment(\.isEnabled)` and `@FocusState`. The trigger should name the *state*: `.hover`, `.pressed`, `.disabled`, `.focused`, or an attribute
    with a name and value. Each emitter then maps that to its own selector or API.
 3. **JSX formatting in a shared type.** `PropMapper.MappedProp.jsValue` formats values as `"var(--x)"` or `{false}`. The mapper should return a typed value
-   (a string, a colour literal or variable, a bool, an image URL), and each emitter should format it.
+   (a string, a color literal or variable, a bool, an image URL), and each emitter should format it.
 4. **CoreGraphics in the geometry the emitter needs.** `PenSVGPathParser` and `PenShapeBuilder` `import CoreGraphics` and return
    `CGPath`. React never needed them, because it hands SVG the `d` string. SwiftUI must emit `Path` code, and the emitter must build on Linux, so the parser needs splitting into
    a CG-free command model (the parse) and a CG builder (the render). The polygon and arc/donut geometry needs the same split. This is also a gain for the library's Linux story.
@@ -112,9 +112,9 @@ the API's introduction, read from the SDK's symbol graph (§3), and are iOS / ma
 
 | .pen | SwiftUI | Grade | Min OS |
 |---|---|---|---|
-| solid colour | `Color(.sRGB, red:green:blue:opacity:)` | exact | 13 / 10.15 |
+| solid color | `Color(.sRGB, red:green:blue:opacity:)` | exact | 13 / 10.15 |
 | linear / radial / angular gradient | `.linearGradient/.ellipticalGradient/.angularGradient(Gradient(stops:).colorSpace(.device), …)` | **exact — MAE 0.135 (CG: 0.133)**, but *only* with `.colorSpace(.device)`. The default interpolation measures **10.69**. March rated these "exact" without it | 16 / 13 |
-| gradient geometry | rotation *θ* (CCW) → `startPoint` = centre + ½(sin θ, cos θ), `endPoint` opposite; radial `endRadiusFraction: 0.5`; angular `startAngle: −90°` | exact on this board; off-centre, resized and rotated-ellipse cases untested | 15 / 12 |
+| gradient geometry | rotation *θ* (CCW) → `startPoint` = center + ½(sin θ, cos θ), `endPoint` opposite; radial `endRadiusFraction: 0.5`; angular `startAngle: −90°` | exact on this board; off-center, resized and rotated-ellipse cases untested | 15 / 12 |
 | image fill (fill/fit/stretch) | `Image(...).resizable().scaledToFill()/scaledToFit()` in `.background`, clipped | exact by construction | 13 / 10.15 |
 | mesh gradient | native `MeshGradient(width:height:bezierPoints:colors:smoothsColors: true, colorSpace: .device)`, **or** the baked 64 px raster React already makes | native: MAE 0.4–3.2, and 7.1 folded (mesh report §1). Baked: 0.33–0.68 | native **18 / 15** |
 | multiple fills, blend modes, `opacity`, `enabled` | stacked `.background { }` layers, `.blendMode`, `.opacity`, omission | exact by construction | 15 / 12 |
@@ -124,7 +124,7 @@ the API's introduction, read from the SDK's symbol graph (§3), and are iOS / ma
 | .pen | SwiftUI | Grade | Min OS |
 |---|---|---|---|
 | inner | `InsettableShape.strokeBorder(_:lineWidth:)` | exact by construction | 13 / 10.15 |
-| centre | `.stroke(_:lineWidth:)` | exact | 13 / 10.15 |
+| center | `.stroke(_:lineWidth:)` | exact | 13 / 10.15 |
 | outer, on rect/rounded rect/ellipse | `shape.inset(by: −w).strokeBorder(...)` | exact by construction (**March said "workaround"**) | 13 / 10.15 |
 | outer or inner on a path/polygon | stroke at 2w, then `.mask`/`.clipShape` by the shape (the trick React's SVG uses) | exact by construction | 15 / 12 |
 | per-side widths | a support `PenSideStroke: Shape` building the ring path (the geometry `PenStrokeRenderer` draws) | exact by construction; untested | 13 / 10.15 |
@@ -151,13 +151,13 @@ the API's introduction, read from the SDK's symbol graph (§3), and are iOS / ma
 
 | .pen | SwiftUI | Grade | Min OS |
 |---|---|---|---|
-| reusable component | a `struct Name: View` with `let` props from `PropDefinition` (string → `String`, colour → `Color`, boolean → `Bool`, image → `URL`/`Image`) | exact | 13 / 10.15 |
+| reusable component | a `struct Name: View` with `let` props from `PropDefinition` (string → `String`, color → `Color`, boolean → `Bool`, image → `URL`/`Image`) | exact | 13 / 10.15 |
 | `ref` + overrides that map to props | `Name(title: "…")` | exact | 13 / 10.15 |
 | unmapped overrides | inline the patched tree, as React does (shared `PenNodePatcher`) | exact | — |
 | slots (`slot: [...]`) | a generic `Content: View` parameter with a `@ViewBuilder` init | exact | 13 / 10.15 |
 | pages | a `struct` per top-level frame | exact | — |
 | themes / variables | a generated `PenTheme` value in the environment (`@Entry var penTheme`). Each variable is a computed `Color`/`CGFloat` that switches on the axis values. A `context` node gives `.environment(\.penTheme, theme.with(mode: .dark))`. The `mode` axis can optionally follow `colorScheme` | exact by construction. March's "EnvironmentKey per axis" works too; `@Entry` is less code | 13 / 10.15 (`@Entry` is a macro that expands to an `EnvironmentKey`; it needs Xcode 16+, not a newer OS) |
-| themed mesh | native `MeshGradient` reads theme colours directly (free); the baked path needs one image per theme combination, as React does | — | 18 / 15 |
+| themed mesh | native `MeshGradient` reads theme colors directly (free); the baked path needs one image per theme combination, as React does | — | 18 / 15 |
 | roles/states (`button`, `toggle`, `textInput`, `select`, `tabBar`) | `Button` + a generated `ButtonStyle` (pressed, disabled via `isEnabled`, hover via `.onHover`), `Toggle`, `TextField`, `Picker`; structural states as `if/else` branches | approx: hover exists only with a pointer (macOS/iPadOS) | 13 / 10.15 |
 | icon (lucide, feather, phosphor, material) | `Text(codepoint).font(.custom(...))` with the icon font Woodcase already bundles (`IconFonts/Fonts`) copied into the package | exact (the same glyphs the CG renderer draws) | 13 / 10.15 |
 | `browser` | WebKit's SwiftUI `WebView(url:)` (availability via sosumi.ai; WebKit is not in the symbol cache) | approx | 26 / 26 |
@@ -234,7 +234,7 @@ color space for interpolating between its colors.
 ### 4.1 Fidelity: is `ImageRenderer` good enough to compare against Pen?
 
 **Yes.** `ImageRenderer` returns `kCGColorSpaceSRGB` images at exactly `scale ×` the view's points: 500×513 at 1×, and 1808×368 at 2× where the reference is 1808×368. The
-colour arithmetic is Pen's once gradients use `.device`. Layout is pixel-exact. Text differs by font metrics, not by rendering quality.
+color arithmetic is Pen's once gradients use `.device`. Layout is pixel-exact. Text differs by font metrics, not by rendering quality.
 
 Method. The SwiftUI below is hand-written the way the emitter would write it, rendered with `ImageRenderer` at the reference's
 scale, and compared with `PenSnapshotTestHelpers.meanAbsoluteError`'s arithmetic: sRGB, premultiplied RGBA8, the mean over every channel of the overlapping area.
@@ -259,7 +259,7 @@ vertical metrics: SwiftUI's board is 513 px tall against Pen's 510, and lines dr
 
 > **Corrected 2026-09-26 (leaf `c9pSVy`):** "vertical metrics" was two causes, not one. The `lineHeight: 2` row sat
 > ~6 px high because `lineHeight(.exact(points:))` puts the first baseline one em below the line top where Pen
-> centres the glyphs (half-leading); `penFont` now matches Pen. The 3 px of board height is SwiftUI's 1× Text
+> centers the glyphs (half-leading); `penFont` now matches Pen. The 3 px of board height is SwiftUI's 1× Text
 > height for 16 pt Inter lines (20 against Pen's 19). The reference has been re-exported with the two rows drawn;
 > against it SwiftUI measures 2.13. See [SwiftUI line height](2026-09-26-swiftui-line-height.md).
 
@@ -324,7 +324,7 @@ idiomatic output, where the emitter cannot prove that a stack is equivalent. The
 fixtures with Pen PNGs (most with a `.layout.json` too). The second risk is the §1.2 refactor, which must leave every React golden byte-identical.
 
 **The first thin slice** is leaf 3 below. It emits frames (stacks, `ZStack` for `none`, padding, gap, sizing, justify, align, clip),
-rectangles and ellipses with solid fills and corner radii, and text (font, weight, size, colour, align, growth, line height). It writes the support file and runs the render test over
+rectangles and ellipses with solid fills and corner radii, and text (font, weight, size, color, align, growth, line height). It writes the support file and runs the render test over
 the `layout-*` fixtures and `render-text`. It proves the pipeline end to end before any paint work.
 
 ## 6. Implementation plan
@@ -341,9 +341,9 @@ The path is clear. Four decisions are **Ben's to make** first (leaf 0). The plan
 >
 >    > **Updated 2026-09-27 (leaf `rlSTe9`).** The 0.4–3.2 / 7.1 figures are for Pen's grid handed to `MeshGradient`
 >    > as is, and the translucent `malpha` board, "n/a" in the mesh report, measures 5.0 that way: SwiftUI blends
->    > colours premultiplied, Pen unpremultiplied. The emitter instead writes the support file's `PenMeshGradient`
+>    > colors premultiplied, Pen unpremultiplied. The emitter instead writes the support file's `PenMeshGradient`
 >    > style, which resolves to a `MeshGradient` of 8 × 8 cells per Pen cell, each corner's position, tangents and
->    > colour evaluated from Pen's own patch. Still native and resolution-independent; every `render-mesh-gradients`
+>    > color evaluated from Pen's own patch. Still native and resolution-independent; every `render-mesh-gradients`
 >    > board measures 0.18–0.83, the fold included (`swift test --filter SwiftUIRenderTests`, Xcode 27.0, macOS 27.0).
 > 3. **Output: a SwiftPM package**, as recommended.
 > 4. **Layout: always idiomatic stacks** (not "stacks where provable, `PenFlex` otherwise"). "The goal is not necessarily

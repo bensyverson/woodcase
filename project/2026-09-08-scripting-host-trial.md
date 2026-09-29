@@ -4,7 +4,7 @@
 
 ## The question
 
-The plan's premise is a claim about agent behaviour: given a loop-shaped task and every route — a verb, `cp --each`, `apply`, `find`, `js` — an agent stays inside the tool, and the activity log accounts for every byte the file changed by. The Quill run of 2026-09-01 was the counter-example that motivated the host: four agents, four Python generators woodcase could not read. This trial re-runs that shape with the host shipped.
+The plan's premise is a claim about agent behavior: given a loop-shaped task and every route — a verb, `cp --each`, `apply`, `find`, `js` — an agent stays inside the tool, and the activity log accounts for every byte the file changed by. The Quill run of 2026-09-01 was the counter-example that motivated the host: four agents, four Python generators woodcase could not read. This trial re-runs that shape with the host shipped.
 
 ## Setup
 

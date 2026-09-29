@@ -48,7 +48,7 @@ struct PenRefExpanderPenKeyTests {
         return nil
     }
 
-    /// A node's solid fill, as a shorthand colour.
+    /// A node's solid fill, as a shorthand color.
     private static func fill(of node: PenNode?) -> String? {
         let fills: PenFills? = switch node?.kind {
         case let .frame(data)?: data.fills

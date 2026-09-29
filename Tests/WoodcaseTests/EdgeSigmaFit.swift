@@ -3,15 +3,15 @@ import Foundation
 /// Fits the Gaussian sigma of one blurred step edge, as `scripts/blur-sigma-fit` does.
 ///
 /// A hard edge blurred by a Gaussian of standard deviation σ reads, across one row, as
-/// `0.5 · (1 − erf((x + 0.5 − c) / (σ√2)))` once normalised between its two plateaus. The
+/// `0.5 · (1 − erf((x + 0.5 − c) / (σ√2)))` once normalized between its two plateaus. The
 /// fit is a least-squares grid search over `(c, σ)`, narrowed around the best point, on the
 /// encoded sRGB values — the space Pen blurs in.
 struct EdgeSigmaFit {
-    /// The fitted edge centre, in columns of the sampled range.
+    /// The fitted edge center, in columns of the sampled range.
     let center: Double
     /// The fitted sigma, in pixels.
     let sigma: Double
-    /// The root-mean-square residual of the normalised profile against the model.
+    /// The root-mean-square residual of the normalized profile against the model.
     let rms: Double
 
     /// Fits `profile`, one 0…1 sample per column, averaging `plateauSamples` columns at each

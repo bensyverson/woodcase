@@ -57,7 +57,7 @@ See individual reports: [HTML/CSS](2026-03-28-codegen-html-css.md) | [React+Tail
 
 > **Correction (2026-09-26):** SwiftUI's `MeshGradient` is close to Pen's mesh, not exact. Fed Pen's positions and
 > handles (`smoothsColors: true`), it measured MAE 0.4–3.2 against Pen's exports, and 7.1 on a folded mesh: it is
-> Apple's colour interpolation, not Pen's. See [the mesh report](2026-09-26-mesh-gradients.md) §1, "The empirical check".
+> Apple's color interpolation, not Pen's. See [the mesh report](2026-09-26-mesh-gradients.md) §1, "The empirical check".
 
 ---
 

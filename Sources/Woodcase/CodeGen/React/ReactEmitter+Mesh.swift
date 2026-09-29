@@ -25,7 +25,7 @@ extension ReactEmitter {
     /// would not draw the fill (a missing field or a count that does not match the grid).
     ///
     /// The mesh is baked to a PNG `data:` URI by the pure-Swift mesh core, with the
-    /// fill's own opacity folded into its alpha. When any colour depends on a theme axis,
+    /// fill's own opacity folded into its alpha. When any color depends on a theme axis,
     /// the mesh is baked once per theme and the layer reads `var(--wc-mesh-…)`, which
     /// ``EmitContext/meshProperties`` records for `theme.css` to declare per theme.
     ///

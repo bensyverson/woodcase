@@ -18,7 +18,7 @@ struct PenGaussianBlurTests {
         return try #require(context.makeImage())
     }
 
-    @Test("The kernel is odd, symmetric, normalised and reaches three sigmas")
+    @Test("The kernel is odd, symmetric, normalized and reaches three sigmas")
     func kernelShape() throws {
         let weights = PenGaussianBlur.kernel(sigma: 4)
         try #require(weights.count == 25)
@@ -33,7 +33,7 @@ struct PenGaussianBlurTests {
         let pixels = try #require(PixelGrid(blurred))
         let fit = try #require(EdgeSigmaFit(profile: pixels.row(20, from: 10, through: 70, channel: 0)))
         #expect(abs(fit.sigma - 4) < 0.2, "sigma \(fit.sigma)")
-        #expect(abs(fit.center - 30) < 0.5, "centre \(fit.center)")
+        #expect(abs(fit.center - 30) < 0.5, "center \(fit.center)")
         // Encoded-value blending: half-way across the edge both channels are near 128,
         // where a linear-light blur would give about 188.
         let middle = pixels.pixel(40, 20)

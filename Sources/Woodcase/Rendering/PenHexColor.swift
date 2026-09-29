@@ -5,11 +5,11 @@
 
 import Foundation
 
-/// A colour as a .pen hex string spells it: four 8-bit channels, sRGB-encoded and
+/// A color as a .pen hex string spells it: four 8-bit channels, sRGB-encoded and
 /// unpremultiplied.
 ///
-/// This is the one parser of the format's hex colour grammar. It needs only Foundation,
-/// so code that must build without CoreGraphics — the mesh core — reads colours through
+/// This is the one parser of the format's hex color grammar. It needs only Foundation,
+/// so code that must build without CoreGraphics — the mesh core — reads colors through
 /// it directly, and ``PenColorParser`` wraps its result into a `CGColor`.
 ///
 /// Three forms are accepted, each with an optional leading `#`:
@@ -26,13 +26,13 @@ import Foundation
 /// let refused = PenHexColor("#F008")    // nil
 /// ```
 public struct PenHexColor: Friendly {
-    /// Creates a colour from its channels.
+    /// Creates a color from its channels.
     ///
     /// - Parameters:
     ///   - red: The sRGB-encoded red channel.
     ///   - green: The sRGB-encoded green channel.
     ///   - blue: The sRGB-encoded blue channel.
-    ///   - alpha: The opacity; the colour channels are not multiplied by it.
+    ///   - alpha: The opacity; the color channels are not multiplied by it.
     public init(red: UInt8, green: UInt8, blue: UInt8, alpha: UInt8 = 255) {
         self.red = red
         self.green = green
@@ -42,8 +42,8 @@ public struct PenHexColor: Friendly {
 
     /// Parses a `#RGB`, `#RRGGBB` or `#RRGGBBAA` hex string; the `#` is optional.
     ///
-    /// - Parameter hex: The colour string.
-    /// - Returns: The colour, or `nil` when the string is not one of the three forms.
+    /// - Parameter hex: The color string.
+    /// - Returns: The color, or `nil` when the string is not one of the three forms.
     public init?(_ hex: String) {
         var digits = hex.hasPrefix("#") ? String(hex.dropFirst()) : hex
         if digits.count == 3 {
@@ -70,7 +70,7 @@ public struct PenHexColor: Friendly {
     /// The sRGB-encoded blue channel.
     public var blue: UInt8
 
-    /// The opacity. The colour channels are not multiplied by it.
+    /// The opacity. The color channels are not multiplied by it.
     public var alpha: UInt8
 
     /// The four channels as fractions of 255, in red, green, blue, alpha order.

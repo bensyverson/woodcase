@@ -13,7 +13,7 @@ import Foundation
 ///
 /// ## The tokens
 ///
-/// Everything colour is a `--v-*` custom property defined twice: once for light, once
+/// Everything color is a `--v-*` custom property defined twice: once for light, once
 /// inside `prefers-color-scheme: dark`. The site's own light and dark follow the
 /// operating system; the *file's* theme axes are a separate control in the top bar, and
 /// the two never share a switch.
@@ -22,8 +22,8 @@ import Foundation
 /// happen — a row lighting up, a marker appearing — and they need a surround to happen
 /// against, or every in-action state is white on white.
 ///
-/// Identity colour arrives as `--v-actor` on the element that needs it, never as a
-/// class: the colour is hashed, so there is no finite set of classes to write. Its ink
+/// Identity color arrives as `--v-actor` on the element that needs it, never as a
+/// class: the color is hashed, so there is no finite set of classes to write. Its ink
 /// rides beside it as `--v-actor-ink`, for the same reason.
 ///
 /// ## The inks
@@ -347,7 +347,7 @@ public enum ViewerStylesheet {
     /* Shared by any expand/collapse control — the Variables pane's own toggle and each
        row's `<summary>` today, the Outline pane next. The box is sized well past the
        triangle it draws, for a comfortable click target; `currentColor` lets whichever
-       control it sits in set its own colour. Carries no direction of its own — a caller
+       control it sits in set its own color. Carries no direction of its own — a caller
        that starts open leaves it unrotated, one that starts closed rotates it -90deg by
        default and back to 0 on its own open state, entirely in that caller's rules. */
     .v-disclosure-glyph {
@@ -400,8 +400,8 @@ public enum ViewerStylesheet {
       background: var(--v-swatch, transparent);
       border: 1px solid var(--v-line);
     }
-    /* Only a colour has a swatch. The slot stays, so every name starts on one column,
-       but it draws nothing — an outlined empty box read as a colour that failed. */
+    /* Only a color has a swatch. The slot stays, so every name starts on one column,
+       but it draws nothing — an outlined empty box read as a color that failed. */
     .v-swatch.is-empty { visibility: hidden; }
     .v-variable-name { font-family: var(--v-mono); flex: none; }
     .v-variable-value {
@@ -562,7 +562,7 @@ public enum ViewerStylesheet {
       pointer-events: auto; cursor: pointer;
       /* Capped at the artboard's right edge, measured from this node's own left — the
          box carries its rect as custom properties, so the cap follows the zoom. Without
-         it a deep node's path ran over the neighbouring pane. */
+         it a deep node's path ran over the neighboring pane. */
       max-width: calc((var(--v-art-w) - var(--v-x)) * var(--v-scale) * 1px + 4px);
     }
     /* The footer's front-truncation, worn by the tag: RTL box so the ellipsis eats the
@@ -680,7 +680,7 @@ public enum ViewerStylesheet {
       background: var(--v-bg);
     }
 
-    /* `margin: auto` rather than `justify-content: center`: a centred flex item that
+    /* `margin: auto` rather than `justify-content: center`: a centered flex item that
        overflows its scroll container is unreachable off the left edge, an auto margin
        is not. */
     .v-map-plane {
@@ -735,7 +735,7 @@ public enum ViewerStylesheet {
       .v-map-frame.is-loading { animation: none; }
     }
 
-    /* The same colour the selected state uses below, not a muted grey — that read fine
+    /* The same color the selected state uses below, not a muted gray — that read fine
        against `--v-chrome` but disappeared against a light artboard's own render. */
     .v-map-board:hover .v-map-frame { border-color: var(--v-accent); }
 
@@ -760,7 +760,7 @@ public enum ViewerStylesheet {
 
     /* The label does not scale with the map: 11px at every zoom, and *under* the box
        rather than over it, so a name never covers the render it names. Its width is the
-       box's, so two neighbouring names cannot overlap into an unreadable run. */
+       box's, so two neighboring names cannot overlap into an unreadable run. */
     .v-map-label {
       position: absolute; top: 100%; left: 0;
       display: inline-flex; align-items: center; gap: 0.25rem;
@@ -772,8 +772,8 @@ public enum ViewerStylesheet {
     }
     .v-map-name { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 
-    /* On the map the mark is its glyph and the name's colour — the pill's word would
-       cost more width than most boxes have at a fit zoom, and the colour says the same
+    /* On the map the mark is its glyph and the name's color — the pill's word would
+       cost more width than most boxes have at a fit zoom, and the color says the same
        thing at every size. The word survives in the box's `title` and in the outline. */
     .v-map-label .v-kind-label { display: none; }
     .v-map-label .v-kind-mark { color: var(--v-mark); }
@@ -782,11 +782,11 @@ public enum ViewerStylesheet {
     .v-map-label:has(.v-kind-slot) .v-map-name { color: var(--v-mark-slot); }
 
     /* The pill's own padding (1px 5px) is shaped for the word beside the glyph; with the
-       word hidden here it reads small and sits off-centre. The map fixes the badge to a
-       circle sized around the glyph alone and grows the glyph, so it lands dead-centre on
+       word hidden here it reads small and sits off-center. The map fixes the badge to a
+       circle sized around the glyph alone and grows the glyph, so it lands dead-center on
        both axes rather than following the pill's text baseline. */
     .v-map-label .v-kind-mark { width: 15px; height: 15px; padding: 0; justify-content: center; }
-    /* Flex-centring the em box does not centre the *ink*: the mono font parks the shape
+    /* Flex-centering the em box does not center the *ink*: the mono font parks the shape
        ~1px above the baseline's optical middle and its side bearings lean it ~0.25px
        left (the pill's 0.02em tracking adds a trailing advance too). The translate is
        the measured correction, checked against a crosshair overlay at 16x zoom. */

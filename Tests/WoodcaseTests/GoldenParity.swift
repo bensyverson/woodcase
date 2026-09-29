@@ -23,7 +23,7 @@ import Woodcase
 /// yield the same document — that is the acceptance test for `PenLegacyMigrator`,
 /// and it stays a real one because the legacy half is never rewritten.
 ///
-/// A handful of differences are Pen's own save behaviour rather than a format
+/// A handful of differences are Pen's own save behavior rather than a format
 /// change, and ``normalized(_:)`` absorbs them:
 ///
 /// - `version` and `fileToken` differ by construction.

@@ -16,7 +16,7 @@ import Woodcase
 /// the first artboard to showcase and, with none, asked the render endpoint for the
 /// empty id.
 ///
-/// Shaped like the dashboard's ``EmptyPage`` — a centred title, one muted lede, the
+/// Shaped like the dashboard's ``EmptyPage`` — a centered title, one muted lede, the
 /// command that makes something appear — because they are the same atom answering the
 /// same question one level apart: *there is nothing here yet, and here is what to type.*
 ///

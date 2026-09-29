@@ -29,7 +29,7 @@ Live updates keep the components server-side: an SSE event names what changed
 (`{file, nodes, identity, revision}`), the page fetches the affected **fragment**
 (`GET /files/{id}/outline`, `/activity`, `/presence`) and swaps its `innerHTML` — the
 htmx pattern, hand-written in ~40 lines of JS. So the only client-side JS is the swap
-loop, the theme-picker/expand clicks, and the **overlay** — the identity-coloured edit
+loop, the theme-picker/expand clicks, and the **overlay** — the identity-colored edit
 outlines and click-to-outline, positioned from the tree's layout rects over the PNG,
 which must live in JS to fade and pin without a re-render. Nothing is rendered twice;
 there is no JS twin of any component.

@@ -59,7 +59,7 @@ extension BatchApplier {
         return theme.sorted { $0.key < $1.key }.map { "\($0.key)=\($0.value)" }.joined(separator: ",")
     }
 
-    /// A variable's stored value as a sentence reads it — a string bare, since a colour
+    /// A variable's stored value as a sentence reads it — a string bare, since a color
     /// in quotes reads as a caption rather than a value.
     private static func spelling(ofValue value: AnyCodable) -> String {
         guard case let .string(text) = value else { return spelling(of: value) }

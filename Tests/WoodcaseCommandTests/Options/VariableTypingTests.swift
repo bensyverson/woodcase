@@ -51,7 +51,7 @@ struct VariableTypingTests {
     // MARK: - Inference
 
     @Test(
-        "A hex literal in any of the schema's three widths reads as a colour",
+        "A hex literal in any of the schema's three widths reads as a color",
         arguments: ["#fff", "#FF6600", "#FF6600AA", "#ABCDEF"]
     )
     func infersColor(literal: String) {
@@ -59,7 +59,7 @@ struct VariableTypingTests {
     }
 
     @Test(
-        "Something hex-shaped but not a hex colour reads as a string",
+        "Something hex-shaped but not a hex color reads as a string",
         arguments: ["#GGG", "#FF66", "#", "FF6600", "rgba(0,0,0,0.5)"]
     )
     func doesNotInferColor(literal: String) {
@@ -100,7 +100,7 @@ struct VariableTypingTests {
         #expect(VariableTyping.value(of: "false", as: .boolean) == .bool(false))
     }
 
-    @Test("A colour is stored verbatim")
+    @Test("A color is stored verbatim")
     func storesColors() {
         #expect(VariableTyping.value(of: "#FF6600", as: .color) == .string("#FF6600"))
     }

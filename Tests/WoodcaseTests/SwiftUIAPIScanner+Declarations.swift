@@ -26,7 +26,7 @@ extension SwiftUIAPIScanner {
         /// Enum cases and static members: what an implicit `.name` can reach.
         var statics: Set<String> = []
 
-        /// The external labels of every declared initializer, `_` for an unlabelled
+        /// The external labels of every declared initializer, `_` for an unlabeled
         /// parameter: `[["hex", "opacity"]]` for `init(hex: UInt32, opacity: Double = 1)`.
         var initializers: [[String]] = []
 

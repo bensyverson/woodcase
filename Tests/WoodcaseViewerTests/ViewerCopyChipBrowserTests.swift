@@ -11,7 +11,7 @@
     import Woodcase
     @testable import WoodcaseViewer
 
-    /// The two pieces of client behaviour ``ViewerScript``'s copy-chip block adds: an id
+    /// The two pieces of client behavior ``ViewerScript``'s copy-chip block adds: an id
     /// chip copies without ever selecting or navigating, and the variables panel's
     /// collapse survives a reload.
     ///
@@ -84,7 +84,7 @@
             /// then asserts "copied" is therefore asserting the state of the desktop; it
             /// passed alone and failed under a loaded suite, which is the classic shape.
             ///
-            /// So the page is handed a focused document and a clipboard whose behaviour
+            /// So the page is handed a focused document and a clipboard whose behavior
             /// the test chooses. What is left to assert is exactly what the chip's
             /// handler is responsible for: that it copies the right text, flashes, and
             /// lets no click through to the row.

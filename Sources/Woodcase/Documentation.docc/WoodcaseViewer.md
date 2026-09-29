@@ -346,11 +346,11 @@ data: "lastSeen":"2026-08-29T16:31:04.123Z","name":"ana"}]}
 Derived entirely from the activity log — there is no registration and no heartbeat from
 an agent. An identity is present because it wrote something, and its age is how long ago.
 The order is **first appearance in the log**, and that is part of the contract: the page
-colours identities by it, so an agent keeps its colour.
+colors identities by it, so an agent keeps its color.
 
 ## Watching, and why it re-arms
 
-``PenFileTransaction`` commits by writing a temporary neighbour and renaming it over the
+``PenFileTransaction`` commits by writing a temporary neighbor and renaming it over the
 original — the only way to leave a reader either the whole old file or the whole new one.
 The file descriptor a watcher holds therefore stops being the file at that path after the
 first edit: it sees a rename and then goes quiet forever, watching an unlinked inode.
@@ -621,7 +621,7 @@ the page does and renders the same components with the same props.
 
 `render` is the image, the boxes drawn over it and the selection footer — everything that
 moves when the file changes or the selection does. It is a fragment rather than
-client-side drawing because an edit marker needs an identity's hashed colour and a box
+client-side drawing because an edit marker needs an identity's hashed color and a box
 needs an absolute layout rect, and re-deriving either in JavaScript would be a second
 implementation of a component.
 
@@ -662,10 +662,10 @@ box on the map shares one small render per artboard and theme. It is laid out at
 artboard's own point size, which is the box's size scaled, so the two rectangles always
 agree and nothing is letterboxed.
 
-An artboard something was written to recently is outlined in its editor's colour, the way
+An artboard something was written to recently is outlined in its editor's color, the way
 a touched outline row grows a bar. Node-level edit markers are too fine for a box 24
 pixels across, so the map marks the artboard instead: same log, same recency window, same
-colour, one level up.
+color, one level up.
 
 Beside it, the outline lists the same artboards as rows — the same ``KindMark``, settled
 rect and click-to-copy id chip a node row has, and the same link a box carries. A map
@@ -717,7 +717,7 @@ The page's only script, and its contract is eleven things:
    navigating, which is always correct.
 3. **Time the overlay.** An edit marker fades seven seconds after it arrives — the
    ruling's five-to-ten window — unless its tag is clicked, which pins it. This is the
-   one piece of behaviour that cannot be server-rendered, and the reason the file exists.
+   one piece of behavior that cannot be server-rendered, and the reason the file exists.
 4. **Keep the selection in sight.** After any swap, and once on load, the selected
    outline row is scrolled into view with `block: "nearest"` — but a swap first restores
    the scroll position of the panel it replaced, so a click on a row already in view
@@ -948,13 +948,13 @@ carries one for the file as a whole, which is the useful question on an artboard
 the news somewhere else? It all starts at page load rather than at the file's history,
 because the file's history is not a record of what *you* have seen.
 
-### Identity colour
+### Identity color
 
-`ActorColor` is the Jobs dashboard's hash, ported so an agent is the same colour in
+`ActorColor` is the Jobs dashboard's hash, ported so an agent is the same color in
 both tools: FNV-1a 32-bit, `hue = h(name + "u") % 360`, `saturation = h(name +
 "zzzzzzzz") % 50 + 50`, lightness 48%. It appears in exactly two places — the avatar disc
 and the edit markers — because a hashed hue collides with the accent green often enough
-that coloured text would read as a link.
+that colored text would read as a link.
 
 The **ink** on that hue is Woodcase's own, not the dashboard's: `ActorColor.ink` is
 black when the disc's WCAG relative luminance exceeds `0.179` and white below it. That
@@ -972,7 +972,7 @@ behind it. `DESIGN.md` § *Colors* carries the before-and-after ratios for this 
 the rest of the palette's AA pass.
 
 Presence order is the log's order of first appearance, and an outline row keeps its
-editor's colour for thirty seconds after the edit.
+editor's color for thirty seconds after the edit.
 
 ## Adding pages
 
@@ -1109,11 +1109,11 @@ fact about your screen, not about the document.
 A real file's top-level frames are often *all* reusable definitions, with the screens on
 the canvas being refs to them (`banking.pen`, `woodcase-app.pen`) — so the outline and
 the artboard map both mark a node's role, not only its structural type. ``KindMark``
-draws a small labelled badge — glyph, a `title` for a hover, and a short visible word —
+draws a small labeled badge — glyph, a `title` for a hover, and a short visible word —
 for a reusable component definition (`component`), a placed instance (`instance`), or a
 slot frame (`slot`, a frame whose `slot` property is non-`nil`). At most one applies, in
 that order of precedence, and its glyph *replaces* the row's plain type glyph rather than
-sitting beside it — a bare "◇" repeated next to a labelled "◇ instance" badge said the
+sitting beside it — a bare "◇" repeated next to a labeled "◇ instance" badge said the
 same thing twice.
 
 Every id the page shows — an outline row's, the selection footer's, an activity row's
@@ -1123,9 +1123,9 @@ usually sits inside something else that also handles clicks (an outline row is i
 link), the click is caught in the capture phase before that other handler ever runs — see
 `viewer.js`'s fourth contract item, above.
 
-``VariablesPanel`` renders every ``PenVariableType`` distinctly: a colour keeps its
+``VariablesPanel`` renders every ``PenVariableType`` distinctly: a color keeps its
 swatch and reads as text, a number gets a right-aligned numeric class, a string is plain
-text, and a boolean is a labelled pill rather than the bare word "true" or "false". Its
+text, and a boolean is a labeled pill rather than the bare word "true" or "false". Its
 header wraps the toggle and the title `Variables` in one flush-left group
 (`.v-panel-head-title`) so the title sits directly beside the disclosure control instead
 of floating away from it — `.v-panel-head`'s own `space-between` would otherwise spread
@@ -1135,7 +1135,7 @@ A variable's own row expands, behind a ``DisclosureGlyph``, to a small table of 
 rows rather than a bullet list: one row per themed variant, its `axis=option` pins in one
 column and its value in the other, oldest variant first — a `card-radius` themed by
 `density` reads as two rows, `density=compact` next to `4` and `density=regular` next to
-`8`. A colour variant's value carries its own swatch, drawn the same way the summary
+`8`. A color variant's value carries its own swatch, drawn the same way the summary
 row's does. A variable with no themed variants still expands to one row, its axis reading
 `*`, so every variable's detail is a table rather than sometimes a table and sometimes
 bare text. The panel's row list has a bounded `max-height` and scrolls on its own rather
@@ -1181,9 +1181,9 @@ are declared.
 
 The states are **representative, not exhaustive**: empty, ordinary, crowded, wrong,
 mid-flight. There is deliberately no matrix generator, and a state that renders nothing
-is not a preview — that is a markup fact, and a behaviour test holds it.
+is not a preview — that is a markup fact, and a behavior test holds it.
 
-The same test, twice over: a state that renders the *same picture* as its neighbour is
+The same test, twice over: a state that renders the *same picture* as its neighbor is
 not a preview either. `id-chip/outline` (a chip wearing a caller's extra class) and
 `pane-grip/rows` (the horizontal seam) were dropped on 2026-09-02 for that reason —
 each varied only an attribute, and a reviewer looking at two identical pictures learns
@@ -1202,7 +1202,7 @@ thing rather than a picture of it.
 `rightPane`, `canvas`, `body`, `topBar`, `page` — because a component alone on a blank
 page is the wrong picture: an outline panel is a fixed column and a right pane sits
 against the window's edge. `canvas` is the render column *between* the two panes;
-`body` is the dashboard's centred column, which is where the file cards live and is a
+`body` is the dashboard's centered column, which is where the file cards live and is a
 different width. The catalog declares the frames and `/preview` serves them.
 
 ### The preview pages

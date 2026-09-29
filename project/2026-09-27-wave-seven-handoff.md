@@ -47,7 +47,7 @@ priority for shot, pdf and archive (WebKit drops a windowless page's content pro
 ## Still open
 
 - SwiftUI: `0QZeR3` kit catalog (blocks packaging `oozXCK`, then churn guard `Dc3tN9`), `26chl8` slots as
-  `@ViewBuilder`, `PlHnG2` unfilled text draws `.primary` (white in dark mode), `ifNKJL` mesh colours through the theme.
+  `@ViewBuilder`, `PlHnG2` unfilled text draws `.primary` (white in dark mode), `ifNKJL` mesh colors through the theme.
 - `HVBKsf` CG places explicit line heights unlike Pen (the render-text-line-height boards score 5.5–13.4 in CG).
 - `mkPpjZ` React's designer-state rotate/flip is invalid CSS and never draws.
 - Quiet-machine measurements landed (`7ddef2f`, [findings](2026-09-27-quiet-machine-measurements.md)): the settled `tree` read grew 7–9 % since 936a89d, half from the iterative rewrite and half from natural line height typesetting each text twice (`cHuvso`); the binary's `set` settles the tree twice for its overlap warnings (`MdCEmo`); the write-then-read pair is 414 ms debug / 201 ms release, still over budget (`Tdgxuz`, open).

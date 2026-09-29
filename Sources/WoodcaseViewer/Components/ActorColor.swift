@@ -6,10 +6,10 @@
 import Foundation
 import Woodcase
 
-/// The colour an identity is drawn in, hashed from its name.
+/// The color an identity is drawn in, hashed from its name.
 ///
 /// Ported from the Jobs dashboard's `internal/web/render/actor_color.go` so an agent is
-/// the same colour in both tools — which is the whole reason the formula is a hash and
+/// the same color in both tools — which is the whole reason the formula is a hash and
 /// not a palette index: two processes that never talk agree without coordinating.
 ///
 /// ```swift
@@ -25,15 +25,15 @@ import Woodcase
 /// below reaches AA on every hue the hash can produce **without touching the hash**,
 /// which is the only reason it is a second property rather than a different lightness.
 ///
-/// ## Where the colour may appear
+/// ## Where the color may appear
 ///
 /// In the avatar disc and in the edit markers over the render — nowhere else. A hashed
 /// hue lands on the accent green often enough (`claude-a` and `ben` both do) that
-/// coloured *text* would read as a link or as liveness. That rule is the design's, not
+/// colored *text* would read as a link or as liveness. That rule is the design's, not
 /// this type's, but it is the reason ``css`` is offered as a custom property rather than
 /// as a class.
 public struct ActorColor: Friendly {
-    /// The colour for an identity.
+    /// The color for an identity.
     ///
     /// - Parameter name: The `--as` name the identity writes under.
     public init(name: String) {
@@ -52,7 +52,7 @@ public struct ActorColor: Friendly {
     /// legible as a small filled disc.
     public let saturation: Int
 
-    /// The lightness every actor colour is drawn at, as a percentage.
+    /// The lightness every actor color is drawn at, as a percentage.
     ///
     /// Fixed rather than hashed: it is what makes white text legible on every disc, and
     /// what keeps two identities distinguishable by hue rather than by brightness.
@@ -60,12 +60,12 @@ public struct ActorColor: Friendly {
         48
     }
 
-    /// The colour as a CSS `hsl()` function.
+    /// The color as a CSS `hsl()` function.
     public var css: String {
         "hsl(\(hue) \(saturation)% \(lightness)%)"
     }
 
-    /// The same colour as a `#RRGGBB` hex string, for a context that cannot take a
+    /// The same color as a `#RRGGBB` hex string, for a context that cannot take a
     /// function — an SVG attribute, a test's expected value.
     public var hex: String {
         let (red, green, blue) = Self.rgb(hue: Double(hue), saturation: Double(saturation) / 100, lightness: Double(lightness) / 100)
@@ -75,7 +75,7 @@ public struct ActorColor: Friendly {
     /// The two inks a filled disc can be lettered in.
     ///
     /// Two values rather than a `Bool`, because "is this disc light?" is a question about
-    /// the fill and this is an answer about the letter: the raw value is the colour to
+    /// the fill and this is an answer about the letter: the raw value is the color to
     /// write, so a caller never re-derives one from the other.
     public enum Ink: String, Friendly, CaseIterable {
         /// `#000000`, for a disc bright enough to read black on.
@@ -114,7 +114,7 @@ public struct ActorColor: Friendly {
         relativeLuminance(red: red, green: green, blue: blue) > inkThreshold ? .black : .white
     }
 
-    /// WCAG 2.x relative luminance: the sRGB channels linearised and weighted.
+    /// WCAG 2.x relative luminance: the sRGB channels linearized and weighted.
     ///
     /// - Parameters:
     ///   - red: The red channel, `0 ... 255`.
@@ -141,7 +141,7 @@ public struct ActorColor: Friendly {
     /// FNV-1a, 32-bit.
     ///
     /// Spelled out rather than taken from `Hasher`, which is seeded per process: the
-    /// colour has to be the same in this viewer, in the Jobs dashboard, and after a
+    /// color has to be the same in this viewer, in the Jobs dashboard, and after a
     /// restart.
     ///
     /// - Parameter text: The string to hash.

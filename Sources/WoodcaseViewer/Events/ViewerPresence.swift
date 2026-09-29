@@ -14,8 +14,8 @@ import Woodcase
 /// simply stops getting newer.
 ///
 /// Identities are ordered by **first appearance in the log**, and that order is part of
-/// the contract: the page assigns each identity a colour by it, so an agent keeps the
-/// same colour for as long as the log does.
+/// the contract: the page assigns each identity a color by it, so an agent keeps the
+/// same color for as long as the log does.
 public struct ViewerPresence: Friendly {
     /// Creates a presence snapshot.
     ///

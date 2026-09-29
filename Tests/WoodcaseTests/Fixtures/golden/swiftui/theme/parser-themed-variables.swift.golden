@@ -57,7 +57,7 @@ public struct PenTheme: Hashable, Sendable {
         case regular
     }
 
-    /// The `mode` axis, which follows the colour scheme.
+    /// The `mode` axis, which follows the color scheme.
     public enum Mode: String, CaseIterable, Hashable, Sendable {
         case light
         case dark
@@ -103,7 +103,7 @@ public extension PenTheme {
 import SwiftUI
 
 public extension EnvironmentValues {
-    /// The theme views draw with. Its `mode` is the colour scheme: reading it reads
+    /// The theme views draw with. Its `mode` is the color scheme: reading it reads
     /// `colorScheme`, and setting it sets `colorScheme`.
     var penTheme: PenTheme {
         get {
@@ -119,17 +119,17 @@ public extension EnvironmentValues {
 }
 
 extension EnvironmentValues {
-    /// The theme as last set; ``penTheme`` reads its `mode` from the colour scheme instead.
+    /// The theme as last set; ``penTheme`` reads its `mode` from the color scheme instead.
     @Entry var penThemeAxes = PenTheme()
 }
 
 public extension PenTheme.Mode {
-    /// The option a colour scheme selects.
+    /// The option a color scheme selects.
     init(_ colorScheme: ColorScheme) {
         self = colorScheme == .dark ? .dark : .light
     }
 
-    /// The colour scheme this option draws in.
+    /// The color scheme this option draws in.
     var colorScheme: ColorScheme {
         self == .dark ? .dark : .light
     }

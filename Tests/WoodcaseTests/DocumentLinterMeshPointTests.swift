@@ -13,7 +13,7 @@ import Testing
 /// One Pen cannot place leaves the whole fill unpainted, so it is dropped (an error); one
 /// Pen places anyway — at its grid position, or at the first two numbers of a longer
 /// array — is painted, but not from what the file says, so it is distorted (a warning).
-/// Pen's behaviour: `project/2026-09-26-what-pen-drops-from-a-file.md`.
+/// Pen's behavior: `project/2026-09-26-what-pen-drops-from-a-file.md`.
 @MainActor
 struct DocumentLinterMeshPointTests {
     private static let colors = ##"["#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#00FFFF", "#FF00FF"]"##

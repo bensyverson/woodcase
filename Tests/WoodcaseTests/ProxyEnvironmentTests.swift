@@ -96,8 +96,8 @@ struct ProxyEnvironmentTests {
         #expect(https.description.contains("localhost:3128"))
     }
 
-    @Test("localhost is dialled as the IPv4 loopback literal; other hosts are left alone")
-    func localhostIsDialledAsLoopback() {
+    @Test("localhost is dialed as the IPv4 loopback literal; other hosts are left alone")
+    func localhostIsDialedAsLoopback() {
         #expect(ProxyEndpoint(host: "localhost", port: 1).connectHost == "127.0.0.1")
         #expect(ProxyEndpoint(host: "LOCALHOST", port: 1).connectHost == "127.0.0.1")
         #expect(ProxyEndpoint(host: "proxy.example", port: 1).connectHost == "proxy.example")

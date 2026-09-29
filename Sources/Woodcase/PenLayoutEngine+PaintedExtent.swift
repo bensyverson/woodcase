@@ -11,7 +11,7 @@ public extension PenLayoutEngine {
     ///
     /// Pen's `getVisualLocalBounds`, reproduced: in the node's own coordinates, its
     /// geometry (the box, or a path's or polygon's own outline) and
-    /// its stroke band — nothing for an inner stroke, half the width for a centred one, all
+    /// its stroke band — nothing for an inner stroke, half the width for a centered one, all
     /// of it for an outer one, per side on a frame or rectangle — then, for a frame that
     /// does not clip and for a group, every enabled child's painted extent carried through
     /// the child's placement. A group paints only its children. Then the effects: each
@@ -20,7 +20,7 @@ public extension PenLayoutEngine {
     /// grows the whole by 1.5 × its radius; a background blur and an inner shadow add
     /// nothing. Last, the extent goes through the node's own placement
     /// (``placement(of:rect:layoutRects:)``), corner by corner, so a turned node's band
-    /// reaches past its bounds at its mitred corners.
+    /// reaches past its bounds at its mitered corners.
     ///
     /// Strokes, shadows and blur never enter layout (`project/2026-09-28-geometry-model.md`):
     /// this is what an export, a `shot --extent painted`, a culling pass or an invalidated

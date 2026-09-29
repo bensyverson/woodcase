@@ -107,7 +107,7 @@ struct CommandFailureTests {
         #expect(!failure.message.contains("\n"))
     }
 
-    /// Was "Permission denied" until ``SandboxDenial`` started recognising that reason
+    /// Was "Permission denied" until ``SandboxDenial`` started recognizing that reason
     /// as EPERM/EACCES and gave it the sandbox sentence instead — "check
     /// $WOODCASE_HOME" never fixed a sandbox denial, since the directory itself is
     /// forbidden, not merely misnamed.

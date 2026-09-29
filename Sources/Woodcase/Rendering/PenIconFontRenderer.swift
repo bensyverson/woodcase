@@ -80,15 +80,15 @@ enum PenIconFontRenderer {
     /// Where Pen puts an icon's glyph in a box of `box`: its pen position from the box's
     /// left edge and its baseline down from the box's top, in points.
     ///
-    /// Pen places the glyph by the font's metrics, never by its ink: the advance is centred
+    /// Pen places the glyph by the font's metrics, never by its ink: the advance is centered
     /// across the box, and the line box — ascent plus descent, each rounded to a whole point
-    /// at ``metricsReferenceSize`` and scaled to the font's size — is centred down it.
+    /// at ``metricsReferenceSize`` and scaled to the font's size — is centered down it.
     /// `render-icon-placement.pen` pins this against Pen for every bundled library at two
     /// sizes and in wide and tall boxes.
     ///
     /// - Parameters:
     ///   - font: The icon's font, at the icon's size.
-    ///   - codepoint: The glyph's code point, whose advance is centred.
+    ///   - codepoint: The glyph's code point, whose advance is centered.
     ///   - box: The icon's box.
     /// - Returns: The glyph's origin, y down.
     static func glyphOrigin(font: CTFont, codepoint: UInt32, box: CGSize) -> CGPoint {

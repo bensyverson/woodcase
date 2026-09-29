@@ -20,7 +20,7 @@ public extension KindMark {
             PreviewState(
                 slug: "component",
                 name: "A reusable definition",
-                note: "`◈ component`. The pill is its mark colour at 12% fill and 45% border — never a flat swatch — and the glyph and the word are both there, because colour is never the only carrier.",
+                note: "`◈ component`. The pill is its mark color at 12% fill and 45% border — never a flat swatch — and the glyph and the word are both there, because color is never the only carrier.",
                 frame: .strip
             ) { KindMark(isReusable: true, isInstance: false, isSlot: false) },
             PreviewState(
@@ -32,7 +32,7 @@ public extension KindMark {
             PreviewState(
                 slug: "slot",
                 name: "A slot frame",
-                note: "`▥ slot`. The rarest of the three and the one nobody recognises cold, which is why it keeps a word even where space is tight.",
+                note: "`▥ slot`. The rarest of the three and the one nobody recognizes cold, which is why it keeps a word even where space is tight.",
                 frame: .strip
             ) { KindMark(isReusable: false, isInstance: false, isSlot: true) },
         ]

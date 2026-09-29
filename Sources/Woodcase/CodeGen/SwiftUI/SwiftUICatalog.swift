@@ -124,7 +124,7 @@ struct SwiftUICatalog: Friendly {
             + ["            }"]
     }
 
-    /// The colour section, a swatch per colour token, and the token section, a value per
+    /// The color section, a swatch per color token, and the token section, a value per
     /// other token; none without a theme.
     private var tokenLines: [String] {
         let tokens = theme?.sortedTokens ?? []
@@ -132,7 +132,7 @@ struct SwiftUICatalog: Friendly {
         let others = tokens.filter { $0.type != .color }
         var lines: [String] = []
         if !colors.isEmpty {
-            lines += section("Colours", flow(colors.map {
+            lines += section("Colors", flow(colors.map {
                 "                PenCatalogSwatch(\(SwiftUILiteral.string("$" + $0.variable)), color: \($0.read))"
             }))
         }

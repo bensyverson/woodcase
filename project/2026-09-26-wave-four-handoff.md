@@ -12,7 +12,7 @@ Woodcase, in order:
 |---|---|---|
 | `21f1fd6` | `bpfpVZ` | Ben's four SwiftUI rulings recorded in the feasibility report; [the emitter plan](2026-09-26-swiftui-emitter-plan.md) imported under `n42KDh` |
 | `631ea0b` | `jNpws2`, `4GVELx`, `sGWNUd`, `5jQhdY` | viewer: `connecting…`; a 520 px pinned selection-bar state (`PreviewState.pinnedWidth`); a clipped selection sheds rect and revision below 720 px; preview renders are real PNGs; the code panel includes imported components (`EditableDocument.materializeForGeneration()`, shared with `generate`) |
-| `7aafe63` | `VaJSI3` | unknown keys survive in 8 nested structs (gradient stops, centre, size, shadow offset, variables, themed values, mesh vertices, connection endpoints); `override` and `cp` of a component are now held to the authoring check |
+| `7aafe63` | `VaJSI3` | unknown keys survive in 8 nested structs (gradient stops, center, size, shadow offset, variables, themed values, mesh vertices, connection endpoints); `override` and `cp` of a component are now held to the authoring check |
 | `58ba398` | — | `rule:` gotcha: the briefing template's bare `job claim` expires under a working agent |
 | `fbaea9f` | `pOTyJp` | `Sources/Woodcase/Geometry/`: CoreGraphics-free SVG parse (`PenPath`) and shape outlines (`PenShapeGeometry`); renderer calls unchanged; 380 MAE figures identical; two parser bugs fixed |
 | `b180bf4` | `k759GF` | `pen-validate` fails on a non-empty validator error list; `--allow-unknowns`; `scripts/test-pen-validate` |

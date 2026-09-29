@@ -17,7 +17,7 @@ public extension PenFill {
         name: "fill",
         singular: "a fill object",
         plural: "an array of fill objects",
-        summary: "the paint a fill or stroke key takes; a bare colour string is the shorthand",
+        summary: "the paint a fill or stroke key takes; a bare color string is the shorthand",
         discriminator: "type",
         variants: [
             PenNestedShape.Variant(
@@ -93,12 +93,12 @@ public extension PenFill {
         ]
     )
 
-    /// One stop of a gradient: a colour and where along the ramp it sits.
+    /// One stop of a gradient: a color and where along the ramp it sits.
     static let stopSchema = PenNestedShape(
         name: "gradient stop",
         singular: "a gradient stop",
         plural: "an array of gradient stops",
-        summary: "one colour of a gradient, and its position from 0 to 1",
+        summary: "one color of a gradient, and its position from 0 to 1",
         variants: [
             PenNestedShape.Variant(fields: [
                 PenNestedShape.Field(key: "color", forms: [.text(.color), .variable(.color)], isRequired: true),
@@ -127,7 +127,7 @@ public extension PenFill {
         ]
     )
 
-    /// Where a gradient is centred, as a fraction of the node's box.
+    /// Where a gradient is centered, as a fraction of the node's box.
     static let positionSchema = PenNestedShape(
         name: "fill position",
         singular: "a position object",

@@ -68,7 +68,7 @@
         /// - Returns: The response body.
         /// - Throws: ``RemoteFetchError/httpError(statusCode:)`` for any HTTP status other
         ///   than 200, ``RemoteFetchError/unreachable(_:)`` when curl got no answer or could
-        ///   not be launched, and `CancellationError` when the task was cancelled.
+        ///   not be launched, and `CancellationError` when the task was canceled.
         public func fetch(url: URL) async throws -> Data {
             let proxy: String? = if case let .proxy(endpoint) = ProxyEnvironment(environment: environment)
                 .route(for: url) { endpoint.description } else { nil }
@@ -150,7 +150,7 @@
         /// Runs curl and collects its standard output, without holding a thread of the
         /// cooperative pool: a dispatch worker drains the pipe while curl writes, the
         /// termination handler reports the exit, and the continuation resumes when both
-        /// are in. Cancelling the task terminates the child.
+        /// are in. Canceling the task terminates the child.
         private func run(arguments: [String]) async throws -> (exitCode: Int32, output: Data) {
             let process = Process()
             process.executableURL = executable

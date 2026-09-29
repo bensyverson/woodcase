@@ -7,8 +7,8 @@ import Foundation
 
 /// One property row of the .pen vocabulary, flattened for a machine reader.
 ///
-/// ``PenSchemaTable/Property`` is modelled for the decoders — ``PenPropertyShape`` and
-/// ``PenValueForm`` are unions whose synthesised encoding (`{"text":{"_0":"color"}}`)
+/// ``PenSchemaTable/Property`` is modeled for the decoders — ``PenPropertyShape`` and
+/// ``PenValueForm`` are unions whose synthesized encoding (`{"text":{"_0":"color"}}`)
 /// is not an interface anyone should have to parse. This carries the same facts flat:
 /// the union as one string, the spellings as an array, the variable type as a name, so
 /// a caller reads one field per question.

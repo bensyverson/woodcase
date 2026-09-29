@@ -4,7 +4,7 @@ import Foundation
 
 /// Renders text content into a CoreGraphics context using Core Text.
 ///
-/// A text node's fills are its paint. A lone solid colour is handed to Core Text, which
+/// A text node's fills are its paint. A lone solid color is handed to Core Text, which
 /// draws the glyphs in it; any other paint is drawn through the glyphs' outlines over the
 /// node's box (see ``PenGlyphPaint`` and ``PenGlyphOutlines``). Both routes share one
 /// layout. A node with no enabled paint draws nothing, as Pen draws it.
@@ -31,7 +31,7 @@ enum PenTextRenderer {
             return
         }
         let size = CGSize(width: CGFloat(rect.width), height: CGFloat(rect.height))
-        // One typesetting pass: the block's height, which vertical alignment centres, is
+        // One typesetting pass: the block's height, which vertical alignment centers, is
         // the line count times the pitch — the height layout measured.
         let lines = PenTextLines(
             built.string, width: size.width, pitch: built.pitch, firstBaseline: built.firstBaseline
@@ -98,7 +98,7 @@ enum PenTextRenderer {
     /// Builds a CFAttributedString for text using the node's style properties, with the
     /// pitch its lines are set at (``PenTextMeasurer/linePitch(lineHeight:fontSize:font:)``)
     /// and its first baseline (``PenTextMeasurer/firstBaseline(of:lineHeight:pitch:)``),
-    /// its glyphs coloured `color` (``PenGlyphPaint/coreTextColor``).
+    /// its glyphs colored `color` (``PenGlyphPaint/coreTextColor``).
     private static func buildPlainAttributedString(
         text: String,
         data: PenNode.TextData,

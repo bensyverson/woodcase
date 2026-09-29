@@ -11,7 +11,7 @@ import Foundation
 /// that is the whole answer. It is not the whole answer for a `ref` **inside** a
 /// component: an instance may repoint one of the component's nested refs — the
 /// natural way to say "this tab is the current one" — by writing `ref` into its own
-/// `descendants` map, and ``PenRefExpander`` honours that when it expands.
+/// `descendants` map, and ``PenRefExpander`` honors that when it expands.
 ///
 /// Every reader that has to agree with the expander asks here. Reading the authored
 /// `ref` instead is what left a repointed instance with no rect and its *old*

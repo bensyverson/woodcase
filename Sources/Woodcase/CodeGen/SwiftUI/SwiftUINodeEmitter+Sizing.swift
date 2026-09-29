@@ -63,7 +63,7 @@ extension SwiftUINodeEmitter {
     ///
     /// SwiftUI splits fixed and flexible frames into two overloads, so a node fixed on
     /// one axis and flexible on the other gets two: the fixed frame first, the flexible
-    /// one around it, both carrying the alignment. A centred alignment is left unwritten.
+    /// one around it, both carrying the alignment. A centered alignment is left unwritten.
     func frameModifiers(width: Dimension, height: Dimension, alignment: SwiftUIAlignment) -> [SwiftUIViewCode.Modifier] {
         var fixed: [String] = []
         var flexible: [String] = []

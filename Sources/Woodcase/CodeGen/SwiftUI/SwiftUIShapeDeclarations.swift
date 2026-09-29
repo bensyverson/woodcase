@@ -31,7 +31,7 @@ final class SwiftUIShapeDeclarations {
         namesByNode[nodeID]
     }
 
-    /// Declares a shape for the node `nodeID` labelled `label`, named for the label and
+    /// Declares a shape for the node `nodeID` labeled `label`, named for the label and
     /// made unique on the page; `lines` receives the name and returns the declaration.
     func declare(nodeID: String, label: String, _ lines: (String) -> [String]) -> String {
         if let name = namesByNode[nodeID] { return name }
@@ -49,7 +49,7 @@ final class SwiftUIShapeDeclarations {
     }
 
     /// `label` as an upper-camel-case Swift identifier: its runs of letters and digits,
-    /// each capitalised, prefixed `Node` when that is empty or starts with a digit.
+    /// each capitalized, prefixed `Node` when that is empty or starts with a digit.
     static func identifier(_ label: String) -> String {
         let words = label.split { !($0.isLetter || $0.isNumber) || !$0.isASCII }
         let joined = words.map { $0.prefix(1).uppercased() + $0.dropFirst() }.joined()

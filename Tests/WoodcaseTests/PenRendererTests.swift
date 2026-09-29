@@ -400,9 +400,9 @@ struct PenRendererTests {
 
     @Test("Rotated rectangle has transparent corner where original had fill")
     func rotatedRectangle() throws {
-        // A 60×60 rect rotated 45°, centred in a 100×100 canvas. Its layout rect is its
+        // A 60×60 rect rotated 45°, centered in a 100×100 canvas. Its layout rect is its
         // turned bounds (60√2 square), as the layout writes it: the renderer draws the
-        // unturned box centred in those bounds. The rect used to be the unturned 60×60 box
+        // unturned box centered in those bounds. The rect used to be the unturned 60×60 box
         // itself, with no declared size, which the renderer read as a node of the bounds'
         // size; since leaf nAuBKh it recovers the unturned size from the bounds, which needs
         // the rect to be the bounds and, at 45°, a declared side.

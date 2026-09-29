@@ -10,7 +10,7 @@ import Foundation
 import Testing
 @testable import Woodcase
 
-/// Pins Pen's gradient map in the node's normalised box, which the emitters share.
+/// Pins Pen's gradient map in the node's normalized box, which the emitters share.
 struct GradientGeometryTests {
     private static func gradient(
         rotation: Double? = nil,
@@ -45,7 +45,7 @@ struct GradientGeometryTests {
         #expect(geometry.rotation == 90)
     }
 
-    @Test("A radial gradient's ellipse is half its size around its centre")
+    @Test("A radial gradient's ellipse is half its size around its center")
     func radialEllipse() {
         let geometry = GradientGeometry(Self.gradient(center: (0.3, 0.6), size: (0.5, 1)))
         #expect(geometry.radiusX == 0.25)

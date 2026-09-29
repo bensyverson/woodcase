@@ -31,7 +31,7 @@ gone, connection as a line, **line `flipX`/`flipY` fixed** — every flipped lin
 4. **Where Woodcase is more correct than Pen, keep it and accept the small MAE** (mesh rounding is the instance).
 5. Viewer: the badge reads `connecting…`; the selection bar's shed gets a pinned-width (~520 px) preview state; the
    viewer agent's reversible choices stay. Integrator adds: fix preview renders served as SVG at a `.png` URL.
-6. **MAE standardises on PixelPeeper across repos, reported in 8-bit steps (0–255)** — leaf `dklpu4`.
+6. **MAE standardizes on PixelPeeper across repos, reported in 8-bit steps (0–255)** — leaf `dklpu4`.
 7. SwiftUI docs: the script is committed, the corpus lives in `local/` and is never committed (Apple's text).
 
 ## Next wave

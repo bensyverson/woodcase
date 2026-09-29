@@ -219,7 +219,7 @@ struct ReactEmitterTests {
         let theme = ThemeAnalyzer.analyze(doc)
         let files = ReactEmitter.emit(document: doc, components: components, theme: theme).files
         let content = files[0].content
-        // Pen centres the stroke on the edge; box-shadows straddle it without eating
+        // Pen centers the stroke on the edge; box-shadows straddle it without eating
         // content space.
         #expect(content.contains("boxShadow: \"inset 0 0 0 2px #000, 0 0 0 2px #000\""))
         #expect(!content.contains("border:"))
@@ -494,7 +494,7 @@ struct ReactEmitterTests {
         let content = files[0].content
         #expect(content.contains("<svg"))
         #expect(content.contains("<path"))
-        // A pie slice from the centre: out to 0° (east/right, (40, 20), not top-center),
+        // A pie slice from the center: out to 0° (east/right, (40, 20), not top-center),
         // then 270° counter-clockwise — the large arc, SVG sweep flag 0 — to (20, 40).
         #expect(content.contains("M20 20 L40 20 A20 20 0 1 0 20 40 Z"))
     }
@@ -889,7 +889,7 @@ struct ReactEmitterTests {
         let files = ReactEmitter.emit(document: doc, components: components, theme: theme).files
         let content = files[0].content
         // .pen rotation increases counter-clockwise, so 45° points the ramp up and left. Pen
-        // lays it out in the normalised box, where 45° is the box's diagonal whatever its
+        // lays it out in the normalized box, where 45° is the box's diagonal whatever its
         // proportions — CSS's `to top left` — and its line is one unit long, shorter than
         // CSS's corner-to-corner line (ReactEmitterGradientGeometryTests).
         #expect(content.contains("linear-gradient(to top left, #FF0000 14.645%, #0000FF 85.355%)"))
@@ -917,7 +917,7 @@ struct ReactEmitterTests {
         let theme = ThemeAnalyzer.analyze(doc)
         let files = ReactEmitter.emit(document: doc, components: components, theme: theme).files
         let content = files[0].content
-        // Pen's radial gradient touches the box's sides (radius ½ of the normalised box),
+        // Pen's radial gradient touches the box's sides (radius ½ of the normalized box),
         // which is CSS's closest-side; CSS's default, farthest-corner, drew it √2 too large.
         #expect(content.contains("background: \"radial-gradient(closest-side, #FFF 0%, #000 100%)\""))
     }
@@ -2790,7 +2790,7 @@ struct ReactEmitterTests {
 
     // MARK: - Line stroke height (Fix 3)
 
-    @Test("Line SVG grows by half its stroke, so the stroke centres on the line")
+    @Test("Line SVG grows by half its stroke, so the stroke centers on the line")
     func lineStrokeHeight() {
         let doc = PenDocument(version: "2.9", children: [
             PenNode(
@@ -2817,7 +2817,7 @@ struct ReactEmitterTests {
         let theme = ThemeAnalyzer.analyze(doc)
         let files = ReactEmitter.emit(document: doc, components: components, theme: theme).files
         let content = files[0].content
-        // The SVG is the box grown by half the stroke on every side, so the stroke centres
+        // The SVG is the box grown by half the stroke on every side, so the stroke centers
         // on the line, which runs corner to corner as the renderer draws it.
         #expect(content.contains("height={3}"))
         #expect(content.contains(##"viewBox="-1 -1 102 3""##))

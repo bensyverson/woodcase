@@ -1,12 +1,12 @@
 //
-//  LintFormatter+Catalogue.swift
+//  LintFormatter+Catalog.swift
 //  Woodcase
 //
 
 import Foundation
 
 /// The two reads that are about the *checks* rather than about one file's findings:
-/// the catalogue `lint --list` prints, and the per-check counts `lint --summary` prints.
+/// the catalog `lint --list` prints, and the per-check counts `lint --summary` prints.
 ///
 /// Both keep ``LintFormatter``'s house shape — severity, then check id, then two spaces,
 /// then the payload — so a reader who has seen one finding line can read either without
@@ -22,7 +22,7 @@ import Foundation
 /// error unknown-icon  2
 /// ```
 public extension LintFormatter {
-    /// Renders the check catalogue as one line each.
+    /// Renders the check catalog as one line each.
     ///
     /// - Parameter checks: The checks to list, in the order they should appear.
     /// - Returns: The lines, with no trailing newline. Empty when every check was
@@ -33,9 +33,9 @@ public extension LintFormatter {
             .joined(separator: "\n")
     }
 
-    /// Renders the check catalogue as the `--json` array: pretty-printed, keys sorted.
+    /// Renders the check catalog as the `--json` array: pretty-printed, keys sorted.
     ///
-    /// The elements are ``LintCheckDescription``, so the catalogue's wire shape is a
+    /// The elements are ``LintCheckDescription``, so the catalog's wire shape is a
     /// struct rather than a hand-written object literal.
     ///
     /// - Parameter checks: The checks to list, in the order they should appear.

@@ -4,7 +4,7 @@
 //
 
 extension SwiftUIViewCode {
-    /// A labelled trailing closure written after the body's: `} footer: { … }`, as a call
+    /// A labeled trailing closure written after the body's: `} footer: { … }`, as a call
     /// that fills a component's second slot ends.
     struct TrailingClosure: Friendly {
         /// The argument label: `footer`.

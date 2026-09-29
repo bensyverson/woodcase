@@ -17,7 +17,7 @@ public extension ArtboardOutline {
             PreviewState(
                 slug: "default",
                 name: "Three artboards, one of them touched",
-                note: "A plain frame, a definition and an unnamed instance. banking-home was just written to, so its row takes the editor's colour; the instance reads as its id-path, percent-encoded in the link.",
+                note: "A plain frame, a definition and an unnamed instance. banking-home was just written to, so its row takes the editor's color; the instance reads as its id-path, percent-encoded in the link.",
                 frame: .leftPane
             ) {
                 ArtboardOutline(

@@ -10,7 +10,7 @@ import Testing
 /// `vars set` with more than one `name=value` on the line.
 ///
 /// A token layer is written all at once or not at all, and one process launch per
-/// colour is the shape that made it 34 launches. Several pairs go through one
+/// color is the shape that made it 34 launches. Several pairs go through one
 /// transaction, one `var` event each, so `activity` and `undo` still read as they did.
 @Suite("`vars set` with several pairs")
 struct VarsSetPairsTests {

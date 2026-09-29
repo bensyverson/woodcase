@@ -15,9 +15,9 @@ public extension PenLayoutEngine {
     /// `viewBox` carries it, inside the box or out — a text from its glyphs' tight ink
     /// (``textInkBounds(of:box:)``, from its own Skia fill path), an icon from its glyph's
     /// tight ink too (``iconInkBounds(of:box:)``, from its own vector fill path fitted to
-    /// the box and centred), and every other node from its box. The stroke band is Pen's
+    /// the box and centered), and every other node from its box. The stroke band is Pen's
     /// (`DZt`): nothing for an inner stroke; a frame's or a rectangle's box grown per side
-    /// by the side's width, halved for a centred stroke; any other shape stroked at its
+    /// by the side's width, halved for a centered stroke; any other shape stroked at its
     /// top width, its band reaching past the geometry by the same half or whole width,
     /// with a line's caps and a sharp polygon's joins counted. Neither a text's nor an
     /// icon's stroke is counted: Pen bounds both by their glyphs alone.

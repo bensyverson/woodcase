@@ -116,7 +116,7 @@ struct DocumentLinterScrollTests {
         #expect(invalid.severity == .warning)
     }
 
-    @Test("An invalid _scroll value falls back to the unannotated (collapsing) behaviour")
+    @Test("An invalid _scroll value falls back to the unannotated (collapsing) behavior")
     func invalidScrollValueStillCollapses() throws {
         let findings = try clippedFindings("scroll-invalid-value.pen")
         let collapsed = try #require(findings.first {

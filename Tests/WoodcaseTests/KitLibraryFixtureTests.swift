@@ -57,7 +57,7 @@ struct KitLibraryFixtureTests {
         #expect(themes["tint"]?.count == 4)
     }
 
-    @Test("The third axis moves a number and a colour token")
+    @Test("The third axis moves a number and a color token")
     func contrastAxisResolves() throws {
         let normal = try Self.index(PenVariableResolver.resolve(
             library(), theme: ["scheme": "night", "tint": "moss", "contrast": "normal"]
@@ -160,7 +160,7 @@ struct KitLibraryFixtureTests {
         Dictionary(flatten(document.children).map { ($0.node.id, $0) }, uniquingKeysWith: { first, _ in first })
     }
 
-    /// A solid fill's colour, lowercased, however the JSON spelled it.
+    /// A solid fill's color, lowercased, however the JSON spelled it.
     private static func color(_ fills: PenFills?) -> String? {
         switch fills?.all.first {
         case let .shorthand(value): value.lowercased()

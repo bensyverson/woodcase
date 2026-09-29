@@ -110,7 +110,7 @@
 
         // MARK: - Vocabulary
 
-        /// The lint checks a caller named, refusing an id the catalogue does not have.
+        /// The lint checks a caller named, refusing an id the catalog does not have.
         private static func checks(in names: [String]) throws -> [LintCheck] {
             try names.map { name in
                 guard let check = LintCheck(rawValue: name) else {

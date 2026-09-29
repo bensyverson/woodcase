@@ -27,7 +27,7 @@ import Woodcase
 ///
 /// Line numbers are ``BatchLineResult/line`` exactly as the applier reports it —
 /// 0-based — because an atomic batch's own cascade message already says "line 1
-/// failed" in that numbering; a formatter that relabelled rows 1-based would disagree
+/// failed" in that numbering; a formatter that relabeled rows 1-based would disagree
 /// with the sentence sitting right beside it.
 enum BatchReportFormatter {
     /// The status column's fixed width, so every row's content starts at the same place.

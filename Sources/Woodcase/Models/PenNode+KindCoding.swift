@@ -15,7 +15,7 @@ import Foundation
 /// is on the stack; encoding reads the payload out in a getter that returns before the
 /// payload's own encoder runs. See `project/2026-09-26-debug-stack-depth.md`.
 extension PenNode.Kind {
-    /// Decodes the payload of a modelled node type.
+    /// Decodes the payload of a modeled node type.
     ///
     /// - Parameters:
     ///   - type: The node's `type`.
@@ -43,7 +43,7 @@ extension PenNode.Kind {
         }
     }
 
-    /// The payload of a modelled kind, ready to encode, or `nil` for an unknown one.
+    /// The payload of a modeled kind, ready to encode, or `nil` for an unknown one.
     var encodablePayload: (any Encodable)? {
         switch self {
         case let .frame(data): data

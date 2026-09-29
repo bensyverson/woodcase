@@ -28,7 +28,7 @@ public extension PenNode.NodeType {
         case .polygon:
             "a regular polygon of polygonCount sides"
         case .text:
-            "a run of text, with its font, growth behaviour and alignment"
+            "a run of text, with its font, growth behavior and alignment"
         case .note:
             "an authoring note; it is never drawn"
         case .prompt:

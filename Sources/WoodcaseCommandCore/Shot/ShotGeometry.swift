@@ -12,7 +12,7 @@ import Woodcase
 /// *ruling* rather than a formula: what counts as on the image, what counts as inside a
 /// crop, and what the tool offers back when the answer is no. `CGRect` has near-namesakes
 /// for three of them and disagrees with all three at the edges — it treats an empty rect
-/// as intersecting nothing, and normalises negative sizes — so the arithmetic lives here
+/// as intersecting nothing, and normalizes negative sizes — so the arithmetic lives here
 /// in layout points, where a zero-height text run still has a position worth pointing at.
 enum ShotGeometry {
     /// Whether two layout rects touch at all.

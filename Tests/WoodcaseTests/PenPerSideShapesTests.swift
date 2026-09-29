@@ -106,7 +106,7 @@ struct PenPerSideShapesTests {
         #expect(try drawnWidth(node) == .uniform(.variable("hairline")))
     }
 
-    @Test("An ellipse's shadow silhouette grows by half the top width of a centred per-side stroke")
+    @Test("An ellipse's shadow silhouette grows by half the top width of a centered per-side stroke")
     func silhouetteTakesTheTop() throws {
         let node = try node("ellipse", Self.perSide)
         let rect = PenRect(x: 30, y: 30, width: 140, height: 100)

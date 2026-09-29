@@ -214,7 +214,7 @@
             world: .page
         )
 
-        /// Whether the page signalled within `seconds`.
+        /// Whether the page signaled within `seconds`.
         private static func waitForSignal(on signals: AsyncStream<String>, within seconds: TimeInterval) async -> Bool {
             await withTaskGroup(of: Bool.self) { group in
                 group.addTask {
@@ -227,9 +227,9 @@
                     try? await Task.sleep(for: .seconds(seconds))
                     return false
                 }
-                let signalled: Bool = await group.next() ?? false
+                let signaled: Bool = await group.next() ?? false
                 group.cancelAll()
-                return signalled
+                return signaled
             }
         }
 

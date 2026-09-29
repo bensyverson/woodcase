@@ -144,7 +144,7 @@ struct VarsCommandTests {
     }
 
     @Test("`--type` declares the type when the value would have inferred another")
-    func setHonoursExplicitType() throws {
+    func setHonorsExplicitType() throws {
         let fixture = try CommandFixture(fixture: "parser-variables.pen")
         let run = try fixture.run(
             "vars", "set", fixture.file.path, "label=16", "--type", "string", "--as", "ana"

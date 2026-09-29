@@ -24,7 +24,7 @@ struct SwiftUIVocabularyMatchingTests {
         #expect(try covers("View.shadow(color:radius:x:y:)", "v.shadow(opacity: 2)", byNameOnly: true))
     }
 
-    @Test("A trailing closure needs a listed parameter after the labelled ones")
+    @Test("A trailing closure needs a listed parameter after the labeled ones")
     func trailingClosure() throws {
         #expect(try covers("View.background(alignment:content:)\nAlignment.top", "v.background(alignment: .top) { x }"))
         #expect(try covers("View.padding(_:)", "v.padding(4) { x }") == false)

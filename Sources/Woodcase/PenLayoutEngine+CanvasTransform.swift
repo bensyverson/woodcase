@@ -14,8 +14,8 @@ public extension PenLayoutEngine {
     /// unturned box (``unturnedBox(of:rect:layoutRects:)``) starts at their origin — for a
     /// group, which is placed from its anchor, the box is its children's union and may
     /// start anywhere. The map composes, from the root down, each node's placement in its
-    /// parent: its box centred in its layout rect, flipped, then turned by Pen's
-    /// counter-clockwise degrees about that centre — `PenRenderer`'s own composition, and
+    /// parent: its box centered in its layout rect, flipped, then turned by Pen's
+    /// counter-clockwise degrees about that center — `PenRenderer`'s own composition, and
     /// the one ``absoluteRects(under:in:layoutRects:)`` takes the bounds of. So the map
     /// sends the node's box to the turned quad it is drawn as, whose bounds are its
     /// ``canvasRects(in:layoutRects:)`` rect.

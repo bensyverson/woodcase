@@ -12,7 +12,7 @@ extension ReactEmitter {
     /// CSS lays a flex item out at its unturned box whatever its `transform`, so every
     /// later sibling would sit where the unturned box ends. A margin of half the difference
     /// between the turned bounds and the box on each side makes the item's margin box the
-    /// bounds, with the box centred in it — where its centre pivot (``TransformPivot/center``)
+    /// bounds, with the box centered in it — where its center pivot (``TransformPivot/center``)
     /// turns it onto exactly those bounds. A box turned onto its side takes a negative
     /// margin along the side it gave up.
     ///
@@ -20,7 +20,7 @@ extension ReactEmitter {
     /// size CSS decides is not known here — except a turned `fill_container` child whose
     /// container's numbers fix its box, which ``emitNode(_:component:indent:ctx:isRoot:parentLayout:)``
     /// has already written as fixed (``TurnedFillSizes``). A line keeps its own margins, which
-    /// centre its stroke, and gets none.
+    /// center its stroke, and gets none.
     ///
     /// - Parameters:
     ///   - node: The node.

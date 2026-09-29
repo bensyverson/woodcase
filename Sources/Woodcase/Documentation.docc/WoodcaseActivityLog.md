@@ -233,7 +233,7 @@ suspended forever in its own loop body all leave a poll loop running for the lif
 process — and the last of those keeps the producer reading and buffering behind a reader
 that will never take another event.
 
-Two consequences worth relying on. Cancelling the consuming task ends the iteration, and
+Two consequences worth relying on. Canceling the consuming task ends the iteration, and
 that is the *only* ending: a quiet log is a log with nothing to say yet, never a feed that
 has finished, so a caller wanting a bounded wait imposes one itself. And a `Follow`
 iterated twice is two independent walks from the same offset, because the cursor lives in

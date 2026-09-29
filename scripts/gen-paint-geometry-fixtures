@@ -5,13 +5,13 @@ a stroke with a gradient or an image.
 
 - Tests/WoodcaseTests/Fixtures/render-gradient-geometry.pen: one artboard per
   case — linear gradients at rotations 0/45/90/135/210 on a square, a wide and a
-  tall box, with an off-centre `center`, a short `size`, and interior stops;
-  angular gradients with rotations, an off-centre `center`, a non-uniform `size`
+  tall box, with an off-center `center`, a short `size`, and interior stops;
+  angular gradients with rotations, an off-center `center`, a non-uniform `size`
   and stops that do not reach 0 and 1; radial gradients with a rotation and a
   non-uniform `size`.
 - Tests/WoodcaseTests/Fixtures/render-per-side-strokes.pen: one artboard per
   case — per-side `strokeWidth` on a frame under each `strokeAlignment` (and
-  none, which Pen treats as centre) for four width combinations, the same with a
+  none, which Pen treats as center) for four width combinations, the same with a
   uniform and a per-corner `cornerRadius`, and on a rectangle.
 - Tests/WoodcaseTests/Fixtures/render-stroke-fills.pen and images/uv-map.png:
   one artboard per case — a red→blue ramp and a UV image (red = u, green = v)
@@ -101,9 +101,9 @@ def gradient_geometry():
     for box in ("sq", "wide", "tall"):
         for rotation in (0, 45, 90, 135, 210):
             case(f"lin-{box}-r{rotation}", box, gradient("linear", RAMP, rotation=rotation))
-    case("lin-wide-r30-centre", "wide",
+    case("lin-wide-r30-center", "wide",
          gradient("linear", RAMP, rotation=30, center={"x": 0.3, "y": 0.4}))
-    case("lin-wide-r315-centre-size", "wide",
+    case("lin-wide-r315-center-size", "wide",
          gradient("linear", RAMP, rotation=315, center={"x": 0.3, "y": 0.4},
                   size={"width": 1, "height": 0.6}))
     case("lin-tall-r30-size", "tall",
@@ -113,7 +113,7 @@ def gradient_geometry():
     for box in ("sq", "wide", "tall"):
         for rotation in (0, 45, 90, 210):
             case(f"ang-{box}-r{rotation}", box, gradient("angular", WHEEL, rotation=rotation))
-    case("ang-wide-r45-centre", "wide",
+    case("ang-wide-r45-center", "wide",
          gradient("angular", WHEEL, rotation=45, center={"x": 0.3, "y": 0.4}))
     case("ang-sq-r45-size", "sq",
          gradient("angular", WHEEL, rotation=45, size={"width": 0.5, "height": 1}))
@@ -121,7 +121,7 @@ def gradient_geometry():
 
     case("rad-wide-r45-size", "wide",
          gradient("radial", WHEEL, rotation=45, size={"width": 0.5, "height": 1}))
-    case("rad-sq-r30-centre-size", "sq",
+    case("rad-sq-r30-center-size", "sq",
          gradient("radial", THREE, rotation=30, center={"x": 0.4, "y": 0.6},
                   size={"width": 1, "height": 0.5}))
     return fx.document()
@@ -167,7 +167,7 @@ UV_SIZE = (256, 128)
 
 
 def uv_map_png():
-    """A 256×128 RGB PNG whose red is u·255 and green v·255, pixel centres 0…255 end to end."""
+    """A 256×128 RGB PNG whose red is u·255 and green v·255, pixel centers 0…255 end to end."""
     w, h = UV_SIZE
     rows = b"".join(
         b"\x00" + bytes(

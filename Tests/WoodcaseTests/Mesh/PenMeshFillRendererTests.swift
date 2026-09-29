@@ -24,7 +24,7 @@ struct PenMeshFillRendererTests {
         // Left of the clip: nothing.
         #expect(image.pixel(10, 0).a == 0)
         // The clip's top-right pixel is the domain's top-right corner: green, not a
-        // colour from the middle of the ramp.
+        // color from the middle of the ramp.
         let corner = image.pixel(199, 0)
         #expect(corner.g >= 254 && corner.r <= 1 && corner.a == 255, "corner \(corner)")
         // Its left edge sits three quarters of the way along: smoothstep(0.75) ≈ 0.84 green.
@@ -61,7 +61,7 @@ struct PenMeshFillRendererTests {
             Self.mesh(Array(repeating: "#FF0000", count: 4), blendMode: .multiply),
             background: CGColor(srgbRed: 0.5, green: 0.5, blue: 0.5, alpha: 1)
         )
-        // Multiply: red × grey is dark red, where normal would be pure red.
+        // Multiply: red × gray is dark red, where normal would be pure red.
         let pixel = image.pixel(20, 20)
         #expect(abs(Int(pixel.r) - 128) <= 1 && pixel.g == 0 && pixel.a == 255, "pixel \(pixel)")
     }
@@ -82,7 +82,7 @@ struct PenMeshFillRendererTests {
 
     // MARK: - Helpers
 
-    /// A 2×2 mesh with default points and the given row-major colours.
+    /// A 2×2 mesh with default points and the given row-major colors.
     private static func mesh(
         _ colors: [String],
         opacity: Double? = nil,

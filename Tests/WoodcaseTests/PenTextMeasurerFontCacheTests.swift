@@ -17,7 +17,7 @@ import Testing
 /// `resolveFont computes new entry when key differs` reported 2 of 3 once in ten full
 /// runs. So every case here runs its window again if a registration landed inside it —
 /// which is what makes the number a measurement of the cache rather than of the
-/// neighbours.
+/// neighbors.
 @Suite("PenTextMeasurer Font Cache")
 struct PenTextMeasurerFontCacheTests {
     /// How many times a window is retried before its count is asserted anyway.

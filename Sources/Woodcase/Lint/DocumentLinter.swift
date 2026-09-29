@@ -193,7 +193,7 @@ public enum DocumentLinter {
         /// is the whole question the three codegen checks ask. This is the same registry
         /// ``EditableDocument/materializedComponents()`` hands the ref expander, so a
         /// definition the lint walks is the definition the pipeline expands, and it is
-        /// also the tree ``ComponentAnalyzer`` reads: `generate react` analyses the
+        /// also the tree ``ComponentAnalyzer`` reads: `generate react` analyzes the
         /// materialized document.
         let components: [String: PenNode]
 
@@ -449,7 +449,7 @@ public enum DocumentLinter {
 
     // MARK: - Words and numbers
 
-    /// A row named the way a reader recognises it: its name, or its id marker.
+    /// A row named the way a reader recognizes it: its name, or its id marker.
     ///
     /// Not `private`: ``DocumentLinter/clippedFindings(rows:in:)`` in
     /// `DocumentLinter+Scroll.swift` names the clipping frame the same way.

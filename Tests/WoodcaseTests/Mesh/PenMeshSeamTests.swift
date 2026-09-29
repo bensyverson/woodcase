@@ -11,8 +11,8 @@ import Testing
 /// each pixel is covered exactly once, so its alpha equals the alpha in a patch interior.
 ///
 /// A doubly covered pixel would composite to a higher alpha, an uncovered one to zero.
-/// Every mesh here is one translucent colour everywhere, so any alpha other than the
-/// colour's own is a coverage error.
+/// Every mesh here is one translucent color everywhere, so any alpha other than the
+/// color's own is a coverage error.
 struct PenMeshSeamTests {
     typealias Support = MeshTestSupport
     typealias Vector = PenMeshPoint.Vector
@@ -41,21 +41,21 @@ struct PenMeshSeamTests {
         try assertUniform(PenMeshRasterizer.rasterize(uniform(columns: 3, rows: 3), width: width, height: height))
     }
 
-    @Test("Interior patch edges through pixel centres", arguments: [(101, 101), (41, 81)])
-    func edgesThroughCentres(width: Int, height: Int) throws {
+    @Test("Interior patch edges through pixel centers", arguments: [(101, 101), (41, 81)])
+    func edgesThroughCenters(width: Int, height: Int) throws {
         // With odd sizes the patch edges at u = ½ and v = ½ run exactly through a column
-        // and a row of pixel centres, where only the top-left rule decides ownership.
+        // and a row of pixel centers, where only the top-left rule decides ownership.
         try assertUniform(PenMeshRasterizer.rasterize(uniform(columns: 3, rows: 3), width: width, height: height))
     }
 
     @Test("The interior alpha is what the seam pixels are compared against")
-    func interiorIsTheColour() throws {
+    func interiorIsTheColor() throws {
         let raster = try PenMeshRasterizer.rasterize(uniform(columns: 3, rows: 3), width: 101, height: 101)
-        let centre = raster.pixel(x: 25, y: 25)
-        #expect(centre.alpha == Self.interiorAlpha)
-        #expect(raster.pixel(x: 50, y: 25).alpha == centre.alpha)
-        #expect(raster.pixel(x: 25, y: 50).alpha == centre.alpha)
-        #expect(raster.pixel(x: 50, y: 50).alpha == centre.alpha)
+        let center = raster.pixel(x: 25, y: 25)
+        #expect(center.alpha == Self.interiorAlpha)
+        #expect(raster.pixel(x: 50, y: 25).alpha == center.alpha)
+        #expect(raster.pixel(x: 25, y: 50).alpha == center.alpha)
+        #expect(raster.pixel(x: 50, y: 50).alpha == center.alpha)
     }
 
     @Test("Curved shared edges of a warped mesh are seamless too")

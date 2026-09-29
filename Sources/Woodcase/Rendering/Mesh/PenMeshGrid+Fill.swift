@@ -8,15 +8,15 @@ import Foundation
 public extension PenMeshGrid {
     /// Builds the grid a mesh gradient fill describes, or says why Pen would not draw it.
     ///
-    /// Pass a fill whose colours the ``PenVariableResolver`` has already resolved. A
-    /// colour string is read as Pen's mesh reads it (``PenMeshColor/init(penMesh:)``): a
+    /// Pass a fill whose colors the ``PenVariableResolver`` has already resolved. A
+    /// color string is read as Pen's mesh reads it (``PenMeshColor/init(penMesh:)``): a
     /// malformed one is not black but whatever Pen makes of it, often transparent. A
-    /// colour that is still a variable becomes opaque black. A point that omits a handle takes
+    /// color that is still a variable becomes opaque black. A point that omits a handle takes
     /// the grid's default for it (``PenMeshPoint/Handles/defaults(columns:rows:)``). A
     /// malformed point sits where Pen places it
     /// (``PenMeshPoint/placement(gridPosition:defaults:)``).
     ///
-    /// - Parameter fill: The fill, with resolved colours.
+    /// - Parameter fill: The fill, with resolved colors.
     /// - Throws: An ``Invalidity`` naming the first missing field, mismatched count or
     ///   point Pen cannot place.
     init(_ fill: PenFill.PenMeshGradientFill) throws(Invalidity) {

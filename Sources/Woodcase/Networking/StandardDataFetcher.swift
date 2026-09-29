@@ -8,7 +8,7 @@ import Foundation
 /// The production ``RemoteDataFetching`` for this platform — the one construction point
 /// the shared resolvers use.
 ///
-/// Everywhere it starts with ``URLSessionDataFetcher``, which honours the proxy
+/// Everywhere it starts with ``URLSessionDataFetcher``, which honors the proxy
 /// environment. On macOS that is wrapped in a ``TrustFallbackDataFetcher`` with a
 /// ``CurlDataFetcher`` behind it, so a process that cannot reach the system
 /// certificate-trust service (the Claude Code Bash sandbox) still downloads, through

@@ -362,7 +362,7 @@ struct GoogleFontResolverTests {
     /// accepts it, so it never touches the one-family-per-run constraint the tests above
     /// carry.
     @Test("Font registration from data stages the file at a set $TMPDIR")
-    func registerFromDataHonoursTMPDIR() throws {
+    func registerFromDataHonorsTMPDIR() throws {
         let scratch = FileManager.default.temporaryDirectory
             .appendingPathComponent("scratch-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: scratch, withIntermediateDirectories: true)

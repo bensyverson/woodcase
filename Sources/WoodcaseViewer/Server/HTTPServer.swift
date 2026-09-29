@@ -50,7 +50,7 @@ actor HTTPServer {
     private let queue = DispatchQueue(label: "dev.woodcase.viewer.server")
     private var listener: NWListener?
 
-    /// Every accepted connection that has not yet been cancelled.
+    /// Every accepted connection that has not yet been canceled.
     ///
     /// Tracked so ``stop()`` can close them: a listener that stops listening does not
     /// close what it already accepted, and an open event stream would keep the process

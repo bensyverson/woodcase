@@ -17,7 +17,7 @@ established from its **renders** (`pen` CLI 0.3.9, headless, format 2.19), never
 3. **Woodcase got both wrong before this change.** Its paint domain was the outline path's `boundingBox`, which is the
    node box only for rectangles, frames and full ellipses: it was narrower for polygons, arcs and `viewBox` paths, and
    *wider* for curves (CoreGraphics' `boundingBox` includes control points — the curve board's ramp started 20 pt
-   above the node). And its even-odd branch drew solid colours only, so a donut or even-odd path with a gradient or
+   above the node). And its even-odd branch drew solid colors only, so a donut or even-odd path with a gradient or
    image fill drew nothing.
 
 Measured on `Tests/WoodcaseTests/Fixtures/render-fill-domains.pen` (node box x 20→220, y 20→140), Pen's 2x export
@@ -41,7 +41,7 @@ After the change every fitted stop is within 0.5 pt of the box edge (the test's 
 
 - `PenFillRenderer.renderFills(_:clip:fillRule:domain:in:imageProvider:)` is the one entry point. The **clip** (a
   `CGPath` and a `CGPathFillRule`) is where each fill shows; the **domain** (a `CGRect` in the same space) is what the
-  gradient frame and the image placement are computed from. Solid colours still fill the path directly (same pixels);
+  gradient frame and the image placement are computed from. Solid colors still fill the path directly (same pixels);
   gradients and images clip, then draw over the domain. Each fill is clipped separately, which is what finding 6 of the
   fills report asks for.
 - `PenShapeBuilder.fillRule(for:)` names the rule an outline is filled with (even-odd for `innerRadius` ellipses and

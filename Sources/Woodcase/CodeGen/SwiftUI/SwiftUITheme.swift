@@ -25,7 +25,7 @@ struct SwiftUITheme: Friendly {
         /// The options, in the file's order; the first is the default.
         var options: [Option]
 
-        /// Whether the axis's options are light and dark, so SwiftUI's colour scheme selects
+        /// Whether the axis's options are light and dark, so SwiftUI's color scheme selects
         /// them.
         var bridgesColorScheme: Bool
 
@@ -81,7 +81,7 @@ struct SwiftUITheme: Friendly {
             /// The value as written, for a string token: a font family's name.
             var string: String?
 
-            /// Whether the value is an opaque colour.
+            /// Whether the value is an opaque color.
             var opaque: Bool
         }
 
@@ -110,7 +110,7 @@ struct SwiftUITheme: Friendly {
     /// Why variables could not become tokens, for the emitter's warnings.
     var problems: [String]
 
-    /// The axis that follows SwiftUI's colour scheme, if any.
+    /// The axis that follows SwiftUI's color scheme, if any.
     var bridgedAxis: Axis? {
         axes.first(where: \.bridgesColorScheme)
     }
@@ -143,7 +143,7 @@ extension SwiftUITheme {
                 bridgesColorScheme: lowered == ["light", "dark"] && axis.values.count == 2
             )
         }
-        // Only the first light/dark axis bridges: one colour scheme cannot select two.
+        // Only the first light/dark axis bridges: one color scheme cannot select two.
         if let first = axes.firstIndex(where: \.bridgesColorScheme) {
             for index in axes.indices where index != first {
                 axes[index].bridgesColorScheme = false
@@ -174,7 +174,7 @@ extension SwiftUITheme {
         return ["`self`", "`init`", "Type", "Protocol"].contains(name) ? name.filter { $0 != "`" } + "Option" : name
     }
 
-    /// An axis enum's name: its property's, capitalised.
+    /// An axis enum's name: its property's, capitalized.
     private static func typeName(_ property: String) -> String {
         let bare = property.filter { $0 != "`" }
         return bare.prefix(1).uppercased() + bare.dropFirst()

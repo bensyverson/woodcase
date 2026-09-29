@@ -3,7 +3,7 @@ import Foundation
 import Testing
 @testable import Woodcase
 
-/// Pins which paint a text or icon node's fills give its glyphs: nothing, one solid colour
+/// Pins which paint a text or icon node's fills give its glyphs: nothing, one solid color
 /// Core Text draws them in, or the fills painted through their outlines.
 struct PenGlyphPaintTests {
     private static let ramp = PenFill.gradient(PenFill.PenGradientFill(
@@ -74,14 +74,14 @@ struct PenGlyphPaintTests {
         #expect(PenGlyphPaint(fills: probe.fills) == probe.paint)
     }
 
-    @Test("A solid's colour is the one CG hands Core Text, component for component")
-    func solidColourIsCoreTexts() throws {
+    @Test("A solid's color is the one CG hands Core Text, component for component")
+    func solidColorIsCoreTexts() throws {
         let paint = PenGlyphPaint(fills: .single(.shorthand("#3366CC80")))
         let expected = try #require(PenColorParser.parse("#3366CC80"))
         #expect(paint.coreTextColor == expected)
     }
 
-    @Test("Paint that is not a lone solid hands Core Text opaque black, the colour no glyph shows")
+    @Test("Paint that is not a lone solid hands Core Text opaque black, the color no glyph shows")
     func otherPaintsHandCoreTextBlack() throws {
         let black = try #require(PenColorParser.parse("#000000"))
         #expect(PenGlyphPaint.glyphOutlines.coreTextColor == black)

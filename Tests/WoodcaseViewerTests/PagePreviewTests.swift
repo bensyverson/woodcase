@@ -18,7 +18,7 @@ struct PagePreviewTests {
     }
 
     /// The file's other artboard, so the footer has somewhere to step to.
-    private var neighbour: Artboard {
+    private var neighbor: Artboard {
         Artboard(id: "Brd01", name: "Settings", x: 500, y: 40, width: 400, height: 300)
     }
 
@@ -27,7 +27,7 @@ struct PagePreviewTests {
         return RenderRegion(
             file: file,
             artboard: artboard,
-            artboards: [artboard, neighbour],
+            artboards: [artboard, neighbor],
             layout: layout,
             layoutJSON: ArtboardPageBuilder.json(layout),
             state: state,

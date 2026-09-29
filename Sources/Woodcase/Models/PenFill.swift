@@ -14,8 +14,8 @@ import Foundation
 /// - **Color:** An object with `type: "color"` and explicit color/blendMode/enabled
 /// - **Gradient:** Linear, radial, or angular gradient with color stops
 /// - **Image:** An image fill referencing a file URL
-/// - **Mesh gradient:** A grid of coloured vertices joined by Bézier patches (see ``PenMeshGradientFill``
-///   and ``PenMeshPoint``); rasterised by the mesh core, and baked to a PNG by the React emitter
+/// - **Mesh gradient:** A grid of colored vertices joined by Bézier patches (see ``PenMeshGradientFill``
+///   and ``PenMeshPoint``); rasterized by the mesh core, and baked to a PNG by the React emitter
 /// - **Shader:** A GPU fragment shader effect (unsupported in renderer, preserved in model; see ``PenShaderFill``)
 public enum PenFill: Friendly {
     case shorthand(String)
@@ -25,7 +25,7 @@ public enum PenFill: Friendly {
     case meshGradient(PenMeshGradientFill)
     case shader(PenShaderFill)
 
-    /// A fill whose `type` this build does not recognise, kept verbatim.
+    /// A fill whose `type` this build does not recognize, kept verbatim.
     ///
     /// Only a file decode produces it; authoring input with an unknown `type` is refused.
     /// The renderer paints nothing for it and the React emitter emits nothing: it is
@@ -103,12 +103,12 @@ public enum PenFill: Friendly {
         }
     }
 
-    /// One colour stop of a gradient.
+    /// One color stop of a gradient.
     public struct PenGradientStop: Friendly {
         /// Creates a stop.
         ///
         /// - Parameters:
-        ///   - color: The stop's colour.
+        ///   - color: The stop's color.
         ///   - position: Where along the gradient it sits, from 0 to 1.
         ///   - extras: Keys a file wrote on the stop that the model does not claim.
         public init(
@@ -133,9 +133,9 @@ public enum PenFill: Friendly {
         }
     }
 
-    /// A gradient's centre, in the node's unit space.
+    /// A gradient's center, in the node's unit space.
     public struct PenFillPosition: Friendly {
-        /// Creates a centre.
+        /// Creates a center.
         ///
         /// - Parameters:
         ///   - x: The horizontal position, as a fraction of the node's width.
@@ -153,7 +153,7 @@ public enum PenFill: Friendly {
         /// Keys the file wrote on this object that the model does not claim. See ``PenExtras``.
         public var extras = PenExtras()
 
-        /// The keys a centre claims; any other key of its object is an extra.
+        /// The keys a center claims; any other key of its object is an extra.
         enum CodingKeys: String, CodingKey, CaseIterable {
             case x, y
         }
@@ -228,8 +228,8 @@ public extension PenFill {
     ///
     /// Read off the decoder's own enumeration, so an error message or a piece of
     /// help built from this can neither name a spelling the decoder refuses nor
-    /// miss one it takes. `"solid"` is not among them; a solid colour is
-    /// `{"type":"color","color":"#FFD166"}`, or just the colour string.
+    /// miss one it takes. `"solid"` is not among them; a solid color is
+    /// `{"type":"color","color":"#FFD166"}`, or just the color string.
     static var fillTypeNames: [String] {
         FillType.allCases.map(\.rawValue)
     }

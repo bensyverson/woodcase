@@ -179,7 +179,7 @@ extension ReactEmitter {
         return attributes
     }
 
-    /// The `stroke` (or `fill`) value for one layer — a colour, or `url(#…)` of a paint
+    /// The `stroke` (or `fill`) value for one layer — a color, or `url(#…)` of a paint
     /// server written into `defs` — or `nil` for a layer SVG cannot paint: an angular
     /// gradient, a themed mesh, an image without a URL, a shader. An icon's glyph is painted
     /// by the same servers (``iconPaint(_:family:nodeID:ctx:)``), with no overhang.
@@ -257,7 +257,7 @@ extension ReactEmitter {
     }
 
     /// The SVG `matrix(…)` from a gradient's own unit space onto the node's box: Pen's map
-    /// into the normalised box (``GradientGeometry/affineComponents``), the one the renderer's
+    /// into the normalized box (``GradientGeometry/affineComponents``), the one the renderer's
     /// `frameTransform(in:)` uses, then stretched to the box — so a turned gradient on a box
     /// that is not square keeps Pen's slant.
     private static func svgGradientMatrix(_ gradient: PenFill.PenGradientFill, box: SVGStrokedShape.Box) -> String {

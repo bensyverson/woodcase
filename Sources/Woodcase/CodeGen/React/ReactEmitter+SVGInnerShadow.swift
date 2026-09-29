@@ -6,7 +6,7 @@
 extension ReactEmitter {
     /// What an inner-shadow filter puts out.
     enum InnerShadowComposite: Friendly {
-        /// The coloured shadow alone, kept inside the silhouette: the filter of a copy of an
+        /// The colored shadow alone, kept inside the silhouette: the filter of a copy of an
         /// SVG shape drawn between its fill and its stroke, blended by the copy's
         /// `mix-blend-mode`.
         case shadowOnly
@@ -18,8 +18,8 @@ extension ReactEmitter {
     /// An inner shadow as an SVG `<filter>`, one line per element.
     ///
     /// The silhouette is cut out of the filter region — the outside, which casts the
-    /// shadow inward, as Pen draws it — then offset, blurred, coloured with the shadow's
-    /// colour, and kept where the silhouette covers. The outside is a flood with the
+    /// shadow inward, as Pen draws it — then offset, blurred, colored with the shadow's
+    /// color, and kept where the silhouette covers. The outside is a flood with the
     /// silhouette cut away, not the silhouette's alpha inverted: WebKit inverts only
     /// within the silhouette's bounding box, which loses every edge on it (a hexagon's
     /// flanks measured 1.721 against Pen's export that way, 0.036 this way; `scripts/png-mae`
@@ -49,14 +49,14 @@ extension ReactEmitter {
         let deviation = scale.x == scale.y
             ? svgNumber(sigma / scale.x)
             : "\(svgNumber(sigma / scale.x)) \(svgNumber(sigma / scale.y))"
-        let colour = shadow.color.map(cssColorReference) ?? PenEffect.PenShadowEffect.defaultCSSColor
+        let color = shadow.color.map(cssColorReference) ?? PenEffect.PenShadowEffect.defaultCSSColor
         var lines = [
             "<filter id=\"\(id)\" \(region) colorInterpolationFilters=\"sRGB\">",
             "  <feFlood floodColor=\"black\" />",
             "  <feComposite in2=\"SourceAlpha\" operator=\"out\" />",
             "  <feOffset dx=\"\(svgNumber(x / scale.x))\" dy=\"\(svgNumber(y / scale.y))\" />",
             "  <feGaussianBlur stdDeviation=\"\(deviation)\" result=\"wcInnerBlur\" />",
-            "  <feFlood style={{ floodColor: \"\(colour)\" }} />",
+            "  <feFlood style={{ floodColor: \"\(color)\" }} />",
             "  <feComposite in2=\"wcInnerBlur\" operator=\"in\" />",
             "  <feComposite in2=\"SourceAlpha\" operator=\"in\" />",
         ]

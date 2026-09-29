@@ -10,7 +10,7 @@ import Testing
 /// The theme the SwiftUI emitter writes beside the views: `Theme/PenTheme.swift`, a typed
 /// value with one enum per axis and one property per variable, and
 /// `Theme/PenTheme+Environment.swift`, which carries it in the environment, sets it on a
-/// subtree and bridges a light/dark axis to SwiftUI's colour scheme.
+/// subtree and bridges a light/dark axis to SwiftUI's color scheme.
 /// ``SwiftUIEmitterThemeReadTests`` covers the views that read it.
 struct SwiftUIEmitterThemeTests {
     private static let themePath = "Sources/PenUI/Theme/PenTheme.swift"
@@ -101,7 +101,7 @@ struct SwiftUIEmitterThemeTests {
         """))
     }
 
-    @Test("A plain variable is a constant, and a translucent colour keeps its opacity")
+    @Test("A plain variable is a constant, and a translucent color keeps its opacity")
     func plainVariable() throws {
         let theme = try Self.theme(Self.emit(
             themes: ##"{"mode": ["light", "dark"]}"##,
@@ -139,7 +139,7 @@ struct SwiftUIEmitterThemeTests {
 
     // MARK: - Environment
 
-    @Test("A light/dark axis follows SwiftUI's colour scheme, and setting it sets the scheme")
+    @Test("A light/dark axis follows SwiftUI's color scheme, and setting it sets the scheme")
     func colorSchemeBridge() throws {
         let environment = try Self.environment(SwiftUIFixtures.emit("parser-themed-variables"))
         #expect(environment.contains("    var penTheme: PenTheme {"))

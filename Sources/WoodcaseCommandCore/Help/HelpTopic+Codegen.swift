@@ -4,7 +4,7 @@
 //
 
 /// The body of ``HelpTopic/codegen``: how to build a component `generate react` and
-/// `generate swiftui` recognise, and what the SwiftUI package is and how to build and run it.
+/// `generate swiftui` recognize, and what the SwiftUI package is and how to build and run it.
 ///
 /// The body lives here rather than in `HelpTopic.swift` because it is held to the same
 /// bar as the recipes topic — `HelpCommandTests` extracts every bare `  woodcase …` line

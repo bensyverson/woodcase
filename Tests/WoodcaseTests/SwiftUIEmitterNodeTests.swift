@@ -90,7 +90,7 @@ struct SwiftUIEmitterNodeTests {
 
     // MARK: - Shapes
 
-    @Test("An ellipse is an Ellipse filled with its colour")
+    @Test("An ellipse is an Ellipse filled with its color")
     func ellipse() throws {
         let child = ##"{"type": "ellipse", "id": "e", "width": 30, "height": 20, "fill": "#0000FF"}"##
         let code = try body(frame: ##""children": [\##(child)]"##)
@@ -128,7 +128,7 @@ struct SwiftUIEmitterNodeTests {
         #expect(code.contains(".foregroundStyle(Color(hex: 0x333333))"))
     }
 
-    @Test("Fixed-width centred text wraps: it centres, fills and grows vertically")
+    @Test("Fixed-width centered text wraps: it centers, fills and grows vertically")
     func fixedWidthText() throws {
         let text = ##"{"type": "text", "id": "t", "content": "Hi", "textGrowth": "fixed-width", "width": "fill_container", "textAlign": "center"}"##
         let code = try body(frame: ##""layout": "vertical", "width": 200, "children": [\##(text)]"##)
@@ -190,8 +190,8 @@ struct SwiftUIEmitterNodeTests {
         #expect(warnings.count == 2)
     }
 
-    @Test("A colour variable is not resolved yet: a warning, and no colour written")
-    func colourVariable() throws {
+    @Test("A color variable is not resolved yet: a warning, and no color written")
+    func colorVariable() throws {
         let child = ##"{"type": "rectangle", "id": "r1", "width": 10, "height": 10, "fill": "$brand"}"##
         let diagnostics = PenDiagnosticCollector()
         let code = try body(frame: ##""children": [\##(child)]"##, diagnostics: diagnostics)

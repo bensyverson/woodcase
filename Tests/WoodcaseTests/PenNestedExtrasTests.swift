@@ -8,7 +8,7 @@ import Testing
 @testable import Woodcase
 
 /// Covers ``PenExtras`` below the payload level: every nested .pen object the model
-/// decodes into a struct of its own — a gradient stop, a gradient's centre and size, a
+/// decodes into a struct of its own — a gradient stop, a gradient's center and size, a
 /// shadow's offset, a variable definition and each of its themed values, a mesh vertex
 /// written as an object, and a connection's endpoints — keeps the keys it does not
 /// claim through a file round trip, and refuses them in authoring input.
@@ -73,7 +73,7 @@ struct PenNestedExtrasTests {
         #expect(fill.colors?.last?.extras.isEmpty == true)
     }
 
-    @Test("A gradient's centre keeps a key it does not claim")
+    @Test("A gradient's center keeps a key it does not claim")
     func gradientCenter() throws {
         let trip = try Self.roundTrip(PenFill.self, Self.gradient)
         let written = trip.written["center"] as? NSDictionary
@@ -131,7 +131,7 @@ struct PenNestedExtrasTests {
         #expect(point.extras.values == ["futurePointKey": "p"])
     }
 
-    @Test("Canonicalising a mesh vertex keeps its extras, even with every handle at its default")
+    @Test("Canonicalizing a mesh vertex keeps its extras, even with every handle at its default")
     func meshPointCanonicalKeepsExtras() throws {
         let point = try PenExtrasDecodingTests.filed(PenMeshPoint.self, #"{"position":[0.5,0.5],"futurePointKey":"p"}"#)
         let canonical = point.canonicalized(defaults: .defaults(columns: 2, rows: 2))

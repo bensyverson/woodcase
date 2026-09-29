@@ -5,7 +5,7 @@
 
 import Foundation
 
-/// A rasterised mesh gradient: premultiplied RGBA, 8 bits a channel, sRGB-encoded.
+/// A rasterized mesh gradient: premultiplied RGBA, 8 bits a channel, sRGB-encoded.
 ///
 /// Rows run top to bottom with no padding, so ``bytesPerRow`` is `width × 4`. Hand the
 /// bytes to CoreGraphics as `premultipliedLast` in sRGB, or encode them as a PNG.

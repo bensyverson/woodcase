@@ -13,7 +13,7 @@ import Woodcase
 /// Every verb funnels its failures through ``describing(_:in:editing:)`` (inside a
 /// transaction, where the document can turn ids into name paths) or
 /// ``describing(_:editing:)`` (outside one). Nothing else decides an exit code, so the
-/// house table is honoured the same way by ten different verbs written by ten
+/// house table is honored the same way by ten different verbs written by ten
 /// different hands.
 ///
 /// ```swift
@@ -56,7 +56,7 @@ import Woodcase
 /// | `Render.RenderError`, ``PNGEncoder/EncodingError``, ``PDFExporter/ExportError`` — the pipeline ran but could not produce the image | 4 |
 /// | anything else | 5 |
 ///
-/// The last row is deliberate: an error this table does not recognise is not a *clean
+/// The last row is deliberate: an error this table does not recognize is not a *clean
 /// negative* (1), which scripts branch on, and not a *usage* error (2), which would
 /// blame an invocation that may have been perfectly good.
 struct CommandFailure: Error, Friendly, CustomStringConvertible {
@@ -222,7 +222,7 @@ struct CommandFailure: Error, Friendly, CustomStringConvertible {
     /// never means the edit was lost — and a message that did not say so would send
     /// the reader looking for damage that is not there.
     ///
-    /// A denial that ``SandboxDenial`` recognises gets its sentence in place of the
+    /// A denial that ``SandboxDenial`` recognizes gets its sentence in place of the
     /// usual "check $WOODCASE_HOME": that remedy assumes the path is merely wrong,
     /// which is not the problem when the environment itself refuses the write.
     private static func logMessage(_ error: PenFileError, editing file: URL) -> String {

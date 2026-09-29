@@ -235,7 +235,7 @@
         /// Evaluating a function literal — an arrow function or `function (r) { … }` —
         /// never touches the free variables in its body; the body only runs when the
         /// function is *called*. So a `ReferenceError` thrown by evaluating the whole
-        /// predicate text, on both the plain and the parenthesised attempt, can only
+        /// predicate text, on both the plain and the parenthesized attempt, can only
         /// mean the text is not a function literal at all: it is a bare expression
         /// whose row variable was never bound by an arrow function it was never
         /// wrapped in. That is true of any predicate that reaches here, not only ones

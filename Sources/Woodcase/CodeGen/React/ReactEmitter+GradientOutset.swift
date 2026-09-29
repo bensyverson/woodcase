@@ -29,9 +29,9 @@ extension ReactEmitter {
         return "\(across) \(down)"
     }
 
-    /// The `background-position` that centres a tile on the node's box within an element
+    /// The `background-position` that centers a tile on the node's box within an element
     /// that grows `outsets` past it. A percentage position aligns that fraction of the
-    /// tile with that fraction of the element, so 50% centres the tile on the element, and
+    /// tile with that fraction of the element, so 50% centers the tile on the element, and
     /// half the difference of the two sides' outsets moves it onto the node's box.
     static func tilePosition(outsets: EdgeLengths) -> String {
         let across = (outsets.left - outsets.right).scaled(by: 0.5)
@@ -81,17 +81,17 @@ extension ReactEmitter {
         return leading.isZero ? "calc(\(offset))" : "calc(\(leading.sumTerms) + \(offset))"
     }
 
-    /// Where a gradient's centre lies on an element grown `outsets` past the node's box, as
-    /// the `at …` of a radial or conic gradient: empty when it is the element's own centre.
-    static func gradientCentre(_ centre: NormalizedPoint, outsets: EdgeLengths) -> String {
+    /// Where a gradient's center lies on an element grown `outsets` past the node's box, as
+    /// the `at …` of a radial or conic gradient: empty when it is the element's own center.
+    static func gradientCenter(_ center: NormalizedPoint, outsets: EdgeLengths) -> String {
         if outsets.isZero {
-            return centre == .center ? "" : " at \(cssPercent(centre.x)) \(cssPercent(centre.y))"
+            return center == .center ? "" : " at \(cssPercent(center.x)) \(cssPercent(center.y))"
         }
-        let centred = outsets.left == outsets.right && outsets.top == outsets.bottom
-        if centred, centre == .center { return "" }
+        let centered = outsets.left == outsets.right && outsets.top == outsets.bottom
+        if centered, center == .center { return "" }
         let horizontal = outsets.left + outsets.right
         let vertical = outsets.top + outsets.bottom
-        return " at \(boxPoint(outsets.left, total: horizontal, centre.x)) \(boxPoint(outsets.top, total: vertical, centre.y))"
+        return " at \(boxPoint(outsets.left, total: horizontal, center.x)) \(boxPoint(outsets.top, total: vertical, center.y))"
     }
 
     /// `value` with floating-point dust around zero removed.

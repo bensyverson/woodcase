@@ -9,8 +9,8 @@ import Foundation
 /// underline and strikethrough bars, so text measurement and placement are exactly those
 /// of the Core Text route.
 ///
-/// Glyphs of a colour font (emoji) are bitmaps with no outline. Their runs are kept
-/// aside and drawn by Core Text in their own colours, which is what the solid route
+/// Glyphs of a color font (emoji) are bitmaps with no outline. Their runs are kept
+/// aside and drawn by Core Text in their own colors, which is what the solid route
 /// does with them too.
 ///
 /// Public so that another renderer paints through the same outlines rather than a copy
@@ -21,7 +21,7 @@ import Foundation
 /// Not `Friendly`: it holds a `CGPath` and `CTRun`s, which are neither `Codable` nor
 /// `Sendable`, and it lives only for the duration of one draw.
 public struct PenGlyphOutlines {
-    /// A run of colour glyphs, drawn by Core Text rather than clipped to.
+    /// A run of color glyphs, drawn by Core Text rather than clipped to.
     public struct ColorRun {
         /// The run to draw.
         public let run: CTRun
@@ -31,7 +31,7 @@ public struct PenGlyphOutlines {
 
     /// Every outlined glyph and decoration bar, in the node's y-down space.
     public let path: CGPath
-    /// Runs from colour fonts, which have no outline.
+    /// Runs from color fonts, which have no outline.
     public let colorRuns: [ColorRun]
     /// Maps Core Text's y-up layout space into the node's y-down space.
     public let textSpace: CGAffineTransform
@@ -62,7 +62,7 @@ public struct PenGlyphOutlines {
         self.textSpace = textSpace
     }
 
-    /// Draws the colour-glyph runs as Core Text would.
+    /// Draws the color-glyph runs as Core Text would.
     ///
     /// - Parameter context: The context, in the node's y-down space.
     public func drawColorGlyphs(in context: CGContext) {
@@ -77,7 +77,7 @@ public struct PenGlyphOutlines {
 
     /// Adds a run's glyph outlines to `path`.
     ///
-    /// - Returns: `false` when the run's font draws colour bitmaps, which have no outline
+    /// - Returns: `false` when the run's font draws color bitmaps, which have no outline
     ///   and nothing was added; `true` otherwise.
     private static func appendGlyphs(
         of run: CTRun,

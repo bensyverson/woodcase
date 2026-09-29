@@ -89,7 +89,7 @@ public extension PreviewFixtures {
         context.strokePath()
     }
 
-    /// An opaque sRGB colour from a `0xRRGGBB` literal.
+    /// An opaque sRGB color from a `0xRRGGBB` literal.
     private static func color(_ hex: UInt32) -> CGColor {
         CGColor(
             srgbRed: CGFloat((hex >> 16) & 0xFF) / 255,

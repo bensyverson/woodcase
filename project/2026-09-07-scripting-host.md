@@ -332,7 +332,7 @@ Checked against the code before import; each item carries its ruling, and the le
 - **Penumbra consumes Woodcase by local path** (`../../Woodcase` in its project), so the un-pin breaks Penumbra's build the moment it lands on `main`. The un-pin leaf lands the Penumbra changes in the same sitting and names that commit in its report.
 - **No event loop.** JavaScriptCore runs a script to completion with no timers and no I/O: `setTimeout`, `fetch`, `require`, `import` and top-level `await` are the mistakes a model makes on day one. The prelude defines each to throw a sentence saying scripts are synchronous and why; an `async` function's Promise as the completion value gets the null-plus-warning treatment.
 - **Per-source line numbers.** Sources are evaluated one at a time with their own source URL, so an error in the second `-F` file reports that file's line, not a line in a concatenation. Top-level `let` and `const` are shared across sources in one context, so a helper file and a run file redeclaring the same name is a syntax error; the primer says so.
-- **Typed values, not argv text.** A script's values arrive typed, the way JSONL values do: the argv coercion rules (`'"42"'`, the number-to-text bending) do not apply, `$name` strings stay strings, and an integer written from JavaScript is stored as an integer, not `10.0`, because marshalling goes through JSON text. The revision depends on this.
+- **Typed values, not argv text.** A script's values arrive typed, the way JSONL values do: the argv coercion rules (`'"42"'`, the number-to-text bending) do not apply, `$name` strings stay strings, and an integer written from JavaScript is stored as an integer, not `10.0`, because marshaling goes through JSON text. The revision depends on this.
 - **A library run needs no log.** `BatchApplier.applyOne` takes an optional recorder, so a library caller can run a script over an in-memory document with no activity log; the write leaf carries it as a criterion.
 - **Memory is unbounded.** JavaScriptCore has no public memory limit either. The CLI's watchdog bounds time only; a script that allocates without end is the operating system's to kill. Accepted, stated.
 - **No `doc.shot()`.** A script sees geometry, not pixels; `shot` is a verb the shell runs after. Consistent with the loop needing no pixels.
@@ -509,7 +509,7 @@ tasks:
           The return value is the WriteReport (id, path, rev, created with ids, divergences,
           node). No @tag support: the return value carries the id. Every write drops the
           settled-tree cache so the next read settles. Values arrive typed, as JSONL values do:
-          the argv coercion rules do not apply, `$name` strings stay strings, and marshalling
+          the argv coercion rules do not apply, `$name` strings stay strings, and marshaling
           goes through JSON text so an integer from JavaScript is stored as an integer. The
           recorder is optional, so a library caller runs a script over an in-memory document
           with no activity log.

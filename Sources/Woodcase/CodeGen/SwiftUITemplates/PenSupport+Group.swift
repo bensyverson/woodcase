@@ -12,7 +12,7 @@ import SwiftUI
 
 /// One shadow of a group, or one inner shadow of a text. `radius` is the Gaussian's sigma, half of Pen's `blur`.
 struct PenShadowStyle {
-    /// The shadow's colour.
+    /// The shadow's color.
     var color: Color
 
     /// The Gaussian's sigma, in points.

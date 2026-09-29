@@ -5,23 +5,23 @@
 
 import Foundation
 
-/// A gradient fill's geometry in the node's normalised box: Pen's one map from the
+/// A gradient fill's geometry in the node's normalized box: Pen's one map from the
 /// gradient's own unit space into that box, with the defaults filled in.
 ///
-/// In its own space a gradient is centred on the origin with unit extent (y down): a
+/// In its own space a gradient is centered on the origin with unit extent (y down): a
 /// linear gradient runs from stop 0 at `(0, 0.5)` to stop 1 at `(0, −0.5)`, bottom to
 /// top; a radial one from the origin to the circle of radius ½. That space is scaled by
 /// ``width`` and ``height``, turned counter-clockwise on screen by ``rotation`` degrees
 /// and moved to ``center`` (`project/2026-09-26-gradient-geometry-and-per-side-strokes.md`).
 /// The renderer's `PenFill.PenGradientFill.frameTransform(in:)` builds its
 /// `CGAffineTransform` from ``affineComponents`` and adds only the final stretch to the
-/// node's box, so this is the one computation of a gradient's scale, rotation and centre —
+/// node's box, so this is the one computation of a gradient's scale, rotation and center —
 /// not a CG-free copy of it. Without CoreGraphics, a code emitter can also state the map in
 /// its target's own terms: CSS as an angle (the map's rotation, which is all a
 /// `linear-gradient` can carry) and a radial ellipse, SwiftUI as start and end points
 /// (``linearStart``, ``linearEnd``).
 struct GradientGeometry: Friendly {
-    /// The gradient's centre in the normalised box; the middle by default.
+    /// The gradient's center in the normalized box; the middle by default.
     var center: NormalizedPoint
 
     /// The scale along the gradient's own x axis; 1 by default.
@@ -41,7 +41,7 @@ struct GradientGeometry: Friendly {
         rotation = gradient.rotation?.literalValue ?? 0
     }
 
-    /// The map from the gradient's own unit space into the normalised box, as the six
+    /// The map from the gradient's own unit space into the normalized box, as the six
     /// numbers of a row-vector affine matrix: `x′ = a·x + c·y + tx`, `y′ = b·x + d·y + ty`
     /// — the same layout `CGAffineTransform`'s own six-argument initializer takes, so a
     /// caller that does have CoreGraphics builds one directly from this. This is the one
@@ -55,7 +55,7 @@ struct GradientGeometry: Friendly {
         return (a: width * cosine, b: -width * sine, c: height * sine, d: height * cosine, tx: center.x, ty: center.y)
     }
 
-    /// Where a point of the gradient's own space lands in the normalised box.
+    /// Where a point of the gradient's own space lands in the normalized box.
     func point(_ local: NormalizedPoint) -> NormalizedPoint {
         let m = affineComponents
         return NormalizedPoint(x: m.a * local.x + m.c * local.y + m.tx, y: m.b * local.x + m.d * local.y + m.ty)
@@ -83,7 +83,7 @@ struct GradientGeometry: Friendly {
         height / 2
     }
 
-    /// Whether a radial gradient's ellipse is the default one, centred and touching the
+    /// Whether a radial gradient's ellipse is the default one, centered and touching the
     /// box's sides.
     var isDefaultEllipse: Bool {
         radiusX == 0.5 && radiusY == 0.5 && center == .center

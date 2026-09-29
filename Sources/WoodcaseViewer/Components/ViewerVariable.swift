@@ -19,7 +19,7 @@ import Woodcase
 /// write names the variable. That is where ``lastEditor`` comes from.
 public struct ViewerVariable: Friendly, Identifiable {
     /// One themed variant of a variable: the axis pins that select it, its value, and —
-    /// for a colour variable — the swatch to draw beside that value.
+    /// for a color variable — the swatch to draw beside that value.
     ///
     /// Nested rather than filed on its own: it has no use outside a ``ViewerVariable``,
     /// and it exists to give the expanded table one strongly-typed row instead of a
@@ -31,8 +31,8 @@ public struct ViewerVariable: Friendly, Identifiable {
         ///   - axis: How the variant's axis pins read — `mode=light`, or `*` for the
         ///     variant that applies unconditionally.
         ///   - value: The variant's value, described as text.
-        ///   - swatch: A `#RRGGBB` colour to draw beside the value, when the owning
-        ///     variable is a colour.
+        ///   - swatch: A `#RRGGBB` color to draw beside the value, when the owning
+        ///     variable is a color.
         public init(axis: String, value: String, swatch: String? = nil) {
             self.axis = axis
             self.value = value
@@ -46,8 +46,8 @@ public struct ViewerVariable: Friendly, Identifiable {
         /// The variant's value, described as text.
         public let value: String
 
-        /// A `#RRGGBB` colour to draw beside the value, when the owning variable is a
-        /// colour.
+        /// A `#RRGGBB` color to draw beside the value, when the owning variable is a
+        /// color.
         public let swatch: String?
     }
 
@@ -57,7 +57,7 @@ public struct ViewerVariable: Friendly, Identifiable {
     ///   - name: The variable's name, as `$name` refers to it.
     ///   - type: Its declared type.
     ///   - value: Its value under the current theme, as text.
-    ///   - swatch: A `#RRGGBB` colour to draw beside it, when the value is a colour.
+    ///   - swatch: A `#RRGGBB` color to draw beside it, when the value is a color.
     ///   - variants: Its themed variants, oldest declared first.
     ///   - lastEditor: The identity that last wrote it, when the log says.
     ///   - lastChange: When that write happened.
@@ -93,7 +93,7 @@ public struct ViewerVariable: Friendly, Identifiable {
     /// Its value under the current theme, as text.
     public let value: String
 
-    /// A `#RRGGBB` colour to draw beside it, when the value is a colour.
+    /// A `#RRGGBB` color to draw beside it, when the value is a color.
     public let swatch: String?
 
     /// Its themed variants, oldest declared first.
@@ -181,7 +181,7 @@ public struct ViewerVariable: Friendly, Identifiable {
     ///
     /// - Parameter variable: The variable whose variants to read.
     /// - Returns: One row per themed variant, each carrying a swatch when the variable
-    ///   is a colour. A variable with a simple (unthemed) value has none — its one value
+    ///   is a color. A variable with a simple (unthemed) value has none — its one value
     ///   already reads in the summary row, with nothing to tabulate beside it.
     static func variants(of variable: PenVariable) -> [Variant] {
         guard case let .themed(values) = variable.value else { return [] }

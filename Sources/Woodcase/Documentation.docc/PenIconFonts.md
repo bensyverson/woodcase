@@ -84,7 +84,7 @@ Core Text instead moves a variable font's `opsz` axis to the point size unless t
 
 The font build is not the difference. Woodcase's 2.926 files and the editor's 2.881 files draw `vpn_lock`, `help`, `home`, `search` and `settings` with the same bounds at every axis setting probed, and the two builds score the same against Pen's export at optical size 24 (`xcrun swift scripts/icon-placement-fit.swift Tests/WoodcaseTests/Fixtures/render-icon-placement.pen --opsz 24`, then again with `--material-fonts <dir>` holding the editor's downloads; `--opsz auto` reproduces the old figures). Woodcase keeps the newer build. Its name table is a superset of the editor's: 4,211 names to 3,810, and every editor name resolves to the same glyph.
 
-Kept on purpose: the editor's own name table lacks some names the font has, `expand_more` and `expand_less` among them, and draws its `help` placeholder for them. Woodcase resolves the real icon. Pen's behaviour is a gap in its table, not a rule of the format, so Woodcase does not copy it.
+Kept on purpose: the editor's own name table lacks some names the font has, `expand_more` and `expand_less` among them, and draws its `help` placeholder for them. Woodcase resolves the real icon. Pen's behavior is a gap in its table, not a rule of the format, so Woodcase does not copy it.
 
 Material Symbols icons accept both hyphenated and underscored names — `vpn-lock` and `vpn_lock` both resolve correctly.
 
@@ -105,18 +105,18 @@ Pen places an icon's glyph by the **font's metrics, never by its ink**, and the 
 and the generated SwiftUI (`PenIconShape`) follow the same rule:
 
 - **Size.** The font size is the shorter side of the box.
-- **Across.** The glyph's advance is centred across the box.
-- **Down.** The line box is centred down the box. The line box is the font's ascent plus
+- **Across.** The glyph's advance is centered across the box.
+- **Down.** The line box is centered down the box. The line box is the font's ascent plus
   descent, **each rounded to a whole point at 14 pt** and then scaled to the icon's size.
   So the baseline sits at `height / 2 + size × (A − D) / 28`, where `A` and `D` are the
   ascent and descent at 14 pt, rounded.
 
 For Lucide and Phosphor (ascent one em, descent zero) and Material Symbols (1.1 and 0.1
-em) the baseline therefore lands on the bottom of an em square centred in the box. For
+em) the baseline therefore lands on the bottom of an em square centered in the box. For
 Feather (ascent 0.9375, descent 0.0625 em: 13.125 and 0.875 at 14 pt, which round to 13 and 1)
 it lands at 13/14 of the em, 0.43 pt higher at 48 pt than unrounded metrics would put it.
-A glyph whose ink is not centred in its em, such as Phosphor's `chat-dots-thin` or Material's
-`vpn_lock`, therefore sits off-centre in its box, as it does in Pen.
+A glyph whose ink is not centered in its em, such as Phosphor's `chat-dots-thin` or Material's
+`vpn_lock`, therefore sits off-center in its box, as it does in Pen.
 
 The evidence is `Tests/WoodcaseTests/Fixtures/render-icon-placement.pen`: one artboard per
 bundled library, each with two glyphs in 24 × 24, 48 × 48, 64 × 32 and 32 × 64 boxes, and
@@ -131,11 +131,11 @@ pinned in `PenIconPlacementTests`.
 
 The 14 pt reference size is fitted, not read from Pen's source. Half-up rounding at 28 or
 42 pt fits the six bundled fonts equally well, and 14 is Pen's default text size. A custom
-icon font whose metrics round differently at those sizes would tell them apart. Centring the
-advance and centring the em square cannot be told apart either, because every bundled glyph
+icon font whose metrics round differently at those sizes would tell them apart. Centering the
+advance and centering the em square cannot be told apart either, because every bundled glyph
 probed has an advance of exactly one em.
 
-Before this rule, both renderers centred the glyph's ink bounds. That put glyphs 0.5–2.9 pt
+Before this rule, both renderers centered the glyph's ink bounds. That put glyphs 0.5–2.9 pt
 off Pen's (Phosphor `chat-dots-thin` at 48 pt was 2.9 pt high) and scored `icon-font-test`
 5.25 MAE against Pen. With the rule it scores 1.24, and 0.89 once Material Symbols also keeps its default optical size (*Which cut of the glyph*).
 

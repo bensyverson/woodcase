@@ -264,7 +264,7 @@ tasks:
               - The measured numbers and the reproducing command are recorded in the doc
       - title: Vision helpers in PixelPeeper
         desc: |
-          Cross-repo. Add to the PixelPeeper library product (../PixelPeeper) a small overlay API: grid with labelled ticks, outlines around rectangles (default or given color), and labels, drawn onto a CGImage with a caller-supplied scale between image pixels and source coordinates. Woodcase then depends on the PixelPeeper library (a pinned GitHub revision, not a path) and wires `shot --grid/--outline` and the viewer's click-outline through it. sleepy migrates its own ShotGrid to the shared code afterwards (its own repo, its own job). This leaf is the Woodcase half: the dependency, the wiring, and a snapshot test.
+          Cross-repo. Add to the PixelPeeper library product (../PixelPeeper) a small overlay API: grid with labeled ticks, outlines around rectangles (default or given color), and labels, drawn onto a CGImage with a caller-supplied scale between image pixels and source coordinates. Woodcase then depends on the PixelPeeper library (a pinned GitHub revision, not a path) and wires `shot --grid/--outline` and the viewer's click-outline through it. sleepy migrates its own ShotGrid to the shared code afterwards (its own repo, its own job). This leaf is the Woodcase half: the dependency, the wiring, and a snapshot test.
         blockedBy: [shot]
         criteria:
           - shot --outline Dashboard/Header draws a box at the node's layout rect at every --max

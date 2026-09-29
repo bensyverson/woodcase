@@ -4,7 +4,7 @@
 //
 
 extension ReactEmitter {
-    /// A gradient's stops as CSS colours and positions (0…1).
+    /// A gradient's stops as CSS colors and positions (0…1).
     typealias GradientStops = [(color: String, position: Double)]
 
     /// The CSS for a gradient fill laid out over the node's box, drawn on an element that
@@ -18,7 +18,7 @@ extension ReactEmitter {
     /// (``cssRadialGradient(_:stops:box:outsets:)``), and an angular one as a conic gradient
     /// turned to Pen's start and bent to a stretched box's bearings
     /// (``cssConicGradient(_:stops:box:outsets:)``). Pen *pads* a gradient beyond the node's
-    /// box — an outer stroke's outer band shows the end colours
+    /// box — an outer stroke's outer band shows the end colors
     /// (`project/2026-09-26-text-and-stroke-fills.md`, finding 2) — and so does each of these.
     ///
     /// - Parameters:
@@ -49,8 +49,8 @@ extension ReactEmitter {
         cssGradient(gradient, box: box)?.backgroundLayer
     }
 
-    /// A gradient's stops as CSS colours and positions (0…1), or `nil` when it has none.
-    /// The fill's opacity is baked into each colour's alpha, as Pen's own HTML export does.
+    /// A gradient's stops as CSS colors and positions (0…1), or `nil` when it has none.
+    /// The fill's opacity is baked into each color's alpha, as Pen's own HTML export does.
     static func gradientStops(_ gradient: PenFill.PenGradientFill) -> GradientStops? {
         guard let colors = gradient.colors, !colors.isEmpty else { return nil }
         let opacity = gradient.opacity?.literalValue ?? 1

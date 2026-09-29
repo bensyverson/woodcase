@@ -14,7 +14,7 @@ import Foundation
     import Security
 #endif
 
-/// Default ``RemoteDataFetching`` implementation, over `URLSession`, that honours the
+/// Default ``RemoteDataFetching`` implementation, over `URLSession`, that honors the
 /// proxy environment.
 ///
 /// When the environment names no proxy this is plain `URLSession.shared`, and the

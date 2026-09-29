@@ -15,7 +15,7 @@ import Foundation
 /// `Support/` files, `PenSupport.swift` and one `PenSupport+<Concern>.swift` per concern.
 ///
 /// It writes frames, groups, rectangles, ellipses, arcs, polygons, paths, lines, icons and text
-/// with their paints — colours, gradients, images, stacks, fill blend modes and opacity,
+/// with their paints — colors, gradients, images, stacks, fill blend modes and opacity,
 /// on shapes and on text — their strokes, and their effects, transforms and blend modes.
 /// A path, polygon, line or arc is a `Shape` the file declares below its view.
 /// A reusable component is a public view struct with a typed `let` per prop, and an
@@ -26,7 +26,7 @@ import Foundation
 /// The document's themes and variables are `Theme/PenTheme.swift`, a typed value the views
 /// read from the environment (``SwiftUITheme``): a variable is `theme.<name>`, a node that
 /// sets a theme sets it on its subtree with `penTheme(…)`, and a light/dark axis follows
-/// SwiftUI's colour scheme.
+/// SwiftUI's color scheme.
 ///
 /// Every component file ends with a `#Preview` per state a caller can pin, repeated under
 /// each of the theme's other options; the package carries a catalog of the whole kit

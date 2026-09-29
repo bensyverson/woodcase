@@ -7,7 +7,7 @@ import Foundation
 import Testing
 @testable import Woodcase
 
-/// Positions and colours of one patch at known parameters, against hand-computed values.
+/// Positions and colors of one patch at known parameters, against hand-computed values.
 struct PenMeshPatchTests {
     typealias Vector = PenMeshPoint.Vector
     typealias Support = MeshTestSupport
@@ -57,7 +57,7 @@ struct PenMeshPatchTests {
         }
     }
 
-    @Test("Default quarter-length handles parametrise the square non-uniformly")
+    @Test("Default quarter-length handles parametrize the square non-uniformly")
     func defaultHandles() throws {
         let patch = try Support.fourColor().patch(column: 0, row: 0)
         // x(u) = B(u; 0, 1/4, 3/4, 1); at u = 1/4 that is 29/128.
@@ -73,7 +73,7 @@ struct PenMeshPatchTests {
         #expect(close(patch.position(u: 0.25, v: 0.75), Vector(9991.0 / 40960, 33219.0 / 40960)))
     }
 
-    @Test("Colour is the bilinear blend of the corners at smoothstep-eased parameters")
+    @Test("Color is the bilinear blend of the corners at smoothstep-eased parameters")
     func colorEasing() throws {
         let patch = try Support.fourColor().patch(column: 0, row: 0)
         #expect(close(patch.color(u: 0, v: 0), Support.red))
@@ -85,7 +85,7 @@ struct PenMeshPatchTests {
         #expect(close(patch.color(u: 0.25, v: 0.75), expected))
     }
 
-    @Test("Colour follows the parameters, not the position, so curved handles do not change it")
+    @Test("Color follows the parameters, not the position, so curved handles do not change it")
     func colorIgnoresGeometry() throws {
         let straight = try Support.fourColor().patch(column: 0, row: 0)
         let curved = try Support.curved().patch(column: 0, row: 0)

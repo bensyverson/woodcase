@@ -62,7 +62,7 @@ package struct WoodcaseCommand: AsyncParsableCommand {
     /// same number across every tool in the family, so the translation happens here —
     /// once, for every verb — rather than in each verb's `run()`.
     ///
-    /// Everything else keeps ArgumentParser's behaviour: `--help` and `CleanExit` print
+    /// Everything else keeps ArgumentParser's behavior: `--help` and `CleanExit` print
     /// on stdout and exit 0, and an ``ArgumentParser/ExitCode`` thrown by a verb is
     /// obeyed silently, because whoever threw it has already said what happened.
     /// The isolation is explicit because it used to be inferred: `@main` gives the
@@ -77,7 +77,7 @@ package struct WoodcaseCommand: AsyncParsableCommand {
     /// reason — which is what lets the same library run a document off it elsewhere.
     @MainActor
     package static func main() async {
-        // The vector is normalised before the parser sees it, because
+        // The vector is normalized before the parser sees it, because
         // ArgumentParser cannot express an option whose value may be omitted.
         let arguments = BareOptionValue.filled(Array(CommandLine.arguments.dropFirst()))
         do {

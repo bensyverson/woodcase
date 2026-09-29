@@ -5,7 +5,7 @@
 
 import Foundation
 
-/// The document root's wire form: the modelled keys, plus every other root key a file
+/// The document root's wire form: the modeled keys, plus every other root key a file
 /// wrote, kept in ``PenDocument/extras``.
 public extension PenDocument {
     private enum CodingKeys: String, CodingKey, CaseIterable {
@@ -20,7 +20,7 @@ public extension PenDocument {
     /// - Parameter decoder: The decoder to read from. In ``PenDecodingMode/file`` an
     ///   unclaimed root key is kept in ``extras``; in ``PenDecodingMode/authoring`` it is
     ///   refused.
-    /// - Throws: `DecodingError` if a modelled key has the wrong shape, or an unclaimed
+    /// - Throws: `DecodingError` if a modeled key has the wrong shape, or an unclaimed
     ///   key is refused.
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)

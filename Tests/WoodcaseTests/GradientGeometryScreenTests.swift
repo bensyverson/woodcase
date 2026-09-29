@@ -28,7 +28,7 @@ struct GradientGeometryScreenTests {
         )
     }
 
-    /// Rotation, centre and size of each geometry the ramp and bearing tests walk.
+    /// Rotation, center and size of each geometry the ramp and bearing tests walk.
     private static let geometries: [(Double, (Double, Double), (Double, Double))] = [
         (0, (0.5, 0.5), (1, 1)),
         (45, (0.5, 0.5), (1, 1)),

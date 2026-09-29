@@ -11,7 +11,7 @@ enum PenStrokeRenderer {
     /// Renders a node's stroke for a shape path into the given context.
     ///
     /// Reads the .pen 2.17 flat keys off the node payload: a node with no `stroke` paint
-    /// draws nothing, and absent alignment, join and cap keys mean centre, mitre and butt.
+    /// draws nothing, and absent alignment, join and cap keys mean center, miter and butt.
     /// Every paint `PenFillRenderer` draws — stacked, translucent and blended fills
     /// included — is drawn through the stroke's outline, laid out over `rect`.
     ///
@@ -68,7 +68,7 @@ enum PenStrokeRenderer {
         }
     }
 
-    /// A single solid colour is stroked directly with `strokePath()`, as it always was, so
+    /// A single solid color is stroked directly with `strokePath()`, as it always was, so
     /// every solid stroke keeps its exact pixels.
     private static func renderSolid(_ color: CGColor, path: CGPath, style: Style, in context: CGContext) {
         context.saveGState()
@@ -107,7 +107,7 @@ enum PenStrokeRenderer {
     }
 
     /// Clips to the shape for an inner stroke, or to its complement within `outerBounds`
-    /// for an outer one; a centred stroke is not clipped.
+    /// for an outer one; a centered stroke is not clipped.
     private static func clipToAlignment(_ style: Style, path: CGPath, outerBounds: CGRect, in context: CGContext) {
         switch style.alignment {
         case .center:

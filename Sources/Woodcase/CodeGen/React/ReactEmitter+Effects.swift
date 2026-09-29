@@ -13,7 +13,7 @@ extension ReactEmitter {
     /// Pen draws a node's outer shadows, then its fills, then its inner shadows, then its
     /// stroke. CSS paints outer box-shadows under the background and inset ones over it,
     /// and within a list the first entry on top, so the list is the stroke's shadows (an
-    /// inset one, a spread one for a centred or outer stroke — ``emitStroke(_:)``), then the
+    /// inset one, a spread one for a centered or outer stroke — ``emitStroke(_:)``), then the
     /// inner shadows top first, then the outer shadows top first, each spread by the
     /// stroke's reach past the box (``shadowSpread(_:)``).
     ///

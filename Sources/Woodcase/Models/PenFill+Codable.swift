@@ -5,7 +5,7 @@
 
 import Foundation
 
-/// A fill's wire form: a bare colour string, or an object whose `type` selects the payload.
+/// A fill's wire form: a bare color string, or an object whose `type` selects the payload.
 extension PenFill {
     /// Every fill `type` this build models, in the .pen file's spelling.
     enum FillType: String, Codable, CaseIterable {
@@ -20,10 +20,10 @@ extension PenFill {
         case type
     }
 
-    /// Decodes a fill: a colour string, or a fill object.
+    /// Decodes a fill: a color string, or a fill object.
     ///
-    /// Each modelled payload keeps the keys it does not claim in its `extras`. An
-    /// unrecognised `type` becomes ``unknown(typeName:payload:)`` in
+    /// Each modeled payload keeps the keys it does not claim in its `extras`. An
+    /// unrecognized `type` becomes ``unknown(typeName:payload:)`` in
     /// ``PenDecodingMode/file`` and stays a decoding error in ``PenDecodingMode/authoring``,
     /// where `"solid"` for `"color"` is the usual mistake.
     ///
@@ -84,7 +84,7 @@ extension PenFill {
 
     // MARK: - Private
 
-    /// Writes one modelled payload as a fill object: its extras, its `type`, its keys.
+    /// Writes one modeled payload as a fill object: its extras, its `type`, its keys.
     private func encode(_ payload: some Encodable, as type: FillType, extras: PenExtras, to encoder: Encoder) throws {
         try extras.encode(into: encoder)
         var container = encoder.container(keyedBy: CodingKeys.self)
@@ -92,7 +92,7 @@ extension PenFill {
         try payload.encode(to: encoder)
     }
 
-    /// Decodes the payload a modelled `type` selects, with its extras.
+    /// Decodes the payload a modeled `type` selects, with its extras.
     private static func decode(_ type: FillType, from decoder: Decoder) throws -> PenFill {
         switch type {
         case .color:

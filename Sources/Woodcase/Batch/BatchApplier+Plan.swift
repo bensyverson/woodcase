@@ -17,7 +17,7 @@ extension BatchApplier {
     ///   - tags: Tag name → node id, for the tags earlier lines declared.
     /// - Returns: The translated plan.
     /// - Throws: ``EditingError`` from address resolution, or ``BatchError``
-    ///   when the grammar was used in a way the document cannot honour.
+    ///   when the grammar was used in a way the document cannot honor.
     static func plan(
         _ operation: BatchOperation,
         in document: EditableDocument,

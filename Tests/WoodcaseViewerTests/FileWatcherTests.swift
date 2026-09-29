@@ -67,7 +67,7 @@ struct FileWatcherTests {
             Task { await watcher.stop() }
         }
 
-        // Exactly how PenFileTransaction commits: write a neighbour, then rename over.
+        // Exactly how PenFileTransaction commits: write a neighbor, then rename over.
         let temporary = scratch.appendingPathComponent(".batch.pen.tmp")
         try Data("{\"version\":\"2.17\",\"children\":[]}".utf8).write(to: temporary)
         _ = try FileManager.default.replaceItemAt(file, withItemAt: temporary)

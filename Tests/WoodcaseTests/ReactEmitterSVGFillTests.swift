@@ -10,9 +10,9 @@ import Testing
 /// The `fill` attribute React writes on a shape it draws as SVG — a polygon, a path, an
 /// arc or a donut.
 ///
-/// Pen paints only enabled fills, the last over the others, so the one colour an SVG
+/// Pen paints only enabled fills, the last over the others, so the one color an SVG
 /// `fill` can carry is the topmost enabled solid, and a shape with none is `fill="none"` —
-/// the rule a text's and an icon's colour follow (`ReactEmitterUnfilledPaintTests`). Any
+/// the rule a text's and an icon's color follow (`ReactEmitterUnfilledPaintTests`). Any
 /// other fill — a gradient, an image, a mesh, a stack — is one filled copy of the shape per
 /// layer, painted by a paint server laid out over the node's box, as Pen lays a fill out.
 struct ReactEmitterSVGFillTests {
@@ -37,7 +37,7 @@ struct ReactEmitterSVGFillTests {
         return try #require(files.first { $0.path == "components/Card.tsx" }).content
     }
 
-    @Test("A disabled colour under an enabled one is skipped", arguments: shapes)
+    @Test("A disabled color under an enabled one is skipped", arguments: shapes)
     func skipsDisabled(shape: String) throws {
         let content = try card(shape: shape, fill: ##"[{"type": "color", "color": "#FF0000", "enabled": false}, "#0000FF"]"##)
         #expect(content.contains(##"fill="#0000FF""##), "\(content)")
@@ -51,8 +51,8 @@ struct ReactEmitterSVGFillTests {
         #expect(!content.contains("#FF0000"))
     }
 
-    @Test("Of two enabled colours, the top one is the fill", arguments: shapes)
-    func topColour(shape: String) throws {
+    @Test("Of two enabled colors, the top one is the fill", arguments: shapes)
+    func topColor(shape: String) throws {
         let content = try card(shape: shape, fill: ##"["#FF0000", "#0000FF"]"##)
         #expect(content.contains(##"fill="#0000FF""##), "\(content)")
     }
@@ -87,12 +87,12 @@ struct ReactEmitterSVGFillTests {
         #expect(content.contains(##"fill="url(#wc-paint-"##), "\(content)")
     }
 
-    @Test("A colour under a gradient is two copies of the shape, the colour first", arguments: shapes)
+    @Test("A color under a gradient is two copies of the shape, the color first", arguments: shapes)
     func stackedFills(shape: String) throws {
         let content = try card(shape: shape, fill: ##"["#00FF00", \##(Self.gradient)]"##)
-        let colour = try #require(content.range(of: ##"fill="#00FF00""##), "\(content)")
+        let color = try #require(content.range(of: ##"fill="#00FF00""##), "\(content)")
         let gradient = try #require(content.range(of: ##"fill="url(#wc-paint-"##), "\(content)")
-        #expect(colour.lowerBound < gradient.lowerBound)
+        #expect(color.lowerBound < gradient.lowerBound)
     }
 
     @Test("A painted fill under a solid stroke keeps the stroke, over the fill and unfilled", arguments: shapes)

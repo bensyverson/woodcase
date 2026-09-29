@@ -57,7 +57,7 @@ struct PreviewCatalogTests {
     /// is a decision: either it renders and it earns a preview, or it is listed here
     /// with a reason a reader can disagree with.
     static let notComponents: [String: String] = [
-        "ActorColor.swift": "a hashed colour, not markup — it is what an avatar is drawn in",
+        "ActorColor.swift": "a hashed color, not markup — it is what an avatar is drawn in",
         "ConnectionState.swift": "the fact a live badge renders; the badge has the previews",
         "EditMarker.swift": "a model derived from the log; ArtboardOverlay draws it, and previews it",
         "Follow.swift": "view state; FollowPicker renders it and has the previews",

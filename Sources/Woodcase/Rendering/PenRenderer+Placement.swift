@@ -32,10 +32,10 @@ extension PenRenderer {
 
         context.saveGState()
 
-        // A node's content is drawn at its unturned box, centred in its layout rect — the
-        // bounds of the turned box — and turned and flipped about that centre. For a node
+        // A node's content is drawn at its unturned box, centered in its layout rect — the
+        // bounds of the turned box — and turned and flipped about that center. For a node
         // placed by its own x/y the layout has already moved the bounds to where turning
-        // about the anchor puts them, so the centre pivot lands exactly there. A group's box
+        // about the anchor puts them, so the center pivot lands exactly there. A group's box
         // is its children's union, which need not start at its anchor: the context then moves
         // to the anchor, the origin its children's rects are measured from.
         let box = PenLayoutEngine.unturnedBox(of: ref.node, rect: rect, layoutRects: layoutRects)

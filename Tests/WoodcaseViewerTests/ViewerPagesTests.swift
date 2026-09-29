@@ -299,7 +299,7 @@ struct ViewerPagesTests {
         #expect(body.contains("is not axis:value"))
     }
 
-    @Test("A recent edit reaches the page as a coloured row and a marker over the render")
+    @Test("A recent edit reaches the page as a colored row and a marker over the render")
     func recentEditsShowOnThePage() async throws {
         let bench = try await Bench()
         defer { Task { await bench.stop() } }
@@ -320,7 +320,7 @@ struct ViewerPagesTests {
         #expect(map.contains("class=\"v-map-board is-touched\" data-artboard=\"Cnv01\""))
         #expect(map.contains("--v-actor: hsl(152 85% 48%)"))
         #expect(!map.contains("data-artboard=\"Brd01\" title=\"Board\" style=\"--v-board-x: 500; --v-board-y: 40; --v-board-w: 200; --v-board-h: 100;"),
-                "an artboard nobody touched carries no colour")
+                "an artboard nobody touched carries no color")
     }
 
     @Test("A ?node= on the file's own URL opens the artboard that holds it, not the map")

@@ -94,7 +94,7 @@ struct PenStrokeFillTests {
         ] {
             #expect(abs(ours - theirs) < 0.5, "\(artboard) \(name): \(ours), Pen's \(theirs)")
         }
-        // The image's first and last pixel centres sit half an image pixel inside the box.
+        // The image's first and last pixel centers sit half an image pixel inside the box.
         #expect(abs(fit.u.stop0 - (Self.nodeBox.minX + 200.0 / 512)) < 0.5, "\(artboard) u0 \(fit.u.stop0)")
         #expect(abs(fit.u.stop1 - (Self.nodeBox.maxX - 200.0 / 512)) < 0.5, "\(artboard) u1 \(fit.u.stop1)")
     }

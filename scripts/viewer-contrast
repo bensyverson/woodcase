@@ -3,7 +3,7 @@
 
 `sleepy contrast` answers one page at a time and reports one row per text node, so a
 palette failure comes back 85 times over — once per state that happens to carry the
-token. This walks every state in both colour schemes and collapses the rows into the
+token. This walks every state in both color schemes and collapses the rows into the
 *pairs* that actually differ: an ink on a ground, at a size, with the worst ratio seen
 and how many states carry it. That is the shape a token decision is made from.
 

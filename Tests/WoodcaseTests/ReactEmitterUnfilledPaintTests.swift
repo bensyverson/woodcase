@@ -7,11 +7,11 @@ import Foundation
 import Testing
 @testable import Woodcase
 
-/// What the React emitter writes for the colour of a text's or an icon's glyphs when the
+/// What the React emitter writes for the color of a text's or an icon's glyphs when the
 /// node has no enabled paint, or paint that is not what it seems.
 ///
 /// Pen draws a text or icon with no enabled fill — no `fill` key, an empty list, only
-/// disabled fills — as nothing, and an enabled solid whose colour does not parse as black
+/// disabled fills — as nothing, and an enabled solid whose color does not parse as black
 /// (`render-text-unfilled.pen`, `PenUnfilledTextPaintTests`). An emitted element with no
 /// `color` inherits the page's, which is black, so "nothing" has to be written out.
 struct ReactEmitterUnfilledPaintTests {
@@ -55,7 +55,7 @@ struct ReactEmitterUnfilledPaintTests {
 
     // MARK: - Text
 
-    @Test("A text with no enabled paint writes a transparent colour", arguments: [
+    @Test("A text with no enabled paint writes a transparent color", arguments: [
         nil, "[]", disabledBlack, disabledRamp,
     ])
     func unfilledTextIsTransparent(fill: String?) throws {
@@ -70,7 +70,7 @@ struct ReactEmitterUnfilledPaintTests {
         #expect(!content.contains("zzzzzz"))
     }
 
-    @Test("An unfilled text a hover state colours is transparent at rest, not the hover colour")
+    @Test("An unfilled text a hover state colors is transparent at rest, not the hover color")
     func unfilledTextStateBase() throws {
         let document = try PenParser.parse("""
         {"version": "2.17",
@@ -90,7 +90,7 @@ struct ReactEmitterUnfilledPaintTests {
 
     // MARK: - Icon
 
-    @Test("An icon with no enabled paint writes a transparent colour", arguments: [
+    @Test("An icon with no enabled paint writes a transparent color", arguments: [
         nil, "[]", disabledBlack, disabledRamp,
     ])
     func unfilledIconIsTransparent(fill: String?) throws {
@@ -98,15 +98,15 @@ struct ReactEmitterUnfilledPaintTests {
         #expect(content.contains(##"color="transparent""##), "\(fill ?? "no fill")")
     }
 
-    @Test("An icon skips a disabled colour for the enabled one above it")
-    func iconHonoursEnabled() throws {
+    @Test("An icon skips a disabled color for the enabled one above it")
+    func iconHonorsEnabled() throws {
         let content = try icon(fill: Self.disabledRedUnderBlue)
         #expect(content.contains(##"color="#0000FF""##))
         #expect(!content.contains("#FF0000"))
     }
 
-    @Test("An icon of two enabled colours takes the top one, as Pen paints it over the other")
-    func iconTakesTopColour() throws {
+    @Test("An icon of two enabled colors takes the top one, as Pen paints it over the other")
+    func iconTakesTopColor() throws {
         let content = try icon(fill: ##"["#FF0000", "#0000FF"]"##)
         #expect(content.contains(##"color="#0000FF""##))
     }

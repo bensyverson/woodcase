@@ -77,7 +77,7 @@ struct PenMeshPointMalformedTests {
         #expect(point.handles(defaults: PenMeshPoint.Handles.defaults(columns: 2, rows: 2)) == nil)
     }
 
-    @Test("Canonicalising leaves a malformed point as written")
+    @Test("Canonicalizing leaves a malformed point as written")
     func canonicalLeavesIt() throws {
         let point = try decoded("[0.123456,0.2,9]")
         #expect(point.canonicalized(defaults: PenMeshPoint.Handles.defaults(columns: 2, rows: 2)) == point)

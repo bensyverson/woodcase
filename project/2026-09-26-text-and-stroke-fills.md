@@ -6,7 +6,7 @@ text first, once we know exactly what Pen does.
 
 Evidence is in `local/NXgRKl-fills/` (gitignored): the fixture, its generator, Pen's reference renders at 1x and 2x,
 Woodcase's renders, the analysis scripts and their outputs. Every figure below names the script that reproduces it.
-All behaviour is established from Pen's **outputs** — PNG and PDF exports, its re-saved `.pen`, and its HTML export —
+All behavior is established from Pen's **outputs** — PNG and PDF exports, its re-saved `.pen`, and its HTML export —
 never from its source.
 
 ## Findings first
@@ -18,9 +18,9 @@ never from its source.
    per line: a three-line vertical gradient runs once, top to bottom, across the whole box, and every line of ragged
    left-aligned text shares one horizontal ramp (finding 3 has the numbers).
 2. **Pen paints strokes with every fill type, and the domain is the node's box, whatever the alignment.** For
-   rectangles, ellipses, paths and frames (uniform and per-side widths), inner, centre and outer strokes all place
+   rectangles, ellipses, paths and frames (uniform and per-side widths), inner, center and outer strokes all place
    stop 0 and stop 1 on the node's layout edges, never on the stroke outline's edges. Outside that box a gradient
-   **pads** (keeps its end colour), while an image is **decal** (draws nothing): an outer stroke painted with an
+   **pads** (keeps its end color), while an image is **decal** (draws nothing): an outer stroke painted with an
    image in `stretch` or `fit` mode is invisible, and in `fill` mode only the part overlapping the covered image
    rectangle shows. A shader is evaluated in node-box coordinates, `@resolution` = node size.
 3. **Measured domains** (Pen 2x renders, `python3 analyze.py pen text-and-stroke-fills 2` and
@@ -29,7 +29,7 @@ never from its source.
    | Case | Node box on the axis | Fitted stop 0 → stop 1 | RMS |
    |---|---|---|---|
    | text, fixed-width 480, `"MM"` left-aligned | x 40 → 520 | 39.98 → 519.96 | 0.62 pt |
-   | text, same, centred | x 40 → 520 | 40.05 → 519.94 | 0.40 pt |
+   | text, same, centered | x 40 → 520 | 40.05 → 519.94 | 0.40 pt |
    | text, fixed-width-height 480×300, one line at top | y 40 → 340 | 40.01 → 339.95 | 0.39 pt |
    | text, same, `textAlignVertical: middle` | y 40 → 340 | 40.01 → 339.98 | 0.25 pt |
    | text, 3 wrapped lines, vertical gradient | y 40 → 298 | 40.11 → 298.10 (each line alone: the same) | 0.26 pt |
@@ -37,14 +37,14 @@ never from its source.
    | text, auto width, lineHeight 2, vertical | y 40 → 184 | 39.99 → 184.01 | 0.12 pt |
    | text, auto width, horizontal | x 40 → **389** | 40.00 → **385.00** | 0.39 pt |
    | icon (lucide star) 120×120 | x 40 → 160 | 40.00 → 160.00 | — |
-   | rect stroke 16, inner / centre / outer | x 60 → 260 | 60.01→260.00 / 59.99→260.01 / 60.00→260.00 | ≤ 0.25 pt |
+   | rect stroke 16, inner / center / outer | x 60 → 260 | 60.01→260.00 / 59.99→260.01 / 60.00→260.00 | ≤ 0.25 pt |
    | rect stroke 16 outer, vertical | y 60 → 180 | 59.99 → 179.98 | 0.13 pt |
    | ellipse stroke 16 outer | x 60 → 260 | 60.00 → 260.00 | 0.23 pt |
-   | path (zig-zag) stroke 12 centre | x 60 → 260 | 60.00 → 260.00 | 0.22 pt |
+   | path (zig-zag) stroke 12 center | x 60 → 260 | 60.00 → 260.00 | 0.22 pt |
    | frame, per-side widths 4/16/24/8 | x 60 → 260 | 60.00 → 260.00 | 0.23 pt |
    | UV image, stretch, on rect/ellipse/path/per-side strokes | node box | u 60.4→259.6, v 60.5→179.5 (path: →159.5) | ≤ 0.23 pt |
    | UV image, `fill` mode, outer stroke | aspect-fill of the box: x 40 → 280 | u 40.45 → 279.48 | 0.27 pt |
-   | shader (u = x/res, v = y/res), centre stroke 24 | node box | u 59.99 → 260.01, v 180.00 → 60.00 (GL y-up) | 0.22 pt |
+   | shader (u = x/res, v = y/res), center stroke 24 | node box | u 59.99 → 260.01, v 180.00 → 60.00 (GL y-up) | 0.22 pt |
 
    The one exception is **auto-width text on the horizontal axis**: the domain starts at the box's left edge but is
    1–7 pt narrower than the width Pen reports for the node (`autoprobe/auto.pen`: 140→138, 194→192, 294→287,
@@ -59,24 +59,24 @@ never from its source.
    > **Confirmed in Pen.app 1.2.14 (2026-09-26, leaf `rjt7to`).** The app strips all three on load, saves none,
    > and its export draws none; see [what Pen drops from a file](2026-09-26-what-pen-drops-from-a-file.md).
    > `woodcase lint` now reports each as `text-style-stripped`.
-5. **Per-side stroke widths honour `strokeAlignment`, and the default is centre** — a bug in Woodcase for solid
+5. **Per-side stroke widths honor `strokeAlignment`, and the default is center** — a bug in Woodcase for solid
    strokes as much as for gradients. A frame with widths top 4, right 16, bottom 24, left 8, measured on the 2x
    export (`perside/perside.pen`):
 
    | Alignment | Pen left / right / top / bottom bands | Woodcase |
    |---|---|---|
-   | (unset = centre) | x 56–64, 252–268; y 58–62, 168–192 | x 60–68, 244–260; y 60–64, 156–180 (inner) |
+   | (unset = center) | x 56–64, 252–268; y 58–62, 168–192 | x 60–68, 244–260; y 60–64, 156–180 (inner) |
    | inner | x 60–68, 244–260; y 60–64, 156–180 | same — matches |
    | outer | x 52–60, 260–276; y 56–60, 180–204 | inner again |
 
    `PenStrokeRenderer.swift:80-84` says per-side strokes are "always inner … matching CSS/Pen border behavior";
    that documented reason is wrong. Pen's own HTML export agrees with its renders: it emits the per-side stroke as a
-   `border` with negative margins of half each width, i.e. centred.
+   `border` with negative margins of half each width, i.e. centered.
 
-   > **Fixed 2026-09-26 (leaf `yKT5m9`).** Woodcase now honours the alignment on frames, rectangles and browser
+   > **Fixed 2026-09-26 (leaf `yKT5m9`).** Woodcase now honors the alignment on frames, rectangles and browser
    > nodes, rounded corners included; see [the follow-up](2026-09-26-gradient-geometry-and-per-side-strokes.md).
 6. **Stacking, opacity and blend behave on text and strokes exactly as on shapes.** Twins (a 400×120 text box above a
-   400×120 rectangle with identical fills) show the same colours at the same relative positions for
+   400×120 rectangle with identical fills) show the same colors at the same relative positions for
    `["#00FF00", gradient@0.5]`, `[gradient, "#FFFFFF80"]`, gradient `opacity: 0.4` and `blendMode: multiply` over a
    solid. Each fill is composited through the glyph coverage separately: in the multiply twin, the glyph edges keep a
    faint green fringe where the rectangle (pixel-aligned edges) has none. A clip-per-fill implementation reproduces
@@ -87,7 +87,7 @@ never from its source.
    - **Text:** `background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
      color: transparent` with the paint as `background-image`, `background-size: 100% 100%`, `no-repeat` — the box
      domain again. Stacks become `background-color` plus `background-image` layers; fill opacity is baked into
-     stop alphas; image fills become `url()` with `cover`/`contain`; mesh and shader fills are rasterised into a
+     stop alphas; image fills become `url()` with `cover`/`contain`; mesh and shader fills are rasterized into a
      `data:image/webp` background. **Blend modes are dropped** (the multiply twin exports as a plain stack).
      Tailwind mode keeps the same declarations in an inline `style`.
    - **Uniform strokes:** an absolutely positioned `<svg>` over the node box. The stroke outline is pre-expanded into a
@@ -134,11 +134,11 @@ paint can be read back per pixel:
   pixel `R + B = 255`, so `t = B/255` is the ramp parameter and a least-squares fit of position against `t` gives
   where stops 0 and 1 sit. A **UV image** (256×128, R = u·255, G = v·255) does the same for image fills in two axes,
   and a **UV shader** (`gl_FragColor = vec4(gl_FragCoord.xy / u_resolution, 0, 1)`) for shader fills.
-- **Text domain probes (`txt-*`)**: auto width; fixed width with left and centre alignment; wrapped and hard-broken
+- **Text domain probes (`txt-*`)**: auto width; fixed width with left and center alignment; wrapped and hard-broken
   multi-line; fixed width and height with top and middle vertical alignment; rotated; underline/strikethrough.
 - **Twins (`twin-*`)**: fixed-size text over a same-size rectangle with the same fill(s) — linear, rotated linear with
-  centre/size, radial, angular, image stretch/fill/fit, mesh, shader, two stacks, multiply blend, fill opacity.
-- **Strokes (`stk-*`)**: rectangle inner/centre/outer with ramp and UV; UV `fill`/`fit` outer; radial, angular,
+  center/size, radial, angular, image stretch/fill/fit, mesh, shader, two stacks, multiply blend, fill opacity.
+- **Strokes (`stk-*`)**: rectangle inner/center/outer with ramp and UV; UV `fill`/`fit` outer; radial, angular,
   mesh, shader, stacked, multiply and opacity strokes; a stroke over a solid fill; ellipse; open zig-zag path;
   frames with per-side widths (with and without corner radius).
 - **Text strokes (`txt-stroke-*`)** and **icon gradient (`icon-grad`)**.
@@ -150,18 +150,18 @@ since Pen strips those keys (finding 4). Contact sheets: `sheet-pen-{text,twin,s
 
 ## What Woodcase does today
 
-| Surface | Code | Behaviour |
+| Surface | Code | Behavior |
 |---|---|---|
 | Text rendering | `PenTextRenderer.swift:164-168`, `:199-231` | One `kCTForegroundColorAttributeName`, the **last** enabled solid fill; gradient, image, mesh and shader fills are skipped, and with no solid fill the text is black. Stacked translucent solids collapse to the top one; fill `blendMode` is ignored. |
 | Icon rendering | `PenIconFontRenderer.swift:60` | Same `extractColor` — a gradient icon is black. |
 | Text stroke | `PenRenderer.swift:491-492` | `TextData` is `PenStrokable` (`PenNode+TextData.swift:11`), but the renderer never strokes text. That happens to match Pen. |
 | Underline / strikethrough | `PenTextRenderer.swift:174-180`, `:90-136`; `ReactEmitter+Text.swift:62-63` | Drawn and emitted. Pen strips and does not draw them (finding 4). |
-| Shape strokes | `PenStrokeRenderer.swift:14`, `:132-149` | The **first** enabled solid in `stroke` only; gradients, images, mesh, shader skipped; stacks collapse to one colour; `blendMode` on a colour stroke ignored. |
+| Shape strokes | `PenStrokeRenderer.swift:14`, `:132-149` | The **first** enabled solid in `stroke` only; gradients, images, mesh, shader skipped; stacks collapse to one color; `blendMode` on a color stroke ignored. |
 | Per-side strokes | `PenStrokeRenderer.swift:16-28`, `:80-130` | Always inner, whatever `strokeAlignment` says (finding 5). |
 | Shape fills (the reusable part) | `PenFillRenderer.swift:10-66`, `:142-183` | Draws every fill type except mesh and shader; the gradient/image **domain is `path.boundingBox`** (`:79`, `:152`), which equals the node box for shapes — but would be the glyph-ink box for a glyph outline, the wrong domain. |
 | Even-odd shape fills | `PenRenderer.swift:592-625` | Solid fills only: a donut ellipse or even-odd path with a gradient fill draws nothing. Not in the brief; same fix shape. |
-| React text | `ReactEmitter+Text.swift:23-28`, `ReactEmitter+Styles.swift:174-178` | `color:` from the **first** enabled fill if it is solid; a gradient first fill emits no colour at all (the text inherits). Note: the CG renderer takes the *last* solid and the emitter the *first* — they disagree on a stack. |
-| React strokes | `ReactEmitter+Styles.swift:417-455`; `ReactEmitter+Shapes.swift:79`, `:259` | `emitFillValueRaw(paint.all.first)`: first fill, solid only; uniform stroke → inset `box-shadow` or `outline`, per-side → `border*`; SVG shapes get `stroke="<colour>"`. A gradient stroke emits nothing. |
+| React text | `ReactEmitter+Text.swift:23-28`, `ReactEmitter+Styles.swift:174-178` | `color:` from the **first** enabled fill if it is solid; a gradient first fill emits no color at all (the text inherits). Note: the CG renderer takes the *last* solid and the emitter the *first* — they disagree on a stack. |
+| React strokes | `ReactEmitter+Styles.swift:417-455`; `ReactEmitter+Shapes.swift:79`, `:259` | `emitFillValueRaw(paint.all.first)`: first fill, solid only; uniform stroke → inset `box-shadow` or `outline`, per-side → `border*`; SVG shapes get `stroke="<color>"`. A gradient stroke emits nothing. |
 | Lint | `Sources/Woodcase/Lint/` | Nothing about paints: no warning for a paint Woodcase cannot draw, nor for keys Pen strips from text. |
 | Schema help | `woodcase help schema text` | Advertises `stroke*`, `underline`, `strikethrough` on text. |
 
@@ -204,7 +204,7 @@ mostly black, which dilutes whole-board MAE, so the twin rows also give the text
 | twin-lin-diag | 20.06 | 20.08 | **rect half 11.53** |
 | twin-angular | 13.36 | 13.37 | **rect half 12.42** |
 | twin-mesh / twin-shader | 48.94 / 25.63 | 48.96 / 25.65 | neither half drawn |
-| stk-rect-lin-h inner / centre / outer | 7.65 / 8.50 / 9.35 | same | stroke not drawn |
+| stk-rect-lin-h inner / center / outer | 7.65 / 8.50 / 9.35 | same | stroke not drawn |
 | stk-rect-radial-center | 25.50 | 25.50 | |
 | stk-rect-stack | 6.37 | 6.37 | solid red layer only |
 | stk-frame-perside-lin-h | 7.04 | 7.04 | |
@@ -212,12 +212,12 @@ mostly black, which dilutes whole-board MAE, so the twin rows also give the text
 
 Two things this table says beyond "not implemented":
 
-- **The shape gradient mapping itself is off for rotated linear gradients with a centre/size, and for angular
+- **The shape gradient mapping itself is off for rotated linear gradients with a center/size, and for angular
   gradients** (rect halves 11.53 and 12.42, where the axis-aligned linear, radial and image rects are ≤ 0.10). Text
   and strokes will inherit whatever `PenFillRenderer` does, so this is worth fixing first or alongside. It is outside
   this leaf's question and I did not diagnose it.
 
-  > **Diagnosed and fixed 2026-09-26 (leaf `UoumNa`).** Pen lays every gradient out in the node's normalised box
+  > **Diagnosed and fixed 2026-09-26 (leaf `UoumNa`).** Pen lays every gradient out in the node's normalized box
   > (rotation and size applied in the unit square before it is stretched to the box); Woodcase worked in pixel space.
   > See [the follow-up](2026-09-26-gradient-geometry-and-per-side-strokes.md).
 - **MAE is a poor criterion for text paints, because text layout already differs.** For the same `Inter` 900 72 pt
@@ -227,7 +227,7 @@ Two things this table says beyond "not implemented":
   glyph coverage times Pen's paint for the box (`projected.py`, output `mae-projected.txt`) — lands at 6.6 for the
   linear twin, 13.2 for radial, 7.3 for image stretch: better than today, and bounded by the glyph mismatch, not the
   paint. Criteria for text should therefore be **geometric** — the fitted domain, as `analyze.py` does it — plus an MAE
-  measured *relative to the same text in a solid colour*, not an absolute threshold.
+  measured *relative to the same text in a solid color*, not an absolute threshold.
 
 ## How a CoreGraphics implementation would work
 
@@ -240,7 +240,7 @@ into their fit/fill/stretch rectangle computed from the domain, which is natural
 exactly this per-fill clip. The even-odd path (`PenRenderer.swift:592`) folds into the same call via `fillRule`,
 which also gives donut ellipses their gradients for free.
 
-**Text.** Keep today's `CTFrameDraw` path when the fills are a single enabled solid colour, so no existing text MAE
+**Text.** Keep today's `CTFrameDraw` path when the fills are a single enabled solid color, so no existing text MAE
 fixture moves. Otherwise:
 
 1. Build the same `CTFrame` (same framesetter, frame path and vertical offset, so **text measurement is unchanged**).
@@ -251,7 +251,7 @@ fixture moves. Otherwise:
 3. `PenFillRenderer.renderFills(fills, clip: glyphPath, fillRule: .winding, domain: node rect)`.
 
 Pitfalls: glyphs without outlines (emoji and other bitmap-font glyphs) return `nil` from `CTFontCreatePathForGlyph` —
-fall back to drawing that run with the text clip mode, or with its last solid colour; the domain for **auto-width**
+fall back to drawing that run with the text clip mode, or with its last solid color; the domain for **auto-width**
 text is 1–7 pt narrower than the box in Pen (open question 1); cache the glyph path per node for the viewer's
 repaint loop (a paragraph is a few hundred glyph paths); underline/strikethrough need no gradient support if Ben
 confirms Pen drops them. **PDF** stays vector because the clip is a path and the gradients are `CGShading`s — which is
@@ -261,17 +261,17 @@ as domain (measured 40→160 on a 120-pt icon at x 40).
 **Strokes.** Turn the stroke into a region, then fill it like a shape:
 
 - Uniform width: `path.copy(strokingWithWidth: w′, lineCap:, lineJoin:, miterLimit:)` — or `addPath` +
-  `replacePathWithStrokedPath()` + `clip()` on the context — with `w′ = w` for centre and `2w` for inner/outer, then
+  `replacePathWithStrokedPath()` + `clip()` on the context — with `w′ = w` for center and `2w` for inner/outer, then
   intersect with the shape (inner) or its even-odd complement (outer), exactly the clips the solid path uses today
   (`PenStrokeRenderer.swift:53-75`). Then `renderFills(stroke, clip: region, domain: node rect)`.
 - Per-side widths: build the ring as a path — outer rectangle minus inner rectangle, each side offset by its width
-  times 0 (outer edge for inner), ½, or 1 according to `strokeAlignment` (default centre) — clipped to the rounded
-  shape for corner radii, then the same fill call. This is also the fix for finding 5 with a solid colour.
+  times 0 (outer edge for inner), ½, or 1 according to `strokeAlignment` (default center) — clipped to the rounded
+  shape for corner radii, then the same fill call. This is also the fix for finding 5 with a solid color.
 - Lines (`renderLine`) use the uniform path.
 
 Pitfalls: miter joins in `copy(strokingWithWidth:)` must use the same miter limit the solid path uses (CG default 10)
 or corners will differ from today's MAE fixtures; an open path's outline is fine to fill with `.winding`; the solid
-single-colour case should keep `strokePath()` so `render-strokes-and-paths` does not move.
+single-color case should keep `strokePath()` so `render-strokes-and-paths` does not move.
 
 **Mesh and shader** on text and strokes need nothing new here: once `PenFillRenderer` can draw them for shapes (see
 `2026-09-26-mesh-gradients.md`), the clip/domain split gives them text and strokes too.
@@ -295,7 +295,7 @@ single-colour case should keep `strokePath()` so `render-strokes-and-paths` does
   spanning the node box; inner/outer alignment as a `clipPath`/`mask` of the shape with `strokeWidth` doubled —
   the same construction as Pen's export.
 - **Image, mesh and shader strokes:** Pen's own export drops them; the mask technique above handles images. Mesh and
-  shader need a rasterised background, which is how Pen does mesh/shader *fills* (`data:image/webp`) — open question 4.
+  shader need a rasterized background, which is how Pen does mesh/shader *fills* (`data:image/webp`) — open question 4.
 
 ## Summary table
 
@@ -304,7 +304,7 @@ the key on load and draws nothing.
 
 | Fill type | Text: Pen renders? | Text: domain | Text: Woodcase today | Stroke: Pen renders? | Stroke: domain | Stroke: Woodcase today |
 |---|---|---|---|---|---|---|
-| Solid colour | yes | — | last solid only; stack/blend ignored | yes | — | first solid only; stack/blend ignored; per-side always inner |
+| Solid color | yes | — | last solid only; stack/blend ignored | yes | — | first solid only; stack/blend ignored; per-side always inner |
 | Linear gradient | yes | node box (auto width: box minus 1–7 pt) | black (no solid) or the solid | yes, all alignments | node box, padded outside | not drawn |
 | Radial gradient | yes | node box | as above | yes | node box, padded | not drawn |
 | Angular gradient | yes | node box | as above | yes | node box, padded | not drawn |
@@ -319,7 +319,7 @@ the key on load and draws nothing.
 
 In order; each is one agent's file surface. Criteria are written so a test can check them.
 
-1. **Per-side stroke alignment (bug, solid colours).** `PenStrokeRenderer.swift` only. Criteria: a regression test
+1. **Per-side stroke alignment (bug, solid colors).** `PenStrokeRenderer.swift` only. Criteria: a regression test
    with `perside/perside.pen`'s three boards, asserting band extents within 0.5 pt of Pen's (finding 5 table) at 2x;
    the wrong doc comment at `:80-84` corrected; `render-strokes-and-paths` MAE unchanged ±0.05.
 2. **Split clip from domain in `PenFillRenderer`.** `PenFillRenderer.swift`, `PenRenderer.swift` (call sites and the
@@ -335,7 +335,7 @@ In order; each is one agent's file surface. Criteria are written so a test can c
    pdf` of a gradient text contains a shading, not a bitmap; the icon star fits 40→160. Radial, angular, image, stacks,
    opacity and blend come with it for free and get one assertion each.
 4. **Non-solid paints on strokes.** `PenStrokeRenderer.swift`. Criteria: committed `render-stroke-fills.pen` with Pen
-   2x references; fitted domain on rect inner/centre/outer, ellipse, path and per-side boards within 0.5 pt of the node
+   2x references; fitted domain on rect inner/center/outer, ellipse, path and per-side boards within 0.5 pt of the node
    box; UV outer `stretch`/`fit` draw nothing and `fill` draws only the two side bands; stack and multiply twins match
    Pen within MAE 1; solid strokes unchanged ±0.05 on existing fixtures.
 5. **React: paints on text.** `ReactEmitter+Text.swift`, `ReactEmitter+Styles.swift`; goldens regenerated and read.
@@ -347,7 +347,7 @@ In order; each is one agent's file surface. Criteria are written so a test can c
    within 1 pt on the rect board.
 7. **Lint and schema help for what Pen strips** — only if Ben confirms finding 4 against Pen.app. `Lint/`,
    `PenNode+TextData` schema metadata. Criteria: `woodcase lint` warns on `stroke*`, `underline` and `strikethrough`
-   on a text node with a message naming Pen's behaviour; `woodcase help schema text` says the same.
+   on a text node with a message naming Pen's behavior; `woodcase help schema text` says the same.
 
 RapidPro renders from Woodcase's model and will want leaves 3 and 4's semantics mirrored; I did not look at it.
 
@@ -363,9 +363,9 @@ RapidPro renders from Woodcase's model and will want leaves 3 and 4's semantics 
    probe file opened and exported)? If confirmed: stop drawing them, lint them, or keep them as a Woodcase extension?
 3. **React fidelity target.** Match Pen's export (including `border-image` per-side strokes and dropping image strokes)
    or match Pen's *renders* (mask technique, blend modes kept)? I recommend the renders.
-4. **Mesh and shader in React.** Pen rasterises them into `data:image/webp`. Is a rasterised background acceptable
+4. **Mesh and shader in React.** Pen rasterizes them into `data:image/webp`. Is a rasterized background acceptable
    for Woodcase's React output once the CG renderer can draw them, or should they stay unsupported there?
-5. **Existing shape-gradient gaps.** Rotated linear gradients with a centre/size, and angular gradients, already differ
+5. **Existing shape-gradient gaps.** Rotated linear gradients with a center/size, and angular gradients, already differ
    from Pen on plain rectangles (MAE 11.5 and 12.4). Fix those first (text and strokes inherit them), or file them
    separately?
 6. **Fixture size.** One 50-board file, or split per surface (text / strokes) as proposed? Either way a few hundred KB of

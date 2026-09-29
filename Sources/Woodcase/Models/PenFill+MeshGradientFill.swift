@@ -6,7 +6,7 @@
 import Foundation
 
 public extension PenFill {
-    /// A mesh gradient: a `columns × rows` grid of coloured vertices joined by
+    /// A mesh gradient: a `columns × rows` grid of colored vertices joined by
     /// Bézier patches.
     ///
     /// The grid is row-major: ``points`` and ``colors`` each hold one entry per vertex,
@@ -31,7 +31,7 @@ public extension PenFill {
         ///   - opacity: The fill's own opacity, on top of the node's.
         ///   - columns: The vertex count across.
         ///   - rows: The vertex count down.
-        ///   - colors: One colour per vertex, row-major.
+        ///   - colors: One color per vertex, row-major.
         ///   - points: One vertex per grid position, row-major.
         ///   - extras: Keys a file wrote on the fill that the model does not claim.
         public init(
@@ -69,7 +69,7 @@ public extension PenFill {
         /// The vertex count down.
         public var rows: Int?
 
-        /// One colour per vertex, row-major: a colour string or a `$variable`.
+        /// One color per vertex, row-major: a color string or a `$variable`.
         public var colors: [PenValue<String>]?
 
         /// One vertex per grid position, row-major, each in the form it was written — a
@@ -91,7 +91,7 @@ public extension PenFill {
             return PenMeshPoint.Handles.defaults(columns: columns, rows: rows)
         }
 
-        /// The fill with every point in the form Pen's serialiser writes.
+        /// The fill with every point in the form Pen's serializer writes.
         ///
         /// See ``PenMeshPoint/canonicalized(defaults:)``. A fill missing ``columns`` or
         /// ``rows`` has no defaults to compare against and is returned unchanged.

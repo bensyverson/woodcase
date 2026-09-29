@@ -20,7 +20,7 @@ wait that could not have succeeded.
 ## A budget is not an assertion, and both measure the machine
 
 `project/gotchas.md` already warns that a wall-clock *assertion* near the interval
-under test measures load rather than behaviour. Two of these three are the other
+under test measures load rather than behavior. Two of these three are the other
 half of that idea, which the entry did not cover: a **budget** passed *into* the
 code under test is just as load-shaped, and it fails in a way that reads like the
 product misbehaving rather than like a clock.

@@ -22,7 +22,7 @@
     /// is what makes this a faithful test of it.
     ///
     /// Every row of `window.__woodcaseKeys` — the same table the script dispatches
-    /// from — has a behavioural test below; ``keyTableMatchesTheDocumentedSpec`` pins
+    /// from — has a behavioral test below; ``keyTableMatchesTheDocumentedSpec`` pins
     /// the table itself, so a row added or reworded without a matching test here is
     /// caught by that mismatch rather than by silence.
     ///

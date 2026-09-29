@@ -7,9 +7,9 @@ import Foundation
 
 /// Draws a mesh gradient into a ``PenMeshRaster``, on the CPU, without CoreGraphics.
 ///
-/// Each triangle is Gouraud-shaded: its vertex colours are premultiplied, then
-/// interpolated linearly and sampled at pixel centres. Coverage follows the top-left
-/// rule on exact fixed-point edge functions, so a pixel centre on an edge two triangles
+/// Each triangle is Gouraud-shaded: its vertex colors are premultiplied, then
+/// interpolated linearly and sampled at pixel centers. Coverage follows the top-left
+/// rule on exact fixed-point edge functions, so a pixel center on an edge two triangles
 /// share belongs to exactly one of them: a translucent mesh has no seams, neither
 /// doubled nor missing pixels. Triangles composite source-over in the tessellation's
 /// order, so where a folded mesh overlaps itself the later patch covers the earlier one.
@@ -20,7 +20,7 @@ import Foundation
 ///
 /// The fill's `opacity` and blend mode are the caller's to apply when compositing.
 public enum PenMeshRasterizer {
-    /// Rasterises a tessellation into a buffer of the given size.
+    /// Rasterizes a tessellation into a buffer of the given size.
     ///
     /// - Parameters:
     ///   - tessellation: Triangles in device pixels, from the box's top-left corner.
@@ -46,7 +46,7 @@ public enum PenMeshRasterizer {
         return PenMeshRaster(width: width, height: height, pixels: pixels)
     }
 
-    /// Tessellates a grid for a box of the given pixel size and rasterises it.
+    /// Tessellates a grid for a box of the given pixel size and rasterizes it.
     ///
     /// - Parameters:
     ///   - grid: The mesh.

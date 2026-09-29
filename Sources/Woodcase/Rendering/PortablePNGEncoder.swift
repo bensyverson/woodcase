@@ -14,8 +14,8 @@ import Foundation
 /// `data:` URIs.
 ///
 /// PNG stores straight alpha, so each pixel is un-premultiplied on the way out. A fully
-/// opaque image is written as 8-bit RGB (colour type 2), anything else as 8-bit RGBA
-/// (colour type 6). Each row takes whichever of the five PNG filters leaves the smallest
+/// opaque image is written as 8-bit RGB (color type 2), anything else as 8-bit RGBA
+/// (color type 6). Each row takes whichever of the five PNG filters leaves the smallest
 /// residuals, the usual heuristic. The output is deterministic.
 ///
 /// ```swift
@@ -27,7 +27,7 @@ public enum PortablePNGEncoder {
     ///
     /// - Parameters:
     ///   - pixels: `width × height × 4` bytes, premultiplied RGBA, rows top to bottom
-    ///     with no padding, colour already in sRGB.
+    ///     with no padding, color already in sRGB.
     ///   - width: The width in pixels.
     ///   - height: The height in pixels.
     /// - Returns: The PNG file.
@@ -41,7 +41,7 @@ public enum PortablePNGEncoder {
         var header: [UInt8] = []
         header += bigEndian(UInt32(width))
         header += bigEndian(UInt32(height))
-        // Bit depth 8; colour type; deflate compression; adaptive filtering; no interlace.
+        // Bit depth 8; color type; deflate compression; adaptive filtering; no interlace.
         header += [8, isOpaque ? 2 : 6, 0, 0, 0]
 
         var file: [UInt8] = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]
@@ -77,7 +77,7 @@ public enum PortablePNGEncoder {
 
     // MARK: - Filtering
 
-    /// Prefixes each row with the filter type that minimises its residuals, and filters it.
+    /// Prefixes each row with the filter type that minimizes its residuals, and filters it.
     private static func filterRows(_ bytes: [UInt8], width: Int, height: Int, channels: Int) -> [UInt8] {
         let rowLength = width * channels
         var output: [UInt8] = []
@@ -111,7 +111,7 @@ public enum PortablePNGEncoder {
         }
     }
 
-    /// The Paeth predictor: whichever neighbour is closest to `left + up − upLeft`.
+    /// The Paeth predictor: whichever neighbor is closest to `left + up − upLeft`.
     private static func paeth(left: Int, up: Int, upLeft: Int) -> Int {
         let estimate = left + up - upLeft
         let distanceLeft = abs(estimate - left)

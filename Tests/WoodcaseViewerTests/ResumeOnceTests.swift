@@ -41,20 +41,20 @@ struct ResumeOnceTests {
 
     @Test("the expiry's side effect runs when the deadline is what resumes")
     func deadlineRunsItsSideEffect() async {
-        let cancelled = Signal()
+        let canceled = Signal()
         let value: Int = await ResumeOnce.value(
             within: .milliseconds(50), on: Self.queue,
             expiring: {
-                cancelled.raise()
+                canceled.raise()
                 return -1
             }
         ) { _ in }
         #expect(value == -1)
-        #expect(cancelled.isRaised)
+        #expect(canceled.isRaised)
     }
 
     /// Network.framework may answer late — a `send` completion arrives after the
-    /// connection is cancelled — and resuming a checked continuation twice is a crash,
+    /// connection is canceled — and resuming a checked continuation twice is a crash,
     /// so the second answer has to be dropped rather than delivered.
     @Test("a callback that arrives after the deadline is ignored")
     func lateCallbackIsDropped() async {

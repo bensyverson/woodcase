@@ -15,7 +15,7 @@ most expensive problems were teaching failures**, not missing features:
   an instance replaces a slot frame's children through `descendants` today (verified live). What
   broke it is one sentence from the divergence check, which tells the writer *"the override is
   stored but nothing will read it"* because its accepted-key list omits `children`
-  (`BatchApplier+Divergence.swift:186`) while the patcher honours it (`PenNodePatcher.swift:90`).
+  (`BatchApplier+Divergence.swift:186`) while the patcher honors it (`PenNodePatcher.swift:90`).
   That sentence is why `atoms` decided "refs are for leaves" and deep-built every composite.
 - **The ref-in-`add` answer existed** in `WoodcaseEditor.md` and no agent found it, because
   agents read `help design` and `<verb> --help` and stop. Documentation that is not at the CLI
@@ -30,7 +30,7 @@ bugs no doc can fix: `tree` and `lint` measure text in the fallback face because
 ## Principles for this round
 
 1. **Agents are given no skill.** Everything they need to use woodcase well, including how to
-   build a component the codegen will recognise, must reach them through `help <topic>` and
+   build a component the codegen will recognize, must reach them through `help <topic>` and
    `<verb> --help`. DocC and README are for humans; the CLI teaches itself.
 2. **Fix the message before the mechanism.** Where the feature exists and the tool denies it,
    the lie is the bug.
@@ -92,7 +92,7 @@ documents, so that help text never describes a message or flag that has not land
 
 ### A. Correctness
 
-- **A1 Slot filling honoured end to end.** `children` joins the divergence check's accepted set
+- **A1 Slot filling honored end to end.** `children` joins the divergence check's accepted set
   (or the check consults the patcher's contract); the "does not set `enabled`" divergence becomes
   an informational line, since adding a property is the sanctioned variant idiom; `tree --expand`
   renders injected children; `lint` exempts a definition's slot frame from `empty-fit-content`.
@@ -122,7 +122,7 @@ documents, so that help text never describes a message or flag that has not land
 - **B2 `shot --json` rects and `--crop`.** `--json` lists every rect it drew, outline targets
   included, in the node's own space; `--crop x,y,w,h` renders a sub-rectangle; help gains the
   vision-model sentence.
-- **B3 `cp --each`.** Generalises `--times` (`CopyCommand.swift:254` substitutes `{n}` into root
+- **B3 `cp --each`.** Generalizes `--times` (`CopyCommand.swift:254` substitutes `{n}` into root
   and descendant path props): one copy per JSONL row, row keys are argv keys.
 - **B4 Metadata deep keys and `_props` in the editing verbs.** `common.metadata.<key>=<value>`
   merges one key; `override` and `cp --each` accept a prop name declared in the component's
@@ -148,7 +148,7 @@ documents, so that help text never describes a message or flag that has not land
   guard suits a short structural batch, not a session-long gate. Foot: "see also `<verb>
   --help`". `help recipes` gains a slot-filling and a `cp --each` example. `WoodcaseEditor.md`
   moves in step.
-- **C2 `help codegen`.** What the React emitter recognises: `reusable`, top-level non-reusable
+- **C2 `help codegen`.** What the React emitter recognizes: `reusable`, top-level non-reusable
   frames as pages, `{Name}:{state}` siblings, `_role`, `_props`, `_action`, `_bind`, `_states`;
   how an instance's overrides map to props, and that an unmapped override makes the emitter
   inline the component. Pointer from `help design` and from `generate react --help`.
@@ -176,10 +176,10 @@ tasks:
       The Quill mobile run (project/2026-09-01-quill-mobile-agents-dx.md) built a 1,850-node design system and four Python generators. An audit found the costliest problems were teaching failures: a false divergence message denied slot filling that works, and the answers agents needed were in DocC where agents never look. This tree fixes the real bugs, adds the few features that delete agent code, and moves the curriculum to the CLI surface. Design: project/2026-09-02-teach-the-cli-what-it-does.md. Strict TDD on every leaf; a doc leaf carries help-text snapshot tests where they exist.
     labels: [quill-dx]
     children:
-      - title: Slot filling honoured end to end
+      - title: Slot filling honored end to end
         ref: slots
         desc: |
-          The divergence check (BatchApplier+Divergence.swift:186) reports "the override is stored but nothing will read it" for a `children` override on a slot frame, because its accepted-key list omits `children` while PenNodePatcher.swift:90 honours it. Make the check agree with the patcher. Demote the "does not set X in Component — the override adds the property" divergence to an informational line: adding `enabled`/`opacity` is the sanctioned variant idiom. `tree --expand` must render the children an instance injects into a slot frame; `lint` must not report `empty-fit-content` on a definition's `kind.slot` frame. Regression tests first for all four. Design: project/2026-09-02-teach-the-cli-what-it-does.md §A1.
+          The divergence check (BatchApplier+Divergence.swift:186) reports "the override is stored but nothing will read it" for a `children` override on a slot frame, because its accepted-key list omits `children` while PenNodePatcher.swift:90 honors it. Make the check agree with the patcher. Demote the "does not set X in Component — the override adds the property" divergence to an informational line: adding `enabled`/`opacity` is the sanctioned variant idiom. `tree --expand` must render the children an instance injects into a slot frame; `lint` must not report `empty-fit-content` on a definition's `kind.slot` frame. Regression tests first for all four. Design: project/2026-09-02-teach-the-cli-what-it-does.md §A1.
         criteria:
           - A children override on a slot frame prints no divergence and the patched tree renders the injected children
           - An override that adds enabled or opacity to a descendant prints an informational line, not a divergence
@@ -192,7 +192,7 @@ tasks:
         criteria:
           - tree and shot report the same text width for a Google-font fixture with the font cached
           - Every verb prints the fallback warning on stderr when a font cannot resolve
-          - A measurement taken in a fallback face is labelled as such
+          - A measurement taken in a fallback face is labeled as such
       - title: Batch parity with the single-node verbs
         ref: parity
         desc: |
@@ -297,7 +297,7 @@ tasks:
         ref: codegen-help
         blockedBy: [props]
         desc: |
-          Nothing in the CLI says how to build a component the React emitter recognises, so consumers rely on outside knowledge. A new help topic: reusable marks a component; top-level non-reusable frames are pages; {Name}:{state} siblings are state variants; common.metadata carries _role (ComponentRole values), _props (prop → descendant path), _action, _bind and _states; an instance's descendant overrides map to props through _props, and an override no prop covers makes the emitter inline the component with a diagnostic. Set metadata with the deep-key form. Pointers from help design and generate react --help. PenCodeGen.md is the human-side source; keep the two in agreement. Design §C2.
+          Nothing in the CLI says how to build a component the React emitter recognizes, so consumers rely on outside knowledge. A new help topic: reusable marks a component; top-level non-reusable frames are pages; {Name}:{state} siblings are state variants; common.metadata carries _role (ComponentRole values), _props (prop → descendant path), _action, _bind and _states; an instance's descendant overrides map to props through _props, and an override no prop covers makes the emitter inline the component with a diagnostic. Set metadata with the deep-key form. Pointers from help design and generate react --help. PenCodeGen.md is the human-side source; keep the two in agreement. Design §C2.
         criteria:
           - help codegen lists every metadata key ComponentAnalyzer reads, with the deep-key set command for each
           - help design and generate react --help point to it

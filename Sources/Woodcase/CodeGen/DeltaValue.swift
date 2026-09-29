@@ -6,7 +6,7 @@
 /// The value a ``PropertyChange`` sets: typed where a target needs the parts, and otherwise
 /// the diff's pen-level encoding.
 public enum DeltaValue: Friendly {
-    /// The pen-level value as ``NodeDiffer`` encodes it: a number, a `$variable`, a colour
+    /// The pen-level value as ``NodeDiffer`` encodes it: a number, a `$variable`, a color
     /// literal, a sizing keyword, or a summary such as `"multi-fill"` for a value it does
     /// not carry whole.
     case encoded(AnyCodable)

@@ -10,7 +10,7 @@ import Foundation
 /// There is one implementation of the property-path vocabulary —
 /// ``NodePropertyCodec`` — and this is the lenient face of it. A remote peer's
 /// operation must never crash or throw its way out of ``CRDTDocument/processRemote(operation:document:)``,
-/// so a path this peer does not recognise (it holds a different kind for that
+/// so a path this peer does not recognize (it holds a different kind for that
 /// node after a concurrent type change) or a value it cannot decode leaves the
 /// property as it was, rather than nilling it out as this codec used to.
 ///

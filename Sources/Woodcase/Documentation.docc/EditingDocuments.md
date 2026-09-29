@@ -120,7 +120,7 @@ clears the property.
 is a string or a `$variable` — `kind.content`, `kind.fontFamily`, `kind.icon` and their
 kin — is stored as the string it spells, because there is no other value such a
 property could take from a number and refusing taught nothing. Nothing else converts,
-and a node of an unrecognised type is never converted at all. See
+and a node of an unrecognized type is never converted at all. See
 ``NodePropertyCodec/coercing(_:at:on:)``. A conversion is not silent: the write reports
 it as a ``WriteDivergence``, which is how a caller learns its number is now text
 without reading the node back.

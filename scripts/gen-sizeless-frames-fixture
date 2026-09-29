@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """gen-sizeless-frames-fixture — write Tests/WoodcaseTests/Fixtures/render-sizeless-frames.pen:
-one 300x300 board per case of a `layout: "none"` frame with no width or height (grey fill,
+one 300x300 board per case of a `layout: "none"` frame with no width or height (gray fill,
 children that overhang it) — plain, clipped, stroked and shadowed, in a flex flow, inside a
 fit_content flex frame, and with an explicit `fit_content` and `fit_content(30)` (leaf Jg0BOv,
 PenSizelessFrameTests). Pen settles every such frame at 0x0, or at its fallback.

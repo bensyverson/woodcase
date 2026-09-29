@@ -6,7 +6,7 @@ import Testing
 /// Per-side strokes against Pen's own renders, measured as geometry.
 ///
 /// `render-per-side-strokes.pen` puts a white per-side stroke on a 200×120 node at
-/// (60, 60) under each `strokeAlignment` — and none, which Pen draws as centre — for
+/// (60, 60) under each `strokeAlignment` — and none, which Pen draws as center — for
 /// four width combinations, with square, rounded and per-corner-rounded boxes. The
 /// references are Pen's 2x PNG exports (`scripts/pen-oracle … --scale 2`); the fixture
 /// comes from `scripts/gen-paint-geometry-fixtures`.

@@ -57,7 +57,7 @@ public extension SelectionBar {
             PreviewState(
                 slug: "clipped",
                 name: "A selection hanging outside its parent",
-                note: "The warn `⚠ partially outside its parent` slots in between the rect and the revision. Colour is never the only carrier here — the sentence says it in words — and the extra column is the one most likely to push the revision off a narrow pane.",
+                note: "The warn `⚠ partially outside its parent` slots in between the rect and the revision. Color is never the only carrier here — the sentence says it in words — and the extra column is the one most likely to push the revision off a narrow pane.",
                 frame: .canvas
             ) {
                 SelectionBar(

@@ -175,7 +175,7 @@ extension BatchApplier {
     ///
     /// The placement divergence is composed from the copy at plan time, and a
     /// `common.name` given on the same line lands one operation later — so without this
-    /// the note named the *source*, the one name the caller is least likely to recognise
+    /// the note named the *source*, the one name the caller is least likely to recognize
     /// as this write's subject (round two of the host trial, agents B and C).
     ///
     /// - Parameters:

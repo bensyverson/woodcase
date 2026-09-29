@@ -28,7 +28,7 @@ public enum RelativeAge {
         case long
     }
 
-    /// How recently a row must have been touched to carry its editor's colour.
+    /// How recently a row must have been touched to carry its editor's color.
     ///
     /// Thirty seconds is the ruling's window: long enough to catch the edit you just
     /// heard about, short enough that the panel is not permanently striped.
@@ -39,7 +39,7 @@ public enum RelativeAge {
     /// - Parameters:
     ///   - time: When it happened.
     ///   - now: The moment to measure against.
-    /// - Returns: `true` while the row should still carry an identity colour.
+    /// - Returns: `true` while the row should still carry an identity color.
     public static func isRecent(_ time: Date, now: Date = Date()) -> Bool {
         let age = now.timeIntervalSince(time)
         return age >= 0 && age < recencyWindow

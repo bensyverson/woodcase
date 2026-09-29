@@ -48,11 +48,11 @@ struct PenOutsetShape<S: Shape>: Shape {
 }
 
 /// An icon: one glyph of a bundled icon font, as large as the box's shorter side, placed
-/// where Pen places it — by the font's metrics, not the glyph's ink: its advance centred
+/// where Pen places it — by the font's metrics, not the glyph's ink: its advance centered
 /// across the box, and its line box (ascent plus descent, each rounded to a whole point at
-/// 14 pt, then scaled) centred down it.
+/// 14 pt, then scaled) centered down it.
 ///
-/// A shape rather than `Text`, so the icon is painted like any shape: a colour, a gradient
+/// A shape rather than `Text`, so the icon is painted like any shape: a color, a gradient
 /// laid out over the node's box, a stack.
 struct PenIconShape: Shape {
     /// The font file, one of the package's bundled fonts (`PenFonts`).

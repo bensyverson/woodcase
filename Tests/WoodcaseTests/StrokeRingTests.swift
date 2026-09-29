@@ -31,7 +31,7 @@ struct StrokeRingTests {
         #expect(ring.outsets == expected)
     }
 
-    @Test("An absent width is Pen's default of 1, centred")
+    @Test("An absent width is Pen's default of 1, centered")
     func defaultWidth() {
         let ring = Self.ring(nil, nil)
         #expect(ring.outsets == EdgeLengths(all: SymbolicLength(points: 0.5)))

@@ -8,7 +8,7 @@ import Foundation
 /// A .pen gradient fill as SwiftUI: one of SwiftUI's own gradient styles wherever it can
 /// say Pen's geometry exactly, and the support file's `PenGradient` view wherever it cannot.
 ///
-/// Pen lays a gradient out in the node's normalised box and then stretches it to the box
+/// Pen lays a gradient out in the node's normalized box and then stretches it to the box
 /// (``GradientGeometry``). SwiftUI's styles lay out in points, so the two agree only where
 /// the stretch changes nothing that matters:
 ///
@@ -23,11 +23,11 @@ import Foundation
 /// Every other case (a turned radial ellipse, a conic on an oblong box, a turned linear
 /// gradient on a box whose proportions are only known at layout time) is
 /// `PenGradient(...)`, a `Canvas` that draws the gradient through Pen's own map. Stops are
-/// interpolated in device colour space (`.colorSpace(.device)`), as Pen and Core Graphics
+/// interpolated in device color space (`.colorSpace(.device)`), as Pen and Core Graphics
 /// do; SwiftUI's default perceptual interpolation measured MAE 10.7 on `render-gradients`.
 enum SwiftUIGradient {
-    /// A colour's code, and whether it is opaque, or `nil` (reported) when it cannot be
-    /// written: how a stop's colour variable is read through the theme.
+    /// A color's code, and whether it is opaque, or `nil` (reported) when it cannot be
+    /// written: how a stop's color variable is read through the theme.
     typealias ColorCode = (PenValue<String>, inout [String]) -> (code: String, opaque: Bool)?
 
     /// A length, literal or read through the theme, or `nil` (reported) when it cannot be
@@ -98,7 +98,7 @@ enum SwiftUIGradient {
     }
 
     /// `Gradient(stops: […]).colorSpace(.device)`, or `nil` when no stop can be written; a
-    /// stop's colour variable is read through `color`, its position variable through `number`.
+    /// stop's color variable is read through `color`, its position variable through `number`.
     static func gradientLiteral(
         _ stops: [PenFill.PenGradientStop], color: ColorCode, number: NumberCode, unemitted: inout [String]
     ) -> String? {

@@ -8,9 +8,9 @@ import Testing
 @testable import Woodcase
 
 /// How the React emitter paints a `mesh_gradient` fill: a small PNG raster from the mesh
-/// core, as a `data:` URI background layer stretched over the box. Colours that change
+/// core, as a `data:` URI background layer stretched over the box. Colors that change
 /// with the theme get one raster per theme, switched through a CSS custom property in
-/// `theme.css`, the way themed colours already are.
+/// `theme.css`, the way themed colors already are.
 struct ReactEmitterMeshTests {
     // MARK: - Helpers
 
@@ -64,9 +64,9 @@ struct ReactEmitterMeshTests {
         }
     #endif
 
-    // MARK: - Literal colours
+    // MARK: - Literal colors
 
-    @Test("A mesh with literal colours paints a data-URI raster stretched over the box")
+    @Test("A mesh with literal colors paints a data-URI raster stretched over the box")
     func literalMeshEmitsDataURI() throws {
         let content = try file("components/Box.tsx", in: emit(document(fill: Self.twoByTwo)))
         #expect(content.contains(#"background: "url('data:image/png;base64,"#))
@@ -102,8 +102,8 @@ struct ReactEmitterMeshTests {
     }
 
     #if canImport(ImageIO)
-        @Test("The raster's corner pixels are the mesh's corner colours")
-        func cornersMatchCornerColours() throws {
+        @Test("The raster's corner pixels are the mesh's corner colors")
+        func cornersMatchCornerColors() throws {
             let content = try file("components/Box.tsx", in: emit(document(fill: Self.twoByTwo)))
             let image = try firstImage(in: content)
             let last = (x: image.width - 1, y: image.height - 1)
@@ -164,9 +164,9 @@ struct ReactEmitterMeshTests {
         }
     #endif
 
-    // MARK: - Themed colours
+    // MARK: - Themed colors
 
-    @Test("A mesh with themed colours paints through a custom property")
+    @Test("A mesh with themed colors paints through a custom property")
     func themedMeshUsesCustomProperty() throws {
         let content = try file("components/ThemedMesh.tsx", in: emit(fixture()))
         #expect(content.contains(#"background: "var(--wc-mesh-"#))
@@ -188,8 +188,8 @@ struct ReactEmitterMeshTests {
     }
 
     #if canImport(ImageIO)
-        @Test("Each theme's raster carries that theme's corner colours")
-        func themedRastersCarryThemeColours() throws {
+        @Test("Each theme's raster carries that theme's corner colors")
+        func themedRastersCarryThemeColors() throws {
             let css = try file("theme.css", in: emit(fixture()))
             let lightBlock = try #require(block(":root", in: css))
             let darkBlock = try #require(block(#"[data-mode="dark"]"#, in: css))
@@ -232,8 +232,8 @@ struct ReactEmitterMeshTests {
         return String(css[start.upperBound ..< end.lowerBound])
     }
 
-    /// Each channel within 3 of the expected value: the corner pixel's centre sits half a
-    /// pixel inside the mesh, and the colour is rounded once.
+    /// Each channel within 3 of the expected value: the corner pixel's center sits half a
+    /// pixel inside the mesh, and the color is rounded once.
     private func expectClose(_ actual: [Int], _ expected: [Int], sourceLocation: SourceLocation = #_sourceLocation) {
         let close = actual.count == expected.count && zip(actual, expected).allSatisfy { abs($0 - $1) <= 3 }
         #expect(close, "\(actual) is not within 3 of \(expected)", sourceLocation: sourceLocation)

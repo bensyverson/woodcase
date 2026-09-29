@@ -26,7 +26,7 @@ struct SwiftUIEmitterFreeTransformTests {
         #expect(flip.lowerBound < turn.lowerBound)
     }
 
-    @Test("A turned node in a flex flow keeps the centre pivot and its bounding-box frame")
+    @Test("A turned node in a flex flow keeps the center pivot and its bounding-box frame")
     func turnedFlexChild() throws {
         let code = try body(
             child: ##"{"type": "rectangle", "id": "r", "width": 80, "height": 40, "rotation": 90, "fill": "#FF0000"}"##,

@@ -18,7 +18,7 @@ extension PenFill {
         }
     }
 
-    /// The fill's own blend mode; a shorthand colour has none.
+    /// The fill's own blend mode; a shorthand color has none.
     var blendMode: PenBlendMode? {
         switch self {
         case .shorthand: nil
@@ -31,8 +31,8 @@ extension PenFill {
         }
     }
 
-    /// The colour of a solid fill — a literal, or a document variable for a `$name`
-    /// shorthand or colour reference — or `nil` for any other kind of fill.
+    /// The color of a solid fill — a literal, or a document variable for a `$name`
+    /// shorthand or color reference — or `nil` for any other kind of fill.
     var solidColor: PenValue<String>? {
         switch self {
         case let .shorthand(color):

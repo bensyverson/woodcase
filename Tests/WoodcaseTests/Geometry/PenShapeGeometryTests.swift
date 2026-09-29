@@ -83,7 +83,7 @@ struct PenShapeGeometryTests {
         ])
     }
 
-    @Test("A pie slice runs from the centre round the arc and closes")
+    @Test("A pie slice runs from the center round the arc and closes")
     func pieSlice() {
         #expect(elements(.ellipse(startAngle: 0, sweepAngle: 90), Self.ellipseBox) == [
             .command(.move(to: pt(100, 60))),

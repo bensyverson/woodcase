@@ -5,7 +5,7 @@
 //  Pen's group in a stack. A group has no box of its own: its children sit at their x/y from
 //  its anchor, and its box is their union, wherever that starts. In a stack Pen gives the
 //  group a slot the size of that union — turned, when the group turns — and draws the union
-//  centred in it.
+//  centered in it.
 //
 
 import SwiftUI
@@ -13,8 +13,8 @@ import SwiftUI
 /// Lays a group's children out at `offsets` from the group's anchor, and sizes to their union,
 /// turned by `rotation` when the group turns.
 ///
-/// The union is centred in the bounds the group is placed at, so a `rotationEffect` about the
-/// centre turns it about the same point Pen does. Each child's own turn does not grow the
+/// The union is centered in the bounds the group is placed at, so a `rotationEffect` about the
+/// center turns it about the same point Pen does. Each child's own turn does not grow the
 /// union here, as its turned bounds do in Pen's layout.
 struct PenGroupFlow: Layout {
     /// Each child's `x`/`y` from the group's anchor, in the order the children are listed.

@@ -6,7 +6,7 @@
 import Foundation
 
 /// Whether a decode is reading a .pen file or an agent's input, which decides what
-/// happens to a key or a `type` the model does not recognise.
+/// happens to a key or a `type` the model does not recognize.
 ///
 /// Set it on a decoder's `userInfo` under ``userInfoKey``:
 ///
@@ -23,11 +23,11 @@ import Foundation
 /// (``PenSubtreeDecoder`` and the `set` value check) opt in to ``authoring``.
 public enum PenDecodingMode: String, Friendly, CaseIterable {
     /// A .pen file, or Woodcase's own encoding of one: unclaimed keys become
-    /// ``PenExtras``, and an unrecognised fill or effect `type` becomes `.unknown`.
+    /// ``PenExtras``, and an unrecognized fill or effect `type` becomes `.unknown`.
     case file
 
     /// An agent's input — `add`, `replace`, `set`, a batch line, a script: an unclaimed
-    /// key or an unrecognised fill or effect `type` is a decoding error.
+    /// key or an unrecognized fill or effect `type` is a decoding error.
     case authoring
 
     /// The `userInfo` key a decoder carries its mode under.

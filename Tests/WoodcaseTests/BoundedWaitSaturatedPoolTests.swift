@@ -18,7 +18,7 @@ struct BoundedWaitSaturatedPoolTests {
     /// How long the pool is held. Long against the deadline, short against the suite.
     private static let hold: TimeInterval = 1.0
 
-    /// Holds the calling thread until `release` is signalled, then passes the signal on;
+    /// Holds the calling thread until `release` is signaled, then passes the signal on;
     /// never longer than ``failsafe``, so the test cannot wedge the run.
     ///
     /// Blocking a pool thread is exactly what async code must never do, and exactly what

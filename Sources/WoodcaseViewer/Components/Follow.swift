@@ -122,7 +122,7 @@ public enum Follow: Friendly {
 
     /// The follow a `follow=` value names.
     ///
-    /// Anything unrecognisable is an identity, because an identity is any name the log
+    /// Anything unrecognizable is an identity, because an identity is any name the log
     /// has seen and this is not the place to decide a name is wrong.
     ///
     /// - Parameter text: The parameter's value, or `nil` when the query has none.

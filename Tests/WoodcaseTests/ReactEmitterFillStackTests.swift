@@ -7,8 +7,8 @@ import Foundation
 import Testing
 @testable import Woodcase
 
-/// A stack of fills on a CSS box is one `background` list, and CSS takes a bare colour only
-/// in its last (bottom) layer: a colour over another fill is written as a flat gradient,
+/// A stack of fills on a CSS box is one `background` list, and CSS takes a bare color only
+/// in its last (bottom) layer: a color over another fill is written as a flat gradient,
 /// or the browser drops the whole declaration and the box paints nothing (leaf 4fZZ38,
 /// found on `render-painted-lines-fill-stack`).
 struct ReactEmitterFillStackTests {
@@ -27,13 +27,13 @@ struct ReactEmitterFillStackTests {
         return line.trimmingCharacters(in: .whitespaces)
     }
 
-    @Test("A colour over a colour is a flat gradient layer")
-    func colourOverColour() throws {
+    @Test("A color over a color is a flat gradient layer")
+    func colorOverColor() throws {
         #expect(try background(##"["#FF9500", "#007AFF80"]"##) == ##"background: "linear-gradient(#007AFF80, #007AFF80), #FF9500","##)
     }
 
-    @Test("A colour over a gradient is a flat gradient layer")
-    func colourOverGradient() throws {
+    @Test("A color over a gradient is a flat gradient layer")
+    func colorOverGradient() throws {
         let value = try background(##"[{"type": "gradient", "gradientType": "linear", "rotation": 90, "colors": [{"color": "#FFFFFF", "position": 0}, {"color": "#000000", "position": 1}]}, "#FF000080"]"##)
         #expect(value.hasPrefix(##"background: "linear-gradient(#FF000080, #FF000080), linear-gradient("##), "\(value)")
     }

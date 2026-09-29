@@ -6,9 +6,9 @@
 /// Where a box's stroke sits relative to the node's box: how wide it is on each side,
 /// and how far past the box each side's outer edge reaches.
 ///
-/// Pen honours `strokeAlignment` for uniform and per-side widths alike, and the default
-/// is centre (`project/2026-09-26-text-and-stroke-fills.md`, finding 5): an inner
-/// stroke reaches nothing past the box, a centred one half its width, an outer one all
+/// Pen honors `strokeAlignment` for uniform and per-side widths alike, and the default
+/// is center (`project/2026-09-26-text-and-stroke-fills.md`, finding 5): an inner
+/// stroke reaches nothing past the box, a centered one half its width, an outer one all
 /// of it.
 struct StrokeRing: Friendly {
     /// The stroke's width on each side; a per-side stroke with a side left out is zero there.

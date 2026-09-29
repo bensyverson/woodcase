@@ -62,7 +62,7 @@ enum ViewerFixtures {
     /// viewer test waits on is several cooperative hops long — a Dispatch source, an
     /// actor, a debounce sleep, a stream, a collector — and this suite has been measured
     /// resuming a 10 ms `Task.sleep` twelve seconds late. Four hops of that overruns
-    /// anything set at the scale of the behaviour, so the bound is set at the scale of
+    /// anything set at the scale of the behavior, so the bound is set at the scale of
     /// "this is hung" instead.
     static let waitBudget: Duration = .seconds(60)
 
@@ -80,7 +80,7 @@ enum ViewerFixtures {
 /// Waits for a condition to hold, and records an issue naming it if it never does.
 ///
 /// Bounds are deliberately generous: the suite runs concurrently, and a bound near the
-/// interval under test measures machine load rather than behaviour. See
+/// interval under test measures machine load rather than behavior. See
 /// ``ViewerFixtures/waitBudget``.
 ///
 /// The evaluation *after* the deadline is the point of this shape rather than a tidier

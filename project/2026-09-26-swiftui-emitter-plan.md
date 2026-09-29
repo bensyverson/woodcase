@@ -21,7 +21,7 @@ tasks:
   - title: "Neutral codegen seams: state triggers, typed prop values, a Paint layer"
     ref: seams
     desc: |
-      Report §1.2 items 1–3 and 5. StateTrigger names the state (.hover, .pressed, .disabled, .focused, attribute name/value), not a CSS selector; React maps it to its selector. PropMapper returns a typed value (string, colour literal or variable, bool, image URL) and each emitter formats it (jsValue moves into React). ManifestEmitter moves out of React/. A CodeGen/Paint/ home for the target-neutral decisions compiled into React extensions today: PaintRoute, Pen unit-box gradient geometry (one map that yields CSS's angle and SwiftUI's UnitPoints), mesh theme resolution, stroke outsets per alignment, FillBox. Rule of two: extract only what the SwiftUI emitter will need.
+      Report §1.2 items 1–3 and 5. StateTrigger names the state (.hover, .pressed, .disabled, .focused, attribute name/value), not a CSS selector; React maps it to its selector. PropMapper returns a typed value (string, color literal or variable, bool, image URL) and each emitter formats it (jsValue moves into React). ManifestEmitter moves out of React/. A CodeGen/Paint/ home for the target-neutral decisions compiled into React extensions today: PaintRoute, Pen unit-box gradient geometry (one map that yields CSS's angle and SwiftUI's UnitPoints), mesh theme resolution, stroke outsets per alignment, FillBox. Rule of two: extract only what the SwiftUI emitter will need.
     criteria:
       - Every React golden (component and page) is byte-identical
       - No CSS selector or JSX formatting remains in a type outside CodeGen/React/
@@ -37,7 +37,7 @@ tasks:
     ref: slice
     blockedBy: [seams, geometry]
     desc: |
-      Report §6 leaf 3 under the rulings. SwiftUIEmitter (mirrors ReactEmitter.emit's signature), Options.deploymentFloor (typed; default iOS 26 / macOS 26), a PenSupport.swift template resource, `woodcase generate swiftui`. Frames as HStack/VStack/ZStack with padding, gap, sizing, justify, align, clip; rectangles and ellipses with solid fills and radii; text (font with optical sizing pinned off, weight, size, colour, align, growth, line height). The render test batches every emitted view into one `xcrun swiftc` child, renders with ImageRenderer, compares in-process with the shared MAE helper.
+      Report §6 leaf 3 under the rulings. SwiftUIEmitter (mirrors ReactEmitter.emit's signature), Options.deploymentFloor (typed; default iOS 26 / macOS 26), a PenSupport.swift template resource, `woodcase generate swiftui`. Frames as HStack/VStack/ZStack with padding, gap, sizing, justify, align, clip; rectangles and ellipses with solid fills and radii; text (font with optical sizing pinned off, weight, size, color, align, growth, line height). The render test batches every emitted view into one `xcrun swiftc` child, renders with ImageRenderer, compares in-process with the shared MAE helper.
     criteria:
       - Goldens over the layout-*.pen fixtures and render-text.pen, passing on Linux (no SwiftUI import in the library)
       - The emitted goldens compile at the default floor and at iOS 18 / macOS 15

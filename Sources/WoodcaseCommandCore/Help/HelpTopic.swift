@@ -38,7 +38,7 @@ enum HelpTopic: String, CaseIterable, ExpressibleByArgument {
     /// extracts and runs every command in it — a file worth reading on its own.
     case recipes
 
-    /// What `generate react` recognises: components, pages, roles, parameters, states.
+    /// What `generate react` recognizes: components, pages, roles, parameters, states.
     ///
     /// The body lives in `HelpTopic+Codegen.swift`, beside the recipes it is built like:
     /// `HelpCommandTests` runs every command in it, so a verb that changes shape breaks

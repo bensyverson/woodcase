@@ -68,7 +68,7 @@ struct ParentProcessWatch: Friendly {
 
     /// Suspends until ``launcher`` has gone away.
     ///
-    /// Returns early if the surrounding task is cancelled, which is how the caller
+    /// Returns early if the surrounding task is canceled, which is how the caller
     /// takes the watch down when the work it was guarding finishes first.
     ///
     /// - Parameter pollInterval: How often to re-read the parent id.

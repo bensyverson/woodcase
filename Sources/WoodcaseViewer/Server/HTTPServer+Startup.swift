@@ -59,7 +59,7 @@ extension HTTPServer {
     ///
     /// `.waiting` is the interesting one. `NWListener` reports it for a port it cannot
     /// have *yet* and then retries on its own schedule, indefinitely. That is the right
-    /// behaviour for a listener on a real interface waiting for a network path; it is the
+    /// behavior for a listener on a real interface waiting for a network path; it is the
     /// wrong one here, because the viewer binds loopback, where there is no path to wait
     /// for and a port that is taken now will be taken in an hour. So waiting is reported.
     ///
@@ -76,9 +76,9 @@ extension HTTPServer {
         case let .failed(error):
             .failed(.listenerFailed(String(describing: error)))
         case .cancelled:
-            .failed(.listenerFailed("cancelled before it was ready"))
+            .failed(.listenerFailed("canceled before it was ready"))
         @unknown default:
-            .failed(.listenerFailed("an unrecognised listener state: \(state)"))
+            .failed(.listenerFailed("an unrecognized listener state: \(state)"))
         }
     }
 }

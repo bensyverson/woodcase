@@ -134,7 +134,7 @@ loosened the bar, so the old value stands unchanged.
 > 2.97, Ratings (Dark) 1.885 → 2.83. The other rows did not move.
 >
 > **Corrected 2026-09-27 (leaf `HVBKsf`):** most of the text rows' remaining error was not glyph
-> rasterisation but two measurable mismatches: Core Text moved Inter's `opsz` axis to the point
+> rasterization but two measurable mismatches: Core Text moved Inter's `opsz` axis to the point
 > size (Pen draws its default, 14), and it placed lines under an explicit `lineHeight` with all the
 > leading on one side. With both fixed, re-measured with
 > `swift test -j 3 --filter "PenBankingAppTests|PenWoodcaseAppTests|PenTextPaintTests"`:

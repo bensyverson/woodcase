@@ -11,7 +11,7 @@ import Testing
 ///
 /// A golden file per component and state is this project's `#Preview`. It is a
 /// regression test — a stray class or a lost `href` fails the run — and it is also the
-/// artefact a person reads when reviewing what a component emits.
+/// artifact a person reads when reviewing what a component emits.
 ///
 /// The states themselves are **not** declared here. They live in
 /// `Sources/WoodcaseViewer/Components/Previews/`, as `PreviewComponent` values that

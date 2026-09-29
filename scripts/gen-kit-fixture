@@ -12,7 +12,7 @@ unless a key does.
 What the library is built to exercise (`--report` prints each count):
 
 - scale: 80+ reusable components in 16 families;
-- three theme axes (`scheme` x `tint` x `contrast`, 2 x 4 x 2), with colour, number
+- three theme axes (`scheme` x `tint` x `contrast`, 2 x 4 x 2), with color, number
   and chained (`$accent`) variables that vary along them;
 - ref chains: a reusable component that is itself a ref, two deep
   (`glyph-action-outline-lg` -> `action-outline-lg` -> `action-solid-lg`);
@@ -137,7 +137,7 @@ STROKE_WEIGHT = {"normal": 1, "high": 2}
 
 
 def themed_color(spec):
-    """Expands one colour token into Pen's themed-value list. Order matters: the
+    """Expands one color token into Pen's themed-value list. Order matters: the
     last matching entry wins, so single-axis entries come before the pairs that
     refine them, and contrast entries come last."""
     entries = [{"value": spec["day"]}]

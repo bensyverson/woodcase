@@ -3,7 +3,7 @@ import Foundation
 import Testing
 @testable import Woodcase
 
-/// Pins what the glyph-outline route keeps: blends, stacks, decorations, colour-glyph runs,
+/// Pins what the glyph-outline route keeps: blends, stacks, decorations, color-glyph runs,
 /// animation overrides and vector PDF output. Which fills take that route is
 /// `PenGlyphPaintTests`'s.
 struct PenTextPaintRouteTests {
@@ -76,12 +76,12 @@ struct PenTextPaintRouteTests {
         #expect(underline.contains { $0.b > 128 } && underline.contains { $0.r > 128 }, "the underline is not on the ramp")
     }
 
-    @Test("A colour glyph keeps its own colours beside glyphs that take the paint")
-    func colourGlyphsKeepTheirColours() throws {
+    @Test("A color glyph keeps its own colors beside glyphs that take the paint")
+    func colorGlyphsKeepTheirColors() throws {
         let ink = try Self.opaqueInk(Self.render(fills: .single(Self.ramp), content: "MM😀"))
         #expect(ink.contains(where: Self.isOnRamp), "the Ms show no ramp")
         // The emoji face is yellow: strong red and green, which the red→blue ramp never has.
-        #expect(ink.contains { $0.r > 180 && $0.g > 140 }, "the emoji was not drawn in its own colours")
+        #expect(ink.contains { $0.r > 180 && $0.g > 140 }, "the emoji was not drawn in its own colors")
     }
 
     // MARK: - Helpers

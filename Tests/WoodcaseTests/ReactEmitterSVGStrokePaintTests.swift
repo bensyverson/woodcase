@@ -7,7 +7,7 @@ import Foundation
 import Testing
 @testable import Woodcase
 
-/// How the React emitter paints a stroke that is more than one plain colour on a node it
+/// How the React emitter paints a stroke that is more than one plain color on a node it
 /// draws as SVG (path, polygon, arc or donut ellipse, line): each paint is a paint server
 /// in `userSpaceOnUse` laid out over the node's box, and an inner or outer alignment is a
 /// doubled stroke clipped to the shape or masked by it — Pen's own export construction.
@@ -68,7 +68,7 @@ struct ReactEmitterSVGStrokePaintTests {
         #expect(content.contains(##"overflow="visible""##))
     }
 
-    @Test("A turned, off-centre, resized gradient keeps Pen's geometry in the normalised box")
+    @Test("A turned, off-center, resized gradient keeps Pen's geometry in the normalized box")
     func turnedGradientMatrix() throws {
         let stroke = """
         {"type": "gradient", "gradientType": "linear", "rotation": 45,

@@ -574,7 +574,7 @@
     {
       "type": "frame",
       "id": "gg032",
-      "name": "lin-wide-r30-centre",
+      "name": "lin-wide-r30-center",
       "x": 3360,
       "y": 0,
       "width": 280,
@@ -616,7 +616,7 @@
     {
       "type": "frame",
       "id": "gg034",
-      "name": "lin-wide-r315-centre-size",
+      "name": "lin-wide-r315-center-size",
       "x": 3680,
       "y": 0,
       "width": 280,
@@ -1298,7 +1298,7 @@
     {
       "type": "frame",
       "id": "gg064",
-      "name": "ang-wide-r45-centre",
+      "name": "ang-wide-r45-center",
       "x": 7040,
       "y": 0,
       "width": 280,
@@ -1489,7 +1489,7 @@
     {
       "type": "frame",
       "id": "gg072",
-      "name": "rad-sq-r30-centre-size",
+      "name": "rad-sq-r30-center-size",
       "x": 8200,
       "y": 0,
       "width": 160,

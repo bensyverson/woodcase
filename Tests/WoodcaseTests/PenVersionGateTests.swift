@@ -131,7 +131,7 @@ struct PenVersionGateTests {
     }
 
     @Test("A different major with no node this build models throws differentMajor", arguments: ["1", "1.0", "3.0", "0.1"])
-    func differentMajorWithNothingModelledThrows(version: String) throws {
+    func differentMajorWithNothingModeledThrows(version: String) throws {
         let thrown = #expect(throws: PenParserError.self) {
             try PenParser.parse(document(version: version))
         }
@@ -155,7 +155,7 @@ struct PenVersionGateTests {
         #expect(reason.contains("children[0]"))
     }
 
-    @Test("A different major whose modelled key changed shape throws differentMajor naming the key")
+    @Test("A different major whose modeled key changed shape throws differentMajor naming the key")
     func differentMajorWithATypeConflictThrows() throws {
         let children = #"[{"id":"r","type":"rectangle","width":{"min":5},"height":5}]"#
         let thrown = #expect(throws: PenParserError.self) {

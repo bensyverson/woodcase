@@ -12,7 +12,7 @@ import Foundation
 /// Pen draws a live snapshot of the page, which no offline renderer can reproduce and
 /// which would make a render depend on the network. So the node is drawn as "a web
 /// view goes here" — a light neutral fill, a thin neutral border inside the edge, and
-/// the stored URL (or `browser` when there is none) as a small grey label, centred and
+/// the stored URL (or `browser` when there is none) as a small gray label, centered and
 /// truncated to fit. Everything is clipped to the node's corner radius.
 ///
 /// The node's own paint wins where it has any: a declared stroke replaces the default
@@ -73,18 +73,18 @@ public enum PenBrowserPlaceholder {
         )
     }
 
-    /// Draws one line of text, centred in `rect` and truncated with an ellipsis to
+    /// Draws one line of text, centered in `rect` and truncated with an ellipsis to
     /// fit inside the style's label inset.
     private static func drawLabel(_ text: String, in rect: PenRect, style: Style, context: CGContext) {
         let available = rect.width - 2 * style.labelInset
-        guard available > 0, let colour = PenColorParser.parse(style.labelHex) else { return }
+        guard available > 0, let color = PenColorParser.parse(style.labelHex) else { return }
 
         let font = PenTextMeasurer.resolveFont(
             family: PenTextMeasurer.defaultFontFamily, size: style.labelSize, weight: "normal", style: "normal"
         )
         let attributes = [
             kCTFontAttributeName: font,
-            kCTForegroundColorAttributeName: colour,
+            kCTForegroundColorAttributeName: color,
         ] as CFDictionary
         let full = CTLineCreateWithAttributedString(CFAttributedStringCreate(nil, text as CFString, attributes))
         let ellipsis = CTLineCreateWithAttributedString(CFAttributedStringCreate(nil, "…" as CFString, attributes))

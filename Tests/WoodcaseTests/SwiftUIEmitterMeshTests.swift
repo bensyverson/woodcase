@@ -10,13 +10,13 @@ import Testing
 /// What a mesh gradient fill becomes in emitted SwiftUI: always a native `MeshGradient`
 /// (Ben's ruling, 2026-09-26), which the support file's `PenMeshGradient` style builds
 /// from Pen's own grid — positions, the handles that differ from the grid's defaults, and
-/// colours. ``SwiftUIRenderTests``
+/// colors. ``SwiftUIRenderTests``
 /// measures `render-mesh-gradients` against Pen's exports; these pin each decision.
 struct SwiftUIEmitterMeshTests {
     private static let fourColors = ##"["#FF0000", "#00FF00", "#0000FF", "#FFFF00"]"##
     private static let fourColorCode = "colors: [Color(hex: 0xFF0000), Color(hex: 0x00FF00), Color(hex: 0x0000FF), Color(hex: 0xFFFF00)]"
 
-    @Test("A plain 2×2 mesh is a PenMeshGradient of its bare points and colours, filling the shape")
+    @Test("A plain 2×2 mesh is a PenMeshGradient of its bare points and colors, filling the shape")
     func plainMesh() throws {
         let code = try body(child: rect(fill: mesh(points: "[[0, 0], [1, 0], [0, 1], [1, 1]]")))
         #expect(code.contains(
@@ -45,7 +45,7 @@ struct SwiftUIEmitterMeshTests {
         #expect(!code.contains("PenMeshVertex("))
     }
 
-    @Test("A translucent colour keeps its alpha, and the fill's opacity is the style's own")
+    @Test("A translucent color keeps its alpha, and the fill's opacity is the style's own")
     func opacity() throws {
         let colors = ##"["#FF000000", "#00FF00FF", "#0000FF80", "#FF00FFFF"]"##
         let code = try body(child: rect(fill: mesh(colors: colors, extra: ##""opacity": 0.7"##)))
@@ -53,8 +53,8 @@ struct SwiftUIEmitterMeshTests {
         #expect(code.contains("]).opacity(0.7))"))
     }
 
-    @Test("A malformed colour is read as Pen's mesh reads it: a wrong length is clear, a word its digits")
-    func malformedColourIsReadAsPenReadsIt() throws {
+    @Test("A malformed color is read as Pen's mesh reads it: a wrong length is clear, a word its digits")
+    func malformedColorIsReadAsPenReadsIt() throws {
         let diagnostics = PenDiagnosticCollector()
         let colors = ##"["#FF0000", "#12345", "#eGeGeG", "red"]"##
         let code = try body(child: rect(fill: mesh(colors: colors)), diagnostics: diagnostics)
@@ -99,8 +99,8 @@ struct SwiftUIEmitterMeshTests {
         #expect(!single.contains("MeshGradient"))
     }
 
-    @Test("A colour variable is read through the theme, and PenMeshGradient resolves it in the environment")
-    func themedColour() throws {
+    @Test("A color variable is read through the theme, and PenMeshGradient resolves it in the environment")
+    func themedColor() throws {
         let diagnostics = PenDiagnosticCollector()
         let colors = ##"["$brand", "#00FF00", "$brand", "#FFFF00"]"##
         let document = ##""themes": {"mode": ["light", "dark"]}, "variables": {"brand": {"type": "color", "value": [{"theme": {"mode": "light"}, "value": "#FF0000"}, {"theme": {"mode": "dark"}, "value": "#0000FF"}]}}, "##
@@ -110,8 +110,8 @@ struct SwiftUIEmitterMeshTests {
         #expect(diagnostics.diagnostics.isEmpty, "\(diagnostics.diagnostics.map(\.message))")
     }
 
-    @Test("A colour variable the document does not declare is reported and the mesh is not drawn")
-    func undeclaredColourVariable() throws {
+    @Test("A color variable the document does not declare is reported and the mesh is not drawn")
+    func undeclaredColorVariable() throws {
         let diagnostics = PenDiagnosticCollector()
         let colors = ##"["$brand", "#00FF00", "#0000FF", "#FFFF00"]"##
         let code = try body(child: rect(fill: mesh(colors: colors)), diagnostics: diagnostics)
@@ -120,7 +120,7 @@ struct SwiftUIEmitterMeshTests {
         #expect(!diagnostics.diagnostics.contains { $0.message.contains("mesh gradient fills") })
     }
 
-    @Test("The support file resolves Pen's mesh to a native MeshGradient, subdivided, in device colour space")
+    @Test("The support file resolves Pen's mesh to a native MeshGradient, subdivided, in device color space")
     func supportTemplate() throws {
         let support = try #require(SwiftUIEmitter.supportTemplates()["PenSupport+Mesh.swift"])
         #expect(support.contains("struct PenMeshVertex"))

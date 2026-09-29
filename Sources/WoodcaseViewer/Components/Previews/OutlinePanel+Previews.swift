@@ -17,7 +17,7 @@ public extension OutlinePanel {
             PreviewState(
                 slug: "default",
                 name: "A selection, a clip and two editors",
-                note: "Customers is selected, partially clipped and touched by two identities; the row takes the first editor's colour as a 3 px left bar. The unnamed row reads as a faint mono #id.",
+                note: "Customers is selected, partially clipped and touched by two identities; the row takes the first editor's color as a 3 px left bar. The unnamed row reads as a faint mono #id.",
                 frame: .leftPane
             ) {
                 OutlinePanel(
@@ -56,7 +56,7 @@ public extension OutlinePanel {
             PreviewState(
                 slug: "kind-marks",
                 name: "Definition, instance, slot and plain",
-                note: "The four cases of the component vocabulary side by side. Each mark is glyph plus word, tinted by its own colour; a plain node carries no mark at all.",
+                note: "The four cases of the component vocabulary side by side. Each mark is glyph plus word, tinted by its own color; a plain node carries no mark at all.",
                 frame: .leftPane
             ) {
                 OutlinePanel(

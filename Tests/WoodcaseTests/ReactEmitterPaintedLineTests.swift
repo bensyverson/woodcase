@@ -63,8 +63,8 @@ struct ReactEmitterPaintedLineTests {
         #expect(!content.contains("matrix(0 0 180 0"), "\(content)")
     }
 
-    /// Green on its first run: the plain colour keeps its border.
-    @Test("A plain colour stroke keeps its top border")
+    /// Green on its first run: the plain color keeps its border.
+    @Test("A plain color stroke keeps its top border")
     func plainStroke() throws {
         let content = try emit(stroke: ##""#FF0000""##)
         #expect(content.contains("borderTop: \"6px solid #FF0000\""), "\(content)")

@@ -36,7 +36,7 @@ public extension BatchOperation {
 
     /// The reason a line failed to decode.
     ///
-    /// A line that ``isMultiLineFragment(_:)`` recognises never comes from a
+    /// A line that ``isMultiLineFragment(_:)`` recognizes never comes from a
     /// hand-written batch — every whole operation is one JSON object, so it always
     /// starts with `{` — so it is almost always one line of a pretty-printed,
     /// multi-line object pasted in by mistake. That earns its own sentence naming the

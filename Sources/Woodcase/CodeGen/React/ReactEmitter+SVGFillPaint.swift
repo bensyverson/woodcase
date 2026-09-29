@@ -6,7 +6,7 @@
 import Foundation
 
 extension ReactEmitter {
-    /// The `fill` attributes of a shape drawn as SVG when its fills are one plain colour:
+    /// The `fill` attributes of a shape drawn as SVG when its fills are one plain color:
     /// `fill="#hex"`, with the fill rule when there is one — or `fill="none"` when the fills
     /// are drawn as layers (``emitSVGFillLayers(_:fills:indent:ctx:)``) under it.
     static func svgFillAttributes(_ fills: PenFills?, fillRule: String? = nil) -> String {
@@ -14,11 +14,11 @@ extension ReactEmitter {
         return "fill=\"\(svgFillColor(fills))\"" + (fillRule.map { " fillRule=\"\($0)\"" } ?? "")
     }
 
-    /// Writes an SVG shape's elements: its fill layers when one colour cannot carry its
+    /// Writes an SVG shape's elements: its fill layers when one color cannot carry its
     /// fills, then its inner shadows (``emitSVGInnerShadows(_:shadows:indent:ctx:)``), then
     /// its stroke — painted layers (``emitPaintedSVGShape(_:fills:stroke:indent:ctx:)``),
-    /// which a plain colour placed inside or outside the outline takes too, or one element
-    /// with a plain `stroke` — or, for plain fills and a centred plain stroke and no inner
+    /// which a plain color placed inside or outside the outline takes too, or one element
+    /// with a plain `stroke` — or, for plain fills and a centered plain stroke and no inner
     /// shadow between them, one element carrying both.
     ///
     /// - Parameters:
@@ -73,10 +73,10 @@ extension ReactEmitter {
         PaintRoute(stroke.stroke) != .none
     }
 
-    /// A plain-colour stroke placed inside or outside the outline, as one paint layer for
-    /// ``emitPaintedSVGShape(_:fills:stroke:indent:ctx:)``, which honours the alignment an
-    /// SVG `stroke` attribute cannot; `nil` for a centred stroke, another route, or a shape
-    /// that takes no fill (a line, whose stroke Pen always centres).
+    /// A plain-color stroke placed inside or outside the outline, as one paint layer for
+    /// ``emitPaintedSVGShape(_:fills:stroke:indent:ctx:)``, which honors the alignment an
+    /// SVG `stroke` attribute cannot; `nil` for a centered stroke, another route, or a shape
+    /// that takes no fill (a line, whose stroke Pen always centers).
     private static func alignedSolid(_ route: PaintRoute, stroke: any PenStrokable, shape: SVGStrokedShape) -> [PenFill]? {
         guard let color = route.plainColor, shape.fill != nil, (stroke.strokeAlignment ?? .center) != .center else {
             return nil
@@ -84,8 +84,8 @@ extension ReactEmitter {
         return [.color(PenFill.PenColorFill(color: color))]
     }
 
-    /// Writes the fills of an SVG shape that one `fill` colour cannot carry — a gradient,
-    /// an image, a mesh, a stack, a blended colour — as one filled copy of the shape per
+    /// Writes the fills of an SVG shape that one `fill` color cannot carry — a gradient,
+    /// an image, a mesh, a stack, a blended color — as one filled copy of the shape per
     /// layer, bottom first, each painted by ``svgPaint(_:index:shape:overhang:defs:ctx:)``
     /// over the node's box, which is Pen's paint domain for a fill as for a stroke. An
     /// angular gradient, which SVG has no paint server for, is a conic layer clipped to the

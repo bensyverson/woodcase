@@ -11,7 +11,7 @@ tree: 3614 + 1017 + 494 + 163 tests, green (`swift test -j 3 --quiet`). Everythi
 | Commit | Leaf | What |
 |---|---|---|
 | `8694ab0` | `HxAVGX` | Test runs sweep the `pen-exports-<pid>` folders of exited processes on first use (109 of them held 2.4 GB); the latest run's folder stays for debugging, `WOODCASE_KEEP_TEST_OUTPUT=1` keeps all |
-| `f493a82` | `PlHnG2`, `ifNKJL`, `x3UuVF` | SwiftUI unfilled text is `.foregroundStyle(.clear)` (Pen draws it as nothing, both schemes; the harness renders dark boards now); mesh colour variables read through the theme; `PenMeshColor.hexColor(penMesh:)` reads mesh colours as Pen does (30 strings pinned by `render-mesh-colors.pen`). **Breaking:** `PenMeshColor.init?(hex:)` removed |
+| `f493a82` | `PlHnG2`, `ifNKJL`, `x3UuVF` | SwiftUI unfilled text is `.foregroundStyle(.clear)` (Pen draws it as nothing, both schemes; the harness renders dark boards now); mesh color variables read through the theme; `PenMeshColor.hexColor(penMesh:)` reads mesh colors as Pen does (30 strings pinned by `render-mesh-colors.pen`). **Breaking:** `PenMeshColor.init?(hex:)` removed |
 | `6b2b11b` | `mkPpjZ` | React transforms are valid CSS, negated (Pen turns CCW), flips before turn, `transformOrigin: "0 0"` for nodes placed by `x`/`y` (`TransformPivot`). Designer states 0.026/0.009/0.039 in WebKit (were 11–27). The node's own rotation had the same wrong sign. `ReactHarnessBuilder` now inlines `states.css` |
 | `9d8cdc8` | `26chl8` | SwiftUI slots: a generic `@ViewBuilder` parameter per slot frame, `<Component><Slot>Default` views, one constrained init, filled instances as trailing-closure calls; `codegen-slots.pen` rendered 0.22–1.62 |
 | `8aba33c` | `0QZeR3` | SwiftUI kit catalog: `#Preview` per state × theme variant, `PenCatalog`/`PenCatalogSheet`/`PenCatalogThemes`, a `<Module>Catalog` executable (`--snapshot <png>`). Rows wrap at the window's width after Ben saw a right-edge cutoff |
@@ -24,9 +24,9 @@ had never been committed. Its uncommitted `.agents.yaml` and two agent docs were
 
 - **Unfilled text draws clear, not black** — measured: Pen draws a text or icon with no enabled fill as nothing.
   Raised with Ben twice; no objection. CG still draws it black until `PRFPX5`.
-- **Mesh colours follow Pen's parser, malformed ones included** (`red` → `#00EEDD`, 4/5-digit → transparent);
-  lint names every colour Pen misreads.
-- **React pivots:** anchor for free-positioned nodes (exact), centre for flex children (closest; Pen grows the
+- **Mesh colors follow Pen's parser, malformed ones included** (`red` → `#00EEDD`, 4/5-digit → transparent);
+  lint names every color Pen misreads.
+- **React pivots:** anchor for free-positioned nodes (exact), center for flex children (closest; Pen grows the
   slot to the turned bounds and CSS cannot). Documented, not filed.
 - **One constrained init for all slots**, not one per subset (2ⁿ); a partial fill passes the other defaults.
 - **Catalog pieces are support templates**, and `main.swift` is `#if os(macOS)`.

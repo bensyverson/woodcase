@@ -64,7 +64,7 @@ extension PenShapeGeometry {
         }
     }
 
-    /// The `i`th vertex of a regular polygon on the ellipse centred at `(cx, cy)` with radii
+    /// The `i`th vertex of a regular polygon on the ellipse centered at `(cx, cy)` with radii
     /// `rx` × `ry`; Pen's first vertex is at the top.
     private static func polygonVertex(
         _ i: Int, cx: Double, cy: Double, rx: Double, ry: Double, angleStep: Double

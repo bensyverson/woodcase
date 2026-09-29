@@ -25,11 +25,11 @@ struct PenMeshRasterizerTests {
         #expect(raster.pixels.allSatisfy { $0 == 0 })
     }
 
-    @Test("A triangle covers exactly the pixel centres inside it, whichever way it winds")
+    @Test("A triangle covers exactly the pixel centers inside it, whichever way it winds")
     func triangleCoverage() {
-        // The lower-left half of a 4×4 box: centres with x < y are inside and x > y
-        // outside. The diagonal x == y runs through centres; it is not a top-left edge
-        // of this triangle, so those centres belong to its neighbour.
+        // The lower-left half of a 4×4 box: centers with x < y are inside and x > y
+        // outside. The diagonal x == y runs through centers; it is not a top-left edge
+        // of this triangle, so those centers belong to its neighbor.
         let windings = [[SIMD2(0.0, 0), SIMD2(0.0, 4), SIMD2(4.0, 4)], [SIMD2(0.0, 0), SIMD2(4.0, 4), SIMD2(0.0, 4)]]
         let rasters = windings.map { PenMeshRasterizer.rasterize(triangle($0[0], $0[1], $0[2], color: Support.red), width: 4, height: 4) }
         #expect(rasters[0] == rasters[1])
@@ -40,7 +40,7 @@ struct PenMeshRasterizerTests {
         }
     }
 
-    @Test("Two triangles sharing a diagonal through pixel centres cover each centre once")
+    @Test("Two triangles sharing a diagonal through pixel centers cover each center once")
     func sharedDiagonal() {
         let half = PenMeshColor(red: 0, green: 0, blue: 1, alpha: 0.5)
         let mesh = PenMeshTessellation(
@@ -69,7 +69,7 @@ struct PenMeshRasterizerTests {
         }
     }
 
-    @Test("Pixels take the patch colour at their centre, within one 8-bit step")
+    @Test("Pixels take the patch color at their center, within one 8-bit step")
     func shading() throws {
         let grid = try Support.fourColor(handles: Support.thirdHandles(columns: 2, rows: 2))
         let size = 64
@@ -78,7 +78,7 @@ struct PenMeshRasterizerTests {
         for y in 0 ..< size {
             for x in 0 ..< size {
                 // Straight third-length handles make position(u, v) = (u, v), so a pixel
-                // centre's parameters are its unit coordinates.
+                // center's parameters are its unit coordinates.
                 let u = (Double(x) + 0.5) / Double(size)
                 let v = (Double(y) + 0.5) / Double(size)
                 let expected = Support.bilinear(
@@ -94,7 +94,7 @@ struct PenMeshRasterizerTests {
         #expect(worst <= 1)
     }
 
-    @Test("Vertex colours are premultiplied before they are interpolated")
+    @Test("Vertex colors are premultiplied before they are interpolated")
     func premultipliedInterpolation() {
         // Opaque red to fully transparent green: premultiplied, the green never shows.
         let mesh = PenMeshTessellation(

@@ -5,12 +5,12 @@
 
 import Foundation
 
-/// One row of the check catalogue: what `lint --list` prints and what its `--json`
+/// One row of the check catalog: what `lint --list` prints and what its `--json`
 /// carries.
 ///
 /// Everything here is derived from ``LintCheck`` — the id, the severity its findings
 /// carry, the one line saying what it looks for — and none of it is stored anywhere
-/// else. It exists as a struct rather than a dictionary so the catalogue's wire shape
+/// else. It exists as a struct rather than a dictionary so the catalog's wire shape
 /// is a type both the producer and any consumer can hold, the same way ``LintFinding``
 /// is the wire shape of a finding.
 ///

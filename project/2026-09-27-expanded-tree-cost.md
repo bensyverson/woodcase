@@ -53,7 +53,7 @@ running; `uptime` load in brackets.
 | `scripts/tree-expand-times --timeout 60` (208 fixtures) | 31.0 s [60–70] | 16.2 s [26.9] |
 
 The sweep figures differ by load, not by the change. Row output is identical before and
-after for all 208 fixtures once `overflowAxes` order is normalised (see below); the
+after for all 208 fixtures once `overflowAxes` order is normalized (see below); the
 sweep saved each file's JSON and a comparison script checked them.
 
 ## Found on the way

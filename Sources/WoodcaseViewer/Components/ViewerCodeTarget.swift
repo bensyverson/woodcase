@@ -48,7 +48,7 @@ public enum ViewerCodeTarget: String, Friendly, CaseIterable {
         }
     }
 
-    /// The `<pre>` language hint, for anything that wants to colour the pane later.
+    /// The `<pre>` language hint, for anything that wants to color the pane later.
     public var syntax: String {
         switch self {
         case .react: "tsx"

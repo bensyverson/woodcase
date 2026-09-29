@@ -47,7 +47,7 @@ failures all wave were WebKit `__READY__` timeouts under load (all pass alone) a
   shadow over the stroke, a 0×0 box's stroke band; plus the two CSS-limit warnings. **`AyTAji`** (Material weight
   200 to the React icon component) is small and sits in the same files.
 - **`jBvokK`** `followStopsWhenOrphaned` still failed once each in two loaded full runs after `b0c0922`. Capture a
-  failing run (follower's state, `sample` if alive) before theorising.
+  failing run (follower's state, `sample` if alive) before theorizing.
 - SwiftUI gap (on `Mu4JsL`'s note): `penDropShadow` casts from the shape only, so a stroke never casts a shadow.
 - **Penumbra follow-up (no leaf: Penumbra has no issue tree yet — ask Ben before creating a root):** replace
   `DragController.canvasToParentMaps`' own ancestor composition with

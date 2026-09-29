@@ -12,8 +12,8 @@ import Woodcase
 ///
 /// One component so it is one swap. The script replaces this whole element on a `change`
 /// event and on a selection, which is why the edit markers and the selection footer are
-/// *server*-rendered with the right colours and the right rects — there is no hash, no
-/// rect maths and no footer template written a second time in JavaScript.
+/// *server*-rendered with the right colors and the right rects — there is no hash, no
+/// rect math and no footer template written a second time in JavaScript.
 public struct RenderRegion: HTML {
     /// Creates a region.
     ///

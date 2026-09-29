@@ -6,7 +6,7 @@
 import Testing
 @testable import Woodcase
 
-/// Pins which fills an emitter paints as a plain colour and which as layers.
+/// Pins which fills an emitter paints as a plain color and which as layers.
 struct PaintRouteTests {
     private static let ramp = PenFill.gradient(PenFill.PenGradientFill(gradientType: .linear))
 
@@ -16,7 +16,7 @@ struct PaintRouteTests {
         #expect(PaintRoute(.single(.color(.init(enabled: .literal(false), color: .literal("#FF0000"))))) == .none)
     }
 
-    @Test("A lone colour is a solid, a shorthand variable a variable reference")
+    @Test("A lone color is a solid, a shorthand variable a variable reference")
     func solid() {
         let route = PaintRoute(.single(.shorthand("$ink")))
         #expect(route == .solid(color: .variable("ink"), blendMode: nil))
@@ -24,7 +24,7 @@ struct PaintRouteTests {
         #expect(route.layeredFills == nil)
     }
 
-    @Test("A blended solid is layered, since a plain colour cannot carry its blend")
+    @Test("A blended solid is layered, since a plain color cannot carry its blend")
     func blendedSolid() {
         let route = PaintRoute(.single(.color(.init(blendMode: .multiply, color: .literal("#FF0000")))))
         #expect(route.plainColor == nil)

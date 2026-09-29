@@ -35,10 +35,10 @@ import Synchronization
 ///
 /// The job runs in a task of its own, and the caller waits on a continuation that
 /// whichever finishes first resumes: the job, the deadline, or the caller's own
-/// cancellation. When the deadline wins, the job is cancelled *and then left behind* —
+/// cancellation. When the deadline wins, the job is canceled *and then left behind* —
 /// the caller does not wait for it to notice. That is the difference from a task group,
 /// which cannot return until every child has, and so hangs with any child that never
-/// resumes — a bridged completion handler never ends early on cancellation. Honouring the caller's
+/// resumes — a bridged completion handler never ends early on cancellation. Honoring the caller's
 /// cancellation the same way is what lets a test's `.timeLimit` end a test that is
 /// stuck here rather than only reporting it.
 enum BoundedWait {
@@ -75,11 +75,11 @@ enum BoundedWait {
     ///   - job: What is being waited for, named in ``Expired`` so a failure says which
     ///     await never answered.
     ///   - budget: How long `work` may run. Defaults to ``budget``.
-    ///   - work: The job to run. It is cancelled when the budget is spent, and
+    ///   - work: The job to run. It is canceled when the budget is spent, and
     ///     abandoned whether or not it notices.
     /// - Returns: Whatever `work` returned.
     /// - Throws: ``Expired`` if the budget was spent first, `CancellationError` if the
-    ///   caller was cancelled first, and anything `work` throws.
+    ///   caller was canceled first, and anything `work` throws.
     static func value<T: Sendable>(
         _ job: String? = nil,
         within budget: Duration = budget,
@@ -110,7 +110,7 @@ enum BoundedWait {
     /// One continuation, resumed by whichever of its racers settles first.
     ///
     /// A settle that arrives before the continuation is armed — the caller was already
-    /// cancelled — is kept and delivered on arming, so no order of events can leave the
+    /// canceled — is kept and delivered on arming, so no order of events can leave the
     /// continuation unresumed or resume it twice.
     private final class Race<T: Sendable>: Sendable {
         /// Where the race stands.
@@ -126,7 +126,7 @@ enum BoundedWait {
         }
 
         /// The race's state and its racers, under one lock, so a racer held after the
-        /// race is decided is cancelled rather than missed.
+        /// race is decided is canceled rather than missed.
         private let books = Mutex<(state: State, racers: [Task<Void, Never>])>((.idle, []))
 
         /// Hands the race the continuation to resume.

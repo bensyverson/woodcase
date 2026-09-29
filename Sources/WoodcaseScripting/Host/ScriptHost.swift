@@ -39,7 +39,7 @@
     ///
     /// It does not cover `while (true) {}`. The public JavaScriptCore headers on macOS 15
     /// carry no execution-time limit and no interrupt — checked 2026-09-07,
-    /// `grep -ri 'TimeLimit\|Interrupt'` over the framework's `Headers` finds only licence
+    /// `grep -ri 'TimeLimit\|Interrupt'` over the framework's `Headers` finds only license
     /// text — so there is nothing to ask the engine for. A hard bound on a pure loop is a
     /// process-ending watchdog, and that is the CLI's to install: a library host that
     /// called `exit` inside Penumbra would kill the editor.

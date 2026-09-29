@@ -339,7 +339,7 @@ struct PenTextLayoutTests {
         let rects = PenLayoutEngine.layout(doc, textMeasurer: Self.stubMeasurer)
         let rect = try #require(rects["text1"])
         #expect(rect.width == 0, "The variable name itself must not be measured")
-        // Empty text still gets one line height (matching Pen's behaviour)
+        // Empty text still gets one line height (matching Pen's behavior)
         #expect(rect.height == 16)
     }
 

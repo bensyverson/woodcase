@@ -74,7 +74,7 @@ matches every one to 0.01 pt.
 | Row | B carries | Row rect (w×h) | B rect | C.x |
 |---|---|---|---|---|
 | f00 | nothing (control) | 220×60 | 80,10 60×40 | 150 |
-| f01–f03 | 12 pt inner / centre / outer | 220×60 | 80,10 60×40 | 150 |
+| f01–f03 | 12 pt inner / center / outer | 220×60 | 80,10 60×40 | 150 |
 | f04 | per-side outer (4/16/24/8) | 220×60 | 80,10 60×40 | 150 |
 | f07 | outer + flipX | 220×60 | 80,10 60×40 | 150 |
 | f09 / f10 / f11 | shadow / blur 10 / background blur 10 | 220×60 | 80,10 60×40 | 150 |
@@ -87,7 +87,7 @@ matches every one to 0.01 pt.
 
 71.96×64.64 is the bounds of the 60×40 box turned 30° (60·cos30 + 40·sin30, …) — the
 turned box, with no stroke in it. An outer 12 pt band on that turned box reaches 16.4 pt
-past those bounds at its mitred corners, and none of it is allocated.
+past those bounds at its mitered corners, and none of it is allocated.
 
 Groups (board `groups`, rects parent-relative, group children relative to the anchor):
 
@@ -130,10 +130,10 @@ Pen's export of a top-level node is its painted extent (scale 2, pixels):
 | x1 outer 12 + shadow | 100×60 | 296×216 | stroke −12…112, then shadow (+10) ± 12 → 148×108 pt |
 | x2 outer 12 + 30° | 116.60×101.96 | 299×270 | the 124×84 stroked box turned → 149.4×134.8 pt |
 | x3 blur 10 | 100×60 | 260×180 | inflated 15 → 130×90 pt |
-| x4 centre 12 | 100×60 | 224×144 | inflated 6 → 112×72 pt |
+| x4 center 12 | 100×60 | 224×144 | inflated 6 → 112×72 pt |
 
 Also: an unclipped frame's painted extent includes its children's (the `free` export is
-1488×803 px for a 720×360 board, because r5's mitred band reaches 41.5 pt above it and
+1488×803 px for a 720×360 board, because r5's mitered band reaches 41.5 pt above it and
 r6's flipped per-side band 24 pt left of it); a clipping frame's does not; per-side bands
 flip with the node (r6's 24 pt left side paints on the right).
 
@@ -163,7 +163,7 @@ flip with the node (r6's 24 pt left side paints on the right).
 
 > **Added 2026-09-28 (later, leaf `slxqjU`):** an icon's painted extent is ink too. Pen's
 > icon class (`DJt`) overrides `computeVisualLocalBounds` to return `fillPath.bounds` —
-> its vector glyph, fitted to the box by its *shorter* side and centred, then measured
+> its vector glyph, fitted to the box by its *shorter* side and centered, then measured
 > tightly (`getIconPath`'s own path, not a font run) — not the box.
 > `PenLayoutEngine.iconInkBounds(of:box:)` reuses the exact Core Text glyph
 > `PenIconGlyph`/`PenIconFontRenderer` already draw and measures its image bounds. x8 (a
@@ -235,7 +235,7 @@ cropped to the layout rect x1 and x4 score 0.000 and x3 0.485.
    child's *unturned* height with the row's inner height (100), then lays out the turned
    bounds (100×60). Woodcase writes a 100×100 rect — the stretched cross size unexpanded —
    and draws the box 20 pt low. Same fix, on the cross-fill path.
-3. **Pen artefact — first layout after load (f20, f21).** Pen sizes widths before heights
+3. **Pen artifact — first layout after load (f20, f21).** Pen sizes widths before heights
    (`VBe`: `cie(t,0),uie(t,0),cie(t,1),uie(t,1),qBe(t)`), so a turned child whose height is
    not resolved yet (a `fit_content` frame, a cross-axis fill) is measured with height 0
    when its parent's width is fitted. Any later relayout converges on Woodcase's numbers,
@@ -274,15 +274,15 @@ Penumbra, codegen's positioned wrappers.
 
 **(ii) Box + transform — the drawn geometry.** The box `0,0,w,h` (a group's: its
 children's union, measured from its anchor) and the affine map into the parent: Pen's
-translate-to-anchor · turn · flip. Woodcase spells it as the box centred in the bounds,
-flipped and turned about its centre — the same quad, because a turned rectangle's bounds
-are centred on its centre — and exposes it as `unturnedBox(of:rect:layoutRects:)` plus
+translate-to-anchor · turn · flip. Woodcase spells it as the box centered in the bounds,
+flipped and turned about its center — the same quad, because a turned rectangle's bounds
+are centered on its center — and exposes it as `unturnedBox(of:rect:layoutRects:)` plus
 `canvasTransform(of:in:layoutRects:)`. Readers: every renderer (CG, RapidPro, React,
 SwiftUI), the space children's rects are measured in, and hit-testing (point in the
 turned quad), selection handles and drag in Penumbra.
 
 **(iii) Painted extent — what may carry ink.** Box ∪ stroke band (alignment, per side,
-mitred corners) ∪ unclipped children's painted extents through their transforms, then
+mitered corners) ∪ unclipped children's painted extents through their transforms, then
 each outer shadow's offset copy ± 1.5·blur and a layer blur ± 1.5·radius, all through the
 node's transform — Pen's `getVisualLocalBounds`, reproduced, including its choice to leave
 spread out. Never an input to layout. Readers: export and `render` canvas size, `shot
@@ -319,11 +319,11 @@ and 2; rule on 3 as "keep the converged layout".** Cost:
 - RapidPro: replace its private painted-bounds computation with the library's (one
   producer call site); verify culling unchanged on its suite.
 - Penumbra: hit-test the turned quad and the stroke band (via (ii) and (iii)) instead of
-  the absolute bounds — a behavioural change to selection, which its hit-test tests pin.
+  the absolute bounds — a behavioral change to selection, which its hit-test tests pin.
 
 The bounds-first reshape to box + transform would instead touch every `PenRect` reader
 across the three repos (layout engine, tree, lint, viewer, codegen, `RenderNodeProducer`,
-Penumbra's absolute rects, hit test and drag) for no behavioural gain.
+Penumbra's absolute rects, hit test and drag) for no behavioral gain.
 
 ## What the brief assumed
 
@@ -334,5 +334,5 @@ Penumbra's absolute rects, hit test and drag) for no behavioural gain.
 - `png-mae` resamples images of different sizes silently, so a Pen export framed on the
   painted extent against a `shot` framed on the layout rect ranks framing, not paint.
 - The 2.17 schema notes in `local/Pen-Schema-2.17.md` still say rotation "pivots at the
-  node's center in the render"; Pen's matrix pivots at the anchor. Woodcase's centre pivot
+  node's center in the render"; Pen's matrix pivots at the anchor. Woodcase's center pivot
   inside the bounds draws the same quad, so it is an equivalent spelling, not the rule.

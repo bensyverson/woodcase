@@ -114,11 +114,11 @@ public extension PenNode {
 
         // MARK: Anchor
 
-        /// A point on a node's box: its centre, or the middle of one of its edges.
+        /// A point on a node's box: its center, or the middle of one of its edges.
         ///
         /// The five spellings, in the order Pen's validator lists them.
         public enum Anchor: String, Friendly, CaseIterable {
-            /// The centre of the box.
+            /// The center of the box.
             case center
             /// The middle of the top edge.
             case top

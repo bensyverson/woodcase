@@ -21,7 +21,7 @@ import Foundation
 /// because each of those has more than one plausible reading and a plausible wrong
 /// value is worse than a refusal.
 ///
-/// A node of an unrecognised type is left alone: Woodcase has no schema for it, so it
+/// A node of an unrecognized type is left alone: Woodcase has no schema for it, so it
 /// has no grounds to say the number was meant as text.
 ///
 /// The rule follows the value across the instance seam. `override … content=42` is the

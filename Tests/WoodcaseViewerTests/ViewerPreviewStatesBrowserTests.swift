@@ -244,7 +244,7 @@
         }
 
         @MainActor
-        @Test("A non-colour variable's swatch slot keeps its width but draws nothing (ZIaKPF)")
+        @Test("A non-color variable's swatch slot keeps its width but draws nothing (ZIaKPF)")
         func emptySwatchDrawsNothing() async throws {
             let bench = try await Bench()
             defer { Task { await bench.stop() } }
@@ -305,7 +305,7 @@
         }
 
         @MainActor
-        @Test("An edit tag keeps its verb and age inside its own coloured ground (vHmA5e)")
+        @Test("An edit tag keeps its verb and age inside its own colored ground (vHmA5e)")
         func editTagHoldsItsWords() async throws {
             let bench = try await Bench()
             defer { Task { await bench.stop() } }

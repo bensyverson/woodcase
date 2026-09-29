@@ -39,7 +39,7 @@ public struct PreviewProse: HTML {
         case text(String)
         /// A code span or a symbol link.
         case code(String)
-        /// An emphasised run.
+        /// An emphasized run.
         case emphasis(String)
     }
 

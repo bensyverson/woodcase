@@ -5,13 +5,13 @@ extension PenFillRenderer {
     /// The fewest raster pixels per point a mesh gets in a context that is not a bitmap.
     ///
     /// A PDF context's device space is its point space, so the device scale alone would
-    /// rasterise at 1x, which looks soft when the page is zoomed. Pen's own PDF export
+    /// rasterize at 1x, which looks soft when the page is zoomed. Pen's own PDF export
     /// embeds its mesh at 2x, and Woodcase matches it (Ben's ruling, 2026-09-26).
     static let minimumVectorMeshScale: CGFloat = 2
 
     /// Draws one mesh gradient fill through `target`'s clip, laid out over its domain.
     ///
-    /// CoreGraphics has no mesh primitive, so the mesh core rasterises the fill
+    /// CoreGraphics has no mesh primitive, so the mesh core rasterizes the fill
     /// (<doc:PenMeshGradients>) at the context's device resolution — at least
     /// ``minimumVectorMeshScale`` in a PDF — and the raster is drawn over the domain, the
     /// node's box, never the clip's bounds. The fill's opacity and blend mode apply when
@@ -45,7 +45,7 @@ extension PenFillRenderer {
         context.draw(placed.image, in: CGRect(origin: .zero, size: placed.rect.size))
     }
 
-    /// Rasterises `grid` for `domain` at the context's resolution.
+    /// Rasterizes `grid` for `domain` at the context's resolution.
     ///
     /// The raster covers whole pixels, so its rectangle starts at the domain's origin and
     /// reaches up to one pixel past its far edges; the mesh itself is tessellated at the

@@ -7,7 +7,7 @@ import Foundation
 import Testing
 @testable import Woodcase
 
-/// How the React emitter states a gradient's centre, size and rotation in CSS, so a turned,
+/// How the React emitter states a gradient's center, size and rotation in CSS, so a turned,
 /// moved or sized gradient on a box that is not square draws where Pen draws it: a linear
 /// gradient on a tile whose diagonal carries Pen's slant, an angular gradient turned (and,
 /// on a stretched box, bent) to Pen's bearings, and a turned ellipse as an SVG paint server.
@@ -84,7 +84,7 @@ struct ReactEmitterGradientGeometryTests {
         #expect(content.contains(##"background: "conic-gradient(from 270deg, #FF0000 0%, #00FF00 50%, #FF0000 100%)","##), "\(content)")
     }
 
-    @Test("A moved angular gradient turns about its centre")
+    @Test("A moved angular gradient turns about its center")
     func movedAngular() throws {
         let content = try rectangle(
             ##""gradientType": "angular", "center": {"x": 0.3, "y": 0.4}, "## + Self.wheel,

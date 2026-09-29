@@ -69,7 +69,7 @@ enum SyntheticPenDocument {
 
     // MARK: - Nodes
 
-    /// One top-level frame: a vertical stack of rows, laid out beside its neighbours.
+    /// One top-level frame: a vertical stack of rows, laid out beside its neighbors.
     ///
     /// - Parameters:
     ///   - number: Which artboard this is, 1-based; it sets the name and the x offset.

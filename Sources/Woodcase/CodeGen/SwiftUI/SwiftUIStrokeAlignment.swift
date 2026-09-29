@@ -9,7 +9,7 @@ enum SwiftUIStrokeAlignment: String, Friendly {
     /// Entirely inside the outline: Pen's `inner`.
     case inside
 
-    /// Centred on the outline: Pen's `center`, and its default.
+    /// Centered on the outline: Pen's `center`, and its default.
     case center
 
     /// Entirely outside the outline: Pen's `outer`.

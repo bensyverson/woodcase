@@ -13,7 +13,7 @@ import Testing
 ///
 /// Two oracles. The renderer's pixels: markers in a turned group inside a turned and
 /// flipped frame are drawn where the map sends their boxes — their bounds and, since
-/// bounds cannot see a flip, their centres. And ``PenLayoutEngine/canvasRects(in:layoutRects:)``:
+/// bounds cannot see a flip, their centers. And ``PenLayoutEngine/canvasRects(in:layoutRects:)``:
 /// the map carries every node's unturned box to its canvas rect.
 struct PenLayoutCanvasTransformTests {
     private static let fixturesDir = URL(fileURLWithPath: #filePath)
@@ -68,12 +68,12 @@ struct PenLayoutCanvasTransformTests {
             let transform = try #require(PenLayoutEngine.canvasTransform(of: id, in: document, layoutRects: rects))
             let bounds = transform.bounds(of: box)
             // Only fully opaque pixels count, and a corner turned 45° is a sharp tip, so the
-            // pixels' bounds sit up to 1.6 pt inside the box's; the centre is exact.
+            // pixels' bounds sit up to 1.6 pt inside the box's; the center is exact.
             #expect(Self.isClose(bounds, drawn.bounds, tolerance: 2), "\(id): \(bounds) vs pixels \(drawn.bounds)")
-            let centre = transform.apply(to: PenPoint(x: box.x + box.width / 2, y: box.y + box.height / 2))
+            let center = transform.apply(to: PenPoint(x: box.x + box.width / 2, y: box.y + box.height / 2))
             #expect(
-                abs(centre.x - drawn.centroid.x) < 1 && abs(centre.y - drawn.centroid.y) < 1,
-                "\(id): centre \(centre) vs pixels' \(drawn.centroid)"
+                abs(center.x - drawn.centroid.x) < 1 && abs(center.y - drawn.centroid.y) < 1,
+                "\(id): center \(center) vs pixels' \(drawn.centroid)"
             )
         }
     }
@@ -156,7 +156,7 @@ struct PenLayoutCanvasTransformTests {
             && abs(lhs.y + lhs.height - rhs.y - rhs.height) <= tolerance
     }
 
-    /// The bounds and centroid of each colour's opaque-enough pixels, in points (the
+    /// The bounds and centroid of each color's opaque-enough pixels, in points (the
     /// render is at 1×).
     private static func pixels(
         in image: CGImage,

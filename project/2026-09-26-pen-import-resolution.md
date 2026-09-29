@@ -2,7 +2,7 @@
 
 Author: Claude (agent `readctx`, leaves `koyac9` / `ukfIU2`), for Ben's ruling of the same
 day: every Woodcase read loads the libraries a document's own `imports` declares, as
-read context, and `--library` goes. The ruling asked for Pen's actual behaviour to be
+read context, and `--library` goes. The ruling asked for Pen's actual behavior to be
 established first and mirrored. This is what Pen does, from its outputs only.
 
 ## Method

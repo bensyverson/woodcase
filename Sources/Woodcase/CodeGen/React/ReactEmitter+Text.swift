@@ -20,7 +20,7 @@ extension ReactEmitter {
         // Build style
         var styles: [(String, String)] = []
 
-        // Fill: a colour, or paint clipped to the glyphs
+        // Fill: a color, or paint clipped to the glyphs
         styles.append(contentsOf: textPaintStyles(data, nodeBlendMode: data.blendMode, ctx: ctx))
 
         // Font

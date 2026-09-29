@@ -20,7 +20,7 @@ The Pen MCP (`execute`) mutates the open document in memory only; Pen.app has no
 
 ## 2026-08-29 — A schema doc comment can describe the position anchor, not the render pivot
 
-The 2.17 schema's `rotation` comment ("Degrees CCW around top-left corner") names the layout **anchor**, not the CG pivot. Settled 2026-09-27 (`nAuBKh`, `cqBw2i`): Pen turns and flips every node its parent does not lay out (roots, `layout: none` and group children, absolute children of flex frames) about its `x`/`y` anchor, and its layout reports the bounds of the result; `PenLayoutEngine.freeRect(of:…)` writes exactly that, and the CG centre pivot inside that rect draws the anchor turn. Only flex-flow children keep the "slot grown to the turned bounds" rule. React, which places free nodes with CSS at their `x`/`y`, pivots at the anchor (`TransformPivot`). Plausible literal readings were wrong in both directions here: measure any pivot change with `scripts/pen-oracle` on a probe fixture first. History: [the group anchor finding](2026-08-29-absolute-fit-content-and-the-group-anchor.md).
+The 2.17 schema's `rotation` comment ("Degrees CCW around top-left corner") names the layout **anchor**, not the CG pivot. Settled 2026-09-27 (`nAuBKh`, `cqBw2i`): Pen turns and flips every node its parent does not lay out (roots, `layout: none` and group children, absolute children of flex frames) about its `x`/`y` anchor, and its layout reports the bounds of the result; `PenLayoutEngine.freeRect(of:…)` writes exactly that, and the CG center pivot inside that rect draws the anchor turn. Only flex-flow children keep the "slot grown to the turned bounds" rule. React, which places free nodes with CSS at their `x`/`y`, pivots at the anchor (`TransformPivot`). Plausible literal readings were wrong in both directions here: measure any pivot change with `scripts/pen-oracle` on a probe fixture first. History: [the group anchor finding](2026-08-29-absolute-fit-content-and-the-group-anchor.md).
 
 ## 2026-08-29 — Wall-clock assertions, *and wall-clock budgets*, are unreliable in the parallel suite
 
@@ -46,7 +46,7 @@ Reproduce with `woodcase serve --port 0 > out.txt & sleep 2; cat out.txt`.
 
 ## 2026-08-29 — `PenLayoutEngine` rects are parent-relative
 
-Only a top-level node's rect is in canvas coordinates; a nested node's `x`/`y` is its offset inside its own parent (`layout-deep-nesting.layout.json`: a leaf four levels down reads `x:0,y:0`). Anything that reads one rect out of the map and treats it as absolute is wrong below depth 1 — that is how `shot --outline` drew every nested box at the wrong place until wlAte. Compose the offsets with `PenLayoutEngine.absoluteRects(under:in:layoutRects:)`, which is the one walk `shot --outline` and the viewer's `ArtboardLayout` both use; never hand-roll a second one. "Relative to the parent" means relative to the parent's own coordinates, which are not always its rect's corner (2026-09-27, `cqBw2i`/`INL8Zi`): a **group**'s children are measured from its anchor while its rect is their union, which can start anywhere (Pen's own layout does this), and a **turned** parent's children are measured in its unturned box, centred in its rect. `absoluteRects` composes both; adding a parent's rect origin to a child's rect is wrong for either.
+Only a top-level node's rect is in canvas coordinates; a nested node's `x`/`y` is its offset inside its own parent (`layout-deep-nesting.layout.json`: a leaf four levels down reads `x:0,y:0`). Anything that reads one rect out of the map and treats it as absolute is wrong below depth 1 — that is how `shot --outline` drew every nested box at the wrong place until wlAte. Compose the offsets with `PenLayoutEngine.absoluteRects(under:in:layoutRects:)`, which is the one walk `shot --outline` and the viewer's `ArtboardLayout` both use; never hand-roll a second one. "Relative to the parent" means relative to the parent's own coordinates, which are not always its rect's corner (2026-09-27, `cqBw2i`/`INL8Zi`): a **group**'s children are measured from its anchor while its rect is their union, which can start anywhere (Pen's own layout does this), and a **turned** parent's children are measured in its unturned box, centered in its rect. `absoluteRects` composes both; adding a parent's rect origin to a child's rect is wrong for either.
 
 ## 2026-08-30 — `swift test --filter` matches the identifier, not the display name
 
@@ -116,14 +116,14 @@ row, so it reads as a flake rather than as the regression it is. `scrollIntoView
 scoped to one scroll container; it walks every scrollable ancestor up to the viewport, and
 two of them issued in one task do not compose. Scroll the container you mean directly
 (`element.scrollLeft += box.left - frame.left`) whenever the page already has a
-`scrollIntoView` somewhere else, and confirm any new viewer scroll behaviour against the
+`scrollIntoView` somewhere else, and confirm any new viewer scroll behavior against the
 **full** suite, never the browser filter alone.
 
 ## 2026-08-30 — Elementary *merges* a conditional `style` onto the element's own
 
 `.attributes(.style("--v-actor: …"), when:)` on an element that already declares
 `.style("--v-x: …")` does not replace it: Elementary joins the two with `;`, which is
-exactly what `OutlineRow`'s touched-row colour relies on and is invisible unless you read
+exactly what `OutlineRow`'s touched-row color relies on and is invisible unless you read
 a golden. The trap is the other direction — repeating the base style inside the
 conditional block, which duplicates every property and yields
 `style="--v-x: 1;--v-x: 1;--v-actor: …"`. Pass only what the condition adds. The same
@@ -396,8 +396,8 @@ silently".
 
 ## 2026-09-08 — a `#`-heavy JSON literal needs `##"…"##`
 
-A Swift raw string `#"…"#` holding a hex colour ends early: `"#fff"` contains the closing
-delimiter `"#`. Every batch-line test fixture with colours in it wants `##"…"##`. The
+A Swift raw string `#"…"#` holding a hex color ends early: `"#fff"` contains the closing
+delimiter `"#`. Every batch-line test fixture with colors in it wants `##"…"##`. The
 compiler says `expected ',' separator`, which points at the wrong thing.
 
 ## 2026-09-26 — Inside the Claude Code sandbox, Apple TLS cannot verify any certificate
@@ -407,7 +407,7 @@ The harness's Seatbelt profile denies `com.apple.trustd.agent` unless the user s
 fails `-1202` (certificate untrusted), and `SecTrustEvaluateWithError` returns
 `errSecInternalComponent` (`-26276`) even offline. It reads as a MITM proxy, but it is
 not one: curl sees the real chain, because it uses LibreSSL and `/etc/ssl/cert.pem`. The
-sandbox also has no DNS, so a `localhost` proxy must be dialled as `127.0.0.1`. Neither
+sandbox also has no DNS, so a `localhost` proxy must be dialed as `127.0.0.1`. Neither
 can be fixed from our side. On macOS the shared resolvers work around it: `StandardDataFetcher`
 retries a `certificateTrustUnavailable` fetch with `/usr/bin/curl` (`CurlDataFetcher`), so a
 render downloads anyway — but any *other* `URLSession` HTTPS code run in the sandbox still
@@ -421,7 +421,7 @@ sandbox allows writes to `$TMPDIR` (`/tmp/claude-501`) but not there. Code that 
 file in it fails sandboxed with `NSCocoaErrorDomain 513` (write permission denied), while
 every test passes, because tests run with the sandbox off. `CurlDataFetcher` first wrote
 curl's body to a temporary file and failed exactly this way; it now reads a pipe.
-Stage scratch files through `ScratchDirectory`, which honours `$TMPDIR`.
+Stage scratch files through `ScratchDirectory`, which honors `$TMPDIR`.
 
 ## 2026-09-26 — Core Image needs a GPU, even with `useSoftwareRenderer`
 
@@ -606,7 +606,7 @@ unreadable profile (leaf `KXKtc7`).
 `SwiftUIRenderBoard`'s artboard fixtures compile into **one** module, so only one of them may carry a theme:
 adding a second fails with `.conflictingTheme("<fixture>", "Sources/PenUI/Theme/PenTheme.swift")`, and
 `swiftui-color-scheme.pen` holds the slot. A new themed fixture gets its own batch, as
-`render-themed-numbers.pen` does (`SwiftUIThemedNumbersBatch`, modelled on `SwiftUISlotBatch`). Cost the
+`render-themed-numbers.pen` does (`SwiftUIThemedNumbersBatch`, modeled on `SwiftUISlotBatch`). Cost the
 `QP5E24` agent a build cycle.
 
 ## 2026-09-27 — Building a deep `PenNode` chain from Swift values, not JSON, does not dodge its recursive `deinit`
@@ -630,9 +630,9 @@ Reproducing a load-only flake (`55P02C`), the follow agent started `yes > /dev/n
 ## 2026-09-27 — `CGRect.width` is the absolute width, so a negative inset rect is not empty
 
 `CGRect.width` and `.height` are *standardized*: a rect built with a negative width reports its absolute
-value. `perSideRing` built its inner rect first and then asked `innerRect.width > 0`, so a centred band wider
+value. `perSideRing` built its inner rect first and then asked `innerRect.width > 0`, so a centered band wider
 than its box came back with a hole the size of the overshoot, and even-odd (or `subtracting`, in the SwiftUI
-support's `PenSideStroke`) cut it out: a centred stroke on a 0×0 box drew nothing. Compute the inner width and
+support's `PenSideStroke`) cut it out: a centered stroke on a 0×0 box drew nothing. Compute the inner width and
 height as scalars and test those before building the rect. Cost leaf `Jg0BOv` a debug build.
 
 ## 2026-09-27 — rule: a subagent the user stops cannot be resumed; relaunch it from a trail of its transcript
@@ -679,7 +679,7 @@ the flood fills the whole region (0.036). `sleepy shot --scale 2` of the test's 
 
 ## 2026-09-28 — `swift test --quiet` hides a compile error behind a bare `fatalError`
 
-A test file that does not compile fails the build with `error: fatalError` and nothing else under `--quiet`; without it, the batch lists a dozen innocent files "failed with a nonzero exit code", and the one real diagnostic is in colour, so a plain `grep ': error'` misses it. One agent read nine such failures as disk pressure (the volume *was* low that day, 0.5–7 GiB free) and handed back a test file it believed compiled; the error was `#expect(…, cap)` passing a `String` where Swift Testing wants a `Comment` (leaf `slxqjU`). When a build dies with a bare `fatalError`, rerun without `--quiet` and strip the colour: `sed 's/\x1b\[[0-9;]*m//g' <log> | grep -E '\.swift:[0-9]+:[0-9]+: error'`. Low disk is real too: check `df -h /System/Volumes/Data`, and the integrator frees about 1.7 GB per finished agent by snapshotting its branch (a hooks-off `wip` commit) and removing its worktree. Finder's folder "Size" is logical bytes (45 GB for 5.85 GB on disk here); use `du`.
+A test file that does not compile fails the build with `error: fatalError` and nothing else under `--quiet`; without it, the batch lists a dozen innocent files "failed with a nonzero exit code", and the one real diagnostic is in color, so a plain `grep ': error'` misses it. One agent read nine such failures as disk pressure (the volume *was* low that day, 0.5–7 GiB free) and handed back a test file it believed compiled; the error was `#expect(…, cap)` passing a `String` where Swift Testing wants a `Comment` (leaf `slxqjU`). When a build dies with a bare `fatalError`, rerun without `--quiet` and strip the color: `sed 's/\x1b\[[0-9;]*m//g' <log> | grep -E '\.swift:[0-9]+:[0-9]+: error'`. Low disk is real too: check `df -h /System/Volumes/Data`, and the integrator frees about 1.7 GB per finished agent by snapshotting its branch (a hooks-off `wip` commit) and removing its worktree. Finder's folder "Size" is logical bytes (45 GB for 5.85 GB on disk here); use `du`.
 
 ## 2026-09-28 — `swiftc` over many files without `-wmo` re-parses the module once per file
 

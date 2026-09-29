@@ -48,7 +48,7 @@ public enum PenValueForm: Friendly {
 
     /// A JSON array of any of the forms listed before this one.
     ///
-    /// `fills` is the case that needs it: a colour string, a fill object, or an array
+    /// `fills` is the case that needs it: a color string, a fill object, or an array
     /// mixing the two. The alternative — spelling the union twice — is the kind of
     /// repetition that goes stale on one side only.
     case eitherInAnArray
@@ -68,11 +68,11 @@ public enum PenValueForm: Friendly {
     /// What a string means where a property takes one.
     ///
     /// The distinction is not decoration: `"#FFD166"` and `"M0 0 L10 10"` are both
-    /// strings to `JSONDecoder`, and only one of them is a colour.
+    /// strings to `JSONDecoder`, and only one of them is a color.
     public enum StringRole: String, Friendly, CaseIterable {
         /// Any string.
         case plain
-        /// A colour — `"#RRGGBB"`, `"#RRGGBBAA"`, or a named colour.
+        /// A color — `"#RRGGBB"`, `"#RRGGBBAA"`, or a named color.
         case color
         /// SVG path data, as the `d` attribute writes it.
         case svgPathData

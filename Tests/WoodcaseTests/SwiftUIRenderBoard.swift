@@ -16,11 +16,11 @@
     /// against Pen's export of it — `<fixture>-<artboard>@2x.png`, `<fixture>-<artboard>.png`
     /// or `<artboard>.png`, the first that exists.
     ///
-    /// A board is rendered under the light colour scheme unless it names another; a dark
+    /// A board is rendered under the light color scheme unless it names another; a dark
     /// board may be measured against another artboard's export — a light artboard drawn
     /// dark against its twin that Pen exported under `theme: {mode: dark}`.
     struct SwiftUIRenderBoard: Friendly, CustomTestStringConvertible {
-        /// The colour scheme a board is rendered under.
+        /// The color scheme a board is rendered under.
         enum ColorScheme: String, Friendly {
             /// SwiftUI's `.light`, the harness's default.
             case light
@@ -41,7 +41,7 @@
         /// renderer draws, when it is not the board's own.
         var referenceArtboard: String?
 
-        /// The colour scheme SwiftUI renders the board under.
+        /// The color scheme SwiftUI renders the board under.
         var colorScheme: ColorScheme = .light
 
         /// The fixtures with effects and transforms, one board each.
@@ -57,7 +57,7 @@
         /// sizes with no `lineHeight`, one and three lines each, which pins the natural pitch.
         static let textBoards = [SwiftUIRenderBoard(fixture: "text-natural-line-height")]
 
-        /// Boards rendered under the dark colour scheme: `swiftui-color-scheme`'s unfilled
+        /// Boards rendered under the dark color scheme: `swiftui-color-scheme`'s unfilled
         /// text and icon, which Pen draws as nothing in any scheme, and its themed mesh,
         /// whose `mode` axis the scheme selects, against the twin Pen exported dark.
         static let darkBoards = [
@@ -98,7 +98,7 @@
         }
 
         /// The boards of `render-stroke-shadows`: a stroked node casting an outer shadow,
-        /// outside, centred and inside, per side, on each shape kind and on a line, which Pen
+        /// outside, centered and inside, per side, on each shape kind and on a line, which Pen
         /// casts from the silhouette its stroke band grows (leaf vPZ0ia,
         /// `PenStrokeShadowSnapshotTests`). Not in ``artboardFixtures``, which React's render
         /// test shares.

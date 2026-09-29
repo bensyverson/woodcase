@@ -8,7 +8,7 @@ at the end groups the fixes by the files they touch, in `job import` format.
 Every gap is classified as Ben asked on 2026-09-27:
 
 - **(a) Woodcase is wrong.** Fix it.
-- **(b) Pen is arguably buggy and likely to catch up.** Keep Woodcase's behaviour, document the difference and
+- **(b) Pen is arguably buggy and likely to catch up.** Keep Woodcase's behavior, document the difference and
   accept the MAE gap. These are listed under *Kept on purpose*, not in the plan.
 - **(c) A genuine design divergence.** A decision for Ben (see *Decisions for Ben*).
 
@@ -75,7 +75,7 @@ documents the full contract:
 - `@backdrop` (red and green behind the node drawn inverted);
 - `@time`, which is **0** in an export;
 - fill `opacity`;
-- the node's box as the domain on text and icons. PRFPX5 had already seen a solid-red shader colour Pen's glyphs.
+- the node's box as the domain on text and icons. PRFPX5 had already seen a solid-red shader color Pen's glyphs.
 
 **What Woodcase does.** CG draws nothing (`PenFillRenderer.swift:91`, "Shader fills are not executed").
 SwiftUI writes nothing and warns (`SwiftUINodeEmitter+Paint.swift:54`). React writes nothing and does not warn
@@ -210,7 +210,7 @@ Its settled layout for `render-rotated-free.pen`'s rectangle (200×60 at `x: 80,
 20.5 pt is 60 × sin 20°.
 
 Woodcase's layout (`woodcase tree`) reports `80,60 208.46×124.79`: the same size, with the box's corner pinned
-at the anchor, and CG then pivots at that box's centre. Everything drawn lands shifted.
+at the anchor, and CG then pivots at that box's center. Everything drawn lands shifted.
 
 | Board | CG MAE (`shot` + `png-mae`) |
 |---|---|
@@ -229,7 +229,7 @@ is the rotated bounding box anchored at the declared `x`/`y`". That is a documen
 in place.
 
 **The fix.** For a node its parent does not lay out, offset the rotated bounding box's origin by where the
-anchor rotation puts it: the minimum of the four rotated corners, relative to the anchor. The CG centre pivot
+anchor rotation puts it: the minimum of the four rotated corners, relative to the anchor. The CG center pivot
 inside that box then reproduces Pen's pixels, and SwiftUI's `.offset` follows. Flex children are unchanged: Pen
 grows the slot to the turned bounds, and that already matches.
 
@@ -239,7 +239,7 @@ move. `render-transforms-and-effects` (CG 0.886) may improve.
 ### F5. Icon glyphs sit 1–3 pt off Pen's position (a)
 
 > **Resolved 2026-09-27 (leaf `VMKixs`):** Pen places the glyph by the font's metrics: the
-> advance is centred across the box, and the line box is centred down it. The line box is
+> advance is centered across the box, and the line box is centered down it. The line box is
 > ascent plus descent, each rounded to a whole point at 14 pt. `render-icon-placement.pen` and
 > `scripts/icon-placement-fit.swift` are the evidence, and PenIconFonts.md ("Where the glyph
 > sits") states the rule. CG `icon-font-test` went from 5.25 to 1.24 (gate 1.86), `icon-grad`
@@ -256,18 +256,18 @@ the highest MAE among the gated CG boards. Ink bounding boxes in export pixels a
 | Lucide `ellipsis` | y 56–103 | y 57–104 | 0.5 pt low |
 | Feather `bell` | y 34–77 | y 34–78 | about the same |
 
-`PenIconFontRenderer` and SwiftUI's `PenIconShape` centre the glyph's **ink** in the box. Pen evidently places
+`PenIconFontRenderer` and SwiftUI's `PenIconShape` center the glyph's **ink** in the box. Pen evidently places
 the glyph by the font's metrics, since the offsets differ by library. `icon-grad` (1.66, the highest
 text-paint ceiling) is probably the same cause.
 
 **The fix.** Probe one glyph per library at two sizes and in a non-square box with `pen-oracle`, fit Pen's
-placement rule (em box, or ascent/descent centring), then apply it in both `PenIconFontRenderer.swift` and the
+placement rule (em box, or ascent/descent centering), then apply it in both `PenIconFontRenderer.swift` and the
 SwiftUI icon support template. Lift M.
 
 ### F6. A per-side stroke width on an ellipse, polygon or path (a)
 
 PenRendering.md calls this "not what Pen draws" and PenCodeGen.md "not established". It is established now.
-Pen draws a **uniform centred stroke of the `top` width** and ignores the other three sides. Evidence from
+Pen draws a **uniform centered stroke of the `top` width** and ignores the other three sides. Evidence from
 `render-per-side-shapes.pen`, both width sets:
 
 - With `t12 r2 b6 l0`, the ellipse ring reaches 6 pt past the 30–170 × 30–130 box on every side.
@@ -279,8 +279,8 @@ Woodcase draws inner bands along the box, clipped to the shape: MAE 15.56 (ellip
 Following Pen is the only defensible target, since the format gives no other meaning. `woodcase lint` should
 also say that only `top` counts.
 
-> **Corrected 2026-09-27 (leaf `bLU8nV`):** "centred" held only because the fixture's shapes set no
-> `strokeAlignment`, whose default is centre. Pen draws **a uniform stroke of the `top` width under the node's
+> **Corrected 2026-09-27 (leaf `bLU8nV`):** "centered" held only because the fixture's shapes set no
+> `strokeAlignment`, whose default is center. Pen draws **a uniform stroke of the `top` width under the node's
 > own alignment, join and cap**: probed with `scripts/pen-oracle` on inner and outer boards (now in
 > `render-per-side-shapes.pen`, 14 boards), the 12 pt ring lies wholly inside or outside the outline, pixel for
 > pixel the same as a uniform `strokeWidth: 12` (`scripts/png-mae` 0.000). With no `top` Pen draws no stroke,
@@ -358,7 +358,7 @@ From `SwiftUINodeEmitter+*.swift`'s `unemitted` warnings and the baselines in `S
 | Inner shadow on text | not drawn, warning | (a) | a text-masked inner shadow in `PenSupport+Effects.swift`; S–M |
 | `textAlign: justify` | drawn leading, warning (SwiftUI `Text` has no justification) | (c) | accept with the warning; a TextKit-backed view would cost the idiom |
 | Remote (`http`) image fills | `AsyncImage(url:)`, fetched at draw time (fixed) | (c), ruled | `AsyncImage`, not a generate-time download (D4, leaf `46XAVC`); done |
-| Themed number variables in effects, rotation, gradient stop positions and per-side widths | dropped, warning | (a) | read the theme's numbers as colours already are; M, low priority |
+| Themed number variables in effects, rotation, gradient stop positions and per-side widths | dropped, warning | (a) | read the theme's numbers as colors already are; M, low priority |
 | A `fit_content` text frame one pixel narrower at 2x | `MoreLink` 5.96, `Chip-selected` 4.68, `Chip` 3.13 (`SwiftUIStateRenderTests` baselines) | (a) | find the rounding: Pen's text width vs SwiftUI's; S investigation |
 | `script` and `browser` nodes | placeholder, warning | F2 / ruled | — |
 | Shader fills | nothing, warning | F1 | — |
@@ -448,9 +448,9 @@ L = lift (S/M/L). Class is (a), (b) or (c) as above.
 | F1 | Shader fills | runs GLSL ES 1.00 with uniforms, samplers, `@sdf`, `@backdrop`, `@time = 0` | nothing | nothing, no warning | nothing, warning | 159.25 (`time`), 11.72 on text | (a) + D1 | warn now; CPU evaluator for CG; React WebGL; SwiftUI raster | S / L / M / S | evaluator performance; scope |
 | F2 | Script nodes | runs JS, deterministic `Math.random` | nothing | empty `<div>` | placeholder | 30.64 | (a) + D2 | expand before layout via JavaScriptCore | M–L | PRNG parity; Apple-only host |
 | F3 | Bold/italic Google faces | the right face | regular (or an arbitrary cached file) | Fontsource, fine | bundles what the cache holds | 15.76 | (a) | fetch and register every used face | S–M | font-registration test isolation |
-| F4 | Rotated free-positioned nodes | pivots at the `x`/`y` anchor | box pinned at anchor, centre pivot | correct since `mkPpjZ` | as CG | 7.33 | (a) | offset the rotated box origin in layout | M | layout goldens move |
-| F5 | Icon glyph placement | by font metrics (to confirm) | ink-centred | icon packages | ink-centred | 5.25 | (a) | fit Pen's rule, apply in both | M | per-library differences |
-| F6 | Per-side width on ellipse, polygon, path | uniform centred stroke of `top` | box bands clipped | SVG stroke | box bands | 15.56 | (a) | follow Pen, lint it | S | Pen may change it |
+| F4 | Rotated free-positioned nodes | pivots at the `x`/`y` anchor | box pinned at anchor, center pivot | correct since `mkPpjZ` | as CG | 7.33 | (a) | offset the rotated box origin in layout | M | layout goldens move |
+| F5 | Icon glyph placement | by font metrics (to confirm) | ink-centered | icon packages | ink-centered | 5.25 | (a) | fit Pen's rule, apply in both | M | per-library differences |
+| F6 | Per-side width on ellipse, polygon, path | uniform centered stroke of `top` | box bands clipped | SVG stroke | box bands | 15.56 | (a) | follow Pen, lint it | S | Pen may change it |
 | F7 | React effects on text, icon, SVG shapes, groups; shadow order, blend, blur rounding, blur without fill | draws them | — | dropped | — | unmeasured | (a) | text-shadow, drop-shadow, mirror CG's rules | M | group silhouette approximated |
 | F8 | React MAE sweep missing | — | — | unmeasured | — | — | infra | `ReactRenderWebViewTests` | M | WebKit flakiness under load |
 | F9 | React natural line height | font pitch, rounded | correct | 1.3 | correct | unmeasured | (a) | emit the pitch | S | overlaps `Wo6Vni` |
@@ -466,7 +466,7 @@ L = lift (S/M/L). Class is (a), (b) or (c) as above.
 
 - **Background blur below opacity 1.** Pen draws none (its opacity layer is read empty); Woodcase draws it. Ben's
   ruling, 2026-09-26, PenRendering.md.
-- **Mesh colour rounding.** Pen truncates the blended vertex colour to 8 bits; Woodcase rounds once. Worth ≤ 1
+- **Mesh color rounding.** Pen truncates the blended vertex color to 8 bits; Woodcase rounds once. Worth ≤ 1
   step; ruling 2026-09-26 (PenMeshGradients.md).
 - **Mesh subdivision.** Pen's fixed 32 × 32 cells facet; Woodcase is adaptive (ruling on `OHdROl`).
 - **Blur at a 4 px sigma.** Pen's kernel fits sigma 4.24; Woodcase keeps the exact Gaussian (≤ 5/255 at edges).
@@ -493,7 +493,7 @@ is not a (b) item: the cause was wrong (F11).
 > **Ruled by Ben, 2026-09-27:** D1 and D2 — ignore shaders and scripts for now (parked in
 > [backlog.md](backlog.md); the phase-1 shader warnings stay). D3 — follow Pen's top width only
 > "unless there's something more rational"; the integrator applies it to ellipses, polygons and paths
-> alike, as one uniform centred stroke with a lint warning. D4 — SwiftUI loads remote images with the
+> alike, as one uniform centered stroke with a lint warning. D4 — SwiftUI loads remote images with the
 > first-party `AsyncImage` rather than bundling them (leaf `46XAVC`).
 
 - **D1 — Shaders: how far?** Options: warn only; CG CPU evaluator (L); React live WebGL (M); SwiftUI raster or
@@ -564,7 +564,7 @@ tasks:
         labels: [fidelity, layout, cg, swiftui]
         blockedBy: [T5l1ul]
         desc: |
-          F4. Pen turns a node its parent does not lay out (layout none, or absolute) about its top-left x/y anchor. Its settled layout of render-rotated-free.pen's rectangle (200×60 at 80,60, rotation -20) is x 59.479, y 60, 208.46×124.79. Woodcase reports 80,60 with the same size: the box's corner is pinned at the anchor and CG pivots at the box's centre, so everything lands shifted. CG MAE (shot + png-mae): rrect 2.57, rtxtf 4.98, rtxta 4.98 (unrotated control 0.14). The existing render-text-fills-txt-rotated scores 7.33 in both CG and SwiftUI, the worst CG board in the repo. React already matches Pen (mkPpjZ, TransformPivot).
+          F4. Pen turns a node its parent does not lay out (layout none, or absolute) about its top-left x/y anchor. Its settled layout of render-rotated-free.pen's rectangle (200×60 at 80,60, rotation -20) is x 59.479, y 60, 208.46×124.79. Woodcase reports 80,60 with the same size: the box's corner is pinned at the anchor and CG pivots at the box's center, so everything lands shifted. CG MAE (shot + png-mae): rrect 2.57, rtxtf 4.98, rtxta 4.98 (unrotated control 0.14). The existing render-text-fills-txt-rotated scores 7.33 in both CG and SwiftUI, the worst CG board in the repo. React already matches Pen (mkPpjZ, TransformPivot).
 
           Fix: offset the rotated bounding box's origin by the rotated corners' minimum relative to the anchor. Flex children keep today's rule, because Pen grows the slot. PenEngine.md states the wrong rule ("rotated bounding box anchored at the declared x/y"); correct it in place and say it was wrong. Adding SwiftUI render boards touches the batch support that T5l1ul owns.
         criteria:
@@ -577,7 +577,7 @@ tasks:
         ref: icons
         labels: [fidelity, cg, swiftui]
         desc: |
-          F5. icon-font-test is the worst gated CG board (5.25, PenIconFontSnapshotTests, gate 7.87). Ink boxes at 2x, Pen → CG: Material Symbols 48 pt y 44–115 → 47–119; Phosphor chat-dots-thin y 45–90 → 40–86; Lucide ellipsis 56–103 → 57–104. PenIconFontRenderer and SwiftUI's PenIconShape centre the glyph's ink, while Pen evidently places by font metrics, since the offset differs per library. icon-grad (1.66, the highest text-paint ceiling) is probably the same cause.
+          F5. icon-font-test is the worst gated CG board (5.25, PenIconFontSnapshotTests, gate 7.87). Ink boxes at 2x, Pen → CG: Material Symbols 48 pt y 44–115 → 47–119; Phosphor chat-dots-thin y 45–90 → 40–86; Lucide ellipsis 56–103 → 57–104. PenIconFontRenderer and SwiftUI's PenIconShape center the glyph's ink, while Pen evidently places by font metrics, since the offset differs per library. icon-grad (1.66, the highest text-paint ceiling) is probably the same cause.
 
           First probe one glyph per library at two sizes and in a non-square box with scripts/pen-oracle, and commit the probe. Then fit the rule and apply it in both PenIconFontRenderer.swift and the SwiftUI icon support template.
         criteria:
@@ -590,7 +590,7 @@ tasks:
         labels: [fidelity, cg, swiftui, react, needs-ben]
         blockedBy: [T5l1ul]
         desc: |
-          F6 / D3 (recommended yes). Pen draws a uniform centred stroke of the top width and ignores the other sides (render-per-side-shapes.pen: t12 r2 b6 l0 reaches 6 pt outside the ellipse; t2 r10 b4 l6 reaches 1 pt). Woodcase draws box bands clipped to the shape: MAE 15.56 ellipse, 15.30 polygon, 14.46 path. PenRendering.md calls this "not what Pen draws" and PenCodeGen.md "not established". Touches PenStrokeRenderer+PerSide.swift, SwiftUI's penSideBands (SwiftUINodeEmitter+Stroke.swift and the stroke template), React's SVG stroke, and a lint rule. Pen's choice of top looks arbitrary, so pin it with the fixture and say so in the docs.
+          F6 / D3 (recommended yes). Pen draws a uniform centered stroke of the top width and ignores the other sides (render-per-side-shapes.pen: t12 r2 b6 l0 reaches 6 pt outside the ellipse; t2 r10 b4 l6 reaches 1 pt). Woodcase draws box bands clipped to the shape: MAE 15.56 ellipse, 15.30 polygon, 14.46 path. PenRendering.md calls this "not what Pen draws" and PenCodeGen.md "not established". Touches PenStrokeRenderer+PerSide.swift, SwiftUI's penSideBands (SwiftUINodeEmitter+Stroke.swift and the stroke template), React's SVG stroke, and a lint rule. Pen's choice of top looks arbitrary, so pin it with the fixture and say so in the docs.
         criteria:
           - CG draws all six render-per-side-shapes boards within MAE 0.5 of Pen's exports.
           - SwiftUI draws them within CG + 1.0 and React's SVG output strokes at the top width.
@@ -653,7 +653,7 @@ tasks:
         labels: [fidelity, cg, needs-ben]
         blockedBy: [shaderwarn]
         desc: |
-          F1 / D1 — do not start until Ben answers D1. A GLSL ES 1.00 front end (lexer, parser, type checker) and a CPU evaluator compiled to Swift closures, in a new Sources/Woodcase/Shader/ folder (Foundation only, so it builds on Linux). Uniforms from annotations, @default and uniforms; @resolution in node points; @time 0; @mouse at the centre or 0 (decide by probe); a sampler2D image with bilinear filtering; @sdf as a signed-distance raster of the node's outline in resolution units with its gradient in gb; @backdrop from the capture the background blur uses; textureSize. Drawn through PenFillRenderer's clip/domain seam, so text, icons and strokes follow. Metal and WebKit were rejected: they fail headless (the Core Image gotcha). Expect 4–5 leaves (front end; evaluator and builtins; samplers and SDF; backdrop; integration), and measure the time per fill.
+          F1 / D1 — do not start until Ben answers D1. A GLSL ES 1.00 front end (lexer, parser, type checker) and a CPU evaluator compiled to Swift closures, in a new Sources/Woodcase/Shader/ folder (Foundation only, so it builds on Linux). Uniforms from annotations, @default and uniforms; @resolution in node points; @time 0; @mouse at the center or 0 (decide by probe); a sampler2D image with bilinear filtering; @sdf as a signed-distance raster of the node's outline in resolution units with its gradient in gb; @backdrop from the capture the background blur uses; textureSize. Drawn through PenFillRenderer's clip/domain seam, so text, icons and strokes follow. Metal and WebKit were rejected: they fail headless (the Core Image gotcha). Expect 4–5 leaves (front end; evaluator and builtins; samplers and SDF; backdrop; integration), and measure the time per fill.
         criteria:
           - Every render-shader-fills board renders within MAE 1.0 of Pen's export.
           - A 400×200 shader fill at 2x renders in under 1 s in a release build, measured and recorded.
@@ -698,7 +698,7 @@ tasks:
         labels: [fidelity, swiftui]
         blockedBy: [rotation, perside, swiftuitext]
         desc: |
-          F10c, low priority. SwiftUINodeEmitter drops effect variables, rotation variables, gradient stop position variables and per-side stroke width variables with a warning, while colours already read through the theme. Read numbers through PenTheme the same way. Touches +Effects, +Transform, +Stroke and SwiftUIGradient, which is why it runs last.
+          F10c, low priority. SwiftUINodeEmitter drops effect variables, rotation variables, gradient stop position variables and per-side stroke width variables with a warning, while colors already read through the theme. Read numbers through PenTheme the same way. Touches +Effects, +Transform, +Stroke and SwiftUIGradient, which is why it runs last.
         criteria:
           - Each of the four variable kinds emits a theme read instead of a warning.
           - A themed board renders within CG + 1.0 under two theme options.

@@ -11,7 +11,7 @@ import Woodcase
 /// Artboards do not overlap. A write that creates an overlap is still applied — the
 /// caller may be mid-edit, and refusing would cost more than it saved — but it says so:
 /// one line on standard error per pair it created, in exactly the form `lint` prints
-/// the same finding, so the two are recognisably one fact.
+/// the same finding, so the two are recognizably one fact.
 ///
 /// ```text
 /// warning artboard-overlap  Checkout (Chk01)  100,0 200×100 overlaps Home (Home1) …

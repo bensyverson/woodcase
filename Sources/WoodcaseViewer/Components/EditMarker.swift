@@ -45,7 +45,7 @@ public struct EditMarker: Friendly, Identifiable {
     /// When it was last touched.
     public let time: Date
 
-    /// The colour the box is drawn in: the first editor's.
+    /// The color the box is drawn in: the first editor's.
     public var color: ActorColor {
         ActorColor(name: identities.first ?? "")
     }

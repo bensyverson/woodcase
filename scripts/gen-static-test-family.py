@@ -8,8 +8,8 @@ drawn at. The suites use it to check that a static family's weights resolve to t
 CSS would pick (leaf BpaSrF, project/2026-09-28-pen-font-faces.md): no committed static
 family has a Medium or a SemiBold, and a system family's cuts vary by machine.
 
-Inter's licence (LICENSES/inter-LICENSE, SIL OFL 1.1) reserves no font name, so a renamed
-derivative is allowed; its copyright and licence records are kept.
+Inter's license (LICENSES/inter-LICENSE, SIL OFL 1.1) reserves no font name, so a renamed
+derivative is allowed; its copyright and license records are kept.
 
 Usage: scripts/gen-static-test-family.py [--check]
 --check exits 1 when a committed cut differs from what the script writes.

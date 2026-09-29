@@ -26,7 +26,7 @@ extension ReactEmitter {
         /// repeat unless the tile is stated.
         var hasIntrinsicSize = false
 
-        /// The position of a tile centred on the box.
+        /// The position of a tile centered on the box.
         static let centered = "center"
 
         /// Whether the image fills the box as a bare gradient function does, needing no tile.

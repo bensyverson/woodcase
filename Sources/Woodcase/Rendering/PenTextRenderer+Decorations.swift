@@ -80,13 +80,13 @@ extension PenTextRenderer {
 
             if let style = attributes[kCTUnderlineStyleAttributeName] as? NSNumber, style.intValue != 0 {
                 let thickness = CTFontGetUnderlineThickness(font)
-                let centre = origin.y + CTFontGetUnderlinePosition(font)
-                bars.append(CGRect(x: span.x, y: centre - thickness / 2, width: span.width, height: thickness))
+                let center = origin.y + CTFontGetUnderlinePosition(font)
+                bars.append(CGRect(x: span.x, y: center - thickness / 2, width: span.width, height: thickness))
             }
             if attributes[strikethroughKey] != nil {
-                let centre = origin.y + CTFontGetAscent(font) * strikethroughAscentFraction
+                let center = origin.y + CTFontGetAscent(font) * strikethroughAscentFraction
                 bars.append(CGRect(
-                    x: span.x, y: centre - strikethroughThickness / 2,
+                    x: span.x, y: center - strikethroughThickness / 2,
                     width: span.width, height: strikethroughThickness
                 ))
             }

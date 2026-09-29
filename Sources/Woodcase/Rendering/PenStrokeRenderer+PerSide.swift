@@ -63,7 +63,7 @@ extension PenStrokeRenderer {
     ///
     /// Established from Pen's renders
     /// (`project/2026-09-26-gradient-geometry-and-per-side-strokes.md`). With `k` the
-    /// alignment's share outside the box — inner 0, centre ½, outer 1 — each side's band
+    /// alignment's share outside the box — inner 0, center ½, outer 1 — each side's band
     /// runs from `k·width` outside the box's edge to `(1 − k)·width` inside it. Corners:
     ///
     /// - A square corner stays square on both edges.
@@ -71,8 +71,8 @@ extension PenStrokeRenderer {
     ///   `max(0, r − (1 − k)·w)` along each axis, `w` being the width of the side that
     ///   axis crosses — as CSS borders do.
     /// - Its outer radius is circular, `r + k·m`, where `m` is the smaller of the two
-    ///   adjacent widths — except that a **centred** stroke whose half-width `½·m` exceeds
-    ///   `r` gets radius `½·m` instead, which is what Pen draws for a uniform centred
+    ///   adjacent widths — except that a **centered** stroke whose half-width `½·m` exceeds
+    ///   `r` gets radius `½·m` instead, which is what Pen draws for a uniform centered
     ///   stroke on a rounded rectangle too.
     ///
     /// - Parameters:

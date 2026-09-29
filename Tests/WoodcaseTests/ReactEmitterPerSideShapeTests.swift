@@ -51,7 +51,7 @@ struct ReactEmitterPerSideShapeTests {
     func cssEllipse() throws {
         let ellipse = ##"{"type": "ellipse", "id": "Shp01", "name": "Shape", "width": 40, "height": 40"##
         let content = try card(shape: ellipse, keys: Self.perSide)
-        // Centred, as Pen draws it: half the top width inside the edge, half outside.
+        // Centered, as Pen draws it: half the top width inside the edge, half outside.
         #expect(content.contains(##"boxShadow: "inset 0 0 0 6px #FF0000, 0 0 0 6px #FF0000""##), "\(content)")
         #expect(!content.contains("borderTop"), "\(content)")
         #expect(!content.contains("borderBottom"), "\(content)")

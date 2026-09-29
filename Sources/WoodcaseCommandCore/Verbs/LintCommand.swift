@@ -22,8 +22,8 @@ struct Lint: AsyncParsableCommand {
         still holding an unresolved $variable, and a ref's stored override carrying a \
         value, a key, or a property the instance will silently drop when it expands. \
         Three say what Pen will do to the file: a mesh gradient Pen paints nothing \
-        for (points or colours that do not fill columns × rows, or a grid under 2×2), \
-        one it paints distorted (a colour its mesh misreads, such as 4-digit #RGBA, \
+        for (points or colors that do not fill columns × rows, or a grid under 2×2), \
+        one it paints distorted (a color its mesh misreads, such as 4-digit #RGBA, \
         or a patch folded over itself), and a stroke, underline or strikethrough on text, which Pen strips \
         on load and never draws. \
         Three more read only the metadata `generate react` reads, and say what it will \
@@ -103,16 +103,16 @@ struct Lint: AsyncParsableCommand {
 
     /// Refuses the combinations that would silently do nothing.
     ///
-    /// `--list` is the catalogue of checks, not a read of a document: it takes no file,
+    /// `--list` is the catalog of checks, not a read of a document: it takes no file,
     /// no subtree and no theme, and pairing it with `--summary` asks for two different
     /// reports at once. Everything else composes — `--exclude` and `--severity` narrow
-    /// the catalogue the same way they narrow a report, and `--summary` is the same run
+    /// the catalog the same way they narrow a report, and `--summary` is the same run
     /// as the default counted rather than listed.
     func validate() throws {
         if list {
             guard !summary else {
                 throw ValidationError(
-                    "--list and --summary are two different reports: --list is the catalogue of "
+                    "--list and --summary are two different reports: --list is the catalog of "
                         + "checks and --summary counts one file's findings. Pass one."
                 )
             }
@@ -135,7 +135,7 @@ struct Lint: AsyncParsableCommand {
 
     func run() async throws {
         guard !list else {
-            try print(catalogue())
+            try print(catalog())
             return
         }
         // Unreachable: validate() has already refused a run with no file and no --list.
@@ -175,8 +175,8 @@ struct Lint: AsyncParsableCommand {
 
     // MARK: - Reports
 
-    /// The catalogue, narrowed by the same two filters a report is narrowed by.
-    private func catalogue() throws -> String {
+    /// The catalog, narrowed by the same two filters a report is narrowed by.
+    private func catalog() throws -> String {
         let excluded = Set(exclude)
         let threshold = severity ?? .warning
         let checks = LintCheck.allCases.filter {

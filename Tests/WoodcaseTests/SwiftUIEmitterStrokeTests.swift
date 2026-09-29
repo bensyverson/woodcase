@@ -15,14 +15,14 @@ import Testing
 struct SwiftUIEmitterStrokeTests {
     // MARK: - Uniform strokes
 
-    @Test("A centred stroke of one colour is SwiftUI's own stroke, in an overlay")
-    func centredStroke() throws {
+    @Test("A centered stroke of one color is SwiftUI's own stroke, in an overlay")
+    func centeredStroke() throws {
         let code = try body(child: rect(##""stroke": "#FF0000", "strokeWidth": 2, "strokeAlignment": "center""##))
         #expect(code.contains(".overlay {\n"))
         #expect(code.contains("Rectangle()\n.stroke(Color(hex: 0xFF0000), lineWidth: 2)"))
     }
 
-    @Test("A stroke with no width or alignment is Pen's default: 1 point, centred")
+    @Test("A stroke with no width or alignment is Pen's default: 1 point, centered")
     func defaultStroke() throws {
         let code = try body(child: rect(##""stroke": "#FF0000""##))
         #expect(code.contains(".stroke(Color(hex: 0xFF0000), lineWidth: 1)"))
@@ -52,7 +52,7 @@ struct SwiftUIEmitterStrokeTests {
         #expect(code.contains("RoundedRectangle(cornerRadius: 24, style: .circular).penStroke(.outside, lineWidth: 16)"))
     }
 
-    @Test("Caps and joins other than butt and mitre are a StrokeStyle")
+    @Test("Caps and joins other than butt and miter are a StrokeStyle")
     func capsAndJoins() throws {
         let keys = ##""stroke": "#FF0000", "strokeWidth": 2, "strokeLinecap": "round", "strokeLinejoin": "bevel""##
         let code = try body(child: rect(keys))
@@ -166,7 +166,7 @@ struct SwiftUIEmitterStrokeTests {
         ))
     }
 
-    @Test("A per-side stroke defaults to centred, leaves missing sides at zero and carries the corners")
+    @Test("A per-side stroke defaults to centered, leaves missing sides at zero and carries the corners")
     func perSideCorners() throws {
         let keys = ##""cornerRadius": [24, 24, 0, 0], "stroke": "#FFFFFF", "strokeWidth": {"top": 4}"##
         let code = try body(child: rect(keys))
