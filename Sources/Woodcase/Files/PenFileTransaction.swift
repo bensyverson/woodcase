@@ -374,6 +374,7 @@ public enum PenFileTransaction {
     /// - Throws: ``PenFileError`` if the file cannot be opened or locked,
     ///   ``PenParserError`` if its contents are not a readable .pen document;
     ///   anything the body throws, unchanged.
+    @discardableResult
     public static func read<Value: Sendable>(
         at url: URL,
         timeout: Duration = defaultTimeout,
