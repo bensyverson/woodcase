@@ -3,7 +3,7 @@
 // woodcase js build/planes.pen -F build/data.js -F lib/helpers.js -F lib/planes.js -F lib/iso-thumbs.js
 
 const TU = 960, TV = 540;
-for (let n = 1; n <= 7; n++) {
+for (let n = 1; n <= 8; n++) {
   const side = (TU + TV) / ROOT2;
   doc.add(null, {
     type: 'frame', name: `Iso thumb ${n}`, layout: 'none', x: (n - 1) * (side + 100), y: 2000, width: side, height: side,

@@ -1,27 +1,50 @@
-// S8 — the reveal, in the deck's own light: the stack comes back, and its planes are this
-// deck's pages 1–7, beside the log of the writes that made them and the undo that would
-// take the last one back.
-const G8 = { ox: 1330, oy: 690, s: 0.58, gap: 80, u: 960, v: 540 };
-const pages8 = [1, 2, 3, 4, 5, 6, 7].map(n => ({ key: `page ${n}`, label: String(n), image: `./assets/iso-thumb-${n}.png` }));
-const rows8 = LOG.map(l => l.replace(/\s+\|\s+/g, '  '));
-const half8 = Math.ceil(rows8.length / 2);
-const size8 = 13, lh8 = 1.62;
+// S8 — in the open: the viewer, in dark mode, following the agent through the banking
+// screen seconds after its writes, their markers still up. Each mark is drawn where the
+// page drew the thing it names (build/dash.js), and labeled from outside the shot, so the
+// shot stays legible.
+const X8 = 620, Y8 = 96, K8 = 1200 / DASH.w;
+const at8 = b => ({ x: X8 + b.x * K8, y: Y8 + b.y * K8, w: b.w * K8, h: b.h * K8 });
+const live8 = at8(DASH.marks.live), act8 = at8(DASH.marks.activity), out8 = at8(DASH.marks.outline);
+const pad8 = 6;
+const mark8 = (name, b) => rect(name, b.x - pad8, b.y - pad8, b.w + 2 * pad8, b.h + 2 * pad8, { stroke: C.signal, strokeWidth: 3, radius: 6 });
+const lead8 = (name, a, b) => path(name, [{ pts: [a, b] }], { stroke: C.signal, strokeWidth: 2, cap: 'butt' });
+
+// A label: the word in the signal color, and what it means beneath it.
+function label8(name, word, gloss, x, y, align) {
+  const o = { width: 420, align };
+  return group(name, [
+    text('Word', word, align === 'right' ? x - 420 : x, y, { font: F.mono, size: 20, weight: '500', fill: C.signal, ...o }),
+    text('Gloss', gloss, align === 'right' ? x - 420 : x, y + 34, { size: 21, fill: C.ink2, ...o }),
+  ]);
+}
+
+const serve8 = text('Command', '$ woodcase serve banking.pen', 0, 0, { font: F.mono, size: 22, weight: '500', fill: C.ink });
+delete serve8.x; delete serve8.y;
+const outY8 = out8.y + out8.h / 2;
 
 const SLIDE = {
-  name: 'S8 Reveal', index: 8, at: 7,
+  name: 'S8 Open', index: 8, at: 7,
   parts: [
-    ['Stack', [stack({ ...G8, planes: pages8 })]],
-    ['Log', [
-      text('Command', `$ TZ=UTC woodcase activity deck.pen   (${rows8.length} writes)`, 120, 96, { font: F.mono, size: 14, fill: C.ink3 }),
-      mono('First', rows8.slice(0, half8), 120, 136, { size: size8, lh: lh8, fill: C.ink }),
-      mono('Then', rows8.slice(half8), 530, 136, { size: size8, lh: lh8, fill: C.ink }),
+    ['Viewer', [
+      { type: 'frame', name: 'Shot', layout: 'none', x: X8, y: Y8, width: DASH.w * K8, height: DASH.h * K8, cornerRadius: 10, clip: true,
+        fill: [C.paper, { type: 'image', url: './assets/dashboard.png', mode: 'stretch' }], stroke: C.ink4, strokeWidth: 1,
+        effect: [{ type: 'shadow', shadowType: 'outer', offset: { x: 0, y: 24 }, blur: 60, color: '#0E111729' }] },
     ]],
-    ['Undo', [
-      text('Command', UNDO[0], 120, 136 + half8 * size8 * lh8 + 34, { font: F.mono, size: 14, fill: C.ink3 }),
-      mono('Answer', UNDO.slice(1), 120, 136 + half8 * size8 * lh8 + 64, { size: size8, lh: lh8, fill: C.signal }),
+    ['Marks', [
+      mark8('Live', live8),
+      mark8('Every Write', act8),
+      mark8('Every Node', out8),
     ]],
-    ['Caption', caption('Of course, this deck was built with Woodcase.',
-      'Every page, and the log of every write that made it.',
-      { width: 900 })],
+    ['Labels', [
+      label8('Live', 'live', 'follows the agent as it writes', live8.x + live8.w + pad8, Y8 - 86, 'right'),
+      lead8('Live Lead', [live8.x + live8.w / 2, Y8 - 14], [live8.x + live8.w / 2, live8.y - pad8]),
+      label8('Every Write', 'every write', 'who made it, what it touched, when', act8.x + act8.w + pad8, Y8 + DASH.h * K8 + 44, 'right'),
+      lead8('Write Lead', [act8.x + act8.w / 2, act8.y + act8.h + pad8], [act8.x + act8.w / 2, Y8 + DASH.h * K8 + 34]),
+      label8('Every Node', 'every node', 'the tree the agent reads, by id', X8 - 48, outY8 - 30, 'right'),
+      lead8('Node Lead', [X8 - 36, outY8], [out8.x - pad8, outY8]),
+    ]],
+    ['Caption', caption('Your agent works in the open.',
+      'A live, read-only view in your browser: every page, every write, every node.',
+      { width: 470, evidence: [serve8] })],
   ],
 };

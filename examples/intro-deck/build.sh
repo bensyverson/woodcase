@@ -98,14 +98,44 @@ page() {
     k=$((k+1))
   done
 }
-for n in 01 02 03 04 05 06 07 09; do
+for n in 01 02 03 04 05 06 07 10; do
   page -F slides/$n.js
 done
 
-# 5. The reveal: this deck's own pages become the planes, beside its own log.
+# 5. In the open: the viewer serves the banking scratch copy, following the agent, and the
+#    agent writes to it; the shot is taken inside the seven seconds its edit markers stay
+#    up, in dark mode. The boxes slide 8 marks come from the page itself.
+SLEEPY=${SLEEPY:-sleepy}
+$W serve $S/banking.pen --port 0 > build/raw/url.txt 2> build/raw/serve.err &
+SERVE=$!
+trap 'kill $SERVE 2> /dev/null' EXIT
+for i in {1..300}; do [[ -s build/raw/url.txt ]] && break; sleep 0.1; done
+URL=$(head -1 build/raw/url.txt)
+[[ -n $URL ]] || { cat build/raw/serve.err; exit 1; }
+VIEW=$(curl -sf ${URL}files | python3 -c 'import json,sys
+f=json.load(sys.stdin)["files"][0]
+print(f["id"] + "/artboards/" + next(a["id"] for a in f["artboards"] if a["name"] == "banking-home"))')
+PAGE="${URL}files/$VIEW?follow=$AS&tab=activity"
+(
+  cd $S
+  $W set banking.pen hdrN kind.content=Ada --as $AS
+  $W override banking.pen Qh9Dq/ydTfa 'content=\$31,204.15' --as $AS
+  $W override banking.pen aqCub/vpvCO 'content=Blue Bottle' --as $AS
+) > /dev/null
+# Connected, and the render drawn; the edit markers are still up (they last seven seconds).
+READY='js:[...document.querySelectorAll(".v-live-label")].some(e => e.dataset.state == "live" && e.offsetParent) && [...document.images].every(i => i.complete && i.naturalWidth > 0)'
+$SLEEPY shot "$PAGE" --size 1600x1000 --scale 2 --theme dark --wait-for $READY --out assets/dashboard.png > /dev/null
+for m in presence:'#v-presence' live:'.v-live-label' activity:'#v-activity' outline:'#v-outline'; do
+  $SLEEPY query "$PAGE" --size 1600x1000 --theme dark --wait-for $READY --selector ${m#*:} > build/raw/dash-${m%%:*}.json
+done
+kill $SERVE; trap - EXIT
+python3 lib/dash.py $DIR > build/dash.js
+page -F build/dash.js -F slides/08.js
+
+# 6. The reveal: this deck's own pages become the planes, beside its own log.
 shots build/thumbs 960
 $W js build/planes.pen -F build/data.js -F lib/helpers.js -F lib/planes.js -F lib/iso-thumbs.js --as $AS > /dev/null
-for n in 1 2 3 4 5 6 7; do
+for n in 1 2 3 4 5 6 7 8; do
   $W shot build/planes.pen "Iso thumb $n" --out assets/iso-thumb-$n.png --scale 1 > /dev/null
 done
 # In UTC, so its times agree with the undo dry-run's timestamps beside it.
@@ -113,12 +143,12 @@ TZ=UTC $W activity deck.pen -n 1000 > build/raw/log.txt
 { echo '$ woodcase undo deck.pen --dry-run'
   $W undo deck.pen --dry-run --as $AS; } > build/raw/undo.txt
 python3 lib/log.py $DIR > build/log.js
-page -F build/log.js -F slides/08.js
+page -F build/log.js -F slides/09.js
 
 # Crops are deliberate: a plane running off the page reads as clipped, and that is the point.
 $W lint deck.pen || true
 
-# 6. The PDF, one vector page per top-level frame, and the page renders.
+# 7. The PDF, one vector page per top-level frame, and the page renders.
 rm -f intro-deck.pdf
 $W render deck.pen --format pdf > /dev/null
 mv deck.pdf intro-deck.pdf

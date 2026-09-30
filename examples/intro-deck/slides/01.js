@@ -23,7 +23,7 @@ const SLIDE = {
     ['Stack', [stack({ ...HOME, labels: true })]],
     ['Title', [titleSlide1()]],
     ['Caption', caption(null,
-      'An engine for .pen files, the format of Pen, with no screen of its own. Agents run it from a terminal; apps build it in as a Swift library.',
+      'An engine for .pen files, the format of Pen. Agents run it from a terminal, you watch it in a browser, and apps build it in as a Swift library.',
       { width: 780 })],
   ],
 };

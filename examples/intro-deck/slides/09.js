@@ -1,26 +1,27 @@
-// S9 — install: the stack closed up into one slab, and the one command to try it.
-const G9 = { ox: 1290, oy: 250, s: 0.8, gap: 8 };
-
-// Two steps, two voices: a shell command, then a sentence typed to an agent, set in a
-// composer field rather than as a shell line.
-const brew9 = text('Command', '$ brew install bensyverson/tap/woodcase', 0, 0, { font: F.mono, size: 30, weight: '500', fill: C.ink });
-delete brew9.x; delete brew9.y;
-const ask9 = {
-  type: 'frame', name: 'Prompt', layout: 'horizontal', gap: 16, alignItems: 'center',
-  padding: [18, 26], cornerRadius: 16, fill: C.paper, stroke: C.ink4, strokeWidth: 1,
-  effect: [{ type: 'shadow', shadowType: 'outer', offset: { x: 0, y: 8 }, blur: 24, color: '#0E111714' }],
-  children: [
-    text('Mark', '›', 0, 0, { size: 34, weight: '600', fill: C.signal }),
-    text('Ask', 'Use woodcase to design a settings screen for my app.', 0, 0, { size: 30, fill: C.ink }),
-  ].map(t => { delete t.x; delete t.y; return t; }),
-};
+// S9 — the reveal, in the deck's own light: the stack comes back, and its planes are this
+// deck's pages 1–8, beside the log of the writes that made them and the undo that would
+// take the last one back.
+const G9 = { ox: 1330, oy: 690, s: 0.58, gap: 80, u: 960, v: 540 };
+const pages9 = [1, 2, 3, 4, 5, 6, 7, 8].map(n => ({ key: `page ${n}`, label: String(n), image: `./assets/iso-thumb-${n}.png` }));
+const rows9 = LOG.map(l => l.replace(/\s+\|\s+/g, '  '));
+const half9 = Math.ceil(rows9.length / 2);
+const size9 = 13, lh9 = 1.62;
 
 const SLIDE = {
-  name: 'S9 Install', index: 9,
+  name: 'S9 Reveal', index: 9, at: 8,
   parts: [
-    ['Stack', [stack({ ...G9, thick: 4, construction: false })]],
-    ['Caption', caption('Install it, then tell your agent to use it.', null,
-      { width: 1100, evidence: [brew9, ask9] })],
-    ['Facts', [text('Facts', 'Swift 6  ·  macOS 15+ and iOS 18+ for rendering  ·  MIT licensed', 1160, 1000 - 16, { font: F.mono, size: 13, fill: C.ink3, width: 640, align: 'right' })]],
+    ['Stack', [stack({ ...G9, planes: pages9 })]],
+    ['Log', [
+      text('Command', `$ TZ=UTC woodcase activity deck.pen   (${rows9.length} writes)`, 120, 96, { font: F.mono, size: 14, fill: C.ink3 }),
+      mono('First', rows9.slice(0, half9), 120, 136, { size: size9, lh: lh9, fill: C.ink }),
+      mono('Then', rows9.slice(half9), 530, 136, { size: size9, lh: lh9, fill: C.ink }),
+    ]],
+    ['Undo', [
+      text('Command', UNDO[0], 120, 136 + half9 * size9 * lh9 + 34, { font: F.mono, size: 14, fill: C.ink3 }),
+      mono('Answer', UNDO.slice(1), 120, 136 + half9 * size9 * lh9 + 64, { size: size9, lh: lh9, fill: C.signal }),
+    ]],
+    ['Caption', caption('Of course, this deck was built with Woodcase.',
+      'Every page, and the log of every write that made it.',
+      { width: 900 })],
   ],
 };
