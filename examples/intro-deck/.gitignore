@@ -1,0 +1,4 @@
+# Scratch: raw CLI output, the plane source file, thumbnails, generated code.
+build/
+# The rendered planes and thumbnails deck.pen fills with; build.sh regenerates them.
+assets/

@@ -2,6 +2,8 @@
 
 A Swift library for rendering design documents in the `.pen` format.
 
+New here? The [intro deck](examples/intro-deck/intro-deck.pdf) says what Woodcase is in nine slides — and was itself built by an agent through the CLI ([how](examples/intro-deck/README.md)).
+
 Woodcase reads .pen files from version 2.8 through 2.17 and later 2.x minor versions (with a diagnostic on anything newer than 2.17); it always writes 2.17. Anything older than 2.11 is migrated on load — dropped or renamed properties are reported through an optional `PenDiagnosticCollector`, never silently discarded. See [PenEngine Pipeline](Sources/Woodcase/Documentation.docc/PenEngine.md) for the version gate and migration rules.
 
 Woodcase provides a complete pipeline for working with the .pen design format:
