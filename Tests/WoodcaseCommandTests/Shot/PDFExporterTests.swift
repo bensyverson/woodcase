@@ -44,6 +44,57 @@ struct PDFExporterTests {
         #expect(pdf.numberOfPages == 3)
     }
 
+    @Test("Each page's media box is that page's own size")
+    func mediaBoxMatchesEachPage() throws {
+        let pages = [
+            PDFExporter.Page(width: 1920, height: 1080, render: { _ in }),
+            PDFExporter.Page(width: 402, height: 874, render: { _ in }),
+        ]
+
+        let pdf = try Self.document(PDFExporter.data(pages: pages))
+
+        #expect(pdf.page(at: 1)?.getBoxRect(.mediaBox) == CGRect(x: 0, y: 0, width: 1920, height: 1080))
+        #expect(pdf.page(at: 2)?.getBoxRect(.mediaBox) == CGRect(x: 0, y: 0, width: 402, height: 874))
+    }
+
+    @Test("A frame's page draws that frame, wherever it sits on the canvas")
+    func framePageDrawsAtTheOrigin() throws {
+        let document = try PenParser.parse("""
+        {"version": "2.17", "children": [
+          {"type": "frame", "id": "first", "x": 0, "y": 0, "width": 100, "height": 50, "fill": "#0000FF"},
+          {"type": "frame", "id": "second", "x": 500, "y": 300, "width": 100, "height": 50, "fill": "#FF0000"}
+        ]}
+        """)
+        let rects = PenLayoutEngine.layout(document)
+        let page = try #require(PDFExporter.Page(frame: "second", of: document, layoutRects: rects))
+
+        let pdf = try Self.document(PDFExporter.data(pages: [page]))
+        let pdfPage = try #require(pdf.page(at: 1))
+        #expect(pdfPage.getBoxRect(.mediaBox) == CGRect(x: 0, y: 0, width: 100, height: 50))
+
+        let bitmap = try #require(CGContext(
+            data: nil, width: 100, height: 50, bitsPerComponent: 8, bytesPerRow: 400,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ))
+        bitmap.drawPDFPage(pdfPage)
+        let bytes = try #require(bitmap.data).assumingMemoryBound(to: UInt8.self)
+        let center = 25 * 400 + 50 * 4
+        #expect(bytes[center] == 255, "red channel")
+        #expect(bytes[center + 3] == 255, "the page is painted, not transparent")
+    }
+
+    @Test("A frame that has no layout rect has no page")
+    func framePageNeedsARect() throws {
+        let document = try PenParser.parse(#"{"version": "2.17", "children": []}"#)
+        #expect(PDFExporter.Page(frame: "missing", of: document, layoutRects: [:]) == nil)
+    }
+
+    private static func document(_ data: Data) throws -> CGPDFDocument {
+        let provider = try #require(CGDataProvider(data: data as CFData))
+        return try #require(CGPDFDocument(provider))
+    }
+
     @Test("Creates intermediate directories")
     func createsDirectories() throws {
         let page = PDFExporter.Page(width: 50, height: 50, render: { _ in })

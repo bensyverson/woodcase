@@ -231,17 +231,15 @@ public actor RenderCache {
     ) async throws -> Data {
         let prepared = try await prepared(file, theme: theme)
         let artboard = try prepared.artboard(id: artboardID, of: file)
-        return try PDFExporter.data(pages: [
-            PDFExporter.Page(width: artboard.width, height: artboard.height) { context in
-                PenRenderer.render(
-                    prepared.document,
-                    layoutRects: prepared.rects,
-                    into: context,
-                    rootNodeID: artboard.id,
-                    imageProvider: PenRenderer.imageProvider(relativeTo: prepared.directory)
-                )
-            },
-        ])
+        guard let page = PDFExporter.Page(
+            frame: artboard.id, of: prepared.document, layoutRects: prepared.rects,
+            imageProvider: PenRenderer.imageProvider(relativeTo: prepared.directory)
+        ) else {
+            throw ViewerError.unknownArtboard(
+                id: artboardID, file: file.id, available: prepared.artboards.map(\.id)
+            )
+        }
+        return try PDFExporter.data(pages: [page])
     }
 
     /// Every file `woodcase generate react` would write for a document.

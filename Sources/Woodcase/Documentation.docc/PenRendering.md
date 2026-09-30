@@ -112,6 +112,12 @@ whole pixels at the scale first (``PenRect/grownToWholePixels(at:)``). A viewpor
 or a dirty-rect pass wants the painted extent in canvas coordinates,
 ``PenLayoutEngine/canvasPaintedExtent(of:in:layoutRects:)``.
 
+The context entry point draws in canvas coordinates, so a PDF page must be moved to the
+frame's origin before it draws, or a frame anywhere but (0, 0) lands off its page and the
+page comes out blank. ``PDFExporter/Page/init(frame:of:layoutRects:imageProvider:)`` is
+that page, sized to the frame and positioned on it; `woodcase render --format pdf` and the
+viewer's PDF export both build their pages with it.
+
 ## Supported Features
 
 ### Shapes

@@ -129,6 +129,31 @@ struct ViewerExportTests {
         #expect(data.starts(with: Data("%PDF".utf8)))
     }
 
+    @Test("An artboard away from the canvas origin exports as its own page, drawn")
+    func pdfOfAnOffsetArtboard() async throws {
+        let bench = try Bench("pdf-offset-artboard.pen")
+        defer { bench.clean() }
+
+        // Off01 sits at (500, 300), 200×100, filled red.
+        let response = try await ViewerEndpoints.export(
+            bench.export(artboard: "Off01", query: ["format": "pdf"])
+        )
+        let provider = try #require(CGDataProvider(data: body(of: response) as CFData))
+        let page = try #require(CGPDFDocument(provider)?.page(at: 1))
+        #expect(page.getBoxRect(.mediaBox) == CGRect(x: 0, y: 0, width: 200, height: 100))
+
+        let bitmap = try #require(CGContext(
+            data: nil, width: 200, height: 100, bitsPerComponent: 8, bytesPerRow: 800,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ))
+        bitmap.drawPDFPage(page)
+        let bytes = try #require(bitmap.data).assumingMemoryBound(to: UInt8.self)
+        let center = 50 * 800 + 100 * 4
+        #expect(bytes[center] == 255, "red channel")
+        #expect(bytes[center + 3] == 255, "the frame is drawn on the page, not off it")
+    }
+
     // MARK: - Code
 
     @Test("Export as React returns the .tsx generate writes for this artboard")

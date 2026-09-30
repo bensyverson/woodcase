@@ -15,11 +15,10 @@ import Foundation
 /// would drift the first time one of them learned about a margin.
 ///
 /// ```swift
-/// let data = try PDFExporter.data(pages: [
-///     PDFExporter.Page(width: rect.width, height: rect.height) { context in
-///         PenRenderer.render(document, layoutRects: rects, into: context, rootNodeID: frame.id)
-///     },
-/// ])
+/// let pages = frames.compactMap { frame in
+///     PDFExporter.Page(frame: frame.id, of: document, layoutRects: rects)
+/// }
+/// let data = try PDFExporter.data(pages: pages)
 /// ```
 public enum PDFExporter {
     /// A single page to render into the PDF.
@@ -82,8 +81,10 @@ public enum PDFExporter {
         }
 
         for page in pages {
-            let pageBox = CGRect(x: 0, y: 0, width: page.width, height: page.height)
-            context.beginPDFPage([kCGPDFContextMediaBox as String: pageBox] as CFDictionary)
+            // The typed call: a `CGRect` bridged into a `beginPDFPage` dictionary is
+            // silently ignored, leaving every page at the zero initial box.
+            var pageBox = CGRect(x: 0, y: 0, width: page.width, height: page.height)
+            context.beginPage(mediaBox: &pageBox)
 
             // Flip so the origin is top-left, matching the bitmap context the renderer
             // is written against.

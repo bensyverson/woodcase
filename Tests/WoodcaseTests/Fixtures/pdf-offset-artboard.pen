@@ -1,0 +1,7 @@
+{
+  "version": "2.17",
+  "children": [
+    {"id": "Org01", "name": "Origin", "type": "frame", "x": 0, "y": 0, "width": 100, "height": 50, "fill": "#0000FF"},
+    {"id": "Off01", "name": "Offset", "type": "frame", "x": 500, "y": 300, "width": 200, "height": 100, "fill": "#FF0000"}
+  ]
+}

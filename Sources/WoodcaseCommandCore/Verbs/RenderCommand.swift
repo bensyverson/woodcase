@@ -218,17 +218,8 @@ struct Render: AsyncParsableCommand {
         let outputURL = outputDir.appendingPathComponent(filename)
 
         let pages: [PDFExporter.Page] = frames.compactMap { frame in
-            guard let frameRect = rects[frame.id] else { return nil }
-            return PDFExporter.Page(
-                width: frameRect.width,
-                height: frameRect.height,
-                render: { context in
-                    PenRenderer.render(
-                        resolved, layoutRects: rects, into: context,
-                        rootNodeID: frame.id,
-                        imageProvider: imageProvider
-                    )
-                }
+            PDFExporter.Page(
+                frame: frame.id, of: resolved, layoutRects: rects, imageProvider: imageProvider
             )
         }
 
