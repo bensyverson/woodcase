@@ -29,7 +29,7 @@ You are working on Woodcase, a Swift library which allows users to parse and ren
 ## Working with .pen files
 
 - To look at a .pen file, read it directly (it's JSON) rather than using the Pencil MCP.
-- The .pen format specification is at `./local/Pen-Format.md`; the schema is at `./local/Pen-Schema-2.17.md` — the app's own 2.17 schema, with a section on what Pen writes beyond it. Older copies: `./local/Pen-Schema.js` (2.10) and `./local/Pen-Schema-v2.js` (2.17 dev docs). Read them only when you need to.
+- The .pen format specification is at `./local/Pen-Format.md`; the schema is at `./local/Pen-Schema-2.20.md` — the app's own 2.20 schema (Pen 1.2.15). Older copies: `./local/Pen-Schema-2.17.md` (2.17, with a section on what Pen writes beyond the schema, still true), `./local/Pen-Schema.js` (2.10) and `./local/Pen-Schema-v2.js` (2.17 dev docs). Read them only when you need to.
 
 <!-- agents:begin core@3a7a5e -->
 ## Working rules
@@ -138,3 +138,13 @@ These files carry instructions for specific situations. When one applies, read t
 | Before filing or claiming work in job, and when running as a subagent | `project/agents/jobs.md` |
 | Before building or extending a command-line tool | `project/agents/cli-design.md` |
 <!-- agents:end index -->
+
+<!-- agents:begin images@526df6 -->
+## Images
+
+In order to work with images, use the following CLI tools:
+
+- `peep` <https://github.com/bensyverson/PixelPeeper>: Crop, scale and compare images
+- `sleepy` <https://github.com/bensyverson/sleepyhollow>: View and inspect web pages and HTML content
+- `woodcase` <https://github.com/bensyverson/woodcase>: Create visual designs for export to PNG, PDF, or code
+<!-- agents:end images -->
