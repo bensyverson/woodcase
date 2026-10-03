@@ -15,22 +15,28 @@ import Foundation
 ///
 /// ```swift
 /// let version = PenFormatVersion("2.17")   // 2.17
-/// version == PenFormatVersion.current      // true
+/// version < PenFormatVersion.current       // true
 /// ```
 public struct PenFormatVersion: Friendly, Comparable, CustomStringConvertible {
     /// The format version Woodcase's model represents. A ``PenDocument`` parsed from
     /// an older file reports this version; see ``Relation`` for the rest.
-    public static let current = PenFormatVersion(major: 2, minor: 19)
+    public static let current = PenFormatVersion(major: 2, minor: 20)
 
     /// The newest version that ``PenLegacyMigrator`` must rewrite before decoding.
     public static let newestLegacy = PenFormatVersion(major: 2, minor: 10)
 
+    /// The oldest version past the legacy range: the shape every legacy-only
+    /// ``PenMigrationRule`` produces, and so its ``PenMigrationRule/target``.
+    public static let oldestModern = PenFormatVersion(major: 2, minor: 11)
+
     /// The versions after the legacy range that Pen has been seen to write: 2.17 (Pen up
-    /// to 1.2.13) and 2.19 (Pen 1.2.14). A 2.11 – 2.18 file declaring anything else is
-    /// read with a warning that its version has never been observed.
+    /// to 1.2.13), 2.19 (Pen 1.2.14) and 2.20 (Pen 1.2.15). A file older than the model
+    /// that declares anything else is read with a warning that its version has never
+    /// been observed.
     public static let observedModern: Set<PenFormatVersion> = [
         PenFormatVersion(major: 2, minor: 17),
         PenFormatVersion(major: 2, minor: 19),
+        PenFormatVersion(major: 2, minor: 20),
     ]
 
     /// The oldest version ever observed in a real .pen file.

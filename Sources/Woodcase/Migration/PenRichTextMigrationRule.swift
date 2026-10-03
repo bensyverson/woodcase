@@ -43,6 +43,9 @@ public struct PenRichTextMigrationRule: PenMigrationRule {
     /// Creates the rule.
     public init() {}
 
+    /// The 2.11 shape: only a legacy (2.8 – 2.10) document gets this rule.
+    public let target = PenFormatVersion.oldestModern
+
     /// Replaces an array-valued `content` with the concatenation of its runs' text.
     ///
     /// Nodes whose `content` is already a string, or absent, are left untouched and emit

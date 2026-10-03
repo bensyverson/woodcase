@@ -73,27 +73,28 @@ struct PenVersionGateTests {
         #expect(diagnostic.message.contains(version))
     }
 
-    // MARK: - Observed (2.17) and current (2.19)
+    // MARK: - Observed (2.17, 2.19) and current (2.20)
 
-    @Test("2.17, which Pen wrote before 1.2.14, decodes without diagnostics and reports the model's version")
-    func observedOlderVersionIsSilent() throws {
+    @Test("2.17 and 2.19, which Pen wrote before 1.2.15, decode without diagnostics and report the model's version",
+          arguments: ["2.17", "2.19"])
+    func observedOlderVersionIsSilent(version: String) throws {
         let diagnostics = PenDiagnosticCollector()
-        let doc = try PenParser.parse(document(version: "2.17", children: rectangle), diagnostics: diagnostics)
+        let doc = try PenParser.parse(document(version: version, children: rectangle), diagnostics: diagnostics)
         #expect(doc.version == PenDocument.currentFormatVersion)
         #expect(!diagnostics.hasIssues)
     }
 
-    @Test("Version 2.19 decodes without diagnostics")
+    @Test("Version 2.20 decodes without diagnostics")
     func currentVersionIsSilent() throws {
         let diagnostics = PenDiagnosticCollector()
-        let doc = try PenParser.parse(document(version: "2.19", children: rectangle), diagnostics: diagnostics)
-        #expect(doc.version == "2.19")
+        let doc = try PenParser.parse(document(version: "2.20", children: rectangle), diagnostics: diagnostics)
+        #expect(doc.version == "2.20")
         #expect(!diagnostics.hasIssues)
     }
 
     // MARK: - Newer minor
 
-    @Test("A newer 2.x minor decodes with one notice and keeps its declared version", arguments: ["2.20", "2.21", "2.99"])
+    @Test("A newer 2.x minor decodes with one notice and keeps its declared version", arguments: ["2.21", "2.22", "2.99"])
     func newerMinorIsANotice(version: String) throws {
         let diagnostics = PenDiagnosticCollector()
         let doc = try PenParser.parse(document(version: version, children: rectangle), diagnostics: diagnostics)
@@ -109,9 +110,9 @@ struct PenVersionGateTests {
 
     @Test("A newer minor re-encodes with its declared version, never the model's")
     func newerMinorRoundTripsItsVersion() throws {
-        let doc = try PenParser.parse(document(version: "2.20", children: rectangle))
+        let doc = try PenParser.parse(document(version: "2.21", children: rectangle))
         let reparsed = try PenParser.parse(PenParser.encode(doc))
-        #expect(reparsed.version == "2.20")
+        #expect(reparsed.version == "2.21")
     }
 
     // MARK: - Different major

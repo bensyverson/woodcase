@@ -43,7 +43,7 @@ struct MigrateExitCodeTests {
 
         #expect(run.status == 0)
         #expect(run.stdout.contains("migrated \(legacy.path)"))
-        #expect(try String(contentsOf: legacy, encoding: .utf8).contains("\"version\": \"2.19\""))
+        #expect(try String(contentsOf: legacy, encoding: .utf8).contains("\"version\": \"2.20\""))
     }
 
     @Test("A file that is not a .pen file is exit 2, and the message says what it wanted")

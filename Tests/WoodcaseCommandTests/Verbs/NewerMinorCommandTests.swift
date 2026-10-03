@@ -9,15 +9,15 @@ import Testing
 import Woodcase
 @testable import WoodcaseCommandCore
 
-/// A file written by a newer Pen of the same major — 2.20 while this build models 2.19.
+/// A file written by a newer Pen of the same major — 2.21 while this build models 2.20.
 ///
 /// It reads with one notice, lints clean when the design is clean, and every write verb
-/// writes it back as 2.20: stamping the model's older version over it would make the
+/// writes it back as 2.21: stamping the model's older version over it would make the
 /// next Pen to open it migrate data this build never touched.
 @Suite("A newer-minor .pen file")
 struct NewerMinorCommandTests {
     /// The version the fixtures are rewritten to declare.
-    static let newer = "2.20"
+    static let newer = "2.21"
 
     /// A write verb, its arguments after the file, and any file it reads its body from.
     struct WriteCase: CustomTestStringConvertible {

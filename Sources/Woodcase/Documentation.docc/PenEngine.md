@@ -97,7 +97,7 @@ option), and dispatches:
 |------------------|----------|-----------------|
 | 2.8 – 2.10 | ``PenLegacyMigrator`` rewrites the JSON tree, then the current decoder runs | the model's version |
 | below 2.8 | migrated as legacy, with a warning | the model's version |
-| 2.11 – 2.18 | ``PenLegacyMigrator/modernRules`` rewrite the tree (the 2.19 shadow change below), then the current decoder; a warning unless it is 2.17, the only one of these Pen has been seen to write | the model's version |
+| 2.11 – 2.18 | the rules ``PenLegacyMigrator/rules(upgrading:)`` picks rewrite the tree (the 2.19 shadow change below), then the current decoder; a warning unless it is 2.17, the only one of these Pen has been seen to write | the model's version |
 | 2.19 | current decoder | 2.19 |
 | newer 2.x | current decoder, with one **notice** | **the declared version, unchanged** |
 | another major | the structural probe below; read-only, with a warning | never — writes are refused |

@@ -17,7 +17,7 @@ public extension PenFileTransaction {
     ///
     /// ```swift
     /// let outcome = try await PenFileTransaction.migrate(at: url, identity: "ana")
-    /// print(outcome.value.writtenVersion, outcome.didWrite)   // "2.19" true
+    /// print(outcome.value.writtenVersion, outcome.didWrite)   // "2.20" true
     /// ```
     ///
     /// A rewrite appends one ``ActivityEvent/Kind/migrate`` event. Its revision is the

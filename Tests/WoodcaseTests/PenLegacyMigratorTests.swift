@@ -14,6 +14,8 @@ struct PenLegacyMigratorTests {
 
     /// Marks every node it visits and reports the node id, so the walker can be observed.
     private struct TagRule: PenMigrationRule {
+        let target = PenFormatVersion.current
+
         func apply(toNode node: inout [String: AnyCodable], id: String?, diagnostics: PenDiagnosticCollector?) {
             node["tagged"] = .bool(true)
             diagnostics?.warn("visited", stage: .migration, nodeID: id)
@@ -22,13 +24,17 @@ struct PenLegacyMigratorTests {
 
     /// Only implements the document-level hook, proving the node hook has a default.
     private struct StampRule: PenMigrationRule {
+        let target = PenFormatVersion.current
+
         func apply(toDocument document: inout [String: AnyCodable], diagnostics _: PenDiagnosticCollector?) {
             document["stamped"] = .bool(true)
         }
     }
 
     /// Implements neither hook, proving both defaults are no-ops.
-    private struct InertRule: PenMigrationRule {}
+    private struct InertRule: PenMigrationRule {
+        let target = PenFormatVersion.current
+    }
 
     // MARK: - Fixture Trees
 
@@ -164,29 +170,56 @@ struct PenLegacyMigratorTests {
         #expect(migrated == current)
     }
 
-    @Test("A document's declared version picks the rules it needs", arguments: [
-        (nil, "legacy"), ("2.9", "legacy"), ("2.10", "legacy"),
-        ("2.11", "modern"), ("2.17", "modern"), ("2.18", "modern"),
-        ("2.19", "none"), ("2.20", "none"),
-    ] as [(String?, String)])
-    func rulesForVersion(declared: String?, expected: String) {
-        let rules = PenLegacyMigrator.rules(upgrading: declared.flatMap(PenFormatVersion.init))
-        let kind = if rules.isEmpty {
-            "none"
-        } else if rules.count == PenLegacyMigrator.rules.count {
-            "legacy"
-        } else if rules.count == PenLegacyMigrator.modernRules.count {
-            "modern"
-        } else {
-            "other"
-        }
-        #expect(kind == expected)
+    /// The type names of the rules a declared version gets, in the order they run.
+    private func ruleNames(upgrading declared: String?) -> [String] {
+        PenLegacyMigrator.rules(upgrading: declared.flatMap(PenFormatVersion.init)).map { "\(type(of: $0))" }
     }
 
-    @Test("Both rule sets end in the 2.19 shadow migration")
-    func shadowRuleIsRegistered() {
+    /// Whether `first` runs before `second` for a document declaring `declared`.
+    private func runs(_ first: String, before second: String, upgrading declared: String?) -> Bool {
+        let names = ruleNames(upgrading: declared)
+        guard let lhs = names.firstIndex(of: first), let rhs = names.firstIndex(of: second) else { return false }
+        return lhs < rhs
+    }
+
+    @Test("A legacy document gets every rule, the 2.19 shadow rule before the 2.20 image rule",
+          arguments: [nil, "2.9", "2.10"] as [String?])
+    func legacyGetsEveryRule(declared: String?) {
+        #expect(ruleNames(upgrading: declared).count == PenLegacyMigrator.rules.count)
+        #expect(runs("PenShadowMigrationRule", before: "PenImageModeMigrationRule", upgrading: declared))
+    }
+
+    @Test("A 2.11 – 2.18 document gets the version stamp, then the shadow rule before the image rule",
+          arguments: ["2.11", "2.17", "2.18"])
+    func modernGetsShadowThenImage(declared: String) {
+        #expect(Set(ruleNames(upgrading: declared)) == [
+            "PenVersionMigrationRule", "PenShadowMigrationRule", "PenImageModeMigrationRule",
+        ])
+        #expect(runs("PenShadowMigrationRule", before: "PenImageModeMigrationRule", upgrading: declared))
+    }
+
+    @Test("A 2.19 document never gets the 2.19 shadow rule, only the image rule and the version stamp")
+    func format219SkipsTheShadowRule() {
+        #expect(Set(ruleNames(upgrading: "2.19")) == ["PenVersionMigrationRule", "PenImageModeMigrationRule"])
+    }
+
+    @Test("A document at or past the model's version gets no rules", arguments: ["2.20", "2.21"])
+    func currentGetsNothing(declared: String) {
+        #expect(ruleNames(upgrading: declared).isEmpty)
+    }
+
+    @Test("The rules a document gets run in the order of the versions they upgrade to",
+          arguments: [nil, "2.11", "2.19"] as [String?])
+    func rulesRunInVersionOrder(declared: String?) {
+        let targets = PenLegacyMigrator.rules(upgrading: declared.flatMap(PenFormatVersion.init)).map(\.target)
+        #expect(!targets.isEmpty)
+        #expect(targets == targets.sorted())
+    }
+
+    @Test("The rule set registers the 2.19 shadow rule and the 2.20 image rule")
+    func modernRulesAreRegistered() {
         #expect(PenLegacyMigrator.rules.contains { $0 is PenShadowMigrationRule })
-        #expect(PenLegacyMigrator.modernRules.contains { $0 is PenShadowMigrationRule })
+        #expect(PenLegacyMigrator.rules.contains { $0 is PenImageModeMigrationRule })
     }
 
     @Test("The default rule set is non-empty and registered on the migrator")

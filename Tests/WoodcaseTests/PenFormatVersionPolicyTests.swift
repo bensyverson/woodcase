@@ -74,7 +74,7 @@ struct PenFormatVersionPolicyTests {
 
     @Test("A document reports the relation of the version it declares")
     func documentReportsItsRelation() throws {
-        #expect(try PenParser.parse(Self.document(version: "2.20")).formatRelation == .newerMinor)
+        #expect(try PenParser.parse(Self.document(version: "2.21")).formatRelation == .newerMinor)
         #expect(try PenParser.parse(Self.document(version: "3.0")).formatRelation == .differentMajor)
         #expect(PenDocument(children: []).formatRelation == .current)
     }
@@ -109,12 +109,12 @@ struct PenFormatVersionPolicyTests {
 
     @Test("An edit to a newer-minor file writes its declared version back")
     func transactionKeepsANewerMinor() async throws {
-        try await withDocument(version: "2.19") { url in
+        try await withDocument(version: "2.21") { url in
             let outcome = try await PenFileTransaction.run(at: url) { document in
                 try Self.rename(document)
             }
             #expect(outcome.didWrite)
-            #expect(try Self.declaredVersion(at: url) == "2.19")
+            #expect(try Self.declaredVersion(at: url) == "2.21")
         }
     }
 
@@ -174,10 +174,10 @@ struct PenFormatVersionPolicyTests {
 
     @Test("Migrating a newer minor leaves it at its own version, as already current")
     func migratorLeavesANewerMinor() throws {
-        let outcome = try PenFileMigrator.migrate(Self.document(version: "2.19"))
+        let outcome = try PenFileMigrator.migrate(Self.document(version: "2.21"))
         #expect(outcome.wasAlreadyCurrent)
-        #expect(outcome.writtenVersion == "2.19")
-        #expect(try PenParser.parse(outcome.data).version == "2.19")
+        #expect(outcome.writtenVersion == "2.21")
+        #expect(try PenParser.parse(outcome.data).version == "2.21")
     }
 
     @Test("Migrating an older file reports the version it writes")

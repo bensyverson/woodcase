@@ -57,10 +57,10 @@ struct PenFormatVersionTests {
 
     // MARK: - Well-known versions
 
-    @Test("The current version is 2.19")
+    @Test("The current version is 2.20")
     func currentVersion() {
-        #expect(PenFormatVersion.current == PenFormatVersion(major: 2, minor: 19))
-        #expect(PenDocument.currentFormatVersion == "2.19")
+        #expect(PenFormatVersion.current == PenFormatVersion(major: 2, minor: 20))
+        #expect(PenDocument.currentFormatVersion == "2.20")
     }
 
     @Test("The newest legacy version is 2.10")

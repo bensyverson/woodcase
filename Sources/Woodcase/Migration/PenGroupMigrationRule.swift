@@ -27,6 +27,9 @@ public struct PenGroupMigrationRule: PenMigrationRule {
     /// Creates the rule.
     public init() {}
 
+    /// The 2.11 shape: only a legacy (2.8 – 2.10) document gets this rule.
+    public let target = PenFormatVersion.oldestModern
+
     /// The keys this rule removes from every `group` node.
     private static let keys = [
         "layout", "gap", "padding", "justifyContent", "alignItems", "width", "height",

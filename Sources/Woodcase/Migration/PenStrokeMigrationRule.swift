@@ -39,6 +39,9 @@ public struct PenStrokeMigrationRule: PenMigrationRule {
     /// Creates the rule.
     public init() {}
 
+    /// The 2.11 shape: only a legacy (2.8 – 2.10) document gets this rule.
+    public let target = PenFormatVersion.oldestModern
+
     /// Rewrites one node's nested `stroke` object into the flat 2.17 keys.
     ///
     /// A node whose `stroke` is not an object is left alone: the rule only ever runs on

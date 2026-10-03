@@ -21,46 +21,49 @@ import Foundation
 /// ```
 ///
 /// ``PenParser`` runs this automatically for any document older than the model, with
-/// the rules ``rules(upgrading:)`` picks for its declared version: everything in
-/// ``rules`` for a legacy (2.8 – 2.10) document, only ``modernRules`` for a 2.11 – 2.18
-/// one. Call it directly only to migrate a file on disk.
+/// the rules ``rules(upgrading:)`` picks for its declared version: those whose
+/// ``PenMigrationRule/target`` is newer than it. A legacy (2.8 – 2.10) document gets
+/// every rule; a 2.17 one the 2.19 shadow rule and then the 2.20 image-mode rule; a 2.19
+/// one only the image-mode rule. Call it directly only to migrate a file on disk.
 ///
 /// ## Adding a rule
 ///
 /// Each format change is one ``PenMigrationRule``. Write the rule in its own file next
-/// to this one and add it to ``rules`` — and, for a change after 2.17, to
-/// ``modernRules`` as well; those two arrays are the whole registration point. Rules
-/// run in array order, once per node, so a rule may rely on rules listed before it
-/// having already run.
+/// to this one, give it the ``PenMigrationRule/target`` version it produces, and add it
+/// to ``rules`` — that array is the whole registration point. Rules run in target order,
+/// and in array order within one target, once per node, so a rule may rely on every
+/// rule of an older target having already run.
 public enum PenLegacyMigrator {
-    /// The rules applied to every legacy document, in order.
+    /// Every rule, in the order they run: by ``PenMigrationRule/target``, then as listed.
     ///
-    /// Append new rules here; this array is the migrator's whole registration point.
-    public static let rules: [any PenMigrationRule] = [
+    /// Add new rules here; this array is the migrator's whole registration point.
+    public static let rules: [any PenMigrationRule] = inTargetOrder([
         PenIconMigrationRule(),
         PenRichTextMigrationRule(),
-        PenVersionMigrationRule(),
         PenStrokeMigrationRule(),
         PenGroupMigrationRule(),
         PenShadowMigrationRule(),
-    ]
-
-    /// The rules applied to a document between 2.11 and the model's version: the format
-    /// changes made after 2.17, which a 2.11 – 2.18 file has not seen.
-    public static let modernRules: [any PenMigrationRule] = [
+        PenImageModeMigrationRule(),
         PenVersionMigrationRule(),
-        PenShadowMigrationRule(),
-    ]
+    ])
 
     /// The rules a document declaring `version` needs to reach the model's shape.
     ///
     /// - Parameter version: The declared version, or `nil` for a document that declares
     ///   none, which is read as legacy.
-    /// - Returns: ``rules`` for a legacy document, ``modernRules`` for one of 2.11 up to
-    ///   the model, and nothing for the model's version or newer.
+    /// - Returns: The rules in ``rules`` whose target is newer than `version`, in the
+    ///   order they run — every rule for a legacy document, and none for the model's
+    ///   version or newer.
     public static func rules(upgrading version: PenFormatVersion?) -> [any PenMigrationRule] {
-        guard let version, version > PenFormatVersion.newestLegacy else { return rules }
-        return version < PenFormatVersion.current ? modernRules : []
+        guard let version else { return rules }
+        return rules.filter { $0.target > version }
+    }
+
+    /// Sorts rules by target, keeping the listed order within one target.
+    private static func inTargetOrder(_ rules: [any PenMigrationRule]) -> [any PenMigrationRule] {
+        rules.enumerated()
+            .sorted { ($0.element.target, $0.offset) < ($1.element.target, $1.offset) }
+            .map(\.element)
     }
 
     /// Rewrites an older document tree into the current format's shape.

@@ -36,7 +36,7 @@ struct PenFileMigratorTests {
 
     private static let currentJSON = """
     {
-      "version": "2.19",
+      "version": "2.20",
       "children": [
         { "type": "rectangle", "id": "r1", "width": 100, "height": 50 }
       ]
@@ -58,7 +58,7 @@ struct PenFileMigratorTests {
         let outcome = try PenFileMigrator.migrate(Self.data(Self.legacyJSON))
         let reparsed = try PenParser.parse(outcome.data)
         #expect(reparsed.version == PenDocument.currentFormatVersion)
-        #expect(Self.text(outcome.data).contains("\"version\": \"2.19\""))
+        #expect(Self.text(outcome.data).contains("\"version\": \"2.20\""))
     }
 
     @Test("The source's declared version is reported")
@@ -71,7 +71,7 @@ struct PenFileMigratorTests {
     @Test("A document already at the current version is recognized")
     func currentDocumentIsRecognized() throws {
         let outcome = try PenFileMigrator.migrate(Self.data(Self.currentJSON))
-        #expect(outcome.declaredVersion == "2.19")
+        #expect(outcome.declaredVersion == "2.20")
         #expect(outcome.wasAlreadyCurrent)
     }
 

@@ -34,15 +34,19 @@ public struct PenShadowMigrationRule: PenMigrationRule {
     /// Creates the rule.
     public init() {}
 
+    /// Format 2.19, which changed shadows: a document declaring 2.19 or newer never gets
+    /// this rule, so its inner shadows stay inner.
+    public let target = PenFormatVersion(major: 2, minor: 19)
+
     /// Whether a document's bytes could hold anything this rule rewrites.
     ///
-    /// A cheap byte search the parser runs before paying for a tree round trip: a file
-    /// with neither an `inner` nor a `spread` anywhere in it has no shadow to migrate.
-    /// A `true` is only a maybe — `innerRadius` and `strokeAlignment: "inner"` match too.
+    /// A file with neither an `inner` nor a `spread` anywhere in it has no shadow to
+    /// migrate. A `true` is only a maybe — `innerRadius` and `strokeAlignment: "inner"`
+    /// match too.
     ///
     /// - Parameter data: The raw bytes of a .pen file.
     /// - Returns: `false` when the rule certainly changes nothing.
-    public static func mayApply(to data: Data) -> Bool {
+    public func mayApply(to data: Data) -> Bool {
         data.range(of: Data("inner".utf8)) != nil || data.range(of: Data("spread".utf8)) != nil
     }
 

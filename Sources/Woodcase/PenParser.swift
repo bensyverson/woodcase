@@ -16,8 +16,8 @@ import Foundation
 /// | --- | --- |
 /// | 2.8 – 2.10 | ``PenLegacyMigrator`` rewrites the JSON tree, then the current decoder runs |
 /// | below 2.8 | migrated as legacy, with a warning |
-/// | 2.11 – 2.18 | ``PenLegacyMigrator/modernRules`` rewrite the tree (shadows), then the current decoder; a warning for a version never observed in the wild |
-/// | 2.19 | current decoder |
+/// | 2.11 – 2.19 | the rules ``PenLegacyMigrator/rules(upgrading:)`` picks rewrite the tree (2.19 shadows for a pre-2.19 file, then 2.20 image modes), then the current decoder; a warning for a version never observed in the wild |
+/// | 2.20 | current decoder |
 /// | newer 2.x | current decoder, with a notice; the declared version is kept |
 /// | any other major | read-only if it passes the structural probe, with a warning; otherwise ``PenParserError/differentMajor(url:version:reason:)`` |
 /// | unparsable | ``PenParserError/unsupportedVersion(url:version:)`` |
@@ -89,12 +89,12 @@ public enum PenParser {
                 return document
             case let .migrate(version):
                 var document: PenDocument
-                if let version, version > PenFormatVersion.newestLegacy, !PenShadowMigrationRule.mayApply(to: data) {
-                    // Nothing in these bytes for a 2.11 – 2.18 rule to rewrite: skip the
-                    // tree round trip, which would cost a second full decode.
+                let rules = PenLegacyMigrator.rules(upgrading: version)
+                if !rules.contains(where: { $0.mayApply(to: data) }) {
+                    // Nothing in these bytes for any rule to rewrite: skip the tree round
+                    // trip, which would cost a second full decode.
                     document = try decode(data)
                 } else {
-                    let rules = PenLegacyMigrator.rules(upgrading: version)
                     let migrated = try PenLegacyMigrator.migrate(tree(from: data), rules: rules, diagnostics: diagnostics)
                     document = try decode(reencode(migrated))
                 }

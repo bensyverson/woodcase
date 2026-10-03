@@ -42,18 +42,12 @@ struct PenFormat219MigrationTests {
 
     // MARK: - The version
 
-    @Test("The model writes format 2.19")
-    func currentVersionIs219() {
-        #expect(PenFormatVersion.current == PenFormatVersion(major: 2, minor: 19))
-        #expect(PenDocument.currentFormatVersion == "2.19")
-    }
-
-    @Test("A 2.17 file with nothing to migrate reads without a diagnostic and reports 2.19")
+    @Test("A 2.17 file with nothing to migrate reads without a diagnostic and reports the model's version")
     func plain217ReadsQuietly() throws {
         let diagnostics = PenDiagnosticCollector()
         let children = #"[{"id":"R1","type":"rectangle","width":10,"height":10,"strokeAlignment":"inner"}]"#
         let doc = try PenParser.parse(document(version: "2.17", children: children), diagnostics: diagnostics)
-        #expect(doc.version == "2.19")
+        #expect(doc.version == PenDocument.currentFormatVersion)
         #expect(diagnostics.diagnostics.isEmpty, "\(diagnostics.diagnostics)")
     }
 
@@ -142,7 +136,7 @@ struct PenFormat219MigrationTests {
         #expect(warning.severity == .warning)
     }
 
-    @Test("Migration is idempotent: re-reading the written 2.19 file changes nothing more")
+    @Test("Migration is idempotent: re-reading the written file changes nothing more")
     func migrationIsIdempotent() throws {
         let first = PenDiagnosticCollector()
         let once = try PenParser.parse(document(version: "2.17", children: innerShadowRectangle), diagnostics: first)
@@ -150,7 +144,7 @@ struct PenFormat219MigrationTests {
         let second = PenDiagnosticCollector()
         let twice = try PenParser.parse(PenParser.encode(once), diagnostics: second)
         #expect(twice == once)
-        #expect(twice.version == "2.19")
+        #expect(twice.version == PenDocument.currentFormatVersion)
         #expect(second.diagnostics.isEmpty)
     }
 }

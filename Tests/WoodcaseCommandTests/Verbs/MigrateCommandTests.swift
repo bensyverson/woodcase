@@ -113,7 +113,7 @@ struct MigrateCommandTests {
         try await command.run()
 
         let rewritten = try String(contentsOf: file, encoding: .utf8)
-        #expect(rewritten.contains("\"version\": \"2.19\""))
+        #expect(rewritten.contains("\"version\": \"2.20\""))
         #expect(!rewritten.contains("thickness"))
     }
 
@@ -155,7 +155,7 @@ struct MigrateCommandTests {
 
         let rewritten = try String(contentsOf: file, encoding: .utf8)
         #expect(rewritten != Self.currentJSON)
-        #expect(rewritten.contains("\"version\": \"2.19\""))
+        #expect(rewritten.contains("\"version\": \"2.20\""))
     }
 
     @Test("A file that cannot be parsed is a target failure, and the others still run")
@@ -170,7 +170,7 @@ struct MigrateCommandTests {
         await #expect(throws: ExitCode.targetFailure) {
             try await command.run()
         }
-        #expect(try String(contentsOf: good, encoding: .utf8).contains("\"version\": \"2.19\""))
+        #expect(try String(contentsOf: good, encoding: .utf8).contains("\"version\": \"2.20\""))
     }
 
     // MARK: - Helpers
@@ -191,7 +191,7 @@ struct MigrateCommandTests {
     """
 
     private static let currentJSON = """
-    {"children":[{"height":50,"id":"r1","type":"rectangle","width":100}],"version":"2.19"}
+    {"children":[{"height":50,"id":"r1","type":"rectangle","width":100}],"version":"2.20"}
     """
 
     private static func makeTemporaryDirectory() throws -> URL {

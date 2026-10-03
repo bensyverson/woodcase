@@ -16,6 +16,9 @@ public struct PenIconMigrationRule: PenMigrationRule {
     /// Creates the rule.
     public init() {}
 
+    /// The 2.11 shape: only a legacy (2.8 – 2.10) document gets this rule.
+    public let target = PenFormatVersion.oldestModern
+
     /// Rewrites an `icon_font` node's type and keys in place.
     ///
     /// The two keys are renamed wherever they appear, not only on a node typed

@@ -49,7 +49,7 @@ struct PenFileTransactionRewriteTests {
 
             #expect(outcome.commit == .wrote)
             #expect(outcome.value.declaredVersion == "2.17")
-            #expect(outcome.value.writtenVersion == "2.19")
+            #expect(outcome.value.writtenVersion == "2.20")
             let written = try Data(contentsOf: url)
             #expect(written == outcome.value.data)
             #expect(!String(decoding: written, as: UTF8.self).contains("spread"))
@@ -85,7 +85,7 @@ struct PenFileTransactionRewriteTests {
     func migrateSkipsCurrentWithoutForce() async throws {
         try await withDirectory { directory, log in
             let url = directory.appendingPathComponent("compact.pen")
-            try Data(#"{"version":"2.19","children":[]}"#.utf8).write(to: url)
+            try Data(#"{"version":"2.20","children":[]}"#.utf8).write(to: url)
 
             let skipped = try await PenFileTransaction.migrate(at: url, identity: "bob", log: log)
             #expect(skipped.commit == .unchanged)
