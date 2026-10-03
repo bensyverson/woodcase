@@ -1,2 +1,2 @@
 --swiftversion 6.0
---exclude .build,Packages,DerivedData
+--exclude .build,Packages,DerivedData,examples/*/build
