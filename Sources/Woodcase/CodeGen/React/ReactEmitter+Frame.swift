@@ -102,9 +102,9 @@ extension ReactEmitter {
             styles.append(("backgroundImage", "`url('${\(imageProp.name)}')`"))
             // Emit sizing/position from the original fill's mode
             if let fills = data.fills, let fill = fills.all.first, case let .image(img) = fill {
-                let size = switch img.mode {
-                case .fill, nil: "cover"
-                case .fit: "contain"
+                let size = switch img.placement {
+                case .cover: "cover"
+                case .contain: "contain"
                 case .stretch: "100% 100%"
                 }
                 styles.append(("backgroundSize", "\"\(size)\""))

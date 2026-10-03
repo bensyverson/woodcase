@@ -23,7 +23,7 @@ extension SwiftUINodeEmitter {
         } else {
             guard let url = fill.url else { return nil }
             if RemoteImageResolver.isRemote(url) {
-                return .view(Self.asyncImageView(url: url, mode: fill.mode ?? .stretch))
+                return .view(Self.asyncImageView(url: url, placement: fill.mode?.placement ?? .stretch))
             }
             guard let name = Self.resourceName(url) else {
                 unemitted.append("the image \(SwiftUILiteral.string(url)) (only images beside the .pen file are bundled)")
@@ -32,12 +32,12 @@ extension SwiftUINodeEmitter {
             expression = "Image(penResource: \(SwiftUILiteral.string(name)), bundle: .module)"
         }
         let image = SwiftUIViewCode(head: expression).modified(".resizable()")
-        switch fill.mode ?? .stretch {
+        switch fill.mode?.placement ?? .stretch {
         case .stretch:
             return .view(image)
-        case .fill:
+        case .cover:
             return .view(Self.placed(image.modified(".scaledToFill()")))
-        case .fit:
+        case .contain:
             return .view(Self.placed(image.modified(".scaledToFit()")))
         }
     }
@@ -64,15 +64,15 @@ extension SwiftUINodeEmitter {
     /// gap kept on purpose rather than built now.
     ///
     /// The resizable + scale modifiers apply inside the loaded `Image`'s own closure —
-    /// `AsyncImage` itself carries none, since only `Image` has them — and `fill`/`fit`
+    /// `AsyncImage` itself carries none, since only `Image` has them — and `cover`/`contain`
     /// center the whole `AsyncImage` in a `Color.clear` overlay, exactly as a bundled image's
     /// modes do.
-    private static func asyncImageView(url: String, mode: PenImageFillMode) -> SwiftUIViewCode {
+    private static func asyncImageView(url: String, placement: PenImageFillMode.Placement) -> SwiftUIViewCode {
         var content = SwiftUIViewCode(head: "image").modified(".resizable()")
-        switch mode {
+        switch placement {
         case .stretch: break
-        case .fill: content = content.modified(".scaledToFill()")
-        case .fit: content = content.modified(".scaledToFit()")
+        case .cover: content = content.modified(".scaledToFill()")
+        case .contain: content = content.modified(".scaledToFit()")
         }
         var asyncImage = SwiftUIViewCode(
             head: "AsyncImage(url: URL(string: \(SwiftUILiteral.string(url))))",
@@ -80,9 +80,9 @@ extension SwiftUINodeEmitter {
             body: [content]
         )
         asyncImage.trailingClosures = [SwiftUIViewCode.TrailingClosure(label: "placeholder", body: [SwiftUIViewCode(head: "Color.clear")])]
-        switch mode {
+        switch placement {
         case .stretch: return asyncImage
-        case .fill, .fit: return placed(asyncImage)
+        case .cover, .contain: return placed(asyncImage)
         }
     }
 

@@ -344,7 +344,7 @@ struct ReactEmitterRefInliningTests {
                             width: .fillContainer(fallback: nil),
                             height: .fixed(90),
                             fills: PenFills.single(.image(PenFill.PenImageFill(
-                                url: "./images/default.png", mode: .fill
+                                url: "./images/default.png", mode: .cover
                             )))
                         ))
                     ),

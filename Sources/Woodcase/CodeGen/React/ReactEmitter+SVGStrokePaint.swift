@@ -218,10 +218,10 @@ extension ReactEmitter {
             return "url(#\(id))"
         case let .image(image):
             guard let url = image.url else { return nil }
-            let fit = switch image.mode {
+            let fit = switch image.placement {
             case .stretch: "none"
-            case .fit: "xMidYMid meet"
-            case .fill, nil: "xMidYMid slice"
+            case .contain: "xMidYMid meet"
+            case .cover: "xMidYMid slice"
             }
             return svgPattern(url: url, preserveAspectRatio: fit, index: index, shape: shape, overhang: overhang, defs: &defs)
         case let .meshGradient(mesh):

@@ -851,7 +851,7 @@ struct ReactEmitterTests {
                 id: "c1",
                 common: PenNodeCommon(name: "Component/Card", reusable: true, metadata: ["type": "component"]),
                 kind: .frame(PenNode.FrameData(
-                    fills: .single(.image(PenFill.PenImageFill(url: "thumb.png", mode: .fill))),
+                    fills: .single(.image(PenFill.PenImageFill(url: "thumb.png", mode: .cover))),
                     layout: .vertical
                 ))
             ),

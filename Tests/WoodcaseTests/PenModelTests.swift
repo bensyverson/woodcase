@@ -476,7 +476,7 @@ struct PenModelTests {
         let decoded = try decoder.decode(PenFill.self, from: json)
         if case let .image(fill) = decoded {
             #expect(fill.url == "./logo.png")
-            #expect(fill.mode == .fill)
+            #expect(fill.mode == .cover)
         } else {
             Issue.record("Expected .image, got \(decoded)")
         }

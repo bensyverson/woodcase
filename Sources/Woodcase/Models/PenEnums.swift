@@ -93,13 +93,6 @@ public enum PenFillRule: String, Friendly, CaseIterable {
     case evenodd
 }
 
-/// Image fill sizing mode.
-public enum PenImageFillMode: String, Friendly, CaseIterable {
-    case stretch
-    case fill
-    case fit
-}
-
 /// How a node is positioned within its parent.
 public enum PenLayoutPosition: String, Friendly, CaseIterable {
     case auto

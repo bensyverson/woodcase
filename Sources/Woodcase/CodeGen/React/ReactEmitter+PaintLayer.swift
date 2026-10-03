@@ -69,7 +69,7 @@ extension ReactEmitter {
                 return PaintLayer(image: css.image, size: css.size, origin: .borderBox, blendMode: blend, position: css.position)
             case let .image(image):
                 guard let url = image.url else { return nil }
-                return PaintLayer(image: "url('\(url)')", size: cssImageSize(image.mode), origin: .paddingBox, blendMode: blend)
+                return PaintLayer(image: "url('\(url)')", size: cssImageSize(image.placement), origin: .paddingBox, blendMode: blend)
             case let .meshGradient(mesh):
                 guard let css = emitMeshImage(mesh, box: box, ctx: ctx) else { return nil }
                 return PaintLayer(image: css, size: PaintLayer.fullSize, origin: .paddingBox, blendMode: blend)
@@ -79,11 +79,11 @@ extension ReactEmitter {
         }
     }
 
-    /// The `background-size` that places an image fill over its box the way its mode does.
-    static func cssImageSize(_ mode: PenImageFillMode?) -> String {
-        switch mode {
-        case .fill, nil: "cover"
-        case .fit: "contain"
+    /// The `background-size` that places an image fill over its box the way its placement does.
+    static func cssImageSize(_ placement: PenImageFillMode.Placement) -> String {
+        switch placement {
+        case .cover: "cover"
+        case .contain: "contain"
         case .stretch: PaintLayer.fullSize
         }
     }

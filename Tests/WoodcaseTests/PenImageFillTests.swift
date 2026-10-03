@@ -130,11 +130,11 @@ struct PenImageFillTests {
         #expect(reader.matches(at: 95, 95, r: 0, g: 128, b: 255, a: 255))
     }
 
-    @Test("Image fill fill mode covers bounds with aspect-fill (no letterbox)")
+    @Test("Image fill cover mode covers bounds with aspect-fill (no letterbox)")
     func fillMode() throws {
         // Wide image (200x50) into square (100x100) — aspect-fill scales to cover
         let testImage = makeTestImage(width: 200, height: 50, r: 255, g: 0, b: 128)
-        let image = try #require(renderWithImageFill(mode: .fill) { _ in testImage })
+        let image = try #require(renderWithImageFill(mode: .cover) { _ in testImage })
         let reader = try #require(PixelReader(image))
         // Center should have image color
         #expect(reader.matches(at: 50, 50, r: 255, g: 0, b: 128, a: 255))
@@ -143,11 +143,11 @@ struct PenImageFillTests {
         #expect(reader.matches(at: 95, 50, r: 255, g: 0, b: 128, a: 255))
     }
 
-    @Test("Image fill fit mode fits within bounds with transparent padding")
+    @Test("Image fill contain mode fits within bounds with transparent padding")
     func fitMode() throws {
         // Wide image (200x50) into square (100x100) — aspect-fit: image is 100x25, centered
         let testImage = makeTestImage(width: 200, height: 50, r: 128, g: 255, b: 0)
-        let image = try #require(renderWithImageFill(mode: .fit) { _ in testImage })
+        let image = try #require(renderWithImageFill(mode: .contain) { _ in testImage })
         let reader = try #require(PixelReader(image))
         // Center should have image color
         #expect(reader.matches(at: 50, 50, r: 128, g: 255, b: 0, a: 255))

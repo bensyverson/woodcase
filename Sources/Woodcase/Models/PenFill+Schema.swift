@@ -53,8 +53,9 @@ public extension PenFill {
                     PenNestedShape.Field(key: "url", forms: [.text(.plain)]),
                     PenNestedShape.Field(
                         key: "mode",
-                        forms: PenImageFillMode.allCases.map { .spelling($0.rawValue) }
+                        forms: PenImageFillMode.allCases.map { .spelling($0.rawString) }
                     ),
+                    PenNestedShape.Field(key: "transform", forms: [.slots(PenImageTransform.slotNames)]),
                 ]
             ),
             PenNestedShape.Variant(

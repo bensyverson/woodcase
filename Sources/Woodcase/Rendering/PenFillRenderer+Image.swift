@@ -5,7 +5,7 @@ extension PenFillRenderer {
     /// Draws one image fill through `target`'s clip, placed by its mode inside the domain.
     ///
     /// Only the placed image is drawn: where the clip reaches past it — an outer stroke,
-    /// or the letterbox of a `fit` image — nothing shows, as in Pen.
+    /// or the letterbox of a `contain` image — nothing shows, as in Pen.
     static func renderImageFill(
         _ imageFill: PenFill.PenImageFill,
         onto target: Target,
@@ -16,7 +16,7 @@ extension PenFillRenderer {
         guard let url = imageFill.url, let cgImage = imageProvider(url) else { return }
 
         let drawRect = imageRect(
-            mode: imageFill.mode ?? .stretch,
+            placement: imageFill.mode?.placement ?? .stretch,
             imageSize: CGSize(width: cgImage.width, height: cgImage.height),
             in: target.domain
         )
@@ -39,22 +39,22 @@ extension PenFillRenderer {
         context.draw(cgImage, in: CGRect(origin: .zero, size: drawRect.size))
     }
 
-    /// Where an image of `imageSize` lands inside `domain` under `mode`.
+    /// Where an image of `imageSize` lands inside `domain` under `placement`.
     ///
     /// - `stretch` fills the domain exactly, ignoring the aspect ratio.
-    /// - `fill` scales to cover the domain, centered, overflowing on one axis.
-    /// - `fit` scales to fit inside the domain, centered, leaving bands on one axis.
-    static func imageRect(mode: PenImageFillMode, imageSize: CGSize, in domain: CGRect) -> CGRect {
+    /// - `cover` scales to cover the domain, centered, overflowing on one axis.
+    /// - `contain` scales to fit inside the domain, centered, leaving bands on one axis.
+    static func imageRect(placement: PenImageFillMode.Placement, imageSize: CGSize, in domain: CGRect) -> CGRect {
         guard imageSize.width > 0, imageSize.height > 0 else { return domain }
         let scaleX = domain.width / imageSize.width
         let scaleY = domain.height / imageSize.height
         let scale: CGFloat
-        switch mode {
+        switch placement {
         case .stretch:
             return domain
-        case .fill:
+        case .cover:
             scale = max(scaleX, scaleY)
-        case .fit:
+        case .contain:
             scale = min(scaleX, scaleY)
         }
         let width = imageSize.width * scale

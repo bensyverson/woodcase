@@ -277,7 +277,7 @@ struct PenParserTests {
            case let .image(imgFill) = fill
         {
             #expect(imgFill.url == "https://example.com/texture.png")
-            #expect(imgFill.mode == .fill)
+            #expect(imgFill.mode == .cover)
         } else {
             Issue.record("Expected single image fill")
         }

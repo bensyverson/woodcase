@@ -192,9 +192,9 @@ extension ReactEmitter {
         case let .image(img):
             guard let url = img.url else { return [] }
             var styles = [("backgroundImage", "\"url('\(url)')\"")]
-            let size = switch img.mode {
-            case .fill, nil: "cover"
-            case .fit: "contain"
+            let size = switch img.placement {
+            case .cover: "cover"
+            case .contain: "contain"
             case .stretch: "100% 100%"
             }
             styles.append(("backgroundSize", "\"\(size)\""))

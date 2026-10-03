@@ -185,13 +185,26 @@ public enum PenFill: Friendly {
         }
     }
 
+    /// An image paint: an image file sized into the node by its ``mode`` and cropped by its
+    /// ``transform``.
     public struct PenImageFill: Friendly {
+        /// Creates an image paint.
+        ///
+        /// - Parameters:
+        ///   - enabled: Whether the paint is drawn; `nil` means it is.
+        ///   - blendMode: How the paint composites over what is beneath it.
+        ///   - opacity: The paint's opacity, 0–1.
+        ///   - url: The image's URL; see ``url``.
+        ///   - mode: How the image is sized into the node; see ``mode``.
+        ///   - transform: The crop; see ``transform``.
+        ///   - extras: Keys the file wrote that the model does not claim.
         public init(
             enabled: PenValue<Bool>? = nil,
             blendMode: PenBlendMode? = nil,
             opacity: PenValue<Double>? = nil,
             url: String? = nil,
             mode: PenImageFillMode? = nil,
+            transform: PenImageTransform? = nil,
             extras: PenExtras = PenExtras()
         ) {
             self.enabled = enabled
@@ -199,6 +212,7 @@ public enum PenFill: Friendly {
             self.opacity = opacity
             self.url = url
             self.mode = mode
+            self.transform = transform
             self.extras = extras
         }
 
@@ -209,14 +223,24 @@ public enum PenFill: Friendly {
         /// URL that ``RemoteImageResolver`` downloads before rendering. Absent when the
         /// fill has not had an image assigned yet.
         public var url: String?
+        /// How the image is sized into the node, as the file wrote it; `nil` when the file
+        /// wrote none. Read ``placement`` to learn how it is drawn.
         public var mode: PenImageFillMode?
+        /// The crop (format 2.20); `nil` when the file wrote none, which is no crop.
+        public var transform: PenImageTransform?
+
+        /// How this paint is placed: its ``mode``'s placement, and ``PenImageFillMode/Placement/cover``
+        /// when it has none — the 2.20 default.
+        public var placement: PenImageFillMode.Placement {
+            mode?.placement ?? .cover
+        }
 
         /// Keys the file wrote on this fill that the model does not claim. See ``PenExtras``.
         public var extras = PenExtras()
 
         /// The keys this payload claims; any other key of its object is an extra.
         enum CodingKeys: String, CodingKey, CaseIterable {
-            case enabled, blendMode, opacity, url, mode
+            case enabled, blendMode, opacity, url, mode, transform
         }
     }
 }
