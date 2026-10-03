@@ -251,5 +251,6 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 - ``PenFillRule``
 - ``PenImageFillMode``
 - ``PenImageTransform``
+- ``PenImagePlacement``
 - ``PenGradientType``
 - ``PenBlendMode``

@@ -311,6 +311,9 @@ MeshGradient.BezierPoint
 MeshGradient.BezierPoint.init(position:leadingControlPoint:topControlPoint:trailingControlPoint:bottomControlPoint:)
 GraphicsContext
 GraphicsContext.concatenate(_:)
+GraphicsContext.clip(to:style:options:)
+GraphicsContext.resolve(_:)
+GraphicsContext.draw(_:in:style:)
 GraphicsContext.fill(_:with:style:)
 GraphicsContext.Shading
 GraphicsContext.Shading.linearGradient(_:startPoint:endPoint:options:)

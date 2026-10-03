@@ -28,7 +28,7 @@ enum SwiftUIVocabularyExemptions {
         "RawRepresentable.rawValue", "Mutex", "Mutex.withLock(_:)", "Sequence.allSatisfy(_:)",
         "Sequence.compactMap(_:)", "Sequence.first(where:)", "Sequence.sorted(by:)", "Unmanaged",
         "Unmanaged.takeRetainedValue()", "Sequence.filter(_:)", "Collection.isEmpty", "Collection.startIndex",
-        "Sequence.min()", "Sequence.min(by:)", "UInt32.init(_:)",
+        "Sequence.min()", "Sequence.min(by:)", "UInt32.init(_:)", "FloatingPoint.squareRoot()",
     ]
 
     /// Swift concurrency's global actor, which emitted code names only in `main.swift`.
@@ -41,6 +41,7 @@ enum SwiftUIVocabularyExemptions {
     private static let unrecorded = [
         "CGFloat", "CGFloat.init(_:)", "CGPoint", "CGSize", "CGRect", "CGRect.init(origin:size:)",
         "CGAffineTransform.a", "CGAffineTransform.b", "CGAffineTransform.c", "CGAffineTransform.d",
+        "CGAffineTransform.init(a:b:c:d:tx:ty:)",
         "CFString", "CFDictionary", "CFURL", "CFError", "CFErrorGetCode(_:)", "exit(_:)", "cos(_:)", "sin(_:)",
         "Bundle.module",
     ]

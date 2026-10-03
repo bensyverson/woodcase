@@ -2,10 +2,12 @@ import CoreGraphics
 import Foundation
 
 extension PenFillRenderer {
-    /// Draws one image fill through `target`'s clip, placed by its mode inside the domain.
+    /// Draws one image fill through `target`'s clip, placed by its mode and cropped by its
+    /// transform inside the domain (``PenImagePlacement``).
     ///
     /// Only the placed image is drawn: where the clip reaches past it — an outer stroke,
-    /// or the letterbox of a `contain` image — nothing shows, as in Pen.
+    /// the letterbox of a `contain` image, or a stretch crop that runs off the image — nothing
+    /// shows, as in Pen. A `contain` paint is also clipped to its crop box.
     static func renderImageFill(
         _ imageFill: PenFill.PenImageFill,
         onto target: Target,
@@ -14,12 +16,12 @@ extension PenFillRenderer {
     ) {
         guard imageFill.enabled?.literalValue != false else { return }
         guard let url = imageFill.url, let cgImage = imageProvider(url) else { return }
-
-        let drawRect = imageRect(
-            placement: imageFill.mode?.placement ?? .stretch,
-            imageSize: CGSize(width: cgImage.width, height: cgImage.height),
-            in: target.domain
-        )
+        let domain = target.domain
+        guard let placed = PenImagePlacement(
+            bounds: PenRect(x: domain.minX, y: domain.minY, width: domain.width, height: domain.height),
+            imageSize: PenSize(width: Double(cgImage.width), height: Double(cgImage.height)),
+            fill: imageFill
+        ) else { return }
 
         context.saveGState()
         defer { context.restoreGState() }
@@ -32,33 +34,14 @@ extension PenFillRenderer {
             context.setAlpha(CGFloat(opacity))
         }
         target.applyClip(in: context)
-
-        // CG draws images bottom-up; the context is flipped to y-down.
-        context.translateBy(x: drawRect.minX, y: drawRect.maxY)
-        context.scaleBy(x: 1, y: -1)
-        context.draw(cgImage, in: CGRect(origin: .zero, size: drawRect.size))
-    }
-
-    /// Where an image of `imageSize` lands inside `domain` under `placement`.
-    ///
-    /// - `stretch` fills the domain exactly, ignoring the aspect ratio.
-    /// - `cover` scales to cover the domain, centered, overflowing on one axis.
-    /// - `contain` scales to fit inside the domain, centered, leaving bands on one axis.
-    static func imageRect(placement: PenImageFillMode.Placement, imageSize: CGSize, in domain: CGRect) -> CGRect {
-        guard imageSize.width > 0, imageSize.height > 0 else { return domain }
-        let scaleX = domain.width / imageSize.width
-        let scaleY = domain.height / imageSize.height
-        let scale: CGFloat
-        switch placement {
-        case .stretch:
-            return domain
-        case .cover:
-            scale = max(scaleX, scaleY)
-        case .contain:
-            scale = min(scaleX, scaleY)
+        if let clipRect = placed.clipRect {
+            context.clip(to: clipRect.cgRect)
         }
-        let width = imageSize.width * scale
-        let height = imageSize.height * scale
-        return CGRect(x: domain.midX - width / 2, y: domain.midY - height / 2, width: width, height: height)
+
+        // The image's unit square, drawn bottom-up as CG draws images into the y-down context.
+        context.concatenate(placed.imageTransform.cgAffineTransform)
+        context.translateBy(x: 0, y: 1)
+        context.scaleBy(x: 1, y: -1)
+        context.draw(cgImage, in: CGRect(x: 0, y: 0, width: 1, height: 1))
     }
 }

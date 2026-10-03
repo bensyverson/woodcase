@@ -127,6 +127,17 @@
             return names.map { SwiftUIRenderBoard(fixture: fixture, artboard: $0) }
         }
 
+        /// The boards of `render-image-crops`: image paints placed by `mode` and cropped by
+        /// `transform` (format 2.20) — stretch, cover and contain with six crops each, on wide and
+        /// tall boxes, and on an ellipse, an outer stroke and at half opacity (leaf X6YNC3,
+        /// `scripts/gen-image-crop-fixture`; `PenImageCropSnapshotTests`). Not in
+        /// ``SwiftUIFixtures/paintFixtures``, which React's render test and the goldens share.
+        static let imageCropBoards: [SwiftUIRenderBoard] = {
+            let fixture = "render-image-crops"
+            let names = (try? PenSnapshotTestHelpers.artboardNames(in: fixture, fixturesDir: SwiftUIFixtures.directory)) ?? []
+            return names.map { SwiftUIRenderBoard(fixture: fixture, artboard: $0) }
+        }()
+
         /// Every board, in a stable order: the layout and text fixtures, the effects
         /// fixtures, then each exported artboard of the many-board fixtures and of the paint
         /// fixtures.
@@ -136,7 +147,8 @@
                 let names = (try? PenSnapshotTestHelpers.artboardNames(in: fixture, fixturesDir: SwiftUIFixtures.directory)) ?? []
                 return names.map { SwiftUIRenderBoard(fixture: fixture, artboard: $0) }.filter { $0.referenceName != nil }
             }
-            return single + boards + transformBoards + groupBoards + sizelessBoards + strokeShadowBoards + turnedFillBoards + effectProbeBoards + darkBoards
+            return single + boards + transformBoards + groupBoards + sizelessBoards + strokeShadowBoards + turnedFillBoards + effectProbeBoards
+                + imageCropBoards + darkBoards
         }()
 
         /// The name the harness writes the render under, and the baselines key it by.
