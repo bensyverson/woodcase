@@ -25,7 +25,7 @@ enum WoodcaseVersion {
     ///
     /// Pre-1.0 and pre-launch: the minor moves when a verb, a flag or an output shape
     /// changes, which is most releases at this stage.
-    static let current = "0.1.2"
+    static let current = "0.1.3"
 
     /// The line `--version` prints: the tool's version, then the .pen format it writes.
     ///
