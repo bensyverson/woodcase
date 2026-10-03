@@ -1,0 +1,1679 @@
+{
+  "version": "2.20",
+  "children": [
+    {
+      "type": "frame",
+      "id": "ic002",
+      "name": "stretch-wide-none",
+      "x": 0,
+      "y": 0,
+      "width": 280,
+      "height": 200,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "stretch"
+          },
+          "id": "ic001",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 200,
+          "height": 120
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic004",
+      "name": "stretch-wide-right-half",
+      "x": 320,
+      "y": 0,
+      "width": 280,
+      "height": 200,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "stretch",
+            "transform": [
+              2,
+              0,
+              0,
+              1,
+              -1,
+              0
+            ]
+          },
+          "id": "ic003",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 200,
+          "height": 120
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic006",
+      "name": "stretch-wide-zoom-center",
+      "x": 640,
+      "y": 0,
+      "width": 280,
+      "height": 200,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "stretch",
+            "transform": [
+              2,
+              0,
+              0,
+              2,
+              -0.5,
+              -0.5
+            ]
+          },
+          "id": "ic005",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 200,
+          "height": 120
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic008",
+      "name": "stretch-wide-shifted-past-edge",
+      "x": 960,
+      "y": 0,
+      "width": 280,
+      "height": 200,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "stretch",
+            "transform": [
+              1.5,
+              0,
+              0,
+              1.5,
+              -0.9,
+              -0.25
+            ]
+          },
+          "id": "ic007",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 200,
+          "height": 120
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic010",
+      "name": "stretch-wide-larger-than-image",
+      "x": 1280,
+      "y": 0,
+      "width": 280,
+      "height": 200,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "stretch",
+            "transform": [
+              0.5,
+              0,
+              0,
+              0.5,
+              0.25,
+              0.25
+            ]
+          },
+          "id": "ic009",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 200,
+          "height": 120
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic012",
+      "name": "stretch-wide-sheared",
+      "x": 1600,
+      "y": 0,
+      "width": 280,
+      "height": 200,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "stretch",
+            "transform": [
+              1,
+              0,
+              0.3,
+              1,
+              -0.15,
+              0
+            ]
+          },
+          "id": "ic011",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 200,
+          "height": 120
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic014",
+      "name": "stretch-wide-quarter-turn",
+      "x": 1920,
+      "y": 0,
+      "width": 280,
+      "height": 200,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "stretch",
+            "transform": [
+              0,
+              1,
+              -1,
+              0,
+              1,
+              0
+            ]
+          },
+          "id": "ic013",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 200,
+          "height": 120
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic016",
+      "name": "stretch-tall-none",
+      "x": 2240,
+      "y": 0,
+      "width": 180,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "stretch"
+          },
+          "id": "ic015",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 100,
+          "height": 160
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic018",
+      "name": "stretch-tall-right-half",
+      "x": 2460,
+      "y": 0,
+      "width": 180,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "stretch",
+            "transform": [
+              2,
+              0,
+              0,
+              1,
+              -1,
+              0
+            ]
+          },
+          "id": "ic017",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 100,
+          "height": 160
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic020",
+      "name": "stretch-tall-zoom-center",
+      "x": 2680,
+      "y": 0,
+      "width": 180,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "stretch",
+            "transform": [
+              2,
+              0,
+              0,
+              2,
+              -0.5,
+              -0.5
+            ]
+          },
+          "id": "ic019",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 100,
+          "height": 160
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic022",
+      "name": "stretch-tall-shifted-past-edge",
+      "x": 2900,
+      "y": 0,
+      "width": 180,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "stretch",
+            "transform": [
+              1.5,
+              0,
+              0,
+              1.5,
+              -0.9,
+              -0.25
+            ]
+          },
+          "id": "ic021",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 100,
+          "height": 160
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic024",
+      "name": "stretch-tall-larger-than-image",
+      "x": 3120,
+      "y": 0,
+      "width": 180,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "stretch",
+            "transform": [
+              0.5,
+              0,
+              0,
+              0.5,
+              0.25,
+              0.25
+            ]
+          },
+          "id": "ic023",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 100,
+          "height": 160
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic026",
+      "name": "stretch-tall-sheared",
+      "x": 3340,
+      "y": 0,
+      "width": 180,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "stretch",
+            "transform": [
+              1,
+              0,
+              0.3,
+              1,
+              -0.15,
+              0
+            ]
+          },
+          "id": "ic025",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 100,
+          "height": 160
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic028",
+      "name": "stretch-tall-quarter-turn",
+      "x": 3560,
+      "y": 0,
+      "width": 180,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "stretch",
+            "transform": [
+              0,
+              1,
+              -1,
+              0,
+              1,
+              0
+            ]
+          },
+          "id": "ic027",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 100,
+          "height": 160
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic030",
+      "name": "cover-wide-none",
+      "x": 3780,
+      "y": 0,
+      "width": 280,
+      "height": 200,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "cover"
+          },
+          "id": "ic029",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 200,
+          "height": 120
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic032",
+      "name": "cover-wide-right-half",
+      "x": 4100,
+      "y": 0,
+      "width": 280,
+      "height": 200,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "cover",
+            "transform": [
+              2,
+              0,
+              0,
+              1,
+              -1,
+              0
+            ]
+          },
+          "id": "ic031",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 200,
+          "height": 120
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic034",
+      "name": "cover-wide-zoom-center",
+      "x": 4420,
+      "y": 0,
+      "width": 280,
+      "height": 200,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "cover",
+            "transform": [
+              2,
+              0,
+              0,
+              2,
+              -0.5,
+              -0.5
+            ]
+          },
+          "id": "ic033",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 200,
+          "height": 120
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic036",
+      "name": "cover-wide-shifted-past-edge",
+      "x": 4740,
+      "y": 0,
+      "width": 280,
+      "height": 200,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "cover",
+            "transform": [
+              1.5,
+              0,
+              0,
+              1.5,
+              -0.9,
+              -0.25
+            ]
+          },
+          "id": "ic035",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 200,
+          "height": 120
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic038",
+      "name": "cover-wide-larger-than-image",
+      "x": 5060,
+      "y": 0,
+      "width": 280,
+      "height": 200,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "cover",
+            "transform": [
+              0.5,
+              0,
+              0,
+              0.5,
+              0.25,
+              0.25
+            ]
+          },
+          "id": "ic037",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 200,
+          "height": 120
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic040",
+      "name": "cover-wide-sheared",
+      "x": 5380,
+      "y": 0,
+      "width": 280,
+      "height": 200,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "cover",
+            "transform": [
+              1,
+              0,
+              0.3,
+              1,
+              -0.15,
+              0
+            ]
+          },
+          "id": "ic039",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 200,
+          "height": 120
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic042",
+      "name": "cover-wide-quarter-turn",
+      "x": 5700,
+      "y": 0,
+      "width": 280,
+      "height": 200,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "cover",
+            "transform": [
+              0,
+              1,
+              -1,
+              0,
+              1,
+              0
+            ]
+          },
+          "id": "ic041",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 200,
+          "height": 120
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic044",
+      "name": "cover-tall-none",
+      "x": 6020,
+      "y": 0,
+      "width": 180,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "cover"
+          },
+          "id": "ic043",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 100,
+          "height": 160
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic046",
+      "name": "cover-tall-right-half",
+      "x": 6240,
+      "y": 0,
+      "width": 180,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "cover",
+            "transform": [
+              2,
+              0,
+              0,
+              1,
+              -1,
+              0
+            ]
+          },
+          "id": "ic045",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 100,
+          "height": 160
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic048",
+      "name": "cover-tall-zoom-center",
+      "x": 6460,
+      "y": 0,
+      "width": 180,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "cover",
+            "transform": [
+              2,
+              0,
+              0,
+              2,
+              -0.5,
+              -0.5
+            ]
+          },
+          "id": "ic047",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 100,
+          "height": 160
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic050",
+      "name": "cover-tall-shifted-past-edge",
+      "x": 6680,
+      "y": 0,
+      "width": 180,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "cover",
+            "transform": [
+              1.5,
+              0,
+              0,
+              1.5,
+              -0.9,
+              -0.25
+            ]
+          },
+          "id": "ic049",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 100,
+          "height": 160
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic052",
+      "name": "cover-tall-larger-than-image",
+      "x": 6900,
+      "y": 0,
+      "width": 180,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "cover",
+            "transform": [
+              0.5,
+              0,
+              0,
+              0.5,
+              0.25,
+              0.25
+            ]
+          },
+          "id": "ic051",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 100,
+          "height": 160
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic054",
+      "name": "cover-tall-sheared",
+      "x": 7120,
+      "y": 0,
+      "width": 180,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "cover",
+            "transform": [
+              1,
+              0,
+              0.3,
+              1,
+              -0.15,
+              0
+            ]
+          },
+          "id": "ic053",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 100,
+          "height": 160
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic056",
+      "name": "cover-tall-quarter-turn",
+      "x": 7340,
+      "y": 0,
+      "width": 180,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "cover",
+            "transform": [
+              0,
+              1,
+              -1,
+              0,
+              1,
+              0
+            ]
+          },
+          "id": "ic055",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 100,
+          "height": 160
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic058",
+      "name": "contain-wide-none",
+      "x": 7560,
+      "y": 0,
+      "width": 280,
+      "height": 200,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "contain"
+          },
+          "id": "ic057",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 200,
+          "height": 120
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic060",
+      "name": "contain-wide-right-half",
+      "x": 7880,
+      "y": 0,
+      "width": 280,
+      "height": 200,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "contain",
+            "transform": [
+              2,
+              0,
+              0,
+              1,
+              -1,
+              0
+            ]
+          },
+          "id": "ic059",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 200,
+          "height": 120
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic062",
+      "name": "contain-wide-zoom-center",
+      "x": 8200,
+      "y": 0,
+      "width": 280,
+      "height": 200,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "contain",
+            "transform": [
+              2,
+              0,
+              0,
+              2,
+              -0.5,
+              -0.5
+            ]
+          },
+          "id": "ic061",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 200,
+          "height": 120
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic064",
+      "name": "contain-wide-shifted-past-edge",
+      "x": 8520,
+      "y": 0,
+      "width": 280,
+      "height": 200,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "contain",
+            "transform": [
+              1.5,
+              0,
+              0,
+              1.5,
+              -0.9,
+              -0.25
+            ]
+          },
+          "id": "ic063",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 200,
+          "height": 120
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic066",
+      "name": "contain-wide-larger-than-image",
+      "x": 8840,
+      "y": 0,
+      "width": 280,
+      "height": 200,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "contain",
+            "transform": [
+              0.5,
+              0,
+              0,
+              0.5,
+              0.25,
+              0.25
+            ]
+          },
+          "id": "ic065",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 200,
+          "height": 120
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic068",
+      "name": "contain-wide-sheared",
+      "x": 9160,
+      "y": 0,
+      "width": 280,
+      "height": 200,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "contain",
+            "transform": [
+              1,
+              0,
+              0.3,
+              1,
+              -0.15,
+              0
+            ]
+          },
+          "id": "ic067",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 200,
+          "height": 120
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic070",
+      "name": "contain-wide-quarter-turn",
+      "x": 9480,
+      "y": 0,
+      "width": 280,
+      "height": 200,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "contain",
+            "transform": [
+              0,
+              1,
+              -1,
+              0,
+              1,
+              0
+            ]
+          },
+          "id": "ic069",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 200,
+          "height": 120
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic072",
+      "name": "contain-tall-none",
+      "x": 9800,
+      "y": 0,
+      "width": 180,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "contain"
+          },
+          "id": "ic071",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 100,
+          "height": 160
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic074",
+      "name": "contain-tall-right-half",
+      "x": 10020,
+      "y": 0,
+      "width": 180,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "contain",
+            "transform": [
+              2,
+              0,
+              0,
+              1,
+              -1,
+              0
+            ]
+          },
+          "id": "ic073",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 100,
+          "height": 160
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic076",
+      "name": "contain-tall-zoom-center",
+      "x": 10240,
+      "y": 0,
+      "width": 180,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "contain",
+            "transform": [
+              2,
+              0,
+              0,
+              2,
+              -0.5,
+              -0.5
+            ]
+          },
+          "id": "ic075",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 100,
+          "height": 160
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic078",
+      "name": "contain-tall-shifted-past-edge",
+      "x": 10460,
+      "y": 0,
+      "width": 180,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "contain",
+            "transform": [
+              1.5,
+              0,
+              0,
+              1.5,
+              -0.9,
+              -0.25
+            ]
+          },
+          "id": "ic077",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 100,
+          "height": 160
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic080",
+      "name": "contain-tall-larger-than-image",
+      "x": 10680,
+      "y": 0,
+      "width": 180,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "contain",
+            "transform": [
+              0.5,
+              0,
+              0,
+              0.5,
+              0.25,
+              0.25
+            ]
+          },
+          "id": "ic079",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 100,
+          "height": 160
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic082",
+      "name": "contain-tall-sheared",
+      "x": 10900,
+      "y": 0,
+      "width": 180,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "contain",
+            "transform": [
+              1,
+              0,
+              0.3,
+              1,
+              -0.15,
+              0
+            ]
+          },
+          "id": "ic081",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 100,
+          "height": 160
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic084",
+      "name": "contain-tall-quarter-turn",
+      "x": 11120,
+      "y": 0,
+      "width": 180,
+      "height": 240,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "contain",
+            "transform": [
+              0,
+              1,
+              -1,
+              0,
+              1,
+              0
+            ]
+          },
+          "id": "ic083",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 100,
+          "height": 160
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic086",
+      "name": "missing-wide-none",
+      "x": 11340,
+      "y": 0,
+      "width": 280,
+      "height": 200,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png"
+          },
+          "id": "ic085",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 200,
+          "height": 120
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic088",
+      "name": "missing-wide-zoom-center",
+      "x": 11660,
+      "y": 0,
+      "width": 280,
+      "height": 200,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "transform": [
+              2,
+              0,
+              0,
+              2,
+              -0.5,
+              -0.5
+            ]
+          },
+          "id": "ic087",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 200,
+          "height": 120
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic090",
+      "name": "contain-ellipse-zoom",
+      "x": 11980,
+      "y": 0,
+      "width": 280,
+      "height": 200,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "ellipse",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "contain",
+            "transform": [
+              2,
+              0,
+              0,
+              2,
+              -0.5,
+              -0.5
+            ]
+          },
+          "id": "ic089",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 200,
+          "height": 120
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic092",
+      "name": "cover-ellipse-shifted",
+      "x": 12300,
+      "y": 0,
+      "width": 280,
+      "height": 200,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "ellipse",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "cover",
+            "transform": [
+              1.5,
+              0,
+              0,
+              1.5,
+              -0.9,
+              -0.25
+            ]
+          },
+          "id": "ic091",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 200,
+          "height": 120
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic094",
+      "name": "cover-stroke-zoom",
+      "x": 12620,
+      "y": 0,
+      "width": 280,
+      "height": 200,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": "#333333",
+          "strokeWidth": 16,
+          "strokeAlignment": "outer",
+          "stroke": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "cover",
+            "transform": [
+              2,
+              0,
+              0,
+              2,
+              -0.5,
+              -0.5
+            ]
+          },
+          "id": "ic093",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 200,
+          "height": 120
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ic096",
+      "name": "contain-opacity-right-half",
+      "x": 12940,
+      "y": 0,
+      "width": 280,
+      "height": 200,
+      "layout": "none",
+      "clip": true,
+      "fill": "#000000",
+      "children": [
+        {
+          "type": "rectangle",
+          "fill": {
+            "type": "image",
+            "url": "./images/uv-map.png",
+            "mode": "contain",
+            "transform": [
+              2,
+              0,
+              0,
+              1,
+              -1,
+              0
+            ],
+            "opacity": 0.5
+          },
+          "id": "ic095",
+          "name": "n",
+          "x": 40,
+          "y": 40,
+          "width": 200,
+          "height": 120
+        }
+      ]
+    }
+  ]
+}

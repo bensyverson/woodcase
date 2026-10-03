@@ -1,0 +1,128 @@
+#!/usr/bin/env python3
+"""gen-image-crop-fixture — write the fixture that pins how Pen 1.2.15 (format 2.20)
+places an image paint by its `mode` and crops it by its `transform`.
+
+- Tests/WoodcaseTests/Fixtures/render-image-crops.pen: one artboard per case — each
+  of stretch, cover and contain, on a wide (200×120) and a tall (100×160) box, with no
+  crop and with six crops: the right half, a centered 2× zoom, a window shifted past
+  the image's right edge, a window larger than the image, a shear and a quarter turn.
+  Then a missing mode (2.20's default) with and without a crop, a cropped image on an
+  ellipse, on an outer stroke, and at half opacity.
+
+The image is images/uv-map.png (256×128, red = u, green = v), written by
+gen-paint-geometry-fixtures, so every pixel says which part of the image it shows.
+Every artboard is a black, clipped, `layout: "none"` frame, so Pen's PNG export is
+exactly the artboard. The reference PNGs come from `scripts/pen-oracle`:
+
+    scripts/gen-image-crop-fixture
+    scripts/pen-oracle Tests/WoodcaseTests/Fixtures/render-image-crops.pen --scale 2
+
+(pen-oracle needs the sandbox disabled; this script does not.) Ids are sequential,
+so the output is a pure function of this file. `--check` exits 1 when the file on
+disk differs. Standard library only.
+
+See project/2026-10-03-pen-1.2.15-format-2.20.md, "Image crop", for the behavior
+these references pin.
+"""
+
+import json
+import os
+import sys
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+FIXTURES = os.path.join(ROOT, "Tests", "WoodcaseTests", "Fixtures")
+NAME = "render-image-crops.pen"
+UV_MAP = "./images/uv-map.png"
+
+# name -> [a, b, c, d, tx, ty], mapping the image's unit square into the crop box's.
+CROPS = {
+    "none": None,
+    "right-half": [2, 0, 0, 1, -1, 0],
+    "zoom-center": [2, 0, 0, 2, -0.5, -0.5],
+    "shifted-past-edge": [1.5, 0, 0, 1.5, -0.9, -0.25],
+    "larger-than-image": [0.5, 0, 0, 0.5, 0.25, 0.25],
+    "sheared": [1, 0, 0.3, 1, -0.15, 0],
+    "quarter-turn": [0, 1, -1, 0, 1, 0],
+}
+
+# name -> (width, height) of the node, and the board around it.
+BOXES = {"wide": (200, 120), "tall": (100, 160)}
+MARGIN = 40
+
+
+class Fixture:
+    def __init__(self, prefix):
+        self.prefix = prefix
+        self.boards = []
+        self.cursor = 0
+        self.count = 0
+
+    def nid(self):
+        self.count += 1
+        return f"{self.prefix}{self.count:03d}"
+
+    def board(self, name, box, node):
+        width, height = BOXES[box]
+        node.update({"id": self.nid(), "name": "n", "x": MARGIN, "y": MARGIN, "width": width, "height": height})
+        board_width, board_height = width + 2 * MARGIN, height + 2 * MARGIN
+        self.boards.append({
+            "type": "frame", "id": self.nid(), "name": name, "x": self.cursor, "y": 0,
+            "width": board_width, "height": board_height, "layout": "none", "clip": True,
+            "fill": "#000000", "children": [node],
+        })
+        self.cursor += board_width + 40
+
+    def document(self):
+        return {"version": "2.20", "children": self.boards}
+
+
+def image(mode, crop, **keys):
+    paint = {"type": "image", "url": UV_MAP}
+    if mode is not None:
+        paint["mode"] = mode
+    if CROPS[crop] is not None:
+        paint["transform"] = CROPS[crop]
+    paint.update(keys)
+    return paint
+
+
+def image_crops():
+    fx = Fixture("ic")
+    for mode in ("stretch", "cover", "contain"):
+        for box in BOXES:
+            for crop in CROPS:
+                fx.board(f"{mode}-{box}-{crop}", box, {"type": "rectangle", "fill": image(mode, crop)})
+    for crop in ("none", "zoom-center"):
+        fx.board(f"missing-wide-{crop}", "wide", {"type": "rectangle", "fill": image(None, crop)})
+    fx.board("contain-ellipse-zoom", "wide", {"type": "ellipse", "fill": image("contain", "zoom-center")})
+    fx.board("cover-ellipse-shifted", "wide", {"type": "ellipse", "fill": image("cover", "shifted-past-edge")})
+    fx.board("cover-stroke-zoom", "wide", {
+        "type": "rectangle", "fill": "#333333", "strokeWidth": 16, "strokeAlignment": "outer",
+        "stroke": image("cover", "zoom-center"),
+    })
+    fx.board("contain-opacity-right-half", "wide", {
+        "type": "rectangle", "fill": image("contain", "right-half", opacity=0.5),
+    })
+    return fx.document()
+
+
+def main():
+    data = (json.dumps(image_crops(), indent=2) + "\n").encode()
+    path = os.path.join(FIXTURES, NAME)
+    if "--check" in sys.argv[1:]:
+        try:
+            with open(path, "rb") as f:
+                if f.read() == data:
+                    return 0
+            print(f"{NAME}: differs from the generator", file=sys.stderr)
+        except FileNotFoundError:
+            print(f"{NAME}: missing", file=sys.stderr)
+        return 1
+    with open(path, "wb") as f:
+        f.write(data)
+    print(f"wrote {NAME}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
