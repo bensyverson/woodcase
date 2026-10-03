@@ -39,20 +39,55 @@ extension ReactEmitter {
     ///   - shape: The outline the stroke follows.
     ///   - beneathChildren: Whether the overlay must paint under the node's children, as
     ///     Pen draws a container's stroke before them; the host must then isolate.
+    /// A cropped image paint (``isCroppedImage(_:)``) and every paint above it are not
+    /// background layers but elements inside the overlay (``strokeOverlayChildren(_:ring:box:ctx:)``),
+    /// which its mask cuts to the ring like the rest.
+    ///
+    /// - Parameters:
+    ///   - stroke: The node's stroke.
+    ///   - shape: The outline the stroke follows.
+    ///   - beneathChildren: Whether the overlay must paint under the node's children, as
+    ///     Pen draws a container's stroke before them; the host must then isolate.
     ///   - box: The node's box, which sizes a mesh raster.
     ///   - ctx: The emission context, for a themed mesh.
-    static func strokeOverlayStyles(
+    static func strokeOverlay(
         _ stroke: any PenStrokable,
         shape: StrokeOverlayShape,
         beneathChildren: Bool,
         box: FillBox,
         ctx: EmitContext
-    ) -> [(String, String)]? {
+    ) -> FillLayer? {
         guard let fills = overlayFills(stroke) else { return nil }
         let ring = StrokeRing(stroke)
-        let layers = paintLayers(fills, outsets: ring.outsets, box: box, ctx: ctx)
-        guard !layers.isEmpty else { return nil }
+        let split = PaintSplit(fills)
+        let layers = paintLayers(split.background, outsets: ring.outsets, box: box, ctx: ctx)
+        let children = strokeOverlayChildren(split.layered, ring: ring, box: box, ctx: ctx)
+        guard !layers.isEmpty || !children.isEmpty else { return nil }
 
+        var styles = overlayBox(ring)
+        if let radius = overlayRadius(shape, outsets: ring.outsets) {
+            styles.append(("borderRadius", radius))
+        }
+        if !layers.isEmpty {
+            styles.append(contentsOf: paintLayerDeclarations(layers, withOrigin: true))
+        }
+        styles.append(("WebkitMask", "\"\(ringMaskLayers)\""))
+        styles.append(("WebkitMaskComposite", "\"xor\""))
+        styles.append(("mask", "\"linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0)\""))
+        if children.isEmpty, let blend = loneLayerBlend(layers) {
+            styles.append(("mixBlendMode", "\"\(blend)\""))
+        }
+        if beneathChildren {
+            styles.append(("zIndex", "-1"))
+        }
+        styles.append(("pointerEvents", "\"none\""))
+        return FillLayer(styles, children: children)
+    }
+
+    /// The position, transparent border and padding that put an overlay's border box on the
+    /// stroke's outer edge, its padding box on the node's box and its content box on the
+    /// stroke's inner edge.
+    private static func overlayBox(_ ring: StrokeRing) -> [(String, String)] {
         var styles = [("position", "\"absolute\"")]
         let inset = ring.outsets.map { $0.scaled(by: -1) }
         styles.append(("inset", inset.isZero ? "0" : "\"\(inset.css)\""))
@@ -64,21 +99,33 @@ extension ReactEmitter {
         if !ring.insideWidths.isZero {
             styles.append(("padding", "\"\(ring.insideWidths.css)\""))
         }
-        if let radius = overlayRadius(shape, outsets: ring.outsets) {
-            styles.append(("borderRadius", radius))
-        }
-        styles.append(contentsOf: paintLayerDeclarations(layers, withOrigin: true))
-        styles.append(("WebkitMask", "\"\(ringMaskLayers)\""))
-        styles.append(("WebkitMaskComposite", "\"xor\""))
-        styles.append(("mask", "\"linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0)\""))
-        if let blend = loneLayerBlend(layers) {
-            styles.append(("mixBlendMode", "\"\(blend)\""))
-        }
-        if beneathChildren {
-            styles.append(("zIndex", "-1"))
-        }
-        styles.append(("pointerEvents", "\"none\""))
         return styles
+    }
+
+    /// The elements inside an overlay that draw its `layered` paints, bottom first: a crop
+    /// over the node's box — the overlay's padding box — unclipped, since a cover crop shows
+    /// image past the box in an outer stroke; any other paint on an element with the
+    /// overlay's own geometry, so it lands where the overlay's background would put it.
+    private static func strokeOverlayChildren(
+        _ layered: [PenFill],
+        ring: StrokeRing,
+        box: FillBox,
+        ctx: EmitContext
+    ) -> [FillLayer] {
+        layered.compactMap { fill -> FillLayer? in
+            if case let .image(image) = fill, image.transform != nil {
+                guard fill.isEnabled, let element = imageCropElement(image, ctx: ctx) else { return nil }
+                let styles = [("position", "\"absolute\""), ("inset", "0")] + cropLayerPaintStyles(image)
+                return FillLayer(styles, content: element)
+            }
+            let layers = paintLayers([fill], outsets: ring.outsets, box: box, ctx: ctx)
+            guard !layers.isEmpty else { return nil }
+            var styles = overlayBox(ring) + paintLayerDeclarations(layers, withOrigin: true)
+            if let blend = loneLayerBlend(layers) {
+                styles.append(("mixBlendMode", "\"\(blend)\""))
+            }
+            return FillLayer(styles)
+        }
     }
 
     /// The layers an overlay paints for `stroke`, or `nil` when a plain declaration draws
@@ -105,25 +152,6 @@ extension ReactEmitter {
         }
         ctx.lines.append("\(pad)  }}")
         ctx.lines.append("\(pad)/>")
-    }
-
-    /// Writes a childless shape's `<div>` with `styles`: self-closing, or holding the
-    /// stroke overlay when there is one.
-    static func emitBoxElement(_ styles: [(String, String)], overlay: [(String, String)]?, indent: Int, ctx: EmitContext) {
-        let pad = String(repeating: " ", count: indent)
-        ctx.lines.append("\(pad)<div")
-        ctx.lines.append("\(pad)  style={{")
-        for (key, value) in styles {
-            ctx.lines.append("\(pad)    \(key): \(value),")
-        }
-        ctx.lines.append("\(pad)  }}")
-        guard let overlay else {
-            ctx.lines.append("\(pad)/>")
-            return
-        }
-        ctx.lines.append("\(pad)>")
-        emitStrokeOverlay(overlay, indent: indent + 2, ctx: ctx)
-        ctx.lines.append("\(pad)</div>")
     }
 
     /// The overlay's corner radii: the node's, grown by the outset on each side, so the

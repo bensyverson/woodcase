@@ -232,6 +232,7 @@ export function ScreenLab({
                 backgroundImage: "url('./images/generated-1774296205111.png')",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
                 borderRadius: 8,
                 flexShrink: 0,
               }}
@@ -417,6 +418,7 @@ export function ScreenLab({
                     backgroundImage: "url('./images/generated-1774296205111.png')",
                     backgroundSize: "cover",
                     backgroundPosition: "center",
+                    backgroundRepeat: "no-repeat",
                     flexShrink: 0,
                   }}
                 >

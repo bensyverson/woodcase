@@ -8,7 +8,7 @@ extension ReactEmitter {
 
     /// The declarations for a uniform stroke that is one plain color: box-shadows. Any
     /// other stroke — a painted one, or one of per-side widths — is drawn by an overlay
-    /// element (``strokeOverlayStyles(_:shape:beneathChildren:box:ctx:)``) and emits nothing
+    /// element (``strokeOverlay(_:shape:beneathChildren:box:ctx:)``) and emits nothing
     /// here.
     ///
     /// None of them takes layout space or moves a child, as Pen's stroke does neither: an

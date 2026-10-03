@@ -110,7 +110,8 @@
             "render-painted-lines",
         ]
 
-        /// Every board, in a stable order.
+        /// Every board, in a stable order, ending with the image mode and crop boards
+        /// (``SwiftUIRenderBoard/imageCropBoards``).
         nonisolated static let boards: [SwiftUIRenderBoard] = {
             let single = (SwiftUIFixtures.rendered + SwiftUIRenderBoard.effectFixtures).map { SwiftUIRenderBoard(fixture: $0) }
                 + SwiftUIRenderBoard.shapeBoards + SwiftUIRenderBoard.textBoards
@@ -118,7 +119,7 @@
                 let names = (try? PenSnapshotTestHelpers.artboardNames(in: fixture, fixturesDir: SwiftUIFixtures.directory)) ?? []
                 return names.map { SwiftUIRenderBoard(fixture: fixture, artboard: $0) }.filter { $0.referenceName != nil }
             }
-            return single + many
+            return single + many + SwiftUIRenderBoard.imageCropBoards
         }()
 
         private nonisolated static let fixturesDir = SwiftUIFixtures.directory

@@ -191,15 +191,13 @@ extension ReactEmitter {
             return []
         case let .image(img):
             guard let url = img.url else { return [] }
-            var styles = [("backgroundImage", "\"url('\(url)')\"")]
-            let size = switch img.placement {
-            case .cover: "cover"
-            case .contain: "contain"
-            case .stretch: "100% 100%"
-            }
-            styles.append(("backgroundSize", "\"\(size)\""))
-            styles.append(("backgroundPosition", "\"center\""))
-            return styles
+            // Pen draws an image once: contain leaves the rest of the box empty, never tiled.
+            return [
+                ("backgroundImage", "\"url('\(url)')\""),
+                ("backgroundSize", "\"\(cssImageSize(img.placement))\""),
+                ("backgroundPosition", "\"center\""),
+                ("backgroundRepeat", "\"no-repeat\""),
+            ]
         case let .meshGradient(mesh):
             guard let layer = emitMeshLayer(mesh, box: box, ctx: ctx) else { return [] }
             return [("background", "\"\(layer)\"")]
@@ -223,7 +221,7 @@ extension ReactEmitter {
         case let .gradient(g):
             emitGradientCSS(g, box: box)
         case let .image(img):
-            img.url.map { "url('\($0)')" }
+            img.url.map { "url('\($0)') center / \(cssImageSize(img.placement)) no-repeat" }
         case let .meshGradient(mesh):
             emitMeshLayer(mesh, box: box, ctx: ctx)
         case .shader:

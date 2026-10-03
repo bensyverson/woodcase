@@ -706,3 +706,10 @@ busy neither runs: `BoundedWait`'s deadline let `sleep 20` under a one-second bu
 serial queue (`DispatchQueue(label:)`) is overcommit and gets a thread anyway; `BoundedWait` fires its deadlines there
 now (`BoundedWaitSaturatedPoolTests`). Cost a hung test run and a flaky `SwiftUIRenderBatchRunAsyncTests` (`ko3YrZ`).
 
+
+## 2026-10-03 — `requestAnimationFrame` never fires in the WebView test harness
+
+The harness's `PageHost` web view is offscreen, and WebKit runs no animation frames for it: a ready signal gated on
+`requestAnimationFrame` never came, and every one of `ReactRenderWebViewTests`' 331 boards hit the 480 s time limit at
+once — which reads as a loaded machine, not a broken page. Poll with `setTimeout` in harness page code (the
+`PenImageCrop` wait in `ReactHarnessBuilder` does). Cost a full gate run (leaf `fmV137`).

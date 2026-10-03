@@ -29,20 +29,23 @@ extension ReactEmitter {
         }
 
         let shadowLayers = shadowLayerStyles(data.effects, borderRadius: data.cornerRadius.flatMap(emitCornerRadius), stroke: data)
+        let box = FillBox(width: data.width, height: data.height)
+        let fills = PaintSplit(data.fills)
         styles.append(contentsOf: emitVisualStyles(
-            fills: data.fills,
-            box: FillBox(width: data.width, height: data.height),
+            fills: fills.backgroundFills,
+            box: box,
             cornerRadius: data.cornerRadius,
             stroke: data,
             effects: data.effects,
+            showsBackdrop: data.fills?.hasVisiblePaint == true,
             layered: shadowLayers != nil,
             ctx: ctx
         ))
-        let overlay = strokeOverlayStyles(
-            data, shape: .box(data.cornerRadius), beneathChildren: false,
-            box: FillBox(width: data.width, height: data.height), ctx: ctx
+        let layersOverFill = liftingInsetShadows(
+            &styles, over: fillLayers(fills.layered, box: box, beneathChildren: false, ctx: ctx), beneathChildren: false
         )
-        if overlay != nil || shadowLayers != nil {
+        let overlay = strokeOverlay(data, shape: .box(data.cornerRadius), beneathChildren: false, box: box, ctx: ctx)
+        if overlay != nil || shadowLayers != nil || !layersOverFill.isEmpty {
             styles.append(("position", "\"relative\""))
         }
 
@@ -61,7 +64,7 @@ extension ReactEmitter {
         if styles.isEmpty {
             ctx.lines.append("\(pad)<div />")
         } else {
-            emitBoxElement(styles, shadowLayers: shadowLayers, overlay: overlay, indent: indent, ctx: ctx)
+            emitBoxElement(styles, shadowLayers: shadowLayers, fillLayers: layersOverFill, overlay: overlay, indent: indent, ctx: ctx)
         }
     }
 
@@ -138,20 +141,23 @@ extension ReactEmitter {
             styles.append(("borderRadius", "\"50%\""))
 
             let shadowLayers = shadowLayerStyles(data.effects, borderRadius: "\"50%\"", stroke: data)
+            let box = FillBox(width: data.width, height: data.height)
+            let fills = PaintSplit(data.fills)
             styles.append(contentsOf: emitVisualStyles(
-                fills: data.fills,
-                box: FillBox(width: data.width, height: data.height),
+                fills: fills.backgroundFills,
+                box: box,
                 cornerRadius: nil,
                 stroke: data,
                 effects: data.effects,
+                showsBackdrop: data.fills?.hasVisiblePaint == true,
                 layered: shadowLayers != nil,
                 ctx: ctx
             ))
-            let overlay = strokeOverlayStyles(
-                data, shape: .ellipse, beneathChildren: false,
-                box: FillBox(width: data.width, height: data.height), ctx: ctx
+            let layersOverFill = liftingInsetShadows(
+                &styles, over: fillLayers(fills.layered, box: box, beneathChildren: false, ctx: ctx), beneathChildren: false
             )
-            if overlay != nil || shadowLayers != nil {
+            let overlay = strokeOverlay(data, shape: .ellipse, beneathChildren: false, box: box, ctx: ctx)
+            if overlay != nil || shadowLayers != nil || !layersOverFill.isEmpty {
                 styles.append(("position", "\"relative\""))
             }
 
@@ -164,7 +170,7 @@ extension ReactEmitter {
             styles.append(contentsOf: emitCommonStyles(node.common, blendMode: data.blendMode, pivot: ctx.transformPivot(for: node.common)))
             styles.append(contentsOf: turnedSlotStyles(node, width: data.width, height: data.height, isRoot: isRoot, ctx: ctx))
 
-            emitBoxElement(styles, shadowLayers: shadowLayers, overlay: overlay, indent: indent, ctx: ctx)
+            emitBoxElement(styles, shadowLayers: shadowLayers, fillLayers: layersOverFill, overlay: overlay, indent: indent, ctx: ctx)
         }
     }
 }

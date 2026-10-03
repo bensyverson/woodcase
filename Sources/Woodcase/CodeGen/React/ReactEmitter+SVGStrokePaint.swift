@@ -218,6 +218,9 @@ extension ReactEmitter {
             return "url(#\(id))"
         case let .image(image):
             guard let url = image.url else { return nil }
+            if image.transform != nil {
+                return svgCropPattern(image, index: index, shape: shape, overhang: overhang, defs: &defs, ctx: ctx)
+            }
             let fit = switch image.placement {
             case .stretch: "none"
             case .contain: "xMidYMid meet"

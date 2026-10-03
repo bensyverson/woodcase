@@ -58,13 +58,14 @@ extension ReactEmitter {
         }
 
         let hasChildren = !(data.children ?? []).isEmpty
-        let overlay = strokeOverlayStyles(
+        let overlay = strokeOverlay(
             data, shape: .box(data.cornerRadius), beneathChildren: hasChildren,
             box: FillBox(width: data.width, height: data.height), ctx: ctx
         )
         let shadowLayers = layersShadows(node)
             ? shadowLayerStyles(data.effects, borderRadius: data.cornerRadius.flatMap(emitCornerRadius), stroke: data) : nil
-        if overlay != nil || shadowLayers != nil, !classes.contains("relative") {
+        let fill = frameFill(node, data: data, component: component, beneathChildren: hasChildren, ctx: ctx)
+        if overlay != nil || shadowLayers != nil || !fill.layers.isEmpty, !classes.contains("relative") {
             classes.append("relative")
         }
 
@@ -94,27 +95,8 @@ extension ReactEmitter {
             styles.append(("height", cssHeight))
         }
 
-        // Fill — check if this frame is an imageURL prop target
-        let imageProp = component.props.first { prop in
-            prop.type == .imageURL && prop.targetNodeID == node.id
-        }
-        if let imageProp {
-            styles.append(("backgroundImage", "`url('${\(imageProp.name)}')`"))
-            // Emit sizing/position from the original fill's mode
-            if let fills = data.fills, let fill = fills.all.first, case let .image(img) = fill {
-                let size = switch img.placement {
-                case .cover: "cover"
-                case .contain: "contain"
-                case .stretch: "100% 100%"
-                }
-                styles.append(("backgroundSize", "\"\(size)\""))
-                styles.append(("backgroundPosition", "\"center\""))
-            }
-        } else if let fills = data.fills {
-            styles.append(contentsOf: emitFillStyles(
-                fills, box: FillBox(width: data.width, height: data.height), ctx: ctx
-            ))
-        }
+        // Fill: the frame's background, or an image prop's image when one targets it
+        styles.append(contentsOf: fill.styles)
 
         // Corner radius
         if let cornerRadius = data.cornerRadius {
@@ -156,6 +138,7 @@ extension ReactEmitter {
             stroke: data, effects: data.effects,
             showsBackdrop: data.fills?.hasVisiblePaint == true, layered: shadowLayers != nil
         ))
+        let layersOverFill = liftingInsetShadows(&styles, over: fill.layers, beneathChildren: hasChildren)
 
         // Flex-shrink for fixed-size children
         styles.append(contentsOf: emitFlexShrink(
@@ -170,8 +153,9 @@ extension ReactEmitter {
         styles.append(contentsOf: turnedSlotStyles(node, width: data.width, height: data.height, isRoot: isRoot, ctx: ctx))
 
         // Isolation: create stacking context when children use fill-level blend modes
-        // Isolation also keeps a stroke overlay's negative z-index above the frame's background.
-        if (data.children ?? []).contains(where: { nodeHasFillBlendMode($0) }) || (overlay != nil && hasChildren) {
+        // Isolation also keeps a stroke overlay's and a fill layer's negative z-index above the
+        // frame's background.
+        if (data.children ?? []).contains(where: { nodeHasFillBlendMode($0) }) || ((overlay != nil || !layersOverFill.isEmpty) && hasChildren) {
             styles.append(("isolation", "\"isolate\""))
         }
 
@@ -258,8 +242,9 @@ extension ReactEmitter {
         if let shadowLayers {
             emitShadowLayers(shadowLayers, indent: indent + 2, ctx: ctx)
         }
+        emitFillLayers(layersOverFill, indent: indent + 2, ctx: ctx)
         if let overlay {
-            emitStrokeOverlay(overlay, indent: indent + 2, ctx: ctx)
+            emitLayer(overlay, indent: indent + 2, ctx: ctx)
         }
 
         // Children

@@ -48,6 +48,9 @@ final class EmitContext {
     var unblendedShadowWarnedNodes: Set<String> = []
     /// The warnings already given, each once per node per file (``warnOnce(_:nodeID:)``).
     var issuedWarnings: Set<IssuedWarning> = []
+    /// Whether the file draws a cropped image paint, and so imports `PenImageCrop` from the
+    /// support file ``ReactEmitter/imageCropSupportFile``.
+    var usesImageCrop = false
 
     /// How the node with `common` is placed: free when it is absolutely positioned, else
     /// as its container places its children.
@@ -128,6 +131,7 @@ public enum ReactEmitter {
 
         var files: [GeneratedFile] = []
         var meshProperties: [String: ThemedCustomProperty] = [:]
+        var usesImageCrop = false
 
         // Component files
         for component in components {
@@ -138,6 +142,7 @@ public enum ReactEmitter {
                 options: options, diagnostics: diagnostics, context: ctx
             )
             meshProperties.merge(ctx.meshProperties) { first, _ in first }
+            usesImageCrop = usesImageCrop || ctx.usesImageCrop
             files.append(GeneratedFile(
                 path: "components/\(component.name).tsx",
                 content: content
@@ -152,6 +157,7 @@ public enum ReactEmitter {
                 theme: theme, options: options, diagnostics: diagnostics, context: ctx
             )
             meshProperties.merge(ctx.meshProperties) { first, _ in first }
+            usesImageCrop = usesImageCrop || ctx.usesImageCrop
             files.append(GeneratedFile(
                 path: "pages/\(page.name).tsx",
                 content: content
@@ -160,6 +166,9 @@ public enum ReactEmitter {
 
         // Utility files
         files.append(emitCnUtility())
+        if usesImageCrop {
+            files.append(imageCropSupportFile)
+        }
         files.append(emitThemeProvider(theme: theme))
         files.append(ThemeEmitter.emitCSS(
             theme: theme,
@@ -250,6 +259,9 @@ public enum ReactEmitter {
             lines.append("import { \(sorted.joined(separator: ", ")) } from \"\(importPath)\";")
         }
         lines.append("import { cn } from \"../lib/cn\";")
+        if ctx.usesImageCrop {
+            lines.append("import { PenImageCrop } from \"../lib/PenImageCrop\";")
+        }
         for imp in componentImports.sorted() {
             lines.append(imp)
         }
@@ -319,6 +331,9 @@ public enum ReactEmitter {
             lines.append("import { \(sorted.joined(separator: ", ")) } from \"\(importPath)\";")
         }
         lines.append("import { cn } from \"../lib/cn\";")
+        if ctx.usesImageCrop {
+            lines.append("import { PenImageCrop } from \"../lib/PenImageCrop\";")
+        }
         // Import sibling components referenced via refs
         for name in ctx.componentRefs.sorted() where name != component.name {
             lines.append("import { \(name) } from \"./\(name)\";")

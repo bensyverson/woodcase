@@ -115,6 +115,7 @@ export function HomeCollection({
                   backgroundImage: "url('./images/generated-1774296205111.png')",
                   backgroundSize: "cover",
                   backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
                   borderRadius: "16px 16px 0px 0px",
                   flexShrink: 0,
                 }}
@@ -195,6 +196,7 @@ export function HomeCollection({
                   backgroundImage: "url('./images/generated-1774296966417.png')",
                   backgroundSize: "cover",
                   backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
                   borderRadius: "16px 16px 0px 0px",
                   flexShrink: 0,
                 }}
@@ -275,6 +277,7 @@ export function HomeCollection({
                   backgroundImage: "url('./images/generated-1774297057972.png')",
                   backgroundSize: "cover",
                   backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
                   borderRadius: "16px 16px 0px 0px",
                   flexShrink: 0,
                 }}

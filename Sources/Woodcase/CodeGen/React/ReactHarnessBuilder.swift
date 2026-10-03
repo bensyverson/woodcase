@@ -151,10 +151,23 @@ public enum ReactHarnessBuilder {
         root.render(
           React.createElement(function __WoodcaseHarnessRoot__() {
             React.useEffect(() => {
-              window.__READY__ = true;
-              if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ready) {
-                window.webkit.messageHandlers.ready.postMessage("ready");
-              }
+              const signal = () => {
+                window.__READY__ = true;
+                if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ready) {
+                  window.webkit.messageHandlers.ready.postMessage("ready");
+                }
+              };
+              // A cropped image paint (PenImageCrop) draws only once it has measured its
+              // image: wait until none is still loading. A timer, not an animation frame,
+              // which an offscreen web view never runs.
+              const settle = () => {
+                if (document.querySelector('[data-pen-image="loading"]')) {
+                  setTimeout(settle, 10);
+                } else {
+                  signal();
+                }
+              };
+              settle();
             }, []);
             return \(componentJSX);
           })

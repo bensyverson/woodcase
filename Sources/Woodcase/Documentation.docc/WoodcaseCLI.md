@@ -1024,7 +1024,7 @@ woodcase generate react myfile.pen --output ./src
 Every component the file's imported libraries define is generated beside the file's
 own.
 
-This produces a complete file set: `components/*.tsx`, `pages/*.tsx`, `ThemeProvider.tsx`, `lib/cn.ts`, and `theme.css`.
+This produces a complete file set: `components/*.tsx`, `pages/*.tsx`, `ThemeProvider.tsx`, `lib/cn.ts`, and `theme.css` — and `lib/PenImageCrop.tsx` when an image paint is cropped.
 
 #### Packaged output
 
@@ -1042,6 +1042,7 @@ my-ui/
 │   ├── components/*.tsx
 │   ├── pages/*.tsx
 │   ├── lib/cn.ts
+│   ├── lib/PenImageCrop.tsx   # Only when an image paint is cropped
 │   └── ThemeProvider.tsx
 ├── theme.css
 ├── states.css          # Only when components have interactive states

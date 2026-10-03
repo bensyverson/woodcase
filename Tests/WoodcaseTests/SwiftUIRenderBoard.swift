@@ -131,7 +131,8 @@
         /// `transform` (format 2.20) — stretch, cover and contain with six crops each, on wide and
         /// tall boxes, and on an ellipse, an outer stroke and at half opacity (leaf X6YNC3,
         /// `scripts/gen-image-crop-fixture`; `PenImageCropSnapshotTests`). Not in
-        /// ``SwiftUIFixtures/paintFixtures``, which React's render test and the goldens share.
+        /// ``SwiftUIFixtures/paintFixtures``, which the goldens share; `ReactRenderWebViewTests`
+        /// adds them to its boards itself (leaf fmV137).
         static let imageCropBoards: [SwiftUIRenderBoard] = {
             let fixture = "render-image-crops"
             let names = (try? PenSnapshotTestHelpers.artboardNames(in: fixture, fixturesDir: SwiftUIFixtures.directory)) ?? []

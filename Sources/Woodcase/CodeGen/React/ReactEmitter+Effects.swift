@@ -95,19 +95,16 @@ extension ReactEmitter {
         }
     }
 
-    /// Writes a childless box's `<div>` holding its shadow layers, then its stroke overlay,
-    /// or hands it to ``emitBoxElement(_:overlay:indent:ctx:)`` when it has no layers.
+    /// Writes a childless box's `<div>` holding its shadow layers, its fill layers, then its
+    /// stroke overlay — self-closing when it holds none.
     static func emitBoxElement(
         _ styles: [(String, String)],
         shadowLayers: [[(String, String)]]?,
-        overlay: [(String, String)]?,
+        fillLayers: [FillLayer] = [],
+        overlay: FillLayer?,
         indent: Int,
         ctx: EmitContext
     ) {
-        guard let shadowLayers else {
-            emitBoxElement(styles, overlay: overlay, indent: indent, ctx: ctx)
-            return
-        }
         let pad = String(repeating: " ", count: indent)
         ctx.lines.append("\(pad)<div")
         ctx.lines.append("\(pad)  style={{")
@@ -115,10 +112,15 @@ extension ReactEmitter {
             ctx.lines.append("\(pad)    \(key): \(value),")
         }
         ctx.lines.append("\(pad)  }}")
+        guard shadowLayers != nil || !fillLayers.isEmpty || overlay != nil else {
+            ctx.lines.append("\(pad)/>")
+            return
+        }
         ctx.lines.append("\(pad)>")
-        emitShadowLayers(shadowLayers, indent: indent + 2, ctx: ctx)
+        emitShadowLayers(shadowLayers ?? [], indent: indent + 2, ctx: ctx)
+        emitFillLayers(fillLayers, indent: indent + 2, ctx: ctx)
         if let overlay {
-            emitStrokeOverlay(overlay, indent: indent + 2, ctx: ctx)
+            emitLayer(overlay, indent: indent + 2, ctx: ctx)
         }
         ctx.lines.append("\(pad)</div>")
     }

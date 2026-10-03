@@ -27,6 +27,7 @@ extension ReactEmitter {
         warnDroppedShaders(node, ctx: ctx)
         warnUnblendedShadows(node, ctx: ctx)
         warnDroppedInnerShadows(node, ctx: ctx)
+        warnTextImageCrops(node, ctx: ctx)
         switch node.kind {
         case let .frame(data):
             emitFrame(node, data: data, component: component, indent: indent, ctx: ctx, isRoot: isRoot, parentLayout: parentLayout)
