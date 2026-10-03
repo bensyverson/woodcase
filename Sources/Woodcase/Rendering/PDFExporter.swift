@@ -74,8 +74,9 @@ public enum PDFExporter {
             throw ExportError.failedToCreateContext(nil)
         }
 
-        // The initial media box is overridden per page.
-        var mediaBox = CGRect.zero
+        // Each page sets its own box; this one becomes the page tree's inherited default,
+        // so it must be a real page rather than zero.
+        var mediaBox = pages.first.map { CGRect(x: 0, y: 0, width: $0.width, height: $0.height) } ?? .zero
         guard let context = CGContext(consumer: consumer, mediaBox: &mediaBox, nil) else {
             throw ExportError.failedToCreateContext(nil)
         }

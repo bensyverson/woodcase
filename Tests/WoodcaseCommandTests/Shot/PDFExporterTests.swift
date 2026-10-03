@@ -57,6 +57,22 @@ struct PDFExporterTests {
         #expect(pdf.page(at: 2)?.getBoxRect(.mediaBox) == CGRect(x: 0, y: 0, width: 402, height: 874))
     }
 
+    @Test("The page tree's default media box is the first page's, never zero")
+    func pageTreeDefaultIsNotZero() throws {
+        let pages = [
+            PDFExporter.Page(width: 612, height: 792, render: { _ in }),
+            PDFExporter.Page(width: 402, height: 874, render: { _ in }),
+        ]
+
+        let data = try PDFExporter.data(pages: pages)
+
+        // Readers that trust the inherited default instead of the page's own box
+        // would see a zero page.
+        let text = String(decoding: data, as: UTF8.self)
+        #expect(!text.contains("/MediaBox [0 0 0 0]"))
+        #expect(text.contains("/MediaBox [0 0 612 792]"))
+    }
+
     @Test("A frame's page draws that frame, wherever it sits on the canvas")
     func framePageDrawsAtTheOrigin() throws {
         let document = try PenParser.parse("""

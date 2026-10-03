@@ -1,7 +1,7 @@
 id,MAE,limit
 ActionButton,0.21,0.5
 FavoriteCard,0.83,1.2
-home-collection,0.59,0.9
+home-collection,0.61,0.9
 lab,0.33,0.6
 mesh-color-badhex,0.00,0.1
 mesh-color-control,0.00,0.1
@@ -65,8 +65,8 @@ mesh-mfold@1x,0.33,0.3
 mesh-mfold@2x,0.37,0.4
 mesh-mwarp@1x,0.36,0.4
 mesh-mwarp@2x,0.36,0.4
-pencil-home-collection,0.87,1.3
-pencil-home-collection-dark,0.90,1.3
+pencil-home-collection,0.86,1.3
+pencil-home-collection-dark,0.89,1.3
 pencil-lab,0.53,0.8
 pencil-lab-dark,0.64,1.0
 pencil-ratings,1.06,1.6
@@ -745,8 +745,8 @@ swiftui-swiftui-color-scheme-themed-mesh-in-dark,0.46,1.4
 swiftui-swiftui-color-scheme-unfilled,0.00,1.0
 swiftui-swiftui-color-scheme-unfilled-in-dark,0.00,1.0
 swiftui-text-natural-line-height,0.21,0.7
-swiftui-woodcase-app-home-collection,0.89,1.4
-swiftui-woodcase-app-home-collection-dark,0.91,1.4
+swiftui-woodcase-app-home-collection,0.88,1.4
+swiftui-woodcase-app-home-collection-dark,0.90,1.4
 swiftui-woodcase-app-lab,1.67,2.2
 swiftui-woodcase-app-lab-dark,2.10,2.6
 swiftui-woodcase-app-ratings,1.05,1.5
