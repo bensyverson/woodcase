@@ -30,7 +30,7 @@ enum WoodcaseVersion {
     /// The line `--version` prints: the tool's version, then the .pen format it writes.
     ///
     /// ```text
-    /// 0.1.0 (.pen 2.19)
+    /// 0.1.3 (.pen 2.20)
     /// ```
     ///
     /// Whitespace-splittable, first field bare, so `woodcase --version | cut -d' ' -f1`

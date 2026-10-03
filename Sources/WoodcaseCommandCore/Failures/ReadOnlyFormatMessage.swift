@@ -14,7 +14,7 @@ import Woodcase
 ///
 /// ```
 /// Cannot write /w/design.pen: it declares .pen format 3.0, a different major version
-/// from the 2.19 this build models, so it is read-only — the read verbs (`woodcase tree`,
+/// from the 2.20 this build models, so it is read-only — the read verbs (`woodcase tree`,
 /// `get`, `lint`, `render`, `shot`) still work; to edit it, update Woodcase to a build
 /// that writes 3.x, or edit it in Pen.
 /// ```

@@ -8,7 +8,7 @@ import Foundation
 public extension PenNode {
     // MARK: Browser
 
-    /// Type-specific data for a `browser` node — a live web page Pen 2.19 embeds in
+    /// Type-specific data for a `browser` node — a live web page Pen (format 2.19 and later) embeds in
     /// the design.
     ///
     /// Pen draws a snapshot of the page it loads. Woodcase never loads it: the layout
@@ -16,7 +16,7 @@ public extension PenNode {
     /// labeled with ``url`` (see <doc:PenRendering>), and the React emitter writes an
     /// `<iframe>` pointing at ``pageURL``.
     ///
-    /// The keys are exactly those of Pen's 2.19 format. A browser takes a stroke
+    /// The keys are exactly those of Pen's format since 2.19. A browser takes a stroke
     /// and effects but no fill and no blend mode, and ``zoom`` and the scroll offsets
     /// are plain numbers, never `$variable` references.
     struct BrowserData: Friendly, PenStrokable {

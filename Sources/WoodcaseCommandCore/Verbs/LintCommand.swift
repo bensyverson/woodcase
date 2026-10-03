@@ -63,8 +63,8 @@ struct Lint: AsyncParsableCommand {
 
             woodcase lint design.pen --severity error
 
-        A file written by a newer Pen of the same major (2.20 while this build models \
-        2.19) reads with a notice, which only --severity notice shows and which never \
+        A file written by a newer Pen of the same major (2.21 while this build models \
+        2.20) reads with a notice, which only --severity notice shows and which never \
         makes lint exit 1. A file of another major reads with a warning, and is \
         read-only: every write verb refuses it.
 

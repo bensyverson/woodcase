@@ -75,7 +75,7 @@ In .pen 2.17 the `strokeAlignment` key defaults to `"center"`, and the format's 
 
 The format's own editor migrates a file on load according to the version it declares — version 1.2.14 of the editor, which writes 2.19, turns every inner shadow in a pre-2.19 file into an outer one. So the declared version is data, not a label: Woodcase writes back a newer minor's declared version unchanged rather than stamping its own model's older one, and treats a file of another major as read-only. The whole policy is in <doc:PenEngine>, under *The version gate*.
 
-Woodcase models and writes 2.19, and migrates an older file the way 1.2.14 does: every pre-2.19 inner shadow becomes an outer one — which is what every earlier editor drew — and `spread`, which 2.19 removed, is deleted, each with a diagnostic naming the node. The editor does both silently. See <doc:PenEngine>, *Shadows before 2.19*.
+Woodcase models and writes 2.20, the format version 1.2.15 of the editor writes, and migrates an older file the way the editor does: every pre-2.19 inner shadow becomes an outer one — which is what every earlier editor drew — and `spread`, which 2.19 removed, is deleted, each with a diagnostic naming the node; and a pre-2.20 image paint's `fill`/`fit` mode becomes `cover`/`contain`, and a missing one an explicit `stretch`. The editor does all of it silently. See <doc:PenEngine>, *Shadows before 2.19* and *Image modes before 2.20*.
 
 ## Dash Patterns Are Gone
 

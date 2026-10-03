@@ -86,8 +86,8 @@ the layout engine gives it no size and moves nothing for it.
 
 ### The version gate
 
-The `.pen` format has had one breaking change, 2.10 → 2.17, and one change of meaning,
-2.17 → 2.19. Woodcase models 2.19 and keeps **one**
+The `.pen` format has had one breaking change, 2.10 → 2.17, and two changes of meaning,
+2.17 → 2.19 (shadows) and 2.19 → 2.20 (image modes). Woodcase models 2.20 and keeps **one**
 in-memory model — the current one — so `PenParser` decodes the raw JSON tree first,
 parses the `version` field as a numeric ``PenFormatVersion`` (`"2.9"` sorts *below*
 `"2.17"` numerically but above it lexically, so the string comparison is not an
@@ -97,8 +97,8 @@ option), and dispatches:
 |------------------|----------|-----------------|
 | 2.8 – 2.10 | ``PenLegacyMigrator`` rewrites the JSON tree, then the current decoder runs | the model's version |
 | below 2.8 | migrated as legacy, with a warning | the model's version |
-| 2.11 – 2.18 | the rules ``PenLegacyMigrator/rules(upgrading:)`` picks rewrite the tree (the 2.19 shadow change below), then the current decoder; a warning unless it is 2.17, the only one of these Pen has been seen to write | the model's version |
-| 2.19 | current decoder | 2.19 |
+| 2.11 – 2.19 | the rules ``PenLegacyMigrator/rules(upgrading:)`` picks rewrite the tree (the 2.19 shadow change for a pre-2.19 file, then the 2.20 image-mode change, both below), then the current decoder; a warning unless it is 2.17 or 2.19, the ones Pen has been seen to write | the model's version |
+| 2.20 | current decoder | 2.20 |
 | newer 2.x | current decoder, with one **notice** | **the declared version, unchanged** |
 | another major | the structural probe below; read-only, with a warning | never — writes are refused |
 | unparsable | throws ``PenParserError/unsupportedVersion(url:version:)`` | — |
@@ -154,6 +154,29 @@ Pen does both silently; Woodcase reports each as a warning at
 inner shadow, and its `spread` — which only a hand edit could put there — is kept as an
 extra like any other key the model does not claim.
 
+### Image modes before 2.20
+
+Format 2.20 renamed the image modes and changed what a missing one means, and
+``PenImageModeMigrationRule`` brings every older document's image paints across — in a
+node's `fill` and `stroke`, in `children` and in `ref` `descendants` alike — the way
+Pen 1.2.15 does when it opens one:
+
+| Before 2.20 | 2.20 |
+|---|---|
+| `fill` | `cover` |
+| `fit` | `contain` |
+| `stretch` | `stretch` |
+| no `mode` (drawn stretched) | `stretch`, written out — a missing mode now means `cover` |
+
+Nothing draws differently, so the rule is silent. 2.20 also added an image paint's
+`transform`, an affine crop (``PenImageTransform``); no older file has one.
+
+Reading a mode is lenient in every version: `fill` and `fit` read as `cover` and
+`contain` wherever they appear, and a spelling Woodcase does not know is kept as
+``PenImageFillMode/unknown(_:)``, written back unchanged and placed as `cover`. An
+agent's write is strict: ``PenDecodingMode/authoring`` refuses an unknown mode, naming
+the three it could have been.
+
 The optional `diagnostics` parameter collects those notices and warnings, plus one entry for
 every property a migration discards, at ``PenDiagnostic/Stage/migration``.
 
@@ -173,6 +196,8 @@ walks the tree itself.
 
 ```swift
 struct IconRenameRule: PenMigrationRule {
+    let target = PenFormatVersion.oldestModern
+
     func apply(toNode node: inout [String: AnyCodable], id: String?, diagnostics: PenDiagnosticCollector?) {
         guard node["type"] == .string("icon_font") else { return }
         node["type"] = .string("icon")
@@ -184,8 +209,11 @@ struct IconRenameRule: PenMigrationRule {
 
 ``PenIconMigrationRule`` ships exactly this rule: `icon_font` → `icon`, with
 `iconFontFamily`/`iconFontName` → `library`/`icon`. `weight` and `fill` carry over
-unchanged. Register a new rule by appending it to ``PenLegacyMigrator/rules`` —
-that array is the whole registration point, and rules run in its order. A rule
+unchanged. Give a new rule the ``PenMigrationRule/target`` version whose shape it
+produces, and register it in ``PenLegacyMigrator/rules`` — that array is the whole
+registration point. A document gets exactly the rules whose target is newer than its
+declared version, in target order (and in array order within one target), so a 2.19
+file never re-runs the rule that made 2.19. A rule
 that drops something the current model cannot express must report it through the
 diagnostic collector, naming the node it came from.
 

@@ -122,7 +122,7 @@ Cannot read /w/broken.pen: not a .pen document — children[0].id should be a st
 ```
 
 A document whose `version` is not a `major.minor` string says so instead. A file from
-a newer Pen of the same major — 2.20 while this build models 2.19 — reads and writes
+a newer Pen of the same major — 2.21 while this build models 2.20 — reads and writes
 normally: every read verb prints one `notice: [migration]` line on stderr, and every
 write keeps the file's declared version. A file of another major is **read-only**:
 when it still reads as a 2.x document, the read verbs work and print a warning, and
@@ -130,7 +130,7 @@ every write verb (and `migrate`) refuses with exit 4:
 
 ```
 $ woodcase set future.pen Card/Title kind.content=Hi
-Cannot write /w/future.pen: it declares .pen format 3.0, a different major version from the 2.19 this build models, so it is read-only — the read verbs (`woodcase tree`, `get`, `lint`, `render`, `shot`) still work; to edit it, update Woodcase to a build that writes 3.x, or edit it in Pen.
+Cannot write /w/future.pen: it declares .pen format 3.0, a different major version from the 2.20 this build models, so it is read-only — the read verbs (`woodcase tree`, `get`, `lint`, `render`, `shot`) still work; to edit it, update Woodcase to a build that writes 3.x, or edit it in Pen.
 ```
 
 When it does not read as a 2.x document, every verb says which key path failed and
@@ -1122,8 +1122,8 @@ platform: ios, web
 Rewrite `.pen` files in the current format version, in place.
 
 Each file is parsed through the version gate — which runs ``PenLegacyMigrator`` over any
-document older than 2.19, turning a pre-2.19 inner shadow into an outer one and dropping
-`spread`, as Pen does — and written back with sorted keys and two-space indentation,
+document older than 2.20 — turning a pre-2.19 inner shadow into an outer one and dropping
+`spread`, and renaming a pre-2.20 image mode, as Pen does — and written back with sorted keys and two-space indentation,
 under the file's lock. A rewrite adds one `migrate` row to the activity log; the
 document's revision does not change, so `undo` passes over it.
 Directories are searched recursively; a file already at the current version — or at
