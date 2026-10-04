@@ -268,7 +268,16 @@ the reader starts again from zero and sets ``ActivityReader/Page/restarted``, wh
 should read as "the history before this point has moved to an archive", not as new
 activity. The heuristic only fails if a fresh log grows past the old offset between two
 polls — megabytes within one poll interval — so a follower that keeps up never misses a
-rotation. Nothing reads the archives; they are there for the operator, not the tool.
+rotation.
+
+A follower that must not lose a single event across a rotation holds an
+``ActivityCursor`` instead of a bare offset. The cursor adds the file's inode, which a
+rename keeps, so ``ActivityReader/read(after:file:identity:)`` can find the archive the
+cursor was taken in, read the rest of it, then every later archive and the live log from
+zero — no gap, no repeat. Only when the archive has been deleted does the reader fall back
+to restarting from the live log, and then it says ``ActivityReader/Page/restarted``.
+``ActivityReader/Follow/Iterator/cursor`` is that position after each event, and the string
+form (`<inode-hex>-<offset>`) is what a stored cursor looks like.
 
 ## Nothing written, nothing logged
 

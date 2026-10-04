@@ -356,9 +356,10 @@ The file descriptor a watcher holds therefore stops being the file at that path 
 first edit: it sees a rename and then goes quiet forever, watching an unlinked inode.
 Any editor worth using writes the same way.
 
-So `FileWatcher` re-opens the path and arms a new source on every event, and coalesces a
-burst — one save is a write, an extend, an attribute change and a rename — into one
-report after 100 ms.
+So ``FileWatcher`` (a library type, so any follower can use it) watches the file's
+directory as well as the file, re-opens the path on every event, and keeps a deleted path
+watched until it comes back. It coalesces a burst — one save is a write, an extend, an
+attribute change and a rename — into one report after 100 ms.
 
 ## The warm cache
 

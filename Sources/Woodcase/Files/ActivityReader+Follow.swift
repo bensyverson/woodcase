@@ -40,6 +40,33 @@ public extension ActivityReader {
         )
     }
 
+    /// Follows the log from a cursor, through any rotation since it was taken.
+    ///
+    /// Each iterator exposes ``Follow/Iterator/cursor`` after every event, so a consumer
+    /// can persist its place and resume here later.
+    ///
+    /// - Parameters:
+    ///   - cursor: Where to start, from ``Page/cursor`` or an iterator's cursor.
+    ///   - file: Show only events for this .pen file.
+    ///   - identity: Show only events written by this `--as` name.
+    ///   - pollInterval: How long to wait between reads.
+    /// - Returns: A feed of events, in log order.
+    func follow(
+        after cursor: ActivityCursor,
+        file: URL? = nil,
+        identity: String? = nil,
+        pollInterval: Duration = .milliseconds(250)
+    ) -> Follow {
+        Follow(
+            reader: self,
+            offset: cursor.offset,
+            cursor: cursor,
+            file: file,
+            identity: identity,
+            pollInterval: pollInterval
+        )
+    }
+
     /// A live feed of an ``ActivityLog``, polled by whoever is reading it.
     ///
     /// ## Why this is a value and not a running task
@@ -79,9 +106,18 @@ public extension ActivityReader {
         ///   - file: Show only events for this .pen file.
         ///   - identity: Show only events written by this `--as` name.
         ///   - pollInterval: How long to wait between reads.
-        init(reader: ActivityReader, offset: UInt64, file: URL?, identity: String?, pollInterval: Duration) {
+        ///   - cursor: The cursor to start from; `nil` starts from `offset` in the live log.
+        init(
+            reader: ActivityReader,
+            offset: UInt64,
+            cursor: ActivityCursor? = nil,
+            file: URL?,
+            identity: String?,
+            pollInterval: Duration
+        ) {
             self.reader = reader
             self.offset = offset
+            self.cursor = cursor
             self.file = file
             self.identity = identity
             self.pollInterval = pollInterval
@@ -92,6 +128,10 @@ public extension ActivityReader {
 
         /// The byte offset every iteration starts from.
         public let offset: UInt64
+
+        /// The cursor every iteration starts from, or `nil` when the feed was made from a
+        /// bare ``offset`` into the live log.
+        public let cursor: ActivityCursor?
 
         /// The .pen file this feed is narrowed to, or `nil` for all of them.
         public let file: URL?
@@ -109,7 +149,7 @@ public extension ActivityReader {
         public func makeAsyncIterator() -> Iterator {
             Iterator(
                 reader: reader,
-                cursor: offset,
+                cursor: cursor ?? reader.liveCursor(atOffset: offset),
                 file: file,
                 identity: identity,
                 pollInterval: pollInterval
@@ -126,17 +166,26 @@ public extension ActivityReader {
             ///
             /// - Parameters:
             ///   - reader: The reader whose log to poll.
-            ///   - cursor: The byte offset to read from next.
+            ///   - cursor: The position to read from next.
             ///   - file: Show only events for this .pen file.
             ///   - identity: Show only events written by this `--as` name.
             ///   - pollInterval: How long to wait between reads.
-            init(reader: ActivityReader, cursor: UInt64, file: URL?, identity: String?, pollInterval: Duration) {
+            init(reader: ActivityReader, cursor: ActivityCursor, file: URL?, identity: String?, pollInterval: Duration) {
                 self.reader = reader
                 self.cursor = cursor
+                position = cursor
                 self.file = file
                 self.identity = identity
                 self.pollInterval = pollInterval
             }
+
+            /// The position just after the last event ``next()`` returned.
+            ///
+            /// Resuming a feed from it (``ActivityReader/follow(after:file:identity:pollInterval:)``)
+            /// yields the next event, whether or not the same read had already buffered
+            /// more. When nothing is buffered it is the end of the last read, so lines the
+            /// filters skipped are not read again.
+            public private(set) var cursor: ActivityCursor
 
             /// The next matching event, waiting for one if the log is quiet.
             ///
@@ -147,13 +196,21 @@ public extension ActivityReader {
             /// - Returns: The next event, or `nil` once the consuming task is canceled.
             public mutating func next() async -> ActivityEvent? {
                 while true {
-                    if let event = pending.popFirst() { return event }
+                    if let event = pending.popFirst() {
+                        cursor = pendingCursors.popFirst() ?? position
+                        return event
+                    }
+                    // Everything the last read returned has been taken, so the place to
+                    // resume is the end of that read, filtered-out lines included.
+                    cursor = position
                     if Task.isCancelled { return nil }
 
-                    if let page = try? reader.read(from: cursor, file: file, identity: identity) {
-                        cursor = page.nextOffset
+                    if let page = try? reader.read(after: position, file: file, identity: identity) {
+                        position = page.cursor ?? position
                         pending = page.events[...]
+                        pendingCursors = page.eventCursors[...]
                         if !pending.isEmpty { continue }
+                        cursor = position
                     }
 
                     do {
@@ -176,8 +233,11 @@ public extension ActivityReader {
             /// How long to wait between reads.
             private let pollInterval: Duration
 
-            /// The byte offset the next read starts at.
-            private var cursor: UInt64
+            /// Where the next read starts: the end of the last read.
+            private var position: ActivityCursor
+
+            /// The position just after each event in ``pending``.
+            private var pendingCursors: ArraySlice<ActivityCursor> = []
 
             /// Events the last read returned that the consumer has not taken yet.
             private var pending: ArraySlice<ActivityEvent> = []

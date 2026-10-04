@@ -30,10 +30,12 @@ import Foundation
 /// ## Rotation
 ///
 /// ``ActivityLog`` renames the live file aside when it grows past its threshold. A
-/// follower notices because the file it resumes into is *shorter* than the offset it
-/// held; the reader then starts from zero and sets ``Page/restarted``. The heuristic
-/// fails only if a fresh log grows past the old offset between two polls — megabytes
-/// within one poll interval — so a follower that keeps up never misses a rotation.
+/// follower holding only a byte offset notices because the file it resumes into is
+/// *shorter* than the offset; the reader then starts from zero and sets
+/// ``Page/restarted``. That heuristic loses events if the fresh log outgrows the old
+/// offset between two polls, so a follower that cannot afford a gap holds an
+/// ``ActivityCursor`` — offset plus inode — and reads with ``read(after:file:identity:)``,
+/// which finds the rotated file by inode and loses nothing.
 public struct ActivityReader: Friendly {
     /// Reads the given log.
     ///
@@ -56,12 +58,33 @@ public struct ActivityReader: Friendly {
         ///   - nextOffset: The byte offset to resume from.
         ///   - restarted: Whether the log had been rotated since the last read.
         ///   - skippedLines: How many lines could not be decoded.
-        public init(events: [ActivityEvent], nextOffset: UInt64, restarted: Bool, skippedLines: Int) {
+        ///   - cursor: The position to resume from; `nil` when the page was not read
+        ///     from a log file.
+        ///   - eventCursors: The position just after each of `events`, in the same order.
+        public init(
+            events: [ActivityEvent],
+            nextOffset: UInt64,
+            restarted: Bool,
+            skippedLines: Int,
+            cursor: ActivityCursor? = nil,
+            eventCursors: [ActivityCursor] = []
+        ) {
             self.events = events
             self.nextOffset = nextOffset
             self.restarted = restarted
             self.skippedLines = skippedLines
+            self.cursor = cursor
+            self.eventCursors = eventCursors
         }
+
+        /// Where to resume, naming the file by inode so a rotation in between is
+        /// survivable: pass it to ``ActivityReader/read(after:file:identity:)``.
+        public var cursor: ActivityCursor?
+
+        /// The position just after each of ``events``, in the same order, so a consumer
+        /// that stops part-way through a page can resume exactly after the last event
+        /// it took.
+        public var eventCursors: [ActivityCursor]
 
         /// The events read, after filtering, in the order they were appended.
         public var events: [ActivityEvent]
@@ -76,6 +99,11 @@ public struct ActivityReader: Friendly {
         ///
         /// A follower that shows a continuous feed should treat this as "the history
         /// before here has moved to an archive file", not as new activity.
+        ///
+        /// A read from an ``ActivityCursor`` (``ActivityReader/read(after:file:identity:)``)
+        /// sets it only when the cursor could not be followed — its archive is gone — so
+        /// events between the cursor and the live log may have been missed. Crossing a
+        /// rotation the cursor *can* follow loses nothing and is not a restart.
         public var restarted: Bool
 
         /// How many complete lines could not be decoded as events.
@@ -104,61 +132,7 @@ public struct ActivityReader: Friendly {
         file: URL? = nil,
         identity: String? = nil
     ) throws -> Page {
-        let url = log.fileURL
-        guard FileManager.default.fileExists(atPath: url.path) else {
-            return Page(events: [], nextOffset: 0, restarted: offset > 0, skippedLines: 0)
-        }
-
-        let handle: FileHandle
-        do {
-            handle = try FileHandle(forReadingFrom: url)
-        } catch {
-            throw PenFileError.cannotOpen(url: url, reason: PenFileError.oneLineReason(error))
-        }
-        defer { try? handle.close() }
-
-        var start = offset
-        var restarted = false
-        do {
-            if try handle.seekToEnd() < offset {
-                start = 0
-                restarted = true
-            }
-            try handle.seek(toOffset: start)
-        } catch {
-            throw PenFileError.cannotOpen(url: url, reason: PenFileError.oneLineReason(error))
-        }
-
-        let data: Data
-        do {
-            data = try handle.readToEnd() ?? Data()
-        } catch {
-            throw PenFileError.cannotOpen(url: url, reason: PenFileError.oneLineReason(error))
-        }
-
-        let wanted = file.map(ActivityEvent.canonicalPath(for:))
-        var page = Page(events: [], nextOffset: start, restarted: restarted, skippedLines: 0)
-        let decoder = JSONDecoder()
-        var consumed = 0
-        var lineStart = data.startIndex
-
-        while let newline = data[lineStart...].firstIndex(of: Self.newline) {
-            let line = data[lineStart ..< newline]
-            consumed += data.distance(from: lineStart, to: newline) + 1
-            lineStart = data.index(after: newline)
-            guard !line.isEmpty else { continue }
-
-            guard let event = try? ActivityEvent(line: Data(line), using: decoder) else {
-                page.skippedLines += 1
-                continue
-            }
-            if let wanted, event.file != wanted { continue }
-            if let identity, event.identity != identity { continue }
-            page.events.append(event)
-        }
-
-        page.nextOffset = start + UInt64(consumed)
-        return page
+        try readFile(at: log.fileURL, from: offset, file: file, identity: identity)
     }
 
     /// The last `count` matching events in the live log.
@@ -237,7 +211,7 @@ public struct ActivityReader: Friendly {
     }
 
     /// The byte that ends every line.
-    private static let newline: UInt8 = 0x0A
+    static let newline: UInt8 = 0x0A
 
     /// How much of the log ``newest(file:)`` reads at a time, walking backwards.
     ///

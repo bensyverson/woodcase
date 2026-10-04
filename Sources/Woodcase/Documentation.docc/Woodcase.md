@@ -164,9 +164,17 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 - ``ActivityLog``
 - ``ActivityLogLocation``
 - ``ActivityReader``
+- ``ActivityCursor``
 - ``ActivityRecorder``
 - ``RepositoryIgnoreFile``
 - ``WoodcaseHome``
+
+### Following
+
+- ``FileWatcher``
+- ``ChangeMatcher``
+- ``PresenceTracker``
+- ``Presence``
 
 ### Sync
 

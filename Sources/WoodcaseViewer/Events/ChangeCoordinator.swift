@@ -43,6 +43,7 @@ public actor ChangeCoordinator {
         self.context = context
         self.matchWindow = matchWindow
         self.pollInterval = pollInterval
+        matcher = ChangeMatcher(window: matchWindow)
     }
 
     /// The files, caches and event hub.
@@ -54,11 +55,20 @@ public actor ChangeCoordinator {
     /// How often the log is read while following it.
     public let pollInterval: Duration
 
-    /// Log events read but not yet attached to a change, by canonical file path.
-    private var pending: [String: [ActivityEvent]] = [:]
+    /// Pairs log events with file changes; the coordinator only schedules and publishes.
+    private var matcher: ChangeMatcher
+
+    /// Matches the matcher has completed that no waiting ``fileChanged(_:)`` has claimed
+    /// yet, by canonical path.
+    private var completed: [String: ChangeMatcher.Match] = [:]
 
     /// The running presence tally.
     private var presence = PresenceTracker()
+
+    /// The viewer's id for each served file, by canonical path, so presence — which names
+    /// files by path — can be shown by id. A file the viewer does not serve has no entry
+    /// and is left out of the payload.
+    private var fileIDs: [String: String] = [:]
 
     /// The task consuming the watcher.
     private var watchTask: Task<Void, Never>?
@@ -116,7 +126,7 @@ public actor ChangeCoordinator {
 
     /// The presence snapshot as it stands.
     public var currentPresence: ViewerPresence {
-        presence.snapshot()
+        ViewerPresence(presence.snapshot(), fileID: { fileIDs[$0] })
     }
 
     /// Handles one log event: it explains a change, it is presence, and — when it names
@@ -127,13 +137,14 @@ public actor ChangeCoordinator {
         let url = URL(fileURLWithPath: event.file)
         // Queued before adoption, so the change the adoption publishes finds the event
         // that explains it rather than waiting out the match window unattributed.
-        pending[event.file, default: []].append(event)
+        if let match = matcher.logged(event) { completed[match.path] = match }
 
         let known = await context.files.file(at: url)
         let adopted = known == nil ? await context.files.adopt(url) : nil
         let file = known ?? adopted
-        presence.record(event, fileID: file?.id)
-        try? await context.events.broadcast(.presence, payload: presence.snapshot())
+        if let file { fileIDs[event.file] = file.id }
+        presence.record(event)
+        try? await context.events.broadcast(.presence, payload: currentPresence)
 
         if let adopted {
             welcome(adopted)
@@ -184,25 +195,28 @@ public actor ChangeCoordinator {
     ///
     /// Returns as soon as anything has arrived; an unattributed write costs the whole
     /// window once, and then only when nothing is logging.
+    ///
+    /// Two changes to one file can be in flight at once — the watcher's and an adopted
+    /// file's announcement. They share the matcher's one waiting change, so the first to
+    /// look takes its match and the other publishes unattributed rather than waiting for
+    /// a match that will never come.
     private func attribution(for file: ViewerFile) async -> [ActivityEvent] {
-        if let events = take(file.path) { return events }
+        if let match = matcher.fileChanged(path: file.path, at: Date()) { return match.events }
 
-        let deadline = ContinuousClock.now + matchWindow
-        while ContinuousClock.now < deadline {
-            // Awaiting inside the actor lets `logged(_:)` run and fill `pending`.
+        while true {
+            // Awaiting inside the actor lets `logged(_:)` run and complete the match.
             do {
                 try await Task.sleep(for: pollInterval)
             } catch {
-                break
+                matcher.abandon(path: file.path)
+                completed.removeValue(forKey: file.path)
+                return []
             }
-            if let events = take(file.path) { return events }
+            for expired in matcher.expire(now: Date()) {
+                completed[expired.path] = expired
+            }
+            if let match = completed.removeValue(forKey: file.path) { return match.events }
+            if !matcher.isWaiting(file.path) { return [] }
         }
-        return []
-    }
-
-    /// Takes and clears the pending events for a path.
-    private func take(_ path: String) -> [ActivityEvent]? {
-        guard let events = pending.removeValue(forKey: path), !events.isEmpty else { return nil }
-        return events
     }
 }

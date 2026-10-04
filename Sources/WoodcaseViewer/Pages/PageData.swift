@@ -63,11 +63,16 @@ public enum PageData {
     /// - Returns: The identities, in order of first appearance.
     public static func presence(_ context: ViewerContext) async -> [ViewerPresence.Identity] {
         var tracker = PresenceTracker()
+        var fileIDs: [String: String] = [:]
         for event in context.allEvents() {
-            let fileID = await context.files.file(at: URL(fileURLWithPath: event.file))?.id
-            tracker.record(event, fileID: fileID)
+            tracker.record(event)
+            if fileIDs[event.file] == nil,
+               let id = await context.files.file(at: URL(fileURLWithPath: event.file))?.id
+            {
+                fileIDs[event.file] = id
+            }
         }
-        return tracker.snapshot().identities
+        return ViewerPresence(tracker.snapshot(), fileID: { fileIDs[$0] }).identities
     }
 
     /// The most recent events, oldest first.
