@@ -58,7 +58,8 @@ public extension BatchApplier {
     ) throws -> BatchLineResult {
         try checkGuards([operation], in: document, log: log, file: file)
         var tags: [String: String] = [:]
-        let outcome = try perform(operation, on: document, tags: &tags, recorder: recorder)
+        let session = writingSession(editing: document, recorder: recorder)
+        let outcome = try perform(operation, on: session, tags: &tags)
         return BatchLineResult(
             line: 0,
             status: .applied,

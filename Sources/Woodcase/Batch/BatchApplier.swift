@@ -159,12 +159,13 @@ public enum BatchApplier {
         identity: PeerID?,
         recorder: ActivityRecorder?
     ) -> BatchReport {
-        // Atomic runs edit a deep copy, so a failure leaves the real document alone.
-        let stage = atomic ? EditableDocument(from: document.materialize()) : document
-        // The recorder belongs to the real document. An atomic batch's staged run
-        // happens on a copy the recorder knows nothing about, so it records nothing
-        // there; the replay onto the real document is what goes through the recorder.
-        let lineRecorder = atomic ? nil : recorder
+        let session = writingSession(editing: document, recorder: recorder)
+        // Atomic runs edit a deep copy through a session of its own, which knows no file
+        // and records nothing, so a failure leaves the real document and the log alone.
+        // The replay onto the real session is what records.
+        let stage = atomic
+            ? DocumentSession(document: document.materialize(), author: session.author)
+            : session
         var tags = seedTags
         var poison = BatchPoison()
         var results: [Int: BatchLineResult] = [:]
@@ -174,16 +175,14 @@ public enum BatchApplier {
         for line in lines {
             let operation = operations[line]
 
-            if let reason = poison.cascadeReason(for: operation, in: stage, tags: tags) {
+            if let reason = poison.cascadeReason(for: operation, in: stage.document, tags: tags) {
                 results[line] = BatchLineResult(line: line, status: .cascaded, error: reason)
-                poison.absorb(operation, in: stage, tags: tags)
+                poison.absorb(operation, in: stage.document, tags: tags)
                 continue
             }
 
             do {
-                let outcome = try perform(
-                    operation, on: stage, tags: &tags, recorder: lineRecorder
-                )
+                let outcome = try perform(operation, on: stage, tags: &tags)
                 results[line] = BatchLineResult(
                     line: line, status: .applied,
                     created: outcome.created, path: outcome.path, inverse: outcome.inverse,
@@ -193,10 +192,10 @@ public enum BatchApplier {
             } catch {
                 results[line] = BatchLineResult(
                     line: line, status: .failed,
-                    error: BatchErrorMessage.describe(error, in: stage),
+                    error: BatchErrorMessage.describe(error, in: stage.document),
                     isRevisionConflict: isRevisionConflict(error)
                 )
-                poison.absorb(operation, in: stage, tags: tags)
+                poison.absorb(operation, in: stage.document, tags: tags)
                 if atomic {
                     culprit = line
                     break
@@ -213,7 +212,7 @@ public enum BatchApplier {
                     )
                 }
             } else {
-                replay(staged, onto: document, results: &results, recorder: recorder)
+                replay(staged, onto: session, results: &results)
             }
         }
 
@@ -229,49 +228,58 @@ public enum BatchApplier {
         )
     }
 
-    /// Replays an atomic batch's translated edits onto the real document.
+    /// Replays an atomic batch's translated edits onto the real document's session.
     ///
     /// The staged run already proved these edits apply to a document identical
     /// to this one, so a failure here is not a user error; it is rolled back so
     /// the atomic promise holds either way. This is also the only place an atomic
-    /// batch touches the recorder: the staged run happened on a copy.
+    /// batch reaches the real session, and so the log: the staged run happened on a copy.
     private static func replay(
         _ staged: [(line: Int, operations: [EditOperation])],
-        onto document: EditableDocument,
-        results: inout [Int: BatchLineResult],
-        recorder: ActivityRecorder?
+        onto session: DocumentSession,
+        results: inout [Int: BatchLineResult]
     ) {
-        let checkpoint = recorder?.events.count ?? 0
-        var undo: [[EditOperation]] = []
+        let checkpoint = session.checkpoint()
         for entry in staged {
-            for edit in entry.operations {
-                do {
-                    let inverse = try document.prepareInverse(of: edit)
-                    if let recorder {
-                        try recorder.apply(edit)
-                    } else {
-                        try document.apply(edit)
-                    }
-                    undo.append(inverse)
-                } catch {
-                    unwind(undo, in: document)
-                    recorder?.discardEvents(after: checkpoint)
-                    let message = BatchErrorMessage.describe(error, in: document)
-                    let conflict = isRevisionConflict(error)
-                    for other in staged {
-                        results[other.line] = BatchLineResult(
-                            line: other.line,
-                            status: other.line == entry.line ? .failed : .cascaded,
-                            error: other.line == entry.line
-                                ? message
-                                : "discarded: the batch is atomic, and line \(entry.line) failed",
-                            isRevisionConflict: other.line == entry.line ? conflict : false
-                        )
-                    }
-                    return
+            do {
+                try session.submit(.local(LocalEdit(operations: entry.operations)))
+            } catch {
+                // A batch's session is never collaborative, so nothing remote can sit
+                // in its journal and the rollback cannot refuse.
+                _ = try? session.rollback(to: checkpoint)
+                let message = BatchErrorMessage.describe(error, in: session.document)
+                let conflict = isRevisionConflict(error)
+                for other in staged {
+                    results[other.line] = BatchLineResult(
+                        line: other.line,
+                        status: other.line == entry.line ? .failed : .cascaded,
+                        error: other.line == entry.line
+                            ? message
+                            : "discarded: the batch is atomic, and line \(entry.line) failed",
+                        isRevisionConflict: other.line == entry.line ? conflict : false
+                    )
                 }
+                return
             }
         }
+    }
+
+    /// The session a batch writes through: the recorder's when the batch is logged, or
+    /// a transient one over `document` that knows no file and records nothing.
+    ///
+    /// - Parameters:
+    ///   - document: The document the batch edits.
+    ///   - recorder: The transaction's recorder, or `nil`.
+    /// - Returns: The session.
+    static func writingSession(editing document: EditableDocument, recorder: ActivityRecorder?) -> DocumentSession {
+        if let recorder {
+            precondition(
+                recorder.session.document === document,
+                "A recorder must record the document the batch edits."
+            )
+            return recorder.session
+        }
+        return DocumentSession(editing: document, author: .unattributed(peer: PeerID.generate()), file: nil)
     }
 
     /// Whether a failure was a stale revision, as opposed to any other refusal.
@@ -283,18 +291,5 @@ public enum BatchApplier {
         if let editing = error as? EditingError, case .revisionConflict = editing { return true }
         if let batch = error as? BatchError, case .documentRevisionConflict = batch { return true }
         return false
-    }
-
-    /// Applies captured inverses in reverse, restoring the document.
-    ///
-    /// This goes straight to the document, never through a recorder: an unwind is the
-    /// undoing of edits that are being dropped, not an edit of its own, and logging it
-    /// would leave the log describing work the file never kept.
-    static func unwind(_ undo: [[EditOperation]], in document: EditableDocument) {
-        for group in undo.reversed() {
-            for edit in group {
-                try? document.apply(edit)
-            }
-        }
     }
 }

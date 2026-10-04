@@ -91,8 +91,10 @@ public struct BatchLineResult: Friendly {
     /// The operations that undo this line, in the order they should be applied.
     ///
     /// Empty for anything but an ``BatchLineStatus/applied`` line. This is what
-    /// an activity log records so the edit can be reversed later; it comes from
-    /// ``EditableDocument/prepareInverse(of:)``, captured before each edit ran.
+    /// an activity log records so the edit can be reversed later: the session's
+    /// granular inverse (``EditableDocument/granularInverse(of:)``), captured before
+    /// each edit ran — one step per property path or override key, and complete for a
+    /// detach.
     public var inverse: [EditOperation]
 
     /// The id of the node the line acted on, or `nil` for a document-level line.

@@ -710,8 +710,10 @@ never writes, so any number of reads run together while a writer still excludes 
 
 ``PenFileTransaction/run(at:identity:log:timeout:effect:fonts:isolation:_:)`` adds attribution: the body is
 handed an ``ActivityRecorder`` beside the document, and operations applied through it
-become one line each in the activity log once the file is committed. See
-<doc:WoodcaseActivityLog>.
+become one line each in the activity log once the file is committed. The recorder
+submits each one to a transient ``DocumentSession`` over the body's document — the CLI's
+write path is the library's one edit funnel, not a second one. See
+<doc:WoodcaseActivityLog> and <doc:Session>.
 
 Five properties matter to callers:
 

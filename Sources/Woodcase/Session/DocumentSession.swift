@@ -42,7 +42,40 @@ public final class DocumentSession {
         self.document = collaborative
             ? EditableDocument(from: document, peerID: author.peerID)
             : EditableDocument(from: document)
-        base = EditableDocument(from: document)
+        activityBatch = nil
+        mergeBase = .deferred(document)
+        peers = [author.peerID: author]
+    }
+
+    /// Creates a session that edits a document someone else already holds.
+    ///
+    /// The session takes `document` as its live document, so the holder keeps reading
+    /// what the session writes. This is how a transaction that hands its body an
+    /// ``EditableDocument`` — ``PenFileTransaction``, ``BatchApplier`` — puts every
+    /// write through the funnel without changing what the body is given. The session is
+    /// never collaborative. Nothing is copied: the merge base is built from `synced` only
+    /// if a merge ever asks for it.
+    ///
+    /// - Parameters:
+    ///   - document: The document to edit in place.
+    ///   - author: Who edits through this session.
+    ///   - file: The .pen file the document belongs to, or `nil` to record no activity.
+    ///   - synced: The document as the file holds it — what a transaction parsed — or
+    ///     `nil` when there is no file state to merge against.
+    ///   - activityBatch: The batch id every activity event shares, for a session that
+    ///     lives for one transaction; `nil` gives each change its own.
+    init(
+        editing document: EditableDocument,
+        author: Author,
+        file: URL?,
+        synced: PenDocument? = nil,
+        activityBatch: String? = nil
+    ) {
+        self.author = author
+        self.file = file
+        self.document = document
+        self.activityBatch = activityBatch
+        mergeBase = synced.map(MergeBase.deferred) ?? .unknown
         peers = [author.peerID: author]
     }
 
@@ -104,12 +137,16 @@ public final class DocumentSession {
     ///   - written: The document the file now holds.
     ///   - sequence: The sequence of the last change that document includes.
     public func noteSynced(_ written: PenDocument, through sequence: UInt64) {
-        base = EditableDocument(from: written)
+        mergeBase = .deferred(written)
         syncedSequence = sequence
         fileHoldsRolledBackWork = false
     }
 
     // MARK: - Internal state
+
+    /// The batch id every activity event shares, for a session that lives for one
+    /// transaction; `nil` gives each change its own.
+    let activityBatch: String?
 
     /// Who last wrote each key.
     var ledger = ChangeLedger()
@@ -122,9 +159,9 @@ public final class DocumentSession {
     /// ``noteJoined(_:)``.
     var peers: [PeerID: Author]
 
-    /// The document as the file was last known to hold it: the base of a file merge.
-    /// Kept editable so its revision cache stays warm between merges.
-    var base: EditableDocument
+    /// The document as the file was last known to hold it, built into the editable base
+    /// of a file merge only on first use — see ``base``.
+    var mergeBase: MergeBase
 
     /// The sequence of the most recent change that dirtied the document.
     var lastDirtyingSequence: UInt64 = 0

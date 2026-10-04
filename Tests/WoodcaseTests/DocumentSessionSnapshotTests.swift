@@ -59,7 +59,7 @@ struct DocumentSessionSnapshotTests {
         session.noteSynced(saved.document, through: saved.sequence)
         #expect(session.syncedSequence == 1)
         #expect(session.hasUnsyncedChanges)
-        #expect(session.base.materialize() == saved.document)
+        #expect(session.base?.materialize() == saved.document)
 
         session.noteSynced(session.document.materialize(), through: session.sequence)
         #expect(!session.hasUnsyncedChanges)

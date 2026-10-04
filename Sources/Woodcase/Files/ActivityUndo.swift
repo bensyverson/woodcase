@@ -137,9 +137,9 @@ public enum ActivityUndo {
             )
             switch decision {
             case .undo:
-                for operation in event.inverse {
-                    try recorder.apply(operation, as: .undo)
-                }
+                // One local edit per event, labeled undo: the event's inverse lands
+                // whole or not at all, through the same session as any other write.
+                try recorder.apply(event.inverse, as: .undo)
                 undone.append(event)
                 if !continues { steps += 1 }
                 // An external row is nobody's command, so nothing rides along with it.

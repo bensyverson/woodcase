@@ -23,14 +23,20 @@ import Foundation
 /// operation — which is what lets `undo` check one event's revision rather than the
 /// whole transaction's.
 ///
-/// ## Order matters, and the recorder gets it right
+/// ## Through the session
 ///
-/// The inverse of an operation can only be captured *before* it is applied, and a name
-/// path is only meaningful in the state where the node exists. The recorder takes the
-/// inverse first, applies, then reads each name path from whichever side of the edit
-/// still has that node: after it for a node that survived, before it for one the
-/// operation removed. A body that applied operations itself would have to remember all
+/// The recorder is the CLI's door to the library's one edit funnel: it holds a transient
+/// ``DocumentSession`` over the transaction's document, under the writer's name, and
+/// every operation is a ``SessionOrigin/local(_:)`` submission. The session captures
+/// the inverse before it applies, reads each name path from whichever side of the edit
+/// still has that node, and keeps the events in its journal, so a run of writes that
+/// must be taken back — a batch line that failed part-way — is rolled back with its
+/// events in one step. A body that applied operations itself would have to remember all
 /// of that; a body that goes through the recorder cannot get it wrong.
+///
+/// Because it is the session's, an event's inverse is granular and complete: one
+/// `setProperties` per property path a whole-struct write changed, one step per
+/// override key, and a detach's full restoration. See <doc:WoodcaseActivityLog>.
 ///
 /// ## Every write is recorded, attributed or not
 ///
@@ -56,12 +62,30 @@ public final class ActivityRecorder {
     ///     `$WOODCASE_AS` — is the unattributed writer, recorded as
     ///     ``ActivityEvent/unattributed`` rather than not recorded at all.
     ///   - batch: The id every event of this transaction shares.
-    init(document: EditableDocument, file: URL, identity: String?, batch: String) {
-        self.document = document
+    ///   - synced: The document as the file holds it — what the transaction parsed — kept
+    ///     as the session's merge base without copying; `nil` when there is none.
+    init(document: EditableDocument, file: URL, identity: String?, batch: String, synced: PenDocument? = nil) {
         self.file = file
-        self.identity = identity ?? ActivityEvent.unattributed
         self.batch = batch
+        session = DocumentSession(
+            editing: document,
+            author: Author(name: identity ?? ActivityEvent.unattributed, peerID: PeerID.generate()),
+            file: file,
+            synced: synced,
+            activityBatch: batch
+        )
+        // Starts the journal, which is where the session keeps the events this
+        // transaction will append — and what a rolled-back line takes back.
+        _ = session.checkpoint()
     }
+
+    /// The session every write goes through: a transient one, over the transaction's
+    /// document, under the writer's name, for this transaction alone.
+    ///
+    /// A caller that must take back a run of writes — ``BatchApplier``'s failed line —
+    /// checkpoints and rolls back here, which reverts the document, the ledger and the
+    /// recorded events together.
+    let session: DocumentSession
 
     /// The .pen file being edited.
     public let file: URL
@@ -69,10 +93,15 @@ public final class ActivityRecorder {
     /// The id every event of this transaction shares.
     public let batch: String
 
-    /// The events recorded so far, in the order the operations were applied.
-    public private(set) var events: [ActivityEvent] = []
+    /// The events recorded so far, in the order the operations were applied: any
+    /// ``ActivityEvent/Kind/external`` row first, then one per operation the session
+    /// has kept.
+    public var events: [ActivityEvent] {
+        unapplied + session.journaledActivity
+    }
 
-    /// Applies an operation and records what it did.
+    /// Applies an operation through the transaction's ``DocumentSession`` and records
+    /// what it did.
     ///
     /// - Parameters:
     ///   - operation: The operation to apply.
@@ -82,40 +111,38 @@ public final class ActivityRecorder {
     ///     operation. `undo` passes ``ActivityEvent/Kind/undo``, `cp` passes
     ///     ``ActivityEvent/Kind/cp``; everything else leaves it `nil`.
     /// - Returns: The event recorded. Every applied operation produces one, whoever
-    ///   the writer is.
+    ///   the writer is. Its inverse is the session's granular one
+    ///   (``EditableDocument/granularInverse(of:)``): one step per property path or
+    ///   override key, and complete for a detach.
     /// - Throws: ``EditingError/revisionConflict(nodeID:expected:actual:)`` or
-    ///   ``EditingError/nodeNotFound(id:)`` from the revision check, and anything
-    ///   ``EditableDocument/prepareInverse(of:)`` or ``EditableDocument/apply(_:)``
-    ///   throws. Nothing is recorded when the operation does not apply.
+    ///   ``EditingError/nodeNotFound(id:)`` from the revision check, and whatever the
+    ///   document refuses the operation with. Nothing is recorded when the operation
+    ///   does not apply.
     @discardableResult
     public func apply(
         _ operation: EditOperation,
         expecting: [String: String] = [:],
         as kind: ActivityEvent.Kind? = nil
     ) throws -> ActivityEvent {
-        let inverse = try document.prepareInverse(of: operation)
-        let nodes = ActivityEvent.nodeIDs(touchedBy: operation)
-        let pathsBefore = nodes.map(document.namePath(of:))
+        try apply([operation], expecting: expecting, as: kind).activity[0]
+    }
 
-        try document.apply(operation, expecting: expecting)
-
-        let paths = zip(nodes, pathsBefore).map { nodeID, before in
-            document.nodes[nodeID] == nil ? before : document.namePath(of: nodeID)
-        }
-        let event = ActivityEvent(
-            time: Date(),
-            identity: identity,
-            file: file,
-            op: kind ?? ActivityEvent.Kind(operation),
-            nodes: nodes,
-            paths: paths,
-            inverse: inverse,
-            forward: [operation],
-            revision: document.documentRevision,
-            batch: batch
-        )
-        events.append(event)
-        return event
+    /// Applies operations together through the transaction's session: all of them, or —
+    /// if one fails — none, with nothing recorded.
+    ///
+    /// - Parameters:
+    ///   - operations: The operations, in order. An empty list applies nothing.
+    ///   - expecting: Revisions checked before the first operation is applied.
+    ///   - kind: The verb to label every event with, or `nil` to derive each.
+    /// - Returns: The committed change, one activity event per operation.
+    /// - Throws: Whatever the session refuses the edit with.
+    @discardableResult
+    func apply(
+        _ operations: [EditOperation],
+        expecting: [String: String] = [:],
+        as kind: ActivityEvent.Kind? = nil
+    ) throws -> CommittedChange {
+        try session.submit(.local(LocalEdit(operations: operations, expecting: expecting, activityKind: kind)))
     }
 
     /// Records an event nothing applied.
@@ -132,33 +159,9 @@ public final class ActivityRecorder {
     ///
     /// - Parameter event: The event to record.
     func record(_ event: ActivityEvent) {
-        events.append(event)
+        unapplied.append(event)
     }
 
-    /// Drops every event recorded after a checkpoint.
-    ///
-    /// The checkpoint is `events.count` taken before the run of operations in
-    /// question. This exists for one caller: ``BatchApplier``, whose unit of work is a
-    /// *line*, not an operation. A line that fails half way through is unwound with
-    /// the inverses of the operations it already applied, and the events those
-    /// operations recorded describe edits the document no longer has — so the line
-    /// leaves no trace at all, exactly as a line that failed on its first operation
-    /// would. The unwind itself goes straight to the document and records nothing.
-    ///
-    /// It is deliberately not public: dropping events is the one thing a recorder
-    /// exists to prevent, and rolling a line back is the only honest reason to do it.
-    ///
-    /// - Parameter count: The number of events to keep. A `count` at or past
-    ///   ``events``'s length keeps everything.
-    func discardEvents(after count: Int) {
-        guard count < events.count else { return }
-        events.removeSubrange(max(0, count)...)
-    }
-
-    /// The document being edited.
-    private let document: EditableDocument
-
-    /// The writer's `--as` name, or ``ActivityEvent/unattributed`` when nobody claimed
-    /// the write.
-    private let identity: String
+    /// Rows recorded without being applied: the ``ActivityEvent/Kind/external`` row.
+    private var unapplied: [ActivityEvent] = []
 }

@@ -23,9 +23,8 @@ extension BatchApplier {
     ///
     /// - Parameters:
     ///   - op: The `cp` line.
-    ///   - document: The document to edit.
+    ///   - session: The session the copies are submitted to.
     ///   - tags: Tag name → node id, for addressing what earlier lines created.
-    ///   - recorder: The transaction's recorder, or `nil` to log nothing.
     ///   - undo: The line's undo stack, extended with every edit applied.
     ///   - outcome: The line's answer, extended with each copy's created tree.
     /// - Throws: ``BatchError/copyPathNotInSource(row:key:source:)`` for a key that names
@@ -34,12 +33,12 @@ extension BatchApplier {
     ///   document refuses an edit with.
     static func performCopy(
         _ op: BatchOperation.CopyOp,
-        on document: EditableDocument,
+        on session: DocumentSession,
         tags: [String: String],
-        recorder: ActivityRecorder?,
         undo: inout [[EditOperation]],
         into outcome: inout LineOutcome
     ) throws {
+        let document = session.document
         let rows = try copyRows(of: op)
         let sourceID = try nodeID(op.source, in: document, tags: tags)
         // A key may be a name the source *publishes* rather than a path, so the
@@ -56,13 +55,13 @@ extension BatchApplier {
                 oneCopy(of: op, root: split.root, offsetBy: index), in: document, tags: tags
             )
             let rootID = insert.rootID
-            try apply(insert.plan, to: document, recorder: recorder, undo: &undo, into: &outcome)
+            try apply(insert.plan, to: session, undo: &undo, into: &outcome)
 
             for (path, props) in split.descendants.sorted(by: { $0.key < $1.key }) {
                 guard let target = CopyAssignment.address(inside: rootID, path: path) else { continue }
                 let assignment = CopyAssignment.assignment(to: target, props: props, in: document)
                 let inner = try plan(assignment, in: document, tags: [:])
-                try apply(inner, to: document, recorder: recorder, undo: &undo, into: &outcome)
+                try apply(inner, to: session, undo: &undo, into: &outcome)
             }
 
             // Read back *after* the assignments: a key may have renamed a node inside

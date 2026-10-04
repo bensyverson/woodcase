@@ -147,6 +147,31 @@ checkpoint first and rolls back to it if the unit fails. The rollback reverts th
 document, the ledger, the journaled activity and the undo and redo stacks together, and
 in collaborative mode returns the operations collaborators need to follow it.
 
+A rollback never crosses a collaborator's change: if a remote change was journaled after
+the checkpoint, ``SessionError/rollbackAcrossRemoteChange`` refuses it and the session
+is left as it was. Restoring the ledger would drop that change's stamps while its effects
+stay in the document, so a later undo could overwrite it. A remote change also leaves the
+open coalescing group open, so a local drag interrupted by a collaborator's edit still
+undoes as one step; keep-theirs protects the remote values when it does.
+
+### The CLI on the funnel
+
+The `woodcase` CLI writes through a session too. ``PenFileTransaction`` hands its body an
+``ActivityRecorder`` that holds a transient, non-collaborative session over the body's
+document, under the `--as` name, with one batch id for the whole transaction. Every
+recorder write — and every edit ``BatchApplier`` makes, logged or not — is a
+``SessionOrigin/local(_:)`` submission; a failed batch line is a checkpoint and a
+rollback; `woodcase undo` replays a logged inverse as a local edit labeled `undo`. So the
+log's rows carry the session's granular, complete inverses and the operation as the
+writer submitted it in `forward`.
+
+A transient session costs no copy of the document: it keeps the file's document as the
+transaction parsed it and builds the editable merge base only if a file merge asks for
+it, which a CLI verb never does. Writes the batch grammar has no verb for — removing a
+variable, a theme axis or an import alias — go through
+``BatchApplier/applyEdit(_:to:recorder:)``, so `woodcase vars rm` and a script's
+`doc.vars.rm` use the same funnel.
+
 ## Topics
 
 ### Sessions

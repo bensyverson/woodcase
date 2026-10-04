@@ -84,7 +84,7 @@ detail. Broken across lines here for reading; on disk it is one line:
 {"batch":"7C6E…","file":"/Users/ana/Designs/dashboard.pen",
  "forward":[{"updateCommon":{"_0":{"nodeID":"jSUCH","common":{"name":"Title"}}}}],
  "identity":"ana",
- "inverse":[{"updateCommon":{"_0":{"nodeID":"jSUCH","common":{"name":"child-1"}}}}],
+ "inverse":[{"setProperties":{"_0":{"nodeID":"jSUCH","properties":{"common.name":"child-1"}}}}],
  "nodes":["jSUCH"],"op":"set","paths":["layout-vertical/Title"],
  "revision":"3f2a91c0d4e5b678","time":"2026-08-29T16:31:04.123Z"}
 ```
@@ -115,13 +115,32 @@ detail. Broken across lines here for reading; on disk it is one line:
   state where the node exists: after the operation for a node that survived it, before
   it for one the operation removed. So a rename records the new name and a delete records
   the name that was deleted.
-- **`inverse`** — the operations that undo this one, from
-  ``EditableDocument/prepareInverse(of:)``, in the order they must be applied. This is
-  what makes the log an undo source rather than a diary. A `detach` row's inverse is
-  complete — delete the expanded subtree, re-insert the ref — because a detach's ids are
-  derived from the document and known before it runs; a row written before that change
-  (2026-10-04) carries only the re-insert, still decodes, and replays as far as it goes.
-  So `woodcase rm --detach` followed by `woodcase undo` restores the file byte for byte.
+- **`inverse`** — the operations that undo this one, in the order they must be applied.
+  This is what makes the log an undo source rather than a diary. Every write reaches the
+  file through a ``DocumentSession`` — the CLI's transaction holds a transient one — so
+  the inverse is the session's, from ``EditableDocument/granularInverse(of:)``: granular
+  and complete.
+  - **Granular.** A property write undoes as one `setProperties` per path it changed,
+    restoring that path's old value: a whole-struct `updateCommon` or same-case
+    `updateKind` that renamed a node logs `setProperties {"common.name": old}`, not the
+    whole old struct. An override write undoes as one `overrideDescendant` or
+    `overrideRoot` per key — writing the old value back, or unsetting a key the write
+    added. A step that puts a node back (the move back of a move, the re-insert of a
+    delete) carries the index it was captured at.
+  - **Complete.** A `detach` row's inverse deletes the expanded subtree and re-inserts
+    the ref, because a detach's ids are derived from the document and known before it
+    runs. So `woodcase rm --detach` followed by `woodcase undo` restores the file byte for
+    byte.
+
+  Before 2026-10-04 inverses were whole-struct snapshots from
+  ``EditableDocument/prepareInverse(of:)`` — one `updateCommon` for any rename, the whole
+  override entry for any override — and a `detach` row carried only the re-insert. Those
+  rows still decode and replay; an old detach row replays as far as it goes. Nothing else
+  about a row changed when the CLI moved onto the session: the file's bytes, `op`,
+  `nodes`, `paths`, `forward`, `revision` and `batch` are what they were, and
+  `external`, `migrate` and `new` rows — which apply nothing — are untouched, as is a
+  `--dry-run`, which still appends nothing. The one visible consequence of granularity
+  is that an `undo` of a row with several inverse steps writes one `undo` row per step.
 - **`forward`** — the operation as applied, exactly as its writer passed it (a
   whole-struct `updateCommon` stays whole), so a reader can show the new values beside
   the old ones in `inverse` without reconstructing them from a later state. One

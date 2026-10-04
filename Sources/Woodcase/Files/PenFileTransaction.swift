@@ -322,7 +322,7 @@ public enum PenFileTransaction {
         let activity = log ?? ActivityLogLocation.log(for: url)
         let lineage = try LogLineage.read(url, at: editable.documentRevision, from: activity)
         let recorder = ActivityRecorder(
-            document: editable, file: url, identity: identity, batch: batch
+            document: editable, file: url, identity: identity, batch: batch, synced: parsed
         )
         // First, so that the history reads in order: whatever this transaction goes on
         // to write happened *after* the outside edit, and the row says where the log's

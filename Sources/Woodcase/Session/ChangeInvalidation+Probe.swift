@@ -108,8 +108,13 @@ extension ChangeInvalidation {
         }
 
         /// A root patch's keys: fonts re-measure every text node; the version, the file
-        /// token and the root's unmodeled keys change no rendering.
-        private static func documentProperties(_ keys: [String]) -> ChangeInvalidation {
+        /// token, a declared table (`variables`, `imports`, `themes` written `{}` or left
+        /// out) and an `extras.`-prefixed unmodeled key change no rendering. A key that is
+        /// none of these invalidates everything rather than being guessed at.
+        ///
+        /// - Parameter keys: The patch's keys.
+        /// - Returns: What the patch can have changed.
+        static func documentProperties(_ keys: [String]) -> ChangeInvalidation {
             var result = ChangeInvalidation()
             for key in keys {
                 switch key {
@@ -121,8 +126,15 @@ extension ChangeInvalidation {
                     result.documentLevel.insert(.version)
                 case DocumentPropertyCodec.fileTokenKey:
                     result.documentLevel.insert(.fileToken)
-                default:
+                case _ where key.hasPrefix(DocumentPropertyCodec.extrasPrefix):
                     result.documentLevel.insert(.extra(String(key.dropFirst(DocumentPropertyCodec.extrasPrefix.count))))
+                default:
+                    if let table = DocumentChangeKey.Table(rawValue: key) {
+                        result.documentLevel.insert(.declaredTable(table))
+                    } else {
+                        // Not a key the codec writes, so nothing can say what it changed.
+                        result.full = true
+                    }
                 }
             }
             return result

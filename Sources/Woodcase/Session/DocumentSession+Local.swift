@@ -30,7 +30,7 @@ extension DocumentSession {
         guard !edit.operations.isEmpty else { return emptyChange(origin: .local) }
 
         let crdtBefore = edit.operations.count > 1 ? document.crdtDocument?.snapshot() : nil
-        var pending = PendingChange(activityKind: edit.activityKind)
+        var pending = pendingChange(activityKind: edit.activityKind)
         do {
             for operation in edit.operations {
                 try apply(operation, into: &pending)
@@ -69,6 +69,7 @@ extension DocumentSession {
         pending.invalidation.formUnion(probe.invalidation(after: document))
         if let event = activityEvent(
             for: forward,
+            as: operation,
             inverse: inverse,
             kind: pending.activityKind,
             nodes: touched,
@@ -188,13 +189,26 @@ extension DocumentSession {
         }
     }
 
+    /// A change about to be built, its activity events sharing the session's batch id
+    /// when it has one.
+    ///
+    /// - Parameter activityKind: The verb every event is labeled with, or `nil` to label
+    ///   each by its operation.
+    /// - Returns: The empty change.
+    func pendingChange(activityKind: ActivityEvent.Kind?) -> PendingChange {
+        PendingChange(batch: activityBatch ?? UUID().uuidString, activityKind: activityKind)
+    }
+
     /// The activity event for one applied operation, or `nil` for a session with no
     /// file to attribute it to.
     ///
     /// Each name path is read from whichever side of the edit still has its node: after
-    /// it for a node that survived, before it for one the operation removed.
+    /// it for a node that survived, before it for one the operation removed. The row's
+    /// `forward` is the operation as submitted, not normalized, so a reader sees what
+    /// the writer asked for.
     private func activityEvent(
         for operation: EditOperation,
+        as submitted: EditOperation,
         inverse: [GuardedInverse],
         kind: ActivityEvent.Kind?,
         nodes: [String],
@@ -213,6 +227,7 @@ extension DocumentSession {
             nodes: nodes,
             paths: paths,
             inverse: inverse.map(\.operation),
+            forward: [submitted],
             revision: document.documentRevision,
             batch: batch
         )

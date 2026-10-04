@@ -126,26 +126,6 @@ struct BatchApplierRecorderTests {
         #expect(recorder.events.map(\.nodes) == [["Ttl01"]])
     }
 
-    @Test("Discarding events after a checkpoint leaves the edits themselves in place")
-    func discardEventsKeepsTheEdits() throws {
-        let document = try makeDocument()
-        let recorder = makeRecorder(for: document)
-        let checkpoint = recorder.events.count
-        let plan = try BatchApplier.plan(
-            ops("""
-            {"op":"set","target":"Canvas/Title","props":{"common.name":"Renamed"}}
-            """)[0],
-            in: document,
-            tags: [:]
-        )
-        try recorder.apply(plan.operations[0])
-        #expect(recorder.events.count == checkpoint + 1)
-
-        recorder.discardEvents(after: checkpoint)
-        #expect(recorder.events.isEmpty)
-        #expect(document.node(id: "Ttl01")?.common.name == "Renamed")
-    }
-
     // MARK: - Atomic batches
 
     @Test("An atomic batch that fails records nothing")

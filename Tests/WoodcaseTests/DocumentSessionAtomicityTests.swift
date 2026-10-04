@@ -99,7 +99,7 @@ struct DocumentSessionAtomicityTests {
         ])))
         #expect(session.journaledActivity.count == 3)
 
-        session.rollback(to: checkpoint)
+        try session.rollback(to: checkpoint)
 
         #expect(session.document.materialize() == document)
         #expect(session.ledger == ledger)
@@ -119,7 +119,7 @@ struct DocumentSessionAtomicityTests {
             .deleteNode(EditOperation.DeleteNode(nodeID: "f2")),
         ])))
 
-        session.rollback(to: checkpoint)
+        try session.rollback(to: checkpoint)
 
         #expect(session.document.materialize() == document)
         #expect(session.document.nodes["c1"]?.common.name == "Kept")
@@ -134,7 +134,7 @@ struct DocumentSessionAtomicityTests {
         try session.submit(.local(LocalEdit(operations: [
             .setProperties(EditOperation.SetProperties(nodeID: "c1", properties: ["common.name": "Gone"])),
         ])))
-        session.rollback(to: checkpoint)
+        try session.rollback(to: checkpoint)
         let next = try session.submit(.local(LocalEdit(operations: [
             .setProperties(EditOperation.SetProperties(nodeID: "c1", properties: ["common.name": "Next"])),
         ])))
@@ -151,7 +151,7 @@ struct DocumentSessionAtomicityTests {
         ])))
         peer.applyRemote(change.broadcast)
 
-        let compensating = session.rollback(to: checkpoint)
+        let compensating = try session.rollback(to: checkpoint)
 
         #expect(!compensating.isEmpty)
         peer.applyRemote(compensating)

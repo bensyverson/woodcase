@@ -227,7 +227,7 @@ struct DocumentSessionUndoHistoryTests {
         let checkpoint = session.checkpoint()
 
         try session.submit(rename("c3", to: "Rolled back"))
-        session.rollback(to: checkpoint)
+        try session.rollback(to: checkpoint)
 
         #expect(session.canRedo)
         try session.submit(.redo)

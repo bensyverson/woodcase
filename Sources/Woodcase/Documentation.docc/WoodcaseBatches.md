@@ -331,15 +331,21 @@ try await PenFileTransaction.run(at: url, identity: "ana") { document, recorder 
 }
 ```
 
-A line is the unit of logging as well as of rollback. A line that fails half way
-through is unwound with the inverses of the edits it already applied, and the
-events those edits recorded are dropped with them — so a failed line leaves no
-trace, exactly as a line that failed on its first edit would. The unwind itself
-never records. An atomic batch stages on the copy with no recorder at all and
-records the replay onto the real document; if the replay fails, the events go
+Every edit, logged or not, is submitted to a ``DocumentSession`` — the recorder's when
+there is one, otherwise a transient session over the document that records nothing — so
+a batch writes through the same funnel as every other edit, and a line's
+``BatchLineResult/inverse`` is the session's granular one, exactly what the log records
+(see <doc:WoodcaseActivityLog>).
+
+A line is the unit of logging as well as of rollback. The applier checkpoints the
+session before each line, and a line that fails half way through rolls the session back
+to it: the document, the ledger and the events its earlier edits recorded go together,
+so a failed line leaves no trace, exactly as a line that failed on its first edit would.
+An atomic batch stages on a copy with a session of its own that records nothing, and
+replays onto the real session; if the replay fails, it rolls back and the events go
 with it.
 
-Without a recorder the batch applies exactly as before and logs nothing — which
+Without a recorder the batch applies the same edits and logs nothing — which
 is what a caller editing a scratch document wants. The `identity` parameter is
 unrelated: that is the CRDT ``PeerID`` stamped on the report.
 

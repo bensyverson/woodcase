@@ -119,20 +119,18 @@
         /// Applies an operation the batch grammar has no verb for, logging it when there
         /// is a log.
         ///
-        /// There are exactly two: removing a variable and removing a theme axis. The
-        /// batch grammar leaves both out on purpose — an optional payload would turn a
-        /// dropped field into a silent delete — so `doc.vars.rm` and `doc.themes.rm` go
-        /// where `woodcase vars rm` goes, straight to the ``Woodcase/EditOperation``,
-        /// and the recorder makes it one logged event exactly as the verb does.
+        /// There are three: removing a variable, a theme axis and an import alias. The
+        /// batch grammar leaves them out on purpose — an optional payload would turn a
+        /// dropped field into a silent delete — so `doc.vars.rm`, `doc.themes.rm` and
+        /// `doc.imports.rm` hand the ``Woodcase/EditOperation`` to
+        /// ``Woodcase/BatchApplier/applyEdit(_:to:recorder:)``, which submits it to the
+        /// same session funnel as every other write: one logged event through the
+        /// recorder, exactly as the verb makes, or an unlogged session edit without one.
         ///
         /// - Parameter operation: The operation to apply.
         /// - Throws: Whatever the document refuses it with.
         func applyDirect(_ operation: EditOperation) throws {
-            if let recorder {
-                try recorder.apply(operation)
-            } else {
-                try document.apply(operation)
-            }
+            try BatchApplier.applyEdit(operation, to: document, recorder: recorder)
             invalidate()
         }
 

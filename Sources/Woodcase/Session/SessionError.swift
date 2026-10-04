@@ -15,6 +15,10 @@ public enum SessionError: Error, Friendly {
     /// The session keeps no CRDT, so it cannot take a collaborator's operations: create it
     /// with `collaborative: true`.
     case notCollaborative
+    /// A remote change landed after the checkpoint, so rolling back would restore a
+    /// ledger without that change's stamps while its effects stay in the document — and a
+    /// later undo could then overwrite it. Nothing was rolled back.
+    case rollbackAcrossRemoteChange
 }
 
 extension SessionError: LocalizedError {
@@ -25,6 +29,8 @@ extension SessionError: LocalizedError {
             "A document session cannot apply \(kind.rawValue) changes yet."
         case .notCollaborative:
             "A document session that is not collaborative cannot apply remote operations."
+        case .rollbackAcrossRemoteChange:
+            "A document session cannot roll back past a collaborator's change."
         }
     }
 }
