@@ -129,6 +129,12 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 - ``PenID``
 - ``SubtreeIDPlan``
 
+### Sessions
+
+- <doc:Session>
+- ``DocumentSession``
+- ``CommittedChange``
+
 ### Batches
 
 - <doc:WoodcaseBatches>
