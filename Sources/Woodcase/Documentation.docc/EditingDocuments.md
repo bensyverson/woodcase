@@ -403,6 +403,24 @@ line of it has run. Under the single-writer file lock every foreign write strict
 precedes that moment, so a guard asserts *"nothing anyone else did has moved what I read"*
 and a batch never trips its own. A failed guard throws, refusing the whole transaction;
 it is never a per-line status.
+
+### Comparing Two Documents
+
+``DocumentChanges/init(from:to:)`` lists what differs between two documents — the
+two-way half of a three-way merge. Nodes are matched by id; each differing node is a
+``NodeChange`` holding its ``NodeChange/State`` on both sides and the
+``NodeChangeKey``s that differ: one per property path (as ``PropertyDiff`` names them),
+one per node extra, one ``NodeChangeKey/type`` standing for every `kind.*` key when the
+type changed, and the placement keys ``NodeChangeKey/parent``,
+``NodeChangeKey/children`` and ``NodeChangeKey/declaredChildren``. Document members
+are ``DocumentChangeKey``s, per variable, import alias, theme axis and root extra.
+
+The walk is pruned by revision tokens: a node both documents hold with one
+``EditableDocument/revision(of:)`` pins an identical subtree, so the walk records that
+node's placement and goes no deeper. Two copies of a large document cost one visit per
+root; one edit costs a visit per node on its spine and per sibling beside it. A
+declared `"children": []` and absent children hash alike, so declared-ness is compared
+apart from the walk, over the containers each document declares empty.
 ### Addressing Nodes
 
 An agent or a CLI names a node with an *address* rather than an id it had to look up
@@ -797,6 +815,13 @@ under one of its own descendants throws
 - ``WriteEffect``
 - ``LintPreview``
 - <doc:WoodcaseActivityLog>
+
+### Comparing Documents
+
+- ``DocumentChanges``
+- ``NodeChange``
+- ``NodeChangeKey``
+- ``DocumentChangeKey``
 
 ### Incremental Layout
 
