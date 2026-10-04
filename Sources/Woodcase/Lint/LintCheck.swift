@@ -135,6 +135,12 @@ public enum LintCheck: String, Friendly, CaseIterable {
     /// stroke when the top is missing; the other sides are never drawn.
     case perSideStrokeOnShape = "per-side-stroke-on-shape"
 
+    /// A `note` with no width or height of its own — absent, or the 0×0 Pen saves an
+    /// unsized note as — which lays out at ``PenPostIt/defaultSize`` on that axis. A
+    /// notice: the note draws, at the default, and writing the size only makes it
+    /// explicit.
+    case noteUnsized = "note-unsized"
+
     /// The severity findings of this check carry.
     ///
     /// ``pipeline`` findings override it with the diagnostic's own severity; every
@@ -166,9 +172,12 @@ public enum LintCheck: String, Friendly, CaseIterable {
     /// ``shaderNotDrawn`` is a warning on the same reading from the other side: the file
     /// is well formed and Pen draws it as written; only Woodcase's render and code differ.
     /// ``perSideStrokeOnShape`` is a warning because the node draws, Pen and Woodcase alike,
-    /// only not with the widths the file writes.
+    /// only not with the widths the file writes. ``noteUnsized`` is a notice: nothing is
+    /// wrong with the note, which draws at the post-it default.
     public var severity: PenDiagnostic.Severity {
         switch self {
+        case .noteUnsized:
+            .notice
         case .pipeline, .textWithoutFill, .fillContainerInFitParent, .emptyFitContent, .clipped,
              .artboardOverlap, .duplicateName, .textOverflow, .codegenUnmappedOverride, .collapsedText,
              .collapsedAbsoluteFrame, .meshGradientDistorted, .textStyleStripped, .importNotFollowed,
@@ -240,6 +249,8 @@ public enum LintCheck: String, Friendly, CaseIterable {
             "A shader fill, which Pen runs and Woodcase does not draw on any target."
         case .perSideStrokeOnShape:
             "A per-side stroke width on an ellipse, polygon, path or line, which Pen draws at the top width alone."
+        case .noteUnsized:
+            "A note with no width or height of its own, which lays out at the 200×200 post-it default."
         }
     }
 }

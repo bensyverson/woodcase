@@ -110,8 +110,14 @@ public enum ChangeCategory: Friendly {
             // A connection has no box and moves nothing: its endpoints and paint only
             // change what is drawn.
             return .renderOnly
+        case let (.note(old), .note(new)):
+            return categorizeSized(width: (old.width, new.width), height: (old.height, new.height))
+        case let (.prompt(old), .prompt(new)):
+            return categorizeSized(width: (old.width, new.width), height: (old.height, new.height))
+        case let (.context(old), .context(new)):
+            return categorizeSized(width: (old.width, new.width), height: (old.height, new.height))
         default:
-            // ref, note, prompt, context, unknown — conservatively layout
+            // ref, unknown — conservatively layout
             return .layout
         }
     }
@@ -158,6 +164,16 @@ public enum ChangeCategory: Friendly {
         // Render-only: textAlign, textAlignVertical, underline, strikethrough,
         // href, fills, stroke, effects, blendMode
         return .renderOnly
+    }
+
+    /// A note, prompt or context: its box is its declared size and nothing else, so
+    /// only a size change moves anything. Its text and TextStyle never measure into
+    /// the layout — the box does not grow to fit them.
+    private static func categorizeSized(
+        width: (old: PenSizing?, new: PenSizing?),
+        height: (old: PenSizing?, new: PenSizing?)
+    ) -> ChangeCategory {
+        width.old != width.new || height.old != height.new ? .layout : .renderOnly
     }
 
     private static func categorizeRectangle(

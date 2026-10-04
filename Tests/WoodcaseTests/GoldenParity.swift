@@ -275,11 +275,20 @@ enum GoldenParity {
         case var .group(data):
             data.children = normalizedChildren(data.children, index: index, flattening: flattening)
             result.kind = .group(data)
-        case .note, .prompt, .context:
-            // Pen writes a size on these; the model has no field for it, so the file's
-            // `width` and `height` are kept as extras — which the 2.9 original never had.
-            result.extras.values["width"] = nil
-            result.extras.values["height"] = nil
+        // Pen writes an unsized note, prompt or context as `width: 0, height: 0`, which the
+        // 2.9 original never had; absent and 0 both mean unsized.
+        case var .note(data):
+            data.width = data.width ?? .fixed(0)
+            data.height = data.height ?? .fixed(0)
+            result.kind = .note(data)
+        case var .prompt(data):
+            data.width = data.width ?? .fixed(0)
+            data.height = data.height ?? .fixed(0)
+            result.kind = .prompt(data)
+        case var .context(data):
+            data.width = data.width ?? .fixed(0)
+            data.height = data.height ?? .fixed(0)
+            result.kind = .context(data)
         default:
             break
         }

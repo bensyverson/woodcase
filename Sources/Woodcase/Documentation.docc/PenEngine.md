@@ -45,9 +45,9 @@ The document model supports 16 node types via ``PenNode/Kind``:
 | `line` | ``PenNode/LineData`` | Line between two points |
 | `polygon` | ``PenNode/PolygonData`` | Regular polygon with N sides |
 | `ref` | ``PenNode/RefData`` | Reference to a reusable component |
-| `note` | ``PenNode/NoteData`` | Annotation note |
-| `prompt` | ``PenNode/PromptData`` | AI prompt node |
-| `context` | ``PenNode/ContextData`` | Context boundary for theming |
+| `note` | ``PenNode/NoteData`` | A post-it: sized, with the TextStyle keys; an unsized or 0×0 note lays out at 200×200 — see <doc:PenPostItConvention> |
+| `prompt` | ``PenNode/PromptData`` | AI prompt node, sized, with the TextStyle keys; not drawn |
+| `context` | ``PenNode/ContextData`` | Guidance for an agent, sized, with the TextStyle keys; not drawn |
 | `icon` | ``PenNode/IconData`` | Icon font glyph |
 | `script` | ``PenNode/ScriptData`` | Sized placeholder for a user-authored script; never executed — see <doc:PenRendering> |
 | `browser` | ``PenNode/BrowserData`` | An embedded web page (Pen 2.19): laid out like a rectangle, drawn as a placeholder, never loaded — see <doc:PenRendering> |

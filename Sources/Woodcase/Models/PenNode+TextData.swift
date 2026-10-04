@@ -8,7 +8,7 @@ import Foundation
 public extension PenNode {
     // MARK: Text
 
-    struct TextData: Friendly, PenStrokable {
+    struct TextData: Friendly, PenStrokable, PenTextStyleProperties {
         public init(
             width: PenSizing? = nil,
             height: PenSizing? = nil,

@@ -208,6 +208,12 @@ extension BatchErrorMessage {
                 in: dialect
             )
 
+        case let .postItMetadataRejected(nodeID, key, value, accepted, suggestion):
+            return postItMetadataRejected(
+                key, on: nodeID, value: value, accepted: accepted, suggestion: suggestion, in: document,
+                dialect: dialect
+            )
+
         case let .unknownDocumentProperty(key):
             return unknownDocumentProperty(key, in: dialect)
 

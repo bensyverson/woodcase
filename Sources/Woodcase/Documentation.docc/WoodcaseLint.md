@@ -81,6 +81,7 @@ no document, so accepting any of those would be accepting an argument it ignores
 | `text-style-stripped` | warning | A text node carries a stroke, `underline: true` or `strikethrough: true`, which Pen strips on load and never draws |
 | `shader-not-drawn` | warning | An enabled shader fill, in a node's fills or its stroke, which Pen runs and Woodcase does not draw on any target |
 | `per-side-stroke-on-shape` | warning | An ellipse, polygon, path or line with a stroke paint and a per-side `strokeWidth` whose sides differ from its `top`, or that has no `top`: Pen draws the `top` width alone, all round |
+| `note-unsized` | notice | A `note` with no `width` or `height` of its own, or the `0` Pen saves an unsized note with, which lays out at the 200-pt post-it default on that axis |
 
 The two sizing checks fire only where the engine has *nothing to fall back on*:
 `fill_container(200)` under a `fit_content` parent, and `fit_content(200)` with no
@@ -449,6 +450,17 @@ is consistent — only not with the widths the file writes. The fix is one `stro
 
 ```text
 warning per-side-stroke-on-shape  Ring (Shp01)  has a per-side strokeWidth (top 12, right 2, bottom 6, left 0), but Pen strokes an ellipse at its top width alone, all round (12); Woodcase draws it the same. Write one strokeWidth.
+```
+
+`note-unsized` is a notice, one finding per note, naming each axis left to the default.
+Pen saves a note it was never given a size for as `width: 0, height: 0`, and Woodcase
+lays such a note out at ``PenPostIt/defaultSize`` (200) on that axis, so `tree`, hit
+testing and the post-it look agree on a 200×200 square. Nothing is wrong — the note draws —
+but the file says 0 while the canvas shows 200; writing the size makes them agree. Only
+`--severity notice` shows it, and it never makes `lint` exit 1.
+
+```text
+notice note-unsized  Board/Device check (JDkm6)  lays out at the post-it default of 200pt because kind.width and kind.height are unset or 0. Run `woodcase set <file> JDkm6 kind.width=200 kind.height=200` to write the size it draws at.
 ```
 
 ## What `generate react` will choke on

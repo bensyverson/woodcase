@@ -15,10 +15,11 @@ import Foundation
 /// planner calls this for `set` and for a copy's own properties.
 public extension NodePropertyCodec {
     /// Refuses an authored value that carries a key or a `type` the model does not claim,
-    /// and any `extras.<key>` path.
+    /// any `extras.<key>` path, and a post-it metadata value the convention does not spell.
     ///
-    /// Only the three properties that can carry extras are checked: `kind.fills`,
-    /// `kind.stroke` and `kind.effects`. A value equal to what the node already holds is
+    /// Only the three properties that can carry extras are checked for unclaimed keys:
+    /// `kind.fills`, `kind.stroke` and `kind.effects`. A `common.metadata` value — deep
+    /// keys already folded into it — is checked by ``checkAuthoredPostIt(_:on:)``. A value equal to what the node already holds is
     /// let through, so reading a property and writing it straight back stays a no-op even
     /// when the file gave it extras.
     ///
@@ -26,12 +27,18 @@ public extension NodePropertyCodec {
     ///   - properties: The values to write, keyed by property path.
     ///   - node: The node they will be written to.
     /// - Throws: ``EditingError/propertyTypeMismatch(nodeID:key:expected:actual:)`` naming
-    ///   the first refused key.
+    ///   the first refused key, or
+    ///   ``EditingError/postItMetadataRejected(nodeID:key:value:accepted:suggestion:)``.
     static func checkAuthored(_ properties: [String: AnyCodable], on node: PenNode) throws {
         // Extras are what a file kept, never what an agent writes: a path that would
         // write one is refused as the unknown property it is to an author.
         if let path = properties.keys.sorted().first(where: isExtrasPath) {
             throw unknownProperty(path, node.id, node.kind.typeName)
+        }
+        // Metadata is common to every node type, unknown ones included, so the post-it
+        // convention is checked before the kind-specific shapes are.
+        if let metadata = properties[metadataPath] {
+            try checkAuthoredPostIt(metadata, on: node)
         }
         if case .unknown = node.kind { return }
         for (path, value) in properties.sorted(by: { $0.key < $1.key }) {
@@ -52,6 +59,10 @@ public extension NodePropertyCodec {
 // MARK: - Shapes
 
 extension NodePropertyCodec {
+    /// `common.metadata`: the whole-object property deep keys reach into, the one the
+    /// schema requires a `type` key on, and where the post-it convention lives.
+    static let metadataPath = "common.metadata"
+
     /// A property whose value is a payload that can carry ``PenExtras``.
     enum AuthoredShape: String, CaseIterable {
         case fills

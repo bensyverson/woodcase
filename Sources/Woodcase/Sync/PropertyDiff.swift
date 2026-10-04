@@ -147,17 +147,7 @@ public enum PropertyDiff {
         if old.height != new.height { changed.insert("kind.height") }
         if old.content != new.content { changed.insert("kind.content") }
         if old.textGrowth != new.textGrowth { changed.insert("kind.textGrowth") }
-        if old.fontFamily != new.fontFamily { changed.insert("kind.fontFamily") }
-        if old.fontSize != new.fontSize { changed.insert("kind.fontSize") }
-        if old.fontWeight != new.fontWeight { changed.insert("kind.fontWeight") }
-        if old.fontStyle != new.fontStyle { changed.insert("kind.fontStyle") }
-        if old.letterSpacing != new.letterSpacing { changed.insert("kind.letterSpacing") }
-        if old.lineHeight != new.lineHeight { changed.insert("kind.lineHeight") }
-        if old.textAlign != new.textAlign { changed.insert("kind.textAlign") }
-        if old.textAlignVertical != new.textAlignVertical { changed.insert("kind.textAlignVertical") }
-        if old.underline != new.underline { changed.insert("kind.underline") }
-        if old.strikethrough != new.strikethrough { changed.insert("kind.strikethrough") }
-        if old.href != new.href { changed.insert("kind.href") }
+        diffTextStyle(old: old, new: new, into: &changed)
         if old.fills != new.fills { changed.insert("kind.fills") }
         diffStroke(old: old, new: new, into: &changed)
         if old.effects != new.effects { changed.insert("kind.effects") }
@@ -243,22 +233,50 @@ public enum PropertyDiff {
         return changed
     }
 
+    /// Records the TextStyle keys that differ between two styled payloads.
+    private static func diffTextStyle(
+        old: some PenTextStyleProperties,
+        new: some PenTextStyleProperties,
+        into changed: inout Set<String>
+    ) {
+        if old.fontFamily != new.fontFamily { changed.insert("kind.fontFamily") }
+        if old.fontSize != new.fontSize { changed.insert("kind.fontSize") }
+        if old.fontWeight != new.fontWeight { changed.insert("kind.fontWeight") }
+        if old.fontStyle != new.fontStyle { changed.insert("kind.fontStyle") }
+        if old.letterSpacing != new.letterSpacing { changed.insert("kind.letterSpacing") }
+        if old.lineHeight != new.lineHeight { changed.insert("kind.lineHeight") }
+        if old.textAlign != new.textAlign { changed.insert("kind.textAlign") }
+        if old.textAlignVertical != new.textAlignVertical { changed.insert("kind.textAlignVertical") }
+        if old.underline != new.underline { changed.insert("kind.underline") }
+        if old.strikethrough != new.strikethrough { changed.insert("kind.strikethrough") }
+        if old.href != new.href { changed.insert("kind.href") }
+    }
+
     private static func diffNote(old: PenNode.NoteData, new: PenNode.NoteData) -> Set<String> {
         var changed = Set<String>()
+        if old.width != new.width { changed.insert("kind.width") }
+        if old.height != new.height { changed.insert("kind.height") }
         if old.content != new.content { changed.insert("kind.content") }
+        diffTextStyle(old: old, new: new, into: &changed)
         return changed
     }
 
     private static func diffPrompt(old: PenNode.PromptData, new: PenNode.PromptData) -> Set<String> {
         var changed = Set<String>()
+        if old.width != new.width { changed.insert("kind.width") }
+        if old.height != new.height { changed.insert("kind.height") }
         if old.content != new.content { changed.insert("kind.content") }
         if old.model != new.model { changed.insert("kind.model") }
+        diffTextStyle(old: old, new: new, into: &changed)
         return changed
     }
 
     private static func diffContext(old: PenNode.ContextData, new: PenNode.ContextData) -> Set<String> {
         var changed = Set<String>()
+        if old.width != new.width { changed.insert("kind.width") }
+        if old.height != new.height { changed.insert("kind.height") }
         if old.content != new.content { changed.insert("kind.content") }
+        diffTextStyle(old: old, new: new, into: &changed)
         return changed
     }
 
@@ -307,6 +325,14 @@ public enum PropertyDiff {
         if old.effects != new.effects { changed.insert("kind.effects") }
         return changed
     }
+
+    /// The paths of Pen's eleven TextStyle keys, which `text`, `note`, `prompt` and
+    /// `context` all take — see ``PenTextStyleProperties``.
+    static let textStyleKeys: Set<String> = [
+        "kind.fontFamily", "kind.fontSize", "kind.fontWeight", "kind.fontStyle",
+        "kind.letterSpacing", "kind.lineHeight", "kind.textAlign", "kind.textAlignVertical",
+        "kind.underline", "kind.strikethrough", "kind.href",
+    ]
 
     /// Returns all property paths for a given kind case (used when kinds differ entirely).
     ///
@@ -370,12 +396,10 @@ public enum PropertyDiff {
                  "kind.effects", "kind.blendMode"])
         case .ref:
             Set(["kind.ref", "kind.descendants", "kind.rootOverrides"])
-        case .note:
-            Set(["kind.content"])
+        case .note, .context:
+            Set(["kind.width", "kind.height", "kind.content"]).union(textStyleKeys)
         case .prompt:
-            Set(["kind.content", "kind.model"])
-        case .context:
-            Set(["kind.content"])
+            Set(["kind.width", "kind.height", "kind.content", "kind.model"]).union(textStyleKeys)
         case .icon:
             Set(["kind.icon", "kind.library", "kind.weight",
                  "kind.width", "kind.height", "kind.fills", "kind.effects", "kind.blendMode"])

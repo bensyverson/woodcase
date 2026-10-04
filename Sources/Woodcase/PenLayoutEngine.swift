@@ -424,6 +424,9 @@ extension PenLayoutEngine {
         case let .icon(d): d.width ?? .fitContent(fallback: nil)
         case let .script(d): d.width ?? .fitContent(fallback: nil)
         case let .browser(d): d.width ?? .fitContent(fallback: nil)
+        case let .note(d): PenPostIt.layoutSizing(d.width)
+        case let .prompt(d): d.width ?? .fitContent(fallback: nil)
+        case let .context(d): d.width ?? .fitContent(fallback: nil)
         case let .unknown(_, properties): PenSizing(declared: properties["width"]) ?? .fitContent(fallback: nil)
         default: .fitContent(fallback: nil)
         }
@@ -440,6 +443,9 @@ extension PenLayoutEngine {
         case let .icon(d): d.height ?? .fitContent(fallback: nil)
         case let .script(d): d.height ?? .fitContent(fallback: nil)
         case let .browser(d): d.height ?? .fitContent(fallback: nil)
+        case let .note(d): PenPostIt.layoutSizing(d.height)
+        case let .prompt(d): d.height ?? .fitContent(fallback: nil)
+        case let .context(d): d.height ?? .fitContent(fallback: nil)
         case let .unknown(_, properties): PenSizing(declared: properties["height"]) ?? .fitContent(fallback: nil)
         default: .fitContent(fallback: nil)
         }

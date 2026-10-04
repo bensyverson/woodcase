@@ -249,6 +249,7 @@ public enum DocumentLinter {
         found += meshGradientFindings(row, node: node)
         found += shaderFindings(row, node: node)
         found += perSideStrokeOnShape(row, node: node)
+        found += noteUnsized(row, node: node)
         found += codegenPropPathFindings(row, node: node, in: context)
         found += codegenUnmappedOverrideFindings(row, node: node, in: context)
         return found

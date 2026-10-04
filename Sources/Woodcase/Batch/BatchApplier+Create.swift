@@ -26,6 +26,7 @@ extension BatchApplier {
         let parentID = try op.parent.map { try containerID($0, in: document, tags: tags) }
         let plan = try SubtreeIDPlan.keeping(op.node, avoiding: document.allNodeIDs)
         let authored = plan.applied(to: op.node)
+        try NodePropertyCodec.checkAuthoredPostIts(in: authored) { _ in nil }
         var node = authored
         if parentID == nil {
             node = placedAtRoot(node, in: document, coordinates: .authored)
@@ -70,8 +71,12 @@ extension BatchApplier {
         let authored = PenNode(id: targetID, common: op.node.common, kind: op.node.kind, extras: op.node.extras)
         let freed = Set(document.descendantIDs(of: targetID))
         let plan = try SubtreeIDPlan.keeping(authored, avoiding: document.allNodeIDs.subtracting(freed))
+        let replacement = plan.applied(to: authored)
+        // Checked against the node each id names now, so a legacy value the replacement
+        // carries over unchanged passes.
+        try NodePropertyCodec.checkAuthoredPostIts(in: replacement) { document.node(id: $0) }
         return BatchPlan(
-            operations: [.replaceSubtree(EditOperation.ReplaceSubtree(node: plan.applied(to: authored)))],
+            operations: [.replaceSubtree(EditOperation.ReplaceSubtree(node: replacement))],
             expecting: expecting(op.rev, on: targetID),
             createdRootID: targetID,
             actedOnID: targetID

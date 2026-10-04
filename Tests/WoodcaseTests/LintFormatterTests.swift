@@ -85,6 +85,7 @@ struct LintFormatterTests {
             "import-unreadable",
             "mesh-gradient-distorted",
             "mesh-gradient-dropped",
+            "note-unsized",
             "override-key-unread",
             "override-target-not-found",
             "override-value-rejected",

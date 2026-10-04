@@ -26,6 +26,7 @@ enum SchemaHelp {
     /// - Throws: ``CommandFailure`` when `typeName` names no type in the format.
     static func text(for typeName: String?) throws -> String {
         guard let typeName else { return overviewText() }
+        if typeName == PenPostIt.typeValue { return postItText() }
         let type = try resolve(typeName)
         return typeText(type)
     }
@@ -38,6 +39,9 @@ enum SchemaHelp {
     static func json(for typeName: String?) throws -> String {
         guard let typeName else {
             return try SchemaTableFormatter.json(SchemaOverviewReport())
+        }
+        if typeName == PenPostIt.typeValue {
+            return try SchemaTableFormatter.json(SchemaPostItReport())
         }
         let type = try resolve(typeName)
         return try SchemaTableFormatter.json(SchemaTypeReport(type: type))
@@ -82,6 +86,9 @@ enum SchemaHelp {
 
         \(SchemaTableFormatter.nested(PenSchema.rootShapes))
 
+        POST-IT CONVENTION — `woodcase schema \(PenPostIt.typeValue)` prints the metadata keys a note \
+        carries when metadata.type is "\(PenPostIt.typeValue)"
+
         \(legend)
         """
     }
@@ -105,6 +112,29 @@ enum SchemaHelp {
         \(legend)
         """)
         return sections.joined(separator: "\n\n")
+    }
+
+    // MARK: - The post-it convention
+
+    /// The post-it metadata keys, what each holds and the spellings the typed ones take.
+    ///
+    /// Not a node type: a convention over `common.metadata`, so it has no `kind.*` rows
+    /// and no legend, only the key table ``SchemaPostItReport`` carries.
+    private static func postItText() -> String {
+        let report = SchemaPostItReport()
+        let width = report.keys.map(\.key.count).max() ?? 0
+        let rows = report.keys.map { key in
+            let path = key.key.padding(toLength: width, withPad: " ", startingAt: 0)
+            let spellings = key.spellings.isEmpty ? "any string" : key.spellings.joined(separator: " | ")
+            return "  \(path)  \(spellings) — \(key.summary)"
+        }
+        return """
+        \(report.type) — \(report.summary)
+
+        \(rows.joined(separator: "\n"))
+
+        Write one key with a deep key: woodcase set <file> <note> common.metadata.kind=question
+        """
     }
 
     // MARK: - The legend

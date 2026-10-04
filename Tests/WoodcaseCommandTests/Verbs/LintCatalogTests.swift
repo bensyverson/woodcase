@@ -20,7 +20,7 @@ struct LintCatalogTests {
     @Test("--list prints every check, one per line, with no file")
     func listPrintsEveryCheck() throws {
         let fixture = try CommandFixture(fixture: "lint/clean.pen")
-        let run = try fixture.run("lint", "--list")
+        let run = try fixture.run("lint", "--list", "--severity", "notice")
         #expect(run.status == 0)
         #expect(run.stderr.isEmpty)
         let lines = run.stdoutLines
@@ -33,7 +33,7 @@ struct LintCatalogTests {
     @Test("--list carries each check's one-line description")
     func listCarriesSummaries() throws {
         let fixture = try CommandFixture(fixture: "lint/clean.pen")
-        let run = try fixture.run("lint", "--list")
+        let run = try fixture.run("lint", "--list", "--severity", "notice")
         for check in LintCheck.allCases {
             #expect(run.stdout.contains(check.summary))
         }
@@ -42,7 +42,7 @@ struct LintCatalogTests {
     @Test("--list --json is an array with an object per check")
     func listJSON() throws {
         let fixture = try CommandFixture(fixture: "lint/clean.pen")
-        let run = try fixture.run("lint", "--list", "--json")
+        let run = try fixture.run("lint", "--list", "--json", "--severity", "notice")
         #expect(run.status == 0)
         let rows = try JSONDecoder().decode([[String: String]].self, from: Data(run.stdout.utf8))
         #expect(rows.count == LintCheck.allCases.count)
@@ -58,10 +58,19 @@ struct LintCatalogTests {
     @Test("--list composes with --exclude, which drops the row")
     func listComposesWithExclude() throws {
         let fixture = try CommandFixture(fixture: "lint/clean.pen")
-        let run = try fixture.run("lint", "--list", "--exclude", "clipped")
+        let run = try fixture.run("lint", "--list", "--exclude", "clipped", "--severity", "notice")
         #expect(run.status == 0)
         #expect(run.stdoutLines.count == LintCheck.allCases.count - 1)
         #expect(!run.stdout.contains(" clipped  "))
+    }
+
+    @Test("--list without --severity leaves out the notice checks, as lint does")
+    func listDefaultsToWarnings() throws {
+        let fixture = try CommandFixture(fixture: "lint/clean.pen")
+        let run = try fixture.run("lint", "--list")
+        #expect(run.status == 0)
+        #expect(!run.stdout.contains(" \(LintCheck.noteUnsized.rawValue)  "))
+        #expect(run.stdoutLines.count == LintCheck.allCases.count(where: { $0.severity.meetsOrExceeds(.warning) }))
     }
 
     @Test("--list composes with --severity, which keeps only the errors")

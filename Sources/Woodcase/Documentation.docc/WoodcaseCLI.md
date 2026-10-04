@@ -409,6 +409,7 @@ anything to read.
 woodcase schema              # the node types, and the common.* properties
 woodcase schema text         # one type's own properties
 woodcase schema text --json  # the same tables, machine-readable
+woodcase schema postit       # the post-it metadata convention: keys and spellings
 ```
 
 Each row is the codec path `set` accepts, the key the `.pen` file writes the value

@@ -81,6 +81,16 @@ public enum EditingError: Error, Equatable, Sendable {
     /// ``propertyTypeMismatch(nodeID:key:expected:actual:)`` carries.
     case documentPropertyTypeMismatch(key: String, expected: String, actual: String)
 
+    /// A write to a post-it's metadata gives a key a value the convention does not spell.
+    ///
+    /// Only an agent's write is held to ``PenPostIt``'s convention, and only on a key it
+    /// changes, so a file that already holds a misspelling still opens and a write that
+    /// leaves that key alone still passes. `key` is the path (`common.metadata.kind`),
+    /// `value` the rejected value as JSON, `accepted` the spellings the key takes
+    /// (``PenPostIt/Key/spellings``, or `["a string"]` for a free-text key), and
+    /// `suggestion` the closest of them, when one is close.
+    case postItMetadataRejected(nodeID: String, key: String, value: String, accepted: [String], suggestion: String?)
+
     // MARK: - Addressing
 
     /// An address matched more than one node. Every candidate is listed with its

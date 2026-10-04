@@ -28,7 +28,7 @@ public extension NodePropertyCodec {
     /// Only these take deep keys. Every other property keeps its plain meaning, so
     /// `common.name.first` is the unknown property it has always been rather than a
     /// silent write into a string.
-    static let deepKeyedPaths: Set<String> = ["common.metadata"]
+    static let deepKeyedPaths: Set<String> = [metadataPath]
 
     /// Splits a deep key into the property it writes into and the key path inside it.
     ///
@@ -86,16 +86,13 @@ public extension NodePropertyCodec {
             for write in writes.sorted(by: { $0.keyPath.lexicographicallyPrecedes($1.keyPath) }) {
                 object = merging(write.value, at: write.keyPath, into: object)
             }
-            if property == metadataProperty, object["type"] == nil {
+            if property == metadataPath, object["type"] == nil {
                 object["type"] = .string(defaultMetadataType)
             }
             folded[property] = .dictionary(object)
         }
         return folded
     }
-
-    /// The one deep-keyed property the schema requires a `type` key on.
-    private static let metadataProperty = "common.metadata"
 
     /// What a deep key writes as `type` when it creates a metadata object with none.
     private static let defaultMetadataType = "unknown"

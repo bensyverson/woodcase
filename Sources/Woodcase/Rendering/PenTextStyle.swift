@@ -96,13 +96,15 @@ public struct PenTextStyle: Friendly {
         self.strikethrough = strikethrough
     }
 
-    /// The style a text node sets its content in.
+    /// The style a node carrying the format's TextStyle keys sets its content in.
     ///
+    /// A `text`, `note`, `prompt` or `context` all carry the same keys
+    /// (``PenTextStyleProperties``), so all four resolve through the same defaults here.
     /// Only literal values count: a property still holding an unresolved `$variable`
     /// takes its default, as the renderer has always drawn it.
     ///
-    /// - Parameter data: The text node's data.
-    public init(_ data: PenNode.TextData) {
+    /// - Parameter data: The node's data.
+    public init(_ data: some PenTextStyleProperties) {
         self.init(
             fontFamily: data.fontFamily?.literalValue ?? Self.defaultFontFamily,
             fontSize: data.fontSize?.literalValue ?? Self.defaultFontSize,

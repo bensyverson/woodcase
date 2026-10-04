@@ -517,14 +517,7 @@ public enum PenVariableResolver {
         result.width = resolveSizing(data.width, from: table)
         result.height = resolveSizing(data.height, from: table)
         result.content = resolveTextContent(data.content, from: table, definedNames: definedNames)
-        result.fontFamily = resolve(data.fontFamily, from: table)
-        result.fontSize = resolve(data.fontSize, from: table)
-        result.fontWeight = resolve(data.fontWeight, from: table)
-        result.fontStyle = resolve(data.fontStyle, from: table)
-        result.letterSpacing = resolve(data.letterSpacing, from: table)
-        result.lineHeight = resolve(data.lineHeight, from: table)
-        result.underline = resolve(data.underline, from: table)
-        result.strikethrough = resolve(data.strikethrough, from: table)
+        resolveTextStyle(&result, from: table)
         result.fills = resolveFills(data.fills, from: table)
         resolveStroke(&result, from: table)
         result.effects = resolveEffects(data.effects, from: table)
@@ -633,13 +626,34 @@ public enum PenVariableResolver {
         return result
     }
 
+    /// Resolves the TextStyle keys that can hold a `$variable`, in place.
+    ///
+    /// `textAlign`, `textAlignVertical` and `href` take no variable, so they are left
+    /// as they are.
+    private static func resolveTextStyle(
+        _ data: inout some PenTextStyleProperties,
+        from table: [String: AnyCodable]
+    ) {
+        data.fontFamily = resolve(data.fontFamily, from: table)
+        data.fontSize = resolve(data.fontSize, from: table)
+        data.fontWeight = resolve(data.fontWeight, from: table)
+        data.fontStyle = resolve(data.fontStyle, from: table)
+        data.letterSpacing = resolve(data.letterSpacing, from: table)
+        data.lineHeight = resolve(data.lineHeight, from: table)
+        data.underline = resolve(data.underline, from: table)
+        data.strikethrough = resolve(data.strikethrough, from: table)
+    }
+
     private static func resolveNoteData(
         _ data: PenNode.NoteData,
         from table: [String: AnyCodable],
         definedNames: Set<String>
     ) -> PenNode.NoteData {
         var result = data
+        result.width = resolveSizing(data.width, from: table)
+        result.height = resolveSizing(data.height, from: table)
         result.content = resolveTextContent(data.content, from: table, definedNames: definedNames)
+        resolveTextStyle(&result, from: table)
         return result
     }
 
@@ -649,7 +663,10 @@ public enum PenVariableResolver {
         definedNames: Set<String>
     ) -> PenNode.PromptData {
         var result = data
+        result.width = resolveSizing(data.width, from: table)
+        result.height = resolveSizing(data.height, from: table)
         result.content = resolveTextContent(data.content, from: table, definedNames: definedNames)
+        resolveTextStyle(&result, from: table)
         return result
     }
 
@@ -659,7 +676,10 @@ public enum PenVariableResolver {
         definedNames: Set<String>
     ) -> PenNode.ContextData {
         var result = data
+        result.width = resolveSizing(data.width, from: table)
+        result.height = resolveSizing(data.height, from: table)
         result.content = resolveTextContent(data.content, from: table, definedNames: definedNames)
+        resolveTextStyle(&result, from: table)
         return result
     }
 
