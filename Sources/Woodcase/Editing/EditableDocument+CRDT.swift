@@ -30,11 +30,12 @@ public extension EditableDocument {
 
         try validate(operation)
 
-        // Detach requires special handling: it generates random IDs, so we must
-        // expand and remap once, then decompose into delete + insert primitives
-        // that both the CRDT and flat store process identically.
+        // Detach has no CRDT primitive: it is planned once — derived ids and all —
+        // and decomposed into the delete + insert both the CRDT and the flat store
+        // process identically.
         if case let .detachRef(detachOp) = operation {
-            return try applyLocalDetachRef(detachOp, crdtDocument: crdtDocument)
+            guard let plan = try detachPlans(for: [detachOp.refNodeID]).first else { return [] }
+            return try applyLocalDetachRef(plan)
         }
 
         // Replace needs the same treatment for a different reason: the CRDT has no
@@ -51,15 +52,17 @@ public extension EditableDocument {
         if case let .deleteNode(deleteOp) = operation {
             let stranded = try instancesToDetach(for: deleteOp)
             if !stranded.isEmpty {
-                return try applyLocalDetachingDelete(deleteOp, stranded: stranded, crdtDocument: crdtDocument)
+                return try applyLocalDetachingDelete(deleteOp, plans: detachPlans(for: stranded))
             }
         }
 
         let ops = crdtDocument.processLocal(operation: operation, document: self)
 
         if ops.isEmpty {
-            // Nothing to replicate — a no-op edit, or a patch the CRDT declined to
-            // encode. The flat store still runs it.
+            // Nothing to replicate — a no-op edit, a patch the CRDT declined to
+            // encode, or a local-only operation: ``EditOperation/setDocumentProperties(_:)``
+            // has no replicated register, so the root's fonts, version, file token and
+            // extras change on this peer alone. The flat store still runs it.
             try apply(operation)
             return []
         }
@@ -85,36 +88,31 @@ public extension EditableDocument {
         return ops
     }
 
-    /// Handles detachRef in CRDT mode by expanding once and decomposing into primitives.
+    /// Carries out one planned detach in CRDT mode by decomposing it into primitives.
     ///
-    /// This avoids the ID divergence bug that would occur if `processLocal` and `apply`
-    /// independently called `PenID.remapIDs()` — they'd generate different random IDs,
-    /// causing the CRDT state and flat store to diverge.
-    private func applyLocalDetachRef(
-        _ op: EditOperation.DetachRef,
-        crdtDocument _: CRDTDocument
-    ) throws -> [CRDTOperation] {
-        try requireRef(op.refNodeID)
+    /// The plan was made once, with derived ids
+    /// (``SubtreeIDPlan/detaching(_:refID:replica:avoiding:)``), so the CRDT and the flat
+    /// store insert the same subtree, and the inverse prepared beforehand names it.
+    ///
+    /// - Parameter plan: The detach, from ``detachPlans(for:)``.
+    /// - Returns: The CRDT operations to replicate, in application order.
+    /// - Throws: Whatever the primitives throw.
+    private func applyLocalDetachRef(_ plan: PlannedDetach) throws -> [CRDTOperation] {
+        try requireRef(plan.refID)
 
-        // Step 1: Expand and remap ONCE
-        let expanded = try expandRef(nodeID: op.refNodeID)
-        let (remapped, _) = PenID.remapIDs(in: expanded.expandedNode)
-
-        // Step 2: Record the ref's position
-        let parentID = parents[op.refNodeID]
+        // Record the ref's position, then decompose into primitive operations.
+        let parentID = parents[plan.refID]
         let index: Int? = if let parentID {
-            children[parentID]?.firstIndex(of: op.refNodeID)
+            children[parentID]?.firstIndex(of: plan.refID)
         } else {
-            rootOrder.firstIndex(of: op.refNodeID)
+            rootOrder.firstIndex(of: plan.refID)
         }
-
-        // Step 3: Decompose into primitive operations
-        let deleteOp = EditOperation.deleteNode(EditOperation.DeleteNode(nodeID: op.refNodeID))
+        let deleteOp = EditOperation.deleteNode(EditOperation.DeleteNode(nodeID: plan.refID))
         let insertOp = EditOperation.insertNode(EditOperation.InsertNode(
-            node: remapped, parentID: parentID, index: index
+            node: plan.subtree, parentID: parentID, index: index
         ))
 
-        // Step 4: Process both through the normal applyLocal path
+        // Process both through the normal applyLocal path
         var allOps = try applyLocal(deleteOp)
         try allOps.append(contentsOf: applyLocal(insertOp))
         return allOps
@@ -164,21 +162,17 @@ public extension EditableDocument {
 
     /// Handles a detaching delete in CRDT mode by decomposing it into primitives.
     ///
-    /// Each stranded instance goes through `applyLocalDetachRef`, the same
-    /// single-expansion path a plain detach uses, so both peers see the same generated
-    /// ids. The component then goes through an ordinary delete, which by then strands
-    /// nothing — and would throw if it somehow still did.
+    /// Each stranded instance goes through `applyLocalDetachRef`, the same planned path
+    /// a plain detach uses, so both peers see the same ids — the ones
+    /// ``prepareInverse(of:)`` named. The component then goes through an ordinary
+    /// delete, which by then strands nothing — and would throw if it somehow still did.
     private func applyLocalDetachingDelete(
         _ op: EditOperation.DeleteNode,
-        stranded: [String],
-        crdtDocument: CRDTDocument
+        plans: [PlannedDetach]
     ) throws -> [CRDTOperation] {
         var ops: [CRDTOperation] = []
-        for instanceID in stranded {
-            try ops.append(contentsOf: applyLocalDetachRef(
-                EditOperation.DetachRef(refNodeID: instanceID),
-                crdtDocument: crdtDocument
-            ))
+        for plan in plans {
+            try ops.append(contentsOf: applyLocalDetachRef(plan))
         }
         var plainDelete = op
         plainDelete.instances = .refuse
@@ -342,6 +336,11 @@ extension EditableDocument {
                 newChildren[parentID, default: []].append(childID)
             }
         }
+        // A live container that declared a children array keeps one, empty or not, so
+        // a peer that removed the last child and the peers it told agree on the bytes.
+        for parentID in children.keys where newChildren[parentID] == nil && nodes[parentID] != nil {
+            newChildren[parentID] = []
+        }
         children = newChildren
     }
 
@@ -364,9 +363,13 @@ extension EditableDocument {
         }
 
         for (parentID, childIDs) in children {
+            guard nodes[parentID] != nil else {
+                children[parentID] = nil
+                continue
+            }
+            // An emptied list stays declared, as it does for a local delete or move.
             var seen = Set<String>()
-            let valid = childIDs.filter { parents[$0] == parentID && seen.insert($0).inserted }
-            children[parentID] = valid.isEmpty ? nil : valid
+            children[parentID] = childIDs.filter { parents[$0] == parentID && seen.insert($0).inserted }
         }
 
         var seenRoot = Set<String>()
@@ -435,18 +438,19 @@ extension EditableDocument {
             componentRegistry[nodeID] = nil
             nodes[nodeID] = nil
             children[nodeID] = nil
+            // A parent left with no children keeps its declared empty array.
             if let parentID = parents[nodeID] {
                 children[parentID]?.removeAll { $0 == nodeID }
-                if children[parentID]?.isEmpty == true {
-                    children[parentID] = nil
-                }
             } else {
                 rootOrder.removeAll { $0 == nodeID }
             }
 
         case let .setChildren(parentID, childIDs):
+            // An emptied list stays declared; one that was never declared stays absent.
             if let parentID {
-                children[parentID] = childIDs.isEmpty ? nil : childIDs
+                if !childIDs.isEmpty || children[parentID] != nil {
+                    children[parentID] = childIDs
+                }
             } else {
                 rootOrder = childIDs
             }
@@ -455,9 +459,6 @@ extension EditableDocument {
             // Remove from old parent first
             if let oldParentID = parents[nodeID] {
                 children[oldParentID]?.removeAll { $0 == nodeID }
-                if children[oldParentID]?.isEmpty == true {
-                    children[oldParentID] = nil
-                }
             } else if rootOrder.contains(nodeID) {
                 rootOrder.removeAll { $0 == nodeID }
             }

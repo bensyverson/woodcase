@@ -243,7 +243,13 @@ extension CRDTDocument {
         }
 
         var ops: [CRDTOperation] = []
-        for (path, value) in op.properties {
+        // A node's extras replicate as one register, never key by key: a per-key write
+        // racing a whole-register write would leave peers disagreeing on which won.
+        // So `extras.<key>` paths become one write of the patched register.
+        if op.properties.keys.contains(where: NodePropertyCodec.isExtrasPath), patched.extras != node.extras {
+            ops.append(contentsOf: processLocalSetExtras(nodeID: op.nodeID, extras: patched.extras))
+        }
+        for (path, value) in op.properties where !NodePropertyCodec.isExtrasPath(path) {
             let normalized = (try? NodePropertyCodec.value(at: path, of: patched)) ?? value
             let crdtOp = makeOp(.setProperty(CRDTOperation.SetProperty(
                 nodeID: op.nodeID,

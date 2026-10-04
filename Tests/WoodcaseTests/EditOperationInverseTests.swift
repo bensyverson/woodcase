@@ -272,17 +272,9 @@ struct EditOperationInverseTests {
         let detachParam = EditOperation.DetachRef(refNodeID: "ref1")
         let detachOp = EditOperation.detachRef(detachParam)
 
-        // Phase 1: capture partial inverse (insert-ref) before detach
-        let partialInverse = try doc.prepareInverse(of: detachOp)
-
-        // Phase 2: apply detach and get the expanded root ID
-        let result = try doc.detachRef(detachParam)
-
-        // Phase 3: complete the inverse with the expanded root ID
-        let fullInverse = doc.completeDetachInverse(
-            expandedRootID: result.rootNodeID,
-            partialInverse: partialInverse
-        )
+        // The inverse is complete before the detach: its ids are derived, not drawn.
+        let fullInverse = try doc.prepareInverse(of: detachOp)
+        try doc.apply(detachOp)
 
         // ref1 should be gone (replaced by expanded nodes)
         #expect(doc.nodes["ref1"] == nil)
@@ -333,19 +325,15 @@ struct EditOperationInverseTests {
         #expect(commonInverse.count == 1)
     }
 
-    @Test("DetachRef partial inverse returns single element, completed inverse returns two")
+    @Test("DetachRef's prepared inverse has two steps, the first deleting the root the detach produces")
     func detachRefInverseElementCounts() throws {
         let doc = makeRefDoc()
         let detachParam = EditOperation.DetachRef(refNodeID: "ref1")
 
-        let partialInverse = try doc.prepareInverse(of: .detachRef(detachParam))
-        #expect(partialInverse.count == 1)
+        let inverse = try doc.prepareInverse(of: .detachRef(detachParam))
+        #expect(inverse.count == 2)
 
         let result = try doc.detachRef(detachParam)
-        let fullInverse = doc.completeDetachInverse(
-            expandedRootID: result.rootNodeID,
-            partialInverse: partialInverse
-        )
-        #expect(fullInverse.count == 2)
+        #expect(inverse.first == .deleteNode(EditOperation.DeleteNode(nodeID: result.rootNodeID)))
     }
 }

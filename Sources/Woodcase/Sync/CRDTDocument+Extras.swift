@@ -10,9 +10,10 @@ import Foundation
 /// Extras are one last-writer-wins register per node, carried on the wire as an ordinary
 /// ``CRDTOperation/SetProperty`` under the reserved path ``extrasProperty`` with the whole
 /// ``PenExtras`` as its value. A node's extras arrive with it in
-/// ``CRDTOperation/CreateNode``; after that the only local write is a replace, which
-/// gives the node its replacement's extras. Nothing edits a single extra, so the register
-/// never contends with a property write.
+/// ``CRDTOperation/CreateNode``; after that a local write is a replace, which gives the
+/// node its replacement's extras, or an ``EditOperation/setProperties(_:)`` naming
+/// `extras.<key>` paths, which is sent as one write of the patched register. Extras never
+/// replicate key by key, so the register never contends with a write of one of its keys.
 extension CRDTDocument {
     /// The property path a node's extras register is keyed under.
     ///

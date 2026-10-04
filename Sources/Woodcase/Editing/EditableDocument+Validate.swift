@@ -59,6 +59,8 @@ extension EditableDocument {
             try requireThemeAxis(op.name)
         case let .removeThemeAxis(op):
             try requireThemeAxis(op.name)
+        case let .setDocumentProperties(op):
+            try validateSetDocumentProperties(op)
         }
     }
 

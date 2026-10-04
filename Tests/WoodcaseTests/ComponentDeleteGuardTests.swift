@@ -171,9 +171,8 @@ struct ComponentDeleteGuardTests {
         let editable = makeEditable()
         let op = EditOperation.DeleteNode(nodeID: "comp1", instances: .detach)
 
-        let partial = try editable.prepareInverse(of: .deleteNode(op))
+        let inverse = try editable.prepareInverse(of: .deleteNode(op))
         let detached = try editable.deleteNode(op)
-        let inverse = editable.completeDetachingDeleteInverse(detached: detached, partialInverse: partial)
 
         #expect(detached.count == 2)
         for step in inverse {

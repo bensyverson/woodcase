@@ -29,6 +29,10 @@ import Foundation
 ///   Every id is drawn afresh, whatever the subtree carries, because a copy that
 ///   kept its source's ids would collide with the source.
 ///
+/// A third, ``detaching(_:refID:replica:avoiding:)``, derives every id instead of drawing it,
+/// so a detach — and the inverse prepared before it — names the same subtree on every
+/// replica.
+///
 /// ```swift
 /// let plan = try SubtreeIDPlan.keeping(subtree, avoiding: document.allNodeIDs)
 /// let settled = plan.applied(to: subtree)

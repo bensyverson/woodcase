@@ -37,6 +37,8 @@ public extension EditingError {
         case .notARefNode: "notARefNode"
         case .unknownProperty: "unknownProperty"
         case .propertyTypeMismatch: "propertyTypeMismatch"
+        case .unknownDocumentProperty: "unknownDocumentProperty"
+        case .documentPropertyTypeMismatch: "documentPropertyTypeMismatch"
         case .ambiguousAddress: "ambiguousAddress"
         case .addressNotFound: "addressNotFound"
         case .componentHasInstances: "componentHasInstances"

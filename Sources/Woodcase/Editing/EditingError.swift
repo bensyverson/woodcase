@@ -68,6 +68,19 @@ public enum EditingError: Error, Equatable, Sendable {
     /// `"string"`), used verbatim in the message.
     case propertyTypeMismatch(nodeID: String, key: String, expected: String, actual: String)
 
+    /// A key is not a property of the document root.
+    ///
+    /// The vocabulary is ``DocumentPropertyCodec``'s: `fonts`, `version`, `fileToken`
+    /// and `extras.<key>` for a root key the model does not claim. `key` is the key as
+    /// written.
+    case unknownDocumentProperty(key: String)
+
+    /// A document property key is known but the supplied value has the wrong shape.
+    ///
+    /// `expected` and `actual` are the same short descriptions
+    /// ``propertyTypeMismatch(nodeID:key:expected:actual:)`` carries.
+    case documentPropertyTypeMismatch(key: String, expected: String, actual: String)
+
     // MARK: - Addressing
 
     /// An address matched more than one node. Every candidate is listed with its

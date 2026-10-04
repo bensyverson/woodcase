@@ -12,7 +12,11 @@ public extension EditableDocument {
     /// in order after the forward operation, will undo its effects.
     ///
     /// Most operations return a single-element array. ``EditOperation/detachRef(_:)``
-    /// returns two operations (delete expanded subtree + re-insert original ref).
+    /// returns two operations (delete expanded subtree + re-insert original ref), and a
+    /// delete that detaches instances returns the re-insert followed by that pair for
+    /// each instance. Both are complete before the operation runs: a detach's ids are
+    /// derived (``SubtreeIDPlan/detaching(_:refID:replica:avoiding:)``), so the subtree it will
+    /// insert is known in advance and needs no completion step afterwards.
     ///
     /// - Parameter operation: The operation about to be applied.
     /// - Returns: The inverse operation(s) that undo this operation.
@@ -57,6 +61,8 @@ public extension EditableDocument {
             try [prepareInverseUpdateThemeAxis(op)]
         case let .removeThemeAxis(op):
             try [prepareInverseRemoveThemeAxis(op)]
+        case let .setDocumentProperties(op):
+            try [prepareInverseSetDocumentProperties(op)]
         }
     }
 }
@@ -89,15 +95,13 @@ extension EditableDocument {
 
     /// Inverse of delete: re-insert the full subtree at its current position.
     ///
-    /// A delete that detaches instances first is three steps forward — detach each
-    /// instance, then delete — so its inverse is those steps undone in reverse. Only
-    /// the re-inserts can be captured now: the expanded roots the detaches will
-    /// produce do not exist yet, so this returns a partial that
-    /// ``completeDetachingDeleteInverse(detached:partialInverse:)`` finishes, exactly
-    /// as ``completeDetachInverse(expandedRootID:partialInverse:)`` finishes a detach.
+    /// A delete that detaches instances first is several steps forward — detach each
+    /// instance, then delete — so its inverse is those steps undone in reverse: the
+    /// deleted subtree back first, so the component exists before anything points at
+    /// it again, then each detach undone, last first.
     ///
-    /// - Returns: The insert that restores the deleted subtree, followed by one insert
-    ///   per instance the delete will detach.
+    /// - Returns: The insert that restores the deleted subtree, followed by a detach
+    ///   inverse per instance the delete will detach.
     private func prepareInverseDelete(_ op: EditOperation.DeleteNode) throws -> [EditOperation] {
         let subtree = try materializeSubtree(rootID: op.nodeID)
         let parentID = parents[op.nodeID]
@@ -113,10 +117,8 @@ extension EditableDocument {
         ))]
 
         guard op.instances == .detach else { return inverse }
-        for instanceID in try instancesToDetach(for: op) {
-            try inverse.append(contentsOf: prepareInverseDetachRef(
-                EditOperation.DetachRef(refNodeID: instanceID)
-            ))
+        for plan in try detachPlans(for: instancesToDetach(for: op)).reversed() {
+            try inverse.append(contentsOf: detachInverse(of: plan))
         }
         return inverse
     }
@@ -230,74 +232,6 @@ extension EditableDocument {
         to existing: [String: AnyCodable]
     ) -> [String] {
         properties.keys.filter { existing[$0] == nil }.sorted()
-    }
-
-    /// Captures pre-detach state for undo. Returns only the insert-ref operation.
-    ///
-    /// Since ``EditOperation/detachRef(_:)`` generates random IDs for expanded nodes,
-    /// the delete operation for the expanded subtree cannot be determined before the
-    /// detach runs. Call ``completeDetachInverse(expandedRootID:partialInverse:)``
-    /// after applying the detach to get the full 2-element inverse.
-    ///
-    /// - Returns: A single-element array containing the insert-ref operation.
-    private func prepareInverseDetachRef(_ op: EditOperation.DetachRef) throws -> [EditOperation] {
-        guard let node = nodes[op.refNodeID] else {
-            throw EditingError.nodeNotFound(id: op.refNodeID)
-        }
-        guard case .ref = node.kind else {
-            throw EditingError.notARefNode(id: op.refNodeID)
-        }
-
-        let parentID = parents[op.refNodeID]
-        let index: Int? = if let parentID {
-            children[parentID]?.firstIndex(of: op.refNodeID)
-        } else {
-            rootOrder.firstIndex(of: op.refNodeID)
-        }
-
-        return [
-            .insertNode(EditOperation.InsertNode(node: node, parentID: parentID, index: index)),
-        ]
-    }
-
-    /// Completes a detach inverse by prepending a delete operation for the expanded root.
-    ///
-    /// Call after applying ``EditOperation/detachRef(_:)`` to combine the expanded root ID
-    /// (from ``DetachResult``) with the partial inverse from ``prepareInverse(of:)``.
-    ///
-    /// - Parameters:
-    ///   - expandedRootID: The root node ID from the detach result.
-    ///   - partialInverse: The partial inverse from ``prepareInverse(of:)``.
-    /// - Returns: A 2-element array: `[deleteNode(expanded), insertNode(ref)]`.
-    public func completeDetachInverse(
-        expandedRootID: String,
-        partialInverse: [EditOperation]
-    ) -> [EditOperation] {
-        [.deleteNode(EditOperation.DeleteNode(nodeID: expandedRootID))] + partialInverse
-    }
-
-    /// Completes a detaching delete's inverse with the roots its detaches produced.
-    ///
-    /// Call after ``deleteNode(_:)`` with the results it returned and the partial
-    /// inverse from ``prepareInverse(of:)``. The completed list restores the deleted
-    /// subtree first — so the component is back before anything points at it again —
-    /// then removes each expanded subtree and re-inserts the instance it replaced.
-    ///
-    /// - Parameters:
-    ///   - detached: The results from ``deleteNode(_:)``.
-    ///   - partialInverse: The partial inverse from ``prepareInverse(of:)``.
-    /// - Returns: The full inverse, to apply in order.
-    public func completeDetachingDeleteInverse(
-        detached: [DetachResult],
-        partialInverse: [EditOperation]
-    ) -> [EditOperation] {
-        guard let restoreDeleted = partialInverse.first, !detached.isEmpty else {
-            return partialInverse
-        }
-        let removals: [EditOperation] = detached.map {
-            .deleteNode(EditOperation.DeleteNode(nodeID: $0.rootNodeID))
-        }
-        return [restoreDeleted] + removals + partialInverse.dropFirst()
     }
 }
 

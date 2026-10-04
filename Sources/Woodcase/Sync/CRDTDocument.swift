@@ -192,6 +192,11 @@ public final class CRDTDocument {
             processLocalSetThemeAxis(name: op.name, options: op.options)
         case let .removeThemeAxis(op):
             processLocalRemoveThemeAxis(name: op.name)
+        case .setDocumentProperties:
+            // Local-only: the replica keeps no register for the root's fonts, version,
+            // file token or extras, so the edit stays on this peer's flat store and
+            // nothing is sent. See ``EditableDocument/applyLocal(_:)``.
+            []
         }
     }
 

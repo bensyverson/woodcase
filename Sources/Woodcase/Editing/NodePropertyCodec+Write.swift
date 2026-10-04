@@ -31,6 +31,9 @@ extension NodePropertyCodec {
     ///   ``EditingError/propertyTypeMismatch(nodeID:key:expected:actual:)`` if the
     ///   value cannot decode to the property's type.
     public static func setting(_ value: AnyCodable, at path: String, on node: PenNode) throws -> PenNode {
+        if isExtrasPath(path) {
+            return try settingExtra(value, at: path, on: node)
+        }
         let written = coercing(value, at: path, on: node.kind)
         var patched = node
         if path.hasPrefix(commonPrefix) {

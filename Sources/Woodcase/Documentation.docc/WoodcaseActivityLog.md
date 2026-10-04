@@ -99,21 +99,25 @@ detail. Broken across lines here for reading; on disk it is one line:
   produce one string and a filter on either finds both.
 - **`op`** — a short verb: `set`, `add`, `replace`, `cp`, `mv`, `rm`, `override`,
   `detach`, `var`, `import`, `theme`, `undo`, `external`, `migrate`, `new`. Coarser than ``EditOperation`` on purpose — a feed wants
-  "something was set here", not which of the three property operations did it. Most are
+  "something was set here", not which of the four property operations did it. Most are
   derived from the operation; `cp` and `undo` are supplied by the caller, because an
   inverse operation looks like any other and only its author knows it is an undo, and
   `external`, `migrate` and `new` are not operations at all — see *Writes from outside*
   and *Rewrites and creations* below.
 - **`nodes`** — the node ids the operation touched, subject first, then the parent whose
   children changed. Empty for an operation on the document itself — a variable, an
-  import, a theme axis.
+  import, a theme axis, the root's own properties.
 - **`paths`** — the same nodes' name paths, in the same order. Each is read from the
   state where the node exists: after the operation for a node that survived it, before
   it for one the operation removed. So a rename records the new name and a delete records
   the name that was deleted.
 - **`inverse`** — the operations that undo this one, from
   ``EditableDocument/prepareInverse(of:)``, in the order they must be applied. This is
-  what makes the log an undo source rather than a diary.
+  what makes the log an undo source rather than a diary. A `detach` row's inverse is
+  complete — delete the expanded subtree, re-insert the ref — because a detach's ids are
+  derived from the document and known before it runs; a row written before that change
+  (2026-10-04) carries only the re-insert, still decodes, and replays as far as it goes.
+  So `woodcase rm --detach` followed by `woodcase undo` restores the file byte for byte.
 - **`revision`** — the document's ``EditableDocument/documentRevision`` *after* this
   operation. Per operation, not per transaction, so `undo` can check one event against
   the file's current revision and refuse rather than guess.

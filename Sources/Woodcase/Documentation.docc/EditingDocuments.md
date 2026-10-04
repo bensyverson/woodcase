@@ -16,7 +16,10 @@ nodes in a flat `[String: PenNode]` dictionary with their children stripped to `
 The tree structure is maintained by three maps:
 
 - **nodes**: Every node by ID, with children removed
-- **children**: Parent ID to ordered child IDs
+- **children**: Parent ID to ordered child IDs — present, possibly empty, for every
+  container that declares a children array. A container whose last child is moved or
+  deleted keeps an empty list, so it materializes as `"children": []` rather than losing
+  the key, and a CRDT peer applying the same removal agrees
 - **parents**: Child ID to parent ID
 - **rootOrder**: Ordered IDs of top-level nodes
 
@@ -81,6 +84,12 @@ on, so an edit, a CRDT write and a dirty-tracking diff all name a property the s
   `layoutPosition`, `metadata`.
 - `"kind.<field>"` — the fields of *this node's kind*: `kind.fontSize` exists on a text
   node, not on a rectangle.
+- `"extras.<key>"` — one of the node's ``PenNode/extras``, the keys a file wrote that
+  its type does not model. A null removes the key. A key the type claims (`extras.width`
+  on a frame) is refused, and so is any extra on a `ref`, whose unclaimed keys are root
+  overrides. This family is for a diff and for undo: an agent's `set` cannot write one —
+  ``NodePropertyCodec/checkAuthored(_:on:)`` refuses the path — and
+  ``PropertyDiff/diffExtras(old:new:)`` names the keys that differ between two nodes.
 
 ``NodePropertyCodec/paths(for:)`` lists what a given node accepts, and
 ``NodePropertyCodec/value(at:of:)`` reads one back. `"kind.type"` is deliberately not a
@@ -163,12 +172,29 @@ The inverse of a patch is a patch: ``EditableDocument/prepareInverse(of:)`` retu
 `setProperties` carrying the prior value of exactly the same keys, so undo restores a
 cleared property as well as a changed one. In collaborative mode the patch replicates as
 one last-writer-wins ``CRDTOperation/SetProperty`` per path, so two peers editing
-different properties of the same node both keep their edit.
+different properties of the same node both keep their edit — except `extras.<key>` paths,
+which replicate as one write of the node's whole extras register
+(``CRDTDocument/extrasProperty``).
 
 **Component operations** work with reusable component instances:
 - ``EditOperation/overrideDescendant(_:)`` — create or update descendant overrides on a ref node
 - ``EditOperation/overrideRoot(_:)`` — create or update the root overrides a ref shows the component through
 - ``EditOperation/detachRef(_:)`` — replace a ref with its expanded independent nodes
+
+A detach's ids are derived, not drawn: ``SubtreeIDPlan/detaching(_:refID:replica:avoiding:)``
+hashes the ref's id and each expanded node's id (FNV-1a, written as five base-62
+characters) and re-salts deterministically on a collision with an id the document holds
+— or, in a collaborative session, one the replica has deleted. So the same document and
+ref detach to the same ids every time, and ``EditableDocument/prepareInverse(of:)``
+returns the complete inverse —
+delete the expanded root, re-insert the ref's whole subtree where it was — *before* the
+detach runs. A detaching delete's inverse is likewise whole: the deleted subtree back,
+then each detach undone, last first.
+
+In a collaborative session the hash is also namespaced by the replica's ``PeerID``. A CRDT
+names a node by its id, so two peers detaching one instance concurrently must create
+distinct nodes — with shared ids, one peer's delete of its copy was undone by the other's
+late `createNode`, and the replicas diverged.
 
 Both override operations carry an `unset` list, applied after the merge. Removing a key
 is not the same as overriding it with null: a null is *stored* and clears the
@@ -181,6 +207,12 @@ so undo puts the map back exactly as it stood.
 - Variables: ``EditOperation/addVariable(_:)``, ``EditOperation/updateVariable(_:)``, ``EditOperation/removeVariable(_:)``
 - Imports: ``EditOperation/addImport(_:)``, ``EditOperation/updateImport(_:)``, ``EditOperation/removeImport(_:)``
 - Themes: ``EditOperation/addThemeAxis(_:)``, ``EditOperation/updateThemeAxis(_:)``, ``EditOperation/removeThemeAxis(_:)``
+- The root's own properties: ``EditOperation/setDocumentProperties(_:)`` sets or clears
+  `fonts`, `version`, `fileToken` and root `extras.<key>` by key, in the vocabulary of
+  ``DocumentPropertyCodec``. Its inverse names exactly the keys it wrote, with their
+  prior values. It is **local-only** in a collaborative session: the CRDT keeps no
+  register for these, so ``EditableDocument/applyLocal(_:)`` applies it to the flat
+  store and returns no operations to send.
 
 ### Component Registry and Expansion
 
@@ -680,8 +712,11 @@ try document.apply(.deleteNode(EditOperation.DeleteNode(nodeID: "Btn01", instanc
 ```
 
 Use ``EditableDocument/deleteNode(_:)`` instead of ``EditableDocument/apply(_:)`` when
-you need the ``DetachResult`` of each detach — an undo stack does, to finish its inverse
-with ``EditableDocument/completeDetachingDeleteInverse(detached:partialInverse:)``.
+you need the ``DetachResult`` of each detach. An undo stack no longer does:
+``EditableDocument/prepareInverse(of:)`` names the expanded roots before the delete runs,
+and the old completion step,
+``EditableDocument/completeDetachingDeleteInverse(detached:partialInverse:)``, is a
+deprecated pass-through.
 
 **An override that matches nothing.** An ``EditOperation/OverrideDescendant`` whose
 `descendantID` names no node in the referenced component throws
@@ -734,6 +769,7 @@ under one of its own descendants throws
 - ``EditOperation``
 - ``EditingError``
 - ``NodePropertyCodec``
+- ``DocumentPropertyCodec``
 - ``PenPropertyShape``
 - ``PenValueForm``
 - ``PenNestedShape``

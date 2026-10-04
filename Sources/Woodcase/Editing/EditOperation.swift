@@ -67,6 +67,12 @@ public enum EditOperation: Friendly {
     /// Remove a theme axis.
     case removeThemeAxis(RemoveThemeAxis)
 
+    // MARK: - Document
+
+    /// Set or clear the document root's own properties — `fonts`, `version`,
+    /// `fileToken` and the root's unmodeled `extras.<key>` — leaving the rest alone.
+    case setDocumentProperties(SetDocumentProperties)
+
     // MARK: - Parameter Structs
 
     /// Parameters for inserting a node.
@@ -209,6 +215,13 @@ public enum EditOperation: Friendly {
     /// — the same `"common.name"` / `"kind.width"` vocabulary ``PropertyDiff``
     /// emits — and values are in the .pen file's own JSON shape. A value of
     /// ``AnyCodable/null`` clears the property.
+    ///
+    /// `"extras.<key>"` names one of the node's ``PenNode/extras``: the keys a file
+    /// wrote that the node's type does not model. Setting one adds or replaces that
+    /// key and a null removes it; a key the type claims, or any extra on a `ref`, is
+    /// refused. An agent's `set` cannot write one —
+    /// ``NodePropertyCodec/checkAuthored(_:on:)`` refuses the path — so this is the
+    /// vocabulary of a diff and of undo, not of authoring.
     ///
     /// The operation is atomic: every key and value is validated before anything
     /// is written, so a map with one bad entry leaves the document untouched.

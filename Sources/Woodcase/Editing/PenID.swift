@@ -14,7 +14,12 @@ import Foundation
 /// Generating is not the same as *accepting*: ``isValid(_:)`` is the wider rule an
 /// id supplied by a caller has to satisfy.
 public enum PenID {
-    private static let charset: [Character] = Array("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+    /// The 62 characters a generated id is drawn from — and the digits a derived one
+    /// (``SubtreeIDPlan/detaching(_:refID:replica:avoiding:)``) is written in.
+    static let charset: [Character] = Array("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+
+    /// How many characters a generated or derived id has.
+    static let length = 5
 
     /// Whether a string can be a node id.
     ///
@@ -38,7 +43,7 @@ public enum PenID {
     /// providing adequate collision resistance for typical document sizes.
     public static func generate() -> String {
         var rng = SystemRandomNumberGenerator()
-        return String((0 ..< 5).map { _ in charset[Int(rng.next(upperBound: UInt64(charset.count)))] })
+        return String((0 ..< length).map { _ in charset[Int(rng.next(upperBound: UInt64(charset.count)))] })
     }
 
     /// Generates a fresh ID that doesn't collide with any in the given set.

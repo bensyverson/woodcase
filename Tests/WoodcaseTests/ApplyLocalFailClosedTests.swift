@@ -116,6 +116,8 @@ struct ApplyLocalFailClosedTests {
         case addThemeAxisExists
         case updateThemeAxisMissing
         case removeThemeAxisMissing
+        case setDocumentPropertiesUnknownKey
+        case setDocumentPropertiesBadValue
 
         var testDescription: String {
             rawValue
@@ -203,6 +205,10 @@ struct ApplyLocalFailClosedTests {
                 .updateThemeAxis(EditOperation.UpdateThemeAxis(name: "nope", options: ["a", "b"]))
             case .removeThemeAxisMissing:
                 .removeThemeAxis(EditOperation.RemoveThemeAxis(name: "nope"))
+            case .setDocumentPropertiesUnknownKey:
+                .setDocumentProperties(EditOperation.SetDocumentProperties(properties: ["colour": 1]))
+            case .setDocumentPropertiesBadValue:
+                .setDocumentProperties(EditOperation.SetDocumentProperties(properties: ["version": 3]))
             }
         }
 
@@ -229,6 +235,8 @@ struct ApplyLocalFailClosedTests {
             case .updateImportMissing, .removeImportMissing: "importNotFound"
             case .addThemeAxisExists: "themeAxisAlreadyExists"
             case .updateThemeAxisMissing, .removeThemeAxisMissing: "themeAxisNotFound"
+            case .setDocumentPropertiesUnknownKey: "unknownDocumentProperty"
+            case .setDocumentPropertiesBadValue: "documentPropertyTypeMismatch"
             }
         }
     }
@@ -332,6 +340,8 @@ struct ApplyLocalFailClosedTests {
         case .notARefNode: "notARefNode"
         case .unknownProperty: "unknownProperty"
         case .propertyTypeMismatch: "propertyTypeMismatch"
+        case .unknownDocumentProperty: "unknownDocumentProperty"
+        case .documentPropertyTypeMismatch: "documentPropertyTypeMismatch"
         case .ambiguousAddress: "ambiguousAddress"
         case .addressNotFound: "addressNotFound"
         case .componentHasInstances: "componentHasInstances"

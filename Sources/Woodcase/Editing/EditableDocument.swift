@@ -55,7 +55,12 @@ public final class EditableDocument {
     /// All nodes in the document, keyed by ID, with children stripped to `nil`.
     public internal(set) var nodes: [String: PenNode]
 
-    /// Ordered child IDs for each container node. Only present for nodes that have children.
+    /// Ordered child IDs for each container node that declares a children array.
+    ///
+    /// An entry may be empty: a container written with `"children": []`, or one whose
+    /// last child was moved or deleted, keeps an empty list here, so it materializes
+    /// with the empty array rather than without the key. A container that never
+    /// declared children has no entry.
     public internal(set) var children: [String: [String]]
 
     /// Parent ID for each non-root node.

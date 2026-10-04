@@ -73,6 +73,8 @@ extension EditableDocument {
             try applyUpdateThemeAxis(op)
         case let .removeThemeAxis(op):
             try applyRemoveThemeAxis(op)
+        case let .setDocumentProperties(op):
+            try applySetDocumentProperties(op)
         }
     }
 }
@@ -117,12 +119,10 @@ extension EditableDocument {
     func applyMove(_ op: EditOperation.MoveNode) throws {
         try validateMove(op)
 
-        // Remove from old location
+        // Remove from old location. An old parent left with no children keeps its
+        // declared empty array rather than losing the key.
         if let oldParentID = parents[op.nodeID] {
             children[oldParentID]?.removeAll { $0 == op.nodeID }
-            if children[oldParentID]?.isEmpty == true {
-                children[oldParentID] = nil
-            }
             parents[op.nodeID] = nil
         } else {
             rootOrder.removeAll { $0 == op.nodeID }

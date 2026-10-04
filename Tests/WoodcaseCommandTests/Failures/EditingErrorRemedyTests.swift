@@ -125,6 +125,8 @@ struct EditingErrorRemedyTests {
         .notARefNode(id: "Ttl01"),
         .unknownProperty(nodeID: "Cd101", key: "kind.nonsense", nodeType: "frame"),
         .propertyTypeMismatch(nodeID: "Ttl01", key: "kind.fontSize", expected: "a number", actual: "a string"),
+        .unknownDocumentProperty(key: "colour"),
+        .documentPropertyTypeMismatch(key: "version", expected: "a version string", actual: "a number"),
         .ambiguousAddress(address: "Title", candidates: [
             NodeAddressCandidate(id: "Ttl01", path: "Canvas/Title"),
             NodeAddressCandidate(id: "Ttl02", path: "Board/Title"),
@@ -208,6 +210,8 @@ struct EditingErrorRemedyTests {
         case .notARefNode: "Canvas/Title"
         case let .unknownProperty(_, key, _): key
         case let .propertyTypeMismatch(_, key, _, _): key
+        case let .unknownDocumentProperty(key): key
+        case let .documentPropertyTypeMismatch(key, _, _): key
         case let .ambiguousAddress(address, _): address
         case let .addressNotFound(address, _): address
         case .componentHasInstances: "Component"

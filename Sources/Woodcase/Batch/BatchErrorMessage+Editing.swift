@@ -208,6 +208,12 @@ extension BatchErrorMessage {
                 in: dialect
             )
 
+        case let .unknownDocumentProperty(key):
+            return unknownDocumentProperty(key, in: dialect)
+
+        case let .documentPropertyTypeMismatch(key, expected, actual):
+            return documentPropertyTypeMismatch(key, expected: expected, actual: actual, in: dialect)
+
         // MARK: Addressing
 
         case let .ambiguousAddress(address, candidates):

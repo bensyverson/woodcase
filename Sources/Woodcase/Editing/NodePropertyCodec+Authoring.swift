@@ -14,7 +14,8 @@ import Foundation
 /// a `type` this build does not model, is refused before the edit exists. The batch
 /// planner calls this for `set` and for a copy's own properties.
 public extension NodePropertyCodec {
-    /// Refuses an authored value that carries a key or a `type` the model does not claim.
+    /// Refuses an authored value that carries a key or a `type` the model does not claim,
+    /// and any `extras.<key>` path.
     ///
     /// Only the three properties that can carry extras are checked: `kind.fills`,
     /// `kind.stroke` and `kind.effects`. A value equal to what the node already holds is
@@ -27,6 +28,11 @@ public extension NodePropertyCodec {
     /// - Throws: ``EditingError/propertyTypeMismatch(nodeID:key:expected:actual:)`` naming
     ///   the first refused key.
     static func checkAuthored(_ properties: [String: AnyCodable], on node: PenNode) throws {
+        // Extras are what a file kept, never what an agent writes: a path that would
+        // write one is refused as the unknown property it is to an author.
+        if let path = properties.keys.sorted().first(where: isExtrasPath) {
+            throw unknownProperty(path, node.id, node.kind.typeName)
+        }
         if case .unknown = node.kind { return }
         for (path, value) in properties.sorted(by: { $0.key < $1.key }) {
             guard let field = try? kindField(of: path, in: node.kind, nodeID: node.id),

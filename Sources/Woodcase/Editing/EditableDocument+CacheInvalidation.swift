@@ -115,7 +115,8 @@ extension EditableDocument {
 
     /// The nodes an editing operation touches.
     ///
-    /// Document-level operations — variables, imports, theme axes — touch no node.
+    /// Document-level operations — variables, imports, theme axes, the root's own
+    /// properties — touch no node.
     /// Expansion is a structural read: it clones component subtrees and leaves
     /// variable references in place for the resolver, so a variable's *value*
     /// cannot falsify a cached expansion. Nor can it falsify a revision: a revision
@@ -154,7 +155,8 @@ extension EditableDocument {
             [op.refNodeID]
         case .addVariable, .removeVariable, .updateVariable,
              .addImport, .removeImport, .updateImport,
-             .addThemeAxis, .removeThemeAxis, .updateThemeAxis:
+             .addThemeAxis, .removeThemeAxis, .updateThemeAxis,
+             .setDocumentProperties:
             []
         }
     }

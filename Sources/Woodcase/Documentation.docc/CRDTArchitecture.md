@@ -53,9 +53,16 @@ arrives, the map compares timestamps and either accepts or discards the update.
 A node's ``PenExtras`` — the keys its file carried that the model does not claim — are
 one more register in the same map, under the reserved path
 ``CRDTDocument/extrasProperty`` (`"extras"`), holding the whole set. They arrive with the
-node in its `createNode`; the only later local write is a replace, which gives the node
-its replacement's extras. The path has no `common.`/`kind.` prefix, so no edit verb can
-name it.
+node in its `createNode`; after that a local write is either a replace, which gives the
+node its replacement's extras, or a `setProperties` naming `extras.<key>` paths, which
+replicates as one write of the patched register — never key by key, because a per-key
+write racing a whole-register one would leave peers disagreeing on which won. The
+register's path has no `common.`/`kind.` prefix, so no edit verb can name it.
+
+The register is per node, so two peers editing *different* extras of one node
+concurrently keep only the later peer's set. Extras are rarely edited at all — a three-way
+merge or an undo is the only writer — so per-key registers are not worth a second
+granularity the replacement path would have to reconcile with.
 
 ### RGA Lists
 
@@ -117,11 +124,19 @@ minimal:
   ``EditingError`` it would outside collaborative mode, and leaves the log,
   the tombstones and the flat store exactly as they were.
   Two operations have no CRDT primitive of their own and are decomposed before
-  replication: ``EditOperation/detachRef(_:)``, which is expanded once and split into
-  a delete and an insert so both peers see the same generated ids, and
+  replication: ``EditOperation/detachRef(_:)``, which is planned once — its ids are
+  derived (``SubtreeIDPlan/detaching(_:refID:replica:avoiding:)``), namespaced by this
+  peer's id so a concurrent detach of the same instance elsewhere creates distinct nodes,
+  and avoiding the replica's tombstones as well as its live ids — and split into a delete
+  and an insert, and
   ``EditOperation/replaceSubtree(_:)``, which becomes the deletes, property writes and
   inserts that add up to it. Both are validated as a whole first, so the decomposition
   cannot be refused half way through.
+  One operation is **local-only**: ``EditOperation/setDocumentProperties(_:)`` — the
+  root's `fonts`, `version`, `fileToken` and extras — has no replicated register, so it
+  is validated, applied to the flat store, and replicates nothing. Peers can therefore
+  disagree on those keys until each takes the same write some other way, such as merging
+  the same file.
 - **Remote path:** Call `applyRemote(_:)` on ``EditableDocument`` with operations
   received from a peer. This feeds them through the CRDT layer and applies the
   resulting ``DocumentMutation``s to the flat store.

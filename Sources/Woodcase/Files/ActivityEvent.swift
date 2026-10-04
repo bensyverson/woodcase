@@ -138,8 +138,9 @@ public struct ActivityEvent: Friendly {
     ///
     /// The operation's subject leads; a structural operation then names the parent whose
     /// children changed, because that is the row a viewer must refresh. Operations that
-    /// edit the document itself — variables, imports, theme axes — touch no node and
-    /// return an empty array; ``op`` and ``inverse`` identify what they changed.
+    /// edit the document itself — variables, imports, theme axes, the root's own
+    /// properties — touch no node and return an empty array; ``op`` and ``inverse``
+    /// identify what they changed.
     ///
     /// - Parameter operation: The operation about to be applied.
     /// - Returns: The node ids it names.
@@ -169,7 +170,8 @@ public struct ActivityEvent: Friendly {
             [op.refNodeID]
         case .addVariable, .updateVariable, .removeVariable,
              .addImport, .updateImport, .removeImport,
-             .addThemeAxis, .updateThemeAxis, .removeThemeAxis:
+             .addThemeAxis, .updateThemeAxis, .removeThemeAxis,
+             .setDocumentProperties:
             []
         }
     }
@@ -191,7 +193,7 @@ public extension ActivityEvent {
     /// The short verb an operation reads as in a feed.
     ///
     /// Deliberately coarser than ``EditOperation``: a reader scanning the log wants
-    /// "something was set here", not which of the three property operations did it.
+    /// "something was set here", not which of the four property operations did it.
     /// The raw values are the wire format's `op` field, and match the CLI verbs, so a
     /// feed row and the command that would repeat it read the same.
     ///
@@ -201,7 +203,8 @@ public extension ActivityEvent {
     /// an edit woodcase made at all — see ``LogLineage`` — and ``migrate`` and ``new``,
     /// which ``PenFileTransaction`` records for a write that is not an edit of a document.
     enum Kind: String, Friendly, CaseIterable {
-        /// A property changed: `updateCommon`, `updateKind` or `setProperties`.
+        /// A property changed: `updateCommon`, `updateKind` or `setProperties` on a node,
+        /// or `setDocumentProperties` on the document root.
         case set
         /// A node was inserted.
         case add
@@ -251,7 +254,7 @@ public extension ActivityEvent {
             case .deleteNode: self = .rm
             case .moveNode: self = .mv
             case .replaceSubtree: self = .replace
-            case .updateCommon, .updateKind, .setProperties: self = .set
+            case .updateCommon, .updateKind, .setProperties, .setDocumentProperties: self = .set
             case .overrideDescendant, .overrideRoot: self = .override
             case .detachRef: self = .detach
             case .addVariable, .updateVariable, .removeVariable: self = .var

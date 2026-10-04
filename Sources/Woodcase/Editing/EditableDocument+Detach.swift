@@ -18,9 +18,8 @@ public extension EditableDocument {
     ///
     /// This is what ``apply(_:)`` runs for ``EditOperation/deleteNode(_:)``. Use this
     /// overload when you need the ``DetachResult`` of each instance that was detached
-    /// — the expanded roots it names are what
-    /// ``completeDetachingDeleteInverse(detached:partialInverse:)`` needs to finish
-    /// the undo.
+    /// — the expanded roots it names are the ones ``prepareInverse(of:)`` already
+    /// named before the delete ran.
     ///
     /// - Parameter op: The delete operation parameters.
     /// - Returns: One result per instance detached, empty for an ordinary delete.
@@ -38,16 +37,15 @@ public extension EditableDocument {
         // delegates to it — so it carries the rule itself.
         return try invalidatingCaches(touching: allIDs) {
             var detached: [DetachResult] = []
-            for instanceID in try instancesToDetach(for: op) {
-                try detached.append(detachRef(EditOperation.DetachRef(refNodeID: instanceID)))
+            for plan in try detachPlans(for: instancesToDetach(for: op)) {
+                try detached.append(detachRef(plan))
             }
 
-            // Remove from parent or root
+            // Remove from parent or root. A parent left with no children keeps its
+            // declared empty array, so the file says `"children": []` as it would have
+            // had it been written that way.
             if let parentID = parents[op.nodeID] {
                 children[parentID]?.removeAll { $0 == op.nodeID }
-                if children[parentID]?.isEmpty == true {
-                    children[parentID] = nil
-                }
             } else {
                 rootOrder.removeAll { $0 == op.nodeID }
             }
@@ -68,8 +66,8 @@ public extension EditableDocument {
 
     /// Applies an ``EditOperation/DetachRef`` operation.
     ///
-    /// Expands the ref node, generates fresh compact IDs for all expanded nodes,
-    /// removes the ref, and inserts the expanded subtree at the same position.
+    /// Expands the ref node, derives compact IDs for all expanded nodes, removes the
+    /// ref, and inserts the expanded subtree at the same position.
     ///
     /// - Parameter op: The detach operation parameters.
     /// - Throws: ``EditingError/nodeNotFound(id:)`` or ``EditingError/notARefNode(id:)``.
@@ -80,70 +78,70 @@ public extension EditableDocument {
     /// Detaches a ref node, returning detailed results.
     ///
     /// Use this overload when you need the ``DetachResult`` (e.g. to construct
-    /// undo operations for the expanded subtree).
+    /// undo operations for the expanded subtree). The ids the expansion takes are
+    /// derived, not drawn — see ``SubtreeIDPlan/detaching(_:refID:replica:avoiding:)`` — so the
+    /// same document detaches to the same ids, and ``prepareInverse(of:)`` can name them
+    /// before the detach runs.
     ///
     /// - Parameter op: The detach operation parameters.
     /// - Returns: The ID mapping and new root node ID.
     /// - Throws: ``EditingError/nodeNotFound(id:)`` or ``EditingError/notARefNode(id:)``.
     func detachRef(_ op: EditOperation.DetachRef) throws -> DetachResult {
-        try requireRef(op.refNodeID)
+        guard let plan = try detachPlans(for: [op.refNodeID]).first else {
+            throw EditingError.notARefNode(id: op.refNodeID)
+        }
+        return try detachRef(plan)
+    }
+}
+
+extension EditableDocument {
+    /// Carries out one planned detach.
+    ///
+    /// - Parameter plan: The detach, from ``detachPlans(for:)``.
+    /// - Returns: The ID mapping and new root node ID.
+    /// - Throws: ``EditingError/nodeNotFound(id:)`` or ``EditingError/notARefNode(id:)``.
+    func detachRef(_ plan: PlannedDetach) throws -> DetachResult {
+        try requireRef(plan.refID)
 
         // A ref is always a subject, so this always drops the cache — including the
-        // entry `expandRef` warms below, which the detach has just consumed.
-        return try invalidatingCaches(touching: [op.refNodeID]) {
-            try detachingRef(op)
+        // entry the plan's expansion warmed, which the detach has just consumed.
+        return try invalidatingCaches(touching: [plan.refID]) {
+            try detachingRef(plan)
         }
     }
 
-    /// The detach itself, wrapped by ``detachRef(_:)``'s cache rule.
+    /// The detach itself, wrapped by ``detachRef(_:)-(PlannedDetach)``'s cache rule.
     ///
-    /// - Parameter op: The detach operation parameters.
+    /// - Parameter plan: The detach, from ``detachPlans(for:)``.
     /// - Returns: The ID mapping and new root node ID.
-    /// - Throws: ``EditingError/nodeNotFound(id:)`` or ``EditingError/notARefNode(id:)``.
-    private func detachingRef(_ op: EditOperation.DetachRef) throws -> DetachResult {
-        // Expand the ref
-        let expanded = try expandRef(nodeID: op.refNodeID)
-
-        // Generate fresh IDs for all nodes in the expanded subtree
-        let (remapped, idMapping) = PenID.remapIDs(in: expanded.expandedNode)
-
-        // Record the ref's position
-        let parentID = parents[op.refNodeID]
+    /// - Throws: Whatever inserting the expansion throws.
+    private func detachingRef(_ plan: PlannedDetach) throws -> DetachResult {
+        let refID = plan.refID
+        let parentID = parents[refID]
         let index: Int? = if let parentID {
-            children[parentID]?.firstIndex(of: op.refNodeID)
+            children[parentID]?.firstIndex(of: refID)
         } else {
-            rootOrder.firstIndex(of: op.refNodeID)
+            rootOrder.firstIndex(of: refID)
         }
 
         // Delete the ref node (without using applyDelete to avoid the "not found" recursion)
-        let allRefIDs = descendantIDs(of: op.refNodeID)
-        for id in allRefIDs {
+        for id in descendantIDs(of: refID) {
             componentRegistry[id] = nil
             nodes[id] = nil
             children[id] = nil
             parents[id] = nil
         }
         if let parentID {
-            children[parentID]?.removeAll { $0 == op.refNodeID }
-            if children[parentID]?.isEmpty == true {
-                children[parentID] = nil
-            }
+            children[parentID]?.removeAll { $0 == refID }
         } else {
-            rootOrder.removeAll { $0 == op.refNodeID }
+            rootOrder.removeAll { $0 == refID }
         }
 
         // Insert the expanded subtree at the same position
-        try applyInsert(EditOperation.InsertNode(
-            node: remapped,
-            parentID: parentID,
-            index: index
-        ))
+        try applyInsert(EditOperation.InsertNode(node: plan.subtree, parentID: parentID, index: index))
 
         _layoutCache?.invalidateAll()
 
-        return DetachResult(
-            idMapping: idMapping,
-            rootNodeID: remapped.id
-        )
+        return DetachResult(idMapping: plan.idMapping, rootNodeID: plan.subtree.id)
     }
 }

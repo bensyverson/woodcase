@@ -9,7 +9,9 @@ import Foundation
 ///
 /// The path vocabulary is the one ``PropertyDiff`` emits and ``LWWPropertyMap``
 /// keys on — `"common.name"`, `"kind.width"`, `"kind.fills"` — so an edit, a
-/// CRDT write and a dirty-tracking diff all name a property the same way.
+/// CRDT write and a dirty-tracking diff all name a property the same way. A third
+/// family, `"extras.<key>"`, names one of the node's unmodeled keys — see
+/// ``extrasPrefix``.
 ///
 /// Values are ``AnyCodable`` in the **.pen file's own JSON shape**: a number is
 /// `42`, a variable reference is `"$spacing.large"`, a fill is whatever the
@@ -76,6 +78,9 @@ public enum NodePropertyCodec {
         }
         if path.hasPrefix("kind.") {
             return try kindValue(at: path, of: node.kind, nodeID: node.id)
+        }
+        if isExtrasPath(path) {
+            return try extraValue(at: path, of: node)
         }
         throw unknownProperty(path, node.id, node.kind.typeName)
     }
