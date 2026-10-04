@@ -56,6 +56,8 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 - ``PenVariableResolver``
 - ``PenLayoutEngine``
 - ``PenTextMeasurer``
+- ``PenTextStyle``
+- ``PenStyledText``
 - ``PenTextLines``
 - ``PenFontWeight``
 - ``PenFontRegistry``
@@ -75,6 +77,7 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 - ``PenHexColor``
 - ``PenGlyphPaint``
 - ``PenGlyphOutlines``
+- ``PenTextRenderer``
 - ``PenIconGlyph``
 - ``PenSVGPathParser``
 - ``PenBrowserPlaceholder``

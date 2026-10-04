@@ -8,7 +8,11 @@ import Foundation
 /// draws the glyphs in it; any other paint is drawn through the glyphs' outlines over the
 /// node's box (see ``PenGlyphPaint`` and ``PenGlyphOutlines``). Both routes share one
 /// layout. A node with no enabled paint draws nothing, as Pen draws it.
-enum PenTextRenderer {
+///
+/// Public only for its strikethrough — ``strikethroughKey``, ``drawStrikethrough(lines:in:)``
+/// and the bar's metrics — which Core Text does not draw and another renderer must draw
+/// the same way. Setting text is ``PenTextStyle``'s job.
+public enum PenTextRenderer {
     /// Renders a text node's content into the given context at the specified rect.
     ///
     /// Handles horizontal alignment, vertical alignment, and the node's paint.
@@ -75,80 +79,27 @@ enum PenTextRenderer {
 
     // MARK: - Attributed String Construction
 
-    /// Builds a CFAttributedString from text data, with where its lines are placed.
+    /// Builds a text node's content in its style, with where its lines are placed.
     ///
     /// Returns nil for content that is absent, empty, or an unresolved variable
-    /// reference — there is nothing to draw in any of those cases.
+    /// reference — there is nothing to draw in any of those cases. Otherwise it is
+    /// ``PenTextStyle/attributedString(_:for:)`` for drawing, the one builder layout
+    /// measurement also sizes text through.
     ///
     /// Shared with ``PenLayoutEngine/textInkBounds(of:box:)``, which lays out the same
     /// string to measure its glyphs' ink rather than to draw them — one attributed
     /// string, so a divergence in font resolution or paragraph style can never separate
     /// what is drawn from what is measured.
+    ///
+    /// - Parameters:
+    ///   - data: The text node's data.
+    ///   - color: The glyphs' color (``PenGlyphPaint/coreTextColor``).
+    /// - Returns: The styled text, or `nil` when there is nothing to draw.
     static func buildAttributedString(
         from data: PenNode.TextData,
         color: CGColor
-    ) -> BuiltText? {
+    ) -> PenStyledText? {
         guard let text = data.content?.literalValue, !text.isEmpty else { return nil }
-        return buildPlainAttributedString(text: text, data: data, color: color)
-    }
-
-    /// A styled string with the pitch its lines are set at and its first baseline.
-    typealias BuiltText = (string: CFAttributedString, pitch: CGFloat, firstBaseline: CGFloat)
-
-    /// Builds a CFAttributedString for text using the node's style properties, with the
-    /// pitch its lines are set at (``PenTextMeasurer/linePitch(lineHeight:fontSize:font:)``)
-    /// and its first baseline (``PenTextMeasurer/firstBaseline(of:lineHeight:pitch:)``),
-    /// its glyphs colored `color` (``PenGlyphPaint/coreTextColor``).
-    private static func buildPlainAttributedString(
-        text: String,
-        data: PenNode.TextData,
-        color: CGColor
-    ) -> BuiltText {
-        let fontSize = data.fontSize?.literalValue ?? PenTextMeasurer.defaultFontSize
-        let font = PenTextMeasurer.resolveFont(
-            family: data.fontFamily?.literalValue ?? PenTextMeasurer.defaultFontFamily,
-            size: fontSize,
-            weight: data.fontWeight?.literalValue ?? "normal",
-            style: data.fontStyle?.literalValue ?? "normal"
-        )
-
-        var attributes: [(CFString, Any)] = [
-            (kCTFontAttributeName, font),
-            (kCTForegroundColorFromContextAttributeName, false),
-            (kCTForegroundColorAttributeName, color),
-        ]
-
-        if let letterSpacing = data.letterSpacing?.literalValue {
-            attributes.append((kCTKernAttributeName, letterSpacing as CFNumber))
-        }
-
-        if let underline = data.underline?.literalValue, underline {
-            attributes.append((kCTUnderlineStyleAttributeName, CTUnderlineStyle.single.rawValue as CFNumber))
-        }
-
-        if let strikethrough = data.strikethrough?.literalValue, strikethrough {
-            attributes.append((strikethroughKey, true as CFBoolean))
-        }
-
-        let lineHeight = data.lineHeight?.literalValue
-        let pitch = PenTextMeasurer.linePitch(lineHeight: lineHeight, fontSize: fontSize, font: font)
-        let paragraphStyle = PenTextMeasurer.paragraphStyle(lineHeight: pitch, alignment: mapAlignment(data.textAlign))
-        attributes.append((kCTParagraphStyleAttributeName, paragraphStyle))
-
-        let cfAttributes = Dictionary(uniqueKeysWithValues: attributes) as CFDictionary
-        let string = CFAttributedStringCreate(kCFAllocatorDefault, text as CFString, cfAttributes)!
-        return (string, pitch, PenTextMeasurer.firstBaseline(of: font, lineHeight: lineHeight, pitch: pitch))
-    }
-
-    // MARK: - Helpers
-
-    /// Maps a PenTextAlign value to a CTTextAlignment value.
-    private static func mapAlignment(_ align: PenTextAlign?) -> CTTextAlignment {
-        switch align {
-        case .left, .none: .left
-        case .center: .center
-        case .right: .right
-        case .justify: .justified
-        }
+        return PenTextStyle(data).attributedString(text, for: .drawing(color: color))
     }
 }

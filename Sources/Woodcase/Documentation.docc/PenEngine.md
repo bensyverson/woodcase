@@ -534,7 +534,7 @@ counts only the band's half width, where Pen counts the miter.
 
 ## Text Measurement
 
-``PenTextMeasurer`` measures text bounding boxes using Core Text's `CTFramesetter`. It is used by both the layout engine (to compute text node sizes) and the renderer (to resolve fonts and measure text for vertical alignment).
+``PenTextMeasurer`` measures text bounding boxes using Core Text's `CTFramesetter`. It is used by both the layout engine (to compute text node sizes) and the renderer (to resolve fonts and measure text for vertical alignment). It sets the text through the same builder the renderer draws with, ``PenTextStyle/attributedString(_:for:)``, sized without horizontal alignment (see Text in <doc:PenRendering>).
 
 ```swift
 let size = PenTextMeasurer.measure(

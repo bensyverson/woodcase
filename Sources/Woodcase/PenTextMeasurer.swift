@@ -11,11 +11,11 @@ import Foundation
 /// Used by the layout engine to determine the intrinsic size of text nodes.
 /// Defaults to SF Pro when no font family is specified.
 public enum PenTextMeasurer {
-    /// The default font family used when none is specified.
-    public static let defaultFontFamily = "SF Pro"
+    /// The default font family used when none is specified: ``PenTextStyle/defaultFontFamily``.
+    public static let defaultFontFamily = PenTextStyle.defaultFontFamily
 
-    /// The default font size used when none is specified.
-    public static let defaultFontSize: Double = 16
+    /// The default font size used when none is specified: ``PenTextStyle/defaultFontSize``.
+    public static let defaultFontSize: Double = PenTextStyle.defaultFontSize
 
     /// Measures the bounding size of a plain text string with the given style properties.
     ///
@@ -25,7 +25,7 @@ public enum PenTextMeasurer {
     ///   - fontSize: Font size in points. Defaults to 16.
     ///   - fontWeight: CSS-style weight string (e.g. "bold", "700"). Defaults to "normal".
     ///   - fontStyle: CSS-style font style (e.g. "italic"). Defaults to "normal".
-    ///   - letterSpacing: Additional spacing between characters in points. Defaults to 0.
+    ///   - letterSpacing: Additional spacing between characters in points. Defaults to none: the font's own kerning.
     ///   - lineHeight: Line height as a multiplier of font size. Each line is set at the
     ///     pitch Pen sets it at, ``linePitch(lineHeight:fontSize:font:)``: this times the
     ///     font size rounded to a whole point, or with nil the font's natural line height.
@@ -45,32 +45,19 @@ public enum PenTextMeasurer {
             return .zero
         }
 
-        let resolvedFontSize = fontSize ?? defaultFontSize
-        let font = resolveFont(
-            family: fontFamily ?? defaultFontFamily,
-            size: resolvedFontSize,
-            weight: fontWeight ?? "normal",
-            style: fontStyle ?? "normal"
+        // The one builder the renderer draws through, sized without alignment (see
+        // `PenTextStyle.Purpose.sizing`), so the font, kern and pitch measured are the
+        // ones drawn.
+        let style = PenTextStyle(
+            fontFamily: fontFamily ?? defaultFontFamily,
+            fontSize: fontSize ?? defaultFontSize,
+            fontWeight: PenTextStyle.weight(fontWeight),
+            isItalic: PenTextStyle.isItalic(fontStyle),
+            letterSpacing: letterSpacing,
+            lineHeight: lineHeight
         )
-
-        var attributes: [(CFString, Any)] = [
-            (kCTFontAttributeName, font),
-        ]
-
-        if let letterSpacing {
-            attributes.append((kCTKernAttributeName, letterSpacing as CFNumber))
-        }
-
-        let lineHeightPoints = linePitch(lineHeight: lineHeight, fontSize: resolvedFontSize, font: font)
-        attributes.append((kCTParagraphStyleAttributeName, paragraphStyle(lineHeight: lineHeightPoints)))
-
-        let cfAttributes = Dictionary(uniqueKeysWithValues: attributes) as CFDictionary
-        let attributedString = CFAttributedStringCreate(
-            kCFAllocatorDefault,
-            text as CFString,
-            cfAttributes
-        )!
-        return measureCFAttributedString(attributedString, maxWidth: maxWidth, lineHeight: lineHeightPoints)
+        let styled = style.attributedString(text, for: .sizing)
+        return measureCFAttributedString(styled.string, maxWidth: maxWidth, lineHeight: styled.pitch)
     }
 
     /// Measures a CFAttributedString, optionally constrained to a maximum width.

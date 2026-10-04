@@ -2,9 +2,12 @@ import CoreGraphics
 import CoreText
 import Foundation
 
-extension PenTextRenderer {
-    /// Custom attribute key for marking strikethrough ranges.
-    /// Core Text has no native strikethrough, so we draw it manually.
+public extension PenTextRenderer {
+    /// The attribute that marks a run struck through.
+    ///
+    /// Core Text has no native strikethrough, so ``PenTextStyle/attributedString(_:for:)``
+    /// marks struck runs with this key and ``drawStrikethrough(lines:in:)`` strokes them.
+    /// Public so that another renderer (RapidPro) draws the same bar rather than a copy.
     static var strikethroughKey: CFString {
         "WoodcaseStrikethrough" as CFString
     }
@@ -67,7 +70,7 @@ extension PenTextRenderer {
     ///   - line: The line.
     ///   - origin: Its origin in Core Text's y-up space.
     /// - Returns: The bars, in the same y-up space.
-    static func decorationBars(of line: CTLine, at origin: CGPoint) -> [CGRect] {
+    internal static func decorationBars(of line: CTLine, at origin: CGPoint) -> [CGRect] {
         var bars: [CGRect] = []
         for run in CTLineGetGlyphRuns(line) as! [CTRun] {
             let attributes = CTRunGetAttributes(run) as NSDictionary
@@ -95,8 +98,8 @@ extension PenTextRenderer {
     }
 
     /// How far up the ascent the strikethrough sits, as a fraction of it.
-    private static let strikethroughAscentFraction: CGFloat = 0.35
+    static let strikethroughAscentFraction: CGFloat = 0.35
 
     /// The strikethrough's thickness in points.
-    private static let strikethroughThickness: CGFloat = 1.0
+    static let strikethroughThickness: CGFloat = 1.0
 }
