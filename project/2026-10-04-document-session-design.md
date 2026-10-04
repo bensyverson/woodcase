@@ -8,6 +8,7 @@
 1. **Shape.** `DocumentSession` is a non-Sendable `final class`, confined by its owner (Penumbra: the main actor; the CLI: its one thread). `submit` is synchronous. It hands out Sendable value snapshots for background work.
 2. **Structural undo keeps theirs.** Apply what can be undone safely. When undoing would destroy another author's later work (undo an insert after `claude` edited inside the node), keep that work and report it ("Kept 1 change by claude").
 3. **Merge conflicts: local wins.** When an unwritten local change and an external write touch the same key, the local value wins and the conflict is reported.
+4. **Undo rules (session 3, built in `fee263a` and `9d353f6`).** Undo titles derive from the edit's activity kind, localized by the editor; `LocalEdit` has no title. An undo-excluded (`.none`) edit still clears redo. A detaching delete whose undo meets another author's edit inside one detached expansion is skipped whole: the component stays deleted and every instance stays detached. An undo or redo closes the open coalescing group. Redo rows get their own `ActivityEvent.Kind.redo`.
 
 ## Main-thread decisions (2026-10-04)
 
