@@ -11,14 +11,17 @@ public extension EditOperation {
     /// The root carries a few properties no node owns and no other operation writes:
     /// the `fonts` it declares, the format `version`, the editor's `fileToken`, and the
     /// root keys a file wrote that the model does not claim (``EditableDocument/extras``).
-    /// Variables, imports and theme axes have operations of their own and are not keys
-    /// here. Keys come from ``DocumentPropertyCodec``:
+    /// Variables, imports and theme axes have operations of their own; the only thing
+    /// about their tables written here is whether each is declared at all — a file can
+    /// write `"variables": {}`, and nothing else can say so. Keys come from
+    /// ``DocumentPropertyCodec``:
     ///
     /// | Key | Value | Null |
     /// | --- | --- | --- |
     /// | `fonts` | the `fonts` array, as the file writes it | removes the array |
     /// | `version` | a string | refused: every document has a version |
     /// | `fileToken` | a string | removes the token |
+    /// | `variables`, `imports`, `themes` | `{}`: declares the table, entries untouched | leaves out the table; refused while it holds entries |
     /// | `extras.<key>` | any JSON value | removes the key |
     ///
     /// Like ``SetProperties`` the operation is atomic — every key and value is checked

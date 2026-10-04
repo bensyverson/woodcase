@@ -19,6 +19,8 @@ public extension EditOperation {
     /// - An ``updateKind(_:)`` that changes the node's type: there is no path for
     ///   "become a text node", so it stays whole (its key is
     ///   ``ChangeKey/property(node:path:)`` with ``ChangeKey/wholeKindPath``).
+    /// - An ``updateKind(_:)`` whose ``UpdateKind/emptyChildren`` changes whether an
+    ///   empty container declares `"children": []` — no property path says that.
     /// - An operation on a node the document does not hold, which ``EditableDocument/apply(_:)``
     ///   will refuse in its own words.
     /// - A rewrite the property codec cannot reproduce exactly. The patch is checked
@@ -43,6 +45,12 @@ public extension EditOperation {
             return Self.patch(node: node, target: target, paths: paths) ?? self
         case let .updateKind(op):
             guard let node = document.nodes[op.nodeID] else { return self }
+            // A change of declared-ness has no path; it stays whole.
+            if let empty = op.emptyChildren, (document.children[op.nodeID] ?? []).isEmpty,
+               (document.children[op.nodeID] != nil) != (empty == .declared)
+            {
+                return self
+            }
             var target = node
             target.kind = op.kind.withEmptyChildren()
             let paths = PropertyDiff.diffKind(old: node.kind, new: target.kind)

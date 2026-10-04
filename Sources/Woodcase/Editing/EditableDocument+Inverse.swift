@@ -147,14 +147,20 @@ extension EditableDocument {
         ))
     }
 
-    /// Inverse of updateKind: restore old kind data.
+    /// Inverse of updateKind: restore old kind data, and for a container holding no
+    /// children, whether it declared its empty list.
     private func prepareInverseUpdateKind(_ op: EditOperation.UpdateKind) throws -> EditOperation {
         guard let node = nodes[op.nodeID] else {
             throw EditingError.nodeNotFound(id: op.nodeID)
         }
+        let list = children[op.nodeID]
+        let empty: EditOperation.UpdateKind.EmptyChildren? = node.kind.canHaveChildren && (list ?? []).isEmpty
+            ? (list == nil ? .absent : .declared)
+            : nil
         return .updateKind(EditOperation.UpdateKind(
             nodeID: op.nodeID,
-            kind: node.kind
+            kind: node.kind,
+            emptyChildren: empty
         ))
     }
 

@@ -20,14 +20,33 @@ extension EditableDocument {
         }
     }
 
+    /// Checks an ``EditOperation/UpdateKind``: a retype to a leaf needs the node to
+    /// hold no children, and a leaf cannot declare an empty list.
+    ///
+    /// - Throws: ``EditingError/nodeNotFound(id:)`` or
+    ///   ``EditingError/cannotHaveChildren(parentID:)``.
+    func validateUpdateKind(_ op: EditOperation.UpdateKind) throws {
+        try requireNode(op.nodeID)
+        guard !op.kind.canHaveChildren else { return }
+        guard (children[op.nodeID] ?? []).isEmpty, op.emptyChildren != .declared else {
+            throw EditingError.cannotHaveChildren(parentID: op.nodeID)
+        }
+    }
+
     /// Applies an ``EditOperation/UpdateKind`` operation.
     func applyUpdateKind(_ op: EditOperation.UpdateKind) throws {
+        try validateUpdateKind(op)
         var node = try requireNode(op.nodeID)
         let oldKind = node.kind
         // Strip children from the provided kind to preserve flat store invariant
         node.kind = op.kind.withEmptyChildren()
         nodes[op.nodeID] = node
         updateComponentRegistry(for: op.nodeID)
+        if !op.kind.canHaveChildren {
+            children[op.nodeID] = nil
+        } else if let empty = op.emptyChildren, (children[op.nodeID] ?? []).isEmpty {
+            children[op.nodeID] = empty == .declared ? [] : nil
+        }
 
         // Invalidate layout cache based on what changed
         if let category = ChangeCategory.categorize(oldKind: oldKind, newKind: op.kind.withEmptyChildren()) {

@@ -32,7 +32,7 @@ extension EditableDocument {
         case let .updateCommon(op):
             try requireNode(op.nodeID)
         case let .updateKind(op):
-            try requireNode(op.nodeID)
+            try validateUpdateKind(op)
         case let .setProperties(op):
             _ = try patchedNode(for: op)
         case let .overrideDescendant(op):

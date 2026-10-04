@@ -43,7 +43,7 @@ public enum DocumentChangeKey: Friendly {
     case declaredTable(Table)
 
     /// The document tables that are written per entry.
-    public enum Table: String, Friendly {
+    public enum Table: String, Friendly, CaseIterable {
         /// ``EditableDocument/variables``.
         case variables
         /// ``EditableDocument/imports``.

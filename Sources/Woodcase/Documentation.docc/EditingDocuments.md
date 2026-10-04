@@ -56,7 +56,10 @@ and stored for undo/redo.
 
 **Property operations** update node data:
 - ``EditOperation/updateCommon(_:)`` — replace shared properties (position, opacity, etc.)
-- ``EditOperation/updateKind(_:)`` — replace type-specific data (fills, dimensions, etc.)
+- ``EditOperation/updateKind(_:)`` — replace type-specific data (fills, dimensions, etc.).
+  A retype to a leaf drops the node's child list and is refused while it still holds
+  children; ``EditOperation/UpdateKind/emptyChildren`` says whether a container with no
+  children writes `"children": []`. The inverse restores both.
 - ``EditOperation/setProperties(_:)`` — set individual properties by path, leaving the rest alone
 
 ### Patching Properties by Path
@@ -214,8 +217,13 @@ so undo puts the map back exactly as it stood.
 - Themes: ``EditOperation/addThemeAxis(_:)``, ``EditOperation/updateThemeAxis(_:)``, ``EditOperation/removeThemeAxis(_:)``
 - The root's own properties: ``EditOperation/setDocumentProperties(_:)`` sets or clears
   `fonts`, `version`, `fileToken` and root `extras.<key>` by key, in the vocabulary of
-  ``DocumentPropertyCodec``. Its inverse names exactly the keys it wrote, with their
-  prior values. It is **local-only** in a collaborative session: the CRDT keeps no
+  ``DocumentPropertyCodec``. The keys `variables`, `imports` and `themes` carry only
+  whether each table is declared: `{}` declares it (a file may write an empty table)
+  and leaves its entries alone; null leaves out a table with no entries and is refused
+  for one that has some, since its inverse could not restore them. Removing a table's
+  last entry still leaves the table out, so a merge that must end on `"variables": {}`
+  removes the entries and then declares the table. Its inverse names exactly the keys
+  it wrote, with their prior values. It is **local-only** in a collaborative session: the CRDT keeps no
   register for these, so ``EditableDocument/applyLocal(_:)`` applies it to the flat
   store and returns no operations to send.
 
@@ -428,6 +436,42 @@ node's placement and goes no deeper. Two copies of a large document cost one vis
 root; one edit costs a visit per node on its spine and per sibling beside it. A
 declared `"children": []` hashes apart from absent children, so declared-ness needs no
 scan of its own: the walk reaches it like any other edit.
+
+### Merging Documents
+
+``DocumentMerge/merge(base:ours:theirs:)`` folds an external version of a document —
+an agent's rewrite of the file on disk — into the local one. It takes the change sets
+base→ours and base→theirs and resolves them key by key: what only theirs changed is
+taken, what only ours changed is kept, and where both changed one key differently the
+local value wins and a ``MergeConflict`` reports base, ours and theirs. A node one side
+deleted and the other edited, an insert under a node ours deleted, and a component
+theirs deleted that the merge still renders follow the rules in
+`project/2026-10-04-three-way-diff-design.md`. ``DocumentMerge/diff(from:to:)`` is
+the same merge with no local changes: the operations that turn one document into
+another.
+
+The ``MergeResult`` is ordinary ``EditOperation``s, to apply to the local document in
+order, so a merge is undoable and attributable like any edit. They are sequenced so
+each applies when its turn comes:
+
+1. Imports, theme axes and variables added or changed, then the root's properties.
+2. Nodes that become containers are retyped.
+3. Every changed child list is made left to right, parents first: new subtrees are
+   inserted whole, existing nodes moved to absolute indices. A node leaving a list
+   drifts to its tail until it is moved or deleted; because a container's own place is
+   final before its list is made, no move puts a node under itself — a parent and child
+   that swap nesting are two plain moves.
+4. Each kept node's content, one ``EditOperation/setProperties(_:)`` per node — after
+   the structure, so a ref retargeted to a new component finds it.
+5. Deletes, topmost nodes only, subtrees holding no component first.
+6. Nodes that become leaves are retyped once their children have gone; a container
+   left empty gets or loses its declared `"children": []` through
+   ``EditOperation/UpdateKind/emptyChildren``.
+7. Variables, imports and theme axes removed, then each table's declaration.
+
+``MergeResult/keepsLocalChanges`` says whether the merged document still differs from
+theirs — whether local work survived, so a session that adopted the file stays dirty.
+Merging the same external version a second time yields no operations.
 
 ### Addressing Nodes
 
@@ -826,6 +870,9 @@ under one of its own descendants throws
 
 ### Comparing Documents
 
+- ``DocumentMerge``
+- ``MergeResult``
+- ``MergeConflict``
 - ``DocumentChanges``
 - ``NodeChange``
 - ``NodeChangeKey``

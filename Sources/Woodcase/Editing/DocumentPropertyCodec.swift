@@ -11,7 +11,16 @@ import Foundation
 /// The root's counterpart to ``NodePropertyCodec``: values are ``AnyCodable`` in the
 /// .pen file's own JSON shape, reading a key and writing the result back is a no-op,
 /// and every entry point throws rather than guess. The keys are `fonts`, `version`,
-/// `fileToken`, and `extras.<key>` for a root key the model does not claim.
+/// `fileToken`, `extras.<key>` for a root key the model does not claim, and
+/// `variables`, `imports` and `themes` for whether each table is declared at all.
+///
+/// A table key carries only its declaration: `{}` when the file writes the table —
+/// however many entries it holds — and ``AnyCodable/null`` when it leaves the table
+/// out. The entries have operations of their own; the key exists because a file may
+/// write an empty table (`"variables": {}`) and that is a difference a merge must be
+/// able to reproduce. Writing `{}` declares a table and leaves its entries alone;
+/// writing null leaves out a table that holds no entries, and is refused for one that
+/// does, since its inverse could not put them back.
 ///
 /// ```swift
 /// try DocumentPropertyCodec.value(at: "version", of: document)        // "2.17"
@@ -30,8 +39,9 @@ public enum DocumentPropertyCodec {
     /// The prefix that turns a root key the model does not claim into a property key.
     public static let extrasPrefix = "extras."
 
-    /// The modeled keys, which every document has whether or not it sets them.
-    public static let modeledKeys: Set<String> = [fontsKey, versionKey, fileTokenKey]
+    /// The modeled keys, which every document has whether or not it sets them —
+    /// including one per table (`variables`, `imports`, `themes`).
+    public static let modeledKeys: Set<String> = Set([fontsKey, versionKey, fileTokenKey] + DocumentChangeKey.Table.allCases.map(\.rawValue))
 
     /// The document root's own properties, as one value a patch is folded onto.
     struct Root: Equatable {
@@ -39,6 +49,10 @@ public enum DocumentPropertyCodec {
         var version: String
         var fileToken: String?
         var extras: PenExtras
+        /// The tables the file writes, empty or not.
+        var declaredTables: Set<DocumentChangeKey.Table>
+        /// The tables that hold at least one entry; never changed by a patch.
+        var populatedTables: Set<DocumentChangeKey.Table>
     }
 
     // MARK: - Reading
@@ -61,7 +75,12 @@ public enum DocumentPropertyCodec {
         case fontsKey: try NodePropertyCodec.encode(root.fonts)
         case versionKey: .string(root.version)
         case fileTokenKey: root.fileToken.map(AnyCodable.string) ?? .null
-        default: try root.extras[extraKey(of: key)] ?? .null
+        default:
+            if let table = DocumentChangeKey.Table(rawValue: key) {
+                root.declaredTables.contains(table) ? .dictionary([:]) : .null
+            } else {
+                try root.extras[extraKey(of: key)] ?? .null
+            }
         }
     }
 
@@ -86,7 +105,21 @@ public enum DocumentPropertyCodec {
 
     /// The root properties a document holds now.
     static func root(of document: EditableDocument) -> Root {
-        Root(fonts: document.fonts, version: document.version, fileToken: document.fileToken, extras: document.extras)
+        var declared: Set<DocumentChangeKey.Table> = []
+        var populated: Set<DocumentChangeKey.Table> = []
+        for (table, count) in [
+            (DocumentChangeKey.Table.variables, document.variables?.count),
+            (.imports, document.imports?.count),
+            (.themes, document.themes?.count),
+        ] {
+            guard let count else { continue }
+            declared.insert(table)
+            if count > 0 { populated.insert(table) }
+        }
+        return Root(
+            fonts: document.fonts, version: document.version, fileToken: document.fileToken, extras: document.extras,
+            declaredTables: declared, populatedTables: populated
+        )
     }
 
     // MARK: - Private
@@ -116,6 +149,10 @@ public enum DocumentPropertyCodec {
             default: throw mismatch(key, value, expected: "a string, or null to remove it")
             }
         default:
+            if let table = DocumentChangeKey.Table(rawValue: key) {
+                try declare(table, value, on: &root)
+                return
+            }
             let extra = try extraKey(of: key)
             var values = root.extras.values
             if case .null = value {
@@ -124,6 +161,20 @@ public enum DocumentPropertyCodec {
                 values[extra] = value
             }
             root.extras = PenExtras(values)
+        }
+    }
+
+    /// Writes a table's declaration: `{}` declares it, null leaves out an empty one.
+    private static func declare(_ table: DocumentChangeKey.Table, _ value: AnyCodable, on root: inout Root) throws {
+        switch value {
+        case let .dictionary(entries) where entries.isEmpty:
+            root.declaredTables.insert(table)
+        case .null where !root.populatedTables.contains(table):
+            root.declaredTables.remove(table)
+        case .null:
+            throw mismatch(table.rawValue, value, expected: "{} — null leaves out only a table with no entries; remove them first")
+        default:
+            throw mismatch(table.rawValue, value, expected: "{} to declare the table, or null to leave it out")
         }
     }
 

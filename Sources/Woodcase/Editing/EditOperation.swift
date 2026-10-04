@@ -70,7 +70,8 @@ public enum EditOperation: Friendly {
     // MARK: - Document
 
     /// Set or clear the document root's own properties — `fonts`, `version`,
-    /// `fileToken` and the root's unmodeled `extras.<key>` — leaving the rest alone.
+    /// `fileToken`, whether each of `variables`, `imports` and `themes` is declared,
+    /// and the root's unmodeled `extras.<key>` — leaving the rest alone.
     case setDocumentProperties(SetDocumentProperties)
 
     // MARK: - Parameter Structs
@@ -196,16 +197,49 @@ public enum EditOperation: Friendly {
     }
 
     /// Parameters for replacing a node's kind-specific data.
+    ///
+    /// The node's children are not part of the payload — they live in the flat store
+    /// and are moved by their own operations — but whether it *has* a child list is:
+    ///
+    /// - A retype to a leaf kind drops the node's child list, which must be empty:
+    ///   a node still holding children is refused with
+    ///   ``EditingError/cannotHaveChildren(parentID:)``. Move or delete them first.
+    /// - ``emptyChildren`` says whether a container with no children writes
+    ///   `"children": []` or leaves the key out — the one difference no other
+    ///   operation can make on a node that already exists. `nil` leaves it as it is.
+    ///
+    /// The inverse restores both the old kind and the old declaration.
     public struct UpdateKind: Friendly {
-        public init(nodeID: String, kind: PenNode.Kind) {
+        /// Whether a container holding no children declares its empty list.
+        public enum EmptyChildren: String, Friendly {
+            /// Writes `"children": []`.
+            case declared
+            /// Leaves the `children` key out.
+            case absent
+        }
+
+        /// Creates the parameters.
+        ///
+        /// - Parameters:
+        ///   - nodeID: The node to update.
+        ///   - kind: Its new kind payload; any children it carries are ignored.
+        ///   - emptyChildren: Whether the node, if it holds no children, declares an
+        ///     empty list; `nil` leaves that as it is. Refused as ``EmptyChildren/declared``
+        ///     on a leaf kind.
+        public init(nodeID: String, kind: PenNode.Kind, emptyChildren: EmptyChildren? = nil) {
             self.nodeID = nodeID
             self.kind = kind
+            self.emptyChildren = emptyChildren
         }
 
         /// The ID of the node to update.
         public var nodeID: String
         /// The new kind-specific data. Children will be stripped to preserve the flat store invariant.
         public var kind: PenNode.Kind
+        /// Whether the node, when it holds no children, writes `"children": []`;
+        /// `nil` leaves the declaration as it stands. A list holding children is
+        /// always written, whatever this says.
+        public var emptyChildren: EmptyChildren?
     }
 
     /// Parameters for setting individual node properties by path.

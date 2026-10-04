@@ -172,6 +172,7 @@ public extension EditOperation.UpdateKind {
     private enum CodingKeys: String, CodingKey {
         case nodeID
         case kind
+        case emptyChildren
     }
 
     init(from decoder: Decoder) throws {
@@ -179,11 +180,13 @@ public extension EditOperation.UpdateKind {
         nodeID = try container.decode(String.self, forKey: .nodeID)
         let envelope = try container.decode(KindEnvelope.self, forKey: .kind)
         kind = envelope.kind
+        emptyChildren = try container.decodeIfPresent(EmptyChildren.self, forKey: .emptyChildren)
     }
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(nodeID, forKey: .nodeID)
         try container.encode(KindEnvelope(kind: kind), forKey: .kind)
+        try container.encodeIfPresent(emptyChildren, forKey: .emptyChildren)
     }
 }

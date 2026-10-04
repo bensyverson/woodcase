@@ -1,0 +1,119 @@
+{
+  "version": "2.20",
+  "fileToken": "tok-theirs",
+  "fonts": [
+    { "name": "Inter", "url": "./Inter.ttf" },
+    { "name": "Plex", "url": "./Plex.ttf" }
+  ],
+  "imports": {},
+  "variables": {
+    "color.primary": { "type": "color", "value": "#0044CC" },
+    "space.m": { "type": "number", "value": 16 },
+    "radius.s": { "type": "number", "value": 4 }
+  },
+  "rootFuture": { "a": 1 },
+  "children": [
+    {
+      "id": "Chip",
+      "name": "Chip",
+      "type": "frame",
+      "reusable": true,
+      "x": 0,
+      "y": 200,
+      "width": 60,
+      "height": 24,
+      "cornerRadius": "$radius.s",
+      "children": [{ "id": "ChipLabel", "name": "Label", "type": "text", "content": "Chip" }]
+    },
+    {
+      "id": "Button",
+      "name": "Button",
+      "type": "frame",
+      "reusable": true,
+      "width": 140,
+      "height": 40,
+      "fill": "$color.primary",
+      "children": [
+        { "id": "ButtonLabel", "name": "Label", "type": "text", "content": "Click", "fill": "#FFFFFF" }
+      ]
+    },
+    {
+      "id": "Page",
+      "name": "Main page",
+      "type": "frame",
+      "futureKey": true,
+      "x": 200,
+      "y": 0,
+      "width": 800,
+      "height": 600,
+      "layout": "vertical",
+      "gap": "$space.m",
+      "children": [
+        {
+          "id": "Header",
+          "name": "Header",
+          "type": "group",
+          "children": []
+        },
+        {
+          "id": "Footer",
+          "name": "Footer",
+          "type": "frame",
+          "children": [
+            { "id": "Logo", "name": "Logo", "type": "rectangle", "width": 32, "height": 32 },
+            { "id": "Copyright", "name": "Copyright", "type": "text", "content": "© 2026 Example" },
+            { "id": "Divider", "name": "Divider", "type": "rectangle", "width": 100, "height": 1 },
+            { "id": "ChipUse", "name": "Chip use", "type": "ref", "ref": "Chip" },
+            { "id": "SpacerUse", "name": "Spacer use", "type": "ref", "ref": "Spacer" }
+          ]
+        },
+        {
+          "id": "Body",
+          "name": "Body",
+          "type": "frame",
+          "children": [
+            {
+              "id": "CardInner",
+              "name": "Inner",
+              "type": "frame",
+              "children": [
+                {
+                  "id": "Card",
+                  "name": "Card",
+                  "type": "frame",
+                  "children": [{ "id": "CardText", "name": "Copy", "type": "text", "content": "Body copy" }]
+                }
+              ]
+            },
+            {
+              "id": "Actions",
+              "name": "Actions",
+              "type": "frame",
+              "layout": "horizontal",
+              "children": [
+                {
+                  "id": "Cta",
+                  "name": "Cta",
+                  "type": "ref",
+                  "ref": "Button",
+                  "descendants": { "ButtonLabel": { "content": "Buy now" } }
+                },
+                { "id": "Secondary", "name": "Secondary", "type": "ref", "ref": "Chip" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "Placeholder",
+          "name": "Placeholder",
+          "type": "frame",
+          "width": 10,
+          "height": 10,
+          "children": [{ "id": "PlaceholderText", "name": "Hint", "type": "text", "content": "Coming soon" }]
+        },
+        { "id": "Spacer", "name": "Spacer", "type": "rectangle", "reusable": true, "width": 10, "height": 10 },
+        { "id": "EmptyBox", "name": "Empty box", "type": "frame", "width": 10, "height": 10 }
+      ]
+    }
+  ]
+}

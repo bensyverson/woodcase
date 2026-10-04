@@ -32,6 +32,16 @@ extension EditableDocument {
         if patched.version != version { version = patched.version }
         if patched.fileToken != fileToken { fileToken = patched.fileToken }
         if patched.extras != extras { extras = patched.extras }
+        declareTables(patched.declaredTables)
+    }
+
+    /// Declares or leaves out each table to match `declared`. Validation has already
+    /// refused leaving out a table that holds entries, so only empty tables go.
+    private func declareTables(_ declared: Set<DocumentChangeKey.Table>) {
+        let isDeclared = declared.contains
+        if isDeclared(.variables) != (variables != nil) { variables = isDeclared(.variables) ? [:] : nil }
+        if isDeclared(.imports) != (imports != nil) { imports = isDeclared(.imports) ? [:] : nil }
+        if isDeclared(.themes) != (themes != nil) { themes = isDeclared(.themes) ? [:] : nil }
     }
 
     /// The inverse of a document patch: the same keys, each with the value it has now.

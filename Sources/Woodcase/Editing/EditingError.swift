@@ -70,8 +70,9 @@ public enum EditingError: Error, Equatable, Sendable {
 
     /// A key is not a property of the document root.
     ///
-    /// The vocabulary is ``DocumentPropertyCodec``'s: `fonts`, `version`, `fileToken`
-    /// and `extras.<key>` for a root key the model does not claim. `key` is the key as
+    /// The vocabulary is ``DocumentPropertyCodec``'s: `fonts`, `version`, `fileToken`,
+    /// `variables`, `imports` and `themes` (each table's declaration), and
+    /// `extras.<key>` for a root key the model does not claim. `key` is the key as
     /// written.
     case unknownDocumentProperty(key: String)
 

@@ -98,6 +98,60 @@ struct EditOperationDocumentPropertiesTests {
         #expect(inverse == [set(["fileToken": "tok-1", "extras.added": .null])])
     }
 
+    // MARK: - Declared tables
+
+    @Test("Each table is declared empty with {}, and the inverse leaves it out again", arguments: ["variables", "imports", "themes"])
+    func declaresAbsentTable(table: String) throws {
+        let editable = try EditableDocument(from: document())
+        #expect(try DocumentPropertyCodec.value(at: table, of: editable) == .null)
+        let after = try roundTrip(set([table: [:]]), on: editable)
+        let declared: Bool = switch table {
+        case "variables": after.variables == [:]
+        case "imports": after.imports == [:]
+        default: after.themes == [:]
+        }
+        #expect(declared)
+    }
+
+    @Test("A declared-empty table is left out with null, and the inverse declares it again", arguments: ["variables", "imports", "themes"])
+    func removesDeclaredEmptyTable(table: String) throws {
+        let editable = try EditableDocument(from: PenParser.parse(#"{"version":"2.20","\#(table)":{},"children":[]}"#))
+        #expect(try DocumentPropertyCodec.value(at: table, of: editable) == [:])
+        let after = try roundTrip(set([table: .null]), on: editable)
+        #expect(after.variables == nil && after.imports == nil && after.themes == nil)
+    }
+
+    @Test("{} on a table that holds entries declares what is already declared, and changes nothing")
+    func declaringPopulatedTableIsNoOp() throws {
+        let editable = try EditableDocument(from: PenParser.parse(
+            #"{"version":"2.20","imports":{"ui":"./ui.pen"},"children":[]}"#
+        ))
+        #expect(try DocumentPropertyCodec.value(at: "imports", of: editable) == [:])
+        let after = try roundTrip(set(["imports": [:]]), on: editable)
+        #expect(after.imports == ["ui": "./ui.pen"])
+    }
+
+    @Test("A table holding entries is not left out, and a table value other than {} or null is refused")
+    func refusesBadTableWrites() throws {
+        let editable = try EditableDocument(from: PenParser.parse(
+            #"{"version":"2.20","themes":{"mode":["light","dark"]},"children":[]}"#
+        ))
+        let before = editable.materialize()
+        let isMismatch = { (error: any Error) in
+            if case EditingError.documentPropertyTypeMismatch = error { return true }
+            return false
+        }
+        for value: AnyCodable in [.null, ["mode": ["light"]], "light", []] {
+            #expect {
+                try editable.apply(self.set(["themes": value]))
+            } throws: { isMismatch($0) }
+        }
+        #expect {
+            try editable.apply(self.set(["variables": ["a": 1]]))
+        } throws: { isMismatch($0) }
+        #expect(editable.materialize() == before)
+    }
+
     // MARK: - Refusals
 
     @Test("An unknown key, a claimed root key and a mistyped value are refused, changing nothing")
