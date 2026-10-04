@@ -20,16 +20,17 @@ extension DocumentSession {
             sequence: sequence,
             journalCount: journal.count,
             ledger: ledger,
-            lastDirtyingSequence: lastDirtyingSequence
+            lastDirtyingSequence: lastDirtyingSequence,
+            history: history
         )
     }
 
     /// Takes back every change committed since a checkpoint.
     ///
-    /// The document, the ledger, the journaled activity and the unsynced state return
-    /// to the checkpoint together. The sequence does not: numbers already handed out
-    /// are never reused, so a snapshot taken in between cannot be confused with a later
-    /// change. If the file was synced past the checkpoint, it now holds work the
+    /// The document, the ledger, the journaled activity, the undo and redo stacks and the
+    /// unsynced state return to the checkpoint together. The sequence does not: numbers
+    /// already handed out are never reused, so a snapshot taken in between cannot be
+    /// confused with a later change. If the file was synced past the checkpoint, it now holds work the
     /// document no longer has, so the session counts as unsynced.
     ///
     /// - Parameter checkpoint: A checkpoint this session took.
@@ -42,6 +43,7 @@ extension DocumentSession {
         let broadcast = unwind(undone.flatMap(\.applied))
         self.journal = Array(journal[..<checkpoint.journalCount])
         ledger = checkpoint.ledger
+        history = checkpoint.history
         lastDirtyingSequence = checkpoint.lastDirtyingSequence
         if syncedSequence > checkpoint.sequence {
             fileHoldsRolledBackWork = true

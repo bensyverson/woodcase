@@ -27,64 +27,103 @@ extension DocumentSession {
     ///   failed.
     func commitLocal(_ edit: LocalEdit) throws -> CommittedChange {
         try checkExpectedRevisions(edit.expecting)
-        guard !edit.operations.isEmpty else { return emptyChange() }
+        guard !edit.operations.isEmpty else { return emptyChange(origin: .local) }
 
-        let batch = UUID().uuidString
         let crdtBefore = edit.operations.count > 1 ? document.crdtDocument?.snapshot() : nil
-        var applied: [AppliedOperation] = []
-        var broadcast: [CRDTOperation] = []
-        var keys: [ChangeKey] = []
-        var invalidation = ChangeInvalidation()
-        var activity: [ActivityEvent] = []
+        var pending = PendingChange(activityKind: edit.activityKind)
         do {
             for operation in edit.operations {
-                let forward = operation.normalized(in: document)
-                let operationKeys = try ChangeKey.keys(of: forward, in: document)
-                let inverse = try document.granularInverse(of: forward)
-                let probe = ChangeInvalidation.Probe(operation: forward, keys: operationKeys, in: document)
-                let touched = ActivityEvent.nodeIDs(touchedBy: forward)
-                let pathsBefore = touched.map(document.namePath(of:))
-
-                broadcast += try applyThroughCRDT(forward)
-
-                applied.append(AppliedOperation(forward: forward, inverse: inverse))
-                keys += operationKeys
-                invalidation.formUnion(probe.invalidation(after: document))
-                if let event = activityEvent(
-                    for: forward,
-                    inverse: inverse,
-                    kind: edit.activityKind,
-                    nodes: touched,
-                    pathsBefore: pathsBefore,
-                    batch: batch
-                ) {
-                    activity.append(event)
-                }
+                try apply(operation, into: &pending)
             }
         } catch {
-            if let crdtBefore, let crdt = document.crdtDocument {
-                unwindFlatStore(applied)
-                crdt.restore(crdtBefore)
-            } else {
-                unwind(applied)
-            }
+            abandon(pending, restoring: crdtBefore)
             throw error
         }
 
+        let change = commit(pending, origin: .local, isUndoable: edit.undoGroup != .none)
+        history.record(UndoEntry(undoing: change.applied, at: change.sequence), group: edit.undoGroup)
+        return change
+    }
+
+    /// Applies one operation as part of a change, recording what it did.
+    ///
+    /// The operation is normalized, keyed and given its granular inverse against the
+    /// document as it stands, then applied — through the CRDT in collaborative mode.
+    ///
+    /// - Parameters:
+    ///   - operation: The operation.
+    ///   - pending: The change it is part of.
+    /// - Throws: The ``EditingError`` that refused the operation, before any write.
+    func apply(_ operation: EditOperation, into pending: inout PendingChange) throws {
+        let forward = operation.normalized(in: document)
+        let operationKeys = try ChangeKey.keys(of: forward, in: document)
+        let inverse = try document.granularInverse(of: forward)
+        let probe = ChangeInvalidation.Probe(operation: forward, keys: operationKeys, in: document)
+        let touched = ActivityEvent.nodeIDs(touchedBy: forward)
+        let pathsBefore = touched.map(document.namePath(of:))
+
+        pending.broadcast += try applyThroughCRDT(forward)
+
+        pending.applied.append(AppliedOperation(forward: forward, inverse: inverse))
+        pending.keys += operationKeys
+        pending.invalidation.formUnion(probe.invalidation(after: document))
+        if let event = activityEvent(
+            for: forward,
+            inverse: inverse,
+            kind: pending.activityKind,
+            nodes: touched,
+            pathsBefore: pathsBefore,
+            batch: pending.batch
+        ) {
+            pending.activity.append(event)
+        }
+    }
+
+    /// Takes back a change that failed part-way, leaving the session as it was.
+    ///
+    /// - Parameters:
+    ///   - pending: The change, as far as it got.
+    ///   - crdtBefore: The CRDT state captured before the change, to restore instead of
+    ///     unwinding through the CRDT; `nil` to unwind through the same path that
+    ///     applied the operations.
+    func abandon(_ pending: PendingChange, restoring crdtBefore: CRDTSnapshot?) {
+        if let crdtBefore, let crdt = document.crdtDocument {
+            unwindFlatStore(pending.applied)
+            crdt.restore(crdtBefore)
+        } else {
+            unwind(pending.applied)
+        }
+    }
+
+    /// Numbers, stamps and describes a change that applied in full.
+    ///
+    /// - Parameters:
+    ///   - pending: The change.
+    ///   - origin: Where it came from.
+    ///   - isUndoable: Whether it joined the author's undo history.
+    ///   - kept: Other authors' work an undo or redo left in place.
+    /// - Returns: The committed change.
+    func commit(
+        _ pending: PendingChange,
+        origin: SessionOrigin.Kind,
+        isUndoable: Bool,
+        kept: [KeptChange] = []
+    ) -> CommittedChange {
         sequence += 1
         lastDirtyingSequence = sequence
-        ledger.stamp(keys, by: author, at: sequence)
+        ledger.stamp(pending.keys, by: author, at: sequence)
         return CommittedChange(
-            origin: .local,
+            origin: origin,
             author: author,
-            applied: applied,
-            invalidation: invalidation,
+            applied: pending.applied,
+            invalidation: pending.invalidation,
             sequence: sequence,
             documentRevision: document.documentRevision,
-            activity: activity,
-            broadcast: broadcast,
-            isUndoable: edit.undoGroup != .none,
-            isDirtying: true
+            activity: pending.activity,
+            broadcast: pending.broadcast,
+            isUndoable: isUndoable,
+            isDirtying: true,
+            kept: kept
         )
     }
 
@@ -180,16 +219,22 @@ extension DocumentSession {
     }
 
     /// A change that applied nothing: it keeps the current sequence and dirties nothing.
-    private func emptyChange() -> CommittedChange {
+    ///
+    /// - Parameters:
+    ///   - origin: Where the change came from.
+    ///   - kept: Other authors' work an undo or redo left in place instead.
+    /// - Returns: The change.
+    func emptyChange(origin: SessionOrigin.Kind, kept: [KeptChange] = []) -> CommittedChange {
         CommittedChange(
-            origin: .local,
+            origin: origin,
             author: author,
             applied: [],
             invalidation: ChangeInvalidation(),
             sequence: sequence,
             documentRevision: document.documentRevision,
             isUndoable: false,
-            isDirtying: false
+            isDirtying: false,
+            kept: kept
         )
     }
 }

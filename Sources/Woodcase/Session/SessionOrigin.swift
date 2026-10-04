@@ -12,8 +12,9 @@ import Foundation
 /// local author's edits, a file rewritten on disk, a collaborator's CRDT operations,
 /// and undo and redo.
 ///
-/// Only ``local(_:)`` is accepted so far; the others throw
-/// ``SessionError/unsupportedOrigin(_:)`` until their support lands.
+/// ``local(_:)``, ``undo`` and ``redo`` are accepted; ``file(_:author:)`` and
+/// ``remote(_:from:)`` throw ``SessionError/unsupportedOrigin(_:)`` until their support
+/// lands.
 public enum SessionOrigin: Friendly {
     /// An edit by the session's own author.
     case local(LocalEdit)
@@ -25,10 +26,12 @@ public enum SessionOrigin: Friendly {
     /// Operations a collaborator broadcast.
     case remote([CRDTOperation], from: Author)
 
-    /// Undo the local author's most recent undoable change.
+    /// Undo the local author's most recent undo entry, keeping every other author's
+    /// later work. With nothing to undo, it applies nothing.
     case undo
 
-    /// Redo the local author's most recently undone change.
+    /// Redo the local author's most recently undone entry, keeping every other author's
+    /// later work. With nothing to redo, it applies nothing.
     case redo
 
     /// The origin's kind, without its payload.

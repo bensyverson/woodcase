@@ -80,7 +80,11 @@ public final class DocumentSession {
         let change: CommittedChange = switch origin {
         case let .local(edit):
             try commitLocal(edit)
-        case .file, .remote, .undo, .redo:
+        case .undo:
+            try commitHistory(.undo)
+        case .redo:
+            try commitHistory(.redo)
+        case .file, .remote:
             throw SessionError.unsupportedOrigin(origin.kind)
         }
         journal?.append(change)
@@ -105,6 +109,9 @@ public final class DocumentSession {
 
     /// Who last wrote each key.
     var ledger = ChangeLedger()
+
+    /// The author's undo and redo stacks.
+    var history = UndoHistory()
 
     /// The document as the file was last known to hold it: the base of a file merge.
     /// Kept editable so its revision cache stays warm between merges.

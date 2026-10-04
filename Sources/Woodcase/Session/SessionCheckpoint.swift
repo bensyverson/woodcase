@@ -10,7 +10,7 @@ import Foundation
 /// Taken by ``DocumentSession/checkpoint()`` before a run of submissions that must land
 /// together or not at all — a batch line, a CLI verb — and handed to
 /// ``DocumentSession/rollback(to:)`` if the run fails. The document, the ledger, the
-/// journaled activity and the unsynced state all return to this point together.
+/// journaled activity, the undo and redo stacks and the unsynced state all return to this point together.
 struct SessionCheckpoint: Friendly {
     /// The session's sequence when the checkpoint was taken.
     var sequence: UInt64
@@ -23,4 +23,7 @@ struct SessionCheckpoint: Friendly {
 
     /// The sequence of the last dirtying change.
     var lastDirtyingSequence: UInt64
+
+    /// The undo and redo stacks as they stood.
+    var history: UndoHistory
 }

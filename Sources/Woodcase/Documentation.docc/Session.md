@@ -52,8 +52,8 @@ no ledger stamp, no activity. In collaborative mode that includes the CRDT: a re
 edit was never broadcast, so its CRDT state is restored rather than unwound, and no
 peer ever has to hear of it.
 
-Only ``SessionOrigin/local(_:)`` is accepted so far. File merges, remote operations,
-undo and redo throw ``SessionError/unsupportedOrigin(_:)`` until their support lands.
+Local edits, undo and redo are accepted. File merges and remote operations throw
+``SessionError/unsupportedOrigin(_:)`` until their support lands.
 
 ### Isolation
 
@@ -78,29 +78,51 @@ two authors.
 An author is a name and a ``PeerID``, so the same person in two windows is two authors:
 each window's undo keeps the other window's work.
 
+### Undo and redo
+
+The session keeps its own author's undo and redo stacks. Each local edit joins them
+as its ``LocalEdit/undoGroup`` says: ``UndoGroup/new`` pushes an entry of its own,
+``UndoGroup/coalesce(_:)`` joins the most recent entry while it was opened with the
+same key — a drag's hundred moves undo as one — and ``UndoGroup/none`` joins nothing.
+Any new local edit clears redo; an undo or a redo closes the open group.
+
+``SessionOrigin/undo`` and ``SessionOrigin/redo`` are changes like any other: they
+take the next sequence, stamp the ledger, go through the CRDT and into the activity
+log (an undo's events are labeled ``ActivityEvent/Kind/undo``), and come back as one
+``CommittedChange``. What an undo applied becomes the redo entry, and the reverse.
+``DocumentSession/canUndo`` and ``DocumentSession/canRedo`` say whether either has
+anything to do; with nothing, the change applies nothing and keeps the current
+sequence.
+
 ### Keep theirs
 
-Undo is per author and keeps everyone else's work. This is the contract
-``SessionOrigin/undo`` implements once it is accepted; the ledger and the guarded
-inverses each ``AppliedOperation`` carries are already in place for it. When the local
-author undoes an edit:
+Undo is per author and keeps everyone else's work. When the local author undoes, or
+redoes, an entry, each step is weighed against the ledger: only a write by another
+author *after* the entry's first change can stop it.
 
 - A property or override key another author has written since is left as they wrote
-  it, and reported in ``CommittedChange/kept``.
-- A structural step that would destroy another author's later work — un-inserting a
-  node someone has since edited inside — is skipped, its node kept, and reported.
+  it, and reported in ``CommittedChange/kept``. The author's other keys are undone.
+- A step that removes or rebuilds a subtree — un-inserting a node, undoing a detach or
+  a replace — is skipped when anyone else has since written anything inside it, and
+  their writes are reported. Undoing a detach someone has edited inside leaves the
+  instance detached.
+- A node moved back is left where another author has since moved it; a node put back
+  by undoing a delete stays deleted when its parent has since been deleted, or one of
+  its ids taken.
+- The steps that take back one structural operation run together or not at all, so
+  half a detach is never undone.
 - A node put back by a move or a delete lands next to the sibling it sat after
   (``Placement``), not at an index someone else's insert has since shifted.
 
 Everything else is undone. The app can then say "Kept 1 change by claude" instead of
-silently overwriting it.
+silently overwriting it. A whole undo lands or none of it does, like a local edit.
 
 ### Rolling back a run of changes
 
 A caller that submits several changes as one unit — a batch line, a CLI verb — takes a
 checkpoint first and rolls back to it if the unit fails. The rollback reverts the
-document, the ledger and the journaled activity together, and in collaborative mode
-returns the operations collaborators need to follow it.
+document, the ledger, the journaled activity and the undo and redo stacks together, and
+in collaborative mode returns the operations collaborators need to follow it.
 
 ## Topics
 

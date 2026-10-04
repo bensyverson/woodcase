@@ -170,12 +170,10 @@ struct DocumentSessionLocalTests {
 
     // MARK: - Origins not yet supported
 
-    @Test("undo, redo, file and remote origins are refused until their leaves land")
+    @Test("file and remote origins are refused until their leaves land")
     func unsupportedOrigins() throws {
         let session = makeSession()
         let document = session.document.materialize()
-        #expect(throws: SessionError.unsupportedOrigin(.undo)) { try session.submit(.undo) }
-        #expect(throws: SessionError.unsupportedOrigin(.redo)) { try session.submit(.redo) }
         #expect(throws: SessionError.unsupportedOrigin(.file)) { try session.submit(.file(document, author: nil)) }
         #expect(throws: SessionError.unsupportedOrigin(.remote)) { try session.submit(.remote([], from: ana)) }
     }
