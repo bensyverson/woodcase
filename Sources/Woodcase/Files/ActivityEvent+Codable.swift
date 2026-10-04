@@ -39,7 +39,7 @@ public extension ActivityEvent {
 
     /// The field names of the wire format. Changing one is a format change.
     internal enum CodingKeys: String, CodingKey {
-        case time, identity, file, op, nodes, paths, inverse, revision, batch
+        case time, identity, file, op, nodes, paths, inverse, forward, revision, batch
     }
 
     /// Decodes an event from one line's JSON.
@@ -65,6 +65,7 @@ public extension ActivityEvent {
         nodes = try container.decodeIfPresent([String].self, forKey: .nodes) ?? []
         paths = try container.decodeIfPresent([String].self, forKey: .paths) ?? []
         inverse = try container.decodeIfPresent([EditOperation].self, forKey: .inverse) ?? []
+        forward = try container.decodeIfPresent([EditOperation].self, forKey: .forward) ?? []
         revision = try container.decode(String.self, forKey: .revision)
         batch = try container.decodeIfPresent(String.self, forKey: .batch)
     }
@@ -82,6 +83,7 @@ public extension ActivityEvent {
         try container.encode(nodes, forKey: .nodes)
         try container.encode(paths, forKey: .paths)
         try container.encode(inverse, forKey: .inverse)
+        if !forward.isEmpty { try container.encode(forward, forKey: .forward) }
         try container.encode(revision, forKey: .revision)
         try container.encodeIfPresent(batch, forKey: .batch)
     }

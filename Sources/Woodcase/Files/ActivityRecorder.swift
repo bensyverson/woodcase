@@ -110,6 +110,7 @@ public final class ActivityRecorder {
             nodes: nodes,
             paths: paths,
             inverse: inverse,
+            forward: [operation],
             revision: document.documentRevision,
             batch: batch
         )

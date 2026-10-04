@@ -14,9 +14,11 @@ import Foundation
 /// meanings are a contract. <doc:WoodcaseActivityLog> documents them for those readers.
 ///
 /// ```json
-/// {"batch":"C1A0…","file":"/Users/agent/Designs/demo.pen","identity":"logger",
+/// {"batch":"C1A0…","file":"/Users/agent/Designs/demo.pen",
+///  "forward":[{"updateCommon":{"_0":{"nodeID":"jSUCH","common":{"name":"Title"}}}}],
+///  "identity":"logger",
 ///  "inverse":[{"updateCommon":{"_0":{"nodeID":"jSUCH","common":{"name":"child-1"}}}}],
-///  "nodes":["jSUCH"],"op":"set","paths":["layout-vertical/child-1"],
+///  "nodes":["jSUCH"],"op":"set","paths":["layout-vertical/Title"],
 ///  "revision":"3f2a91c0d4e5b678","time":"2026-08-29T16:31:04.123Z"}
 /// ```
 ///
@@ -45,6 +47,7 @@ public struct ActivityEvent: Friendly {
     ///   - paths: Those nodes' name paths, in the same order.
     ///   - inverse: The operations that undo this one, from
     ///     ``EditableDocument/prepareInverse(of:)``.
+    ///   - forward: The operations as applied; empty for a row that applied nothing.
     ///   - revision: The document's ``EditableDocument/documentRevision`` *after* the
     ///     operation was applied.
     ///   - batch: An id shared by every event of one transaction, or `nil` for an event
@@ -57,6 +60,7 @@ public struct ActivityEvent: Friendly {
         nodes: [String] = [],
         paths: [String] = [],
         inverse: [EditOperation] = [],
+        forward: [EditOperation] = [],
         revision: String,
         batch: String? = nil
     ) {
@@ -67,6 +71,7 @@ public struct ActivityEvent: Friendly {
         self.nodes = nodes
         self.paths = paths
         self.inverse = inverse
+        self.forward = forward
         self.revision = revision
         self.batch = batch
     }
@@ -110,6 +115,13 @@ public struct ActivityEvent: Friendly {
 
     /// The operations that undo this one, in the order they must be applied.
     public var inverse: [EditOperation]
+
+    /// The operations as they were applied, so a reader can show new values beside the
+    /// old ones in ``inverse`` without reconstructing them from a later state.
+    ///
+    /// Empty for rows that apply nothing (`external`, `migrate`, `new`) and for lines
+    /// written before the field existed; the key is omitted from the wire when empty.
+    public var forward: [EditOperation]
 
     /// The document's revision *after* this operation was applied.
     ///

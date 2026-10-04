@@ -81,7 +81,9 @@ fields by name, so the names and their meanings are a contract, not an implement
 detail. Broken across lines here for reading; on disk it is one line:
 
 ```json
-{"batch":"7C6E…","file":"/Users/ana/Designs/dashboard.pen","identity":"ana",
+{"batch":"7C6E…","file":"/Users/ana/Designs/dashboard.pen",
+ "forward":[{"updateCommon":{"_0":{"nodeID":"jSUCH","common":{"name":"Title"}}}}],
+ "identity":"ana",
  "inverse":[{"updateCommon":{"_0":{"nodeID":"jSUCH","common":{"name":"child-1"}}}}],
  "nodes":["jSUCH"],"op":"set","paths":["layout-vertical/Title"],
  "revision":"3f2a91c0d4e5b678","time":"2026-08-29T16:31:04.123Z"}
@@ -118,6 +120,12 @@ detail. Broken across lines here for reading; on disk it is one line:
   derived from the document and known before it runs; a row written before that change
   (2026-10-04) carries only the re-insert, still decodes, and replays as far as it goes.
   So `woodcase rm --detach` followed by `woodcase undo` restores the file byte for byte.
+- **`forward`** — the operation as applied, exactly as its writer passed it (a
+  whole-struct `updateCommon` stays whole), so a reader can show the new values beside
+  the old ones in `inverse` without reconstructing them from a later state. One
+  operation per row today; an `undo` row's `forward` is the inverse it replayed. Omitted
+  when empty: `external`, `migrate` and `new` rows apply nothing, and a line written
+  before the field existed (2026-10-04) decodes with an empty `forward`.
 - **`revision`** — the document's ``EditableDocument/documentRevision`` *after* this
   operation. Per operation, not per transaction, so `undo` can check one event against
   the file's current revision and refuse rather than guess.
