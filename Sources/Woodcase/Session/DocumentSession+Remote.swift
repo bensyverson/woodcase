@@ -1,0 +1,94 @@
+//
+//  DocumentSession+Remote.swift
+//  Woodcase
+//
+
+import Foundation
+
+public extension DocumentSession {
+    /// Introduces a collaborator, so the writes their replica makes are credited to them.
+    ///
+    /// Each CRDT operation names the replica that made it, not the person; this is
+    /// the mapping back. Call it when a peer joins. A ``SessionOrigin/remote(_:from:)``
+    /// submission introduces its sender too, so an operation relayed through one peer
+    /// on behalf of another is credited to whoever made it, as long as that peer has
+    /// been introduced; one from a replica nobody introduced is credited to
+    /// ``Author/unattributed(peer:)``.
+    ///
+    /// - Parameter author: The collaborator, with the peer id their replica uses.
+    func noteJoined(_ author: Author) {
+        peers[author.peerID] = author
+    }
+}
+
+extension DocumentSession {
+    /// Applies a collaborator's CRDT operations.
+    ///
+    /// Each operation is keyed against the document before it lands
+    /// (``ChangeKey/keys(ofRemote:in:)``), then run through the CRDT; only the ones the
+    /// CRDT accepts are stamped, under the author of the replica that made them. The
+    /// children lists are reconciled once, after the last operation, and the
+    /// invalidation is read by comparing the document before and after
+    /// (``ChangeInvalidation/RemoteProbe``).
+    ///
+    /// The change is somebody else's work: it joins no undo history — the local
+    /// author's undo keeps it instead, through the ledger — leaves redo and the open
+    /// undo group as they were, writes no activity (the collaborator's own session
+    /// logs it), broadcasts nothing and does not dirty the file. Ordering operations
+    /// whose dependencies have not arrived is not done here: they are applied as given.
+    ///
+    /// - Parameters:
+    ///   - operations: The operations, in the order they arrived.
+    ///   - sender: The collaborator who sent them, who joins the peer registry.
+    /// - Returns: The committed change; with nothing accepted, an empty change that keeps
+    ///   the current sequence.
+    /// - Throws: ``SessionError/notCollaborative`` when the session keeps no CRDT.
+    func commitRemote(_ operations: [CRDTOperation], from sender: Author) throws -> CommittedChange {
+        guard document.crdtDocument != nil else { throw SessionError.notCollaborative }
+        noteJoined(sender)
+
+        let probe = ChangeInvalidation.RemoteProbe(document)
+        var mutations: [DocumentMutation] = []
+        var writes: [(keys: [ChangeKey], author: Author)] = []
+        for operation in operations {
+            let keys = ChangeKey.keys(ofRemote: operation, in: document)
+            let applied = document.applyRemoteMutations(operation)
+            guard !applied.isEmpty else { continue }
+            mutations += applied
+            writes.append((keys, author(of: operation.id.peerID)))
+        }
+        guard !mutations.isEmpty else {
+            return CommittedChange(
+                origin: .remote,
+                author: sender,
+                applied: [],
+                invalidation: ChangeInvalidation(),
+                sequence: sequence,
+                documentRevision: document.documentRevision,
+                isUndoable: false,
+                isDirtying: false
+            )
+        }
+        document.reconcileChildrenWithParents()
+
+        sequence += 1
+        for write in writes {
+            ledger.stamp(write.keys, by: write.author, at: sequence)
+        }
+        return CommittedChange(
+            origin: .remote,
+            author: sender,
+            applied: [],
+            invalidation: probe.invalidation(of: mutations, after: document),
+            sequence: sequence,
+            documentRevision: document.documentRevision,
+            isUndoable: false,
+            isDirtying: false
+        )
+    }
+
+    /// The author of the replica a remote operation came from.
+    private func author(of peer: PeerID) -> Author {
+        peers[peer] ?? .unattributed(peer: peer)
+    }
+}

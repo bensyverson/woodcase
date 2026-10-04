@@ -83,6 +83,18 @@ struct DocumentSessionUndoHistoryTests {
         #expect(!session.canRedo)
     }
 
+    @Test("a redo's activity rows are labeled redo, not by their operations")
+    func redoRowsAreLabeledRedo() throws {
+        let session = makeSession(file: file)
+        try session.submit(rename("c1", to: "Renamed"))
+        try session.submit(.undo)
+
+        let redo = try session.submit(.redo)
+
+        #expect(redo.activity.map(\.op) == [.redo])
+        #expect(ActivityEvent.Kind.redo.rawValue == "redo")
+    }
+
     // MARK: - Clearing redo and coalescing
 
     @Test("a new local edit clears redo")

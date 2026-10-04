@@ -209,9 +209,9 @@ public extension ActivityEvent {
     /// The raw values are the wire format's `op` field, and match the CLI verbs, so a
     /// feed row and the command that would repeat it read the same.
     ///
-    /// Five kinds have no operation of their own and are only ever supplied by the
-    /// caller: ``cp``, which is an insert the CLI knows was a copy, ``undo``, which
-    /// is whatever operation an inverse happens to be, ``external``, which is not
+    /// Six kinds have no operation of their own and are only ever supplied by the
+    /// caller: ``cp``, which is an insert the CLI knows was a copy, ``undo`` and
+    /// ``redo``, which are whatever operation an inverse happens to be, ``external``, which is not
     /// an edit woodcase made at all — see ``LogLineage`` — and ``migrate`` and ``new``,
     /// which ``PenFileTransaction`` records for a write that is not an edit of a document.
     enum Kind: String, Friendly, CaseIterable {
@@ -240,6 +240,11 @@ public extension ActivityEvent {
         case theme
         /// An earlier event's inverse was replayed. Caller-supplied.
         case undo
+        /// An undone edit was put back by a ``DocumentSession`` redo. Caller-supplied: a
+        /// redo replays the inverse of an undo, which looks like any other operation.
+        /// Unlike ``undo`` it is an ordinary forward edit to the log-driven
+        /// `woodcase undo`, which takes it back like any other row.
+        case redo
         /// Somebody rewrote the file outside woodcase, and a transaction that opened it
         /// afterwards noticed. Caller-supplied by ``LogLineage``: it *records* a change
         /// rather than making one, so it names nobody, carries no inverse — there is

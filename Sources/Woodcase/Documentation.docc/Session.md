@@ -52,8 +52,31 @@ no ledger stamp, no activity. In collaborative mode that includes the CRDT: a re
 edit was never broadcast, so its CRDT state is restored rather than unwound, and no
 peer ever has to hear of it.
 
-Local edits, undo and redo are accepted. File merges and remote operations throw
+Local edits, remote operations, undo and redo are accepted. File merges throw
 ``SessionError/unsupportedOrigin(_:)`` until their support lands.
+
+### Remote operations
+
+A collaborator's CRDT operations arrive as ``SessionOrigin/remote(_:from:)`` to a
+collaborative session (any other throws ``SessionError/notCollaborative``). Each one the
+CRDT accepts stamps the ledger with the keys it wrote — keyed as finely as a local edit,
+so a remote write to one override key meets a local undo of that key — under the author
+of the replica that made it. Each operation names its replica by ``PeerID``;
+``DocumentSession/noteJoined(_:)`` maps a peer to an ``Author``, the sender of a
+submission is introduced automatically, and a replica nobody introduced is
+``Author/unattributed(peer:)``. A write the CRDT rejects as stale stamps nothing, and a
+submission with nothing accepted applies nothing and keeps the current sequence.
+
+The invalidation compares the document before and after the whole batch, because the
+reconciliation that ends it may move nodes without naming them: written nodes, moved
+nodes with both parents, reordered children lists, the root order and any document
+member.
+
+A remote change is someone else's work: it is neither undoable nor dirtying, writes no
+activity (its author's own session logs it), broadcasts nothing, and leaves the local
+author's redo stack and open undo group alone. The local author's later undo keeps it,
+as *Keep theirs* below describes. Operations are applied in the order given; holding
+back one whose causal dependencies have not arrived is not done yet.
 
 ### Isolation
 
@@ -88,7 +111,7 @@ Any new local edit clears redo; an undo or a redo closes the open group.
 
 ``SessionOrigin/undo`` and ``SessionOrigin/redo`` are changes like any other: they
 take the next sequence, stamp the ledger, go through the CRDT and into the activity
-log (an undo's events are labeled ``ActivityEvent/Kind/undo``), and come back as one
+log (an undo's events are labeled ``ActivityEvent/Kind/undo``, a redo's ``ActivityEvent/Kind/redo``), and come back as one
 ``CommittedChange``. What an undo applied becomes the redo entry, and the reverse.
 ``DocumentSession/canUndo`` and ``DocumentSession/canRedo`` say whether either has
 anything to do; with nothing, the change applies nothing and keeps the current

@@ -12,8 +12,8 @@ import Foundation
 /// local author's edits, a file rewritten on disk, a collaborator's CRDT operations,
 /// and undo and redo.
 ///
-/// ``local(_:)``, ``undo`` and ``redo`` are accepted; ``file(_:author:)`` and
-/// ``remote(_:from:)`` throw ``SessionError/unsupportedOrigin(_:)`` until their support
+/// ``local(_:)``, ``remote(_:from:)``, ``undo`` and ``redo`` are accepted;
+/// ``file(_:author:)`` throws ``SessionError/unsupportedOrigin(_:)`` until its support
 /// lands.
 public enum SessionOrigin: Friendly {
     /// An edit by the session's own author.
@@ -23,7 +23,9 @@ public enum SessionOrigin: Friendly {
     /// log explains the write, and `nil` for an outside writer.
     case file(PenDocument, author: Author?)
 
-    /// Operations a collaborator broadcast.
+    /// Operations a collaborator broadcast, sent by `from`. Accepted only by a
+    /// collaborative session; neither undoable nor dirtying. Each operation is credited
+    /// to the author of the replica that made it (see ``DocumentSession/noteJoined(_:)``).
     case remote([CRDTOperation], from: Author)
 
     /// Undo the local author's most recent undo entry, keeping every other author's

@@ -43,6 +43,7 @@ public final class DocumentSession {
             ? EditableDocument(from: document, peerID: author.peerID)
             : EditableDocument(from: document)
         base = EditableDocument(from: document)
+        peers = [author.peerID: author]
     }
 
     /// Who edits through this session.
@@ -74,7 +75,8 @@ public final class DocumentSession {
     /// - Parameter origin: The change and where it comes from.
     /// - Returns: Everything the change did.
     /// - Throws: ``SessionError/unsupportedOrigin(_:)`` for an origin the session
-    ///   cannot take yet, or the ``EditingError`` that refused the edit.
+    ///   cannot take yet, ``SessionError/notCollaborative`` for remote operations to a
+    ///   session without a CRDT, or the ``EditingError`` that refused the edit.
     @discardableResult
     public func submit(_ origin: SessionOrigin) throws -> CommittedChange {
         let change: CommittedChange = switch origin {
@@ -84,7 +86,9 @@ public final class DocumentSession {
             try commitHistory(.undo)
         case .redo:
             try commitHistory(.redo)
-        case .file, .remote:
+        case let .remote(operations, sender):
+            try commitRemote(operations, from: sender)
+        case .file:
             throw SessionError.unsupportedOrigin(origin.kind)
         }
         journal?.append(change)
@@ -112,6 +116,11 @@ public final class DocumentSession {
 
     /// The author's undo and redo stacks.
     var history = UndoHistory()
+
+    /// Who edits on each replica the session has heard of, the session's own included:
+    /// how a remote operation's peer id becomes an ``Author``. See
+    /// ``noteJoined(_:)``.
+    var peers: [PeerID: Author]
 
     /// The document as the file was last known to hold it: the base of a file merge.
     /// Kept editable so its revision cache stays warm between merges.

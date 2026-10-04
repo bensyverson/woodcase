@@ -100,10 +100,12 @@ detail. Broken across lines here for reading; on disk it is one line:
   (``ActivityEvent/canonicalPath(for:)``), so `/tmp/x.pen` and `/private/tmp/x.pen`
   produce one string and a filter on either finds both.
 - **`op`** — a short verb: `set`, `add`, `replace`, `cp`, `mv`, `rm`, `override`,
-  `detach`, `var`, `import`, `theme`, `undo`, `external`, `migrate`, `new`. Coarser than ``EditOperation`` on purpose — a feed wants
+  `detach`, `var`, `import`, `theme`, `undo`, `redo`, `external`, `migrate`, `new`. Coarser than ``EditOperation`` on purpose — a feed wants
   "something was set here", not which of the four property operations did it. Most are
-  derived from the operation; `cp` and `undo` are supplied by the caller, because an
-  inverse operation looks like any other and only its author knows it is an undo, and
+  derived from the operation; `cp`, `undo` and `redo` are supplied by the caller, because an
+  inverse operation looks like any other and only its author knows it is an undo or a
+  redo (a ``DocumentSession`` labels its redo rows `redo`; `woodcase undo` treats one as
+  an ordinary edit it can take back), and
   `external`, `migrate` and `new` are not operations at all — see *Writes from outside*
   and *Rewrites and creations* below.
 - **`nodes`** — the node ids the operation touched, subject first, then the parent whose

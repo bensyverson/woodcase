@@ -139,7 +139,7 @@ public extension ChangeKey {
     }
 
     /// The marker ``PropertyDiff/diffKind(old:new:)`` emits for a change of node type.
-    private static let kindTypePath = "kind.type"
+    internal static let kindTypePath = "kind.type"
 
     /// The keys in their first-seen order, each once.
     private static func unique(_ keys: [ChangeKey]) -> [ChangeKey] {

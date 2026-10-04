@@ -191,11 +191,8 @@ public extension EditableDocument {
     ///
     /// - Parameter operation: The remote CRDT operation from another peer.
     func applyRemote(_ operation: CRDTOperation) {
-        guard let crdtDocument else { return }
-        guard let mutations = crdtDocument.processRemote(operation: operation, document: self) else { return }
-        for mutation in mutations {
-            applyMutation(mutation)
-        }
+        guard crdtDocument != nil else { return }
+        guard !applyRemoteMutations(operation).isEmpty else { return }
         reconcileChildrenWithParents()
         onRemoteChange?()
     }
@@ -208,15 +205,36 @@ public extension EditableDocument {
     ///
     /// - Parameter operations: The remote CRDT operations to apply.
     func applyRemote(_ operations: [CRDTOperation]) {
-        guard let crdtDocument else { return }
+        guard crdtDocument != nil else { return }
         for operation in operations {
-            guard let mutations = crdtDocument.processRemote(operation: operation, document: self) else { continue }
-            for mutation in mutations {
-                applyMutation(mutation)
-            }
+            applyRemoteMutations(operation)
         }
         reconcileChildrenWithParents()
         onRemoteChange?()
+    }
+
+    /// Runs one remote operation through the CRDT and writes what it accepted into the
+    /// flat store, returning the mutations written.
+    ///
+    /// This is the step the batch `applyRemote` repeats, exposed so a
+    /// ``DocumentSession`` can see which operations landed — and so stamp only those —
+    /// and what each changed. It does not reconcile the children lists with the
+    /// parents: the caller calls ``reconcileChildrenWithParents()`` once after the last
+    /// operation of a batch, as `applyRemote` does.
+    ///
+    /// - Parameter operation: The remote CRDT operation.
+    /// - Returns: The mutations written, in order; empty when the CRDT rejected the
+    ///   operation (a stale write, a cycle-creating move) or the document is not
+    ///   collaborative.
+    @discardableResult
+    func applyRemoteMutations(_ operation: CRDTOperation) -> [DocumentMutation] {
+        guard let crdtDocument,
+              let mutations = crdtDocument.processRemote(operation: operation, document: self)
+        else { return [] }
+        for mutation in mutations {
+            applyMutation(mutation)
+        }
+        return mutations
     }
 
     /// Returns CRDT operations not yet seen by the given vector clock.

@@ -12,6 +12,9 @@ import Foundation
 public enum SessionError: Error, Friendly {
     /// The session cannot take edits from this kind of origin yet.
     case unsupportedOrigin(SessionOrigin.Kind)
+    /// The session keeps no CRDT, so it cannot take a collaborator's operations: create it
+    /// with `collaborative: true`.
+    case notCollaborative
 }
 
 extension SessionError: LocalizedError {
@@ -20,6 +23,8 @@ extension SessionError: LocalizedError {
         switch self {
         case let .unsupportedOrigin(kind):
             "A document session cannot apply \(kind.rawValue) changes yet."
+        case .notCollaborative:
+            "A document session that is not collaborative cannot apply remote operations."
         }
     }
 }

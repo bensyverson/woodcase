@@ -48,7 +48,7 @@ extension DocumentSession {
         }
 
         let crdtBefore = document.crdtDocument?.snapshot()
-        var pending = PendingChange(activityKind: direction == .undo ? .undo : nil)
+        var pending = PendingChange(activityKind: direction == .undo ? .undo : .redo)
         var kept: [KeptChange] = []
         var reversals: [UndoEntry.Reversal] = []
         do {

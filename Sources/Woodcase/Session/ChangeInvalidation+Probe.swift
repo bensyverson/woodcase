@@ -156,7 +156,7 @@ extension ChangeInvalidation {
         }
 
         /// The keyed tables a document declares, written empty or not.
-        private static func declaredTables(of document: EditableDocument) -> Set<DocumentChangeKey.Table> {
+        static func declaredTables(of document: EditableDocument) -> Set<DocumentChangeKey.Table> {
             var tables: Set<DocumentChangeKey.Table> = []
             if document.variables != nil { tables.insert(.variables) }
             if document.imports != nil { tables.insert(.imports) }

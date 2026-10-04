@@ -55,11 +55,12 @@ public struct CommittedChange: Friendly {
     /// Where the change came from.
     public var origin: SessionOrigin.Kind
 
-    /// Who made the change: the session's author for a local edit, undo or redo.
+    /// Who made the change: the session's author for a local edit, undo or redo; the
+    /// collaborator who sent a remote change.
     public var author: Author
 
     /// The operations applied, in order, each normalized and with complete, guarded
-    /// inverses.
+    /// inverses. Empty for a remote change, which is applied as CRDT operations.
     public var applied: [AppliedOperation]
 
     /// The nodes and document-level members the change can have changed.
