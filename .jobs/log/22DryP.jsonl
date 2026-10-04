@@ -4171,3 +4171,9 @@
 {"v":1,"rep":"22DryP","seq":4171,"ts":1791140697241,"actor":"w-follow","type":"claimed","task":"efimSr","data":{"duration":"2h","expires_at":1791147897}}
 {"v":1,"rep":"22DryP","seq":4172,"ts":1791140701563,"actor":"w-postit","type":"claimed","task":"lAWTEF","data":{"duration":"2h","expires_at":1791147901}}
 {"v":1,"rep":"22DryP","seq":4173,"ts":1791140704306,"actor":"w-postit","type":"claimed","task":"fOSTzS","data":{"duration":"2h","expires_at":1791147904}}
+{"v":1,"rep":"22DryP","seq":4174,"ts":1791141129779,"actor":"w-session","type":"released","task":"UOI9Dg","data":{"was_claimed_by":"w-session","was_expires_at":1791146623}}
+{"v":1,"rep":"22DryP","seq":4175,"ts":1791141129899,"actor":"claude","type":"done","task":"UOI9Dg","data":{"note":"Landed in 8eec904 (squash of wt/w-session; hook green). Session init(merger:) and CommittedChange.conflicts deferred to s-file (MergeConflict lives in Merge/). Known limits: checkpoint journal grows for the session's life once started; multi-op collaborative edits copy the CRDT op log once.","cascade":false,"was_status":"available"}}
+{"v":1,"rep":"22DryP","seq":4176,"ts":1791141129900,"actor":"claude","type":"unblocked","task":"0OgBjJ","data":{"blocked_id":"0OgBjJ","blocker_id":"UOI9Dg","reason":"blocker_done"}}
+{"v":1,"rep":"22DryP","seq":4177,"ts":1791141129902,"actor":"claude","type":"unblocked","task":"2oUqxH","data":{"blocked_id":"2oUqxH","blocker_id":"UOI9Dg","reason":"blocker_done"}}
+{"v":1,"rep":"22DryP","seq":4178,"ts":1791141129903,"actor":"claude","type":"unblocked","task":"JnQiWj","data":{"blocked_id":"JnQiWj","blocker_id":"UOI9Dg","reason":"blocker_done"}}
+{"v":1,"rep":"22DryP","seq":4179,"ts":1791141129904,"actor":"claude","type":"unblocked","task":"kYZagZ","data":{"blocked_id":"kYZagZ","blocker_id":"UOI9Dg","reason":"blocker_done"}}

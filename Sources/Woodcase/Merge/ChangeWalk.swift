@@ -15,9 +15,8 @@ import Foundation
 /// document holds is walked fully on that side, because a new container can adopt
 /// nodes the other side holds elsewhere, and each of those is then compared in turn.
 ///
-/// The one difference a revision cannot see is a declared `"children": []` against
-/// absent children (both fold nothing into the hash), so it is found apart from the
-/// walk: by comparing the containers each document declares empty.
+/// A revision hashes a declared `"children": []` apart from absent children, so that
+/// difference moves every ancestor's revision too and the walk reaches it like any other.
 struct ChangeWalk {
     /// The source document.
     let from: EditableDocument
@@ -70,21 +69,7 @@ struct ChangeWalk {
             }
         }
 
-        recordDeclaredEmptyChildren(into: &changes)
         return changes
-    }
-
-    /// Records ``NodeChangeKey/declaredChildren`` for every node both documents hold
-    /// that one declares `"children": []` and the other leaves undeclared — including
-    /// those under a pruned subtree, which the walk never reached.
-    private func recordDeclaredEmptyChildren(into changes: inout DocumentChanges) {
-        let differing = Self.declaredEmpty(in: from).symmetricDifference(Self.declaredEmpty(in: to))
-        for id in differing {
-            guard let before = Self.state(of: id, in: from), let after = Self.state(of: id, in: to),
-                  (before.children == nil) != (after.children == nil)
-            else { continue }
-            changes.nodes[id, default: NodeChange(from: before, to: after)].keys.insert(.declaredChildren)
-        }
     }
 
     /// The keys of a node's place in the tree that differ: its parent, its child list
@@ -101,11 +86,6 @@ struct ChangeWalk {
     private static func state(of id: String, in document: EditableDocument) -> NodeChange.State? {
         guard let node = document.nodes[id] else { return nil }
         return NodeChange.State(node: node, parentID: document.parents[id], children: document.children[id])
-    }
-
-    /// The containers `document` declares with an empty child list.
-    private static func declaredEmpty(in document: EditableDocument) -> Set<String> {
-        Set(document.children.lazy.filter(\.value.isEmpty).map(\.key))
     }
 
     /// The ids of `first`, then those of `second` that `first` lacks, each in order.

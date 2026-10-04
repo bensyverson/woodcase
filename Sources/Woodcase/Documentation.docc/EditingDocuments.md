@@ -342,8 +342,10 @@ rendered tiles — if unchanged, the tile is still valid.
 
 ``EditableDocument/revision(of:)`` returns a stable, 16-character hex content hash for
 a node's subtree — 64-bit FNV-1a over the node's canonical JSON followed by each
-child's own revision, in ``EditableDocument/children`` order. Editing a node changes
-its own revision and every ancestor's, but never an unrelated sibling's.
+child's own revision, in ``EditableDocument/children`` order. A container written
+`"children": []` is hashed with that empty list, so it differs from one written without
+the key. Editing a node changes its own revision and every ancestor's, but never an
+unrelated sibling's.
 ``EditableDocument/documentRevision`` does the same for the whole document, folding in
 the root nodes' revisions plus ``EditableDocument/version``, ``EditableDocument/themes``,
 ``EditableDocument/imports`` and ``EditableDocument/variables``.
@@ -419,8 +421,9 @@ The walk is pruned by revision tokens: a node both documents hold with one
 ``EditableDocument/revision(of:)`` pins an identical subtree, so the walk records that
 node's placement and goes no deeper. Two copies of a large document cost one visit per
 root; one edit costs a visit per node on its spine and per sibling beside it. A
-declared `"children": []` and absent children hash alike, so declared-ness is compared
-apart from the walk, over the containers each document declares empty.
+declared `"children": []` hashes apart from absent children, so declared-ness needs no
+scan of its own: the walk reaches it like any other edit.
+
 ### Addressing Nodes
 
 An agent or a CLI names a node with an *address* rather than an id it had to look up

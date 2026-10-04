@@ -713,3 +713,10 @@ The harness's `PageHost` web view is offscreen, and WebKit runs no animation fra
 `requestAnimationFrame` never came, and every one of `ReactRenderWebViewTests`' 331 boards hit the 480 s time limit at
 once — which reads as a loaded machine, not a broken page. Poll with `setTimeout` in harness page code (the
 `PenImageCrop` wait in `ReactHarnessBuilder` does). Cost a full gate run (leaf `fmV137`).
+
+## 2026-10-04 — A bare `nil` in a ternary typed `AnyCodable?` is `AnyCodable.null`, not "absent"
+
+`AnyCodable` is `ExpressibleByNilLiteral`, so in `cond ? nil : someAnyCodable` the literal binds to the
+non-optional branch's type and becomes `.some(.null)` once promoted. A `MergeConflict` meant to say "the base does
+not hold this" then said "the base holds it unset" (leaf `b8hhaf`). Write `optional.map { _ in value }` or
+`Optional<AnyCodable>.none` where absence and `null` mean different things.

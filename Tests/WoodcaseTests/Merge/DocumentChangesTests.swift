@@ -165,12 +165,15 @@ struct DocumentChangesTests {
         #expect(result.nodes["r1"]?.to?.node.extras["added"] == .int(3))
     }
 
-    @Test("Declared `children: []` against absent children is a change revision(of:) cannot see")
+    @Test("Declared `children: []` against absent children is found by the pruned walk alone")
     func declaredChildren() throws {
         let from = try document(tree())
         let to = try document(tree().replacingOccurrences(of: #"{"type":"frame","id":"box","children":[]}"#, with: #"{"type":"frame","id":"box"}"#))
-        #expect(from.revision(of: "page") == to.revision(of: "page"), "the hole this change exists for")
-        let result = DocumentChanges(from: from, to: to)
+        #expect(from.revision(of: "page") != to.revision(of: "page"))
+        var walk = ChangeWalk(from: from, to: to)
+        let result = walk.run()
+        // page and side, then page's three children: the walk descends to box along its spine.
+        #expect(walk.visits == 5)
         #expect(result.nodes["box"]?.keys == [.declaredChildren])
         #expect(result.nodes["box"]?.from?.children == [])
         #expect(result.nodes["box"]?.to?.children == nil)

@@ -13,6 +13,8 @@ public extension EditableDocument {
     /// revision in ``children`` order, then — for a `ref` node — the revision of every
     /// component it renders. So an edit anywhere in a subtree changes the revision of
     /// every ancestor up to the root, while leaving unrelated siblings untouched.
+    /// A container written `"children": []` is hashed with that empty list, so it
+    /// differs from one written without the key: equal revisions mean equal bytes.
     ///
     /// Because the hash mixes in the children's revisions, a node's revision is a
     /// pin on its **whole subtree**: two documents whose subtrees under a node hold
@@ -151,8 +153,13 @@ public extension EditableDocument {
         guard let node = nodes[nodeID] else { return .finished(nil, cachable: true) }
 
         var hasher = FNV1aHasher()
-        hasher.combine(Self.revisionEncoder.encodeCanonical(node))
-        let steps = (children[nodeID] ?? []).map(RevisionFold.Step.child)
+        let childIDs = children[nodeID]
+        // A declared-empty list folds in no child, so it is hashed as the file writes
+        // it — `"children": []` — to tell it from a container that declares none.
+        var written = node
+        if childIDs == [] { written.kind = node.kind.withChildren([]) }
+        hasher.combine(Self.revisionEncoder.encodeCanonical(written))
+        let steps = (childIDs ?? []).map(RevisionFold.Step.child)
             + componentsRendered(by: node).map(RevisionFold.Step.component)
         return .pending(RevisionFold(nodeID: nodeID, folding: folding, hasher: hasher, steps: steps))
     }

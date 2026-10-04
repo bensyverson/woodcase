@@ -40,8 +40,7 @@ public enum NodeChangeKey: Friendly {
     /// The node declares `children` on one side and not on the other: a container
     /// written `"children": []` against one written without the key.
     ///
-    /// Reported on its own because ``EditableDocument/revision(of:)`` hashes the two
-    /// forms equal, so nothing else in the walk tells them apart.
+    /// Reported on its own because both forms hold the same (empty) ``children`` list.
     case declaredChildren
 
     /// The path this key sets in the property vocabulary, for keys that are one: the
