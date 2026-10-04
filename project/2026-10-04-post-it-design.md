@@ -13,7 +13,7 @@
 
 ## Open for Ben
 
-- **Who becomes `author` of a copied note?** R10 says "whoever edited it after copying". Stateless option (recommended by the research): stamp at copy time — `cp` and Penumbra's paste set `author` to the copier. Literal option: a transient `copiedFrom` key, cleared and replaced by the editor's identity on the first edit. Nothing before the copy/paste work depends on it.
+- **Who becomes `author` of a copied note?** *Ruled 2026-10-04 by Ben: the literal option — a `copiedFrom` marker, replaced by the editor's identity on the first edit after the copy.* R10 says "whoever edited it after copying". Stateless option (recommended by the research): stamp at copy time — `cp` and Penumbra's paste set `author` to the copier. Literal option: a transient `copiedFrom` key, cleared and replaced by the editor's identity on the first edit. Nothing before the copy/paste work depends on it.
 - **c41x's board** places notes at a 200-pt pitch, so 200×200 notes will abut and some extend past their 260-pt lanes. That's a c41x follow-up (re-space at ~216), not a Woodcase change.
 
 ## Findings
