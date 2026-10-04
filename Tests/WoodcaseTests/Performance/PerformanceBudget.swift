@@ -83,6 +83,22 @@ struct PerformanceBudget: Friendly {
     /// that the whole performance suite stays a rounding error on the full run.
     var repetitions: Int = 5
 
+    /// Whether being over the ceiling can fail a run.
+    var standing: Standing = .enforced
+
+    /// Whether a budget is a promise about code that exists or a target for code that
+    /// does not exist yet.
+    enum Standing: Friendly {
+        /// A ceiling the code is held to: ``check(_:sourceLocation:)`` fails a strict
+        /// run that is over it.
+        case enforced
+
+        /// A ceiling a design set for work that has not landed. Over it prints a
+        /// ``targetNote(_:)`` on every build and never fails; the leaf that meets the
+        /// target changes the budget to ``enforced``.
+        case target
+    }
+
     /// The ceiling this build is held to: ``release``, scaled by ``debugMultiplier``
     /// when the build is unoptimized.
     var limit: Duration {
@@ -120,8 +136,9 @@ struct PerformanceBudget: Friendly {
     /// Announces a measurement and records a failure if it is one.
     ///
     /// The one call site a budget test needs: it prints the `BUDGET` line either way,
-    /// and decides — by ``isStrict`` — whether being over ``limit`` is a failure or a
-    /// note (``advisory(_:)``). See <doc:WoodcasePerformance>.
+    /// and decides — by ``standing`` and then ``isStrict`` — whether being over
+    /// ``limit`` is a failure or a note (``targetNote(_:)`` for a target,
+    /// ``advisory(_:)`` otherwise). See <doc:WoodcasePerformance>.
     ///
     /// - Parameters:
     ///   - sample: The repetitions that were measured.
@@ -129,7 +146,9 @@ struct PerformanceBudget: Friendly {
     func check(_ sample: PerformanceSample, sourceLocation: SourceLocation = #_sourceLocation) {
         announce(sample)
         guard !admits(sample.best) else { return }
-        if Self.isStrict {
+        if standing == .target {
+            print(targetNote(sample))
+        } else if Self.isStrict {
             Issue.record(Comment(rawValue: report(sample)), sourceLocation: sourceLocation)
         } else {
             print(advisory(sample))
@@ -169,6 +188,18 @@ struct PerformanceBudget: Friendly {
             + " | \(String(format: "%.1f", ratio))× its \(Self.milliseconds(limit)) debug limit"
             + " | confirm with: swift test -c release --filter Performance"
             + " (or set $\(Self.strictEnvironmentVariable) to fail on this)"
+    }
+
+    /// The note a ``Standing/target`` budget prints for a measurement over ``limit``:
+    /// how far the code still is from the target, and that nothing fails on it yet.
+    ///
+    /// - Parameter sample: The repetitions that were measured.
+    /// - Returns: One `BUDGET-TARGET` line.
+    func targetNote(_ sample: PerformanceSample) -> String {
+        let ratio = sample.best / limit
+        return "BUDGET-TARGET | \(name) | min \(Self.milliseconds(sample.best))"
+            + " | \(String(format: "%.1f", ratio))× its \(Self.milliseconds(limit)) target"
+            + " | not enforced until the work that meets it lands"
     }
 
     /// Prints one machine-readable line for a measurement, pass or fail.

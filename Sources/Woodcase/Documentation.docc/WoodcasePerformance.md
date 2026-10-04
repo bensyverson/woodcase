@@ -129,6 +129,10 @@ swift test -c release --filter Performance 2>&1 | grep BUDGET
 # Load average 13 when these were taken; the minima are stable from ~load 2 upward.
 swift test --filter Performance 2>&1 | grep BUDGET
 
+# The layout-edit targets on the 2,000-node editor board (see "Layout edits on an
+# editor board" below). Strict only; a debug run skips them.
+WOODCASE_BUDGET_STRICT=1 swift test -c release --filter PerformanceBudgets.LayoutEditTests 2>&1 | grep BUDGET
+
 # Where the milliseconds go inside a settled read.
 WOODCASE_TEST_PROFILE=1 swift test --filter Performance 2>&1 | grep PROFILE
 
@@ -570,6 +574,42 @@ authored nodes expand to 974, and ref expansion alone is more than half the read
 > document is parse-bound now, like the synthetic one. The debug table above has not been
 > re-taken.
 
+## Layout edits on an editor board
+
+What one editor gesture costs ``EditableDocument/computeLayout(textMeasurer:)`` on a
+2,000-node board, with real Core Text measurement: the edit is applied, then the new
+rects computed — everything an editor waits for between the gesture and its next frame.
+These are **targets**, not budgets: the ceilings come from the cost model in
+`project/2026-10-04-sub-root-layout-design.md` and describe the node-granular layout
+that design builds, so today a measurement over one prints a `BUDGET-TARGET` line and
+never fails, on any build. The leaf that meets a target makes it enforced — the
+committed edit with the node-granular engine, reorder and resize with the hypothetical
+layout. The suite, `PerformanceBudgets.LayoutEditTests`, runs only on a strict build: a
+debug `swift test` skips it.
+
+The board is `SyntheticPenDocument.makeEditorBoard(nodeCount:)`, deterministic and
+exactly the node count asked for: a reusable card component (wrapping body, footer)
+beside a 1200-pt `Board` holding a header, rows of card instances that override their
+title, and a 400-row task list whose rows hold a title, a fill-width wrapping detail and
+a label. `scripts/editor-board <out.pen>` writes the 2,000-node one to a file — that is
+the board Penumbra's drag bench opens.
+
+| Gesture | Target (release) | Root-granular baseline (release) |
+|---|---|---|
+| Reorder a row within the 400-row list (a committed move today) | 1 ms | 516.3 ms |
+| Resize a list row (`kind.height`) | 2 ms | 295.5 ms |
+| Commit a text edit to a list row's title | 1 ms | 266.3 ms |
+
+Baseline: `WOODCASE_BUDGET_STRICT=1 swift test -c release --filter
+PerformanceBudgets.LayoutEditTests 2>&1 | grep BUDGET`, at `fb70c59` with this suite on
+top, 2026-10-04, minimum of 5 repetitions; `uptime` load averages 106/140/149 before the
+build and 158/116/111 after the run, with other agents building. That load inflates
+every figure — the samples spread to 1033 ms — so treat the baseline as an upper bound
+and re-take it on a quiet machine. Its shape is the point and will survive the load: a
+reorder is a structural edit, which invalidates the whole layout cache and lays out
+every root again, and a property edit re-lays out the whole 2,000-node `Board` root —
+roughly 270–520 ms either way, against the low single milliseconds the targets ask for.
+
 ## Debug and release
 
 `PerformanceBudget` states every ceiling for a release build and multiplies it by
@@ -617,6 +657,7 @@ So `PerformanceBudget.check(_:)` decides what being over the limit means:
 | --- | --- |
 | release, or `WOODCASE_BUDGET_STRICT=1` | **fails** |
 | default `swift test` | prints `BUDGET-ADVISORY`: how many times over, and the release run that confirms it |
+| any build, for a budget whose `standing` is `.target` | prints `BUDGET-TARGET`: how far the code still is from a ceiling set for work not yet landed |
 
 Until 2026-09-28 a debug run also failed past 4 × the limit, on the reasoning that load
 inflates a figure without changing its order of growth. A loaded soak disproved the

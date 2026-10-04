@@ -1,0 +1,25 @@
+#!/bin/sh
+# editor-board — write the 2,000-node editor board to a .pen file.
+#
+#     scripts/editor-board <out.pen>
+#
+# The board is SyntheticPenDocument.makeEditorBoard(nodeCount: 2000) from
+# Tests/WoodcaseTests/Performance/ — the document PerformanceBudgets.LayoutEditTests
+# measures — written by EditorBoardTests' "writes a file the loader opens" test, so
+# there is one generator and no copy of it here to drift. Penumbra's drag bench opens
+# the file. The output is deterministic: the same commit always writes the same bytes.
+#
+# Runs `swift test`, so the sandbox must be off.
+set -eu
+
+out="${1:?usage: scripts/editor-board <out.pen>}"
+case "$out" in
+    /*) ;;
+    *) out="$PWD/$out" ;;
+esac
+
+root="$(cd "$(dirname "$0")/.." && pwd)"
+WOODCASE_EDITOR_BOARD_OUT="$out" swift test --package-path "$root" \
+    --filter 'EditorBoardTests/writesALoadableFile' >/dev/null
+test -s "$out"
+echo "$out"
