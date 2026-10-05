@@ -77,6 +77,7 @@ struct LintFormatterTests {
             "codegen-unmapped-override",
             "collapsed-absolute-frame",
             "collapsed-text",
+            "component-loop",
             "duplicate-name",
             "empty-fit-content",
             "fill-in-fit-parent",

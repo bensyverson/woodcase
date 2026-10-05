@@ -60,7 +60,8 @@ public enum PenRefExpander {
 
         var result = document
         result.children = expandNodes(
-            document.children, registry: registry, visited: [], cache: ResolverCache(),
+            document.children, registry: registry, visited: [],
+            cache: ResolverCache(loops: ComponentLoopIndex(registry: registry)),
             strippingDefinitions: purpose == .export
         )
         return result
@@ -74,9 +75,12 @@ public enum PenRefExpander {
     /// - Parameters:
     ///   - node: The subtree to expand.
     ///   - registry: Component ID → component, as ``buildRegistry(from:)`` builds it.
+    ///   - loops: The registry's component loops, when the caller holds them already —
+    ///     a caller expanding many subtrees against one registry finds them once.
     /// - Returns: The subtree with its ref nodes replaced by expanded component trees.
-    static func expand(_ node: PenNode, registry: [String: PenNode]) -> PenNode {
-        expandNodes([node], registry: registry, visited: [], cache: ResolverCache()).first ?? node
+    static func expand(_ node: PenNode, registry: [String: PenNode], loops: ComponentLoopIndex? = nil) -> PenNode {
+        let cache = ResolverCache(loops: loops ?? ComponentLoopIndex(registry: registry))
+        return expandNodes([node], registry: registry, visited: [], cache: cache).first ?? node
     }
 
     // MARK: - Component Registry
@@ -104,6 +108,10 @@ public enum PenRefExpander {
     /// The walk is ``PenTreeRewrite``'s, so it does not recurse: an instance's clone is
     /// prepared when the walk reaches its `ref`, then walked in turn like any subtree.
     ///
+    /// A definition the walk keeps is on the chain for everything under it, as the
+    /// component is inside an instance of it: a loop's nesting is ignored in the
+    /// definition just as in its instances (``ComponentLoop``).
+    ///
     /// With `strippingDefinitions`, a reusable definition is left out as the walk
     /// reaches it — in the same pass, so no expanded tree is built only to be thrown
     /// away, which in a debug build costs stack as deep as the tree to free.
@@ -116,7 +124,12 @@ public enum PenRefExpander {
     ) -> [PenNode] {
         PenTreeRewrite.rewrite(nodes, context: visited) { node, visited in
             if strippingDefinitions, node.common.reusable == true { return .drop }
-            guard case let .ref(refData) = node.kind else { return .descend(node, visited) }
+            guard case let .ref(refData) = node.kind else {
+                // A definition drawn where it is written is its component, entered: what
+                // it holds stops where an instance of it would.
+                guard node.common.reusable == true else { return .descend(node, visited) }
+                return .descend(node, visited.union([node.id]))
+            }
             guard let instance = prepareInstance(
                 refNode: node, refData: refData, registry: registry, visited: visited, cache: cache
             ) else { return .keep(node) }
@@ -130,16 +143,18 @@ public enum PenRefExpander {
     ///   - refNode: The `ref` node.
     ///   - registry: Component id → component.
     ///   - visited: The component ids already on this expansion chain.
-    ///   - cache: The override-key resolvers built so far in this expansion.
+    ///   - cache: The override-key resolvers built so far in this expansion, with the
+    ///     registry's component loops; `nil` finds the loops afresh.
     /// - Returns: The expanded instance, or `refNode` for a circular or unresolved ref,
     ///   or for a node that is no `ref`.
     static func expandRef(
         refNode: PenNode,
         registry: [String: PenNode],
         visited: Set<String>,
-        cache: ResolverCache = ResolverCache()
+        cache: ResolverCache? = nil
     ) -> PenNode {
         guard case .ref = refNode.kind else { return refNode }
+        let cache = cache ?? ResolverCache(loops: ComponentLoopIndex(registry: registry))
         return expandNodes([refNode], registry: registry, visited: visited, cache: cache).first ?? refNode
     }
 

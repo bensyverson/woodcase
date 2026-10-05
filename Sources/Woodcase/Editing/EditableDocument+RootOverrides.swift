@@ -27,6 +27,7 @@ extension EditableDocument {
         var (node, refData) = try requireRef(op.refNodeID)
         try validateRootOverrideKeys(op)
         try validateRootOverrideValues(op)
+        try refuseComponentLoops(closedBy: .overrideRoot(op))
 
         let overrides = Self.merging(
             op.properties, into: refData.rootOverrides ?? [:], removing: op.unset

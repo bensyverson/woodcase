@@ -18,6 +18,10 @@ struct SwiftUIComponentScope: Friendly {
     /// includes reusable nodes that are no analyzed component (a state variant).
     var reusable: [String: PenNode] = [:]
 
+    /// The component loops among ``reusable``, which stop an inlined copy where the
+    /// expansion stops (``ComponentLoop``).
+    var loops = ComponentLoopIndex.empty
+
     /// The props of the component whose body is being written, by the id of the node each
     /// is read at; empty in a page and in an inlined copy.
     var bound: [String: [SwiftUIProp]] = [:]
@@ -45,6 +49,7 @@ struct SwiftUIComponentScope: Friendly {
     /// reusable nodes, reading variables through `theme`.
     init(document: PenDocument, components: [ComponentDefinition], typeNames: [String: String], theme: SwiftUITheme? = nil) {
         reusable = PenRefExpander.buildRegistry(from: document.children)
+        loops = ComponentLoopIndex(registry: reusable)
         self.theme = theme
         for definition in components {
             let name = typeNames[definition.id] ?? definition.name

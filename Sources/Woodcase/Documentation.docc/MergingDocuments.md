@@ -113,6 +113,27 @@ in theirs reads as a delete of the instance plus an insert of the copy.
   its nearest preceding sibling on its own side; when both sides insert after one
   sibling, ours' insert stays next to it and theirs' follows.
 
+### Component loops
+
+Neither side can make components contain each other — an edit that would is refused —
+but two sides can each add half of a loop: ours puts an instance of `Badge` in `Card`
+while theirs puts one of `Card` in `Badge`. The merge resolves as above, replays its
+operations on a copy of ours, and looks for a loop ours did not already hold. For each,
+it traces an edge ours lacks to the external change that made it and leaves that change
+out — the local side is kept — reporting it as ``MergeConflict/Kind/wouldCloseComponentLoop``:
+
+- an external **insert** is dropped (``MergeConflict/Subject/existence(nodeID:)``, the
+  subtree in ``MergeConflict/theirs``);
+- an external **move** is left undone (``MergeConflict/Subject/parent(nodeID:)``);
+- an external **rewrite** of a `ref`, its overrides or a `reusable` flag keeps ours'
+  node (``MergeConflict/Subject/property(nodeID:path:)``, path `kind.ref`,
+  `kind.descendants`, `kind.rootOverrides` or `common.reusable`).
+
+Every other change of theirs is taken, and ``MergeResult/keepsLocalChanges`` is true. A
+merge's operations may still pass through a loop *between* two of them — theirs swapped
+which component holds which — so a session applies them with the loop guard off; the
+result, checked whole, holds none. See <doc:ComponentLoops>.
+
 ### What a merge does not do
 
 - **No heuristic id matching.** Nodes are matched by id and nothing else. A writer that

@@ -41,7 +41,7 @@ struct ImportsList: AsyncParsableCommand {
     func run() async throws {
         let url = try file.existingFile()
         try await runReportingFailures(editing: url) {
-            let listing = try await PenFileTransaction.read(at: url, fonts: .shared) { document in
+            let listing = try await CommandTransaction.read(at: url, fonts: .shared) { document in
                 ImportFormatter.listing(of: document)
             }.value
             if output.json {

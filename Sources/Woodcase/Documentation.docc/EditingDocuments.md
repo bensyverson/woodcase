@@ -256,11 +256,13 @@ holds flat-store nodes whose children were stripped on the way in, and handing
 those to the expander would expand a component to an empty shell.
 
 A read that walks instances without expanding them — ``TreeView``'s expanded rows,
-the descendant-key walk — has to stop where the expander stops. The expander carries
-the components already on its chain and leaves a `ref` to one of them as written, so
-a component that places itself, or two that place each other, expand one level and
-end. ``EditableDocument/componentPlacement(of:onChain:)`` is that step, alias links
-included, and ``EditableDocument/effectiveRefData(of:enclosedBy:)`` settles a nested
+the descendant-key walk, the address resolver — has to stop where the expander stops.
+The expander carries the components already on its chain and leaves a `ref` as written
+when its component, or any member of that component's loop, is on the chain — so the
+nesting among components that contain each other is not expanded at all, and a
+definition drawn where it is written counts as its component entered (see
+<doc:ComponentLoops>). ``EditableDocument/componentPlacement(of:onChain:)`` is that step,
+alias links included, and ``EditableDocument/effectiveRefData(of:enclosedBy:)`` settles a nested
 `ref` from the payload the walk already holds for its enclosing instance. The tree
 walk carries both down, so a row costs the same however deep its instance chain.
 
@@ -385,7 +387,8 @@ the question a caller who read that frame actually has.
 ``EditableDocument/revisionCoverage(of:)`` is the set that answers it.
 
 The component graph may cycle — a component holding an instance of itself, or of one
-that holds one of it. The members of each such group share a *group revision*: each is
+that holds one of it — in a file that arrived that way; an edit can no longer make one
+(<doc:ComponentLoops>). The members of each such group share a *group revision*: each is
 hashed with references to the group's members written as markers naming them, and the
 group revision folds those hashes in id order. A ref to a member folds in the group
 revision with the member's id, so an edit inside any member moves every member and every
@@ -398,7 +401,7 @@ memoized like any other and is the same whichever node was asked for first.
 > nested components) took 7.4 s and its merge 481 s. Every revision of that document now
 > takes 42 ms in all (debug build, load about 5, measured on the merge fuzzer's seed-12581
 > document with component cycles allowed; `RevisionCycleTests` pins a document of the same
-> size and shape, built directly, since the fuzzer currently avoids cycles).
+> size and shape, built directly, since edits can no longer make cycles).
 
 Unlike ``EditableDocument/contentHash(for:)`` — which mixes in layout rects and uses
 Swift's per-process-seeded `Hasher` — a revision is content-only and deterministic
@@ -774,8 +777,8 @@ try document.apply(.deleteNode(EditOperation.DeleteNode(nodeID: "Btn01", instanc
 ```
 
 A component that renders itself — directly, or through another component the delete also
-removes — expands with the inner instance that closes the cycle left as a `ref`, because
-the expansion stops where it would repeat. Once the component is gone that ref would name
+removes — expands with the inner instance that closes the loop left as a `ref`, because
+the expansion ignores a loop's nesting (<doc:ComponentLoops>). Once the component is gone that ref would name
 nothing, so the detach leaves out every instance of a component the delete removes: no ref survives that names a deleted
 component, and the delete's inverse, built from the same plans, puts everything back.
 
@@ -828,6 +831,14 @@ against the component root exactly as a descendant's are, throwing
 **Moving a node into its own subtree.** ``EditOperation/moveNode(_:)`` onto itself or
 under one of its own descendants throws
 ``EditingError/wouldCreateCycle(nodeID:targetParentID:)``.
+
+**Closing a component loop.** An insert, move, replace, property patch, retype, root or
+descendant override that would make components contain each other — an instance of a
+component placed inside it, directly or through others, or a frame made reusable while it
+holds an instance of a component that names it — throws
+``EditingError/wouldCloseComponentLoop(path:)``, naming the loop as component ids in
+render order: `["Card", "Badge", "Card"]`. Only a loop the document does not already hold
+counts, so a file that arrived with one still takes its fix. See <doc:ComponentLoops>.
 
 ## Topics
 

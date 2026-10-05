@@ -74,7 +74,7 @@ struct Generate: AsyncParsableCommand {
             // 2–3. Parse, and merge in the components, variables and theme axes the
             // libraries the file imports define: every imported component becomes code
             // beside the file's own.
-            let document = try await PenFileTransaction.read(at: inputURL, fonts: .shared) { editable in
+            let document = try await CommandTransaction.read(at: inputURL, fonts: .shared) { editable in
                 editable.materializeForGeneration()
             }.value
 

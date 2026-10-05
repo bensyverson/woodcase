@@ -104,7 +104,7 @@ struct Tree: AsyncParsableCommand {
         try await runReportingFailures(editing: url) {
             let diagnostics = PenDiagnosticCollector()
             defer { StandardError.write(diagnostics) }
-            try await PenFileTransaction.read(at: url, diagnostics: diagnostics, fonts: .shared) { document in
+            try await CommandTransaction.read(at: url, diagnostics: diagnostics, fonts: .shared) { document in
                 do {
                     let rows = try TreeView.rows(
                         of: document,

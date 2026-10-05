@@ -55,6 +55,7 @@ no document, so accepting any of those would be accepting an argument it ignores
 |---|---|---|
 | `pipeline` | the diagnostic's | The caller hands in a ``PenDiagnostic`` |
 | `broken-ref` | error | A `ref` names a component neither the document nor its imported libraries define |
+| `component-loop` | error | Components contain each other — one renders an instance of itself, directly or through others; one finding per loop, at the top of the report (<doc:ComponentLoops>) |
 | `import-not-found` | error | An `imports` entry has no library to read: no file at the path (relative to the document, and nowhere else), a library bundled with Pen (``PenLibraries/bundledScheme``), or a location that is not a file |
 | `import-unreadable` | error | An `imports` entry names a file that is not a readable .pen document |
 | `import-not-followed` | warning | An imported library itself imports another, which Pen does not follow |

@@ -23,7 +23,7 @@ extension EditableDocument {
         guard let componentID = componentRoot(ofInstanceChain: [op.refNodeID]) else { return false }
         let registry = materializedComponents()
         guard let component = registry[componentID] else { return false }
-        return PenOverrideKeyResolver(component: component, registry: registry)
+        return PenOverrideKeyResolver(component: component, registry: registry, loops: componentLoopIndex)
             .target(of: op.descendantID) != nil
     }
 }

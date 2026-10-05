@@ -146,6 +146,7 @@ struct EditingErrorRemedyTests {
             NodeAddressCandidate(id: "Chi01/Bdg01/Cnt01", path: "Board/Chip/Badge/Count"),
         ]),
         .componentHasInstances(componentID: "Cmp01", instanceIDs: ["Chi01"]),
+        .wouldCloseComponentLoop(path: ["Cmp01", "Cmp01"]),
         .componentTypeChange(componentID: "Cmp01", from: "frame", to: "text", instanceIDs: ["Chi01"]),
         .overrideTargetNotFound(refID: "Chi01", descendantKey: "Nope", candidates: [
             NodeAddressCandidate(id: "Lbl01", path: "Component/Label"),
@@ -230,6 +231,7 @@ struct EditingErrorRemedyTests {
         case let .rootOverrideKeyReserved(_, key, _): key
         case let .rootOverrideValueRejected(_, key, _, _): key
         case .revisionConflict: "Canvas/Title"
+        case .wouldCloseComponentLoop: "Component"
         }
     }
 

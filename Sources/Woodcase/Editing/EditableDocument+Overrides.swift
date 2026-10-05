@@ -23,6 +23,7 @@ extension EditableDocument {
         var (node, refData) = try requireRef(op.refNodeID)
         try validateOverrideTarget(op)
         try validateOverrideValues(op)
+        try refuseComponentLoops(closedBy: .overrideDescendant(op))
 
         var descendants = refData.descendants ?? [:]
         let properties = Self.merging(

@@ -84,7 +84,7 @@ struct AddCommand: AsyncParsableCommand {
         let wantsJSON = output.json
 
         try await runReportingFailures(editing: url) {
-            let outcome = try await PenFileTransaction.run(at: url, identity: writer, effect: effect, fonts: .shared) { document, recorder in
+            let outcome = try await CommandTransaction.run(at: url, identity: writer, effect: effect, fonts: .shared) { document, recorder in
                 let overlapping = RootOverlapWarnings.baseline(in: document)
                 do {
                     let findings = try effect.preview(of: document)

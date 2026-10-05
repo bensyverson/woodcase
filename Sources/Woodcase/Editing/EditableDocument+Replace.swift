@@ -54,6 +54,7 @@ extension EditableDocument {
         try validateReplacementIDs(op.node, freed: freed, seen: &seen)
         try requireNothingStranded(by: op.node.id, freed: freed)
         try requireStableType(of: existing, replacedBy: op.node, freed: freed)
+        try refuseComponentLoops(closedBy: .replaceSubtree(op))
     }
 
     // MARK: - Writing

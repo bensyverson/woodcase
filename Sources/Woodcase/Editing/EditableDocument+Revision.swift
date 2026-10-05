@@ -73,39 +73,19 @@ public extension EditableDocument {
     /// overrides name — a repoint of a nested ref, or an instance written as slot content
     /// or as a replacement node.
     ///
-    /// The authored `ref` is the answer for an instance on a page. It is not the whole
-    /// answer for an instance that has repointed one of its component's nested refs —
-    /// the natural way to say "this tab is the current one" — because what it draws
-    /// there is the component it repointed *at*, which its authored payload never
-    /// names. Nor for an instance that fills a slot: slot content is a `children` list
-    /// inside a `descendants` entry (or the root overrides), stored on the ref as plain
-    /// values rather than nodes of the store, and an instance written there draws its
-    /// component. So every override value is searched, at any depth, for an object whose
-    /// `ref` is a string, and each one names a component folded into the ref's revision.
-    /// A name that is no component folds in nothing, so searching wide costs no
-    /// precision.
+    /// The authored `ref` is the answer for an instance on a page, but not for one that
+    /// has repointed a nested ref or filled a slot, so this is
+    /// The node's ``PenNode/renderedComponentIDs``: every override value is searched, at
+    /// any depth, for an object whose `ref` is a string, and each one names a component
+    /// folded into the ref's revision. A name that is no component folds in nothing, so
+    /// searching wide costs no precision. The same list is the edge set of the component
+    /// graph whose loops ``componentLoops`` reports.
     ///
     /// - Parameter node: The node to read.
     /// - Returns: The component ids, the authored one first, the others sorted so the
     ///   hash never depends on dictionary order. Empty for anything but a `ref`.
     func componentsRendered(by node: PenNode) -> [String] {
-        guard case let .ref(refData) = node.kind else { return [] }
-        var named: Set<String> = []
-        // A work list, not recursion: slot content can nest instances in instances.
-        var pending: [AnyCodable] = (refData.descendants ?? [:]).values.map { .dictionary($0.properties) }
-        if let rootOverrides = refData.rootOverrides { pending.append(.dictionary(rootOverrides)) }
-        while let value = pending.popLast() {
-            switch value {
-            case let .dictionary(fields):
-                if case let .string(target)? = fields["ref"] { named.insert(target) }
-                pending.append(contentsOf: fields.values)
-            case let .array(items):
-                pending.append(contentsOf: items)
-            default:
-                continue
-            }
-        }
-        return [refData.ref] + named.subtracting([refData.ref]).sorted()
+        node.renderedComponentIDs
     }
 
     /// A stable content hash for the whole document, as 16 lowercase hex characters.

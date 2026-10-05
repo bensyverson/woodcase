@@ -30,11 +30,11 @@ extension EditableDocument {
         case let .replaceSubtree(op):
             try validateReplaceSubtree(op)
         case let .updateCommon(op):
-            try requireNode(op.nodeID)
+            try validateUpdateCommon(op)
         case let .updateKind(op):
             try validateUpdateKind(op)
         case let .setProperties(op):
-            _ = try patchedNode(for: op)
+            _ = try validateSetProperties(op)
         case let .overrideDescendant(op):
             try validateOverride(op)
         case let .overrideRoot(op):
@@ -127,14 +127,17 @@ extension EditableDocument {
     ///
     /// - Parameter op: The insert to check.
     /// - Throws: ``EditingError/duplicateNodeID(id:)``, ``EditingError/parentNotFound(id:)``,
-    ///   ``EditingError/cannotHaveChildren(parentID:)`` or ``EditingError/invalidIndex(index:count:)``.
+    ///   ``EditingError/cannotHaveChildren(parentID:)``, ``EditingError/invalidIndex(index:count:)``
+    ///   or ``EditingError/wouldCloseComponentLoop(path:)``.
     func validateInsert(_ op: EditOperation.InsertNode) throws {
         try validateNoDuplicateIDs(in: op.node)
         guard let parentID = op.parentID else {
-            return try validateIndex(op.index, count: rootOrder.count)
+            try validateIndex(op.index, count: rootOrder.count)
+            return try refuseComponentLoops(closedBy: .insertNode(op))
         }
         try requireContainer(parentID)
         try validateIndex(op.index, count: children[parentID]?.count ?? 0)
+        try refuseComponentLoops(closedBy: .insertNode(op))
     }
 
     /// Checks a delete: the node exists, and it strands no component instance the
@@ -155,7 +158,7 @@ extension EditableDocument {
     /// - Parameter op: The move to check.
     /// - Throws: ``EditingError/nodeNotFound(id:)``, ``EditingError/parentNotFound(id:)``,
     ///   ``EditingError/cannotHaveChildren(parentID:)``, ``EditingError/wouldCreateCycle(nodeID:targetParentID:)``
-    ///   or ``EditingError/invalidIndex(index:count:)``.
+    ///   ``EditingError/invalidIndex(index:count:)`` or ``EditingError/wouldCloseComponentLoop(path:)``.
     func validateMove(_ op: EditOperation.MoveNode) throws {
         try requireNode(op.nodeID)
         if let newParentID = op.newParentID {
@@ -165,6 +168,7 @@ extension EditableDocument {
             }
         }
         try validateIndex(op.index, count: destinationCount(for: op))
+        try refuseComponentLoops(closedBy: .moveNode(op))
     }
 
     /// Checks an override: the node is a `ref`, the key names something its component
@@ -178,6 +182,7 @@ extension EditableDocument {
         try requireRef(op.refNodeID)
         try validateOverrideTarget(op)
         try validateOverrideValues(op)
+        try refuseComponentLoops(closedBy: .overrideDescendant(op))
     }
 
     /// Checks a root override: the node is a `ref`, no key is one the ref reserves for
@@ -191,6 +196,7 @@ extension EditableDocument {
         try requireRef(op.refNodeID)
         try validateRootOverrideKeys(op)
         try validateRootOverrideValues(op)
+        try refuseComponentLoops(closedBy: .overrideRoot(op))
     }
 
     /// The node with this id, refusing one that cannot hold children.

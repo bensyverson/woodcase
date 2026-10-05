@@ -120,6 +120,7 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 
 - <doc:EditingDocuments>
 - <doc:MergingDocuments>
+- <doc:ComponentLoops>
 - ``EditableDocument``
 - ``EditOperation``
 - ``EditingError``

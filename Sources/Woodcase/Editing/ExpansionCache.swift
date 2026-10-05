@@ -20,6 +20,10 @@ public final class ExpansionCache {
     /// Cached expansion results, keyed by ref node ID.
     var entries: [String: ExpandedRef] = [:]
 
+    /// The document's component loops, found on first use. They change exactly when an
+    /// expansion can, so they are dropped with the entries.
+    var componentLoops: ComponentLoopIndex?
+
     public init() {}
 
     /// Caches an expansion result.
@@ -34,5 +38,6 @@ public final class ExpansionCache {
     /// Removes all cached entries.
     func invalidateAll() {
         entries.removeAll()
+        componentLoops = nil
     }
 }

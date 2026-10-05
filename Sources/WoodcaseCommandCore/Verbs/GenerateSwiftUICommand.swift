@@ -83,7 +83,7 @@ extension Generate {
             if force, FileManager.default.fileExists(atPath: outputDirectory.path) {
                 try FileManager.default.removeItem(at: outputDirectory)
             }
-            let document = try await PenFileTransaction.read(at: inputURL, fonts: .shared) { editable in
+            let document = try await CommandTransaction.read(at: inputURL, fonts: .shared) { editable in
                 editable.materializeForGeneration()
             }.value
 

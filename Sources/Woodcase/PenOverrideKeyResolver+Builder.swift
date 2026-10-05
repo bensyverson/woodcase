@@ -21,6 +21,10 @@ extension PenOverrideKeyResolver {
         /// Component id → component.
         let registry: [String: PenNode]
 
+        /// The registry's component loops, which stop the walk where they stop the
+        /// expansion.
+        let loops: ComponentLoopIndex
+
         /// The nodes placed so far, in pre-order.
         var entries: [Entry] = []
 
@@ -29,9 +33,12 @@ extension PenOverrideKeyResolver {
 
         /// Creates a builder over a registry.
         ///
-        /// - Parameter registry: Component id → component.
-        init(registry: [String: PenNode]) {
+        /// - Parameters:
+        ///   - registry: Component id → component.
+        ///   - loops: The registry's component loops.
+        init(registry: [String: PenNode], loops: ComponentLoopIndex) {
             self.registry = registry
+            self.loops = loops
         }
 
         /// One node still to place, or one whose subtree has just been placed.
@@ -139,11 +146,13 @@ extension PenOverrideKeyResolver {
         }
 
         /// The component a `ref` clones, following alias chains, or `nil` for a
-        /// missing one or one already on this chain.
+        /// missing one or one whose loop is already on this chain
+        /// (``ComponentLoopIndex/closesLoop(entering:onChain:)``).
         private func component(named ref: String, visited: Set<String>) -> PenNode? {
             var seen = visited
             var current = ref
-            while seen.insert(current).inserted, let node = registry[current] {
+            while !loops.closesLoop(entering: current, onChain: seen), let node = registry[current] {
+                seen.insert(current)
                 guard case let .ref(inner) = node.kind else { return node }
                 current = inner.ref
             }

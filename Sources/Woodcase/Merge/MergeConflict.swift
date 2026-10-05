@@ -84,6 +84,15 @@ public struct MergeConflict: Friendly {
         /// Both sides added a node with this id and set the subject differently; the
         /// local value was kept.
         case addedTwice
+
+        /// The external change, merged with the local side's, would make components
+        /// contain each other (``ComponentLoop``), so it was left out: an external insert
+        /// is dropped (``Subject/existence(nodeID:)``, its subtree in
+        /// ``MergeConflict/theirs``), an external move left undone
+        /// (``Subject/parent(nodeID:)``), an external rewrite of the node left at the
+        /// local value (``Subject/property(nodeID:path:)`` — the `ref`, the overrides or
+        /// `reusable`). Every other change of theirs is taken.
+        case wouldCloseComponentLoop
     }
 
     /// What the conflict is about.

@@ -9,9 +9,11 @@ import Testing
 
 /// An expanded tree read stops at a circular `ref` exactly where the expansion does.
 ///
-/// ``PenRefExpander`` leaves a `ref` as written when the component it names is already
-/// on the expansion chain — its own instance inside itself, two components placing each
-/// other, a slot filled with the component that holds the slot. The tree walk has to
+/// ``PenRefExpander`` leaves a `ref` as written when the component it names, or a member
+/// of its component loop, is already on the expansion chain — its own instance inside
+/// itself, two components placing each other, a slot filled with the component that
+/// holds the slot (``ComponentLoop``). A definition drawn where it is written is on the
+/// chain for everything under it, so its loop stops at once, as in its instances. The tree walk has to
 /// stop at the same ref: walking on lists rows the expansion never made, and never ends.
 /// A `moveNode` that puts an instance inside its own component writes such a document,
 /// which is how `IncrementalSettleEquivalenceTests` once ran for minutes.
@@ -33,19 +35,13 @@ struct TreeViewCircularRefTests {
     }
 
     /// The row is the circular ref as the expansion left it: a ref, with nothing below.
-    ///
-    /// - Parameter settledID: The id the expansion's node has, when it is not the row's —
-    ///   an alias whose target is on the chain is cloned whole, a `ref` under its own id.
-    private func expectLeafRef(
-        _ id: String, settledAs settledID: String? = nil, in rows: [TreeRow], settled: SettledTree
-    ) throws {
+    private func expectLeafRef(_ id: String, in rows: [TreeRow], settled: SettledTree) throws {
         let row = try #require(rows.first { $0.id == id }, "no row \(id)")
         #expect(row.type == "ref", "\(id) is a \(row.type)")
         #expect(row.childCount == 0, "\(id) has \(row.childCount) children")
-        let expandedID = settledID ?? id
-        let node = try #require(settled.nodes[expandedID], "the expansion has no node \(expandedID)")
+        let node = try #require(settled.nodes[id], "the expansion has no node \(id)")
         guard case .ref = node.kind else {
-            Issue.record("the expansion expanded \(expandedID)")
+            Issue.record("the expansion expanded \(id)")
             return
         }
     }
@@ -60,8 +56,8 @@ struct TreeViewCircularRefTests {
         ]}
         """)
 
-        #expect(rows.map(\.id) == ["CmpA0", "Self0", "Self0/Self0", "Inst0", "Inst0/Self0"])
-        try expectLeafRef("Self0/Self0", in: rows, settled: settled)
+        #expect(rows.map(\.id) == ["CmpA0", "Self0", "Inst0", "Inst0/Self0"])
+        try expectLeafRef("Self0", in: rows, settled: settled)
         try expectLeafRef("Inst0/Self0", in: rows, settled: settled)
     }
 
@@ -77,13 +73,9 @@ struct TreeViewCircularRefTests {
         ]}
         """)
 
-        #expect(rows.map(\.id) == [
-            "CmpA0", "ToB00", "ToB00/ToA00", "ToB00/ToA00/ToB00",
-            "CmpB0", "ToA00", "ToA00/ToB00", "ToA00/ToB00/ToA00",
-            "Inst0", "Inst0/ToB00", "Inst0/ToB00/ToA00",
-        ])
-        try expectLeafRef("ToB00/ToA00/ToB00", in: rows, settled: settled)
-        try expectLeafRef("Inst0/ToB00/ToA00", in: rows, settled: settled)
+        #expect(rows.map(\.id) == ["CmpA0", "ToB00", "CmpB0", "ToA00", "Inst0", "Inst0/ToB00"])
+        try expectLeafRef("ToB00", in: rows, settled: settled)
+        try expectLeafRef("Inst0/ToB00", in: rows, settled: settled)
     }
 
     @Test("A component reached through an alias is on the chain under both names")
@@ -97,9 +89,9 @@ struct TreeViewCircularRefTests {
         ]}
         """)
 
-        try expectLeafRef("ToAl0/ToAl0", in: rows, settled: settled)
-        // Inside `Inst0` the chain already holds `CmpA0`, so the alias stops at itself.
-        try expectLeafRef("Inst0/ToAl0", settledAs: "Inst0/ToAl0/Alias", in: rows, settled: settled)
+        // `CmpA0` and `Alias` are one loop, and `CmpA0` is on the chain wherever `ToAl0` is.
+        try expectLeafRef("ToAl0", in: rows, settled: settled)
+        try expectLeafRef("Inst0/ToAl0", in: rows, settled: settled)
         #expect(rows.map(\.depth).max() ?? 0 < 3)
     }
 

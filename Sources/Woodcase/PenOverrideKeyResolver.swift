@@ -90,8 +90,10 @@ struct PenOverrideKeyResolver: Friendly {
     /// - Parameters:
     ///   - component: The component root the instance places, with its children.
     ///   - registry: Component id → component, for the instances nested inside it.
-    init(component: PenNode, registry: [String: PenNode]) {
-        var builder = Builder(registry: registry)
+    ///   - loops: The registry's component loops, so the walk stops where the expansion
+    ///     does; `nil` finds them.
+    init(component: PenNode, registry: [String: PenNode], loops: ComponentLoopIndex? = nil) {
+        var builder = Builder(registry: registry, loops: loops ?? ComponentLoopIndex(registry: registry))
         builder.placeRoot(component)
         entries = builder.entries
     }

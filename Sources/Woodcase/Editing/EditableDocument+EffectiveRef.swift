@@ -101,8 +101,9 @@ public extension EditableDocument {
     /// Where a `ref` payload lands, inside instances of the given components.
     ///
     /// Mirrors ``PenRefExpander``'s `resolveChain` step for step: a payload naming a
-    /// component already on the chain is circular and places nothing; an alias is
-    /// followed until a non-`ref` component, a component already passed, or one the
+    /// component already on the chain, or a member of a component loop already on it
+    /// (see ``ComponentLoop``), is circular and places nothing; an alias is followed
+    /// until a non-`ref` component, a component the same rule stops, or one the
     /// registry lacks — where the clone is whatever the walk stopped on.
     ///
     /// - Parameters:
@@ -112,12 +113,16 @@ public extension EditableDocument {
     /// - Returns: The placement, or `nil` for a circular payload or one that names no
     ///   reusable component — the two cases the expansion leaves as written.
     func componentPlacement(of refData: PenNode.RefData, onChain chain: Set<String>) -> ComponentPlacement? {
-        guard !chain.contains(refData.ref), var component = reusableComponent(refData.ref) else { return nil }
+        guard !closesComponentLoop(entering: refData.ref, onChain: chain),
+              var component = reusableComponent(refData.ref)
+        else { return nil }
 
         var passed = chain
         passed.insert(refData.ref)
         while case let .ref(inner) = component.kind {
-            guard !passed.contains(inner.ref), let next = reusableComponent(inner.ref) else { break }
+            guard !closesComponentLoop(entering: inner.ref, onChain: passed),
+                  let next = reusableComponent(inner.ref)
+            else { break }
             passed.insert(inner.ref)
             component = next
         }

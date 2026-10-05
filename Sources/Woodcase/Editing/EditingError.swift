@@ -166,4 +166,16 @@ public enum EditingError: Error, Equatable, Sendable {
 
     /// A node's current revision differs from the one the caller expected.
     case revisionConflict(nodeID: String, expected: String, actual: String)
+
+    // MARK: - Component loops
+
+    /// The edit would make components contain each other — a component that renders an
+    /// instance of itself, directly or through others — which is a design error
+    /// (``ComponentLoop``).
+    ///
+    /// `path` is the loop the edit would close, as component ids in render order and
+    /// closed: the component the edit writes into, the one it would render, each one
+    /// after that, and the first again — `["Card", "Badge", "Card"]`, or
+    /// `["Row", "Row"]` for a component that would render itself.
+    case wouldCloseComponentLoop(path: [String])
 }

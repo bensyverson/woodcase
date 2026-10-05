@@ -125,7 +125,8 @@ extension EditableDocument {
     /// `componentID` is always the *resolved* root — the far end of any alias chain —
     /// because that is the subtree the expander clones and prefixes. `visited` carries
     /// the components already on this chain, so a component that refers to itself
-    /// terminates instead of recurring forever. `chain` carries the `ref` nodes the walk
+    /// terminates instead of recurring forever — and, as in the expansion, no member of
+    /// a component loop already on the chain is entered (``ComponentLoop``). `chain` carries the `ref` nodes the walk
     /// has stepped through, which is what tells a nested ref whether an instance above
     /// it has repointed it — and what tells a slot frame which children the instance
     /// wrote into it. `isOwn` says the walk is already inside content the instance
@@ -221,7 +222,8 @@ extension EditableDocument {
     private func componentStep(
         componentID: String, prefix: String, chain: [String], visited: Set<String>, isOwn: Bool
     ) -> DescendantKeyStep? {
-        guard !visited.contains(componentID), let surface = inspectComponent(componentID),
+        guard !closesComponentLoop(entering: componentID, onChain: visited),
+              let surface = inspectComponent(componentID),
               !surface.overridableNodes.isEmpty
         else { return nil }
         var seen = visited

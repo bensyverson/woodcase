@@ -162,10 +162,12 @@ extension DocumentSession {
     @discardableResult
     func unwind(_ applied: [AppliedOperation]) -> [CRDTOperation] {
         var broadcast: [CRDTOperation] = []
-        for operation in applied.reversed() {
-            for step in operation.inverse {
-                if let ops = try? applyThroughCRDT(step.resolved(in: document)) {
-                    broadcast += ops
+        document.allowingComponentLoops {
+            for operation in applied.reversed() {
+                for step in operation.inverse {
+                    if let ops = try? applyThroughCRDT(step.resolved(in: document)) {
+                        broadcast += ops
+                    }
                 }
             }
         }
@@ -177,9 +179,11 @@ extension DocumentSession {
     ///
     /// - Parameter applied: The operations to take back, in the order they were applied.
     private func unwindFlatStore(_ applied: [AppliedOperation]) {
-        for operation in applied.reversed() {
-            for step in operation.inverse {
-                try? document.apply(step.resolved(in: document))
+        document.allowingComponentLoops {
+            for operation in applied.reversed() {
+                for step in operation.inverse {
+                    try? document.apply(step.resolved(in: document))
+                }
             }
         }
     }

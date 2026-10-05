@@ -36,8 +36,8 @@ extension TreeView {
         /// component, which the expansion leaves as written.
         case own
 
-        /// A `ref` naming a component already on the chain. The expansion leaves it as
-        /// written, and nothing is below it.
+        /// A `ref` naming a component already on the chain, or a member of a component
+        /// loop already on it. The expansion leaves it as written, and nothing is below it.
         case circular
 
         /// An instance: the component root it clones, and the scope its children sit in.
@@ -72,7 +72,7 @@ extension TreeView {
             if case let .ref(data) = node.kind { data } else { nil }
         }
         guard let payload else { return .own }
-        if scope.components.contains(payload.ref) { return .circular }
+        if document.closesComponentLoop(entering: payload.ref, onChain: scope.components) { return .circular }
         guard let placed = document.componentPlacement(of: payload, onChain: scope.components) else { return .own }
         return .instance(rootID: placed.rootID, scope: InstanceScope(payload: payload, components: placed.chain))
     }

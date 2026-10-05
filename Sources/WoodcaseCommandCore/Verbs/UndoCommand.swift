@@ -85,7 +85,7 @@ struct Undo: AsyncParsableCommand {
         let unit: UndoUnit = event ? .event : .transaction
         let wantsJSON = output.json
         let outcome = try await runReportingFailures(editing: url) {
-            try await PenFileTransaction.run(at: url, identity: name, effect: effect, fonts: .shared) { document, recorder in
+            try await CommandTransaction.run(at: url, identity: name, effect: effect, fonts: .shared) { document, recorder in
                 do {
                     return try Self.reverseTail(
                         in: document,

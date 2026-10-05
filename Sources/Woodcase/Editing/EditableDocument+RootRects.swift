@@ -53,7 +53,8 @@ extension EditableDocument {
 
         var subtrees = document(withRoots: laidOut)
         let registry = materializedComponents()
-        subtrees.children = subtrees.children.map { PenRefExpander.expand($0, registry: registry) }
+        let loops = componentLoopIndex
+        subtrees.children = subtrees.children.map { PenRefExpander.expand($0, registry: registry, loops: loops) }
         let resolved = PenVariableResolver.resolve(subtrees, theme: [:])
         registerFonts(forSettling: resolved)
         let layout = PenLayoutEngine.layout(resolved, textMeasurer: textMeasurer)

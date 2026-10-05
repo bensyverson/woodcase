@@ -39,6 +39,12 @@ public enum DocumentMerge {
     /// Pure and synchronous: none of the three documents is changed. The inputs'
     /// revision caches are read, and warmed.
     ///
+    /// When the two sides together would make components contain each other, the local
+    /// side is kept and the external change that closes the loop is reported as a
+    /// ``MergeConflict/Kind/wouldCloseComponentLoop``. The operations may pass through a
+    /// loop between two of them — an external side that swapped which component holds
+    /// which — so they are applied with the loop guard off, as ``DocumentSession`` does.
+    ///
     /// - Parameters:
     ///   - base: The version both sides started from — what the local side last read
     ///     or wrote.
@@ -46,6 +52,19 @@ public enum DocumentMerge {
     ///   - theirs: The external version being folded in.
     /// - Returns: The operations, the conflicts, and whether local work survived.
     public static func merge(base: EditableDocument, ours: EditableDocument, theirs: EditableDocument) -> MergeResult {
+        keepingComponentLoopsOut(base: base, ours: ours, theirs: theirs) { external in
+            mergeOnce(base: base, ours: ours, theirs: external)
+        }
+    }
+
+    /// One merge, without the component-loop rule.
+    ///
+    /// - Parameters:
+    ///   - base: The version both sides started from.
+    ///   - ours: The local document.
+    ///   - theirs: The external version.
+    /// - Returns: The operations, the conflicts, and whether local work survived.
+    private static func mergeOnce(base: EditableDocument, ours: EditableDocument, theirs: EditableDocument) -> MergeResult {
         var resolver = ThreeWayResolver(base: base, ours: ours, theirs: theirs)
         let resolution = resolver.run()
         var sequencer = OpSequencer(resolution: resolution, ours: ours, theirs: theirs)

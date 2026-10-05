@@ -60,8 +60,12 @@ struct DetachRecursiveComponentTests {
 
         #expect(danglingRefs(in: editable).isEmpty)
         #expect(editable.nodes["IR"] == nil, "the page's instance is detached")
-        for step in inverse {
-            try editable.apply(step)
+        // The inverse puts the self-rendering component back, which an edit may no longer
+        // do (a component loop); replaying history is what the guard lets through.
+        try editable.allowingComponentLoops {
+            for step in inverse {
+                try editable.apply(step)
+            }
         }
         #expect(editable.materialize() == before)
     }

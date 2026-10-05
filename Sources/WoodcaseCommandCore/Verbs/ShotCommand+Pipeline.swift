@@ -19,7 +19,7 @@ extension Shot {
     ///   pipeline throws.
     static func render(_ request: Request, editing url: URL) async throws -> ShotOutput {
         let diagnostics = PenDiagnosticCollector()
-        let selection = try await PenFileTransaction.read(at: url, diagnostics: diagnostics, fonts: .shared) { editable in
+        let selection = try await CommandTransaction.read(at: url, diagnostics: diagnostics, fonts: .shared) { editable in
             editable.readContext.libraries.report(into: diagnostics)
             return try ShotTargets.select(
                 node: request.node, outlining: request.outline, in: editable, editing: url

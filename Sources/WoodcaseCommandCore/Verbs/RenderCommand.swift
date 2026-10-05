@@ -57,7 +57,7 @@ struct Render: AsyncParsableCommand {
         // 1–3. Parse, read the libraries the file imports, and expand refs — keeping
         // reusable definitions: a definition placed in visible flow is an artboard
         // like any other, exactly as it is for `shot`, `tree` and the viewer.
-        let document = try await PenFileTransaction.read(
+        let document = try await CommandTransaction.read(
             at: inputURL, diagnostics: diagnostics, fonts: .shared
         ) { editable in
             editable.readContext.libraries.report(into: diagnostics)

@@ -126,6 +126,10 @@ public final class EditableDocument {
     /// Backing storage for the revision cache.
     var _revisionCache: RevisionCache?
 
+    /// Whether an edit that would close a component loop is refused — always, except
+    /// while ``allowingComponentLoops(_:)`` replays a state the document has held.
+    var _componentLoopPolicy = ComponentLoopPolicy.refuse
+
     /// Backing storage for ``readContext``: what the document was read with, never
     /// written back.
     var _readContext: PenReadContext = .none

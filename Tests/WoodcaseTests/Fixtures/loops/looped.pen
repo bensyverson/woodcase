@@ -1,0 +1,13 @@
+{
+  "version": "2.17",
+  "children": [
+    {"id": "CmpA1", "name": "Card", "type": "frame", "reusable": true, "width": 120, "height": 80, "children": [
+      {"id": "TxtA1", "type": "text", "content": "a", "fill": "#000000"},
+      {"id": "AinB1", "type": "ref", "ref": "CmpB1"}
+    ]},
+    {"id": "CmpB1", "name": "Badge", "type": "frame", "reusable": true, "x": 200, "width": 120, "height": 80, "children": [
+      {"id": "TxtB1", "type": "text", "content": "b", "fill": "#000000"},
+      {"id": "BinA1", "type": "ref", "ref": "CmpA1"}
+    ]}
+  ]
+}

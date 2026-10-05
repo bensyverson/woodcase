@@ -258,6 +258,18 @@ extension BatchErrorMessage {
 
         // MARK: Consequences
 
+        case let .wouldCloseComponentLoop(path):
+            return sentence(
+                """
+                this would make components contain each other: \
+                \(path.map { name($0, in: document) }.joined(separator: " → ")). A component \
+                cannot render an instance of itself, directly or through others
+                """,
+                batch: "place an instance of a component that does not render this one",
+                command: "run `woodcase tree \(file) --expand` to see what each component renders",
+                in: dialect
+            )
+
         case let .componentHasInstances(componentID, instanceIDs):
             return sentence(
                 """

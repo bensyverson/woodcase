@@ -13,6 +13,9 @@ extension PenFileTransaction {
     /// is a ``PenImportProblem`` on the context, for `lint` to report. They are read
     /// under the file's lock but without locks of their own: a library is only ever
     /// read, never written, by a transaction on the document that imports it.
+    ///
+    /// A file holding a component loop is read too, the loop recorded on the context
+    /// (``EditableDocument/recordComponentLoopsOnRead()``) for the caller to report.
     static func editableDocument(
         from parsed: PenDocument,
         at url: URL,
@@ -24,6 +27,7 @@ extension PenFileTransaction {
             libraries: PenLibraries.load(importedBy: parsed, at: url),
             fonts: fonts
         )
+        editable.recordComponentLoopsOnRead()
         return editable
     }
 }

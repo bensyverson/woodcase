@@ -162,7 +162,8 @@ extension SettledTree {
     ) -> (pieces: [String: Piece], generation: Int) {
         var forest = document.document(withRoots: roots)
         let registry = document.materializedComponents()
-        forest.children = forest.children.map { PenRefExpander.expand($0, registry: registry) }
+        let loops = document.componentLoopIndex
+        forest.children = forest.children.map { PenRefExpander.expand($0, registry: registry, loops: loops) }
         let resolved = PenVariableResolver.resolve(forest, theme: theme)
         document.registerFonts(forSettling: resolved)
         let generation = textSizes.fontGeneration

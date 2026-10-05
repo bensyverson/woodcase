@@ -116,10 +116,12 @@ public extension EditableDocument {
     /// enclosing chain injected.
     ///
     /// - Parameter chain: The `ref` node ids, outermost first.
-    /// - Returns: The component root's id, or `nil` when the chain is empty or its
-    ///   innermost element places no component.
+    /// - Returns: The component root's id, or `nil` when the chain is empty, its
+    ///   innermost element places no component, or one of its elements is an instance
+    ///   the expansion leaves unexpanded inside a component loop
+    ///   (``expandsAcrossComponentLoops(_:)``).
     func componentRoot(ofInstanceChain chain: [String]) -> String? {
-        guard let innermost = chain.last else { return nil }
+        guard let innermost = chain.last, expandsAcrossComponentLoops(chain) else { return nil }
         let outer = Array(chain.dropLast())
         if let stored = componentRootID(placedBy: innermost, insideInstances: outer) {
             return stored

@@ -50,6 +50,7 @@ public extension EditingError {
         case .rootOverrideKeyReserved: "rootOverrideKeyReserved"
         case .rootOverrideValueRejected: "rootOverrideValueRejected"
         case .revisionConflict: "revisionConflict"
+        case .wouldCloseComponentLoop: "wouldCloseComponentLoop"
         }
     }
 

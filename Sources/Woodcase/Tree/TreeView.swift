@@ -245,10 +245,15 @@ public enum TreeView {
         if let limit = context.limit, depth >= limit { return [] }
         if isInstance, !context.expandInstances { return [] }
 
-        let (childPrefix, childScope) = if case let .instance(_, inner) = placement {
+        let (childPrefix, placedScope) = if case let .instance(_, inner) = placement {
             (prefix + [nodeID], inner)
         } else {
             (prefix, entry.scope)
+        }
+        var childScope = placedScope
+        // A definition is its component, entered — as the expansion has it.
+        if placement.componentRootID == nil, node.common.reusable == true {
+            childScope.components.insert(nodeID)
         }
         // A group has no box to clip its children to, and its rect is their union measured
         // from its anchor, not from its corner: nothing under a group is outside it.

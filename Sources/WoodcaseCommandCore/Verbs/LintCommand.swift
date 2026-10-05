@@ -147,7 +147,7 @@ struct Lint: AsyncParsableCommand {
         try await runReportingFailures(editing: url) {
             let pins = try ThemePinParser.parse(themePin.theme)
             let diagnostics = PenDiagnosticCollector()
-            let outcome = try await PenFileTransaction.read(at: url, diagnostics: diagnostics, fonts: .shared) { document in
+            let outcome = try await CommandTransaction.read(at: url, diagnostics: diagnostics, fonts: .shared) { document in
                 do {
                     return try DocumentLinter.findings(
                         in: document,

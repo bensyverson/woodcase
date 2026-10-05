@@ -48,7 +48,8 @@ public extension EditableDocument {
         let expanded = PenRefExpander.expandRef(
             refNode: node,
             registry: materializedComponents(),
-            visited: []
+            visited: [],
+            cache: PenRefExpander.ResolverCache(loops: componentLoopIndex)
         )
         let result = ExpandedRef(expandedNode: expanded, provenance: provenance(of: node, refData: refData))
         _expansionCache?.store(result, for: nodeID)
@@ -68,7 +69,7 @@ public extension EditableDocument {
         let subtree = try materializeSubtree(rootID: rootID)
         var context = ExpansionContext()
         collectProvenance(in: subtree, into: &context)
-        return (PenRefExpander.expand(subtree, registry: materializedComponents()), context)
+        return (PenRefExpander.expand(subtree, registry: materializedComponents(), loops: componentLoopIndex), context)
     }
 
     /// Returns a fully expanded document with provenance context.

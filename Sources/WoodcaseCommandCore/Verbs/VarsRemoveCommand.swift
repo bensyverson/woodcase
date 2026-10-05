@@ -123,7 +123,7 @@ struct VarsRemove: AsyncParsableCommand {
         let force = force
         let effect = preview.effect
         try await runReportingFailures(editing: url) {
-            let outcome = try await PenFileTransaction.run(
+            let outcome = try await CommandTransaction.run(
                 at: url, identity: identity.identity, effect: effect,
                 fonts: .shared
             ) {

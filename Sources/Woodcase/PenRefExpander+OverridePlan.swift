@@ -91,8 +91,16 @@ extension PenRefExpander {
         /// Component id → its resolver.
         private var resolvers: [String: PenOverrideKeyResolver] = [:]
 
+        /// The component loops of the registry this expansion reads, which decide
+        /// where it stops.
+        let loops: ComponentLoopIndex
+
         /// Creates an empty cache.
-        init() {}
+        ///
+        /// - Parameter loops: The component loops of the registry the expansion reads.
+        init(loops: ComponentLoopIndex) {
+            self.loops = loops
+        }
 
         /// The resolver for a component, built on first use.
         ///
@@ -107,7 +115,7 @@ extension PenRefExpander {
             registry: [String: PenNode]
         ) -> PenOverrideKeyResolver {
             if let cached = resolvers[ref] { return cached }
-            let built = PenOverrideKeyResolver(component: component, registry: registry)
+            let built = PenOverrideKeyResolver(component: component, registry: registry, loops: loops)
             resolvers[ref] = built
             return built
         }

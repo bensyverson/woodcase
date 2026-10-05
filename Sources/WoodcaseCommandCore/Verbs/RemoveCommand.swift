@@ -58,7 +58,7 @@ struct RemoveCommand: AsyncParsableCommand {
         let wantsJSON = output.json
 
         try await runReportingFailures(editing: url) {
-            let outcome = try await PenFileTransaction.run(at: url, identity: writer, effect: effect, fonts: .shared) { document, recorder in
+            let outcome = try await CommandTransaction.run(at: url, identity: writer, effect: effect, fonts: .shared) { document, recorder in
                 do {
                     let findings = try effect.preview(of: document)
                     // The path has to be read before the delete: afterwards there is no

@@ -25,7 +25,7 @@ extension RandomEditGenerator {
     mutating func mergeOperation(for doc: EditableDocument, label: String, index: Int, scope: String? = nil) -> EditOperation? {
         let nodeIDs = scope.map { Array(doc.descendantIDs(of: $0).dropFirst()).sorted() } ?? Array(doc.allNodeIDs).sorted()
         let newID = "\(label)_m\(index)"
-        let operation: EditOperation? = switch Int.random(in: 0 ..< 20, using: &rng) {
+        return switch Int.random(in: 0 ..< 20, using: &rng) {
         case 0, 1: insertLeaf(id: newID, in: doc, nodeIDs: nodeIDs, scope: scope)
         case 2: insertFrame(id: newID, in: doc, nodeIDs: nodeIDs, scope: scope)
         case 3: insertInstance(id: newID, in: doc, nodeIDs: nodeIDs, scope: scope)
@@ -42,21 +42,6 @@ extension RandomEditGenerator {
         case 18 where scope == nil: documentPropertyEdit(in: doc, label: label, index: index)
         case 19 where scope == nil && !nodeIDs.isEmpty: move(in: doc, nodeIDs: nodeIDs)
         default: patchProperties(in: doc, nodeIDs: nodeIDs, label: label, index: index)
-        }
-        return closesComponentCycle(operation, in: doc) ? nil : operation
-    }
-
-    /// Whether an insert or move would put an instance of a component inside that
-    /// component, directly or through others.
-    private func closesComponentCycle(_ operation: EditOperation?, in doc: EditableDocument) -> Bool {
-        switch operation {
-        case let .insertNode(insert):
-            guard case let .ref(data) = insert.node.kind else { return false }
-            return closesComponentCycle(adding: [data.ref], under: insert.parentID, in: doc)
-        case let .moveNode(move):
-            return closesComponentCycle(adding: instanceTargets(under: move.nodeID, in: doc), under: move.newParentID, in: doc)
-        default:
-            return false
         }
     }
 

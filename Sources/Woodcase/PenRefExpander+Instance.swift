@@ -25,8 +25,9 @@ extension PenRefExpander {
     ///   - registry: Component id → component.
     ///   - visited: The component ids already on this expansion chain.
     ///   - cache: The override-key resolvers built so far in this expansion.
-    /// - Returns: The prepared clone, or `nil` for a circular or unresolved ref, which
-    ///   stays as written.
+    /// - Returns: The prepared clone, or `nil` for an unresolved ref or one that would
+    ///   re-enter a component loop already on the chain
+    ///   (``ComponentLoopIndex/closesLoop(entering:onChain:)``), which stays as written.
     static func prepareInstance(
         refNode: PenNode,
         refData: PenNode.RefData,
@@ -34,8 +35,8 @@ extension PenRefExpander {
         visited: Set<String>,
         cache: ResolverCache
     ) -> PreparedInstance? {
-        guard !visited.contains(refData.ref),
-              let resolved = resolveChain(of: refData.ref, registry: registry, visited: visited)
+        guard !cache.loops.closesLoop(entering: refData.ref, onChain: visited),
+              let resolved = resolveChain(of: refData.ref, registry: registry, visited: visited, loops: cache.loops)
         else { return nil }
         let (component, chainVisited) = resolved
 
@@ -86,12 +87,15 @@ extension PenRefExpander {
     ///   - ref: The component id the instance names.
     ///   - registry: Component id → component.
     ///   - visited: The component ids already on this expansion chain.
+    ///   - loops: The registry's component loops: a link into a loop already on the
+    ///     chain is not followed, as an instance of it would not be expanded.
     /// - Returns: The resolved component and the chain's visited ids, or `nil` when the
     ///   registry holds no such component.
     static func resolveChain(
         of ref: String,
         registry: [String: PenNode],
-        visited: Set<String>
+        visited: Set<String>,
+        loops: ComponentLoopIndex
     ) -> (PenNode, Set<String>)? {
         guard var component = registry[ref] else { return nil }
 
@@ -99,7 +103,7 @@ extension PenRefExpander {
         chainVisited.insert(ref)
         var links: [PenNode] = []
         while case let .ref(innerRef) = component.kind {
-            guard !chainVisited.contains(innerRef.ref),
+            guard !loops.closesLoop(entering: innerRef.ref, onChain: chainVisited),
                   let next = registry[innerRef.ref]
             else { break }
             links.append(component)

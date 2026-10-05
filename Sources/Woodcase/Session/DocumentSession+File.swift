@@ -76,8 +76,12 @@ extension DocumentSession {
         let crdtBefore = result.operations.count > 1 ? document.crdtDocument?.snapshot() : nil
         var pending = PendingChange(logsActivity: false)
         do {
-            for operation in result.operations {
-                try apply(operation, into: &pending)
+            // The merge checked its result whole for component loops; its steps may pass
+            // through one between two of them (theirs swapped which component holds which).
+            try document.allowingComponentLoops {
+                for operation in result.operations {
+                    try apply(operation, into: &pending)
+                }
             }
         } catch {
             abandon(pending, restoring: crdtBefore)

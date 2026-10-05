@@ -41,7 +41,8 @@ import Foundation
 /// underline or strikethrough it strips (see `DocumentLinter+TextStripped.swift`)
 /// — three from the metadata `generate react` reads: a `_props` entry that resolves to
 /// no descendant, a `_role` outside ``ComponentRole``, and an instance whose overrides no
-/// declared prop covers (see `DocumentLinter+Codegen*.swift`) — and one,
+/// declared prop covers (see `DocumentLinter+Codegen*.swift`) — one from the component
+/// graph, components that contain each other (see `DocumentLinter+ComponentLoops.swift`) — and one,
 /// ``LintCheck/pipeline``, is whatever diagnostics the caller hands in.
 ///
 /// ## What it does not check
@@ -131,7 +132,7 @@ public enum DocumentLinter {
         }
 
         var perRow: [Int: [PenDiagnostic]] = [:]
-        var found: [LintFinding] = root == nil ? importFindings(in: document) : []
+        var found: [LintFinding] = root == nil ? importFindings(in: document) + componentLoopFindings(in: document) : []
         for diagnostic in diagnostics {
             guard let nodeID = diagnostic.nodeID else {
                 if root == nil { found.append(finding(for: diagnostic, at: nil)) }

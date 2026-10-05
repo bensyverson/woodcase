@@ -97,6 +97,8 @@ struct ApplyLocalFailClosedTests {
         case moveParentCannotHaveChildren
         case moveCreatesCycle
         case moveIndexTooLarge
+        case insertClosesComponentLoop
+        case moveClosesComponentLoop
         case updateCommonMissingNode
         case updateKindMissingNode
         case setPropertiesMissingNode
@@ -157,6 +159,13 @@ struct ApplyLocalFailClosedTests {
                 .moveNode(EditOperation.MoveNode(nodeID: "f1", newParentID: "inner"))
             case .moveIndexTooLarge:
                 .moveNode(EditOperation.MoveNode(nodeID: "label", newParentID: "inner", index: 5))
+            case .insertClosesComponentLoop:
+                .insertNode(EditOperation.InsertNode(
+                    node: PenNode(id: "self1", common: PenNodeCommon(), kind: .ref(PenNode.RefData(ref: "comp1"))),
+                    parentID: "comp1"
+                ))
+            case .moveClosesComponentLoop:
+                .moveNode(EditOperation.MoveNode(nodeID: "ref1", newParentID: "comp1"))
             case .updateCommonMissingNode:
                 .updateCommon(EditOperation.UpdateCommon(nodeID: "nope", common: PenNodeCommon(name: "X")))
             case .updateKindMissingNode:
@@ -225,6 +234,7 @@ struct ApplyLocalFailClosedTests {
                 "nodeNotFound"
             case .deleteStrandsInstances: "componentHasInstances"
             case .moveCreatesCycle: "wouldCreateCycle"
+            case .insertClosesComponentLoop, .moveClosesComponentLoop: "wouldCloseComponentLoop"
             case .setPropertiesUnknownKey: "unknownProperty"
             case .setPropertiesBadValue: "propertyTypeMismatch"
             case .overrideNotARef, .detachNotARef: "notARefNode"
@@ -353,6 +363,7 @@ struct ApplyLocalFailClosedTests {
         case .rootOverrideKeyReserved: "rootOverrideKeyReserved"
         case .rootOverrideValueRejected: "rootOverrideValueRejected"
         case .revisionConflict: "revisionConflict"
+        case .wouldCloseComponentLoop: "wouldCloseComponentLoop"
         }
     }
 }

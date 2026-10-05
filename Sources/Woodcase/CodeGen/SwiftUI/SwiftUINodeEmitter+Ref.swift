@@ -39,7 +39,7 @@ extension SwiftUINodeEmitter {
             themeReads.rollBack(to: mark)
         }
         guard let prepared = PenRefExpander.prepareInstance(
-            refNode: node, refData: data, registry: scope.reusable, visited: scope.chain, cache: .init()
+            refNode: node, refData: data, registry: scope.reusable, visited: scope.chain, cache: .init(loops: scope.loops)
         ) else {
             return missing(node, data: data, in: container)
         }

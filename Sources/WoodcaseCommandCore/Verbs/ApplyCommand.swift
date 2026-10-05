@@ -98,7 +98,7 @@ struct Apply: AsyncParsableCommand {
         ) { () async throws -> PenFileTransaction.Outcome<BatchReport> in
             let operations = try Apply.readOperations(from: opsPath)
             let previousReport = try retry.map(Apply.readReport(from:))
-            return try await PenFileTransaction.run(
+            return try await CommandTransaction.run(
                 at: url, identity: identity.identity, effect: effect,
                 fonts: .shared
             ) { document, recorder in

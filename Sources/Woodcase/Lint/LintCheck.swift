@@ -141,6 +141,11 @@ public enum LintCheck: String, Friendly, CaseIterable {
     /// explicit.
     case noteUnsized = "note-unsized"
 
+    /// Components that contain each other — a component that renders an instance of
+    /// itself, directly or through others (``ComponentLoop``). One finding per loop, at
+    /// the top of the report.
+    case componentLoop = "component-loop"
+
     /// The severity findings of this check carry.
     ///
     /// ``pipeline`` findings override it with the diagnostic's own severity; every
@@ -173,7 +178,8 @@ public enum LintCheck: String, Friendly, CaseIterable {
     /// is well formed and Pen draws it as written; only Woodcase's render and code differ.
     /// ``perSideStrokeOnShape`` is a warning because the node draws, Pen and Woodcase alike,
     /// only not with the widths the file writes. ``noteUnsized`` is a notice: nothing is
-    /// wrong with the note, which draws at the post-it default.
+    /// wrong with the note, which draws at the post-it default. ``componentLoop`` is an
+    /// error: an edit refuses to make one, and the nesting it closes draws nothing.
     public var severity: PenDiagnostic.Severity {
         switch self {
         case .noteUnsized:
@@ -185,7 +191,7 @@ public enum LintCheck: String, Friendly, CaseIterable {
             .warning
         case .brokenRef, .importNotFound, .importUnreadable, .unresolvedVariable, .unknownIcon, .unknownIconLibrary,
              .overrideValueRejected, .overrideTargetNotFound, .overrideKeyUnread,
-             .codegenPropPath, .codegenRole, .meshGradientDropped:
+             .codegenPropPath, .codegenRole, .meshGradientDropped, .componentLoop:
             .error
         }
     }
@@ -251,6 +257,8 @@ public enum LintCheck: String, Friendly, CaseIterable {
             "A per-side stroke width on an ellipse, polygon, path or line, which Pen draws at the top width alone."
         case .noteUnsized:
             "A note with no width or height of its own, which lays out at the 200×200 post-it default."
+        case .componentLoop:
+            "Components that contain each other, directly or through others; that nesting is not drawn."
         }
     }
 }

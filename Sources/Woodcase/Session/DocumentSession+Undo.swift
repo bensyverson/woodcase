@@ -52,12 +52,16 @@ extension DocumentSession {
         var kept: [KeptChange] = []
         var reversals: [UndoEntry.Reversal] = []
         do {
-            for reversal in entry.reversals {
-                let start = pending.applied.count
-                kept += try apply(reversal, since: entry.sequence, into: &pending)
-                let applied = pending.applied[start...]
-                if !applied.isEmpty {
-                    reversals.insert(UndoEntry.Reversal(steps: applied.reversed().flatMap(\.inverse)), at: 0)
+            // A history step returns to a state the document held, so it is never
+            // refused for a component loop: undoing a loop's fix puts the loop back.
+            try document.allowingComponentLoops {
+                for reversal in entry.reversals {
+                    let start = pending.applied.count
+                    kept += try apply(reversal, since: entry.sequence, into: &pending)
+                    let applied = pending.applied[start...]
+                    if !applied.isEmpty {
+                        reversals.insert(UndoEntry.Reversal(steps: applied.reversed().flatMap(\.inverse)), at: 0)
+                    }
                 }
             }
         } catch {

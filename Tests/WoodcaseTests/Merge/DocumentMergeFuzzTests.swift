@@ -69,11 +69,14 @@ struct DocumentMergeFuzzTests {
     }
 
     /// Applies `operations` in order to a copy of `document`, recording the first refusal.
+    ///
+    /// With the component-loop guard off, as a session applies a merge: the merge checks
+    /// its result as a whole, and its steps may pass through a loop on the way.
     private static func applying(_ operations: [EditOperation], to document: EditableDocument, seed: UInt64) -> EditableDocument? {
         let result = copy(document)
         for (index, operation) in operations.enumerated() {
             do {
-                try result.apply(operation)
+                try result.allowingComponentLoops { try result.apply(operation) }
             } catch {
                 Issue.record("seed \(seed): operation \(index) of \(operations.count) refused — \(error)\n\(operation)")
                 return nil

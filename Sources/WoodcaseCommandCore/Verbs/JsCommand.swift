@@ -124,7 +124,7 @@ struct Js: AsyncParsableCommand {
 
         try await runReportingFailures(editing: url) {
             do {
-                let outcome = try await PenFileTransaction.run(
+                let outcome = try await CommandTransaction.run(
                     at: url, identity: identity.identity, effect: effect,
                     fonts: .shared
                 ) { document, recorder in
