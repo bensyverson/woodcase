@@ -38,7 +38,7 @@ struct PenAssetGathering {
     /// The folder files are copied into.
     let destination: URL
 
-    /// The references whose file was not there, left as they were.
+    /// The references whose file was not there or could not be read, left as they were.
     private(set) var missing: [PenAssetReferences.Reference] = []
 
     /// How many files were copied.
@@ -50,11 +50,15 @@ struct PenAssetGathering {
     ///   - kind: An image or a font.
     ///   - value: The reference as the document writes it.
     /// - Returns: `./images/<name>` or `./fonts/<name>`, or `nil` to leave the reference
-    ///   alone: it is remote, a variable, or names a file that does not exist.
+    ///   alone: it is remote, a variable, or names a file that does not exist or cannot
+    ///   be read.
     /// - Throws: ``PenFileError/writeFailed(url:reason:)`` when the copy fails.
     mutating func place(_ kind: PenAssetReferences.Kind, _ value: String) throws -> String? {
         guard let file = Self.localFile(value, relativeTo: source) else { return nil }
-        guard FileManager.default.fileExists(atPath: file.path) else {
+        // A file this process may not read — a sandboxed app without a grant for its
+        // folder — is left behind like a missing one, rather than failing the move.
+        guard FileManager.default.fileExists(atPath: file.path), FileManager.default.isReadableFile(atPath: file.path)
+        else {
             missing.append(PenAssetReferences.Reference(kind: kind, value: value))
             return nil
         }

@@ -21,20 +21,7 @@ import Foundation
 /// ```
 enum PenAssetReferences {
     /// Which kind of file a reference points at.
-    enum Kind: String, Friendly, CaseIterable {
-        /// An image paint's `url`.
-        case image
-        /// A declared font's `url`.
-        case font
-
-        /// The bundle folder files of this kind are kept in.
-        var directoryName: String {
-            switch self {
-            case .image: PenLocation.imagesDirectoryName
-            case .font: PenLocation.fontsDirectoryName
-            }
-        }
-    }
+    typealias Kind = PenBundle.AssetKind
 
     /// One reference, as the document writes it.
     struct Reference: Friendly {

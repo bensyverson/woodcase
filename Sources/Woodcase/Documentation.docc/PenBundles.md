@@ -81,6 +81,13 @@ document takes every row, whatever path it was written under
   `images/` or `fonts/` keeps its relative path; any other is copied in under its own
   name, numbered when two share one. The original is removed (Git sees a rename), the
   bundle's log starts with a `new` row, and the original's history stays in its old log.
+- An app's Convert… — ``PenBundle/convert(_:to:identity:)`` — makes the same bundle
+  wherever the user chose in a save panel and **keeps the original**. The original is
+  only read, under a shared lock, and `converted-from.json` names it relative to the
+  bundle's folder (`../project/Design.pen` one folder over). A file the process may not
+  read — a sandboxed app without a grant for the original's folder — is left as it was
+  and reported in ``PenBundle/Report/missing``, as a missing one is; an app asks first
+  for the folders of the files ``PenBundle/localAssets(of:)`` lists that it cannot read.
 - `woodcase unbundle Design.umbra` — ``PenBundle/export(_:to:identity:)`` — copies the
   document out into a plain folder, `Design/` beside the bundle by default: `Design.pen`
   with `images/` and `fonts/`, every reference relative to it, including any the bundle
@@ -93,13 +100,23 @@ document takes every row, whatever path it was written under
   on its own. The rewrite is one logged change (`replace` rows and a `set` row for
   `fonts`), so `woodcase undo` takes it back.
 
+## Adding a file
+
+``PenBundle/importAsset(_:as:into:)`` copies one file into the bundle's `images/` or
+`fonts/` — a dropped image, an installed font — under its own name, numbered
+(`hero-2.png`) when the name is taken, and returns the reference to write:
+`./images/hero.png`. A file already inside the bundle is not copied. Bytes with no file
+— a pasted image — go through ``PenBundle/importAsset(_:named:as:into:)``.
+
 ## Two sources of truth
 
 A bundle made from a bare file records it in `converted-from.json`
 (``PenBundle/ConvertedFrom``): the original's path, relative to the folder holding the
 bundle, its document revision and the date. It sits at the bundle's root, not in
 `.woodcase/`, so it is committed and a collaborator is warned too. Any CLI command run
-on a bare `.pen` that a bundle beside it was converted from warns on standard error:
+on a bare `.pen` that a bundle beside it was converted from warns on standard error (a
+bundle converted into another folder is not found from the original, so it does not
+warn):
 
 ```text
 woodcase: Design.pen was converted to Design.umbra on 2026-10-05; edit that instead.
@@ -117,5 +134,6 @@ not in the bundle.
 ### Converting
 
 - ``PenBundle``
+- ``PenBundle/AssetKind``
 - ``PenBundle/ConvertedFrom``
 - ``PenBundleError``

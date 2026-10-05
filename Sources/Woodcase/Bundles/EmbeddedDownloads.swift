@@ -110,14 +110,7 @@ struct EmbeddedDownloads {
     /// - Returns: Its path relative to the bundle.
     private func store(_ data: Data, named name: String, kind: PenAssetReferences.Kind) throws -> String {
         let folder = bundle.appendingPathComponent(kind.directoryName, isDirectory: true)
-        let stem = (name as NSString).deletingPathExtension
-        let ext = (name as NSString).pathExtension
-        var candidate = name
-        var number = 2
-        while FileManager.default.fileExists(atPath: folder.appendingPathComponent(candidate).path) {
-            candidate = stem + "-\(number)" + (ext.isEmpty ? "" : "." + ext)
-            number += 1
-        }
+        let candidate = PenBundle.freeName(name, in: folder)
         let target = folder.appendingPathComponent(candidate)
         do {
             try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)

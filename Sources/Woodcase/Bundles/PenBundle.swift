@@ -14,7 +14,10 @@ import Foundation
 /// and nothing here ever runs unless asked.
 ///
 /// - ``convert(_:identity:)`` — `woodcase bundle`: a bare `.pen` becomes a bundle beside
-///   it, taking its local images and fonts along.
+///   it, taking its local images and fonts along; ``convert(_:to:identity:)`` makes it
+///   wherever an app's save panel chose, keeping the original.
+/// - ``importAsset(_:as:into:)`` — a dropped image or an installed font is copied into
+///   the bundle's `images/` or `fonts/`.
 /// - ``export(_:to:identity:)`` — `woodcase unbundle`: a bundle's document and files are
 ///   copied out into a plain folder any `.pen` tool opens.
 /// - ``embed(_:identity:fetcher:fonts:)`` — `woodcase embed`: remote images and Google
@@ -30,8 +33,8 @@ public enum PenBundle {
         ///   - document: The `.pen` file written.
         ///   - revision: Its document revision.
         ///   - copied: How many image and font files were copied or downloaded.
-        ///   - missing: References whose file could not be found or fetched, left as
-        ///     they were.
+        ///   - missing: References whose file could not be found, read or fetched, left
+        ///     as they were.
         public init(document: URL, revision: String, copied: Int, missing: [String] = []) {
             self.document = document
             self.revision = revision
@@ -48,7 +51,7 @@ public enum PenBundle {
         /// How many image and font files were copied or downloaded.
         public var copied: Int
 
-        /// References whose file could not be found or fetched, left as they were.
+        /// References whose file could not be found, read or fetched, left as they were.
         public var missing: [String]
     }
 }
