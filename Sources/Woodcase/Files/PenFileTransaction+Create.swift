@@ -29,7 +29,9 @@ public extension PenFileTransaction {
     /// ```
     ///
     /// - Parameters:
-    ///   - url: Where to create the file. Its directory must exist.
+    ///   - url: Where to create the file: a bare `.pen`, whose directory must exist, or a
+    ///     `.umbra` bundle, which is created — its parent must exist — holding
+    ///     `document.pen`, with the `new` row in the bundle's own log.
     ///   - document: What the file holds.
     ///   - identity: The writer's name — the CLI's `--as` — or `nil` for the
     ///     unattributed writer.
@@ -49,6 +51,9 @@ public extension PenFileTransaction {
         log: ActivityLog? = nil,
         effect: WriteEffect = .commit
     ) async throws -> Outcome<String> {
+        // A bundle is created through its document.pen; see PenLocation.
+        let url = PenLocation(url).document
+        let location = PenLocation(url)
         try document.requireWritableFormat(at: url)
         let revision = EditableDocument(from: document).documentRevision
         let data = try encode(document, for: url)
@@ -59,10 +64,12 @@ public extension PenFileTransaction {
             return Outcome(value: revision, commit: .previewed, url: url)
         }
 
-        let temporary = url
-            .deletingLastPathComponent()
-            .appendingPathComponent(".\(url.lastPathComponent).\(UUID().uuidString).tmp")
+        if let bundle = location.bundle {
+            try createBundleDirectory(bundle)
+        }
+        let temporary: URL
         do {
+            temporary = try temporaryNeighbor(of: url)
             try data.write(to: temporary, options: .withoutOverwriting)
         } catch {
             throw PenFileError.writeFailed(url: url, reason: PenFileError.oneLineReason(error))
@@ -84,6 +91,23 @@ public extension PenFileTransaction {
             op: .new, revision: revision, batch: UUID().uuidString
         )])
         return Outcome(value: revision, commit: .wrote, url: url)
+    }
+
+    /// Makes a bundle's directory, if it is not there yet. Its parent must exist, as a
+    /// bare file's directory must: a create never makes more than the one document.
+    private static func createBundleDirectory(_ bundle: URL) throws {
+        var isDirectory: ObjCBool = false
+        if FileManager.default.fileExists(atPath: bundle.path, isDirectory: &isDirectory) {
+            guard isDirectory.boolValue else {
+                throw PenFileError.cannotOpen(url: bundle, reason: alreadyExists)
+            }
+            return
+        }
+        do {
+            try FileManager.default.createDirectory(at: bundle, withIntermediateDirectories: false)
+        } catch {
+            throw PenFileError.writeFailed(url: bundle, reason: PenFileError.oneLineReason(error))
+        }
     }
 
     /// Why a create was refused when its path was taken.

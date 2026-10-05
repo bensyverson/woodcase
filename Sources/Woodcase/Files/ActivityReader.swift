@@ -176,7 +176,9 @@ public struct ActivityReader: Friendly {
         }
         defer { try? handle.close() }
 
-        let wanted = file.map(ActivityEvent.canonicalPath(for:))
+        // A bundle's log holds only its document's rows, under whatever path the bundle
+        // had when each was written, so a renamed bundle keeps its history.
+        let wanted = log.origin.holdsOneDocument ? nil : file.map(ActivityEvent.canonicalPath(for:))
         let decoder = JSONDecoder()
         do {
             var end = try handle.seekToEnd()

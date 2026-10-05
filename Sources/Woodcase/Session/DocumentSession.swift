@@ -95,8 +95,9 @@ public final class DocumentSession {
     /// Who edits through this session.
     public let author: Author
 
-    /// The .pen file the document belongs to, or `nil` for one never saved.
-    public let file: URL?
+    /// The .pen file or `.umbra` bundle the document belongs to, or `nil` for one never
+    /// saved. It changes only through ``retarget(to:)``, when the document moves.
+    public internal(set) var file: URL?
 
     /// The live document. Read it freely; change it only through ``submit(_:)``.
     public let document: EditableDocument

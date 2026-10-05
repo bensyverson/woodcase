@@ -35,6 +35,7 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 - <doc:WoodcaseEditor>
 - <doc:WoodcaseLint>
 - <doc:WoodcaseActivityLog>
+- <doc:PenBundles>
 - <doc:WoodcaseBatches>
 - <doc:WoodcaseScripting>
 - <doc:WoodcaseViewer>
@@ -169,6 +170,13 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 - ``ActivityRecorder``
 - ``RepositoryIgnoreFile``
 - ``WoodcaseHome``
+
+### Bundles
+
+- <doc:PenBundles>
+- ``PenLocation``
+- ``PenBundle``
+- ``PenBundleError``
 
 ### Following
 

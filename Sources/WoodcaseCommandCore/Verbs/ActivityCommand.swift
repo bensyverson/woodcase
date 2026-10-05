@@ -234,6 +234,8 @@ struct Activity: AsyncParsableCommand {
             "Check $\(ActivityLog.homeEnvironmentVariable), which points at \(log.home.path)."
         case .repository, .directory:
             "Remove it, or set $\(ActivityLog.homeEnvironmentVariable) to a directory you can read."
+        case let .bundle(root, _):
+            "Check the permissions of \(root.path) — a bundle keeps its log inside itself."
         }
     }
 

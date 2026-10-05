@@ -310,6 +310,8 @@ public enum PenFileTransaction {
         isolation _: isolated (any Actor)? = #isolation,
         _ body: (EditableDocument, ActivityRecorder) throws -> Value
     ) async throws -> Outcome<Value> {
+        // A bundle is read and written through its document.pen; see PenLocation.
+        let url = PenLocation(url).document
         let lock = try await FileLock.acquire(url, mode: .exclusive, timeout: timeout)
         defer { lock.release() }
 
@@ -383,6 +385,8 @@ public enum PenFileTransaction {
         isolation _: isolated (any Actor)? = #isolation,
         _ body: (EditableDocument) throws -> Value
     ) async throws -> Outcome<Value> {
+        // A bundle is read and written through its document.pen; see PenLocation.
+        let url = PenLocation(url).document
         let lock = try await FileLock.acquire(url, mode: .shared, timeout: timeout)
         defer { lock.release() }
 
@@ -430,14 +434,29 @@ public enum PenFileTransaction {
         }
     }
 
+    /// A uniquely named temporary file to stage a write of `url` in: in a bundle's
+    /// `.woodcase/` (created if missing), beside a bare file otherwise — on the same
+    /// volume either way, so the rename that follows is atomic. See
+    /// ``PenLocation/temporaryDirectory``.
+    ///
+    /// - Parameter url: The `.pen` file about to be written.
+    /// - Returns: A path nothing exists at yet.
+    /// - Throws: Whatever creating a bundle's `.woodcase/` throws.
+    static func temporaryNeighbor(of url: URL) throws -> URL {
+        let location = PenLocation(url)
+        if let state = location.stateDirectory {
+            try FileManager.default.createDirectory(at: state, withIntermediateDirectories: true)
+        }
+        return location.temporaryDirectory
+            .appendingPathComponent(".\(url.lastPathComponent).\(UUID().uuidString).tmp")
+    }
+
     /// Writes `data` over the locked file: a temporary neighbor, then a rename.
     static func write(_ data: Data, replacing lock: FileLock) throws {
         let url = lock.url
-        let temporary = url
-            .deletingLastPathComponent()
-            .appendingPathComponent(".\(url.lastPathComponent).\(UUID().uuidString).tmp")
-
+        let temporary: URL
         do {
+            temporary = try temporaryNeighbor(of: url)
             try data.write(to: temporary)
         } catch {
             throw PenFileError.writeFailed(url: url, reason: String(describing: error))

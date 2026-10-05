@@ -15,7 +15,11 @@ import Foundation
 ///
 /// ## The rule
 ///
-/// 1. `$WOODCASE_HOME`, if set and not empty, is the whole answer: one log at
+/// 0. A `.umbra` bundle — or the `document.pen` inside one — keeps its own log, at
+///    `<bundle>/.woodcase/activity.jsonl`, before any rule below is consulted, so its
+///    history travels with it (``ActivityLog/Origin/bundle(root:repository:)``). This
+///    is the one exception to rule 1. See <doc:PenBundles>.
+/// 1. `$WOODCASE_HOME`, if set and not empty, is the whole answer for a bare file: one log at
 ///    `$WOODCASE_HOME/activity.jsonl`, whatever file is being edited. It is the escape
 ///    hatch for a test, a sandbox, or a person who wants one feed for everything.
 /// 2. Otherwise, walk up from the file's directory to the nearest one holding a `.git`
@@ -44,7 +48,12 @@ public enum ActivityLogLocation {
         for file: URL,
         environment: [String: String] = ProcessInfo.processInfo.environment
     ) -> ActivityLog {
-        log(inDirectory: file.deletingLastPathComponent(), environment: environment)
+        let location = PenLocation(file)
+        if let bundle = location.bundle, let state = location.stateDirectory {
+            let repository = repositoryRoot(above: location.containingDirectory)
+            return ActivityLog(home: state, origin: .bundle(root: bundle, repository: repository))
+        }
+        return log(inDirectory: file.deletingLastPathComponent(), environment: environment)
     }
 
     /// The log a directory's work is recorded in — what `activity` and `serve` read when

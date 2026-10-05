@@ -51,6 +51,8 @@ public extension PenFileTransaction {
         rewritingCurrent force: Bool = false,
         diagnostics: PenDiagnosticCollector? = nil
     ) async throws -> Outcome<PenFileMigrator.Outcome> {
+        // A bundle is read and written through its document.pen; see PenLocation.
+        let url = PenLocation(url).document
         let lock = try await FileLock.acquire(url, mode: .exclusive, timeout: timeout)
         defer { lock.release() }
 

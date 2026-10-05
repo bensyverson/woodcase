@@ -79,7 +79,9 @@ extension ActivityReader {
             throw PenFileError.cannotOpen(url: url, reason: PenFileError.oneLineReason(error))
         }
 
-        let wanted = file.map(ActivityEvent.canonicalPath(for:))
+        // A bundle's log holds only its document's rows, under whatever path the bundle
+        // had when each was written, so a renamed bundle keeps its history.
+        let wanted = log.origin.holdsOneDocument ? nil : file.map(ActivityEvent.canonicalPath(for:))
         var page = Page(events: [], nextOffset: start, restarted: restarted, skippedLines: 0)
         let decoder = JSONDecoder()
         var consumed = 0

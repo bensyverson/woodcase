@@ -25,7 +25,9 @@ Two operations, two events, one batch id — appended once the file is safely on
 ## Where it lives
 
 With the project, not with the user. ``ActivityLogLocation`` resolves it, and is the only
-place that does; for a given .pen file:
+place that does. A **`.umbra` bundle** keeps its own log, at
+`<bundle>/.woodcase/activity.jsonl`, before any rule below is asked — see *Bundles* below.
+For a bare .pen file:
 
 1. **`$WOODCASE_HOME`**, when set and not empty, is the whole answer: one log at
    `$WOODCASE_HOME/activity.jsonl`, whatever file is being edited.
@@ -49,13 +51,30 @@ everything that happened anywhere, and an agent working in a sandbox that permit
 under the project would find its own history unwritable. This is the same choice a task
 tracker's in-repo database makes.
 
+### Bundles
+
+A bundle's log is inside the bundle (``ActivityLog/Origin/bundle(root:repository:)``),
+wherever the bundle sits and whatever `$WOODCASE_HOME` says, so the history travels with
+the document — that is what a bundle is for. Every row in it is about the bundle's one
+document, so a reader asking about that document takes every row, whatever path it was
+written under (``ActivityLog/Origin/holdsOneDocument``): a renamed bundle keeps its
+history, and `woodcase undo` reaches back across the rename. Rows name a bundle by its
+`document.pen` (``ActivityEvent/canonicalPath(for:)``), whichever path the caller gave.
+See <doc:PenBundles>.
+
+A **bare file that moves** — a rename, or a move to another repository — keeps nothing:
+rows are filed by path, so the new path's history starts with its next write, in the log
+of wherever it now sits, and the old rows stay under the old path in the old log.
+``DocumentSession/retarget(to:)`` follows a move in an app; see <doc:Session>.
+
 ### The `.gitignore` line
 
 The log is generated local state, so the write that *creates* `.woodcase/` inside a
 repository adds `.woodcase/` to that repository's root `.gitignore` at the same moment,
 creating the file if there is none (``RepositoryIgnoreFile``). Only a missing pattern is
 appended — `.woodcase`, `/.woodcase` and `.woodcase/` all count as present — so it happens
-once. Outside a repository nothing is written, and a `.gitignore` that cannot be written
+once. A bundle inside a repository adds the same line on its own log's first write.
+Outside a repository nothing is written, and a `.gitignore` that cannot be written
 is not an error: the edit and its log line are the work.
 
 ### Pointing it somewhere else

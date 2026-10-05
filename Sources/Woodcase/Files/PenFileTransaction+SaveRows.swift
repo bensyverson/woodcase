@@ -26,7 +26,15 @@ extension PenFileTransaction {
         let included = changes
             .filter { $0.sequence <= snapshot.sequence }
             .sorted { $0.sequence < $1.sequence }
-        var rows = [lineage.external(naming: url)].compactMap(\.self) + included.flatMap(\.activity)
+        // Each row names the file this save writes, not the one the session had when the
+        // change was made: a session retargeted to a moved file logs under its new name.
+        let file = ActivityEvent.canonicalPath(for: url)
+        let logged = included.flatMap(\.activity).map { row in
+            var row = row
+            row.file = file
+            return row
+        }
+        var rows = [lineage.external(naming: url)].compactMap(\.self) + logged
         let explained = rows.last?.revision ?? lineage.newest?.revision
         // A file with no history explains itself, as it does to a CLI transaction.
         if let explained, explained != snapshot.documentRevision {

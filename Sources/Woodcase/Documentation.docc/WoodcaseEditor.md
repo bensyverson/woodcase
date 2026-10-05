@@ -19,10 +19,13 @@ actually produced, so the cheap structural read answers most of the questions a
 screenshot would — and <doc:WoodcaseLint> answers the rest. `shot` is there for the
 last mile.
 
-No file yet? `woodcase new design.pen` writes the minimum a .pen file needs — the
-format version and an empty `children` array — before the loop above begins. Every
-verb's own "no such file" refusal names it, so an agent never has to remember it
-unprompted.
+No file yet? `woodcase new design.umbra` writes the minimum a document needs — the
+format version and an empty `children` array — before the loop above begins. **Prefer a
+bundle** (`.umbra`) to a bare `.pen`: it is a directory holding `document.pen` with its
+`images/`, `fonts/` and activity log, so they travel together, and every verb takes its
+path exactly as it takes a `.pen`'s (<doc:PenBundles>). `woodcase bundle design.pen`
+converts an existing file. Every verb's own "no such file" refusal names `new`, so an
+agent never has to remember it unprompted.
 
 Every transcript below is real output from `Tests/WoodcaseTests/Fixtures/banking.pen`
 and `batch.pen`, copied into a scratch directory with `WOODCASE_HOME` pointed at one

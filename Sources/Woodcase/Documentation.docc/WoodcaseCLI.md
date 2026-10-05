@@ -41,11 +41,18 @@ swift run woodcase render myfile.pen
 
 ## The verbs
 
-Every verb takes a `.pen` file as its first argument. **Read** verbs take a shared lock
-and change nothing; **write** verbs run inside a file transaction and append to the
-activity log; **render** verbs write images or code; the **viewer** verbs serve. `new`
-is the one write verb that opens no transaction — there is no existing file to lock —
-and so is the one edit the activity log never records.
+Every verb takes the document as its first argument: a `.umbra` **bundle** or a bare
+`.pen` file. A bundle is a directory holding `document.pen` with its `images/`, `fonts/`
+and its own activity log in `.woodcase/`; every verb reads, writes and resolves relative
+paths inside it, and its log is the bundle's whatever `$WOODCASE_HOME` says. **Prefer
+bundles** for new work — `woodcase new design.umbra` — so a document's images, fonts and
+history travel together; see <doc:PenBundles>. Naming a bare `.pen` that a bundle beside
+it was converted from prints a warning to edit the bundle instead.
+
+**Read** verbs take a shared lock and change nothing; **write** verbs run inside a file
+transaction and append to the activity log; **render** verbs write images or code — beside
+a bundle, never inside it; the **viewer** verbs serve. `new` opens no transaction — there
+is no existing file to lock — and records the file's first row, `new`, as it creates it.
 
 Exit codes are the house table below — 0 and the codes each verb can additionally
 return are listed here, so a script knows what it must branch on.
@@ -63,7 +70,10 @@ return are listed here, so a script knows what it must branch on.
 | `icons` | read | The icon names an icon library defines, or matching a query | 0 1 2 |
 | `schema` | read | Every property a node type takes, and each value's shape | 0 2 |
 | `help` | read | The primer: `woodcase help design` teaches the loop | 0 2 |
-| `new` | write | Write the minimum .pen file a design can grow from | 0 3 4 5 |
+| `new` | write | Write the minimum bundle or .pen file a design can grow from | 0 3 4 5 |
+| `bundle` | write | Convert a .pen into a bundle beside it, copying its images and fonts | 0 2 3 4 5 |
+| `unbundle` | write | Copy a bundle out as a plain .pen folder any .pen tool opens | 0 2 3 4 5 |
+| `embed` | write | Download a bundle's remote images and Google Fonts into it | 0 2 3 4 5 |
 | `add` | write | Insert a .pen subtree under a parent, or at the root | 0 2 3 4 5 |
 | `set` | write | Patch properties of one node by path | 0 2 3 4 5 |
 | `replace` | write | Swap a node's subtree for a new one, keeping its place | 0 2 3 4 5 |
@@ -473,9 +483,13 @@ file is created under its lock, and its first activity-log row is a `new` event 
 the writer — `undo` stops there.
 
 ```bash
-woodcase new design.pen
-woodcase tree design.pen
+woodcase new design.umbra
+woodcase tree design.umbra
 ```
+
+A path ending in `.umbra` creates a bundle — the directory and its `document.pen`, with
+the `new` row in the bundle's own `.woodcase/activity.jsonl` — and is the shape to
+prefer. Any other path creates a bare `.pen` file.
 
 Refused rather than overwritten when the path already exists (exit 3) — `woodcase
 tree` is the read that shows what is there. The parent directory has to exist already;
@@ -488,6 +502,71 @@ tree` is the read that shows what is there. The parent directory has to exist al
 | `--as` | `$WOODCASE_AS` | Who the file's first activity-log row, `new`, is attributed to; with neither, it is unattributed |
 | `--dry-run` | `false` | Run both refusals and print the path, creating nothing. No revision, because no file was made |
 | `--json` | `false` | `{"path":…,"documentRevision":…}` |
+
+### `bundle`
+
+Convert a bare `.pen` into a bundle beside it, in place: `design.pen` becomes
+`design.umbra/document.pen`. Every local image fill and declared font it points at is
+copied into the bundle's `images/` and `fonts/` and its path rewritten; one already under
+the folder's own `images/` or `fonts/` keeps its relative path. The original is removed,
+so Git sees a rename; the bundle's log starts with a `new` row attributed to `--as`, and
+the original's history stays in the log it was written to. The bundle records what it was
+converted from (`converted-from.json`), and any later command on a `design.pen` that comes
+back warns: "design.pen was converted to design.umbra on <date>; edit that instead."
+
+```bash
+woodcase bundle design.pen
+woodcase bundle design.pen --embed
+```
+
+Refused when `design.umbra` exists (exit 3). A reference whose file is not there is left
+as it was and printed as `missing`.
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--embed` | `false` | Also download remote images and Google Fonts into the bundle, as `embed` does |
+| `--as` | `$WOODCASE_AS` | Who the bundle's `new` row is attributed to |
+| `--json` | `false` | `{"path":…,"documentRevision":…,"files":…,"missing":[…],"verb":"copied"}` |
+
+### `unbundle`
+
+The reverse of `bundle`, as a copy: write the bundle out as `<folder>/design.pen` beside
+`images/` and `fonts/` holding every local file it uses, every reference relative to it —
+including one the bundle reached outside itself for. Pen, or any `.pen` tool, opens the
+folder as it is. The bundle is left alone; the folder defaults to `design/` beside it, is
+created if missing, and nothing in it is overwritten (an existing `design.pen` is exit 3).
+A bare `.pen` is refused (exit 2).
+
+```bash
+woodcase unbundle design.umbra --to ~/Desktop/design-for-pen
+```
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--to` | `<bundle's folder>/<name>/` | The folder to write into |
+| `--as` | `$WOODCASE_AS` | Who the exported file's `new` row is attributed to |
+| `--json` | `false` | As `bundle` |
+
+### `embed`
+
+Make a bundle self-contained: download every `http(s)` image fill into `images/` and every
+remote declared font into `fonts/`, and copy the Google Fonts file of each face a text node
+draws — for a family the document does not declare and the OS does not ship — into
+`fonts/`, declaring it in the root `fonts` array. References are rewritten to the local
+copies, so the bundle renders offline and the same on every machine. **Nothing embeds on
+its own**; this verb or `bundle --embed` is how. The rewrite is one logged change (`replace`
+rows and a `set` row for `fonts`), so `undo` takes it back. A failed download leaves its
+reference remote and is printed as `missing`. A bare `.pen` is refused (exit 2) — `bundle`
+it first.
+
+```bash
+woodcase embed design.umbra
+```
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--as` | `$WOODCASE_AS` | Who the rows are attributed to |
+| `--json` | `false` | As `bundle`, with `"verb":"downloaded"` |
 
 ### `add`
 

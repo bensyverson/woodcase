@@ -32,6 +32,7 @@ Render
 
 - **Google Fonts Resolution** — Automatically download and register Google Fonts referenced in .pen files. Resolves font family names to TTF files from the [google/fonts](https://github.com/google/fonts) repository, with on-disk caching. Supports variable fonts with per-axis weight control.
 
+- **Bundles** — A `.umbra` bundle is a directory holding `document.pen`, its `images/` and `fonts/`, and its own activity log; every API and CLI verb takes one wherever it takes a `.pen`, and `woodcase bundle`, `unbundle` and `embed` convert between the two.
 - **Remote Image Fills** — Image fills whose URL is an `http(s)` address are downloaded before rendering and cached on disk, so a design using stock photography renders the same as one with images beside the file. Relative paths keep resolving against the .pen file's directory.
 
 - **Text Measurer** — Measure text bounding boxes via Core Text's `CTFramesetter`. Supports font family/size/weight/style, letter spacing, line height, and width-constrained wrapping. Defaults to SF Pro.
@@ -173,6 +174,7 @@ let image = PenRenderer.render(
 - [Pen Interoperability](Sources/Woodcase/Documentation.docc/PenInteroperability.md) — rendering differences between Woodcase and the format's own editor
 - [Code Generation](Sources/Woodcase/Documentation.docc/PenCodeGen.md) — deterministic code generation from .pen files to React + Tailwind
 - [Editing Documents](Sources/Woodcase/Documentation.docc/EditingDocuments.md) — mutable flat-store editing model with typed operations and round-trip materialization
+- [Bundles](Sources/Woodcase/Documentation.docc/PenBundles.md) — the `.umbra` directory that keeps a document with its images, fonts and history; prefer it to a bare .pen
 - [The Activity Log](Sources/Woodcase/Documentation.docc/WoodcaseActivityLog.md) — the append-only JSONL record of every committed edit: its wire format, where it lives, and how to follow it
 - [The Viewer](Sources/Woodcase/Documentation.docc/WoodcaseViewer.md) — the local, read-only web view of your .pen files, and the JSON, PNG and Server-Sent Events API it is built on
 - [DESIGN.md](DESIGN.md) — the viewer's design system: tokens, color rules, typography and component atoms, in the [design.md](https://github.com/google-labs-code/design.md) format

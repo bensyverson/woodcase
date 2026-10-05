@@ -99,7 +99,7 @@ extension GoogleFontResolver {
     ///
     /// A cached METADATA whose license names no directory leaves the directory `nil`,
     /// and a download then probes each in turn.
-    private func familyMetadata(family: String) async throws -> (GoogleFontMetadata, String?) {
+    func familyMetadata(family: String) async throws -> (GoogleFontMetadata, String?) {
         if let cached = cachedFile(family: family, named: GoogleFontCache.metadataFilename),
            let data = cached.contents,
            let metadata = try? GoogleFontMetadata.parse(data)

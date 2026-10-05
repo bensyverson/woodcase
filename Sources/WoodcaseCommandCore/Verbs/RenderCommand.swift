@@ -47,9 +47,11 @@ struct Render: AsyncParsableCommand {
     ///   the parser, the layout engine or the exporters throw.
     func run() async throws {
         let inputURL = try input.existingFile()
-        let baseName = inputURL.deletingPathExtension().lastPathComponent
+        // Named after the document and written beside it — beside a bundle, not inside.
+        let location = PenLocation(inputURL)
+        let baseName = location.name
         let outputDirectory = outputDir.map { URL(fileURLWithPath: $0) }
-            ?? inputURL.deletingLastPathComponent()
+            ?? location.containingDirectory
         let diagnostics = PenDiagnosticCollector()
 
         // 1–3. Parse, read the libraries the file imports, and expand refs — keeping

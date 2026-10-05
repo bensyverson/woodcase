@@ -213,7 +213,7 @@ public struct ActivityLog: Friendly {
     /// remembers making, and an agent that cannot account for it has to go looking.
     /// Standard output stays the verb's answer.
     private func ignoreInRepository() {
-        guard case let .repository(root) = origin else { return }
+        guard let root = origin.repositoryRoot else { return }
         let ignoreFile = RepositoryIgnoreFile(root: root)
         guard (try? ignoreFile.addIfMissing(Self.ignorePattern, comment: Self.ignoreComment)) == true
         else { return }

@@ -94,8 +94,10 @@ private extension PenLibraries {
         guard let url = location(of: path, relativeTo: host) else {
             return URL(string: path)?.scheme == bundledScheme ? .bundled : .remote
         }
-        if url == host { return .read(document) }
-        guard FileManager.default.fileExists(atPath: url.path) else { return .notFound(url) }
+        // A library may be a bundle — `"../Kit.umbra"` — read through its document.pen.
+        let file = PenLocation(url).document
+        if file == host || url == host { return .read(document) }
+        guard FileManager.default.fileExists(atPath: file.path) else { return .notFound(url) }
         do {
             return try .read(PenParser.parse(contentsOf: url))
         } catch {

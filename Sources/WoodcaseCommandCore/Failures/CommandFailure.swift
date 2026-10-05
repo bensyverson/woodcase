@@ -113,6 +113,8 @@ struct CommandFailure: Error, Friendly, CustomStringConvertible {
             CommandFailure(message: ParserFailureMessage.describe(parser), exitCode: .targetFailure)
         case let refusal as PenFormatWriteRefusal:
             CommandFailure(message: ReadOnlyFormatMessage.describe(refusal), exitCode: .targetFailure)
+        case let bundle as PenBundleError:
+            describing(bundle)
         case let validation as ValidationError:
             CommandFailure(message: "\(validation)", exitCode: .usage)
         case let pin as ThemePinParser.PinError:

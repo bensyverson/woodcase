@@ -103,6 +103,8 @@ public extension PenFileTransaction {
         timeout: Duration = defaultTimeout
     ) async throws -> SaveOutcome {
         guard let expected = snapshot.syncedRevision else { throw SessionError.fileStateUnknown }
+        // A bundle is read and written through its document.pen; see PenLocation.
+        let url = PenLocation(url).document
         let lock = try await FileLock.acquire(url, mode: .exclusive, timeout: timeout)
         defer { lock.release() }
 

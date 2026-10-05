@@ -14,14 +14,19 @@ package struct WoodcaseCommand: AsyncParsableCommand {
         commandName: "woodcase",
         abstract: "Read, edit and render Pen .pen design files.",
         discussion: """
-        Every verb takes the .pen file as its first argument and leaves it a plain, \
-        canonical .pen file any editor of the format can still open. There is no \
-        session and no daemon: \
+        Every verb takes the document as its first argument — a .umbra bundle or a \
+        bare .pen file — and leaves a plain, canonical .pen file any editor of the \
+        format can still open. There is no session and no daemon: \
         a command opens the file, does one thing, and writes it back under a lock.
+
+        PREFER BUNDLES. A bundle (design.umbra/) holds document.pen with its images, \
+        fonts and activity log, so they travel together: `woodcase new design.umbra` \
+        makes one, `woodcase bundle design.pen` converts one.
 
           read    tree  find  get  shot  lint  activity  vars  imports  icons  schema
                   never write; --json on every one, and a document read carries a revision
           write   new  add  set  replace  cp  mv  rm  override  apply  js  undo
+                  bundle  unbundle  embed
                   attributed with --as, appended to the activity log, guarded by --rev
           render  render  themes  generate  migrate
           view    serve  preview
@@ -45,7 +50,7 @@ package struct WoodcaseCommand: AsyncParsableCommand {
         version: WoodcaseVersion.line,
         subcommands: [
             Tree.self, Find.self, Get.self, Shot.self, Lint.self, Schema.self, Undo.self,
-            NewCommand.self,
+            NewCommand.self, BundleCommand.self, UnbundleCommand.self, EmbedCommand.self,
             AddCommand.self, SetCommand.self, ReplaceCommand.self, CopyCommand.self,
             MoveCommand.self, RemoveCommand.self,
             OverrideCommand.self, Apply.self, Js.self, Vars.self, Imports.self,

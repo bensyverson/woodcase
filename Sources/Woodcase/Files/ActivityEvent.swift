@@ -140,10 +140,15 @@ public struct ActivityEvent: Friendly {
     /// `/private/tmp/demo.pen` — the same file named two ways — produce the same
     /// string, and a reader filtering by one finds events written under the other.
     ///
-    /// - Parameter url: The file to name.
+    /// A bundle is named by its document, whichever of the two paths the caller gave
+    /// — `Design.umbra` and `Design.umbra/document.pen` record the same string — so the
+    /// file watcher, which reports the `.pen` that changed, matches the log's rows.
+    ///
+    /// - Parameter url: The file to name: a bare `.pen`, a bundle, or a bundle's
+    ///   `document.pen`.
     /// - Returns: Its absolute, canonical path.
     public static func canonicalPath(for url: URL) -> String {
-        url.standardizedFileURL.resolvingSymlinksInPath().path
+        PenLocation(url).document.standardizedFileURL.resolvingSymlinksInPath().path
     }
 
     /// The node ids an operation touches, most specific first.

@@ -117,7 +117,9 @@ back one whose causal dependencies have not arrived is not done yet.
 
 An app saves through ``PenFileTransaction/save(_:changes:to:log:timeout:)``, which
 writes a ``DocumentSnapshot`` under the file's lock in the CLI's bytes and logs the
-changes' rows under the session's author (see <doc:WoodcaseActivityLog>). The save
+changes' rows under the session's author (see <doc:WoodcaseActivityLog>). The file may
+be a bare `.pen` or a `.umbra` bundle — the save writes the bundle's `document.pen` and
+logs in the bundle's own `.woodcase/` (<doc:PenBundles>); prefer a bundle. The save
 touches only values, so it runs off the main actor. Around it, the app keeps this
 contract:
 
@@ -161,6 +163,38 @@ case let .fileChanged(found, lineage):
    so an app that coordinates wraps the call in a coordinated write naming its own
    presenter. Either way the check in step 3 is the backstop: a notification that
    arrives late, or not at all, cannot make a save overwrite an agent's write.
+
+#### When the document moves
+
+``DocumentSession/retarget(to:)`` points a session at its document's new file and keeps
+everything else: the undo and redo stacks, the ledger, the sequence, the synced revision
+and the merge base. Call it instead of rebuilding the session whenever the app's document
+gets a new URL — the first save of an untitled document, Save As, Rename, Move To, a move
+in the Finder, a renamed bundle. It does no I/O. What follows:
+
+- **First save, Save As.** Create the file through
+  ``PenFileTransaction/create(at:document:identity:log:effect:)`` with the snapshot's
+  document and the author's name — so its history starts with a `new` row — then
+  retarget, then ``DocumentSession/noteSynced(_:)`` with that snapshot. Edits made while
+  the document was untitled wrote no rows (a session without a file records none); the
+  `new` row's revision explains the file. They stay undoable, and an undo of one after
+  the save is logged like any other.
+- **A move or rename.** Retarget only: the bytes did not change, so the synced revision
+  and merge base stand. The next save resolves its log from the new URL.
+- **The log.** A bundle's log moves with the bundle, and its rows keep answering for the
+  document under its new name, so `woodcase undo` reaches back across the rename. A bare
+  `.pen` files rows by path: after a move its new rows start in the log of wherever it
+  now sits — another repository's, or its new folder's — and the rows written before
+  stay under the old path in the old log. Crossing log roots or not, the new path's
+  history starts with the first save after the move; an agent's `woodcase undo` there
+  stops at that point, while the app's own undo stack is unaffected.
+- **Unsaved changes** made before the move are logged under the new file when saved:
+  the save names the file it writes in every row it appends.
+
+```swift
+// The document moved, or an untitled one was just created at `url`.
+session.retarget(to: url)
+```
 
 ### Isolation
 

@@ -18,7 +18,7 @@ import Woodcase
 struct NewCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "new",
-        abstract: "Write: create a .pen file with nothing in it.",
+        abstract: "Write: create a .umbra bundle or .pen file with nothing in it.",
         discussion: """
         An act verb. The file it writes is the minimum a .pen file needs — the \
         current format version and an empty children array — with no themes, \
@@ -35,13 +35,19 @@ struct NewCommand: AsyncParsableCommand {
         runs both refusals above and then prints the path, creating nothing. No \
         revision, because no file was made.
 
+        A path ending in .umbra creates a bundle — the directory, holding \
+        document.pen, with its history in design.umbra/.woodcase/ — and is the \
+        shape to prefer: images and fonts copied into it travel with the document. \
+        Every verb takes the bundle's path.
+
         EXAMPLE
+          woodcase new design.umbra
+          woodcase tree design.umbra
           woodcase new design.pen
-          woodcase tree design.pen
         """
     )
 
-    @Argument(help: "The .pen file to create.")
+    @Argument(help: "The .umbra bundle or .pen file to create.")
     var file: PenFilePath
 
     @OptionGroup var preview: DryRunOption

@@ -78,12 +78,14 @@ public actor FileWatcher {
     /// been deleted is not a reason for the other four to go unwatched. It is reported by
     /// ``watchedCount`` being lower than the list.
     ///
-    /// - Parameter urls: The files to watch.
+    /// - Parameter urls: The files to watch: bare `.pen` files, or `.umbra` bundles,
+    ///   whose `document.pen` is watched and reported (``PenLocation``).
     public func watch(_ urls: [URL]) {
         guard !isStopped else { return }
         let backend = activeBackend()
         for url in urls {
-            let path = url.standardizedFileURL.resolvingSymlinksInPath().path
+            // A bundle is watched through its document.pen, the file a write replaces.
+            let path = PenLocation(url).document.standardizedFileURL.resolvingSymlinksInPath().path
             guard !watched.contains(path) else { continue }
             if backend.watch(path: path) {
                 watched.insert(path)

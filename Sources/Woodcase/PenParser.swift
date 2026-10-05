@@ -129,13 +129,16 @@ public enum PenParser {
     /// Parses a .pen file at the given URL into a ``PenDocument``.
     ///
     /// - Parameters:
-    ///   - url: A file URL pointing to a .pen JSON file.
+    ///   - url: A file URL pointing to a .pen JSON file, or to a `.umbra` bundle, whose
+    ///     `document.pen` is read (``PenLocation``).
     ///   - diagnostics: Optional collector notified about version handling and
     ///     any data a legacy migration discards.
     /// - Returns: A fully decoded ``PenDocument``.
     /// - Throws: ``PenParserError/fileReadFailed(url:underlying:)`` if the file cannot be read,
     ///   or the errors thrown when decoding the data — every one of them naming `url`.
     public static func parse(contentsOf url: URL, diagnostics: PenDiagnosticCollector? = nil) throws -> PenDocument {
+        // A bundle is read through its document.pen; see PenLocation.
+        let url = PenLocation(url).document
         let data: Data
         do {
             data = try Data(contentsOf: url)
