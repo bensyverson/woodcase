@@ -36,6 +36,19 @@ struct SetCommandTests {
         #expect(page.events.first?.op == .set)
     }
 
+    @Test("A set of only the position logs place, so a reader never takes it for an mv")
+    func positionOnlySetLogsPlace() throws {
+        let fixture = try CommandFixture(fixture: "batch.pen")
+
+        let run = try fixture.run(
+            "set", fixture.file.path, "Canvas/Title", "common.x=12", "common.y=34", "--as", "ana"
+        )
+
+        #expect(run.status == 0)
+        let page = try ActivityReader(log: ActivityLog(home: fixture.home)).read()
+        #expect(page.events.map(\.op) == [.place])
+    }
+
     @Test("A set with no identity is logged as an unattributed write, not dropped")
     func unattributedSetIsLoggedWithAnEmptyIdentity() throws {
         // `CommandFixture` clears $WOODCASE_AS, so no flag and no variable is the

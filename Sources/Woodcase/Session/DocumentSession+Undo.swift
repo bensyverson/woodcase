@@ -70,9 +70,10 @@ extension DocumentSession {
         case .redo: history.redo.removeLast()
         }
         history.openGroup = nil
-        guard !pending.applied.isEmpty else { return emptyChange(origin: origin, kept: kept) }
+        guard !pending.applied.isEmpty else { return emptyChange(origin: origin, kept: kept, undoEffect: .consumedEntry) }
 
-        let change = commit(pending, origin: origin, isUndoable: direction == .redo, kept: kept)
+        var change = commit(pending, origin: origin, isUndoable: direction == .redo, kept: kept)
+        change.undoEffect = [.consumedEntry, .filedReversal]
         let opposite = UndoEntry(sequence: change.sequence, reversals: reversals)
         switch direction {
         case .undo: history.redo.append(opposite)

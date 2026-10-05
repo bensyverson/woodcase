@@ -30,21 +30,28 @@ struct UndoHistory: Friendly {
     /// - Parameters:
     ///   - entry: The change's entry.
     ///   - group: How the change joins the history.
-    mutating func record(_ entry: UndoEntry, group: UndoGroup) {
+    /// - Returns: What recording it did to the stacks.
+    @discardableResult
+    mutating func record(_ entry: UndoEntry, group: UndoGroup) -> CommittedChange.UndoEffect {
+        var effect: CommittedChange.UndoEffect = redo.isEmpty ? [] : .clearedRedo
         redo.removeAll()
         switch group {
         case .none:
-            return
+            break
         case .new:
             undo.append(entry)
             openGroup = nil
+            effect.insert(.openedEntry)
         case let .coalesce(key):
             if openGroup == key, let last = undo.indices.last {
                 undo[last].absorb(entry)
+                effect.insert(.joinedEntry)
             } else {
                 undo.append(entry)
                 openGroup = key
+                effect.insert(.openedEntry)
             }
         }
+        return effect
     }
 }

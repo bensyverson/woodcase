@@ -32,11 +32,24 @@ public extension EditableDocument {
     /// pin, so one token on a frame covers what the frame draws. A definition edit
     /// moves the definition's spine and every instance's spine alike.
     ///
+    /// ## Components that render themselves
+    ///
     /// A component graph may cycle — a definition holding an instance of itself, or of
-    /// something that holds one of it. A component already being folded on the current
-    /// chain is skipped, and a revision whose computation skipped one is deliberately
-    /// **not** memoized, so every cached value is one no cut took part in and therefore
-    /// one that does not depend on which node was asked for first.
+    /// something that holds one of it — and then no member can be hashed before the
+    /// others. So the members of each cyclic group (``ComponentRenderGraph``) share one
+    /// *group revision*: each member is hashed with every reference to a member written
+    /// as a marker naming it, and the group revision folds those hashes in id order. A
+    /// ref to a member then folds in the group revision with the member's id, where a
+    /// ref to any other component folds in that component's revision. An edit inside any
+    /// member therefore moves every member and every instance of one, as it would
+    /// without the cycle.
+    ///
+    /// The definition reads only the document — never the order nodes were asked for,
+    /// nor the process — so every revision, cyclic or not, is memoized, and a document
+    /// with no cycle hashes exactly as it did before cycles had a definition. The fold
+    /// finds a cycle when it meets a component already on its chain; it then works out
+    /// that component's group, and every group below it, from the graph, and starts
+    /// again with those group revisions known.
     ///
     /// This is unrelated to ``contentHash(for:)``: that one mixes in layout
     /// rects and uses Swift's per-process-seeded `Hasher`, so it is neither
@@ -93,87 +106,6 @@ public extension EditableDocument {
             }
         }
         return [refData.ref] + named.subtracting([refData.ref]).sorted()
-    }
-
-    /// The revision of a node, folding in its subtree and the components it renders.
-    ///
-    /// A computation that skipped a component because it was already on the chain of
-    /// components being folded depends on where the walk started, so it is not
-    /// memoized, and neither is anything above it. Everything else is chain-independent
-    /// by construction — the chain is read nowhere else — which is what lets a cached
-    /// value be returned whatever chain asks for it.
-    ///
-    /// The fold runs from a work list rather than by recursion: a debug build reserved
-    /// 2.2 KB a level, and a deep tree overflowed a Swift task's stack
-    /// (`project/2026-09-26-debug-stack-depth.md`). Each node is still finished — and
-    /// memoized — before its next sibling starts, as a recursive fold would.
-    ///
-    /// - Parameter nodeID: The node to hash.
-    /// - Returns: The revision, or `nil` for a node that is not in the document.
-    private func foldedRevision(of nodeID: String) -> String? {
-        var stack: [RevisionFold] = []
-        switch beginFold(of: nodeID, folding: []) {
-        case let .finished(revision, _): return revision
-        case let .pending(fold): stack.append(fold)
-        }
-
-        while let last = stack.indices.last {
-            guard stack[last].next < stack[last].steps.count else {
-                let (revision, cachable) = finishFold(stack.removeLast())
-                guard !stack.isEmpty else { return revision }
-                stack[stack.count - 1].absorb(revision, cachable: cachable)
-                continue
-            }
-            let step = stack[last].steps[stack[last].next]
-            stack[last].next += 1
-
-            let folding: Set<String>
-            switch step {
-            case .child:
-                folding = stack[last].folding
-            case let .component(id):
-                guard !stack[last].folding.contains(id) else {
-                    stack[last].cachable = false
-                    continue
-                }
-                folding = stack[last].folding.union([id])
-            }
-            switch beginFold(of: step.id, folding: folding) {
-            case let .finished(revision, cachable): stack[last].absorb(revision, cachable: cachable)
-            case let .pending(fold): stack.append(fold)
-            }
-        }
-        return nil
-    }
-
-    /// Starts folding one node: its memoized revision, `nil` for a node not in the
-    /// document, or the fold still to run over what it contains.
-    private func beginFold(of nodeID: String, folding: Set<String>) -> RevisionFold.Start {
-        if let cached = _revisionCache?.entries[nodeID] { return .finished(cached, cachable: true) }
-        guard let node = nodes[nodeID] else { return .finished(nil, cachable: true) }
-
-        var hasher = FNV1aHasher()
-        let childIDs = children[nodeID]
-        // A declared-empty list folds in no child, so it is hashed as the file writes
-        // it — `"children": []` — to tell it from a container that declares none.
-        var written = node
-        if childIDs == [] { written.kind = node.kind.withChildren([]) }
-        hasher.combine(Self.revisionEncoder.encodeCanonical(written))
-        let steps = (childIDs ?? []).map(RevisionFold.Step.child)
-            + componentsRendered(by: node).map(RevisionFold.Step.component)
-        return .pending(RevisionFold(nodeID: nodeID, folding: folding, hasher: hasher, steps: steps))
-    }
-
-    /// Ends a node's fold, memoizing the revision when it may be.
-    private func finishFold(_ fold: RevisionFold) -> (revision: String, cachable: Bool) {
-        let revision = fold.hasher.hexString
-        if fold.cachable {
-            if _revisionCache == nil {
-                _revisionCache = RevisionCache()
-            }
-            _revisionCache?.store(revision, for: fold.nodeID)
-        }
-        return (revision, fold.cachable)
     }
 
     /// A stable content hash for the whole document, as 16 lowercase hex characters.
@@ -251,11 +183,13 @@ public extension EditableDocument {
             }
         }
     }
+}
 
+extension EditableDocument {
     /// A `JSONEncoder` that produces canonical bytes for revision hashing: sorted keys, no
     /// whitespace, and a non-throwing strategy for non-conforming floats so revision
     /// computation can never fail on a pathological NaN/Infinity value.
-    private static let revisionEncoder: JSONEncoder = {
+    static let revisionEncoder: JSONEncoder = {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys]
         encoder.nonConformingFloatEncodingStrategy = .convertToString(
@@ -263,9 +197,7 @@ public extension EditableDocument {
         )
         return encoder
     }()
-}
 
-extension EditableDocument {
     /// The revision cache, created by the first ``revision(of:)`` and `nil` until then.
     ///
     /// Internal because nothing outside the library should read a revision from
@@ -276,7 +208,7 @@ extension EditableDocument {
     }
 }
 
-private extension JSONEncoder {
+extension JSONEncoder {
     /// Encodes a value to canonical JSON bytes, guaranteed not to throw for any
     /// value ``EditableDocument`` stores (see `nonConformingFloatEncodingStrategy`).
     func encodeCanonical(_ value: some Encodable) -> [UInt8] {

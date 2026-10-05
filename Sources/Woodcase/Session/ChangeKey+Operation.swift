@@ -53,7 +53,7 @@ public extension ChangeKey {
         case let .overrideRoot(op):
             Set(op.properties.keys).union(op.unset).sorted().map { .rootOverride(ref: op.refNodeID, key: $0) }
         case let .detachRef(op):
-            try detachKeys(refIDs: [op.refNodeID], in: document)
+            try detachKeys(document.detachPlans(for: [op.refNodeID]), in: document)
         case let .addVariable(op):
             [.variable(name: op.name)]
         case let .updateVariable(op):
@@ -105,15 +105,15 @@ public extension ChangeKey {
         var keys: [ChangeKey] = document.descendantIDs(of: op.nodeID).map { .existence(node: $0) }
         keys.append(.placement(node: op.nodeID))
         if op.instances == .detach {
-            keys += try detachKeys(refIDs: document.instancesToDetach(for: op), in: document)
+            keys += try detachKeys(document.detachPlans(deleting: op), in: document)
         }
         return keys
     }
 
     /// A run of detaches' keys: each ref's existence and the existence of every node its
     /// planned expansion inserts, from the same plan the detach itself carries out.
-    private static func detachKeys(refIDs: [String], in document: EditableDocument) throws -> [ChangeKey] {
-        try document.detachPlans(for: refIDs).flatMap { plan in
+    private static func detachKeys(_ plans: [EditableDocument.PlannedDetach], in document: EditableDocument) -> [ChangeKey] {
+        plans.flatMap { plan in
             [ChangeKey.existence(node: plan.refID)]
                 + document.collectInsertedIDs(in: plan.subtree).map { .existence(node: $0) }
         }

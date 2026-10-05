@@ -117,7 +117,7 @@ extension EditableDocument {
         ))]
 
         guard op.instances == .detach else { return inverse }
-        for plan in try detachPlans(for: instancesToDetach(for: op)).reversed() {
+        for plan in try detachPlans(deleting: op).reversed() {
             try inverse.append(contentsOf: detachInverse(of: plan))
         }
         return inverse

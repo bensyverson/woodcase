@@ -37,7 +37,7 @@ public extension EditableDocument {
         // delegates to it — so it carries the rule itself.
         return try invalidatingCaches(touching: allIDs) {
             var detached: [DetachResult] = []
-            for plan in try detachPlans(for: instancesToDetach(for: op)) {
+            for plan in try detachPlans(deleting: op) {
                 try detached.append(detachRef(plan))
             }
 

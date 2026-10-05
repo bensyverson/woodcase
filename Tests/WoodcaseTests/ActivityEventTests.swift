@@ -113,6 +113,12 @@ struct ActivityEventTests {
             (.moveNode(EditOperation.MoveNode(nodeID: "n1")), .mv),
             (.updateCommon(EditOperation.UpdateCommon(nodeID: "n1", common: PenNodeCommon())), .set),
             (.setProperties(EditOperation.SetProperties(nodeID: "n1", properties: [:])), .set),
+            (.setProperties(EditOperation.SetProperties(nodeID: "n1", properties: ["common.x": 10])), .place),
+            (.setProperties(EditOperation.SetProperties(nodeID: "n1", properties: ["common.y": 4])), .place),
+            (.setProperties(EditOperation.SetProperties(nodeID: "n1", properties: ["common.x": 10, "common.y": 4])), .place),
+            (.setProperties(EditOperation.SetProperties(nodeID: "n1", properties: ["common.x": 10, "common.name": "Moved"])), .set),
+            (.setProperties(EditOperation.SetProperties(nodeID: "n1", properties: ["common.rotation": 45])), .set),
+            (.setProperties(EditOperation.SetProperties(nodeID: "n1", properties: ["kind.width": 10])), .set),
             (.overrideDescendant(EditOperation.OverrideDescendant(
                 refNodeID: "r1", descendantID: "d1", properties: [:]
             )), .override),

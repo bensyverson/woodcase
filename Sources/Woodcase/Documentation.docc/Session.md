@@ -33,6 +33,7 @@ origin, the owner reacts to the same value:
 | ``CommittedChange/broadcast`` | Sends the operations to collaborators |
 | ``CommittedChange/isDirtying`` | Marks the document edited |
 | ``CommittedChange/isUndoable`` | Offers Undo |
+| ``CommittedChange/undoEffect`` | Mirrors the undo and redo stacks into its own undo manager |
 | ``CommittedChange/kept`` | Tells the author whose work an undo kept |
 | ``CommittedChange/conflicts`` | Tells the author where a file merge kept their value over the file's |
 
@@ -200,6 +201,23 @@ log (an undo's events are labeled ``ActivityEvent/Kind/undo``, a redo's ``Activi
 anything to do; with nothing, the change applies nothing and keeps the current
 sequence.
 
+### Mirroring the stacks
+
+An app whose menus and shortcuts belong to a platform undo manager (`NSUndoManager`)
+mirrors the session's stacks into it rather than keeping a second history. Every
+``CommittedChange`` says what it did to them in ``CommittedChange/undoEffect``, so the
+mirror acts on the flags instead of inferring them:
+
+| Change | ``CommittedChange/undoEffect`` | The mirror… |
+| --- | --- | --- |
+| A ``UndoGroup/new`` edit, or the first of a ``UndoGroup/coalesce(_:)`` group | ``CommittedChange/UndoEffect/openedEntry`` | registers an undo action |
+| A later edit of the open coalescing group | ``CommittedChange/UndoEffect/joinedEntry`` | registers nothing: one action still undoes the whole drag |
+| A ``UndoGroup/none`` edit | — | registers nothing |
+| Any of those, when redo held entries | adds ``CommittedChange/UndoEffect/clearedRedo`` | drops its redo actions — for a ``UndoGroup/none`` edit it registers nothing, so the platform manager will not clear them itself |
+| An undo or a redo that applied something | ``CommittedChange/UndoEffect/consumedEntry`` and ``CommittedChange/UndoEffect/filedReversal`` | registers the opposite action from inside the one being performed |
+| An undo or a redo whose every step was kept | ``CommittedChange/UndoEffect/consumedEntry`` only | registers no opposite action: the entry is gone and nothing replaces it |
+| Nothing to undo or redo, an edit that applied nothing, a collaborator's change, a file merge | empty | does nothing |
+
 ### Keep theirs
 
 Undo is per author and keeps everyone else's work. When the local author undoes, or
@@ -278,6 +296,7 @@ variable, a theme axis or an import alias — go through
 ### Describing changes
 
 - ``CommittedChange``
+- ``CommittedChange/UndoEffect``
 - ``AppliedOperation``
 - ``ChangeInvalidation``
 - ``KeptChange``

@@ -83,7 +83,7 @@ extension EditableDocument {
     ///
     /// - Parameter subjects: The nodes the mutation touches.
     func forgetRevisions(along subjects: [String]) {
-        guard let cache = _revisionCache, !cache.entries.isEmpty else { return }
+        guard let cache = _revisionCache, !cache.isEmpty else { return }
         var visited: Set<String> = []
         for subject in subjects {
             var current = subject

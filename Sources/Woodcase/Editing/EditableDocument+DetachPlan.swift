@@ -45,15 +45,18 @@ extension EditableDocument {
     /// depend on how the earlier detaches are carried out, only on the document they
     /// start from.
     ///
-    /// - Parameter refIDs: The refs to detach, in the order they will be detached.
+    /// - Parameters:
+    ///   - refIDs: The refs to detach, in the order they will be detached.
+    ///   - dropping: Components whose instances are left out of every expansion — the
+    ///     ones a delete is removing (see ``detachPlans(deleting:)``).
     /// - Returns: One plan per ref.
     /// - Throws: ``EditingError/nodeNotFound(id:)`` or ``EditingError/notARefNode(id:)``.
-    func detachPlans(for refIDs: [String]) throws -> [PlannedDetach] {
+    func detachPlans(for refIDs: [String], dropping: Set<String> = []) throws -> [PlannedDetach] {
         var taken = detachTakenIDs
         var plans: [PlannedDetach] = []
         for refID in refIDs {
             try requireRef(refID)
-            let expanded = try expandRef(nodeID: refID).expandedNode
+            let expanded = try Self.removingInstances(of: dropping, from: expandRef(nodeID: refID).expandedNode)
             let ids = SubtreeIDPlan.detaching(
                 expanded, refID: refID, replica: crdtDocument?.peerID, avoiding: taken
             )
@@ -74,5 +77,42 @@ extension EditableDocument {
             ))
         }
         return plans
+    }
+
+    /// Plans the detaches a delete under ``EditOperation/DeleteNode/Instances/detach``
+    /// makes: one per instance it would strand.
+    ///
+    /// An instance of a component that renders itself expands with the inner instance
+    /// that closes the cycle left as a `ref` — the expansion stops where it would
+    /// repeat. Once the delete removes that component, such a ref would name nothing, so
+    /// every instance of a component the delete removes is left out of the expansions:
+    /// what it drew is going away with the delete. No ref survives that names a deleted
+    /// component, and the delete's inverse, which reads these same plans, puts the
+    /// instance back as it was.
+    ///
+    /// - Parameter op: The delete.
+    /// - Returns: One plan per stranded instance; empty for a delete that strands none.
+    /// - Throws: ``EditingError/componentHasInstances(componentID:instanceIDs:)`` for a
+    ///   delete that strands instances it may not detach, as ``instancesToDetach(for:)``.
+    func detachPlans(deleting op: EditOperation.DeleteNode) throws -> [PlannedDetach] {
+        let stranded = try instancesToDetach(for: op)
+        guard !stranded.isEmpty else { return [] }
+        let removed = Set(descendantIDs(of: op.nodeID).filter { componentRegistry[$0] != nil })
+        return try detachPlans(for: stranded, dropping: removed)
+    }
+
+    /// An expansion without the instances of some components.
+    ///
+    /// - Parameters:
+    ///   - components: The components whose instances to leave out.
+    ///   - expanded: The expansion.
+    /// - Returns: The expansion, every `ref` naming one of `components` removed below its
+    ///   root.
+    private static func removingInstances(of components: Set<String>, from expanded: PenNode) -> PenNode {
+        guard !components.isEmpty else { return expanded }
+        return PenTreeRewrite.rewrite(expanded, context: true) { node, isRoot in
+            if !isRoot, case let .ref(data) = node.kind, components.contains(data.ref) { return .drop }
+            return .descend(node, false)
+        } ?? expanded
     }
 }

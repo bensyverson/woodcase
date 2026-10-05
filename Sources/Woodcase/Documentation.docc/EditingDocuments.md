@@ -378,10 +378,21 @@ pin: one comparison on a frame answers "has anything this frame draws changed?",
 the question a caller who read that frame actually has.
 ``EditableDocument/revisionCoverage(of:)`` is the set that answers it.
 
-The component graph may cycle. A component already being folded on the current chain is
-skipped, and a revision computed with such a cut is not memoized, so every cached value
-is one no cut took part in — which is what keeps a node's revision independent of which
-node was asked for first.
+The component graph may cycle — a component holding an instance of itself, or of one
+that holds one of it. The members of each such group share a *group revision*: each is
+hashed with references to the group's members written as markers naming them, and the
+group revision folds those hashes in id order. A ref to a member folds in the group
+revision with the member's id, so an edit inside any member moves every member and every
+instance of one. The definition reads only the document, so a cyclic revision is
+memoized like any other and is the same whichever node was asked for first.
+
+> **Corrected 2026-10-05:** until then a component already on the fold's chain was
+> skipped and nothing above the cut was memoized. That made the value depend on the
+> walk, and the cost exponential: one revision on fuzz seed 12581 (2,244 nodes, 228
+> nested components) took 7.4 s and its merge 481 s. Every revision of that document now
+> takes 42 ms in all (debug build, load about 5, measured on the merge fuzzer's seed-12581
+> document with component cycles allowed; `RevisionCycleTests` pins a document of the same
+> size and shape, built directly, since the fuzzer currently avoids cycles).
 
 Unlike ``EditableDocument/contentHash(for:)`` — which mixes in layout rects and uses
 Swift's per-process-seeded `Hasher` — a revision is content-only and deterministic
@@ -755,6 +766,12 @@ try document.apply(.deleteNode(EditOperation.DeleteNode(nodeID: "Btn01")))
 // Detach them first, then delete:
 try document.apply(.deleteNode(EditOperation.DeleteNode(nodeID: "Btn01", instances: .detach)))
 ```
+
+A component that renders itself — directly, or through another component the delete also
+removes — expands with the inner instance that closes the cycle left as a `ref`, because
+the expansion stops where it would repeat. Once the component is gone that ref would name
+nothing, so the detach leaves out every instance of a component the delete removes: no ref survives that names a deleted
+component, and the delete's inverse, built from the same plans, puts everything back.
 
 Use ``EditableDocument/deleteNode(_:)`` instead of ``EditableDocument/apply(_:)`` when
 you need the ``DetachResult`` of each detach. An undo stack no longer does:

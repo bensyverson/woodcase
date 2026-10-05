@@ -10,7 +10,8 @@ import Foundation
 /// The owner of a session reacts to its edits through this and nothing else: it
 /// re-derives what ``invalidation`` names, appends ``activity`` to the log, sends
 /// ``broadcast`` to collaborators, marks the document edited when ``isDirtying``, and
-/// tells the author about anything an undo ``kept``.
+/// tells the author about anything an undo ``kept``; an app mirroring the session's
+/// undo stacks acts on ``undoEffect``.
 public struct CommittedChange: Friendly {
     /// Creates a change description.
     ///
@@ -27,6 +28,7 @@ public struct CommittedChange: Friendly {
     ///   - isDirtying: Whether the change leaves the document differing from its file.
     ///   - kept: Other authors' work an undo left in place.
     ///   - conflicts: What a file merge resolved by keeping the local side.
+    ///   - undoEffect: What the change did to the author's undo and redo stacks.
     public init(
         origin: SessionOrigin.Kind,
         author: Author,
@@ -39,7 +41,8 @@ public struct CommittedChange: Friendly {
         isUndoable: Bool,
         isDirtying: Bool,
         kept: [KeptChange] = [],
-        conflicts: [MergeConflict] = []
+        conflicts: [MergeConflict] = [],
+        undoEffect: UndoEffect = []
     ) {
         self.origin = origin
         self.author = author
@@ -53,6 +56,7 @@ public struct CommittedChange: Friendly {
         self.isDirtying = isDirtying
         self.kept = kept
         self.conflicts = conflicts
+        self.undoEffect = undoEffect
     }
 
     /// Where the change came from.
@@ -97,4 +101,9 @@ public struct CommittedChange: Friendly {
     /// What a file merge could not take from both sides, and resolved — local changes
     /// win a same-key conflict. Empty for every other origin.
     public var conflicts: [MergeConflict]
+
+    /// What the change did to the author's undo and redo stacks — an entry opened or
+    /// joined, an entry consumed and its reversal filed, redo cleared — for an app that
+    /// mirrors them into its own undo manager. Empty for a change that left both alone.
+    public var undoEffect: UndoEffect
 }

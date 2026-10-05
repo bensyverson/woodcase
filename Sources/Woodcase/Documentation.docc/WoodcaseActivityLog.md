@@ -99,9 +99,15 @@ detail. Broken across lines here for reading; on disk it is one line:
 - **`file`** — the absolute path of the .pen file, standardized with symlinks resolved
   (``ActivityEvent/canonicalPath(for:)``), so `/tmp/x.pen` and `/private/tmp/x.pen`
   produce one string and a filter on either finds both.
-- **`op`** — a short verb: `set`, `add`, `replace`, `cp`, `mv`, `rm`, `override`,
+- **`op`** — a short verb: `set`, `place`, `add`, `replace`, `cp`, `mv`, `rm`, `override`,
   `detach`, `var`, `import`, `theme`, `undo`, `redo`, `external`, `migrate`, `new`, `merge`. Coarser than ``EditOperation`` on purpose — a feed wants
-  "something was set here", not which of the four property operations did it. Most are
+  "something was set here", not which of the four property operations did it. Two kinds
+  look alike and are not: **`mv` is a reparent or a reorder** — the node changed parent or
+  index, what `woodcase mv` does — and **`place` is a change of position**: a write of
+  `common.x`, `common.y` or both and nothing else, a nudge or a freeform drag
+  (``ActivityEvent/Kind/placementPaths``). A write that changes anything beside the
+  position, rotation and size included, is `set`; `place` has no verb of its own, and
+  `woodcase set x=… y=…` both writes and repeats it. Most kinds are
   derived from the operation; `cp`, `undo` and `redo` are supplied by the caller, because an
   inverse operation looks like any other and only its author knows it is an undo or a
   redo (a ``DocumentSession`` labels its redo rows `redo`; `woodcase undo` treats one as

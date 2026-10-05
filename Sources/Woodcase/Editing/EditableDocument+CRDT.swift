@@ -50,9 +50,9 @@ public extension EditableDocument {
         // generate the same ids. `validate(_:)` has already refused the delete if it
         // strands instances it is not allowed to detach.
         if case let .deleteNode(deleteOp) = operation {
-            let stranded = try instancesToDetach(for: deleteOp)
-            if !stranded.isEmpty {
-                return try applyLocalDetachingDelete(deleteOp, plans: detachPlans(for: stranded))
+            let plans = try detachPlans(deleting: deleteOp)
+            if !plans.isEmpty {
+                return try applyLocalDetachingDelete(deleteOp, plans: plans)
             }
         }
 

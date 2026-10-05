@@ -40,8 +40,8 @@ extension DocumentSession {
             throw error
         }
 
-        let change = commit(pending, origin: .local, isUndoable: edit.undoGroup != .none)
-        history.record(UndoEntry(undoing: change.applied, at: change.sequence), group: edit.undoGroup)
+        var change = commit(pending, origin: .local, isUndoable: edit.undoGroup != .none)
+        change.undoEffect = history.record(UndoEntry(undoing: change.applied, at: change.sequence), group: edit.undoGroup)
         return change
     }
 
@@ -246,8 +246,14 @@ extension DocumentSession {
     /// - Parameters:
     ///   - origin: Where the change came from.
     ///   - kept: Other authors' work an undo or redo left in place instead.
+    ///   - undoEffect: What the change did to the undo stacks: an undo whose every step
+    ///     was kept still consumed its entry.
     /// - Returns: The change.
-    func emptyChange(origin: SessionOrigin.Kind, kept: [KeptChange] = []) -> CommittedChange {
+    func emptyChange(
+        origin: SessionOrigin.Kind,
+        kept: [KeptChange] = [],
+        undoEffect: CommittedChange.UndoEffect = []
+    ) -> CommittedChange {
         CommittedChange(
             origin: origin,
             author: author,
@@ -257,7 +263,8 @@ extension DocumentSession {
             documentRevision: document.documentRevision,
             isUndoable: false,
             isDirtying: false,
-            kept: kept
+            kept: kept,
+            undoEffect: undoEffect
         )
     }
 }

@@ -31,16 +31,28 @@ import Foundation
 /// cache, the way ``ExpansionCache`` always does, because the instances it moves are a
 /// closure over the ref graph rather than a walk up one spine.
 ///
-/// Not every revision is cachable. One computed by cutting a cycle in the component
-/// graph depends on which node the walk started from, so
-/// ``EditableDocument/revision(of:)`` declines to store it — every entry here is one
-/// that no cut took part in.
+/// Components that render each other share a group revision
+/// (``EditableDocument/revision(of:)``), kept per member in ``cycles``. A revision that
+/// reads one is as cachable as any other; only a member's working hash, folded while its
+/// group is being resolved, is never stored. An edit whose spine crosses a member
+/// takes the whole cache, because the group revision it moves is read by nodes on no
+/// spine — the case a component edit already covers, and a ref to a node that is not a
+/// component would otherwise miss.
 ///
 /// The cache is owned by the ``EditableDocument`` that made it and shares that
 /// document's isolation; it is not `Sendable`, exactly as ``ExpansionCache`` is not.
 final class RevisionCache {
     /// Cached revisions, keyed by node ID.
     var entries: [String: String] = [:]
+
+    /// What a reference to each member of a cyclic component group folds in, keyed by
+    /// the member's id: the group's shared revision with the member's id.
+    var cycles: [String: String] = [:]
+
+    /// Whether nothing is cached.
+    var isEmpty: Bool {
+        entries.isEmpty && cycles.isEmpty
+    }
 
     init() {}
 
@@ -53,15 +65,19 @@ final class RevisionCache {
         entries[nodeID] = revision
     }
 
-    /// Forgets one node's revision, leaving every other entry alone.
+    /// Forgets one node's revision, leaving every other entry alone — unless the node
+    /// is a member of a cyclic component group, whose shared revision other nodes have
+    /// folded in, in which case it forgets everything.
     ///
     /// - Parameter nodeID: The node to forget.
     func forget(_ nodeID: String) {
+        guard cycles[nodeID] == nil else { return invalidateAll() }
         entries.removeValue(forKey: nodeID)
     }
 
     /// Removes all cached entries.
     func invalidateAll() {
         entries.removeAll()
+        cycles.removeAll()
     }
 }
