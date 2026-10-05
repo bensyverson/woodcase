@@ -108,16 +108,37 @@ extension EditableDocument {
         if let cached = _revisionCache?.entries[nodeID] { return .finished(cached, cachable: true) }
         guard let node = nodes[nodeID] else { return .finished(nil, cachable: true) }
 
-        var hasher = FNV1aHasher()
         let childIDs = children[nodeID]
-        // A declared-empty list folds in no child, so it is hashed as the file writes
-        // it — `"children": []` — to tell it from a container that declares none.
-        var written = node
-        if childIDs == [] { written.kind = node.kind.withChildren([]) }
-        hasher.combine(Self.revisionEncoder.encodeCanonical(written))
+        let encoding = encoding(of: node, declaresEmptyChildren: childIDs == [])
+        let hasher = encoding.hasher
         let steps = (childIDs ?? []).map(RevisionFold.Step.child)
-            + componentsRendered(by: node).map(RevisionFold.Step.component)
+            + encoding.rendered.map(RevisionFold.Step.component)
         return .pending(RevisionFold(nodeID: nodeID, folding: folding, hasher: hasher, steps: steps))
+    }
+
+    /// A node's own canonical encoding, hashed, with the ids it renders — from the cache
+    /// when the node has not been written since it was encoded.
+    ///
+    /// A declared-empty list folds in no child, so it is hashed as the file writes it —
+    /// `"children": []` — to tell it from a container that declares none.
+    private func encoding(of node: PenNode, declaresEmptyChildren: Bool) -> RevisionCache.Encoding {
+        if let known = _revisionCache?.encodings[node.id], known.declaresEmptyChildren == declaresEmptyChildren {
+            return known
+        }
+        var hasher = FNV1aHasher()
+        var written = node
+        if declaresEmptyChildren { written.kind = node.kind.withChildren([]) }
+        hasher.combine(Self.revisionEncoder.encodeCanonical(written))
+        let encoding = RevisionCache.Encoding(
+            hasher: hasher,
+            declaresEmptyChildren: declaresEmptyChildren,
+            rendered: componentsRendered(by: node)
+        )
+        if _revisionCache == nil {
+            _revisionCache = RevisionCache()
+        }
+        _revisionCache?.encodings[node.id] = encoding
+        return encoding
     }
 
     /// Ends a node's fold, memoizing the revision when it may be.

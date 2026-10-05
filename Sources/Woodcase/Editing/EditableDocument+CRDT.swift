@@ -67,6 +67,12 @@ public extension EditableDocument {
             return []
         }
 
+        // A remote batch settles only what it touches, which is exact while the flat
+        // store agrees with the CRDT. An edit that leaves its own footprint disagreeing
+        // marks the store, so the next batch reconciles the whole document instead.
+        var journal = FlatStoreJournal()
+        journal.noteFootprint(of: operation, in: self)
+        defer { notePlacementAfterLocalEdit(journal) }
         do {
             try apply(operation)
         } catch {
@@ -186,14 +192,16 @@ public extension EditableDocument {
     /// If the operation is rejected (e.g. stale timestamp, cycle-creating move),
     /// the flat store is not modified.
     ///
-    /// After applying, the ``children`` map is reconciled with ``parents`` to handle
-    /// cases where list CRDTs and the tree move CRDT disagree.
+    /// After applying, what the operation placed is reconciled with the CRDT
+    /// (``reconcileChildrenWithParents(after:)``) to handle cases where list CRDTs and
+    /// the tree move CRDT disagree.
     ///
     /// - Parameter operation: The remote CRDT operation from another peer.
     func applyRemote(_ operation: CRDTOperation) {
         guard crdtDocument != nil else { return }
-        guard !applyRemoteMutations(operation).isEmpty else { return }
-        reconcileChildrenWithParents()
+        var journal = FlatStoreJournal()
+        guard !applyRemoteMutations(operation, journal: &journal).isEmpty else { return }
+        reconcileChildrenWithParents(after: &journal)
         onRemoteChange?()
     }
 
@@ -201,26 +209,27 @@ public extension EditableDocument {
     ///
     /// Each operation is processed individually through the CRDT conflict resolution
     /// pipeline. Operations that are rejected are silently skipped. A final
-    /// reconciliation pass ensures structural consistency.
+    /// reconciliation of what the batch placed ensures structural consistency.
     ///
     /// - Parameter operations: The remote CRDT operations to apply.
     func applyRemote(_ operations: [CRDTOperation]) {
         guard crdtDocument != nil else { return }
+        var journal = FlatStoreJournal()
         for operation in operations {
-            applyRemoteMutations(operation)
+            applyRemoteMutations(operation, journal: &journal)
         }
-        reconcileChildrenWithParents()
+        reconcileChildrenWithParents(after: &journal)
         onRemoteChange?()
     }
 
     /// Runs one remote operation through the CRDT and writes what it accepted into the
     /// flat store, returning the mutations written.
     ///
-    /// This is the step the batch `applyRemote` repeats, exposed so a
-    /// ``DocumentSession`` can see which operations landed — and so stamp only those —
-    /// and what each changed. It does not reconcile the children lists with the
-    /// parents: the caller calls ``reconcileChildrenWithParents()`` once after the last
-    /// operation of a batch, as `applyRemote` does.
+    /// This is the step the batch `applyRemote` repeats. It does not reconcile the
+    /// children lists with the parents; a caller applying a batch of these reconciles
+    /// once after the last operation, as `applyRemote` does. Inside the library a
+    /// ``DocumentSession`` uses the overload that keeps a ``FlatStoreJournal``, so the
+    /// reconciliation and the change's invalidation read only what the batch wrote.
     ///
     /// - Parameter operation: The remote CRDT operation.
     /// - Returns: The mutations written, in order; empty when the CRDT rejected the
@@ -228,13 +237,8 @@ public extension EditableDocument {
     ///   collaborative.
     @discardableResult
     func applyRemoteMutations(_ operation: CRDTOperation) -> [DocumentMutation] {
-        guard let crdtDocument,
-              let mutations = crdtDocument.processRemote(operation: operation, document: self)
-        else { return [] }
-        for mutation in mutations {
-            applyMutation(mutation)
-        }
-        return mutations
+        var journal = FlatStoreJournal()
+        return applyRemoteMutations(operation, journal: &journal)
     }
 
     /// Returns CRDT operations not yet seen by the given vector clock.
@@ -253,6 +257,30 @@ public extension EditableDocument {
 // MARK: - Reconciliation
 
 extension EditableDocument {
+    /// Runs one remote operation through the CRDT and writes what it accepted into the
+    /// flat store, noting every write in a batch's journal first.
+    ///
+    /// Every write a remote batch makes is noted before it lands, so the journal names
+    /// the batch's whole footprint: what ``reconcileChildrenWithParents(after:)``
+    /// settles and what a ``ChangeInvalidation/RemoteProbe`` compares.
+    ///
+    /// - Parameters:
+    ///   - operation: The remote CRDT operation.
+    ///   - journal: The batch's journal.
+    /// - Returns: The mutations written, in order; empty when the CRDT rejected the
+    ///   operation or the document is not collaborative.
+    @discardableResult
+    func applyRemoteMutations(_ operation: CRDTOperation, journal: inout FlatStoreJournal) -> [DocumentMutation] {
+        guard let crdtDocument,
+              let mutations = crdtDocument.processRemote(operation: operation, document: self)
+        else { return [] }
+        for mutation in mutations {
+            journal.note(mutation, in: self)
+            applyMutation(mutation)
+        }
+        return mutations
+    }
+
     /// Ensures the ``children`` map is consistent with the ``parents`` map.
     ///
     /// After tree move operations, the list CRDTs (RGA) may have accepted
@@ -260,14 +288,27 @@ extension EditableDocument {
     /// nodes from children lists that don't match their actual parent,
     /// and ensures each node appears in its correct parent's children list.
     ///
-    /// This is the one structural write that names no subjects — it may reparent or
-    /// reorder anywhere in the document — so it drops the whole revision cache rather
-    /// than a spine. It runs once per `applyRemote` batch, so the cost is a single
-    /// rehash on the next read, not one per operation.
+    /// This whole-document pass is the definition a remote batch's own reconciliation,
+    /// ``reconcileChildrenWithParents(after:)``, reproduces over what the batch wrote, and
+    /// the oracle the reconciliation fuzz holds it to. It names no subjects — it may
+    /// reparent or reorder anywhere in the document — so it drops the whole revision and
+    /// expansion caches. Only a local edit the CRDT logged but the flat store refused,
+    /// which ``applyLocal(_:)`` guards against, still runs it.
     func reconcileChildrenWithParents() {
+        var journal = FlatStoreJournal()
+        reconcileWholeDocument(journal: &journal)
+    }
+
+    /// The whole-document pass, noting in a journal every parent link, children list and
+    /// root order it changes, so a probe reading the journal sees them.
+    ///
+    /// - Parameter journal: The journal of the change the pass closes.
+    func reconcileWholeDocument(journal: inout FlatStoreJournal) {
+        _placementUnsettled = false
         _revisionCache?.invalidateAll()
+        _expansionCache?.invalidateAll()
         if let crdtDocument {
-            reconcileCRDT(crdtDocument)
+            reconcileCRDT(crdtDocument, journal: &journal)
         } else {
             reconcileNonCRDT()
         }
@@ -275,7 +316,7 @@ extension EditableDocument {
 
     /// CRDT-mode reconciliation. Uses the tree move CRDT as the authoritative
     /// source for parent assignments and RGA lists for ordering.
-    private func reconcileCRDT(_ crdtDocument: CRDTDocument) {
+    private func reconcileCRDT(_ crdtDocument: CRDTDocument, journal: inout FlatStoreJournal) {
         // Step 1: Determine the correct parent for every live node.
         // Sources of truth (in priority order):
         //   1. Tree move CRDT parentMap — authoritative for any node it knows about
@@ -304,10 +345,9 @@ extension EditableDocument {
                 nil
             }
 
-            if let parent = resolvedParent {
-                parents[nodeID] = parent
-            } else {
-                parents[nodeID] = nil
+            if parents[nodeID] != resolvedParent {
+                journal.noteParent(of: nodeID, in: self)
+                parents[nodeID] = resolvedParent
             }
         }
 
@@ -326,13 +366,17 @@ extension EditableDocument {
         // Step 3: Rebuild rootOrder from RGA, filtered and deduplicated
         let rgaRoot = crdtDocument.childrenLists[CRDTDocument.rootListID]?.elements ?? []
         var seenRoot = Set<String>()
-        rootOrder = rgaRoot.filter { nodeID in
+        var newRootOrder = rgaRoot.filter { nodeID in
             expectedRootSet.contains(nodeID) && seenRoot.insert(nodeID).inserted
         }
         // Deterministic fallback: sort root nodes not covered by the RGA
         // so that all peers produce the same order.
         for nodeID in expectedRootSet.sorted() where !seenRoot.contains(nodeID) {
-            rootOrder.append(nodeID)
+            newRootOrder.append(nodeID)
+        }
+        if rootOrder != newRootOrder {
+            journal.noteChildren(of: nil, in: self)
+            rootOrder = newRootOrder
         }
 
         // Step 4: Rebuild children maps from per-parent RGA lists
@@ -358,6 +402,9 @@ extension EditableDocument {
         // a peer that removed the last child and the peers it told agree on the bytes.
         for parentID in children.keys where newChildren[parentID] == nil && nodes[parentID] != nil {
             newChildren[parentID] = []
+        }
+        for parentID in Set(children.keys).union(newChildren.keys) where children[parentID] != newChildren[parentID] {
+            journal.noteChildren(of: parentID, in: self)
         }
         children = newChildren
     }

@@ -7,43 +7,32 @@ import Foundation
 
 extension ChangeInvalidation {
     /// What a batch of a collaborator's operations can have changed, read by comparing
-    /// the document before the batch with the document after it.
+    /// what the batch wrote with the document after it.
     ///
     /// A local edit's ``Probe`` reads the operation before applying it. A remote batch
     /// cannot be read that way: its ``DocumentMutation``s exist only once the CRDT has
     /// resolved each operation, and the reconciliation that closes the batch may
-    /// reparent or reorder anywhere while naming no subjects. So this probe keeps the
-    /// document's tables as they were — copy-on-write values, so keeping them costs
-    /// nothing until the batch writes — and compares: every written node, every node
-    /// whose parent changed together with both parents, every parent whose children
-    /// changed, and the root order. The comparison is linear in the document, as the
-    /// reconciliation it follows already is.
+    /// reparent or reorder nodes no operation names. So the batch notes everything it
+    /// writes, as it was, in this probe's ``journal`` — the mutations through
+    /// ``EditableDocument/applyRemoteMutations(_:journal:)``, the reconciliation through
+    /// ``EditableDocument/reconcileChildrenWithParents(after:)`` — and the probe compares
+    /// those entries with the document after: every written node, every node whose parent
+    /// changed together with both parents, every parent whose children changed, and the
+    /// root order. An entry the batch never wrote cannot differ, so the comparison is the
+    /// whole-document one, at the cost of what the batch wrote.
     struct RemoteProbe {
         /// Keeps what the batch may change.
         ///
         /// - Parameter document: The collaborative document, before the batch.
         init(_ document: EditableDocument) {
-            nodesBefore = document.nodes
-            parentsBefore = document.parents
-            childrenBefore = document.children
-            rootOrderBefore = document.rootOrder
             tablesBefore = Probe.declaredTables(of: document)
         }
 
-        /// The nodes, as they were.
-        let nodesBefore: [String: PenNode]
-
-        /// Each node's parent, as it was.
-        let parentsBefore: [String: String]
-
-        /// Each parent's children, as they were.
-        let childrenBefore: [String: [String]]
-
-        /// The top-level nodes, as they were.
-        let rootOrderBefore: [String]
-
         /// The document tables declared before.
         let tablesBefore: Set<DocumentChangeKey.Table>
+
+        /// What the batch wrote, as it was before the batch.
+        var journal = FlatStoreJournal()
 
         /// The batch's invalidation, finished against the document it left.
         ///
@@ -76,7 +65,7 @@ extension ChangeInvalidation {
         /// A written node's invalidation: its category when it was edited in place,
         /// structural when it arrived or left.
         private func content(of nodeID: String, after document: EditableDocument) -> ChangeInvalidation {
-            guard let before = nodesBefore[nodeID], let after = document.nodes[nodeID] else {
+            guard let before = journal.nodes[nodeID] ?? nil, let after = document.nodes[nodeID] else {
                 return ChangeInvalidation(nodes: [nodeID], category: .structural, structural: true)
             }
             let category = ChangeCategory.merge(
@@ -90,18 +79,14 @@ extension ChangeInvalidation {
         /// reordered children lists, and the root order.
         private func placement(after document: EditableDocument) -> ChangeInvalidation {
             var nodes = Set<String>()
-            for nodeID in Set(parentsBefore.keys).union(document.parents.keys)
-                where parentsBefore[nodeID] != document.parents[nodeID]
-            {
+            for (nodeID, before) in journal.parents where before != document.parents[nodeID] {
                 nodes.insert(nodeID)
-                nodes.formUnion([parentsBefore[nodeID], document.parents[nodeID]].compactMap(\.self))
+                nodes.formUnion([before, document.parents[nodeID]].compactMap(\.self))
             }
-            for parentID in Set(childrenBefore.keys).union(document.children.keys)
-                where childrenBefore[parentID] != document.children[parentID]
-            {
+            for (parentID, before) in journal.children where before != document.children[parentID] {
                 nodes.insert(parentID)
             }
-            let rootChanged = rootOrderBefore != document.rootOrder
+            let rootChanged = journal.rootOrder.map { $0 != document.rootOrder } ?? false
             guard !nodes.isEmpty || rootChanged else { return ChangeInvalidation() }
             return ChangeInvalidation(
                 nodes: nodes,

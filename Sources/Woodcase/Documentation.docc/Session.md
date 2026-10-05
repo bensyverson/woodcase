@@ -105,7 +105,16 @@ submission with nothing accepted applies nothing and keeps the current sequence.
 The invalidation compares the document before and after the whole batch, because the
 reconciliation that ends it may move nodes without naming them: written nodes, moved
 nodes with both parents, reordered children lists, the root order and any document
-member.
+member. Both read only what the batch wrote: every write — each mutation's, and the
+reconciliation's own — is noted, as it was, in a `FlatStoreJournal`, the
+reconciliation settles only the nodes and lists the journal names
+(``EditableDocument/reconcileChildrenWithParents(after:)``), and the comparison reads
+only the journal's entries. A collaborator's one-property change therefore costs its
+spine, not the document: about 0.14 ms on Penumbra's 2,464-node perf board, flat across
+500 changes (release, `RemoteApplyCostProbe`). Scoping is exact while the flat store
+agrees with the CRDT; a local edit that leaves it disagreeing (an index the CRDT's lists
+cannot give, a node created again under a tombstoned id) marks the store, and the next
+batch reconciles the whole document once, which is when the store always caught up.
 
 A remote change is someone else's work: it is neither undoable nor dirtying, writes no
 activity (its author's own session logs it), broadcasts nothing, and leaves the local

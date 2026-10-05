@@ -196,6 +196,15 @@ After processing a remote operation, ``CRDTDocument`` returns mutations like
 `.setChildren`, `.setProperty`, `.createNode`, and `.deleteNode` that the
 ``EditableDocument`` applies to update its observable state.
 
+A batch of remote operations ends with a reconciliation, because the list CRDTs may
+hold an order the tree move CRDT disagrees with. The whole-document pass,
+``EditableDocument/reconcileChildrenWithParents()``, is its definition; a batch runs
+``EditableDocument/reconcileChildrenWithParents(after:)`` instead, which settles only
+the nodes and lists the batch's `FlatStoreJournal` names — every write a mutation made,
+noted before it landed — and agrees with the whole pass on every key while the flat
+store agreed with the CRDT before the batch. `RemoteReconcileFuzzTests` holds the two to
+each other after every batch of random concurrent edits.
+
 ## Topics
 
 ### Clock Primitives

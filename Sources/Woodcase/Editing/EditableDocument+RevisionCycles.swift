@@ -52,7 +52,7 @@ extension EditableDocument {
                 var memberHasher = FNV1aHasher()
                 memberHasher.combine(groupRevision)
                 memberHasher.combine(member)
-                _revisionCache?.cycles[member] = memberHasher.hexString
+                _revisionCache?.storeCycle(memberHasher.hexString, for: member)
             }
         }
     }

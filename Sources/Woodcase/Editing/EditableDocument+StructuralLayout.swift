@@ -54,6 +54,8 @@ extension EditableDocument {
         guard let cache = _layoutCache, !cache.isFullyInvalidated else { return try body() }
         let before = structuralLayoutScope(of: subjects)
         defer {
+            // The index the after-reading walks must know what the inserted nodes render.
+            reindexReferrers(of: subjects)
             let scope = before.union(structuralLayoutScope(of: subjects))
             cache.invalidateStructure(spine: scope.spine, roots: scope.roots)
         }
@@ -89,41 +91,16 @@ extension EditableDocument {
     /// through a component that nests one, plus the top-level nodes holding each
     /// component so reached.
     ///
-    /// One pass over the `ref` nodes finds who renders what — including names that
-    /// resolve to nothing yet, so a component just inserted reaches the refs that were
-    /// dangling — then a work list closes over components nested in components. A
-    /// component already reached is not walked again, so components that render each
-    /// other end the walk.
+    /// These are the tops of the spines in the components' revision closure
+    /// (``revisionDependents(of:)``): the closure walks up from each component, and from
+    /// every node that renders something on the way — names that resolve to nothing yet
+    /// included, so a component just inserted reaches the refs that were dangling — so
+    /// it costs what the components reach rather than a pass over the document.
     ///
     /// - Parameter components: The components whose content changed.
     /// - Returns: The top-level node ids.
     private func rootsDrawing(_ components: Set<String>) -> Set<String> {
-        // Component name → the drawing refs' top-level node and enclosing components.
-        var drawers: [String: [(root: String, enclosing: [String])]] = [:]
-        for (id, node) in nodes {
-            let rendered = componentsRendered(by: node)
-            guard !rendered.isEmpty else { continue }
-            let chain = [id] + ancestors(of: id)
-            let enclosing = chain.filter { nodes[$0]?.common.reusable == true }
-            let root = chain.last ?? id
-            for name in rendered {
-                drawers[name, default: []].append((root, enclosing))
-            }
-        }
-
-        var roots: Set<String> = []
-        var reached = components
-        var pending = Array(components)
-        while let component = pending.popLast() {
-            if nodes[component] != nil { roots.insert(topLevelID(of: component)) }
-            for drawer in drawers[component] ?? [] {
-                roots.insert(drawer.root)
-                for outer in drawer.enclosing where reached.insert(outer).inserted {
-                    pending.append(outer)
-                }
-            }
-        }
-        return roots
+        Set(revisionDependents(of: Array(components)).filter { parents[$0] == nil })
     }
 
     /// The top-level node holding a node, or the node itself at the top level.

@@ -26,10 +26,11 @@ extension DocumentSession {
     ///
     /// Each operation is keyed against the document before it lands
     /// (``ChangeKey/keys(ofRemote:in:)``), then run through the CRDT; only the ones the
-    /// CRDT accepts are stamped, under the author of the replica that made them. The
-    /// children lists are reconciled once, after the last operation, and the
-    /// invalidation is read by comparing the document before and after
-    /// (``ChangeInvalidation/RemoteProbe``).
+    /// CRDT accepts are stamped, under the author of the replica that made them. What
+    /// the batch placed is reconciled once, after the last operation, and the
+    /// invalidation is read by comparing what the batch wrote with the document after
+    /// (``ChangeInvalidation/RemoteProbe``) — both in proportion to the batch, so a
+    /// collaborator's one-property change costs a spine, not the document.
     ///
     /// The change is somebody else's work: it joins no undo history — the local
     /// author's undo keeps it instead, through the ledger — leaves redo and the open
@@ -47,12 +48,12 @@ extension DocumentSession {
         guard document.crdtDocument != nil else { throw SessionError.notCollaborative }
         noteJoined(sender)
 
-        let probe = ChangeInvalidation.RemoteProbe(document)
+        var probe = ChangeInvalidation.RemoteProbe(document)
         var mutations: [DocumentMutation] = []
         var writes: [(keys: [ChangeKey], author: Author)] = []
         for operation in operations {
             let keys = ChangeKey.keys(ofRemote: operation, in: document)
-            let applied = document.applyRemoteMutations(operation)
+            let applied = document.applyRemoteMutations(operation, journal: &probe.journal)
             guard !applied.isEmpty else { continue }
             mutations += applied
             writes.append((keys, author(of: operation.id.peerID)))
@@ -69,7 +70,7 @@ extension DocumentSession {
                 isDirtying: false
             )
         }
-        document.reconcileChildrenWithParents()
+        document.reconcileChildrenWithParents(after: &probe.journal)
 
         sequence += 1
         for write in writes {

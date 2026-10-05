@@ -126,6 +126,15 @@ public final class EditableDocument {
     /// Backing storage for the revision cache.
     var _revisionCache: RevisionCache?
 
+    /// Backing storage for ``componentReferrers``, built the first time an edit has a
+    /// warm cache to scope.
+    var _componentReferrers: ComponentReferrers?
+
+    /// Whether a local edit left the flat store disagreeing with the CRDT, so the next
+    /// remote batch must reconcile the whole document rather than what it wrote. See
+    /// ``reconcileChildrenWithParents(after:)``.
+    var _placementUnsettled = false
+
     /// Whether an edit that would close a component loop is refused — always, except
     /// while ``allowingComponentLoops(_:)`` replays a state the document has held.
     var _componentLoopPolicy = ComponentLoopPolicy.refuse

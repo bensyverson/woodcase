@@ -14,7 +14,7 @@ import Foundation
 /// or ``combine(_:)-(String)`` in the order they should be hashed, then read
 /// ``finalize()`` for the raw 64-bit value or ``hexString`` for its 16-character
 /// lowercase hex rendering.
-struct FNV1aHasher {
+struct FNV1aHasher: Friendly {
     /// The FNV-1a 64-bit offset basis — also the hash of an empty input.
     private static let offsetBasis: UInt64 = 0xCBF2_9CE4_8422_2325
     /// The FNV-1a 64-bit prime.
@@ -45,10 +45,16 @@ struct FNV1aHasher {
 
     /// The current hash, rendered as 16 lowercase hex characters.
     var hexString: String {
-        var hex = String(value, radix: 16, uppercase: false)
-        if hex.count < 16 {
-            hex = String(repeating: "0", count: 16 - hex.count) + hex
+        // Written digit by digit: a revision is rendered once per node folded, and the
+        // radix conversion and padding it replaces were most of a refold's cost.
+        let digits: StaticString = "0123456789abcdef"
+        return String(unsafeUninitializedCapacity: 16) { buffer in
+            digits.withUTF8Buffer { table in
+                for index in 0 ..< 16 {
+                    buffer[index] = table[Int((value >> (60 - 4 * UInt64(index))) & 0xF)]
+                }
+            }
+            return 16
         }
-        return hex
     }
 }

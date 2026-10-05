@@ -275,27 +275,47 @@ inserted, a node moved out — not just an edit to the ref or to the component's
 root. One rule enforces that, in one place:
 ``EditableDocument/invalidatingCaches(touching:_:)`` wraps every mutating
 path (``EditableDocument/apply(_:)`` for local edits,
-``EditableDocument/applyMutation(_:)`` for remote CRDT ones, and the two
-value-returning mutators ``EditableDocument/deleteNode(_:)`` and
-``EditableDocument/detachRef(_:)``). Each names the nodes it touches; the rule
-reads them before and after the mutation — a delete only looks like component
-work beforehand, an insert only afterwards — and empties the cache if either
-reading finds a `ref`, a reusable component, or a node inside one. Invalidation
-is whole-cache: what the cache is for is repeated expansion of an *unchanged*
-document, and a per-component index would have to be right about which component
-a node belongs to at two points in time, for an edit that may be moving it
-between them.
+``EditableDocument/applyMutation(_:)`` for remote CRDT ones, the reconciliation
+that closes a remote batch, and the two value-returning mutators
+``EditableDocument/deleteNode(_:)`` and ``EditableDocument/detachRef(_:)``). Each
+names the nodes it touches — every node whose content it writes, and the parent a
+move or an insert lands under — and the rule reads them before and after the
+mutation: a delete only looks like component work beforehand, an insert only
+afterwards.
 
-The same wrapper carries the second cache. ``EditableDocument/revision(of:)``
-memoizes into a `RevisionCache`, and there invalidation *is* scoped: a node's
-revision hashes the node and its descendants and nothing else, so an edit can
-only move the revisions of the node it touched and of the ancestors above it.
-The wrapper forgets exactly that spine — before the mutation and after it, so a
-move's old parent chain and its new one are both dropped — and leaves every
-other entry warm. That is what makes `woodcase tree --json`, which asks for one
-revision per row, a single pass over the document rather than one subtree walk
-per row. ``EditableDocument/documentRevision`` is not cached at all: it is one
-hash over the root nodes' revisions, which are.
+What the rule forgets is the edit's *revision closure*
+(``EditableDocument/revisionDependents(of:)``): each touched node, each ancestor
+above it, each node that renders one of those (an instance of a component on the
+spine), each of *its* ancestors, and so on. The walk reads the reverse of
+``PenNode/renderedComponentIDs`` from a `ComponentReferrers` index, which the same
+rule keeps exact, so it costs what the edit reaches — its spine, for an edit clear of
+every component — rather than a pass over the document. The cached expansions it
+drops are the instances in that closure, since an expansion reads exactly what its
+instance renders; the component loops memoized beside them are dropped only by an
+edit that can change the component graph (a component made or unmade, an instance
+inside one rewritten, or a subtree carrying either moved in or out). Every other
+expansion stays cached.
+
+The same closure scopes the second cache. ``EditableDocument/revision(of:)``
+memoizes into a `RevisionCache`: a node's revision hashes the node, its descendants
+and the nodes it renders, so an edit can only move the revisions in its closure. The
+wrapper forgets exactly those — before the mutation and after it, so a move's old
+parent chain and its new one are both dropped — and leaves every other entry warm.
+Each node's own canonical encoding is memoized beside its revision and forgotten only
+when the node itself is written, so refolding a forgotten instance or ancestor costs a
+few string combines rather than a JSON encoding. That is what makes
+`woodcase tree --json`, which asks for one revision per row, a single pass over the
+document rather than one subtree walk per row — and an edit inside a component cost
+its instances rather than the document. ``EditableDocument/documentRevision`` is not
+cached at all: it is one hash over the root nodes' revisions, which are.
+
+> **Corrected 2026-10-05 (Woodcase leaves `OWicrc`, `tHIrpG`):** until then any edit
+> touching a `ref`, a component or a node inside one emptied both caches, and a remote
+> batch's reconciliation emptied the revision cache. Every session commit reads
+> ``EditableDocument/documentRevision``, so each such edit re-encoded every node: 13 ms
+> for a nudge inside a component on a 2,580-node document, 24 ms for a collaborator's
+> recolor on Penumbra's 2,464-node perf board. Both now cost what they reach — see
+> `project/2026-10-05-edit-cost-proportional.md` for the figures.
 
 ### Component Introspection
 
@@ -407,11 +427,10 @@ Unlike ``EditableDocument/contentHash(for:)`` — which mixes in layout rects an
 Swift's per-process-seeded `Hasher` — a revision is content-only and deterministic
 across processes, so two peers computing it for the same node agree. It is
 Foundation-only and derived from the file alone: no log, no history, no daemon.
-Values are memoized in a `RevisionCache` and forgotten along an edit's spine — or
-wholesale, when the edit touched a component and the instances it moved are a closure
-over the ref graph rather than one spine — so the cached answer and a from-scratch
-recompute are the same answer. See the invalidation rule under *Component Registry and
-Expansion* above.
+Values are memoized in a `RevisionCache` and forgotten over an edit's revision
+closure — its spine, and for an edit inside a component every instance that draws it
+and their spines — so the cached answer and a from-scratch recompute are the same
+answer. See the invalidation rule under *Component Registry and Expansion* above.
 
 ```swift
 let expected = editable.revision(of: "rect1")

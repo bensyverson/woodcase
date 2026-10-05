@@ -22,14 +22,18 @@ import Foundation
 /// every row carry a revision at no cost. Absolute numbers here move by a factor of
 /// two with sibling builds running; only the paired comparison means anything.
 ///
-/// Invalidation is spine-scoped for an edit that touches no component: a revision
-/// depends on the node itself, on its descendants and on the components it renders, so
-/// an edit clear of all that can only move the revisions of the edited node and its
-/// ancestors. That spine is what ``EditableDocument/invalidatingCaches(touching:_:)``
-/// forgets, and every other entry stays warm — which is what makes a read after a write
-/// cheap as well as a cold read. An edit that *does* touch a component takes the whole
-/// cache, the way ``ExpansionCache`` always does, because the instances it moves are a
-/// closure over the ref graph rather than a walk up one spine.
+/// Invalidation is scoped to what an edit can move: a revision depends on the node
+/// itself, on its descendants and on the nodes it renders, so an edit can only move the
+/// revisions of the edited node, its ancestors, every instance rendering one of those,
+/// their ancestors, and so on — the closure
+/// ``EditableDocument/revisionDependents(of:)`` walks, which for an edit clear of every
+/// component is its spine. That closure is what
+/// ``EditableDocument/invalidatingCaches(touching:_:)`` forgets, and every other entry
+/// stays warm — which is what makes a read after a write cheap as well as a cold read.
+/// A forgotten node keeps its ``encodings`` entry unless the edit wrote it, so refolding
+/// the closure costs a few string combines per node, not a JSON encoding: an edit inside
+/// a component nested in 25 others, with 400 instances on the page, refolds 512 nodes in
+/// about 0.56 ms (release, `ComponentLoopEditCostProbe`'s document, load about 10).
 ///
 /// Components that render each other share a group revision
 /// (``EditableDocument/revision(of:)``), kept per member in ``cycles``. A revision that
@@ -49,6 +53,32 @@ final class RevisionCache {
     /// the member's id: the group's shared revision with the member's id.
     var cycles: [String: String] = [:]
 
+    /// A node's own canonical encoding, hashed: where its fold starts before any child
+    /// or component is folded in.
+    struct Encoding: Friendly {
+        /// The hasher, having consumed the node's encoding.
+        var hasher: FNV1aHasher
+
+        /// Whether the node declared an empty children list when it was encoded, which
+        /// the encoding spells as `"children": []`.
+        var declaresEmptyChildren: Bool
+
+        /// The ids the node renders (``PenNode/renderedComponentIDs``), which like the
+        /// encoding depend on its content alone.
+        var rendered: [String]
+    }
+
+    /// Each node's own encoding, keyed by node ID.
+    ///
+    /// Encoding a node as canonical JSON is nearly all of what folding it costs; folding
+    /// in its children's and components' revisions is a few dozen bytes each. The
+    /// encoding depends on the node's own content alone, so an edit that only moves a
+    /// node's revision — a descendant edited, a component it renders redrawn — keeps it,
+    /// and refolding the spines and instances such an edit forgets costs a few string
+    /// combines per node rather than a JSON encoding. It is forgotten only for the nodes
+    /// an edit writes (``forgetEncodings(of:)``).
+    var encodings: [String: Encoding] = [:]
+
     /// Whether nothing is cached.
     var isEmpty: Bool {
         entries.isEmpty && cycles.isEmpty
@@ -63,7 +93,22 @@ final class RevisionCache {
     ///   - nodeID: The node it was computed for.
     func store(_ revision: String, for nodeID: String) {
         entries[nodeID] = revision
+        writes &+= 1
     }
+
+    /// Caches the revision a reference to a member of a cyclic group folds in.
+    ///
+    /// - Parameters:
+    ///   - revision: The group's revision with the member's id.
+    ///   - member: The member.
+    func storeCycle(_ revision: String, for member: String) {
+        cycles[member] = revision
+        writes &+= 1
+    }
+
+    /// How many revisions have been stored, so an edit can tell whether anything was
+    /// cached while it ran.
+    private(set) var writes = 0
 
     /// Forgets one node's revision, leaving every other entry alone — unless the node
     /// is a member of a cyclic component group, whose shared revision other nodes have
@@ -75,9 +120,20 @@ final class RevisionCache {
         entries.removeValue(forKey: nodeID)
     }
 
+    /// Forgets the encodings of nodes whose content may have changed.
+    ///
+    /// - Parameter nodeIDs: The nodes an edit wrote.
+    func forgetEncodings(of nodeIDs: [String]) {
+        guard !encodings.isEmpty else { return }
+        for nodeID in nodeIDs {
+            encodings.removeValue(forKey: nodeID)
+        }
+    }
+
     /// Removes all cached entries.
     func invalidateAll() {
         entries.removeAll()
         cycles.removeAll()
+        encodings.removeAll()
     }
 }

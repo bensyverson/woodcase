@@ -9,7 +9,8 @@ import Testing
 
 /// What one local edit costs through a session on a 2,580-node, 30-component document —
 /// a property nudge and a plain-rectangle insert, on the page and inside a component,
-/// each alone and followed by one instance's expansion — printed as `PROBE` lines.
+/// each alone and followed by one instance's expansion, then inside a component with the
+/// document's layout cache primed — printed as `PROBE` lines.
 ///
 /// A measurement, not a check: it runs only when asked, in a release build, and its
 /// figures mean something only beside `uptime`:
@@ -92,5 +93,14 @@ struct ComponentLoopEditCostProbe {
                 .insertNode(EditOperation.InsertNode(node: Self.node("NC\(tag)\(i)", .rectangle(PenNode.RectangleData())), parentID: "C7k2"))
             }, readBack: readBack)
         }
+        // A host that keeps the document's layout cache — Penumbra primes it — has each
+        // structural edit work out which boards it changes.
+        session.document.primeLayoutCache(with: [:])
+        try Self.measure("set x in component, layout primed", session, { i in
+            .setProperties(EditOperation.SetProperties(nodeID: "C5k1l0", properties: ["common.x": .int(1000 + i)]))
+        }, readBack: false)
+        try Self.measure("insert rect in component, layout primed", session, { i in
+            .insertNode(EditOperation.InsertNode(node: Self.node("NL\(i)", .rectangle(PenNode.RectangleData())), parentID: "C7k2"))
+        }, readBack: false)
     }
 }

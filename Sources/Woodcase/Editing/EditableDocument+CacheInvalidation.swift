@@ -7,110 +7,150 @@ import Foundation
 
 /// The one rule that keeps the ``ExpansionCache`` and the ``RevisionCache`` honest.
 ///
-/// A cached expansion is a snapshot of a component's whole subtree, so *any* edit
-/// inside that subtree can falsify it — not just an edit to the ref or to the
-/// component's root. A cached revision is a hash of a node, its descendants *and the
-/// components it renders*, so an edit falsifies it for the edited node and every
-/// ancestor above it, and — once a component is involved — for every instance that
-/// draws what was edited, wherever it sits. Rather than ask each operation to remember
-/// either rule, every mutating path wraps itself in
-/// ``EditableDocument/invalidatingCaches(touching:_:)`` and names the nodes it
-/// touches; the rules decide.
+/// A cached revision is a hash of a node, its descendants *and the nodes it renders*,
+/// and a cached expansion is a clone of everything an instance renders. So an edit
+/// falsifies the revision of the edited node and of every ancestor above it — and, for
+/// each node on that spine that something renders, of every instance rendering it, every
+/// ancestor of those, every instance of a component holding one of them, and so on: a
+/// closure over the tree and the render graph together, which
+/// ``revisionDependents(of:)`` walks with the ``ComponentReferrers`` index. A cached
+/// expansion can only read what its instance renders, so the instances in that same
+/// closure are the expansions it can falsify.
 ///
-/// Both rules read the touched nodes *before and after* the mutation. Both readings
-/// are needed: a delete or a move out of a component only looks like component work
-/// beforehand, and an insert or a move in only afterwards — and for revisions, a move
-/// has one spine before it and a different one after.
+/// Rather than ask each operation to remember the rule, every mutating path wraps itself
+/// in ``EditableDocument/invalidatingCaches(touching:_:)`` and names the nodes it
+/// touches — every node whose content it writes, and for a move or an insert the parent
+/// it lands under. The closure is read *before and after* the mutation. Both readings are
+/// needed: a delete or a move out of a component is only reached from that component
+/// beforehand, and an insert or a move in only afterwards; a repointed instance renders
+/// one component before and another after.
 extension EditableDocument {
-    /// Runs a mutation, dropping the cached expansions and revisions it could have
-    /// falsified.
+    /// Runs a mutation, dropping the cached revisions and expansions it could have
+    /// falsified and no others.
     ///
-    /// Expansion invalidation is whole-cache on purpose. A per-component index would
-    /// have to be right about which component a node belongs to at two points in time,
-    /// for an edit that may be moving the node between components — the failure mode
-    /// this fixes. The cache exists to spare repeated expansion of an *unchanged*
-    /// document, which whole-cache invalidation still does.
+    /// The revisions forgotten are the closure ``revisionDependents(of:)`` reads, before
+    /// and after; a subject's own encoding is forgotten too, since its content may have
+    /// changed. The expansions dropped are the instances in the same closure. The
+    /// component graph's loops (``ComponentLoopIndex``), memoized with the expansions,
+    /// are dropped only when the edit can change the graph:
+    /// ``invalidatesComponentLoops(_:before:after:)``.
     ///
-    /// Revision invalidation is spine-scoped *unless a component is involved*. A
-    /// revision depends on the node, its descendants, and — for a `ref` — the
-    /// components it renders, so an edit that touches none of that machinery can only
-    /// move the revisions of the edited node and its ancestors. Dropping the whole
-    /// cache for those would make every read after every write a full rehash.
-    ///
-    /// An edit that *does* touch a component is the other case, and it takes the whole
-    /// revision cache with it. The nodes whose revisions such an edit can move are the
-    /// instances of the component, their ancestors, the instances of any component
-    /// holding one of those instances, and so on — a closure over both the tree and the
-    /// ref graph, with a repoint able to add an edge the ref itself does not name.
-    /// Keeping an index of that right through moves between components is the failure
-    /// mode the expansion rule already declines to risk, and the condition is the same
-    /// one: ``expansionCanDepend(on:)`` is true exactly when a node is a `ref`, is a
-    /// component, or is inside one — which is exactly when a fold-in edge can be in
-    /// play. So the two caches drop together, on one predicate, read before and after.
+    /// The walk costs the size of the closure: an edit clear of every component is its
+    /// spine, and an edit inside a component reaches each instance of it once, however
+    /// many components nest it.
     ///
     /// - Parameters:
-    ///   - subjects: The nodes the mutation touches — its subject, and for a move
-    ///     or an insert the parent it lands under. Ids that name nothing are ignored.
+    ///   - subjects: The nodes the mutation touches — every node whose content it writes,
+    ///     and for a move or an insert the parent it lands under. Ids that name nothing
+    ///     are ignored.
     ///   - body: The mutation.
     /// - Returns: Whatever `body` returns.
     /// - Throws: Whatever `body` throws. The caches are still checked, because a
     ///   throwing operation may have written before it threw.
     func invalidatingCaches<T>(touching subjects: [String], _ body: () throws -> T) rethrows -> T {
-        let affectedBefore = subjects.contains { expansionCanDepend(on: $0) }
-        forgetRevisions(along: subjects)
+        forgetDependents(of: subjects)
+        let sitesBefore = componentGraphSites(of: subjects)
+        let placesBefore = subjects.map(place(of:))
+        let writesBefore = cacheWrites
         defer {
-            forgetRevisions(along: subjects)
-            if affectedBefore || subjects.contains(where: { expansionCanDepend(on: $0) }) {
-                _expansionCache?.invalidateAll()
-                _revisionCache?.invalidateAll()
+            let renderingChanged = reindexReferrers(of: subjects)
+            // The closure after differs from the one already forgotten only if a subject
+            // moved, arrived, left or renders something else — or if the mutation cached
+            // something while it ran, which may have read it half done.
+            if renderingChanged || cacheWrites != writesBefore || subjects.map(place(of:)) != placesBefore {
+                forgetDependents(of: subjects)
+            }
+            _revisionCache?.forgetEncodings(of: subjects)
+            // Loops first memoized during the mutation may have read it half done.
+            if let sitesAfter = componentGraphSites(of: subjects),
+               sitesBefore.map({ invalidatesComponentLoops(subjects, before: $0, after: sitesAfter) }) ?? true
+            {
+                _expansionCache?.componentLoops = nil
             }
         }
         return try body()
     }
 
-    /// Forgets the cached revision of every subject and of every ancestor above it.
-    ///
-    /// The walk stops at a node it has already visited in this pass, so an insert of a
-    /// thousand-node subtree pays for the shared spine once rather than a thousand
-    /// times; the same check makes a transiently cyclic parent map terminate.
-    ///
-    /// A subject's *descendants* are deliberately left alone: their revisions cannot
-    /// have moved unless they were touched themselves, in which case they are subjects
-    /// too — and an id that comes back into the document later arrives as the subject
-    /// of the insert that brings it. Instances that render a touched component are not
-    /// on this walk either; they are covered by the whole-cache drop in
-    /// ``invalidatingCaches(touching:_:)``, which is the case this spine walk cannot see.
+    /// Forgets the cached revision and expansion of every node whose revision can depend
+    /// on a subject as the document stands now.
     ///
     /// - Parameter subjects: The nodes the mutation touches.
-    func forgetRevisions(along subjects: [String]) {
-        guard let cache = _revisionCache, !cache.isEmpty else { return }
+    func forgetDependents(of subjects: [String]) {
+        let revisions = _revisionCache.flatMap { $0.isEmpty ? nil : $0 }
+        let expansions = _expansionCache.flatMap { $0.entries.isEmpty ? nil : $0 }
+        guard revisions != nil || expansions != nil else { return }
+        for nodeID in revisionDependents(of: subjects) {
+            revisions?.forget(nodeID)
+            expansions?.entries[nodeID] = nil
+        }
+    }
+
+    /// Every node whose revision can depend on a subject: each subject, each ancestor of
+    /// one, each node that renders one of those, each of *its* ancestors, and so on.
+    ///
+    /// The walk visits each node once, so a spine shared by many subjects — an inserted
+    /// subtree, the instances of one component — is paid for once, and a transiently
+    /// cyclic parent map or render graph terminates.
+    ///
+    /// - Parameter subjects: The nodes to start from.
+    /// - Returns: The closure, subjects included.
+    func revisionDependents(of subjects: [String]) -> Set<String> {
+        let referrers = componentReferrers
         var visited: Set<String> = []
-        for subject in subjects {
-            var current = subject
+        var pending = subjects
+        while let start = pending.popLast() {
+            var current = start
             while visited.insert(current).inserted {
-                cache.forget(current)
+                pending.append(contentsOf: referrers.referrers(of: current))
                 guard let parent = parents[current] else { break }
                 current = parent
             }
         }
+        return visited
     }
 
-    /// Whether a cached expansion could depend on the node as it stands right now.
+    /// The document's ``ComponentReferrers``, built from every node on first use and kept
+    /// in step by ``invalidatingCaches(touching:_:)`` after that.
+    var componentReferrers: ComponentReferrers {
+        if let built = _componentReferrers { return built }
+        let built = ComponentReferrers(nodes: nodes)
+        _componentReferrers = built
+        return built
+    }
+
+    /// Re-reads what each subject renders into the referrer index, if it has been built.
     ///
-    /// True for a `ref` node (its own expansion is cached under its id), for a
-    /// reusable component (every instance of it expands from its subtree), and for
-    /// any node inside a reusable component's subtree (it *is* part of that
-    /// expansion). False for a node that names nothing — an id that has not been
-    /// inserted yet, or has just been deleted, cannot be inside a component; the
-    /// other reading of the pair covers that half of the edit.
-    ///
-    /// - Parameter nodeID: The node to test.
-    /// - Returns: `true` if an expansion could be reading this node.
-    func expansionCanDepend(on nodeID: String) -> Bool {
-        guard let node = nodes[nodeID] else { return false }
-        if case .ref = node.kind { return true }
-        if node.common.reusable == true { return true }
-        return ancestors(of: nodeID).contains { nodes[$0]?.common.reusable == true }
+    /// - Parameter subjects: The nodes a mutation touched.
+    /// - Returns: Whether any subject's entry changed.
+    @discardableResult
+    func reindexReferrers(of subjects: [String]) -> Bool {
+        guard _componentReferrers != nil else { return false }
+        var changed = false
+        for nodeID in subjects {
+            if _componentReferrers?.reindex(nodeID, rendering: nodes[nodeID]?.renderedComponentIDs ?? []) == true {
+                changed = true
+            }
+        }
+        return changed
+    }
+
+    /// Where a node is: whether it exists, and its parent.
+    private func place(of nodeID: String) -> Place {
+        Place(exists: nodes[nodeID] != nil, parent: parents[nodeID])
+    }
+
+    /// A node's existence and parent, compared before and after a mutation.
+    private struct Place: Friendly {
+        /// Whether the node is in the document.
+        var exists: Bool
+
+        /// Its parent, `nil` at the root or when it is not in the document.
+        var parent: String?
+    }
+
+    /// How many entries the revision and expansion caches have stored so far.
+    private var cacheWrites: Int {
+        (_revisionCache?.writes ?? 0) &+ (_expansionCache?.writes ?? 0)
     }
 
     /// The nodes an editing operation touches.
@@ -152,6 +192,8 @@ extension EditableDocument {
         case let .overrideRoot(op):
             [op.refNodeID]
         case let .detachRef(op):
+            // ``detachRef(_:)`` widens this to the subtree it removes and the one it
+            // inserts.
             [op.refNodeID]
         case .addVariable, .removeVariable, .updateVariable,
              .addImport, .removeImport, .updateImport,
@@ -166,7 +208,8 @@ extension EditableDocument {
     /// Remote operations reach the flat store only as ``DocumentMutation``s, and
     /// ``CRDTDocument`` emits one for *every* parent relationship a move changed,
     /// so weighing each mutation covers the reparenting that
-    /// ``reconcileChildrenWithParents()`` then re-derives from it.
+    /// ``reconcileChildrenWithParents(after:)`` then re-derives from it — which names
+    /// its own subjects for what it changes besides.
     ///
     /// - Parameter mutation: The mutation about to be applied.
     /// - Returns: The ids to weigh the rules against, possibly empty.

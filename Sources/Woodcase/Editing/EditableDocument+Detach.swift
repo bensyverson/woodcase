@@ -103,9 +103,12 @@ extension EditableDocument {
     func detachRef(_ plan: PlannedDetach) throws -> DetachResult {
         try requireRef(plan.refID)
 
-        // A ref is always a subject, so this always drops the cache — including the
-        // entry the plan's expansion warmed, which the detach has just consumed.
-        return try invalidatingCaches(touching: [plan.refID]) {
+        // The subjects are every node the detach removes and every one it inserts: the
+        // inserted expansion can hold instances, which the referrer index has to learn.
+        // The ref among them drops the entry the plan's expansion warmed, which the
+        // detach has just consumed.
+        let subjects = descendantIDs(of: plan.refID) + collectInsertedIDs(in: plan.subtree)
+        return try invalidatingCaches(touching: subjects) {
             try detachingRef(plan)
         }
     }
