@@ -26,6 +26,7 @@ public struct CommittedChange: Friendly {
     ///   - isUndoable: Whether the change joined the author's undo history.
     ///   - isDirtying: Whether the change leaves the document differing from its file.
     ///   - kept: Other authors' work an undo left in place.
+    ///   - conflicts: What a file merge resolved by keeping the local side.
     public init(
         origin: SessionOrigin.Kind,
         author: Author,
@@ -37,7 +38,8 @@ public struct CommittedChange: Friendly {
         broadcast: [CRDTOperation] = [],
         isUndoable: Bool,
         isDirtying: Bool,
-        kept: [KeptChange] = []
+        kept: [KeptChange] = [],
+        conflicts: [MergeConflict] = []
     ) {
         self.origin = origin
         self.author = author
@@ -50,13 +52,15 @@ public struct CommittedChange: Friendly {
         self.isUndoable = isUndoable
         self.isDirtying = isDirtying
         self.kept = kept
+        self.conflicts = conflicts
     }
 
     /// Where the change came from.
     public var origin: SessionOrigin.Kind
 
     /// Who made the change: the session's author for a local edit, undo or redo; the
-    /// collaborator who sent a remote change.
+    /// collaborator who sent a remote change; the file's writer for a file merge, or
+    /// ``Author/external`` when the log does not say who wrote it.
     public var author: Author
 
     /// The operations applied, in order, each normalized and with complete, guarded
@@ -89,4 +93,8 @@ public struct CommittedChange: Friendly {
 
     /// Other authors' work an undo left in place rather than overwrite.
     public var kept: [KeptChange]
+
+    /// What a file merge could not take from both sides, and resolved — local changes
+    /// win a same-key conflict. Empty for every other origin.
+    public var conflicts: [MergeConflict]
 }

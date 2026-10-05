@@ -55,7 +55,7 @@ enum UndoFailures {
                 """,
                 exitCode: .conflict
             )
-        case .undo, .stepOverUndo, .stepOverUndone, .stepOverRewrite, .reachedCreation:
+        case .undo, .stepOverUndo, .stepOverUndone, .stepOverRewrite, .stepOverMerge, .reachedCreation:
             nil
         }
     }

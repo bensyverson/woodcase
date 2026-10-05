@@ -40,4 +40,10 @@ public struct Author: Friendly {
     public static func unattributed(peer: PeerID) -> Author {
         Author(name: ActivityEvent.unattributed, peerID: peer)
     }
+
+    /// The author of a file write the activity log does not explain — an outside editor,
+    /// a `git checkout` — credited for a ``SessionOrigin/file(_:author:)`` merge with no
+    /// author. Unattributed, on a replica of its own, so the local author's undo keeps
+    /// what it wrote.
+    public static let external = Author.unattributed(peer: PeerID(rawValue: "__external__"))
 }

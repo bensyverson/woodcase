@@ -67,7 +67,7 @@ extension DocumentSession {
         pending.applied.append(AppliedOperation(forward: forward, inverse: inverse))
         pending.keys += operationKeys
         pending.invalidation.formUnion(probe.invalidation(after: document))
-        if let event = activityEvent(
+        if pending.logsActivity, let event = activityEvent(
             for: forward,
             as: operation,
             inverse: inverse,
@@ -103,19 +103,26 @@ extension DocumentSession {
     ///   - origin: Where it came from.
     ///   - isUndoable: Whether it joined the author's undo history.
     ///   - kept: Other authors' work an undo or redo left in place.
+    ///   - writer: Who made the change, when not the session's author: a file's writer.
+    ///   - isDirtying: Whether the change leaves the document differing from its file.
+    ///   - conflicts: What a file merge resolved by keeping the local side.
     /// - Returns: The committed change.
     func commit(
         _ pending: PendingChange,
         origin: SessionOrigin.Kind,
         isUndoable: Bool,
-        kept: [KeptChange] = []
+        kept: [KeptChange] = [],
+        by writer: Author? = nil,
+        isDirtying: Bool = true,
+        conflicts: [MergeConflict] = []
     ) -> CommittedChange {
+        let writer = writer ?? author
         sequence += 1
         lastDirtyingSequence = sequence
-        ledger.stamp(pending.keys, by: author, at: sequence)
+        ledger.stamp(pending.keys, by: writer, at: sequence)
         return CommittedChange(
             origin: origin,
-            author: author,
+            author: writer,
             applied: pending.applied,
             invalidation: pending.invalidation,
             sequence: sequence,
@@ -123,8 +130,9 @@ extension DocumentSession {
             activity: pending.activity,
             broadcast: pending.broadcast,
             isUndoable: isUndoable,
-            isDirtying: true,
-            kept: kept
+            isDirtying: isDirtying,
+            kept: kept,
+            conflicts: conflicts
         )
     }
 

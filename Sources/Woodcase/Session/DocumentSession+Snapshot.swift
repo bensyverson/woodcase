@@ -10,20 +10,24 @@ public extension DocumentSession {
     ///
     /// The session itself cannot leave its owner's isolation domain; the snapshot can.
     /// Save it, render it or export it from any task, then report a save back with
-    /// ``noteSynced(_:through:)``.
+    /// ``noteSynced(_:)``.
     ///
     /// ```swift
     /// let snapshot = session.snapshot()
-    /// try await Task.detached { try writer.write(snapshot.document, to: url) }.value
-    /// session.noteSynced(snapshot.document, through: snapshot.sequence)
+    /// if try await PenFileTransaction.save(snapshot, changes: unsaved, to: url).isSynced {
+    ///     session.noteSynced(snapshot)
+    /// }
     /// ```
     ///
-    /// - Returns: The materialized document with its sequence and revision.
+    /// - Returns: The materialized document with its sequence, its revision and the
+    ///   revision of what the file holds.
     func snapshot() -> DocumentSnapshot {
         DocumentSnapshot(
             document: document.materialize(),
             sequence: sequence,
-            documentRevision: document.documentRevision
+            documentRevision: document.documentRevision,
+            syncedRevision: syncedRevision,
+            author: author
         )
     }
 }

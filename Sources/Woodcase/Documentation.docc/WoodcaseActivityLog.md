@@ -100,14 +100,14 @@ detail. Broken across lines here for reading; on disk it is one line:
   (``ActivityEvent/canonicalPath(for:)``), so `/tmp/x.pen` and `/private/tmp/x.pen`
   produce one string and a filter on either finds both.
 - **`op`** — a short verb: `set`, `add`, `replace`, `cp`, `mv`, `rm`, `override`,
-  `detach`, `var`, `import`, `theme`, `undo`, `redo`, `external`, `migrate`, `new`. Coarser than ``EditOperation`` on purpose — a feed wants
+  `detach`, `var`, `import`, `theme`, `undo`, `redo`, `external`, `migrate`, `new`, `merge`. Coarser than ``EditOperation`` on purpose — a feed wants
   "something was set here", not which of the four property operations did it. Most are
   derived from the operation; `cp`, `undo` and `redo` are supplied by the caller, because an
   inverse operation looks like any other and only its author knows it is an undo or a
   redo (a ``DocumentSession`` labels its redo rows `redo`; `woodcase undo` treats one as
   an ordinary edit it can take back), and
-  `external`, `migrate` and `new` are not operations at all — see *Writes from outside*
-  and *Rewrites and creations* below.
+  `external`, `migrate`, `new` and `merge` are not operations at all — see *Writes from
+  outside*, *Rewrites and creations* and *Saves from an app* below.
 - **`nodes`** — the node ids the operation touched, subject first, then the parent whose
   children changed. Empty for an operation on the document itself — a variable, an
   import, a theme axis, the root's own properties.
@@ -212,6 +212,58 @@ lock and leave a row, so the log accounts for every byte woodcase writes:
   there: nothing before it is this file's history.
 
 Both carry the writer's `--as`, or name nobody, like any other write.
+
+## Saves from an app
+
+An editor that keeps a document open writes the same rows a CLI verb does.
+``PenFileTransaction/save(_:changes:to:log:timeout:)`` takes a ``DocumentSnapshot`` of the
+app's ``DocumentSession`` and the ``CommittedChange``s it has not saved yet, locks the
+file, writes the CLI's bytes, and appends each change's ``CommittedChange/activity`` —
+one row per operation, under the session's author (`ben`), with node ids, granular
+inverses and the forward operation. So an agent reading the log sees who changed what,
+the next CLI write finds the log explaining the file instead of recording an `external`
+row, and `woodcase undo --as ben` steps back through the app's edits like anyone else's.
+
+Before it writes, the save checks under the lock that the file still holds what the
+session last synced; if an agent wrote it since, nothing is written and the app merges
+the file (``SessionOrigin/file(_:author:)``) before saving again. If the file holds
+what the session expected but the log does not explain it, an `external` row goes first,
+exactly as a transaction records one. See <doc:Session> under "Saving from an app".
+
+### The merge row
+
+The rows a save appends carry the revisions their changes had *in the session*. When the
+session also took in work that writes no rows of its own — a file merge that kept unsaved
+local work, a collaborator's operations — after its last logged change, no single
+writer's row explains the saved revision. So the save appends one more row, last:
+
+```json
+{"batch":"…","file":"/Users/ben/Designs/banking.pen","forward":[…],"identity":"ben",
+ "inverse":[{"setProperties":{"nodeID":"Ttl01","properties":{"common.name":"Title"}}}],
+ "nodes":["Ttl01"],"op":"merge","paths":["Screen/Title"],"revision":"77a0c2e1",…}
+```
+
+- **identity** — the saving identity: the session folded the work in, though somebody
+  else wrote it (their own rows, earlier in the log, say who).
+- **revision** — the saved revision, so ``LogLineage`` finds the file explained and the
+  next write records no `external` row.
+- **nodes** and **paths** — every node the folded-in work touched, named as saved.
+- **forward** — the folded-in operations as the session applied them.
+- **inverse** — the operations that take the folded-in work back out of the saved
+  document, when the session can build them: a file merge's operations are the
+  session's own, so their inverses are complete. A collaborator's arrive as CRDT
+  operations with none, so a row folding any of them carries no inverse.
+
+`undo` never replays a `merge` row and is never stopped by it, whoever saved it. It is a
+barrier of a different kind: the session's rows below it were written against a document
+without the folded-in work, so their revisions no longer match the file. When the row has
+an inverse and the file is in the state it recorded, `undo` replays that inverse on a
+scratch copy and judges the rows below against the copy — exactly, as it judges any row —
+while applying their inverses to the real document. So `undo --as ben` takes back ben's
+own edits and leaves the merged-in values in place. A row whose undo would reach the
+folded-in work — its node is, or holds, one the merge touched — is refused as stale
+rather than taking that work with it. Without an inverse, or once the file has moved on
+from the row's state, the rows below are judged against the file as usual.
 
 ## Undo is by transaction
 
@@ -327,6 +379,7 @@ ana` never returns unattributed events, and following `ana` never moves for them
 
 - ``ActivityRecorder``
 - ``ActivityLog``
+- ``PenFileTransaction/save(_:changes:to:log:timeout:)``
 
 ### Reading
 

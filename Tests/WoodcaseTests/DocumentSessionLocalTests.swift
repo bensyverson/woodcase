@@ -168,15 +168,6 @@ struct DocumentSessionLocalTests {
         #expect(makeSession().document.crdtDocument == nil)
     }
 
-    // MARK: - Origins not yet supported
-
-    @Test("the file origin is refused until its leaf lands")
-    func unsupportedOrigin() throws {
-        let session = makeSession()
-        let document = session.document.materialize()
-        #expect(throws: SessionError.unsupportedOrigin(.file)) { try session.submit(.file(document, author: nil)) }
-    }
-
     // MARK: - Author
 
     @Test("an unattributed author has the log's empty name")

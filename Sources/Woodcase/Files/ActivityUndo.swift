@@ -122,6 +122,9 @@ public enum ActivityUndo {
         // command and rides along inside the step already counted.
         var continuing: String?
         var index = events.count - 1
+        // Past a merge row: the document without the work it folded in, and the nodes
+        // that work touched. See ``unfold(_:from:)``.
+        var unfolding: Unfolding?
 
         walk: while index >= 0 {
             let event = events[index]
@@ -133,13 +136,18 @@ public enum ActivityUndo {
                 currentRevision: document.documentRevision,
                 identity: identity,
                 allIdentities: allIdentities,
-                afterUndo: afterUndo
+                afterUndo: afterUndo,
+                unfolded: unfolding.map { UndoStep.Unfolded(
+                    revision: $0.document.documentRevision,
+                    touchesFoldedWork: $0.touches(event, in: document)
+                ) }
             )
             switch decision {
             case .undo:
                 // One local edit per event, labeled undo: the event's inverse lands
                 // whole or not at all, through the same session as any other write.
                 try recorder.apply(event.inverse, as: .undo)
+                unfolding?.replay(event.inverse)
                 undone.append(event)
                 if !continues { steps += 1 }
                 // An external row is nobody's command, so nothing rides along with it.
@@ -153,6 +161,10 @@ public enum ActivityUndo {
                 // Does not end a command's run of events either: a migrate is between
                 // two commands, never inside one, so the batch id decides as before.
                 break
+            case .stepOverMerge:
+                // Not a command either: the batch id decides as before.
+                unfolding = Self.unfold(event, from: unfolding?.document ?? document)
+                    .map { $0.adding(unfolding?.folded ?? []) }
             case .reachedCreation:
                 break walk
             case .blockedByOther, .blockedByStale, .blockedByExternal:
@@ -161,5 +173,68 @@ public enum ActivityUndo {
             }
         }
         return Result(undone: undone, stopped: stopped, recorded: recorded.count)
+    }
+
+    /// The document as it would be without a merge row's folded-in work, so the rows
+    /// below it can still be judged exactly.
+    ///
+    /// A ``ActivityEvent/Kind/merge`` row's inverse takes the folded-in work back out of
+    /// the state the row recorded. When the document — or the unfolded document of a
+    /// merge row above — is in that state, replaying the inverse on a copy gives the
+    /// state the session's own rows were written against, and their revisions chain
+    /// again. Otherwise — a row with no inverse (the work came from a collaborator), or a
+    /// state something has moved on from — there is nothing exact to judge by, and the
+    /// rows below are judged against the document as usual.
+    ///
+    /// - Parameters:
+    ///   - row: The merge row.
+    ///   - document: The document, or the unfolded document of a merge row above.
+    /// - Returns: The unfolded document and the nodes the folded-in work touched, or
+    ///   `nil` when it cannot be built exactly.
+    private static func unfold(_ row: ActivityEvent, from document: EditableDocument) -> Unfolding? {
+        guard !row.inverse.isEmpty, LogLineage.explains(row, at: document.documentRevision) else { return nil }
+        let unfolded = EditableDocument(from: document.materialize())
+        do {
+            for operation in row.inverse {
+                try unfolded.apply(operation)
+            }
+        } catch {
+            return nil
+        }
+        return Unfolding(document: unfolded, folded: Set(row.nodes))
+    }
+
+    /// The walk's view past one or more merge rows.
+    ///
+    /// Not `Friendly`: it holds an ``EditableDocument``, a reference type that is
+    /// neither `Codable` nor `Sendable`, and it never leaves the walk.
+    private struct Unfolding {
+        /// The document without the folded-in work.
+        let document: EditableDocument
+
+        /// Every node the folded-in work touched.
+        let folded: Set<String>
+
+        /// The same view, also counting the nodes of merge rows above it.
+        func adding(_ nodes: Set<String>) -> Unfolding {
+            Unfolding(document: document, folded: folded.union(nodes))
+        }
+
+        /// Replays an undone row's inverse on the unfolded document too, so the next
+        /// row down is judged against the state before it.
+        func replay(_ inverse: [EditOperation]) {
+            for operation in inverse {
+                try? document.apply(operation)
+            }
+        }
+
+        /// Whether undoing an event would reach folded-in work: its subject is a node
+        /// the work touched, or holds one in the document.
+        func touches(_ event: ActivityEvent, in document: EditableDocument) -> Bool {
+            guard let subject = event.nodes.first else { return false }
+            return folded.contains { node in
+                node == subject || document.ancestors(of: node).contains(subject)
+            }
+        }
     }
 }

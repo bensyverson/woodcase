@@ -56,7 +56,7 @@ extension DocumentSession {
         history = checkpoint.history
         lastDirtyingSequence = checkpoint.lastDirtyingSequence
         if syncedSequence > checkpoint.sequence {
-            fileHoldsRolledBackWork = true
+            fileDiffersFromDocument = true
         }
         return broadcast
     }

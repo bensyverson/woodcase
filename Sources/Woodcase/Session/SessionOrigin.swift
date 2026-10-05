@@ -12,15 +12,16 @@ import Foundation
 /// local author's edits, a file rewritten on disk, a collaborator's CRDT operations,
 /// and undo and redo.
 ///
-/// ``local(_:)``, ``remote(_:from:)``, ``undo`` and ``redo`` are accepted;
-/// ``file(_:author:)`` throws ``SessionError/unsupportedOrigin(_:)`` until its support
-/// lands.
+/// A ``file(_:author:)`` submission needs a session created with a
+/// ``DocumentMerger``; a ``remote(_:from:)`` one, a collaborative session.
 public enum SessionOrigin: Friendly {
     /// An edit by the session's own author.
     case local(LocalEdit)
 
     /// The file on disk now holds this document. The author is known when the activity
-    /// log explains the write, and `nil` for an outside writer.
+    /// log explains the write, and `nil` for an outside writer (``Author/external``).
+    /// The session merges it three ways with its unwritten local work; local changes
+    /// win a same-key conflict, which the change reports.
     case file(PenDocument, author: Author?)
 
     /// Operations a collaborator broadcast, sent by `from`. Accepted only by a

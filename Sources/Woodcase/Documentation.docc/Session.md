@@ -34,6 +34,7 @@ origin, the owner reacts to the same value:
 | ``CommittedChange/isDirtying`` | Marks the document edited |
 | ``CommittedChange/isUndoable`` | Offers Undo |
 | ``CommittedChange/kept`` | Tells the author whose work an undo kept |
+| ``CommittedChange/conflicts`` | Tells the author where a file merge kept their value over the file's |
 
 So there is no second path that edits the document and forgets to log, broadcast or
 invalidate. Each ``AppliedOperation`` carries the operation as applied — normalized to
@@ -52,8 +53,41 @@ no ledger stamp, no activity. In collaborative mode that includes the CRDT: a re
 edit was never broadcast, so its CRDT state is restored rather than unwound, and no
 peer ever has to hear of it.
 
-Local edits, remote operations, undo and redo are accepted. File merges throw
-``SessionError/unsupportedOrigin(_:)`` until their support lands.
+### File merges
+
+When the file changes on disk — another tool, an agent, a `git checkout` — the owner
+parses it and submits ``SessionOrigin/file(_:author:)``, naming the writer when the
+activity log explains the write. The session needs a ``DocumentMerger`` for this,
+given at creation; the library's is `.threeWay` (``ThreeWayMerger``, which is
+``DocumentMerge`` behind the seam). Without one the submission throws
+``SessionError/mergeUnavailable``; a session that never knew what its file holds — one
+wrapping a document with no file state — throws ``SessionError/fileStateUnknown``.
+
+```swift
+let session = DocumentSession(document: parsed, author: ben, file: url, merger: .threeWay)
+let change = try session.submit(.file(try PenParser.parse(contentsOf: url), author: claude))
+for conflict in change.conflicts { /* "Kept your fill; claude also changed it" */ }
+```
+
+The merge is three-way: base is the document as the file was last known to hold it
+(from creation, the last ``DocumentSession/noteSynced(_:through:)``, or the last file
+merge), ours the live document, theirs the file's. Every external change comes in and
+every unwritten local change survives; where both changed the same key the local value
+wins and the merge reports it in ``CommittedChange/conflicts``. The operations go
+through the same path as a local edit — guarded inverses, invalidation, the CRDT in
+collaborative mode, so collaborators who cannot see the file receive them — with these
+differences:
+
+- the change, and every ledger stamp it makes, belongs to the file's writer, or to
+  ``Author/external`` when nobody claimed the write, so the local author's undo keeps it;
+- it joins no undo history and leaves redo and the open undo group alone;
+- it writes no activity: the writer logged it;
+- the file's document becomes the new merge base, and the session is in sync with its
+  file again unless local work survived (``MergeResult/keepsLocalChanges``), in which
+  case the change is dirtying.
+
+A merge lands whole or not at all, like a local edit; a failed one leaves the base
+where it was.
 
 ### Remote operations
 
@@ -77,6 +111,55 @@ activity (its author's own session logs it), broadcasts nothing, and leaves the 
 author's redo stack and open undo group alone. The local author's later undo keeps it,
 as *Keep theirs* below describes. Operations are applied in the order given; holding
 back one whose causal dependencies have not arrived is not done yet.
+
+### Saving from an app
+
+An app saves through ``PenFileTransaction/save(_:changes:to:log:timeout:)``, which
+writes a ``DocumentSnapshot`` under the file's lock in the CLI's bytes and logs the
+changes' rows under the session's author (see <doc:WoodcaseActivityLog>). The save
+touches only values, so it runs off the main actor. Around it, the app keeps this
+contract:
+
+1. **Keep the unsaved changes.** Append every ``CommittedChange`` the session returns —
+   local, undo, redo, file merges; only local, undo and redo carry rows — to a list, and
+   drop those with a ``CommittedChange/sequence`` at most a saved snapshot's once its
+   save is synced. A debounced save passes the whole list; the save logs only what the
+   snapshot includes.
+2. **Snapshot, save, report back.** Take ``DocumentSession/snapshot()`` on the session's
+   actor, save it in a task, and on an outcome that ``PenFileTransaction/SaveOutcome/isSynced``
+   call ``DocumentSession/noteSynced(_:)`` with that snapshot. Changes made while the save
+   ran stay unsaved, and the next save checks against what this one wrote
+   (``DocumentSession/syncedRevision``, carried as ``DocumentSnapshot/syncedRevision``).
+3. **Merge when told.** On ``PenFileTransaction/SaveOutcome/fileChanged(found:lineage:)``
+   someone wrote the file since the last sync and nothing was written. Submit
+   ``SessionOrigin/file(_:author:)`` with `found` and the lineage's
+   ``LogLineage/writer``, append that change to the unsaved list, then save again. If
+   local work survived the merge, the save appends a `merge` row so the log still
+   explains the file.
+
+```swift
+let snapshot = session.snapshot()
+switch try await PenFileTransaction.save(snapshot, changes: unsaved, to: url) {
+case .wrote, .unchanged:
+    session.noteSynced(snapshot)
+    unsaved.removeAll { $0.sequence <= snapshot.sequence }
+case let .fileChanged(found, lineage):
+    unsaved.append(try session.submit(.file(found, author: lineage.writer)))
+    // save again
+}
+```
+4. **Never write the file another way.** Every byte goes through the save, or the
+   check and the log stop meaning anything; the old direct write of compact JSON is
+   gone.
+5. **Let the presenter feed merges, not reloads.** An `NSFilePresenter` change
+   notification parses the file and submits ``SessionOrigin/file(_:author:)`` (the
+   writer from ``LogLineage/read(_:at:from:)``'s ``LogLineage/writer``), unless the
+   file holds the session's own last save (its revision is
+   ``DocumentSession/syncedRevision``), which is the app hearing itself. The save is a
+   plain locked write — the library is cross-platform and uses no `NSFileCoordinator` —
+   so an app that coordinates wraps the call in a coordinated write naming its own
+   presenter. Either way the check in step 3 is the backstop: a notification that
+   arrives late, or not at all, cannot make a save overwrite an agent's write.
 
 ### Isolation
 
@@ -180,6 +263,11 @@ variable, a theme axis or an import alias — go through
 - ``DocumentSnapshot``
 - ``Author``
 - ``SessionError``
+
+### Merging the file
+
+- ``DocumentMerger``
+- ``ThreeWayMerger``
 
 ### Submitting changes
 

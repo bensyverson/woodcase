@@ -261,6 +261,15 @@ public extension ActivityEvent {
         /// revision is the empty document's, and `undo` stops at it. Caller-supplied by
         /// ``PenFileTransaction/create(at:document:identity:log:effect:)``.
         case new
+        /// A session folded work that wrote no rows of its own — a file merge that kept
+        /// unsaved local work, a collaborator's operations — into the document an app
+        /// then saved, so no single writer's row explains the saved revision.
+        /// Caller-supplied by ``PenFileTransaction/save(_:changes:to:log:timeout:)``,
+        /// under the saving identity. Its ``ActivityEvent/revision`` is the saved one,
+        /// its nodes are the ones the folded-in work touched, and its inverse — when the
+        /// session could build one — takes the folded-in work back out. `undo` never
+        /// replays it and is never stopped by it.
+        case merge
 
         /// The kind an operation reads as, before any caller-supplied override.
         ///

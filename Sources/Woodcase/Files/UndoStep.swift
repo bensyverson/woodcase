@@ -9,8 +9,8 @@ import Foundation
 /// newest-first.
 ///
 /// This enum *is* the undo rule; ``ActivityUndo`` around it only loops, and the CLI
-/// around that only turns a refusal into a sentence and an exit code. Six things can
-/// be true of the next step down:
+/// around that only turns a refusal into a sentence and an exit code. These can be
+/// true of the next step down:
 ///
 /// | Step | Meaning |
 /// |---|---|
@@ -20,6 +20,9 @@ import Foundation
 /// | ``blockedByOther(_:)`` | Somebody else edited later. Refuse, and name them. |
 /// | ``blockedByStale(_:)`` | The file moved since this step, and no undo explains it. Refuse. |
 /// | ``blockedByExternal(_:)`` | Somebody rewrote the file outside woodcase. There is no inverse to replay. Refuse. |
+/// | ``stepOverRewrite`` | A `migrate` row: the bytes changed, the document did not. Pass over it. |
+/// | ``stepOverMerge`` | A `merge` row: work folded into an app's save. Pass over it, for every identity. |
+/// | ``reachedCreation`` | A `new` row: the file's history begins here. Stop. |
 ///
 /// The decision is made on **one event**: the last event of the step. For
 /// ``UndoUnit/event`` that is the only event there is; for ``UndoUnit/transaction`` it
@@ -82,9 +85,36 @@ public enum UndoStep: Friendly {
     /// whoever wrote it, and it does not count as a step.
     case stepOverRewrite
 
+    /// The step is a ``ActivityEvent/Kind/merge`` row: work folded into a save that is
+    /// nobody's command. The walk neither replays it nor stops at it, whoever wrote it,
+    /// and it does not count as a step; see ``ActivityUndo`` for how the rows before
+    /// it are judged.
+    case stepOverMerge
+
     /// The step created the file — ``ActivityEvent/Kind/new``. Nothing before it is
     /// this file's history, so the walk ends here with nothing left to undo.
     case reachedCreation
+
+    /// What the walk knows past a ``ActivityEvent/Kind/merge`` row, for judging the
+    /// event below it.
+    public struct Unfolded: Friendly {
+        /// Creates the knowledge.
+        ///
+        /// - Parameters:
+        ///   - revision: The document's revision with the folded-in work taken out.
+        ///   - touchesFoldedWork: Whether the event's node is, or holds, a node the
+        ///     folded-in work touched.
+        public init(revision: String, touchesFoldedWork: Bool) {
+            self.revision = revision
+            self.touchesFoldedWork = touchesFoldedWork
+        }
+
+        /// The document's revision with the folded-in work taken out.
+        public var revision: String
+
+        /// Whether the event's node is, or holds, a node the folded-in work touched.
+        public var touchesFoldedWork: Bool
+    }
 
     /// Decides what to do about one step of the log.
     ///
@@ -97,16 +127,27 @@ public enum UndoStep: Friendly {
     ///     one running the undo. Undo events stay ``stepOverUndo`` either way, and an
     ///     external event stays ``blockedByExternal(_:)``.
     ///   - afterUndo: Whether the scan has already passed an undo event.
+    ///   - unfolded: Once the scan has passed a ``ActivityEvent/Kind/merge`` row with an
+    ///     inverse, the revision the document would have without the work that row
+    ///     folded in, and whether this event's node holds any of that work; `nil`
+    ///     otherwise. An event this revision explains is undone even though the
+    ///     document's own revision no longer does — unless it would take the folded-in
+    ///     work with it.
     /// - Returns: The step to take.
     public static func decide(
         _ event: ActivityEvent,
         currentRevision: String,
         identity: String,
         allIdentities: Bool,
-        afterUndo: Bool
+        afterUndo: Bool,
+        unfolded: Unfolded? = nil
     ) -> UndoStep {
         if event.op == .undo {
             return .stepOverUndo
+        }
+        // Nobody's command, whoever saved it: never replayed, never in the way.
+        if event.op == .merge {
+            return .stepOverMerge
         }
         // Neither is anybody's edit of the document: a migrate is transparent to what
         // came before it, and a new is where the file's history begins.
@@ -128,6 +169,9 @@ public enum UndoStep: Friendly {
             return .blockedByOther(event)
         }
         if LogLineage.explains(event, at: currentRevision) {
+            return .undo(event)
+        }
+        if let unfolded, !unfolded.touchesFoldedWork, LogLineage.explains(event, at: unfolded.revision) {
             return .undo(event)
         }
         return afterUndo ? .stepOverUndone : .blockedByStale(event)

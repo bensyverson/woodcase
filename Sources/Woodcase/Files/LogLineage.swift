@@ -105,6 +105,23 @@ public enum LogLineage: Friendly {
         }
     }
 
+    /// Who wrote the file, as the ``Author`` a ``SessionOrigin/file(_:author:)`` merge
+    /// of it is credited to; `nil` when the log does not say — no history, a write
+    /// behind the log's back, or an ``ActivityEvent/Kind/external`` row — which the
+    /// session credits to ``Author/external``.
+    ///
+    /// The author is the newest row's identity on a replica named for it
+    /// (`log:<identity>`), one per name: every file write by `claude` is the same
+    /// author to a session's ledger, and never the session's own author, even when the
+    /// names match — the same person in another process is another author for undo.
+    public var writer: Author? {
+        guard case let .current(event) = self,
+              event.op != .external,
+              event.identity != ActivityEvent.unattributed
+        else { return nil }
+        return Author(name: event.identity, peerID: PeerID(rawValue: "log:\(event.identity)"))
+    }
+
     /// Whether something rewrote the file outside woodcase.
     public var isDiverged: Bool {
         if case .diverged = self { true } else { false }

@@ -16,8 +16,10 @@ extension DocumentSession {
     /// Not `Friendly`: it holds an ``EditableDocument``, a reference type that is neither
     /// `Codable` nor `Sendable`, and it never leaves the session.
     enum MergeBase {
-        /// The file's document, not yet built into an editable base.
-        case deferred(PenDocument)
+        /// The file's document, not yet built into an editable base, with its
+        /// ``EditableDocument/documentRevision`` when the session already knows it — a
+        /// saved snapshot carries it — so a save's check need not build the base.
+        case deferred(PenDocument, revision: String?)
         /// The editable base, built and kept so its revision cache stays warm between
         /// merges.
         case built(EditableDocument)
@@ -32,7 +34,7 @@ extension DocumentSession {
         switch mergeBase {
         case let .built(base):
             return base
-        case let .deferred(written):
+        case let .deferred(written, _):
             let base = EditableDocument(from: written)
             mergeBase = .built(base)
             return base

@@ -17,9 +17,12 @@ struct PendingChange: Friendly {
     ///   - batch: The batch id every activity event of the change shares.
     ///   - activityKind: The verb every activity event is labeled with, or `nil` to
     ///     label each by its operation.
-    init(batch: String = UUID().uuidString, activityKind: ActivityEvent.Kind? = nil) {
+    ///   - logsActivity: Whether the change writes activity events at all; a file merge
+    ///     does not, as its writer logged it.
+    init(batch: String = UUID().uuidString, activityKind: ActivityEvent.Kind? = nil, logsActivity: Bool = true) {
         self.batch = batch
         self.activityKind = activityKind
+        self.logsActivity = logsActivity
     }
 
     /// The batch id every activity event of the change shares.
@@ -28,6 +31,9 @@ struct PendingChange: Friendly {
     /// The verb every activity event is labeled with, or `nil` to label each by its
     /// operation.
     let activityKind: ActivityEvent.Kind?
+
+    /// Whether the change writes activity events at all.
+    let logsActivity: Bool
 
     /// The operations applied so far, with their inverses.
     var applied: [AppliedOperation] = []
