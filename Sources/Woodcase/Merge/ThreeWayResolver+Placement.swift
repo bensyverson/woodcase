@@ -12,8 +12,9 @@ extension ThreeWayResolver {
     ///
     /// A move only theirs made is taken, unless its new parent does not survive — the
     /// node goes back to ours' parent, reported as
-    /// ``MergeConflict/Kind/deletedLocallyEditedExternally`` — or it would put the node
-    /// under itself once ours' moves are in, which keeps ours' parent and reports
+    /// ``MergeConflict/Kind/deletedLocallyEditedExternally`` — or ours retyped that
+    /// parent to a leaf, or the move would put the node under itself once ours' moves
+    /// are in, each of which keeps ours' parent and reports
     /// ``MergeConflict/Kind/bothChanged``. Two different moves keep ours'.
     mutating func resolveParents() {
         var taken: [String] = []
@@ -30,7 +31,10 @@ extension ThreeWayResolver {
                 reportParent(of: id, .bothChanged)
             } else if let theirsParent, !survives(theirsParent) {
                 reportParent(of: id, .deletedLocallyEditedExternally)
-                keepChain(from: id, kind: .editedLocallyDeletedExternally)
+                keepChain(from: id, kind: .editedLocallyDeletedExternally, oursParent: true)
+            } else if let theirsParent, !canHoldChildren(theirsParent) {
+                reportParent(of: id, .bothChanged)
+                keepChain(from: id, kind: .editedLocallyDeletedExternally, oursParent: true)
             } else {
                 parentOf[id] = .some(theirsParent)
                 taken.append(id)
@@ -41,10 +45,18 @@ extension ThreeWayResolver {
             parentOf[id] = .some(theirs.parents[id])
         }
 
-        for id in taken where isUnderItself(id) {
-            parentOf.removeValue(forKey: id)
-            reportParent(of: id, .bothChanged)
-            keepChain(from: id, kind: .editedLocallyDeletedExternally)
+        // Declining one move can close a cycle through a move already checked, so check
+        // again until none closes. Each pass declines at least one move or ends, and
+        // with every external move declined the tree is ours', which has no cycle.
+        var declining = true
+        while declining {
+            declining = false
+            for id in taken where parentOf[id] != nil && isUnderItself(id) {
+                parentOf.removeValue(forKey: id)
+                reportParent(of: id, .bothChanged)
+                keepChain(from: id, kind: .editedLocallyDeletedExternally, oursParent: true)
+                declining = true
+            }
         }
     }
 

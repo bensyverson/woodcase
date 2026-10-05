@@ -28,7 +28,7 @@ extension OpSequencer {
 
     // MARK: - Phase 4
 
-    /// Writes every kept node's merged content phase 6 does not, as one
+    /// Writes every kept node's merged content the leaf retypes do not, as one
     /// `setProperties` per node.
     mutating func writeContents() {
         for (id, state) in keptChanges where !(isRetyped(id, to: state) && !state.node.kind.canHaveChildren) {
@@ -44,8 +44,12 @@ extension OpSequencer {
             guard let path = key.propertyPath, key != .type else { continue }
             properties[path] = ThreeWayResolver.value(at: path, of: merged)
         }
+        // Compared as the file writes them: a value the codec carries can come back as
+        // another case of one JSON number (a live `.double(0)` returns as `.int(0)`),
+        // which is no drift.
         assert(
-            (try? properties.reduce(now) { try NodePropertyCodec.setting($1.value, at: $1.key, on: $0) }) == merged,
+            (try? properties.reduce(now) { try NodePropertyCodec.setting($1.value, at: $1.key, on: $0) })
+                .flatMap { try? NodePropertyCodec.encode($0) } == (try? NodePropertyCodec.encode(merged)),
             "Node \(id): patching its content through the codec does not reach the merged node — the vocabulary has drifted"
         )
         guard !properties.isEmpty else { return }
@@ -84,13 +88,23 @@ extension OpSequencer {
         }
     }
 
-    // MARK: - Phase 6
+    // MARK: - Phases 5 and 6
 
-    /// Retypes every kept node that becomes a leaf, now that its children are gone —
+    /// Retypes every kept node that becomes a leaf and holds no children now —
     /// `updateKind` drops the child list a leaf cannot hold — then writes its
     /// remaining content.
-    mutating func retypeToLeaves() {
-        for (id, state) in keptChanges where isRetyped(id, to: state) && !state.node.kind.canHaveChildren {
+    ///
+    /// Runs twice. Before the deletes it takes the nodes already childless, among them
+    /// every instance that stops being one: a component's delete is refused while an
+    /// instance of it is still a `ref`. After the deletes it takes the rest, whose last
+    /// children the deletes removed.
+    ///
+    /// - Parameter childlessOnly: Whether to leave alone a node that still holds children.
+    mutating func retypeToLeaves(childlessOnly: Bool) {
+        for (id, state) in keptChanges where !state.node.kind.canHaveChildren
+            && contentNow(of: id).map({ $0.kind.typeName != state.node.kind.typeName }) == true
+            && (!childlessOnly || (list(of: id) ?? []).isEmpty)
+        {
             retype(id, to: state.node)
             lists[id] = .some(nil)
             writeContent(of: id, to: state.node)

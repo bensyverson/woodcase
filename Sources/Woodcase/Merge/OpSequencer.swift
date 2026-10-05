@@ -21,9 +21,12 @@ import Foundation
 ///    made, no move can put a node under itself.
 /// 4. Each kept node's content, as `setProperties` — after the structure, so a ref
 ///    retargeted to a new component finds it.
-/// 5. Deletes, topmost nodes only, subtrees holding no component first.
-/// 6. Nodes that become leaves are retyped, now that their children are gone; then
-///    each container left empty gets its declared `"children": []`, or loses it.
+/// 5. Nodes that become leaves and hold no children by now are retyped — an instance
+///    that stops being one must let go of its component before the component's delete.
+///    Then deletes, topmost nodes only, subtrees holding no component first.
+/// 6. The other nodes that become leaves are retyped, now that their children are
+///    gone; then each container left empty gets its declared `"children": []`, or
+///    loses it.
 /// 7. Variables, imports and theme axes the merge removes, then whether each table
 ///    is declared.
 ///
@@ -76,8 +79,9 @@ struct OpSequencer {
         retypeToContainers()
         buildStructure()
         writeContents()
+        retypeToLeaves(childlessOnly: true)
         deleteRemoved()
-        retypeToLeaves()
+        retypeToLeaves(childlessOnly: false)
         declareEmptyChildren()
         removeDocumentEntries()
         return operations

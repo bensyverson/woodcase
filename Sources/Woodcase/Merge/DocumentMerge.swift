@@ -30,8 +30,9 @@ import Foundation
 /// ``EditableDocument/revision(of:)`` and never walked, so merging a small edit into a
 /// large document costs little; equal 64-bit revisions are trusted.
 ///
-/// The rules are in `project/2026-10-04-three-way-diff-design.md` and in
-/// <doc:EditingDocuments> under "Merging Documents".
+/// The rules, each conflict they report and the order of the operations are in
+/// <doc:MergingDocuments>; the design behind them is
+/// `project/2026-10-04-three-way-diff-design.md`.
 public enum DocumentMerge {
     /// Merges an external version of a document into the local one.
     ///

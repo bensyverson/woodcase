@@ -39,7 +39,12 @@ extension ThreeWayResolver {
         var merged = ours
         var typeReported = false
 
-        for key in keys.sorted(by: { ($0.propertyPath ?? "") < ($1.propertyPath ?? "") }) {
+        // The type goes first: which keys are extras depends on it, so an extra of theirs
+        // is written onto the type the node ends up with.
+        let ordered = keys.sorted { lhs, rhs in
+            (lhs == .type ? 0 : 1, lhs.propertyPath ?? "") < (rhs == .type ? 0 : 1, rhs.propertyPath ?? "")
+        }
+        for key in ordered {
             guard let path = key.propertyPath else { continue }
             let isKindKey = key == .type || path.hasPrefix("kind.")
             if isKindKey, key == .type || oursRetyped {
@@ -81,8 +86,29 @@ extension ThreeWayResolver {
         }
         do {
             merged = try NodePropertyCodec.setting(theirsValue, at: path, on: merged)
+        } catch where path.hasPrefix(NodePropertyCodec.extrasPrefix) && merged.kind.typeName != theirs.kind.typeName {
+            // An extra is a key theirs' type does not model; ours' type, kept over it,
+            // may model that key, so the value cannot go in as an extra.
+            report(.property(nodeID: id, path: path), kind, base: base.map { _ in baseValue }, ours: oursValue, theirs: theirsValue)
         } catch {
             assertionFailure("Node \(id): theirs' \(path) does not write back through the codec: \(error)")
+        }
+    }
+
+    /// Keeps ours' type for every node theirs retyped to a leaf that still holds
+    /// children in the merge — children ours gave it, which a leaf cannot hold — and
+    /// reports it as a ``MergeConflict/Subject/nodeType(nodeID:)`` both sides changed.
+    mutating func keepContainersHoldingChildren() {
+        for id in contents.keys.sorted() {
+            guard let merged = contents[id], !merged.kind.canHaveChildren,
+                  let local = ours.nodes[id], local.kind.canHaveChildren else { continue }
+            let children: [String]? = if let entry = childLists[id] { entry } else { ours.children[id] }
+            guard !(children ?? []).isEmpty else { continue }
+            contents[id]?.kind = local.kind
+            report(
+                .nodeType(nodeID: id), .bothChanged, base: base.nodes[id].map { .string($0.kind.typeName) },
+                ours: .string(local.kind.typeName), theirs: .string(merged.kind.typeName)
+            )
         }
     }
 

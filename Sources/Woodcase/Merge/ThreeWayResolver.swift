@@ -82,6 +82,7 @@ struct ThreeWayResolver {
         resolveParents()
         keepComponentsForInstances()
         resolveChildLists()
+        keepContainersHoldingChildren()
         resolveDocument()
         return assemble()
     }
@@ -94,6 +95,18 @@ struct ThreeWayResolver {
     func survives(_ id: String) -> Bool {
         if ours.nodes[id] != nil { return !removed.contains(id) }
         return theirs.nodes[id] != nil && base.nodes[id] == nil && !dropped.contains(id)
+    }
+
+    /// Whether a node's merged type can hold children, as the content merge will decide
+    /// it: ours' type when ours changed the kind (or both added the node), else theirs'.
+    ///
+    /// - Parameter id: The node's id.
+    func canHoldChildren(_ id: String) -> Bool {
+        guard let local = ours.nodes[id] else { return theirs.nodes[id]?.kind.canHaveChildren ?? false }
+        if let original = base.nodes[id], original.kind == local.kind, let external = theirs.nodes[id] {
+            return external.kind.canHaveChildren
+        }
+        return local.kind.canHaveChildren
     }
 
     /// A node's parent in the merged document; `nil` for a top-level node.
