@@ -93,21 +93,22 @@ struct LayoutCacheIntegrationTests {
         #expect(!cache.isFullyInvalidated)
     }
 
-    // MARK: - Delete Node → Full Invalidation
+    // MARK: - Delete Node → Its Board
 
-    @Test("Delete node fully invalidates cache")
-    func deleteNodeFullyInvalidates() throws {
+    @Test("Delete node marks only its board for layout")
+    func deleteNodeMarksItsBoard() throws {
         let editable = makeDocument()
         try editable.apply(.deleteNode(EditOperation.DeleteNode(nodeID: "child2")))
 
         let cache = try #require(editable._layoutCache)
-        #expect(cache.isFullyInvalidated)
+        #expect(!cache.isFullyInvalidated)
+        #expect(cache.dirtyLayoutRoots == ["root1"])
     }
 
-    // MARK: - Insert Node → Full Invalidation
+    // MARK: - Insert Node → Its Board
 
-    @Test("Insert node fully invalidates cache")
-    func insertNodeFullyInvalidates() throws {
+    @Test("Insert node marks only its board for layout")
+    func insertNodeMarksItsBoard() throws {
         let editable = makeDocument()
         let newNode = PenNode(
             id: "child3",
@@ -119,13 +120,14 @@ struct LayoutCacheIntegrationTests {
         )))
 
         let cache = try #require(editable._layoutCache)
-        #expect(cache.isFullyInvalidated)
+        #expect(!cache.isFullyInvalidated)
+        #expect(cache.dirtyLayoutRoots == ["root1"])
     }
 
-    // MARK: - Move Node → Full Invalidation
+    // MARK: - Move Node → Both Boards
 
-    @Test("Move node fully invalidates cache")
-    func moveNodeFullyInvalidates() throws {
+    @Test("Move node marks the boards it leaves and enters for layout")
+    func moveNodeMarksBothBoards() throws {
         // Need a second root to move into
         let doc = PenDocument(
             version: "1",
@@ -151,7 +153,9 @@ struct LayoutCacheIntegrationTests {
             nodeID: "child1", newParentID: "root2"
         )))
 
-        #expect(try #require(editable._layoutCache?.isFullyInvalidated))
+        let cache = try #require(editable._layoutCache)
+        #expect(!cache.isFullyInvalidated)
+        #expect(cache.dirtyLayoutRoots == ["root1", "root2"])
     }
 
     // MARK: - Variable Change → Full Invalidation

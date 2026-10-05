@@ -23,6 +23,9 @@ public final class LayoutCache {
     /// Node IDs needing re-layout (size/position changed).
     public private(set) var dirtyLayoutNodes: Set<String> = []
 
+    /// Top-level nodes a structural edit requires laying out afresh, by source id.
+    public private(set) var dirtyLayoutRoots: Set<String> = []
+
     /// Node IDs needing re-render only (visual-only change).
     public private(set) var dirtyRenderNodes: Set<String> = []
 
@@ -77,6 +80,35 @@ public final class LayoutCache {
         }
     }
 
+    /// Marks the spine of a structural edit for re-layout, and the top-level nodes it
+    /// can change for a whole fresh pass.
+    ///
+    /// The root ids join ``dirtyLayoutNodes`` too, so a host that lays out from that
+    /// set alone still re-lays every affected root.
+    ///
+    /// - Parameters:
+    ///   - spine: The touched nodes and their ancestors, by source id.
+    ///   - roots: The top-level nodes to lay out whole, by source id.
+    func invalidateStructure(spine: Set<String>, roots: Set<String>) {
+        dirtyLayoutNodes.formUnion(spine)
+        dirtyLayoutNodes.formUnion(roots)
+        dirtyLayoutRoots.formUnion(roots)
+        for id in spine {
+            measurementCache.removeValue(forKey: id)
+        }
+    }
+
+    /// Forgets the measurement of every node in an expanded subtree.
+    ///
+    /// - Parameter root: The subtree's root, as the layout engine sees it.
+    func forgetMeasurements(under root: PenNode) {
+        var pending = [root]
+        while let node = pending.popLast() {
+            measurementCache.removeValue(forKey: node.id)
+            pending.append(contentsOf: PenLayoutEngine.nodeChildren(node) ?? [])
+        }
+    }
+
     /// Marks a node as needing re-render only (no layout change).
     ///
     /// - Parameter nodeID: The node with a visual-only change.
@@ -86,8 +118,8 @@ public final class LayoutCache {
 
     /// Marks the entire cache as needing full re-layout.
     ///
-    /// Used for structural changes (insert, delete, move) and
-    /// document-level changes (variables, themes, imports).
+    /// Used for document-level changes (variables, themes, imports) and the
+    /// structural changes that are not yet scoped (replace, detach, remote edits).
     func invalidateAll() {
         isFullyInvalidated = true
         measurementCache.removeAll()
@@ -106,6 +138,7 @@ public final class LayoutCache {
     /// Call this after the editor has re-rendered the dirty nodes.
     public func clearDirtyNodes() {
         dirtyLayoutNodes.removeAll()
+        dirtyLayoutRoots.removeAll()
         dirtyRenderNodes.removeAll()
         isFullyInvalidated = false
     }

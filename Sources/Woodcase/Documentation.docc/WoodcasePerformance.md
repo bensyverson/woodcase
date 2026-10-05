@@ -606,9 +606,35 @@ top, 2026-10-04, minimum of 5 repetitions; `uptime` load averages 106/140/149 be
 build and 158/116/111 after the run, with other agents building. That load inflates
 every figure — the samples spread to 1033 ms — so treat the baseline as an upper bound
 and re-take it on a quiet machine. Its shape is the point and will survive the load: a
-reorder is a structural edit, which invalidates the whole layout cache and lays out
-every root again, and a property edit re-lays out the whole 2,000-node `Board` root —
-roughly 270–520 ms either way, against the low single milliseconds the targets ask for.
+reorder is a structural edit, which at that commit invalidated the whole layout cache and
+laid out every root again, and a property edit re-lays out the whole 2,000-node `Board`
+root — roughly 270–520 ms either way, against the low single milliseconds the targets
+ask for. A structural edit now lays out only the boards it can change (next section);
+on this one-board document that is still the whole `Board`, so the reorder baseline
+keeps its shape.
+
+## Structural edits on a many-board document
+
+An insert, move or delete lays out only the top-level boards it can change — the board
+that holds it, plus every board drawing a component it lands inside (Penumbra ruling
+R20) — and copies every other board's rects. `PerformanceBudgets.StructuralEditTests`
+measures what that buys: one text inserted into one board's list of a 2,500-node
+document of eight equal boards, then ``EditableDocument/computeLayout(textMeasurer:)``
+with CoreText measurement, beside a full layout of the same document.
+
+| Measurement (release) | Minimum of 5 |
+|---|---|
+| Full layout of the document (the cost of every insert before R20) | 64.7 ms |
+| One-node insert, laid out | 15.3 ms (target 8 ms) |
+
+`swift test -c release --filter PerformanceBudgets.StructuralEditTests 2>&1 | grep -E
+'BUDGET|INFO'`, on `8ef368e` with this change on top, 2026-10-05; `uptime` load
+averages 8/31/39 before the build and 46/34/34 after, with another agent building, so
+both figures are upper bounds. The insert is 4.2× cheaper, short of the 8× one board in
+eight would give: ``EditableDocument/computeLayout(textMeasurer:)`` still expands and
+resolves the whole document and copies every clean board's rects on each call, which the
+root-granular step does not touch. The 8 ms target is that eighth; it stays a target
+until the node-granular engine lands.
 
 ## Debug and release
 

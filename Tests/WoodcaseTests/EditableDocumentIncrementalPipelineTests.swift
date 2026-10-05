@@ -124,7 +124,7 @@ struct EditableDocumentIncrementalPipelineTests {
 
     // MARK: - isLayoutFullyInvalidated reflects cache state
 
-    @Test("isLayoutFullyInvalidated is true before priming, false after, true after structural edit")
+    @Test("isLayoutFullyInvalidated is true before priming, false after, and stays false after an insert")
     func isFullyInvalidatedReflectsCacheState() throws {
         let editable = makeDocument()
 
@@ -135,7 +135,7 @@ struct EditableDocumentIncrementalPipelineTests {
         _ = runFullPipeline(editable)
         #expect(editable.isLayoutFullyInvalidated == false)
 
-        // After structural edit (insert) — should be true again
+        // An insert marks its board, not the whole document
         try editable.apply(.insertNode(EditOperation.InsertNode(
             node: PenNode(
                 id: "newRect",
@@ -146,7 +146,8 @@ struct EditableDocumentIncrementalPipelineTests {
             ),
             parentID: "frame1"
         )))
-        #expect(editable.isLayoutFullyInvalidated == true)
+        #expect(editable.isLayoutFullyInvalidated == false)
+        #expect(editable.dirtyLayoutRootIDs == ["frame1"])
     }
 
     // MARK: - Color edit produces render-only dirty state
@@ -171,10 +172,10 @@ struct EditableDocumentIncrementalPipelineTests {
         #expect(editable.dirtyRenderNodeIDs.count == 1)
     }
 
-    // MARK: - Structural edit sets full invalidation
+    // MARK: - Structural edit marks its board
 
-    @Test("Insert after priming sets isLayoutFullyInvalidated to true")
-    func structuralEditSetsFullInvalidation() throws {
+    @Test("Insert after priming marks only its board for layout")
+    func structuralEditMarksItsBoard() throws {
         let editable = makeDocument()
         _ = runFullPipeline(editable)
         editable.clearDirtyNodes()
@@ -193,6 +194,8 @@ struct EditableDocumentIncrementalPipelineTests {
             parentID: "frame2"
         )))
 
-        #expect(editable.isLayoutFullyInvalidated == true)
+        #expect(editable.isLayoutFullyInvalidated == false)
+        #expect(editable.dirtyLayoutRootIDs == ["frame2"])
+        #expect(editable.dirtyLayoutNodeIDs.isSuperset(of: ["newEllipse", "frame2"]))
     }
 }

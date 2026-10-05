@@ -84,7 +84,16 @@ extension EditableDocument {
 extension EditableDocument {
     func applyInsert(_ op: EditOperation.InsertNode) throws {
         try validateInsert(op)
+        let subjects = collectInsertedIDs(in: op.node) + [op.parentID].compactMap(\.self)
+        invalidatingLayout(structurallyTouching: subjects) {
+            insertValidated(op)
+        }
+    }
 
+    /// The insert itself, wrapped by ``applyInsert(_:)``'s layout scope.
+    ///
+    /// - Parameter op: An insert ``validateInsert(_:)`` has passed.
+    private func insertValidated(_ op: EditOperation.InsertNode) {
         if let parentID = op.parentID {
             var childList = children[parentID] ?? []
             flattenAndInsert(op.node, parentID: parentID)
@@ -107,8 +116,6 @@ extension EditableDocument {
         for nodeID in collectInsertedIDs(in: op.node) {
             updateComponentRegistry(for: nodeID)
         }
-
-        _layoutCache?.invalidateAll()
     }
 
     /// Applies a delete, discarding the detach results ``deleteNode(_:)`` returns.
@@ -118,7 +125,15 @@ extension EditableDocument {
 
     func applyMove(_ op: EditOperation.MoveNode) throws {
         try validateMove(op)
+        invalidatingLayout(structurallyTouching: [op.nodeID] + [op.newParentID].compactMap(\.self)) {
+            moveValidated(op)
+        }
+    }
 
+    /// The move itself, wrapped by ``applyMove(_:)``'s layout scope.
+    ///
+    /// - Parameter op: A move ``validateMove(_:)`` has passed.
+    private func moveValidated(_ op: EditOperation.MoveNode) {
         // Remove from old location. An old parent left with no children keeps its
         // declared empty array rather than losing the key.
         if let oldParentID = parents[op.nodeID] {
@@ -137,8 +152,6 @@ extension EditableDocument {
         } else {
             rootOrder.insert(op.nodeID, at: op.index ?? rootOrder.count)
         }
-
-        _layoutCache?.invalidateAll()
     }
 
     // MARK: - Helpers

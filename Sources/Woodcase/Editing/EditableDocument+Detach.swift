@@ -41,24 +41,24 @@ public extension EditableDocument {
                 try detached.append(detachRef(plan))
             }
 
-            // Remove from parent or root. A parent left with no children keeps its
-            // declared empty array, so the file says `"children": []` as it would have
-            // had it been written that way.
-            if let parentID = parents[op.nodeID] {
-                children[parentID]?.removeAll { $0 == op.nodeID }
-            } else {
-                rootOrder.removeAll { $0 == op.nodeID }
-            }
+            invalidatingLayout(structurallyTouching: allIDs + [parents[op.nodeID]].compactMap(\.self)) {
+                // Remove from parent or root. A parent left with no children keeps its
+                // declared empty array, so the file says `"children": []` as it would
+                // have had it been written that way.
+                if let parentID = parents[op.nodeID] {
+                    children[parentID]?.removeAll { $0 == op.nodeID }
+                } else {
+                    rootOrder.removeAll { $0 == op.nodeID }
+                }
 
-            // Remove all nodes and update the registry
-            for id in allIDs {
-                componentRegistry[id] = nil
-                nodes[id] = nil
-                children[id] = nil
-                parents[id] = nil
+                // Remove all nodes and update the registry
+                for id in allIDs {
+                    componentRegistry[id] = nil
+                    nodes[id] = nil
+                    children[id] = nil
+                    parents[id] = nil
+                }
             }
-
-            _layoutCache?.invalidateAll()
 
             return detached
         }

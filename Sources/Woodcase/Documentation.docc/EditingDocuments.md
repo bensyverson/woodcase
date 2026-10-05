@@ -345,7 +345,13 @@ editable.clearDirtyNodes()
 **Three-tier change categorization** (``ChangeCategory``):
 - **Render-only** — color, opacity, fills, stroke, effects, blendMode, etc. Skip re-layout.
 - **Layout** — x, y, width, height, gap, padding, font props, rotation, enabled, theme, etc. Re-layout the node's root subtree.
-- **Structural** — insert, delete, move, variable/import/theme changes. Full re-layout.
+- **Structural** — insert, delete, move. Re-lays out only the top-level boards the edit
+  can change: the board that holds it (both boards, for a move between them), plus —
+  when the edit is inside a component — every board that draws that component, through
+  components nesting it. ``EditableDocument/dirtyLayoutRootIDs`` names them by source id;
+  every other board keeps its rects.
+- **Document-level** — variable, import and theme changes, plus replace, detach and
+  remote edits. Full re-layout (``EditableDocument/isLayoutFullyInvalidated``).
 
 **Content hashing** for tile caches: ``EditableDocument/contentHash(for:)`` combines
 node properties, layout rect, and children's hashes. The editor stores this alongside

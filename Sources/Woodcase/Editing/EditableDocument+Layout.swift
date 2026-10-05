@@ -33,14 +33,7 @@ public extension EditableDocument {
             // Full layout pass
             PenLayoutEngine.layout(resolvedDoc, textMeasurer: textMeasurer)
         } else {
-            // Incremental layout — only re-layout dirty root subtrees
-            PenLayoutEngine.layoutIncremental(
-                resolvedDoc,
-                previousRects: cache.rects,
-                dirtyNodeIDs: cache.dirtyLayoutNodes,
-                textMeasurer: textMeasurer,
-                measurementCache: &cache.measurementCache
-            )
+            layOutDirtyRoots(of: resolvedDoc, cache: cache, textMeasurer: textMeasurer)
         }
 
         cache.store(rects: rects)
@@ -62,6 +55,11 @@ public extension EditableDocument {
         _layoutCache?.dirtyLayoutNodes ?? []
     }
 
+    /// Top-level nodes a structural edit requires laying out afresh, by source id.
+    var dirtyLayoutRootIDs: Set<String> {
+        _layoutCache?.dirtyLayoutRoots ?? []
+    }
+
     /// Nodes needing re-render only (visual-only change like color/opacity).
     ///
     /// A subset of ``dirtyNodeIDs``. These nodes have unchanged layout rects.
@@ -80,8 +78,9 @@ public extension EditableDocument {
 
     /// Whether the layout cache requires a full re-layout.
     ///
-    /// Returns `true` when no cache exists (never primed) or after a structural
-    /// edit (insert, delete, move, variable/theme/import change).
+    /// Returns `true` when no cache exists (never primed) or after a change the cache
+    /// cannot scope (variable, theme or import change, replace, detach). An insert,
+    /// move or delete marks only the roots it can change — ``dirtyLayoutRootIDs``.
     /// The pipeline uses this to decide between the incremental and full paths.
     var isLayoutFullyInvalidated: Bool {
         _layoutCache?.isFullyInvalidated ?? true
@@ -126,17 +125,46 @@ public extension EditableDocument {
         let rects: [String: PenRect] = if cache.rects.isEmpty {
             PenLayoutEngine.layout(document, textMeasurer: textMeasurer)
         } else {
-            PenLayoutEngine.layoutIncremental(
-                document,
-                previousRects: cache.rects,
-                dirtyNodeIDs: cache.dirtyLayoutNodes,
-                textMeasurer: textMeasurer,
-                measurementCache: &cache.measurementCache
-            )
+            layOutDirtyRoots(of: document, cache: cache, textMeasurer: textMeasurer)
         }
 
         cache.store(rects: rects)
         return rects
+    }
+
+    /// Lays out the top-level nodes holding a dirty node or named by a structural
+    /// edit, and copies every other one's rects from the cache.
+    ///
+    /// An expanded top-level node is matched to its source by the id before its first
+    /// `/`. A root a structural edit named is measured afresh throughout: an edit inside
+    /// a component changes nodes of its instances that no source spine names.
+    ///
+    /// - Parameters:
+    ///   - document: The expanded, resolved document.
+    ///   - cache: The cache holding the previous rects and the dirty state.
+    ///   - textMeasurer: A function that measures text bounding boxes.
+    /// - Returns: Every expanded node's rect.
+    private func layOutDirtyRoots(
+        of document: PenDocument,
+        cache: LayoutCache,
+        textMeasurer: TextMeasurer
+    ) -> [String: PenRect] {
+        var dirty = cache.dirtyLayoutNodes
+        if !cache.dirtyLayoutRoots.isEmpty {
+            for root in document.children {
+                let sourceID = root.id.split(separator: "/", maxSplits: 1).first.map(String.init) ?? root.id
+                guard cache.dirtyLayoutRoots.contains(sourceID) else { continue }
+                dirty.insert(root.id)
+                cache.forgetMeasurements(under: root)
+            }
+        }
+        return PenLayoutEngine.layoutIncremental(
+            document,
+            previousRects: cache.rects,
+            dirtyNodeIDs: dirty,
+            textMeasurer: textMeasurer,
+            measurementCache: &cache.measurementCache
+        )
     }
 
     // MARK: - Content Hash
