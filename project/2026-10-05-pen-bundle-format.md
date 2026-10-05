@@ -1,6 +1,6 @@
 # 2026-10-05 — A bundle format for .pen documents
 
-**Status: decided 2026-10-05 (Ben), except the one open question at the end.** Woodcase owns the format and the CLI; Penumbra adopts it. This closes the "Open Decision: Bundle Format" in Penumbra's [April vision](../../Penumbra/project/2026-04-02-penumbra-vision.md), §10.
+**Status: decided 2026-10-05 (Ben), including imports across bundles (below).** Woodcase owns the format and the CLI; Penumbra adopts it. This closes the "Open Decision: Bundle Format" in Penumbra's [April vision](../../Penumbra/project/2026-04-02-penumbra-vision.md), §10.
 
 ## Why now
 
@@ -66,6 +66,6 @@ None needed. Penumbra is pre-launch with no users. Bare `.pen` keeps working, so
    - **Woodcase prevents two sources of truth.** The bundle records the file it was converted from, with that file's revision. The CLI, run on a `.pen` with such a bundle beside it, warns: "Design.pen was converted to Design.umbra on <date>; edit that instead."
    - **`woodcase bundle Design.pen` converts in place** from the terminal: no sandbox, so it moves the file and Git sees a rename. Agents create bundles from the start (`woodcase new X.umbra`), and the agent-facing docs say to prefer them.
 
-## Open questions for Ben
+## Imports across bundles (decided, Ben, 2026-10-05)
 
-1. **Imports across bundles.** `"imports": {"kit": "../Kit.umbra"}` reaches outside the granted bundle, so Penumbra's sandbox needs a grant for the library too. Proposed: a remembered folder grant, asked once per library.
+`"imports": {"kit": "../Kit.umbra"}` reaches outside the granted bundle, so Penumbra's sandbox needs a grant for the library too. **Penumbra asks once per library folder and keeps an app-scoped bookmark**, so every document importing that library reuses the grant. It is the mechanism `DocumentFolderAccess` (Penumbra QnusK6) already uses for the log root. Rejected: a document-scoped bookmark per document, which asks again for each document that imports the same library. Woodcase needs nothing for this; it resolves the relative path as today.
