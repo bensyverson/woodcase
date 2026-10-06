@@ -636,6 +636,25 @@ resolves the whole document and copies every clean board's rects on each call, w
 root-granular step does not touch. The 8 ms target is that eighth; it stays a target
 until the node-granular engine lands.
 
+## Documents that arrive with component loops
+
+A document written elsewhere can hold a component loop, which the operations refuse to
+make. Before the loop rule (<doc:ComponentLoops>), detaching or overriding an instance in
+the documents merge-fuzz seeds 12456 and 13964 drew expanded 12 million and 80 thousand
+nodes. `PerformanceBudgets.ComponentLoopTests` holds every such detach or override under
+**100 ms**: each repetition detaches every instance and overrides one key of each, each
+on a fresh copy, and keeps the slowest single operation.
+
+| Seed's documents (release) | Slowest operation, minimum of 5 |
+|---|---|
+| 12456 | 21.7 ms |
+| 13964 | 0.4 ms |
+
+`swift test -c release -Xswiftc -enable-testing --filter
+PerformanceBudgets.ComponentLoopTests 2>&1 | grep BUDGET`, on `0c258c7` with this suite on
+top, 2026-10-06; `uptime` load averages 13.9 before the build and 21.0 after, from the
+build itself, with no other work running.
+
 ## Debug and release
 
 `PerformanceBudget` states every ceiling for a release build and multiplies it by

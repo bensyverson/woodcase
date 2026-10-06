@@ -23,6 +23,7 @@ import Testing
 /// - ``PerformanceBudgets/ShotTests``
 /// - ``PerformanceBudgets/LayoutEditTests`` (targets, not yet enforced; runs only on a
 ///   strict build)
+/// - ``PerformanceBudgets/ComponentLoopTests`` (runs only on a strict build)
 /// - ``PerformanceBudgets/PaintedExtentWalkTests`` (a measurement, not a budget — no
 ///   fixed ceiling)
 ///

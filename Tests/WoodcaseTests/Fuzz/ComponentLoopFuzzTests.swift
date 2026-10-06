@@ -27,7 +27,7 @@ struct ComponentLoopFuzzTests {
     /// The documents a merge-fuzz seed draws with the loop guard off, the way the seeds
     /// drew them before it: each side unscoped and in its disjoint subtree, and theirs'
     /// edits replayed onto ours. Returns those holding a loop, and the slowest edit.
-    private static func loopyDocuments(seed: UInt64) throws -> ([EditableDocument], Duration) {
+    static func loopyDocuments(seed: UInt64) throws -> ([EditableDocument], Duration) {
         let base = try FuzzFixture.mergeDocument()
         let clock = ContinuousClock()
         var slowest: Duration = .zero
@@ -61,7 +61,7 @@ struct ComponentLoopFuzzTests {
 
     /// Detaches every instance, each on a fresh copy, and overrides one key of each;
     /// returns the slowest.
-    private static func slowestDetachAndOverride(in document: EditableDocument) -> Duration {
+    static func slowestDetachAndOverride(in document: EditableDocument) -> Duration {
         let clock = ContinuousClock()
         var slowest: Duration = .zero
         let refs = document.allNodeIDs.sorted().filter { id in
