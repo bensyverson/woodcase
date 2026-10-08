@@ -126,6 +126,16 @@ Pre-launch, zero users, no existing data. Never spend effort on backward compati
 - **The head of `AGENTS.md` lists where the docs live; keep that list current.**
 <!-- agents:end docs -->
 
+<!-- agents:begin images@526df6 -->
+## Images
+
+In order to work with images, use the following CLI tools:
+
+- `peep` <https://github.com/bensyverson/PixelPeeper>: Crop, scale and compare images
+- `sleepy` <https://github.com/bensyverson/sleepyhollow>: View and inspect web pages and HTML content
+- `woodcase` <https://github.com/bensyverson/woodcase>: Create visual designs for export to PNG, PDF, or code
+<!-- agents:end images -->
+
 <!-- agents:begin index@6272fe -->
 ## Situational instructions
 
@@ -138,13 +148,3 @@ These files carry instructions for specific situations. When one applies, read t
 | Before filing or claiming work in job, and when running as a subagent | `project/agents/jobs.md` |
 | Before building or extending a command-line tool | `project/agents/cli-design.md` |
 <!-- agents:end index -->
-
-<!-- agents:begin images@526df6 -->
-## Images
-
-In order to work with images, use the following CLI tools:
-
-- `peep` <https://github.com/bensyverson/PixelPeeper>: Crop, scale and compare images
-- `sleepy` <https://github.com/bensyverson/sleepyhollow>: View and inspect web pages and HTML content
-- `woodcase` <https://github.com/bensyverson/woodcase>: Create visual designs for export to PNG, PDF, or code
-<!-- agents:end images -->
