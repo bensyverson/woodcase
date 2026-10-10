@@ -10,6 +10,16 @@ session's scratchpad, not kept. Nothing below is decided yet, and the outputs qu
 the agent's, not re-run by the integrator — re-run a finding before building on it. Each
 is a candidate leaf under `LY4OvG`.
 
+> **Triaged with Ben, 2026-10-10 (leaf `PibuTW`).** F1 and F2 were re-run on `5644a5c` and
+> reproduce; `override` and `tree --props` now warn on the typo but still answer at exit 0.
+> Rulings: **refuse when the result would be wrong, hint when it is right but suboptimal.**
+> F1: `--rev` accepts the document revision with a stderr hint naming the node rev, and the
+> help points at the node rev. F2: refuse with exit 2 and a near miss, with a named opt-in
+> flag where creating the thing is legitimate. F5: a cell with whitespace is JSON-quoted, `-`
+> is absent, a literal `-` is quoted. All ten are filed under `LY4OvG` (F1 `Q1Sj2e`, F3+F4
+> `pwVyP0`, F2 `xm6QFi`, F5+F7 `3HsmAU`, F6 `fVgF7s`, F8 `3TtuaM`, F9 `ehieXC`, F10
+> `3HjrhP`); none dispatched yet.
+
 ## Decided and built alongside the audit
 
 `tree` now leads with the name, indented by depth, then type, rect, any `--props`

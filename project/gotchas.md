@@ -730,3 +730,13 @@ at once. Three of five runs sat at 0 % CPU for 10+ minutes with every test threa
 suite `.serialized` it passed 3 of 3 (leaf `AC2izc`). Not root-caused: concurrent cold fallback within one process is
 the likeliest reading. Serialize a suite whose layouts need fallback faces; a renderer that lays out text on several
 threads at once (RapidPro's tiles) may meet the same wait.
+
+## 2026-10-10 — rule: cli-design.md has no rule for wrong-but-plausible answers, cell encoding or revision scope
+
+The CLI agent audit (`project/2026-10-10-cli-agent-audit.md`, *Gaps in cli-design.md*) found rules the shared file
+lacks, and Ben ruled on three: **refuse when the result would be wrong; hint when it is right but suboptimal** (a typo
+or a missing target exits 2 with a near miss, and a named flag opts into creating it; a stricter-than-needed token
+is accepted with a stderr hint); **a text cell containing whitespace is JSON-quoted, `-` means absent, a literal `-`
+is quoted**; and near misses by edit distance on the misspelled segment, for paths, property keys, subcommands and
+enum values. Still unruled: one revision token labeled by scope (leaf `fVgF7s`), capped lists in errors, and "a
+write answers with what it made" covering files. Belongs in `project/agents/cli-design.md`.
