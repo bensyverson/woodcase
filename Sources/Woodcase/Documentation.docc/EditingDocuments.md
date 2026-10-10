@@ -610,10 +610,11 @@ pre-order, with the geometry the layout engine actually produced.
 ```swift
 let rows = try TreeView.rows(of: editable, depth: 2)
 print(TreeFormatter.text(rows))
-// frame      Card         0,0 200×100               Card1
-// rectangle    fits       10,10 50×50               Fit01
-// rectangle    overflows  160,20 80×40   ⚠ partial  Ovr01
-// rectangle    #Out01     260,120 20×20  ⚠ clipped  Out01
+// name                   type       rect           id
+// Card                   frame      0,0 200×100    Card1
+//   fits                 rectangle  10,10 50×50    Fit01
+//   overflows ⚠ partial  rectangle  160,20 80×40   Ovr01
+//   #Out01 ⚠ clipped     rectangle  260,120 20×20  Out01
 ```
 
 **Settled, not authored.** Every read runs the pipeline first — materialize, expand

@@ -16,18 +16,40 @@ import Woodcase
 struct FindCommandTests {
     // MARK: - The answer
 
-    @Test("matching rows print in tree's format, under tree's header")
+    @Test("matching rows print in tree's columns, under tree's headers")
     func matchingRowsPrint() throws {
         let fixture = try CommandFixture(fixture: "batch.pen")
         let run = try fixture.run("find", fixture.file.path, "r => r.type === 'text'")
 
         #expect(run.status == 0)
         let lines = run.stdoutLines
-        #expect(lines.count == 3)
+        #expect(lines.count == 4)
         #expect(lines[0].hasPrefix("rev "))
         #expect(lines[0].hasSuffix("2 rows"))
-        #expect(lines[1].hasSuffix("Ttl01"))
-        #expect(lines[2].hasSuffix("Lbl01"))
+        #expect(lines[1].split(separator: " ") == ["name", "type", "rect", "id"])
+        #expect(lines[2].hasSuffix("Ttl01"))
+        #expect(lines[3].hasSuffix("Lbl01"))
+    }
+
+    @Test("matches print flush: they are picked from anywhere, so depth would imply a nesting not shown")
+    func matchesAreFlush() throws {
+        let fixture = try CommandFixture(fixture: "batch.pen")
+        let run = try fixture.run("find", fixture.file.path, "r => r.id === 'Lbl01' || r.id === 'Brd01'")
+
+        #expect(run.status == 0)
+        for row in run.stdoutLines.dropFirst(2) {
+            #expect(!row.hasPrefix(" "), "indented match: \(row)")
+        }
+    }
+
+    @Test("a match carries no hidden-children count: every match hides the rest of its subtree")
+    func matchesCountNoHiddenChildren() throws {
+        let fixture = try CommandFixture(fixture: "batch.pen")
+        let run = try fixture.run("find", fixture.file.path, "r => r.id === 'Brd01'")
+
+        #expect(run.status == 0)
+        let row = try #require(run.stdoutLines.last)
+        #expect(row.hasPrefix("Board  "), "hidden-children count on a match: \(row)")
     }
 
     @Test("no matches exits 1 with nothing on stdout")
@@ -61,14 +83,29 @@ struct FindCommandTests {
 
     // MARK: - Parity with tree
 
-    @Test("a predicate that keeps everything prints exactly what tree prints")
+    /// What `find` prints when its predicate keeps every row `tree` would list: the
+    /// same rows, headers and columns, printed flush as a selection.
+    private func treeAsSelection(
+        _ fixture: CommandFixture,
+        root: String? = nil,
+        expand: Bool = false,
+        absolute: Bool = false,
+        properties: [String] = []
+    ) throws -> String {
+        let document = try EditableDocument(from: PenParser.parse(contentsOf: fixture.file))
+        let rows = try TreeView.rows(of: document, root: root, expandInstances: expand, properties: properties)
+        let header = "rev \(document.documentRevision)  \(rows.count) rows" + (absolute ? "  absolute" : "")
+        let listing = TreeFormatter.text(rows, properties: properties, absolute: absolute, listing: .selection)
+        return "\(header)\n\(listing)\n"
+    }
+
+    @Test("a predicate that keeps everything prints tree's rows, as a selection")
     func everythingEqualsTree() throws {
         let fixture = try CommandFixture(fixture: "batch.pen")
         let found = try fixture.run("find", fixture.file.path, "r => true")
-        let listed = try fixture.run("tree", fixture.file.path)
 
         #expect(found.status == 0)
-        #expect(found.stdout == listed.stdout)
+        #expect(try found.stdout == treeAsSelection(fixture))
     }
 
     @Test("--json parity too, byte for byte")
@@ -88,7 +125,7 @@ struct FindCommandTests {
         let document = try EditableDocument(from: PenParser.parse(contentsOf: fixture.file))
         let matching = try TreeView.rows(of: document).filter { $0.type == "text" }
         let expected = "rev \(document.documentRevision)  2 rows\n"
-            + TreeFormatter.text(matching) + "\n"
+            + TreeFormatter.text(matching, listing: .selection) + "\n"
         #expect(run.stdout == expected)
     }
 
@@ -99,22 +136,18 @@ struct FindCommandTests {
             "find", fixture.file.path, "r => true",
             "--expand", "--absolute", "--props", "kind.content"
         )
-        let listed = try fixture.run(
-            "tree", fixture.file.path,
-            "--expand", "--absolute", "--props", "kind.content"
-        )
+        let expected = try treeAsSelection(fixture, expand: true, absolute: true, properties: ["kind.content"])
 
-        #expect(found.stdout == listed.stdout)
+        #expect(found.stdout == expected)
     }
 
     @Test("an address scopes the walk, as tree's does")
     func anAddressScopesTheWalk() throws {
         let fixture = try CommandFixture(fixture: "batch.pen")
         let found = try fixture.run("find", fixture.file.path, "Board", "r => true")
-        let listed = try fixture.run("tree", fixture.file.path, "Board")
 
         #expect(found.status == 0)
-        #expect(found.stdout == listed.stdout)
+        #expect(try found.stdout == treeAsSelection(fixture, root: "Board"))
     }
 
     @Test("an address that resolves to nothing is a usage error, as it is for tree")
@@ -141,7 +174,7 @@ struct FindCommandTests {
         let run = try fixture.run("find", fixture.file.path, "-F", script.path)
 
         #expect(run.status == 0)
-        #expect(run.stdoutLines.count == 3)
+        #expect(run.stdoutLines.count == 4)
     }
 
     @Test("-F - reads the predicate from standard input")
@@ -153,8 +186,8 @@ struct FindCommandTests {
         )
 
         #expect(run.status == 0)
-        #expect(run.stdoutLines.count == 2)
-        #expect(run.stdoutLines[1].hasSuffix("Brd01"))
+        #expect(run.stdoutLines.count == 3)
+        #expect(run.stdoutLines[2].hasSuffix("Brd01"))
     }
 
     @Test("a predicate given twice is refused rather than one of them being ignored")
@@ -178,10 +211,9 @@ struct FindCommandTests {
         try Data("r => true".utf8).write(to: script)
 
         let found = try fixture.run("find", fixture.file.path, "Board", "-F", script.path)
-        let listed = try fixture.run("tree", fixture.file.path, "Board")
 
         #expect(found.status == 0)
-        #expect(found.stdout == listed.stdout)
+        #expect(try found.stdout == treeAsSelection(fixture, root: "Board"))
     }
 
     @Test("no predicate at all points at tree, which is the listing find filters")
@@ -276,7 +308,7 @@ struct FindCommandTests {
         #expect(lines.count > 2)
         #expect(lines[1].contains("kind.fontSize"))
         for row in lines.dropFirst(2) {
-            #expect(row.hasPrefix("text"))
+            #expect(row.contains("  text  "))
         }
     }
 

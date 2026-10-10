@@ -17,7 +17,7 @@ import Woodcase
 struct TreeCommandTests {
     // MARK: - The outline
 
-    @Test("A bare read prints a revision header and one row per node")
+    @Test("A bare read prints a revision header, a column header and one row per node")
     func rowsForEveryNode() throws {
         let fixture = try CommandFixture(fixture: "batch.pen")
         let run = try fixture.run("tree", fixture.file.path)
@@ -25,11 +25,12 @@ struct TreeCommandTests {
         #expect(run.status == 0)
         let lines = run.stdoutLines
         // Cnv01, Ttl01, Crd01, Cd101, Cd201, Brd01, Chi01, Cmp01, Lbl01.
-        #expect(lines.count == 10)
+        #expect(lines.count == 11)
         #expect(lines[0].hasPrefix("rev "))
         #expect(lines[0].hasSuffix("9 rows"))
+        #expect(lines[1].split(separator: " ") == ["name", "type", "rect", "id"])
         for name in ["Canvas", "Title", "Cards", "First", "Second", "Board", "Chip", "Component", "Label"] {
-            #expect(lines.dropFirst().contains { $0.contains(name) }, "no row for \(name)")
+            #expect(lines.dropFirst(2).contains { $0.contains(name) }, "no row for \(name)")
         }
     }
 
@@ -50,7 +51,7 @@ struct TreeCommandTests {
         let run = try fixture.run("tree", fixture.file.path)
 
         #expect(run.status == 0)
-        #expect(run.stdoutLines.count == 5)
+        #expect(run.stdoutLines.count == 6)
         let overflowing = try #require(run.stdoutLines.first { $0.contains("overflows") })
         #expect(overflowing.contains("⚠ partial"))
         let outside = try #require(run.stdoutLines.first { $0.contains("Out01") })
@@ -77,10 +78,10 @@ struct TreeCommandTests {
         let run = try fixture.run("tree", fixture.file.path, "Board")
 
         #expect(run.status == 0)
-        #expect(run.stdoutLines.count == 3)
+        #expect(run.stdoutLines.count == 4)
         #expect(run.stdoutLines[0].hasSuffix("2 rows"))
-        #expect(run.stdoutLines[1].contains("Board"))
-        #expect(run.stdoutLines[2].contains("Chip"))
+        #expect(run.stdoutLines[2].contains("Board"))
+        #expect(run.stdoutLines[3].contains("Chip"))
     }
 
     @Test("--depth limits the walk and the hidden children are counted")
@@ -89,7 +90,7 @@ struct TreeCommandTests {
         let run = try fixture.run("tree", fixture.file.path, "--depth", "0")
 
         #expect(run.status == 0)
-        #expect(run.stdoutLines.count == 4)
+        #expect(run.stdoutLines.count == 5)
         let canvas = try #require(run.stdoutLines.first { $0.contains("Canvas") })
         #expect(canvas.contains("+2"))
     }
@@ -109,8 +110,8 @@ struct TreeCommandTests {
         let run = try fixture.run("tree", fixture.file.path, "Board", "--expand")
 
         #expect(run.status == 0)
-        #expect(run.stdoutLines.count == 4)
-        #expect(run.stdoutLines[3].contains("Chi01/Lbl01"))
+        #expect(run.stdoutLines.count == 5)
+        #expect(run.stdoutLines[4].hasSuffix("Chi01/Lbl01"))
     }
 
     @Test("--props adds a labeled column per property path")
@@ -121,11 +122,12 @@ struct TreeCommandTests {
         #expect(run.status == 0)
         #expect(run.stderr.isEmpty)
         #expect(run.stdoutLines[0].hasPrefix("rev "))
-        #expect(run.stdoutLines[1].hasPrefix("type"))
+        #expect(run.stdoutLines[1].hasPrefix("name"))
         #expect(run.stdoutLines[1].contains("kind.content"))
+        #expect(run.stdoutLines[1].hasSuffix("id"))
         let title = try #require(run.stdoutLines.first { $0.contains("Ttl01") })
         #expect(title.contains("Canvas"))
-        #expect(title.hasSuffix("Title"))
+        #expect(title.hasSuffix("Ttl01"))
     }
 
     @Test("A bare --props widens the listing with the default columns instead of erroring")
@@ -135,7 +137,7 @@ struct TreeCommandTests {
 
         #expect(run.status == 0)
         let heading = try #require(run.stdoutLines.dropFirst().first)
-        #expect(heading.hasPrefix("type"))
+        #expect(heading.hasPrefix("name"))
         for path in Tree.defaultPropertyPaths {
             #expect(heading.contains(path), "the default columns omit \(path)")
         }

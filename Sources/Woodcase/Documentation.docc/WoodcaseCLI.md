@@ -250,10 +250,12 @@ that puts them together into a working loop, with a real transcript for each.
 ### `tree`
 
 Print the settled node tree, one row per node — the read that replaces most
-screenshots. The header line carries the document revision; each row is the node's
-type, its name indented by depth, the settled rect as `x,y w×h`, a clip flag, and its
-id. A `*` marks a reusable component definition, `+N` counts children the listing left
-out, and the last column of a row is an address every other verb accepts.
+screenshots. The first line carries the document revision and the second names the
+columns; each row is the node's name indented by depth, its type, the settled rect as
+`x,y w×h`, any `--props` columns, and its id. Markers ride on the name: `*` for a
+reusable component definition, `+N` for children the listing left out, `⚠ partial` /
+`⚠ clipped` for a node that leaves its parent. The last field of a row is always an
+address every other verb accepts.
 
 ```bash
 woodcase tree design.pen

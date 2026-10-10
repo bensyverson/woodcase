@@ -34,25 +34,29 @@ ids and revisions differ on every insert, so yours will differ.
 
 ## The loop
 
-**Read.** `tree` prints one row per node: type, name indented by depth, the settled
-rect, a clip flag, and the id. The header carries the *document* revision.
+**Read.** `tree` prints a header naming its columns, then one row per node: the name
+indented by depth, the type, the settled rect, and the id — always last, so it is a
+row's last field even when a name has spaces. The first line carries the *document*
+revision.
 
 ```text
 $ woodcase tree banking.pen --depth 1
 rev 7cf8d84e7b6b9b23  25 rows
-prompt  #j4hLC                     3053,-288 0×0                j4hLC
-*frame  banking-home               3053,-10 402×874             nSNTs
-frame     status-bar +2            0,0 402×33                   DLRXo
-frame     header +2                0,33 402×72                  6m90O
-frame     card-section +1          0,105 402×240                m0GAt
-frame     quick-actions +4         0,345 402×73                 X0xcX
+name                    type    rect              id
+#j4hLC                  prompt  3053,-288 0×0     j4hLC
+*banking-home           frame   3053,-10 402×874  nSNTs
+  status-bar +2         frame   0,0 402×33        DLRXo
+  header +2             frame   0,33 402×72       6m90O
+  card-section +1       frame   0,105 402×240     m0GAt
+  quick-actions +4      frame   0,345 402×73      X0xcX
 …
-*frame  component/QuickAction      3600,-10 42×65               msdSu
-ref     banking-home / Dark +7     4520,-10 402×874             YGJ0d
+*component/QuickAction  frame   3600,-10 42×65    msdSu
+banking-home / Dark +7  ref     4520,-10 402×874  YGJ0d
 ```
 
-A `*` marks a reusable component definition, `+N` counts children the listing left
-out, and `⚠ clipped` / `⚠ partial` marks a node that falls outside its parent.
+Markers ride on the name: a `*` marks a reusable component definition, `+N` counts
+children the listing left out, and `⚠ clipped` / `⚠ partial` marks a node that falls
+outside its parent. Depth is the line's leading indentation and nothing else.
 
 **Coordinates are parent-relative.** A row's `x,y` is its offset inside its *own*
 parent, which is the layout engine's convention: only a top-level node's rect is in
@@ -65,11 +69,12 @@ is never ambiguous:
 ```text
 $ woodcase tree banking.pen banking-home/header --absolute
 rev 7cf8d84e7b6b9b23  5 rows  absolute
-frame  header        3053,23 402×72  6m90O
-frame    hdrG        3077,43 95×52   CcYdb
-text       hdrL      3077,43 95×18   DhDsc
-text       hdrN      3077,63 51×32   4YeMj
-ref      bellBtn +2  3389,48 42×42   E97qI
+name          type   absRect         id
+header        frame  3053,23 402×72  6m90O
+  hdrG        frame  3077,43 95×52   CcYdb
+    hdrL      text   3077,43 95×18   DhDsc
+    hdrN      text   3077,63 51×32   4YeMj
+  bellBtn +2  ref    3389,48 42×42   E97qI
 ```
 
 `--json` needs no flag: every row carries `rect` and `absRect` both.
@@ -81,12 +86,12 @@ Narrow to a subtree and ask for the properties you care about as columns — or 
 ```text
 $ woodcase tree banking.pen banking-home/header --props kind.content
 rev 7cf8d84e7b6b9b23  5 rows
-type   name          rect          clip  id     kind.content
-frame  header        0,33 402×72         6m90O  -
-frame    hdrG        24,20 95×52         CcYdb  -
-text       hdrL      0,0 95×18           DhDsc  Good morning
-text       hdrN      0,20 51×32          4YeMj  Alex
-ref      bellBtn +2  336,25 42×42        E97qI  -
+name          type   rect          kind.content  id
+header        frame  0,33 402×72   -             6m90O
+  hdrG        frame  24,20 95×52   -             CcYdb
+    hdrL      text   0,0 95×18     Good morning  DhDsc
+    hdrN      text   0,20 51×32    Alex          4YeMj
+  bellBtn +2  ref    336,25 42×42  -             E97qI
 ```
 
 `--json` prints the same rows as a decodable report, and there every row carries a
@@ -179,12 +184,12 @@ just reported, which is how you know you are looking at your own edit.
 ```text
 $ woodcase tree banking.pen banking-home/header --props kind.content
 rev 71108d83bc08a28b  5 rows
-type   name          rect          clip  id     kind.content
-frame  header        0,33 402×72         6m90O  -
-frame    hdrG        24,20 92×52         CcYdb  -
-text       hdrL      0,0 92×18           DhDsc  Good evening
-text       hdrN      0,20 51×32          4YeMj  Alex
-ref      bellBtn +2  336,25 42×42        E97qI  -
+name          type   rect          kind.content  id
+header        frame  0,33 402×72   -             6m90O
+  hdrG        frame  24,20 92×52   -             CcYdb
+    hdrL      text   0,0 92×18     Good evening  DhDsc
+    hdrN      text   0,20 51×32    Alex          4YeMj
+  bellBtn +2  ref    336,25 42×42  -             E97qI
 ```
 
 Note the settled width moved from 95 to 92: the read reports layout, not just data.
@@ -247,12 +252,12 @@ those nodes take:
 ```text
 $ woodcase tree banking.pen banking-home/quick-actions --expand --depth 2 --props kind.content
 rev 71108d83bc08a28b  13 rows
-type   name                 rect            clip  id           kind.content
-frame  quick-actions        0,345 402×73          X0xcX        -
-ref      qa1                46.75,4 42×65         zHahn        -
-ref        #zHahn/M7RGT +2  0,0 42×42             zHahn/M7RGT  -
-text       label            6,50 30×15            zHahn/M5gJu  Send
-ref      qa2                134.25,4 46×65        5qeyz        -
+name                 type   rect            kind.content  id
+quick-actions        frame  0,345 402×73    -             X0xcX
+  qa1                ref    46.75,4 42×65   -             zHahn
+    #zHahn/M7RGT +2  ref    0,0 42×42       -             zHahn/M7RGT
+    label            text   6,50 30×15      Send          zHahn/M5gJu
+  qa2                ref    134.25,4 46×65  -             5qeyz
 …
 ```
 

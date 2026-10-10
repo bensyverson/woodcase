@@ -10,9 +10,10 @@ import WoodcaseScripting
 
 /// Prints the rows of a settled tree read that a JavaScript predicate keeps.
 ///
-/// `tree` with a question attached. The rows are the rows `tree` builds and the bytes
-/// are the bytes `tree` prints, so anything that reads one reads the other; the only
-/// thing `find` adds is which rows appear and an exit code a shell can branch on.
+/// `tree` with a question attached. The rows are the rows `tree` builds, in `tree`'s
+/// columns, so anything that reads one reads the other; `find` adds which rows appear
+/// and an exit code a shell can branch on, and prints them flush, as a
+/// ``TreeFormatter/Listing/selection``, because they need not be a walk.
 struct Find: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "find",
@@ -37,8 +38,10 @@ struct Find: AsyncParsableCommand {
         `false` and a query that answers a question nobody asked is worse than one that \
         stops.
 
-        OUTPUT is `tree`'s, filtered: the same header, the same columns, the same \
-        --json report, so `find` pipes wherever `tree` does. Matches exit 0; no matches \
+        OUTPUT is `tree`'s, filtered: the same headers, the same columns, the same \
+        --json report, so `find` pipes wherever `tree` does. The rows print flush, with \
+        no `+N`: matches come from anywhere in the tree, so indentation would imply a \
+        nesting the listing does not show. Matches exit 0; no matches \
         exit 1 and print nothing, so `woodcase find … && …` branches on the answer. A \
         predicate that will not parse, or throws, exits 2 naming the row it threw on.
 
@@ -193,6 +196,6 @@ struct Find: AsyncParsableCommand {
         }
         let header = "rev \(revision)  \(rows.count) \(rows.count == 1 ? "row" : "rows")"
             + (absolute ? "  absolute" : "")
-        return "\(header)\n\(TreeFormatter.text(rows, properties: properties, absolute: absolute))"
+        return "\(header)\n\(TreeFormatter.text(rows, properties: properties, absolute: absolute, listing: .selection))"
     }
 }

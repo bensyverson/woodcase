@@ -22,10 +22,11 @@ struct Tree: AsyncParsableCommand {
 
         The header line carries the document's revision — quote it back with --rev on \
         the write that follows and a document that changed underneath fails loudly \
-        instead of being edited blind. Each row is the node's type, its name indented \
-        by depth, the settled rect as `x,y w×h`, a clip flag when the node leaves its \
-        parent, and its id. A `*` marks a reusable component definition and `+N` \
-        counts children the listing left out.
+        instead of being edited blind. A second line names the columns. Each row is the \
+        node's name indented by depth, its type, the settled rect as `x,y w×h`, any \
+        --props columns, and its id — always the last field. Markers ride on the name: \
+        `*` for a reusable component definition, `+N` for children the listing left \
+        out, and `⚠ partial` / `⚠ clipped` for a node that leaves its parent.
 
         --json carries a per-node `rev` on every row: a content hash of everything that \
         node renders — what the file stores under it, and, through each component \

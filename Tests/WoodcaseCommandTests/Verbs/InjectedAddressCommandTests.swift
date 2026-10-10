@@ -59,7 +59,7 @@ struct InjectedAddressCommandTests {
 
         let listing = try fixture.run("tree", fixture.file.path, "Page0", "--expand")
         #expect(listing.status == 0)
-        let ids = listing.stdoutLines.dropFirst().compactMap { $0.split(separator: " ").last.map(String.init) }
+        let ids = listing.stdoutLines.dropFirst(2).compactMap { $0.split(separator: " ").last.map(String.init) }
         #expect(ids.contains("Inst0/Note0"))
 
         for id in ids {

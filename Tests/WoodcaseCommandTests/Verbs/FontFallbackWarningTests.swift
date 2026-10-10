@@ -33,7 +33,7 @@ struct FontFallbackWarningTests {
         #expect(run.status == 0)
         #expect(run.stderr.contains(Self.missingFamily))
         #expect(run.stderr.contains(PenTextMeasurer.defaultFontFamily))
-        #expect(run.stdoutLines.count == 3)
+        #expect(run.stdoutLines.count == 4)
         #expect(!run.stdout.contains(Self.missingFamily))
     }
 

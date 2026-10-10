@@ -10,60 +10,80 @@ import Foundation
 ///
 /// ## The text form
 ///
-/// One line per row, columns padded to the widest cell and joined by two spaces:
+/// A header row naming the columns, then one line per row, columns padded to the
+/// widest cell and joined by two spaces:
 ///
 /// ```text
-/// frame      Card         0,0 200×100               Card1
-/// rectangle    fits       10,10 50×50               Fit01
-/// rectangle    overflows  160,20 80×40   ⚠ partial  Ovr01
-/// rectangle    #Out01     260,120 20×20  ⚠ clipped  Out01
+/// name                   type       rect           id
+/// Card                   frame      0,0 200×100    Card1
+///   fits                 rectangle  10,10 50×50    Fit01
+///   overflows ⚠ partial  rectangle  160,20 80×40   Ovr01
+///   #Out01 ⚠ clipped     rectangle  260,120 20×20  Out01
 /// ```
 ///
-/// The columns are the type, the name indented by depth, the rect as `x,y w×h`, the
-/// clip flag and the id — around 55 characters for a typical row. Two markers ride
-/// along: a `*` before the type marks a reusable component definition, and a `+N`
-/// after the name counts children the listing left out (a depth limit, or an
-/// unexpanded instance). An unnamed node shows its id marker (`#Out01`) in the name
-/// column, which is also what its address uses. A column that is empty on every row
-/// is dropped, and no line ever ends in a space, so the output is byte-stable.
+/// The columns are the name indented by depth, the type, the rect as `x,y w×h`, and
+/// the id. The name leads so that a row's depth is its leading indentation: were a
+/// variable-width column first, depth would be the gap after it, and a reader that
+/// sees runs of spaces rather than aligned columns — an agent — would have to do
+/// arithmetic to recover the tree. The id is always last, so it is the last field of
+/// a row even when a name or a property value contains spaces.
 ///
-/// Requested property columns follow the id, and — only then — a header line names
-/// every column, because an unlabeled value column teaches nothing.
+/// Markers ride on the name: a `*` before it marks a reusable component definition, a
+/// `+N` after it counts children the listing left out (a depth limit, or an
+/// unexpanded instance), and `⚠ partial` / `⚠ clipped` marks a node that falls
+/// outside its parent. An unnamed node shows its id marker (`#Out01`), which is also
+/// what its address uses. No line ever ends in a space, so the output is byte-stable.
+///
+/// Requested property columns sit between the rect and the id, labeled by the header.
 ///
 /// ## Coordinates
 ///
 /// The rect column is parent-relative, the layout engine's own convention: only a
 /// top-level node's rect is in canvas coordinates. Pass `absolute: true` and the same
 /// column carries ``TreeRow/absRect`` instead — document space at every depth — and
-/// its header, when there is one, reads `absRect` so the two forms cannot be confused
+/// its header reads `absRect` so the two forms cannot be confused
 /// in a saved transcript. The JSON report needs no flag: every row carries both.
 public enum TreeFormatter {
+    /// What the rows of a listing are, which decides how depth and hidden children
+    /// show in the text form.
+    public enum Listing: String, Codable, Hashable, Sendable {
+        /// A walk of a subtree, in order: depth is the name's leading indentation, and
+        /// a row whose children the walk left out counts them (`+N`).
+        case outline
+        /// Rows picked from anywhere in the document, as `find` picks them: printed
+        /// flush, since neighboring rows need not be parent and child, and with no
+        /// hidden-children count, since every row hides the rest of its subtree.
+        case selection
+    }
+
     /// Renders rows as the aligned text outline.
     ///
     /// - Parameters:
     ///   - rows: The rows to render, in the order they should appear.
-    ///   - properties: Property paths to add as columns, in the order given. When
-    ///     this is non-empty a header line naming the columns is emitted first.
+    ///   - properties: Property paths to add as columns before the id, in the order
+    ///     given.
     ///   - absolute: Whether the rect column carries ``TreeRow/absRect`` — document
     ///     space — rather than ``TreeRow/rect``. The column keeps its name and its
     ///     place either way: one listing is in one coordinate system, so a reader
     ///     never has to work out which number is which.
-    /// - Returns: The outline, with no trailing newline. Empty for no rows.
+    ///   - listing: Whether the rows are a walk (``Listing/outline``) or picked from
+    ///     anywhere (``Listing/selection``).
+    /// - Returns: The header row and the outline, with no trailing newline. Empty for
+    ///   no rows.
     public static func text(
         _ rows: [TreeRow],
         properties: [String] = [],
-        absolute: Bool = false
+        absolute: Bool = false,
+        listing: Listing = .outline
     ) -> String {
         guard !rows.isEmpty else { return "" }
 
-        var table: [[String]] = []
-        if !properties.isEmpty {
-            table.append(["type", "name", absolute ? "absRect" : "rect", "clip", "id"] + properties)
-        }
+        var table: [[String]] = [["name", "type", absolute ? "absRect" : "rect"] + properties + ["id"]]
         for (index, row) in rows.enumerated() {
             table.append(cells(
                 for: row,
-                hidesChildren: hidesChildren(at: index, in: rows),
+                depth: listing == .outline ? row.depth : 0,
+                hidesChildren: listing == .outline && hidesChildren(at: index, in: rows),
                 properties: properties,
                 absolute: absolute
             ))
@@ -102,23 +122,24 @@ public enum TreeFormatter {
     /// One row's cells, in column order.
     private static func cells(
         for row: TreeRow,
+        depth: Int,
         hidesChildren: Bool,
         properties: [String],
         absolute: Bool
     ) -> [String] {
-        let type = (row.isReusable ? "*" : "") + row.type
-        let indent = String(repeating: " ", count: row.depth * 2)
-        let label = row.name ?? NodeAddress.marker(forID: row.id)
-        let name = indent + label + (hidesChildren ? " +\(row.childCount)" : "")
+        let indent = String(repeating: " ", count: depth * 2)
+        let label = (row.isReusable ? "*" : "") + (row.name ?? NodeAddress.marker(forID: row.id))
+        let hidden = hidesChildren ? " +\(row.childCount)" : ""
         let clip = switch row.clip {
         case .none: ""
-        case .partial: "⚠ partial"
-        case .full: "⚠ clipped"
+        case .partial: " ⚠ partial"
+        case .full: " ⚠ clipped"
         }
         let columns = properties.map { path in
             row.properties?[path].map(display) ?? "-"
         }
-        return [type, name, rect(absolute ? row.absRect : row.rect), clip, row.id] + columns
+        return [indent + label + hidden + clip, row.type, rect(absolute ? row.absRect : row.rect)]
+            + columns + [row.id]
     }
 
     /// A rect as `x,y w×h`, or `-` when the layout engine produced none.
@@ -166,18 +187,16 @@ public enum TreeFormatter {
 
     // MARK: - Alignment
 
-    /// Pads every cell to its column's width, dropping columns that are empty
-    /// throughout and never leaving a trailing space.
+    /// Pads every cell to its column's width, never leaving a trailing space.
     private static func align(_ table: [[String]]) -> String {
         let columnCount = table.map(\.count).max() ?? 0
         let widths = (0 ..< columnCount).map { column in
             table.map { $0.indices.contains(column) ? $0[column].count : 0 }.max() ?? 0
         }
-        let kept = widths.indices.filter { widths[$0] > 0 }
 
         return table
             .map { row in
-                let cells = kept.map { column -> String in
+                let cells = widths.indices.map { column -> String in
                     let cell = row.indices.contains(column) ? row[column] : ""
                     return cell + String(repeating: " ", count: max(0, widths[column] - cell.count))
                 }

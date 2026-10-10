@@ -26,38 +26,59 @@ struct TreeFormatterTests {
 
     // MARK: - Text
 
-    @Test("The text form is byte-stable, aligned, and marks both clip states")
+    @Test("The text form is byte-stable, name first, and marks both clip states on the name")
     func textIsByteStable() throws {
         let rows = try TreeView.rows(of: document("tree-overflow.pen"))
         let expected = """
-        frame      Card         0,0 200×100               Card1
-        rectangle    fits       10,10 50×50               Fit01
-        rectangle    overflows  160,20 80×40   ⚠ partial  Ovr01
-        rectangle    #Out01     260,120 20×20  ⚠ clipped  Out01
+        name                   type       rect           id
+        Card                   frame      0,0 200×100    Card1
+          fits                 rectangle  10,10 50×50    Fit01
+          overflows ⚠ partial  rectangle  160,20 80×40   Ovr01
+          #Out01 ⚠ clipped     rectangle  260,120 20×20  Out01
         """
         #expect(TreeFormatter.text(rows) == expected)
     }
 
-    @Test("Property columns are labeled by a header line")
+    @Test("Depth is the line's leading indentation, whatever the type's width")
+    func depthIsLeadingIndentation() throws {
+        let rows = try TreeView.rows(of: document("tree-overflow.pen"))
+        let lines = TreeFormatter.text(rows).split(separator: "\n").dropFirst()
+        let indents = lines.map { $0.prefix { $0 == " " }.count }
+        #expect(indents == rows.map { $0.depth * 2 })
+    }
+
+    @Test("Property columns sit between the rect and the id, so the id is always last")
     func textWithPropertyColumns() throws {
         let rows = try TreeView.rows(of: document("tree-overflow.pen"), properties: ["kind.width"])
         let expected = """
-        type       name         rect           clip       id     kind.width
-        frame      Card         0,0 200×100               Card1  200
-        rectangle    fits       10,10 50×50               Fit01  50
-        rectangle    overflows  160,20 80×40   ⚠ partial  Ovr01  80
-        rectangle    #Out01     260,120 20×20  ⚠ clipped  Out01  20
+        name                   type       rect           kind.width  id
+        Card                   frame      0,0 200×100    200         Card1
+          fits                 rectangle  10,10 50×50    50          Fit01
+          overflows ⚠ partial  rectangle  160,20 80×40   80          Ovr01
+          #Out01 ⚠ clipped     rectangle  260,120 20×20  20          Out01
         """
         #expect(TreeFormatter.text(rows, properties: ["kind.width"]) == expected)
+    }
+
+    @Test("Every listing opens with a header row, and an absolute one says so")
+    func headerRowIsAlwaysPrinted() throws {
+        let rows = try TreeView.rows(of: document("tree-overflow.pen"))
+        let relative = TreeFormatter.text(rows).split(separator: "\n")[0]
+        let absolute = TreeFormatter.text(rows, absolute: true).split(separator: "\n")[0]
+        #expect(relative.split(separator: " ") == ["name", "type", "rect", "id"])
+        #expect(absolute.split(separator: " ") == ["name", "type", "absRect", "id"])
     }
 
     @Test("Children left out of the listing are counted on the row that hides them")
     func hiddenChildrenAreCounted() throws {
         let rows = try TreeView.rows(of: document("tree-overflow.pen"), depth: 0)
-        #expect(TreeFormatter.text(rows) == "frame  Card +3  0,0 200×100  Card1")
+        #expect(TreeFormatter.text(rows) == """
+        name     type   rect         id
+        Card +3  frame  0,0 200×100  Card1
+        """)
     }
 
-    @Test("A collapsed instance and a component definition are both marked")
+    @Test("A collapsed instance and a component definition are both marked on the name")
     func instanceAndComponentMarkers() throws {
         let rows = try TreeView.rows(of: document("addressing.pen"), root: "Dashboard/Body")
         let text = TreeFormatter.text(rows)
@@ -65,7 +86,20 @@ struct TreeFormatterTests {
         #expect(text.contains("Nav +2"))
 
         let component = try TreeView.rows(of: document("addressing.pen"), root: "Button", depth: 0)
-        #expect(TreeFormatter.text(component).hasPrefix("*frame"))
+        let row = try #require(TreeFormatter.text(component).split(separator: "\n").last)
+        #expect(row.hasPrefix("*Button"))
+        #expect(row.contains("  frame  "))
+    }
+
+    @Test("A selection prints flush, with no hidden-children count, since its rows are not a walk")
+    func selectionIsFlush() throws {
+        let all = try TreeView.rows(of: document("tree-overflow.pen"), depth: 0)
+            + TreeView.rows(of: document("tree-overflow.pen")).filter { $0.id == "Out01" }
+        #expect(TreeFormatter.text(all, listing: .selection) == """
+        name              type       rect           id
+        Card              frame      0,0 200×100    Card1
+        #Out01 ⚠ clipped  rectangle  260,120 20×20  Out01
+        """)
     }
 
     @Test("The text form never has a trailing space on a line")
