@@ -919,7 +919,10 @@ history stays local. `$WOODCASE_HOME`, if set, overrides all of that with one lo
 
 Identity comes from `--as` or `$WOODCASE_AS`; with neither, the edit still applies and
 is still logged, as an unattributed write with an empty identity. Nothing you do to a
-.pen file through `woodcase` is invisible to the log.
+.pen file through `woodcase` is invisible to the log. On `tree`, `get`, `find`, `shot`
+and `render` the same identity records what you read, in `views.jsonl` beside the log —
+so the person in the editor can see where you looked — and a read with no identity
+records nothing.
 
 `woodcase activity --file <path>` reads that file's project log; with no `--file` it
 reads the log of the project you are standing in.

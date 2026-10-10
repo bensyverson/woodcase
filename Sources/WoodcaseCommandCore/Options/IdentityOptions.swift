@@ -6,7 +6,7 @@
 import ArgumentParser
 import Foundation
 
-/// The `--as <name>` option group, in one of the three roles an identity plays.
+/// The `--as <name>` option group, in one of the four roles an identity plays.
 ///
 /// Identity is a name, not an account: there is no registration step, and naming an
 /// identity is creating it. It comes from `--as`, or from `$WOODCASE_AS` when the flag
@@ -20,6 +20,7 @@ import Foundation
 /// @OptionGroup var identity: IdentityOptions<Identity.Attribution>  // add, set, cp, …
 /// @OptionGroup var identity: IdentityOptions<Identity.Filter>       // activity
 /// @OptionGroup var identity: IdentityOptions<Identity.Required>     // undo
+/// @OptionGroup var identity: IdentityOptions<Identity.Reader>       // tree, get, find, shot, render
 /// ```
 ///
 /// ``identity`` is `nil` when neither is set. Under ``Identity/Attribution`` that is

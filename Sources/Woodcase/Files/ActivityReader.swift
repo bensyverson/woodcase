@@ -165,59 +165,6 @@ public struct ActivityReader: Friendly {
     /// - Throws: ``PenFileError/cannotOpen(url:reason:)`` if the log exists but cannot
     ///   be read.
     public func newest(file: URL? = nil) throws -> ActivityEvent? {
-        let url = log.fileURL
-        guard FileManager.default.fileExists(atPath: url.path) else { return nil }
-
-        let handle: FileHandle
-        do {
-            handle = try FileHandle(forReadingFrom: url)
-        } catch {
-            throw PenFileError.cannotOpen(url: url, reason: PenFileError.oneLineReason(error))
-        }
-        defer { try? handle.close() }
-
-        // A bundle's log holds only its document's rows, under whatever path the bundle
-        // had when each was written, so a renamed bundle keeps its history.
-        let wanted = log.origin.holdsOneDocument ? nil : file.map(ActivityEvent.canonicalPath(for:))
-        let decoder = JSONDecoder()
-        do {
-            var end = try handle.seekToEnd()
-            // Bytes from the chunk below that turned out to be the head of a line
-            // this chunk had only the tail of.
-            var carried = Data()
-            while end > 0 {
-                let size = min(Self.reverseChunk, end)
-                let start = end - size
-                try handle.seek(toOffset: start)
-                var chunk = try handle.read(upToCount: Int(size)) ?? Data()
-                chunk.append(carried)
-                var lines = chunk.split(separator: Self.newline, omittingEmptySubsequences: false)
-                // The first segment is only a whole line when the read reached the
-                // log's beginning; otherwise it continues into the chunk below.
-                carried = start > 0 ? Data(lines.removeFirst()) : Data()
-                for line in lines.reversed() where !line.isEmpty {
-                    guard let event = try? ActivityEvent(line: Data(line), using: decoder) else {
-                        continue
-                    }
-                    if let wanted, event.file != wanted { continue }
-                    return event
-                }
-                end = start
-            }
-        } catch let error as PenFileError {
-            throw error
-        } catch {
-            throw PenFileError.cannotOpen(url: url, reason: PenFileError.oneLineReason(error))
-        }
-        return nil
+        try log.lines.newest(matching: matching(file: file, identity: nil))
     }
-
-    /// The byte that ends every line.
-    static let newline: UInt8 = 0x0A
-
-    /// How much of the log ``newest(file:)`` reads at a time, walking backwards.
-    ///
-    /// A whole event line is a few hundred bytes, so one chunk holds hundreds of them:
-    /// the backwards walk almost always ends in its first read.
-    private static let reverseChunk: UInt64 = 64 * 1024
 }

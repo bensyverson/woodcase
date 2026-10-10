@@ -92,6 +92,8 @@ struct Tree: AsyncParsableCommand {
 
     @OptionGroup var output: OutputOptions
 
+    @OptionGroup var reader: IdentityOptions<Identity.Reader>
+
     /// Reads the file and prints the outline, or the JSON report.
     func run() async throws {
         let url = try file.existingFile()
@@ -104,7 +106,7 @@ struct Tree: AsyncParsableCommand {
         try await runReportingFailures(editing: url) {
             let diagnostics = PenDiagnosticCollector()
             defer { StandardError.write(diagnostics) }
-            try await CommandTransaction.read(at: url, diagnostics: diagnostics, fonts: .shared) { document in
+            let read = try await CommandTransaction.read(at: url, diagnostics: diagnostics, fonts: .shared) { document in
                 do {
                     let rows = try TreeView.rows(
                         of: document,
@@ -117,10 +119,14 @@ struct Tree: AsyncParsableCommand {
                     let text = try render(rows, revision: document.documentRevision, properties: properties)
                     print(text)
                     PropertyColumnWarning.warnAboutEmptyColumns(properties, in: rows, expand: expand)
+                    return (revision: document.documentRevision, nodes: rows.map(\.id))
                 } catch {
                     throw CommandFailure.describing(error, in: document, editing: url)
                 }
-            }
+            }.value
+            await ViewLogging.record(
+                .tree, of: url, by: reader.identity, revision: read.revision, nodes: read.nodes
+            )
         }
     }
 

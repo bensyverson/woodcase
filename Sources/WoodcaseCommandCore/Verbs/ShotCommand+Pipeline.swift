@@ -14,17 +14,20 @@ extension Shot {
     /// - Parameters:
     ///   - request: What was asked for.
     ///   - url: The `.pen` file, already confirmed to exist.
+    ///   - reader: Who to record as having viewed the shot's nodes, or `nil`.
     /// - Returns: What to print.
     /// - Throws: ``CommandFailure`` for anything a caller can fix, or whatever the
     ///   pipeline throws.
-    static func render(_ request: Request, editing url: URL) async throws -> ShotOutput {
+    static func render(_ request: Request, editing url: URL, reader: String?) async throws -> ShotOutput {
         let diagnostics = PenDiagnosticCollector()
-        let selection = try await CommandTransaction.read(at: url, diagnostics: diagnostics, fonts: .shared) { editable in
+        let read = try await CommandTransaction.read(at: url, diagnostics: diagnostics, fonts: .shared) { editable in
             editable.readContext.libraries.report(into: diagnostics)
-            return try ShotTargets.select(
+            let selection = try ShotTargets.select(
                 node: request.node, outlining: request.outline, in: editable, editing: url
             )
+            return (selection: selection, revision: editable.documentRevision)
         }.value
+        let selection = read.selection
 
         let pins = try ThemePinParser.parse(request.theme)
         let document = PenVariableResolver.resolve(selection.document, theme: pins)
@@ -92,6 +95,10 @@ extension Shot {
 
         let outputURL = URL(fileURLWithPath: request.out)
         try ImageExporter.writePNG(annotated.image, to: outputURL)
+        await ViewLogging.record(
+            .shot, of: url, by: reader, revision: read.revision,
+            nodes: [selection.nodeID] + selection.outlines.map(\.id), scope: .subtrees
+        )
 
         return ShotOutput(
             node: selection.nodeID,

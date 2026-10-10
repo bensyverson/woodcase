@@ -66,6 +66,8 @@ struct Get: AsyncParsableCommand {
 
     @OptionGroup var output: OutputOptions
 
+    @OptionGroup var reader: IdentityOptions<Identity.Reader>
+
     /// Reads the file and prints the node, or its instances.
     func run() async throws {
         let url = try file.existingFile()
@@ -80,16 +82,30 @@ struct Get: AsyncParsableCommand {
         try await runReportingFailures(editing: url) {
             let diagnostics = PenDiagnosticCollector()
             defer { StandardError.write(diagnostics) }
-            try await CommandTransaction.read(at: url, diagnostics: diagnostics, fonts: .shared) { document in
+            let read = try await CommandTransaction.read(at: url, diagnostics: diagnostics, fonts: .shared) { document in
                 do {
-                    let rendered = instances
-                        ? try text(forInstancesIn: document)
-                        : try text(for: NodeLookup.find(node, in: document, expanding: expand))
+                    let rendered: String
+                    let nodes: [String]
+                    if instances {
+                        let report = try InstanceLookup.find(node, in: document)
+                        rendered = try text(forInstances: report)
+                        nodes = [report.definition.id] + report.instances.map(\.id)
+                    } else {
+                        let found = try NodeLookup.find(node, in: document, expanding: expand)
+                        rendered = try text(for: found)
+                        nodes = [found.address]
+                    }
                     print(rendered)
+                    return (revision: document.documentRevision, nodes: nodes)
                 } catch {
                     throw CommandFailure.describing(error, in: document, editing: url)
                 }
-            }
+            }.value
+            // A plain get prints the node without its children; --expand prints them.
+            await ViewLogging.record(
+                .get, of: url, by: reader.identity, revision: read.revision, nodes: read.nodes,
+                scope: expand ? .subtrees : .nodes
+            )
         }
     }
 
@@ -113,13 +129,11 @@ struct Get: AsyncParsableCommand {
     /// The bytes `--instances` prints: the definition's header line and one row per
     /// `ref` that draws it.
     ///
-    /// - Parameter document: The document to read.
+    /// - Parameter report: The definition and its instances, from ``InstanceLookup``.
     /// - Returns: The whole of stdout, without a trailing newline.
-    /// - Throws: ``CommandFailure`` when the address names something no `ref` can
-    ///   point at, or whatever the address resolution and the JSON encoder throw.
-    private func text(forInstancesIn document: EditableDocument) throws -> String {
-        let report = try InstanceLookup.find(node, in: document)
-        return try output.json
+    /// - Throws: Whatever the JSON encoder throws.
+    private func text(forInstances report: InstanceReport) throws -> String {
+        try output.json
             ? InstanceReportFormatter.json(report)
             : InstanceReportFormatter.text(report)
     }

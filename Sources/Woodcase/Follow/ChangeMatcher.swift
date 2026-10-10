@@ -70,9 +70,46 @@ public struct ChangeMatcher: Friendly {
     ///   otherwise `nil`, and the row is kept for the file's next change.
     @discardableResult
     public mutating func logged(_ event: ActivityEvent) -> Match? {
-        pending[event.file, default: []].append(event)
-        guard let changedAt = waiting.removeValue(forKey: event.file) else { return nil }
-        return Match(path: event.file, events: take(event.file), changedAt: changedAt)
+        file(event, under: event.file, arrivedAt: nil)
+    }
+
+    /// Takes in one log row on behalf of a known file, noting when it arrived.
+    ///
+    /// For a caller following a single file: the row is filed under `path` whatever path
+    /// it names itself — a renamed bundle's older rows name its old path — and, because
+    /// it has an arrival time, ``expireEvents(now:)`` releases it if no change claims it
+    /// within the window, rather than letting it explain some later, unrelated change.
+    ///
+    /// - Parameters:
+    ///   - event: The row, as read from the log. Delivered unchanged in any match.
+    ///   - path: The canonical path the row explains.
+    ///   - now: When the row was read.
+    /// - Returns: The match this row completed if the file's change was waiting;
+    ///   otherwise `nil`, and the row is kept for the file's next change.
+    @discardableResult
+    public mutating func logged(_ event: ActivityEvent, path: String, at now: Date) -> Match? {
+        file(event, under: path, arrivedAt: now)
+    }
+
+    /// Releases every row that has waited out the window with no change to claim it.
+    ///
+    /// Only rows taken in with an arrival time (``logged(_:path:at:)``) ever expire.
+    ///
+    /// - Parameter now: The current time.
+    /// - Returns: The released rows, in the order they were logged.
+    public mutating func expireEvents(now: Date) -> [ActivityEvent] {
+        let seconds = windowSeconds
+        var released: [ActivityEvent] = []
+        for path in pending.keys.sorted() {
+            guard let rows = pending[path] else { continue }
+            let isDue = { (row: Pending) in
+                row.arrivedAt.map { now.timeIntervalSince($0) >= seconds } ?? false
+            }
+            released += rows.filter(isDue).map(\.event)
+            let kept = rows.filter { !isDue($0) }
+            pending[path] = kept.isEmpty ? nil : kept
+        }
+        return released
     }
 
     /// Takes in one file change.
@@ -98,8 +135,7 @@ public struct ChangeMatcher: Friendly {
     /// - Parameter now: The current time.
     /// - Returns: One unattributed match per expired change, oldest first.
     public mutating func expire(now: Date) -> [Match] {
-        let seconds = Double(window.components.seconds)
-            + Double(window.components.attoseconds) / 1e18
+        let seconds = windowSeconds
         let due = waiting
             .filter { now.timeIntervalSince($0.value) >= seconds }
             .sorted { ($0.value, $0.key) < ($1.value, $1.key) }
@@ -121,13 +157,32 @@ public struct ChangeMatcher: Friendly {
 
     // MARK: - Private
 
+    /// A row read but not yet attached to a change.
+    private struct Pending: Friendly {
+        /// The row.
+        var event: ActivityEvent
+        /// When it was read, or `nil` for a row that never expires.
+        var arrivedAt: Date?
+    }
+
     /// Rows read but not yet attached to a change, by canonical path.
-    private var pending: [String: [ActivityEvent]] = [:]
+    private var pending: [String: [Pending]] = [:]
 
     /// When each waiting change was seen.
     private var waiting: [String: Date] = [:]
 
+    /// ``window`` in seconds, to compare against `Date` intervals.
+    private var windowSeconds: TimeInterval {
+        Double(window.components.seconds) + Double(window.components.attoseconds) / 1e18
+    }
+
+    private mutating func file(_ event: ActivityEvent, under path: String, arrivedAt: Date?) -> Match? {
+        pending[path, default: []].append(Pending(event: event, arrivedAt: arrivedAt))
+        guard let changedAt = waiting.removeValue(forKey: path) else { return nil }
+        return Match(path: path, events: take(path), changedAt: changedAt)
+    }
+
     private mutating func take(_ path: String) -> [ActivityEvent] {
-        pending.removeValue(forKey: path) ?? []
+        pending.removeValue(forKey: path)?.map(\.event) ?? []
     }
 }

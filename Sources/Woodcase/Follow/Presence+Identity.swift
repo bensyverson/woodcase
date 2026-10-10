@@ -13,10 +13,10 @@ public extension Presence {
         /// - Parameters:
         ///   - name: The `--as` name it writes under; empty for unattributed writes.
         ///   - order: Its position in order of first appearance, from zero.
-        ///   - lastSeen: When it last wrote.
+        ///   - lastSeen: When it last wrote or read.
         ///   - changes: How many events it has written in the log read so far.
         ///   - latestChange: The node mark of its newest change, if that change named nodes.
-        ///   - latestView: The node mark of its newest read, once views are logged.
+        ///   - latestView: The node mark of its newest read.
         ///   - files: The canonical paths of the files it has touched, most recent first.
         public init(
             name: String,
@@ -42,10 +42,11 @@ public extension Presence {
         /// Its position in order of first appearance, from zero.
         public var order: Int
 
-        /// When it last wrote. Never moves backwards, whatever order events arrive in.
+        /// When it last wrote or read. Never moves backwards, whatever order events
+        /// arrive in.
         public var lastSeen: Date
 
-        /// How many events it has written in the log read so far.
+        /// How many events it has written in the log read so far. Reads are not counted.
         public var changes: Int
 
         /// The nodes its newest change touched — one mark per batch.
@@ -54,10 +55,11 @@ public extension Presence {
         /// `external` row), which updates ``lastSeen`` and ``changes`` only.
         public var latestChange: NodeMark?
 
-        /// The nodes its newest read touched. Filled once view events are logged.
+        /// The nodes its newest read touched, from a ``ViewEvent``: what an attributed
+        /// `tree`, `get`, `find`, `shot` or `render` printed.
         public var latestView: NodeMark?
 
-        /// The canonical paths of the files it has touched, most recently touched first.
+        /// The canonical paths of the files it has written or read, most recent first.
         public var files: [String]
 
         /// The node a cursor for this identity belongs on: the first node of whichever of

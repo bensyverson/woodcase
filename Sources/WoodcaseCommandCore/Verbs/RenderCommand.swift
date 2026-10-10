@@ -41,6 +41,8 @@ struct Render: AsyncParsableCommand {
     @Flag(name: .long, help: "Fail on warnings (missing fonts, broken refs, etc.); notices never fail.")
     var strict: Bool = false
 
+    @OptionGroup var reader: IdentityOptions<Identity.Reader>
+
     /// Reads the file, settles each theme combination's layout and writes the images.
     ///
     /// - Throws: ``CommandFailure`` when the .pen file cannot be read, and whatever
@@ -57,12 +59,13 @@ struct Render: AsyncParsableCommand {
         // 1–3. Parse, read the libraries the file imports, and expand refs — keeping
         // reusable definitions: a definition placed in visible flow is an artboard
         // like any other, exactly as it is for `shot`, `tree` and the viewer.
-        let document = try await CommandTransaction.read(
+        let read = try await CommandTransaction.read(
             at: inputURL, diagnostics: diagnostics, fonts: .shared
         ) { editable in
             editable.readContext.libraries.report(into: diagnostics)
-            return editable.expanded(for: .canvas)
+            return (document: editable.expanded(for: .canvas), revision: editable.documentRevision)
         }.value
+        let document = read.document
         // Once per document, not per theme combination: the same shaders go undrawn in each.
         if let shaders = ShaderFills.diagnostic(under: document.children) {
             diagnostics.add(shaders)
@@ -87,6 +90,7 @@ struct Render: AsyncParsableCommand {
 
         // 6. Render each theme combination
         var totalFiles = 0
+        var drawn: [String] = []
         for combo in combinations {
             // Resolve variables with this theme
             let resolved = PenVariableResolver.resolve(
@@ -124,6 +128,7 @@ struct Render: AsyncParsableCommand {
             }
 
             totalFiles += format == .pdf ? 1 : frames.count
+            drawn += frames.map(\.id).filter { !drawn.contains($0) }
             let themeValues: [String] = useSubdirectories
                 ? combo.sorted(by: { $0.key < $1.key }).map(\.value)
                 : []
@@ -163,6 +168,9 @@ struct Render: AsyncParsableCommand {
         }
 
         print("Rendered \(totalFiles) file(s) to \(outputDirectory.path)")
+        await ViewLogging.record(
+            .render, of: inputURL, by: reader.identity, revision: read.revision, nodes: drawn, scope: .subtrees
+        )
     }
 
     // MARK: - PNG Rendering

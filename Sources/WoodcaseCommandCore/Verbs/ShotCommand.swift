@@ -269,6 +269,8 @@ struct Shot: AsyncParsableCommand {
     /// The `--json` flag.
     @OptionGroup var output: OutputOptions
 
+    @OptionGroup var reader: IdentityOptions<Identity.Reader>
+
     /// Rejects a `--scale` that cannot render anything, and a `--crop` that is not four
     /// numbers with an area.
     func validate() throws {
@@ -285,7 +287,7 @@ struct Shot: AsyncParsableCommand {
             grid: grid, outline: outline, crop: crop?.region(), extent: extent, out: out
         )
         let result = try await runReportingFailures(editing: url) {
-            try await Self.render(request, editing: url)
+            try await Self.render(request, editing: url, reader: reader.identity)
         }
         try print(output.json ? result.json() : result.text)
     }

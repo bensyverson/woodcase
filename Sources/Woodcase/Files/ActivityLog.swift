@@ -5,12 +5,6 @@
 
 import Foundation
 
-#if canImport(Darwin)
-    import Darwin
-#elseif canImport(Glibc)
-    import Glibc
-#endif
-
 /// The append-only JSONL file every committed edit is written to.
 ///
 /// One ``ActivityEvent`` per line, in the order the operations were applied. The log is
@@ -123,13 +117,8 @@ public struct ActivityLog: Friendly {
             payload.append(Self.newline)
         }
 
-        try createDirectoryIfNeeded()
-        var attempt = 1
-        while true {
-            let mayRetry = attempt < Self.maximumAttempts
-            if try await appendOnce(payload, timeout: timeout, mayRetry: mayRetry) { return }
-            attempt += 1
-        }
+        try prepareDirectory()
+        try await lines.append(payload, timeout: timeout)
     }
 
     /// The name a log rotated at `date` is moved to: `activity.20260829T163104Z.jsonl`.
@@ -140,56 +129,25 @@ public struct ActivityLog: Friendly {
     /// - Parameter date: When the rotation happened.
     /// - Returns: The archive's URL, beside the live log.
     public func archiveURL(rotatedAt date: Date) -> URL {
-        let stamp = date.formatted(Self.archiveTimeFormat)
-        return home.appendingPathComponent("activity.\(stamp).jsonl", isDirectory: false)
+        lines.archiveURL(rotatedAt: date)
+    }
+
+    /// The lines file underneath: locking, appending and rotation.
+    var lines: JSONLinesFile {
+        JSONLinesFile(home: home, stem: Self.fileStem, rotationThreshold: Self.rotationThreshold)
     }
 
     // MARK: - Private
 
-    /// How many times an append re-takes the lock before giving up on rotation.
-    ///
-    /// One rotation costs one retry; the extra attempts absorb the instant in which a
-    /// competing process has renamed the log but not yet recreated it.
-    private static let maximumAttempts = 4
+    /// The name of the live file without `.jsonl`; archives are `activity.<stamp>.jsonl`.
+    private static let fileStem = "activity"
 
     /// The byte that ends every line.
     private static let newline: UInt8 = 0x0A
 
-    /// The timestamp format in a rotated log's name.
-    private static let archiveTimeFormat = Date.ISO8601FormatStyle(
-        dateSeparator: .omitted,
-        timeSeparator: .omitted,
-        includingFractionalSeconds: false
-    )
-
-    /// One attempt at appending.
-    ///
-    /// - Returns: `true` when the payload was written, `false` when the log was rotated
-    ///   or vanished under us and the caller should try again.
-    private func appendOnce(_ payload: Data, timeout: Duration, mayRetry: Bool) async throws -> Bool {
-        try createFileIfNeeded()
-
-        let lock: FileLock
-        do {
-            lock = try await FileLock.acquire(fileURL, mode: .exclusive, timeout: timeout)
-        } catch let error as PenFileError {
-            // Another process may have renamed the log a moment ago and not yet
-            // recreated it. That is a retry, not a failure.
-            if case .cannotOpen = error, mayRetry { return false }
-            throw error
-        }
-        defer { lock.release() }
-
-        if try Self.size(of: lock) >= Self.rotationThreshold, mayRetry {
-            try rotate()
-            return false
-        }
-        try Self.appendBytes(payload, to: lock)
-        return true
-    }
-
-    /// Creates ``home`` if it is not there yet, and tells the repository to ignore it.
-    private func createDirectoryIfNeeded() throws {
+    /// Creates ``home`` if it is not there yet, and tells the repository to ignore it —
+    /// for any log kept there, this one or a ``ViewLog`` beside it.
+    func prepareDirectory() throws {
         guard !FileManager.default.fileExists(atPath: home.path) else { return }
         do {
             try FileManager.default.createDirectory(at: home, withIntermediateDirectories: true)
@@ -221,74 +179,5 @@ public struct ActivityLog: Friendly {
             "woodcase: added \"\(Self.ignorePattern)\" to \(ignoreFile.url.path) — "
                 + "the activity log is local state, not history."
         )
-    }
-
-    /// Creates the log file if it is not there yet, never truncating an existing one.
-    private func createFileIfNeeded() throws {
-        let descriptor = open(fileURL.path, O_WRONLY | O_CREAT, mode_t(0o644))
-        guard descriptor >= 0 else {
-            throw PenFileError.cannotOpen(url: fileURL, reason: FileLock.systemMessage(errno))
-        }
-        close(descriptor)
-    }
-
-    /// Moves the log aside and puts an empty file in its place.
-    ///
-    /// Only ever called while this process holds the log's exclusive lock, so no other
-    /// participant can be mid-append when the path changes underneath it.
-    private func rotate() throws {
-        let archive = uniqueArchiveURL()
-        guard rename(fileURL.path, archive.path) == 0 else {
-            throw PenFileError.writeFailed(url: fileURL, reason: FileLock.systemMessage(errno))
-        }
-        try createFileIfNeeded()
-    }
-
-    /// An archive name nothing else has taken, so two rotations in one second do not
-    /// overwrite each other.
-    private func uniqueArchiveURL() -> URL {
-        let base = archiveURL(rotatedAt: Date())
-        guard FileManager.default.fileExists(atPath: base.path) else { return base }
-        let stem = base.deletingPathExtension().lastPathComponent
-        for suffix in 1 ... 999 {
-            let candidate = home.appendingPathComponent("\(stem)-\(suffix).jsonl", isDirectory: false)
-            if !FileManager.default.fileExists(atPath: candidate.path) { return candidate }
-        }
-        return home.appendingPathComponent("\(stem)-\(UUID().uuidString).jsonl", isDirectory: false)
-    }
-
-    /// The locked file's size in bytes.
-    private static func size(of lock: FileLock) throws -> UInt64 {
-        var status = stat()
-        guard fstat(lock.descriptor, &status) == 0 else {
-            throw PenFileError.cannotOpen(url: lock.url, reason: FileLock.systemMessage(errno))
-        }
-        return UInt64(max(0, status.st_size))
-    }
-
-    /// Writes the whole payload at the end of the locked file and flushes it.
-    private static func appendBytes(_ payload: Data, to lock: FileLock) throws {
-        guard lseek(lock.descriptor, 0, SEEK_END) >= 0 else {
-            throw PenFileError.writeFailed(url: lock.url, reason: FileLock.systemMessage(errno))
-        }
-        var remaining = payload[...]
-        while !remaining.isEmpty {
-            let written = remaining.withUnsafeBytes { buffer in
-                Self.writeBytes(lock.descriptor, buffer.baseAddress, buffer.count)
-            }
-            if written > 0 {
-                remaining = remaining.dropFirst(written)
-            } else if written < 0, errno == EINTR {
-                continue
-            } else {
-                throw PenFileError.writeFailed(url: lock.url, reason: FileLock.systemMessage(errno))
-            }
-        }
-        fsync(lock.descriptor)
-    }
-
-    /// A named wrapper around POSIX `write`, so the call site is unambiguous.
-    private static func writeBytes(_ descriptor: Int32, _ bytes: UnsafeRawPointer?, _ count: Int) -> Int {
-        write(descriptor, bytes, count)
     }
 }

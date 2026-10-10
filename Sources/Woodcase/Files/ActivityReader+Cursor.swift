@@ -31,62 +31,6 @@ public extension ActivityReader {
         file: URL? = nil,
         identity: String? = nil
     ) throws -> Page {
-        // A rotation can land between resolving the live inode and reading it; the page
-        // then names a different inode than the one resolved, and one more pass reads
-        // the file that is live now.
-        var attempt = 0
-        while true {
-            attempt += 1
-            let liveInode = FileSignature.read(at: log.fileURL.path)?.inode
-            if cursor.inode != 0, cursor.inode == liveInode {
-                let page = try readFile(at: log.fileURL, from: cursor.offset, file: file, identity: identity)
-                if page.cursor?.inode == cursor.inode || attempt >= 3 {
-                    return page
-                }
-                continue
-            }
-            return try readThroughArchives(after: cursor, file: file, identity: identity)
-        }
-    }
-
-    private func readThroughArchives(
-        after cursor: ActivityCursor,
-        file: URL?,
-        identity: String?
-    ) throws -> Page {
-        let archives = log.archives()
-        let chain: [ActivityLog.Archive]
-        var restarted = false
-        if cursor.inode == 0 {
-            chain = archives
-        } else if let index = archives.firstIndex(where: { $0.inode == cursor.inode }) {
-            chain = Array(archives[index...])
-        } else {
-            // The file the cursor was into is gone; whatever it held after the cursor is
-            // lost, and the caller must be told.
-            chain = []
-            restarted = true
-        }
-
-        var merged = Page(events: [], nextOffset: 0, restarted: restarted, skippedLines: 0)
-        for (position, archive) in chain.enumerated() {
-            let offset = position == 0 && cursor.inode != 0 ? cursor.offset : 0
-            let page = try readFile(at: archive.url, from: offset, file: file, identity: identity)
-            merged.events += page.events
-            merged.eventCursors += page.eventCursors
-            merged.skippedLines += page.skippedLines
-            merged.cursor = page.cursor
-            merged.nextOffset = page.nextOffset
-        }
-
-        let live = try readFile(at: log.fileURL, from: 0, file: file, identity: identity)
-        merged.events += live.events
-        merged.eventCursors += live.eventCursors
-        merged.skippedLines += live.skippedLines
-        if FileManager.default.fileExists(atPath: log.fileURL.path) || merged.cursor == nil {
-            merged.cursor = live.cursor
-            merged.nextOffset = live.nextOffset
-        }
-        return merged
+        try Page(log.lines.read(after: cursor, matching: matching(file: file, identity: identity)))
     }
 }

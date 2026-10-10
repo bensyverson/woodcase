@@ -162,6 +162,12 @@ with an empty identity, so it still shows in `activity`, in the viewer and in `u
 simply names nobody. The name is never taken from the OS account, which on a shared
 machine would attribute everyone's edits to whoever is logged in.
 
+On a read verb — `tree`, `get`, `find`, `shot`, `render` — the same name records that
+you viewed the nodes it printed, in `views.jsonl` beside the activity log, so an editor
+can show what an agent looked at. A read with neither `--as` nor `$WOODCASE_AS` records
+nothing, and a views file that cannot be written never fails the read. See
+<doc:WoodcaseActivityLog>.
+
 The log is the project's, not the machine's: `.woodcase/activity.jsonl` at the nearest
 `.git` above the .pen file, or beside the file when there is no repository. The write
 that creates it adds `.woodcase/` to that repository's `.gitignore`. `$WOODCASE_HOME`

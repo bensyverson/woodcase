@@ -398,7 +398,74 @@ already render it — the viewer draws a `?` disc titled "unattributed".
 Because the empty name is a name, a filter matches it the way it matches any other: `--as
 ana` never returns unattributed events, and following `ana` never moves for them.
 
+## Views live beside the log
+
+A read verb — `tree`, `get`, `find`, `shot`, `render` — run with an identity (`--as`, or
+`$WOODCASE_AS`) records what it read: one ``ViewEvent`` with the reader, the document,
+the verb, the document revision it read and the node ids it printed (at most 64, with
+`covered` counting the rest), and whether it covered those nodes alone or their
+subtrees. A read with no identity records nothing.
+
+```json
+{"covered":1,"file":"/Users/agent/Designs/demo.pen","identity":"claude",
+ "nodes":["jSUCH"],"revision":"3f2a91c0d4e5b678","scope":"nodes",
+ "time":"2026-10-04T16:31:04.123Z","verb":"get"}
+```
+
+Views go to `views.jsonl` in the same directory (``ViewLog``), **never** to
+`activity.jsonl`. This log is the write history, and three things read it on the
+assumption that every row is a write: ``LogLineage`` takes the newest row as the file's
+last known state, the undo walk treats a foreign row as a later edit, and change
+attribution pairs rows with file changes. A view in this file would break all three.
+`views.jsonl` shares the lock discipline and rotation (`views.<timestamp>.jsonl`, its own
+8 MB threshold) and is read with ``ViewReader``, through the same ``ActivityCursor``.
+
+Two rules keep it small and harmless. A view the reader's newest view of the same file
+already covers — same revision, no new node, no wider scope — is not written
+(``ViewEvent/covers(_:)``). And recording is best effort: it happens after the read,
+outside the .pen file's lock, and a views file that cannot be written leaves the verb's
+output and exit status untouched.
+
+## Following one document
+
+``PenFileFollower`` is the library's answer to "tell me what happens to this file": an
+`AsyncSequence` that watches the document (``FileWatcher``), reads both logs from their
+cursors, and pairs each file change with the rows that explain it (``ChangeMatcher``).
+
+```swift
+var presence = PresenceTracker()
+for await event in PenFileFollower(file: url) {      // a .pen or a .umbra
+    presence.record(event)
+    switch event {
+    case let .changed(change): refresh(change.nodes, by: change.identities)
+    case let .viewed(view): showCursor(view.identity, on: view.nodes)
+    case .activity, .restarted: break
+    }
+}
+```
+
+Like ``ActivityReader/Follow`` it is a value with no task of its own: canceling the
+consuming task stops and releases the watcher. ``PenFileFollower/Start/end`` is resolved
+when the follower is made, so a write that lands before iteration begins is still seen,
+and ``PenFileFollower/Iterator/position`` resumes a later follower without gaps. A
+delete-then-recreate write keeps the file followed, because the watcher watches the
+document's folder as well as the file; where that folder cannot be opened — a sandboxed
+app holding a grant on one bare `.pen` — the follower polls the file instead. A
+``PresenceTracker`` folds the follower's events
+into who changed and who viewed which nodes last.
+
 ## Topics
+
+### Following
+
+- ``PenFileFollower``
+- ``PresenceTracker``
+
+### Views
+
+- ``ViewEvent``
+- ``ViewLog``
+- ``ViewReader``
 
 ### Writing
 

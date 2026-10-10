@@ -23,7 +23,7 @@ protocol IdentityRole {
     static var help: ArgumentHelp { get }
 }
 
-/// The three roles `--as` plays, and the environment variable they all default from.
+/// The four roles `--as` plays, and the environment variable they all default from.
 ///
 /// A namespace, not a value: each role is a case-less enum used only as a type
 /// argument to ``IdentityOptions``.
@@ -48,6 +48,18 @@ enum Identity {
             """
             Show only this writer's events. Defaults to $\(Identity.environmentVariable); \
             with neither, every writer's are shown.
+            """,
+            valueName: "name"
+        )
+    }
+
+    /// `--as` names who read the nodes a read verb printed, so an editor can show what
+    /// an agent looked at. The role of `tree`, `get`, `find`, `shot` and `render`.
+    enum Reader: IdentityRole {
+        static let help = ArgumentHelp(
+            """
+            Records that you viewed these nodes, in views.jsonl beside the activity log. \
+            Defaults to $\(Identity.environmentVariable); with neither, nothing is logged.
             """,
             valueName: "name"
         )

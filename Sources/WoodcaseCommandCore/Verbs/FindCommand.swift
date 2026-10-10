@@ -82,6 +82,8 @@ struct Find: AsyncParsableCommand {
 
     @OptionGroup var output: OutputOptions
 
+    @OptionGroup var reader: IdentityOptions<Identity.Reader>
+
     /// Reads the file, filters its rows, and prints what is left.
     func run() async throws {
         let url = try file.existingFile()
@@ -91,7 +93,7 @@ struct Find: AsyncParsableCommand {
         try await runReportingFailures(editing: url) {
             let diagnostics = PenDiagnosticCollector()
             defer { StandardError.write(diagnostics) }
-            try await CommandTransaction.read(at: url, diagnostics: diagnostics, fonts: .shared) { document in
+            let read = try await CommandTransaction.read(at: url, diagnostics: diagnostics, fonts: .shared) { document in
                 let rows: [TreeRow]
                 do {
                     rows = try TreeView.rows(
@@ -121,7 +123,11 @@ struct Find: AsyncParsableCommand {
                     properties: properties
                 )
                 print(text)
-            }
+                return (revision: document.documentRevision, nodes: outcome.rows.map(\.id))
+            }.value
+            await ViewLogging.record(
+                .find, of: url, by: reader.identity, revision: read.revision, nodes: read.nodes
+            )
         }
     }
 

@@ -169,6 +169,9 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 - ``ActivityReader``
 - ``ActivityCursor``
 - ``ActivityRecorder``
+- ``ViewEvent``
+- ``ViewLog``
+- ``ViewReader``
 - ``RepositoryIgnoreFile``
 - ``WoodcaseHome``
 
@@ -181,6 +184,7 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 
 ### Following
 
+- ``PenFileFollower``
 - ``FileWatcher``
 - ``ChangeMatcher``
 - ``PresenceTracker``

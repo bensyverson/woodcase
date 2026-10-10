@@ -5,7 +5,7 @@
 
 import Foundation
 
-/// Folds activity events into a ``Presence`` snapshot.
+/// Folds activity events and views into a ``Presence`` snapshot.
 ///
 /// A value, not an actor: it holds nothing but the running tally, so whoever is already
 /// serializing the log owns one and no second lock is needed.
@@ -22,23 +22,39 @@ public struct PresenceTracker: Friendly {
     ///
     /// - Parameter event: The event, as read from the log.
     public mutating func record(_ event: ActivityEvent) {
-        let index: Int
-        if let known = indexByName[event.identity] {
-            index = known
-        } else {
-            index = identities.count
-            indexByName[event.identity] = index
-            identities.append(Presence.Identity(
-                name: event.identity, order: index, lastSeen: event.time, changes: 0
-            ))
-            batches.append(nil)
-        }
-
+        let index = touch(event.identity, file: event.file, at: event.time)
         identities[index].changes += 1
-        identities[index].lastSeen = max(identities[index].lastSeen, event.time)
-        identities[index].files.removeAll { $0 == event.file }
-        identities[index].files.insert(event.file, at: 0)
         fold(event, into: index)
+    }
+
+    /// Folds one read in: it sets the reader's ``Presence/Identity/latestView``.
+    ///
+    /// - Parameter view: The read, from a ``ViewReader`` or a ``PenFileFollower``.
+    public mutating func record(_ view: ViewEvent) {
+        let index = touch(view.identity, file: view.file, at: view.time)
+        if let latest = identities[index].latestView, latest.time > view.time { return }
+        identities[index].latestView = Presence.NodeMark(
+            nodes: view.nodes, paths: [], revision: view.revision, time: view.time, verb: view.verb
+        )
+    }
+
+    /// Folds in whatever a ``PenFileFollower`` delivered: the rows of a change, a lone
+    /// row, or a read. A restart carries nothing to fold.
+    ///
+    /// - Parameter event: The follower's event.
+    public mutating func record(_ event: PenFileFollower.Event) {
+        switch event {
+        case let .changed(change):
+            for row in change.events {
+                record(row)
+            }
+        case let .activity(row):
+            record(row)
+        case let .viewed(view):
+            record(view)
+        case .restarted:
+            break
+        }
     }
 
     /// The current snapshot.
@@ -61,6 +77,25 @@ public struct PresenceTracker: Friendly {
     /// The batch id behind each identity's latest mark, so the next event of the same
     /// batch extends it instead of replacing it.
     private var batches: [String?] = []
+
+    /// Finds or adds an identity, and notes that it was seen at `time` on `file`.
+    ///
+    /// - Returns: The identity's index.
+    private mutating func touch(_ name: String, file: String, at time: Date) -> Int {
+        let index: Int
+        if let known = indexByName[name] {
+            index = known
+        } else {
+            index = identities.count
+            indexByName[name] = index
+            identities.append(Presence.Identity(name: name, order: index, lastSeen: time, changes: 0))
+            batches.append(nil)
+        }
+        identities[index].lastSeen = max(identities[index].lastSeen, time)
+        identities[index].files.removeAll { $0 == file }
+        identities[index].files.insert(file, at: 0)
+        return index
+    }
 
     /// Updates the identity's latest mark from an event; events naming no node leave it alone.
     private mutating func fold(_ event: ActivityEvent, into index: Int) {
