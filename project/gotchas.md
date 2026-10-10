@@ -720,3 +720,13 @@ once — which reads as a loaded machine, not a broken page. Poll with `setTimeo
 non-optional branch's type and becomes `.some(.null)` once promoted. A `MergeConflict` meant to say "the base does
 not hold this" then said "the base holds it unset" (leaf `b8hhaf`). Write `optional.map { _ in value }` or
 `Optional<AnyCodable>.none` where absence and `null` mean different things.
+
+## 2026-10-10 — Parallel tests that each trigger a Core Text font fallback can wedge in `fontd`
+
+`PenTextGeometryTests` lays out emoji and a mathematical-script letter (fallback faces) from four parameterized cases
+at once. Three of five runs sat at 0 % CPU for 10+ minutes with every test thread in `CTFramesetterCreateWithAttributedString`
+→ `TFontCascade::CreateFallback` → `XTCopyFontWithName` → `xpc_connection_send_message_with_reply_sync`, waiting on a
+`fontd` that kept answering other processes (a one-off `xcrun swift` script did the same fallback in 20 ms). With the
+suite `.serialized` it passed 3 of 3 (leaf `AC2izc`). Not root-caused: concurrent cold fallback within one process is
+the likeliest reading. Serialize a suite whose layouts need fallback faces; a renderer that lays out text on several
+threads at once (RapidPro's tiles) may meet the same wait.

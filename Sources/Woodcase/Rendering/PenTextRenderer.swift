@@ -15,7 +15,8 @@ import Foundation
 public enum PenTextRenderer {
     /// Renders a text node's content into the given context at the specified rect.
     ///
-    /// Handles horizontal alignment, vertical alignment, and the node's paint.
+    /// The lines and where they sit in the box are ``PenTextLayout``'s; this draws them
+    /// in the node's paint. Empty content draws nothing.
     ///
     /// - Parameters:
     ///   - data: The text node's data containing content and style.
@@ -31,28 +32,13 @@ public enum PenTextRenderer {
         imageProvider: PenRenderer.ImageProvider = { _ in nil }
     ) {
         let paint = PenGlyphPaint(fills: fills)
-        guard paint != .nothing, let built = buildAttributedString(from: data, color: paint.coreTextColor) else {
-            return
-        }
         let size = CGSize(width: CGFloat(rect.width), height: CGFloat(rect.height))
-        // One typesetting pass: the block's height, which vertical alignment centers, is
-        // the line count times the pitch — the height layout measured.
-        let lines = PenTextLines(
-            built.string, width: size.width, pitch: built.pitch, firstBaseline: built.firstBaseline
-        )
-
-        // Vertical alignment: compute Y offset in top-down (visual) space
-        let verticalOffset: CGFloat = switch data.textAlignVertical {
-        case .middle:
-            (size.height - ceil(lines.height)) / 2
-        case .bottom:
-            size.height - ceil(lines.height)
-        default:
-            0
-        }
-        // Core Text draws bottom-up in a box `size.height` tall; our context is y-down.
-        let placed = lines.placed(inBoxOfHeight: size.height)
-        let textSpace = CGAffineTransform(translationX: 0, y: verticalOffset + size.height).scaledBy(x: 1, y: -1)
+        guard paint != .nothing,
+              let layout = PenTextLayout(data, box: size, color: paint.coreTextColor),
+              !layout.lines.lines.isEmpty
+        else { return }
+        let placed = layout.placed
+        let textSpace = layout.textSpace
 
         switch paint {
         case .nothing:
@@ -75,31 +61,5 @@ public enum PenTextRenderer {
                 size: size, in: context, imageProvider: imageProvider
             )
         }
-    }
-
-    // MARK: - Attributed String Construction
-
-    /// Builds a text node's content in its style, with where its lines are placed.
-    ///
-    /// Returns nil for content that is absent, empty, or an unresolved variable
-    /// reference — there is nothing to draw in any of those cases. Otherwise it is
-    /// ``PenTextStyle/attributedString(_:for:)`` for drawing, the one builder layout
-    /// measurement also sizes text through.
-    ///
-    /// Shared with ``PenLayoutEngine/textInkBounds(of:box:)``, which lays out the same
-    /// string to measure its glyphs' ink rather than to draw them — one attributed
-    /// string, so a divergence in font resolution or paragraph style can never separate
-    /// what is drawn from what is measured.
-    ///
-    /// - Parameters:
-    ///   - data: The text node's data.
-    ///   - color: The glyphs' color (``PenGlyphPaint/coreTextColor``).
-    /// - Returns: The styled text, or `nil` when there is nothing to draw.
-    static func buildAttributedString(
-        from data: PenNode.TextData,
-        color: CGColor
-    ) -> PenStyledText? {
-        guard let text = data.content?.literalValue, !text.isEmpty else { return nil }
-        return PenTextStyle(data).attributedString(text, for: .drawing(color: color))
     }
 }

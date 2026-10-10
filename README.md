@@ -166,6 +166,7 @@ let image = PenRenderer.render(
 - [Editing from the Command Line](Sources/Woodcase/Documentation.docc/WoodcaseEditor.md) — the read–write–verify loop, addressing, property paths, batches, revisions and undo
 - [PenEngine Pipeline](Sources/Woodcase/Documentation.docc/PenEngine.md) — pipeline stages, design patterns, and key architectural decisions
 - [Rendering](Sources/Woodcase/Documentation.docc/PenRendering.md) — rendering architecture overview
+- [Text Layout for Editors](Sources/Woodcase/Documentation.docc/PenTextLayoutForEditors.md) — the one layout call renderers and an editor's caret share: lines in a box, carets, hit-testing and selection
 - [Mesh Gradients](Sources/Woodcase/Documentation.docc/PenMeshGradients.md) — the pure-Swift tessellator and rasterizer behind `mesh_gradient` fills, and its adaptive error bound
 - [Icon Fonts](Sources/Woodcase/Documentation.docc/PenIconFonts.md) — bundled icon font families, versions, weight support, and custom registration
 - [Google Fonts](Sources/Woodcase/Documentation.docc/PenGoogleFonts.md) — automatic font resolution, caching, and variable font support

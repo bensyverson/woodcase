@@ -61,6 +61,9 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 - ``PenTextStyle``
 - ``PenStyledText``
 - ``PenTextLines``
+- ``PenTextLayout``
+- ``PenTextGeometry``
+- ``PenTextLayoutSample``
 - ``PenFontWeight``
 - ``PenFontRegistry``
 - ``PenRenderer``
@@ -68,6 +71,7 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 ### Rendering
 
 - <doc:PenRendering>
+- <doc:PenTextLayoutForEditors>
 - <doc:PenMeshGradients>
 - <doc:PenIconFonts>
 - <doc:PenGoogleFonts>

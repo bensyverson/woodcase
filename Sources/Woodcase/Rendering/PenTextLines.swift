@@ -10,11 +10,11 @@ import Foundation
 /// it equally above and below (``PenTextMeasurer/firstBaseline(of:lineHeight:pitch:)``).
 /// So only the lines and their horizontal origins are taken from Core Text.
 ///
-/// This is the one place a renderer asks where a line of text goes: Woodcase's CG renderer
-/// draws through it, and so does any other renderer that must land its lines on the same
-/// pixel rows (RapidPro's `TextRasterizer`). Build one with
-/// ``init(_:width:font:fontSize:lineHeight:)`` and draw each of
-/// ``placed(inBoxOfHeight:)``'s lines at its origin with `CTLineDraw`.
+/// ``PenTextLayout`` builds one for a text in its box, and is what a renderer or an editor
+/// should call: it also places the block of lines by vertical alignment. Building one
+/// directly with ``init(_:width:font:fontSize:lineHeight:)`` and drawing each of
+/// ``placed(inBoxOfHeight:)``'s lines at its origin with `CTLineDraw` remains public for
+/// RapidPro's `TextRasterizer` until it adopts ``PenTextLayout``.
 ///
 /// Not `Friendly`: it holds `CTLine`s, which are neither `Codable` nor `Sendable`, and it
 /// lives only for the duration of one draw.
