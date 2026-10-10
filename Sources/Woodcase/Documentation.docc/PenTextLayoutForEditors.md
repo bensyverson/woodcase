@@ -48,7 +48,7 @@ Hit-testing the midpoint of the caret at `i` returns `i` — with its affinity a
 
 ### Selection
 
-``PenTextGeometry/selectionRects(for:)`` returns one rect per line a range touches, filling that line's band between the selection's carets. A selection that takes in a line's newline reaches the box's right edge, as `NSTextView` draws it. Bands tile, so the rects of different lines never overlap. The same rects underline marked text during input-method composition.
+``PenTextGeometry/selectionRects(for:)`` returns one rect per line a range touches, filling that line's band between the selection's carets. A selection that continues past a line's end, taking in its newline or running on past a soft wrap, reaches the box's right edge on that line, as `NSTextView` draws it; one that stops exactly at a soft wrap ends at that line's last caret. Bands tile, so the rects of different lines never overlap. The same rects underline marked text during input-method composition.
 
 ### The shared fixture
 

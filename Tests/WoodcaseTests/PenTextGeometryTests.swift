@@ -108,6 +108,35 @@ struct PenTextGeometryTests {
         #expect(geometry.selectionRects(for: 5 ..< 5).isEmpty)
     }
 
+    @Test("A selection that runs past a soft wrap reaches the box's right edge on the wrapped line",
+          arguments: PenTextLayoutSample.multiLine)
+    func selectionAcrossSoftWrap(sample: PenTextLayoutSample) throws {
+        let geometry = Self.layout(sample).geometry
+        let wrapped = try #require(geometry.lines.firstIndex { $0.ending == .softWrap })
+        let line = geometry.lines[wrapped]
+        let next = geometry.lines[wrapped + 1]
+        let start = line.stringRange.lowerBound
+        let past = try #require(Self.boundaries(of: sample.text).first { $0 > next.stringRange.lowerBound })
+        let rects = geometry.selectionRects(for: start ..< past)
+        let onLine = try #require(rects.first { $0.y == line.band.y })
+        let lastCaret = try #require(line.carets.map(\.x).max())
+        // A trailing space can hang past the edge (right-aligned, justified); the rect covers it.
+        #expect(onLine.x + onLine.width == max(geometry.box.width, lastCaret), "\(sample.name)")
+    }
+
+    @Test("A selection that ends at a soft wrap stops at the wrapped line's last caret",
+          arguments: PenTextLayoutSample.multiLine)
+    func selectionEndingAtSoftWrap(sample: PenTextLayoutSample) throws {
+        let geometry = Self.layout(sample).geometry
+        let wrapped = try #require(geometry.lines.firstIndex { $0.ending == .softWrap })
+        let line = geometry.lines[wrapped]
+        let rects = geometry.selectionRects(for: line.stringRange)
+        #expect(rects.count == 1)
+        let rect = try #require(rects.first)
+        let carets = line.carets.map(\.x)
+        #expect(rect.x + rect.width == carets.max(), "\(sample.name)")
+    }
+
     @Test("Empty text has one caret line at Pen's first baseline, placed as a one-line block")
     func emptyText() {
         let sample = PenTextLayoutSample.empty
