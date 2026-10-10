@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# pre-commit — formats the staged Swift files and re-stages them, then warns on MAE
-# regressions (scripts/mae-check, which never blocks). It does not run the tests.
+# pre-commit — formats the staged Swift files and re-stages them, warns on MAE
+# regressions (scripts/mae-check, which never blocks), and refuses a stale or
+# hand-edited AGENTS.md (`agents check`). It does not run the tests.
 #
 # Tracked so a fresh clone gets it; enable it once per clone with
 #     git config core.hooksPath scripts/git-hooks
@@ -21,3 +22,11 @@ if [[ ${#files[@]} -gt 0 ]]; then
 fi
 
 scripts/mae-check
+
+# `agents check` reads the shared rules from a sibling checkout, which the Claude Code
+# sandbox denies; commit with the sandbox off. A clone without the tool skips it.
+if command -v agents >/dev/null 2>&1; then
+    agents check || exit 1
+else
+    echo "pre-commit: agents not installed; skipping the AGENTS.md check" >&2
+fi
