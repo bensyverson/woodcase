@@ -7,7 +7,7 @@ import Foundation
 
 extension ReactEmitter {
     /// The margin that sizes a turned flow child's flex item to its turned bounds, the
-    /// slot Pen's layout gives it (`render-transforms-and-effects`; gotchas, 2026-08-29).
+    /// slot Pen's layout gives it (`render-transforms-and-effects`; ``PenLayoutEngine/applyRotationExpansion(width:height:node:)``).
     ///
     /// CSS lays a flex item out at its unturned box whatever its `transform`, so every
     /// later sibling would sit where the unturned box ends. A margin of half the difference

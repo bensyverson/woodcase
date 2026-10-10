@@ -199,6 +199,9 @@ public struct OutlineRow: HTML {
         }
         .attributes(.class("is-selected"), when: isSelected)
         .attributes(.class("is-clipped"), when: row.clip != .none)
+        // Elementary joins a conditional `style` or `class` onto the element's own with
+        // `;` or a space, so pass only what the condition adds: repeating `--v-depth` here
+        // would write it twice. Other attributes are appended in declaration order.
         .attributes(
             .class("is-touched"),
             .style("--v-actor: \(editorColor)"),

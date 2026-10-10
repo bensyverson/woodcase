@@ -14,7 +14,7 @@ import Testing
 /// found for.
 ///
 /// Nothing here registers a font: the bundle is files to copy, and Core Text
-/// registration is process-global (`project/gotchas.md`, 2026-09-02).
+/// registration is process-global (see `TestFontRegistration`).
 @Suite("GoogleFontResolver bundling")
 struct GoogleFontResolverBundlingTests {
     private static let fontsDirectory = URL(fileURLWithPath: #filePath)

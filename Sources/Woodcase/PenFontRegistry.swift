@@ -103,7 +103,7 @@ public enum PenFontRegistry {
     /// Registration goes through the file URL on purpose: descriptors created *from
     /// data* carry no `kCTFontURLAttribute`, and `CTFontManagerRegisterFontDescriptors`
     /// rejects them with error 303 — silently, when nobody reads the handler
-    /// (`project/gotchas.md`).
+    /// (`project/2026-08-30-font-registration-from-data.md`).
     ///
     /// - Parameter url: The font file.
     /// - Returns: What the registration did to the font set.

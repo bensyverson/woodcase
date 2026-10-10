@@ -17,6 +17,11 @@ import Foundation
 /// The .pen JSON format is flat — common and type-specific properties coexist at the same level.
 /// The custom `Codable` implementation decodes `type` first, then delegates to `PenNodeCommon`
 /// and the appropriate `*Data` struct, both reading from the same decoder.
+///
+/// - Important: Walk a tree of nodes from a work list, never by recursion: a Swift task's
+///   512 KiB stack overflows on a deep document (SIGBUS, exit 138, no output). Freeing,
+///   comparing, encoding and some emitters still recurse — issue `a1p6vh`;
+///   `project/2026-09-26-debug-stack-depth.md` has the measurements.
 public struct PenNode: Friendly, Identifiable {
     /// Creates a node.
     ///

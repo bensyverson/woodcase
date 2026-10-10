@@ -13,7 +13,7 @@ import Woodcase
 /// Asserted on outcome, never on elapsed time. The deadline handed in has *already*
 /// passed, so the test says exactly one thing — a call past the deadline refuses — and
 /// says it in microseconds. Wall-clock budgets are unreliable in the parallel suite
-/// (`project/gotchas.md`, 2026-08-29), and a test that sleeps to prove a timeout is
+/// (`project/2026-08-31-load-shaped-budgets.md`), and a test that sleeps to prove a timeout is
 /// measuring the machine.
 @Suite("the script deadline")
 struct ScriptDeadlineTests {

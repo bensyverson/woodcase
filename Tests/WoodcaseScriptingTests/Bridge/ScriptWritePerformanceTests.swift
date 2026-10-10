@@ -27,7 +27,7 @@ import Woodcase
 /// ```
 ///
 /// It asserts nothing about the clock. A timing measured while other builds run is not a
-/// timing (`project/gotchas.md`), and a budget nobody can reproduce from a checkout has no
+/// timing (`project/2026-08-29-test-suite-speed.md`), and a budget nobody can reproduce from a checkout has no
 /// business failing a suite; the lines it prints are the whole of its answer.
 @Suite("the write-then-read cost")
 struct ScriptWritePerformanceTests {

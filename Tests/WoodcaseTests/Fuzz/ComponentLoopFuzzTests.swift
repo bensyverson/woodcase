@@ -15,7 +15,7 @@ import Testing
 /// detaches and overrides expanded 12 million and 80 thousand nodes; under the loop rule
 /// every instance expands its loop at most once. Each operation is bounded at "not hung"
 /// scale, because the parallel suite stretches wall time
-/// (`project/gotchas.md`); the unloaded figures are in leaf `xaAJeF`'s report.
+/// (`project/2026-08-31-load-shaped-budgets.md`); the unloaded figures are in leaf `xaAJeF`'s report.
 @MainActor
 struct ComponentLoopFuzzTests {
     /// The merge-fuzz seeds that hung, and the operations each side draws.

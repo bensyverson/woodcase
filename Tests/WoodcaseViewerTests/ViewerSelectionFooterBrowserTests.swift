@@ -124,7 +124,7 @@
             return ['.v-selection-rect', '.v-selection-rev']
               .map((s) => getComputedStyle(document.querySelector(s)).display).join(',');
             """) == "none,none")
-            // A character the ellipsis ate reports a zero-width rect (gotchas.md).
+            // A character the ellipsis ate reports a zero-width rect (see ViewerChromeBrowserTests.aLongSelectionPathIsFrontTruncated).
             #expect(await bench.ask("""
             const path = document.querySelector('.v-selection-path');
             const text = path.querySelector('bdi').firstChild;

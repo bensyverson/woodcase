@@ -42,7 +42,7 @@
         /// loaded machine (measured 2026-09-27, `swift test --filter SwiftUIRenderTests
         /// -j 3`, load ~130 on an 8-core Mac) and crossed the previous 600 s budget
         /// entirely under the full suite's contention — the house convention (see
-        /// `project/gotchas.md`, "wall-clock budgets") is to scale a *not hung* guard
+        /// `project/2026-08-31-load-shaped-budgets.md`) is to scale a *not hung* guard
         /// rather than pick a number that only covers today's quietest run. 30 minutes
         /// gives roughly 3x headroom over the worst compile measured so far, while
         /// staying well inside the run's own watchdog (`perl -e 'alarm …'`).
@@ -195,8 +195,8 @@
         /// that way under load, and 12.6 s of CPU whole-module (measured 2026-09-28,
         /// `xcrun swiftc -typecheck` over the batch's own sources, load ~55). `-j 3` caps
         /// the driver's parallelism on this shared 8-core Mac, as `swift build` and
-        /// `swift test` are capped (`project/gotchas.md`, "Ten cold Swift builds at once
-        /// panic this Mac").
+        /// `swift test` are capped for parallel agents (ten cold builds at
+        /// once panicked this Mac).
         static func compile(floor: SwiftUIEmitter.DeploymentFloor) -> [String] {
             [
                 "/usr/bin/xcrun", "swiftc", "-wmo", "-j", "3", "-swift-version", "6",
@@ -322,7 +322,9 @@
         /// A batch that cannot be put together.
         enum BatchError: Error {
             /// A fixture emitted a theme file that differs from one another fixture wrote:
-            /// the fixture and the file.
+            /// the fixture and the file. Every fixture compiles into one module, so only one
+            /// may carry a theme; a new themed fixture gets its own batch, as
+            /// `SwiftUIThemedNumbersBatch` does.
             case conflictingTheme(String, String)
         }
 

@@ -275,7 +275,7 @@
             let bench = try await Bench()
             defer { Task { await bench.stop() } }
             try await bench.open("activity-row", "cross-file")
-            // A character the ellipsis ate reports a zero-width rect (gotchas.md).
+            // A character the ellipsis ate reports a zero-width rect (see ViewerChromeBrowserTests.aLongSelectionPathIsFrontTruncated).
             #expect(await bench.ask("""
             const path = document.querySelector('.v-activity-path');
             const text = path.querySelector('bdi').firstChild;

@@ -11,7 +11,9 @@ import Woodcase
 /// both suites turn a fixture into emitted files.
 ///
 /// Every `layout-*.pen` and `render-text.pen`: each holds one top-level frame, which
-/// `PageAnalyzer` finds as a page, so every fixture emits exactly one page file.
+/// `PageAnalyzer` finds as a page, so every fixture emits exactly one page file. A new
+/// `layout-*.pen` therefore joins the SwiftUI goldens and needs one generated; name a
+/// fixture only the layout engine reads something else.
 enum SwiftUIFixtures {
     /// The directory holding the fixtures, in the source tree.
     static let directory = URL(fileURLWithPath: #filePath)

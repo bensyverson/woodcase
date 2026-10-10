@@ -44,7 +44,7 @@ final class ResumeOnce<Value: Sendable>: Sendable {
     ///
     /// A *not hung* guard rather than a measurement: binding a loopback port or handing
     /// a few kilobytes to the transport takes milliseconds, and this is sized far past
-    /// anything the parallel suite's load can explain, per `project/gotchas.md`.
+    /// anything the parallel suite's load can explain, per `project/2026-08-31-load-shaped-budgets.md`.
     static var budget: Duration {
         .seconds(30)
     }

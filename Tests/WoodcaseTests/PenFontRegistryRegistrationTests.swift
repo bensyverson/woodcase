@@ -10,7 +10,7 @@ import Testing
 /// ``PenFontRegistry/registerFont(at:)`` says what a registration did to the font set,
 /// because only a registration that added a face may move the font generation.
 ///
-/// Registration is process-global and irreversible (`project/gotchas.md`, 2026-09-02),
+/// Registration is process-global and irreversible (see `TestFontRegistration`),
 /// so these tests never take a family from absent to present: the "already registered"
 /// case uses a test font ``registerTestFonts()`` has already placed, and the "added" case
 /// registers a fresh copy of a bundled icon font — the same bytes as a face the process

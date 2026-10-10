@@ -37,7 +37,7 @@ struct PenFileTransactionTests {
     /// measures the machine rather than the lock: at ten seconds
     /// ``concurrentTransactionsSerialize`` failed a loaded soak with a genuine
     /// ``PenFileError/lockTimeout(url:timeout:)`` (leaf `YfptE`). Bounded at "not hung"
-    /// scale instead, per `project/gotchas.md`. Tests that expect the timeout *itself*
+    /// scale instead, per `project/2026-08-31-load-shaped-budgets.md`. Tests that expect the timeout *itself*
     /// keep their own short budget — that is the behavior they assert.
     private static let lockBudget: Duration = .seconds(60)
 

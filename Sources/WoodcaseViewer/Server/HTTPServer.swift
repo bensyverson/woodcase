@@ -77,6 +77,8 @@ actor HTTPServer {
         let listener = try NWListener(using: parameters)
         self.listener = listener
 
+        // Before `start(queue:)`: a listener started with no handler fails with EINVAL
+        // (`POSIXErrorCode` 22), which reads like a bad loopback parameter but is not.
         listener.newConnectionHandler = { [routes, context, queue] connection in
             connection.stateUpdateHandler = { state in
                 switch state {

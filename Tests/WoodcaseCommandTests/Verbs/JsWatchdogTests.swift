@@ -17,7 +17,7 @@ import Woodcase
 ///
 /// Every assertion here is about the **outcome** — the sentence, the exit code, the
 /// file's bytes — and never about elapsed time: wall-clock assertions are unreliable in
-/// the parallel suite (`project/gotchas.md`, 2026-08-29). The bound that keeps a broken
+/// the parallel suite (`project/2026-08-31-load-shaped-budgets.md`). The bound that keeps a broken
 /// watchdog from hanging the suite is ``CommandFixture/runBudget``, which is two orders
 /// of magnitude above the one-second timeout these runs are given.
 @Suite("woodcase js watchdog")

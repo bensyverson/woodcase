@@ -49,7 +49,7 @@
             let queue = DispatchQueue(label: "LoopbackHTTPServer")
             let box = HeldConnections()
             // The handler must be set before `start`, or the listener fails with EINVAL
-            // (project/gotchas.md, 2026-08-30).
+            // (see `HTTPServer.start(port:)`).
             listener.newConnectionHandler = { connection in
                 box.add(connection)
                 connection.start(queue: queue)

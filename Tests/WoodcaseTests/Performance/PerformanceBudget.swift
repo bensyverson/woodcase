@@ -26,7 +26,7 @@ import Woodcase
 /// Nothing here is asserted against a single wall-clock sample: a budget is always
 /// checked against ``PerformanceSample/best``, the minimum of several in-process
 /// repetitions. A loaded machine inflates a single run several-fold (see
-/// `project/gotchas.md`, "A timing measured while agents build is not a timing"), and
+/// `project/2026-08-29-test-suite-speed.md`), and
 /// the minimum is the figure that survives a neighbor building in another worktree.
 struct PerformanceBudget: Friendly {
     /// How much slower the same pipeline is when built without optimization.

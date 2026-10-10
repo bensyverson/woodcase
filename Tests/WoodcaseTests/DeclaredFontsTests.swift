@@ -16,7 +16,7 @@ import Testing
 ///
 /// Core Text registration is process-global and irreversible, so each family that goes
 /// from absent to present here is owned by exactly one test and used by no other suite
-/// (`project/gotchas.md`, 2026-09-02): "Woodcase Declared Mono" and "Woodcase Fetched
+/// (see `TestFontRegistration`): "Woodcase Declared Mono" and "Woodcase Fetched
 /// Mono", renamed copies of JetBrains Mono made by `scripts/rename-font-family`.
 @Suite("Declared fonts")
 struct DeclaredFontsTests {

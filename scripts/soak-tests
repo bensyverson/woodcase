@@ -21,6 +21,11 @@
 #   TIMEOUT     the run outstayed --timeout. `sample` output for the test host
 #               is written beside the log before it is killed, because a run
 #               that hangs prints nothing and cannot be diagnosed afterwards.
+#               A sample with none of our frames is not proof of a hang: the
+#               browser tests poll with Task.sleep, and a sleeping task has no
+#               thread, so a slow WebKit phase samples exactly like a wedge.
+#               That is why the default is 600 s; re-run longer before
+#               believing it (project/2026-09-07-unpinning-and-the-loaded-soak.md).
 #
 # Only pids this script started are ever killed. Never `pkill -f`: the pattern
 # matches other agents' runs and the shared dev server.

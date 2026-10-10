@@ -53,7 +53,9 @@ extension View {
     ///
     /// Pen casts a text's inner shadow from its glyphs drawn opaque, whatever the paint, so
     /// the glyphs that cast it are this view unpainted and styled opaque black: a translucent
-    /// fill, or none, still shows the shadow at full strength. The result is one layer, so
+    /// fill, or none, still shows the shadow at full strength. The style must be explicit —
+    /// an unstyled `Text` draws `.primary`, 85 % alpha on macOS, and leaves a veil when cut
+    /// out. The result is one layer, so
     /// a `.shadow` after it is cast once, not by the paint and each inner shadow apart.
     func penTextFill(innerShadows: [PenShadowStyle], @ViewBuilder _ paint: () -> some View) -> some View {
         // Unstyled, the glyphs would draw in `.primary`, which is not opaque: black at 85 %.

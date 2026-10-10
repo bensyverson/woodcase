@@ -28,6 +28,9 @@ struct EditingIsolationTests {
             .appendingPathComponent("Woodcase")
     }
 
+    /// Every line counts, string literals and the `.swift` files under `SwiftUITemplates/`
+    /// included, so a generator must not spell the attribute into emitted code either; the
+    /// code it emits into a top-level `main.swift` is main-actor already.
     @Test("no @MainActor appears anywhere in Sources/Woodcase")
     func sourcesCarryNoGlobalActor() throws {
         let root = Self.librarySources

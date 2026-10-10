@@ -13,7 +13,7 @@ extension Trait where Self == TimeLimitTrait {
     /// browser test runs on the main actor, interleaved with every other, so the
     /// slowest reports about 80 % of the whole run (78 s of a 94 s run, 2026-09-08 suite
     /// logs), and a run at load 200 takes about 3 minutes. And the agents' watchdog
-    /// kills a run at 10 minutes (`project/gotchas.md`), so a limit at or past it would
+    /// kills a run at 10 minutes (`perl -e "alarm 600"` around `swift test`), so a limit at or past it would
     /// never get to name anything. Eight minutes is past every healthy test the watchdog
     /// lets finish, and short of the watchdog. Swift Testing counts limits in whole
     /// minutes.

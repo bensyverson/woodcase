@@ -107,7 +107,7 @@ end-to-end time is recorded below as information.
 shared with other builds. The same unchanged pipeline measured 8639 ms under four
 concurrent `swift build`s and 411 ms twenty minutes later; the *minimum* barely
 moved between repetitions in either case, while a single sample was off by 20×. See
-`project/gotchas.md`, "A timing measured while agents build is not a timing".
+`project/2026-08-29-test-suite-speed.md`.
 
 **One at a time.** Every budget lives under one `@Suite(.serialized)` parent,
 `PerformanceBudgets`. Run in parallel, the six of them inflated one another by about a

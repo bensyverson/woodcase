@@ -9,6 +9,11 @@
 # unresolved when widths are fitted); scripts/pen-settle writes both layouts,
 # and --settle makes this script's exports and layout the settled ones.
 #
+# The re-save is not proof of what Pen draws: the save rounds values through
+# JavaScript's Number(), the drawing does arithmetic on them, so malformed mesh
+# points re-saved as clean numbers yet drew nothing (2026-09-26). Judge Pen's
+# rendering from the exports, never from the re-save.
+#
 # This is a fixture *generator*, run by hand. The test suite never calls
 # `pen` — Ben's ruling (see project/2026-08-29-pen-cli.md): `pen` may break
 # or vanish, and consumers cannot be made to install and log in. Outputs are

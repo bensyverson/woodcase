@@ -47,7 +47,7 @@ enum ViewerFixtures {
     /// suite is building all queue on the **main actor**; while a heavy library suite
     /// holds it — a 5000-node layout, a WebKit round trip — this test's lock poll does
     /// not run at all, and a budget it cannot poll against measures the machine rather
-    /// than the lock. Bounded at "not hung" scale instead, per `project/gotchas.md`.
+    /// than the lock. Bounded at "not hung" scale instead, per `project/2026-08-31-load-shaped-budgets.md`.
     static let lockBudget: Duration = .seconds(60)
 
     /// How long a viewer test waits for its own loopback server to answer.

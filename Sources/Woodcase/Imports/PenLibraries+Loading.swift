@@ -8,6 +8,9 @@ import Foundation
 public extension PenLibraries {
     /// The URL scheme Pen reserves for the libraries it bundles with itself, written
     /// `<scheme>:shadcn.lib.pen`.
+    ///
+    /// The scheme is the vendor's old product name, which `VendorWordsTests` forbids in any
+    /// `.docc` file: DocC names this symbol instead of spelling the word.
     static let bundledScheme = "pencil"
 
     /// Reads every library a document's `imports` name.

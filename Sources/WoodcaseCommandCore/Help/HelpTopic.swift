@@ -88,6 +88,11 @@ enum HelpTopic: String, CaseIterable, ExpressibleByArgument {
     /// means, how to read one back, and the loop that ties the four steps together.
     /// It ends by naming the verb whose own `--help` carries each thing this leaves
     /// out, because the Quill run's agents stopped reading here and never found them.
+    ///
+    /// It runs at its line budget (`HelpCommandTests.designTopicLineBudget`), so any line
+    /// added here fails that test. Trim to the claim and move the rest behind the verb's own
+    /// `--help` with a SEE ALSO row; raise the budget only deliberately, with the reason in
+    /// its doc comment.
     private static let designTopic = """
     FLEX FIRST
       A frame with no "layout" key lays its children out horizontally, in order. Only a root — a

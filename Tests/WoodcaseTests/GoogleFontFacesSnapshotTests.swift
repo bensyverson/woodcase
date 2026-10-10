@@ -24,7 +24,7 @@ import Testing
 /// listed first and draw upright text in italic.
 ///
 /// Core Text registration is process-wide and irreversible, and exactly one test per run
-/// may watch a family go from absent to present (`project/gotchas.md`, 2026-09-02). IBM
+/// may watch a family go from absent to present (see `TestFontRegistration`). IBM
 /// Plex Mono, Spectral, Lora and Instrument Serif belong to this suite; no other suite
 /// registers them. So the preparation runs once, in ``preparation``, and every test here
 /// awaits it rather than preparing its own.

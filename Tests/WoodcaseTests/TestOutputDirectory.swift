@@ -23,6 +23,10 @@ import Foundation
 /// ``keepVariable`` to keep every folder for debugging.
 enum TestOutputDirectory {
     /// The environment variable that, when set, turns off the sweep of old folders.
+    ///
+    /// It stops only this run's sweep: any other run sharing the temporary directory still
+    /// sweeps this one's folder once the process exits. To keep output, give the run its
+    /// own `TMPDIR` as well.
     static let keepVariable = "WOODCASE_KEEP_TEST_OUTPUT"
 
     /// The folder-name prefix; the process id follows it.

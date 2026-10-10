@@ -102,8 +102,8 @@
             /// next callback it gets, with no check that the callback is *this*
             /// navigation's own. `load` then returns claiming success while the page is
             /// still showing whatever it showed before, and no amount of waiting
-            /// recovers a step that never landed (`project/gotchas.md`, "A wait after an
-            /// irreversible step tests nothing") — so this re-navigates instead of
+            /// recovers a step that never landed (`project/2026-08-31-follow-is-a-value.md`: a wait after an
+            /// irreversible step tests nothing) — so this re-navigates instead of
             /// waiting out the full budget on a page that was never coming.
             func reload(
                 _ url: URL,
