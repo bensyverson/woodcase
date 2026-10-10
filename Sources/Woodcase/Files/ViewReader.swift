@@ -54,19 +54,7 @@ public struct ViewReader: Friendly {
     /// - Throws: ``PenFileError/cannotOpen(url:reason:)`` if a log file exists but cannot
     ///   be read.
     public func read(after cursor: ActivityCursor = .start, file: URL? = nil, identity: String? = nil) throws -> Page {
-        let wanted = log.origin.holdsOneDocument ? nil : file.map(ActivityEvent.canonicalPath(for:))
-        let page: JSONLinesPage<ViewEvent> = try log.lines.read(after: cursor) { view in
-            if let wanted, view.file != wanted { return false }
-            if let identity, view.identity != identity { return false }
-            return true
-        }
-        return Page(
-            events: page.rows,
-            eventCursors: page.rowCursors,
-            cursor: page.cursor,
-            restarted: page.restarted,
-            skippedLines: page.skippedLines
-        )
+        try Page(log.lines.read(after: cursor, matching: matching(file: file, identity: identity)))
     }
 
     /// The cursor at the end of the log as it is now, for a reader that wants only
@@ -75,5 +63,63 @@ public struct ViewReader: Friendly {
     /// - Returns: The end of the live log, without reading it.
     public func endCursor() -> ActivityCursor {
         log.lines.endCursor()
+    }
+
+    /// Where the views at or after `date` begin, walking back from `end`: see
+    /// ``JSONLinesFile/cursor(since:through:)``.
+    ///
+    /// - Parameters:
+    ///   - date: The oldest moment in the window.
+    ///   - end: Where the window ends, from ``endCursor()``.
+    /// - Returns: The cursor just after the newest view stamped before `date`.
+    /// - Throws: ``PenFileError/cannotOpen(url:reason:)`` if a file the walk needs cannot
+    ///   be read.
+    func cursor(since date: Date, through end: ActivityCursor) throws -> ActivityCursor {
+        try log.lines.cursor(since: date, through: end)
+    }
+
+    /// Reads the views after `cursor` up to `end` stamped at or after `date`: see
+    /// ``JSONLinesFile/read(after:through:since:matching:)``.
+    ///
+    /// - Parameters:
+    ///   - cursor: Where to start, from ``cursor(since:through:)``.
+    ///   - end: Where to stop, from ``endCursor()``.
+    ///   - date: Views stamped before it are dropped.
+    ///   - file: Keep only views of this document.
+    /// - Returns: The page, whose cursor resumes just after the last complete line read.
+    /// - Throws: ``PenFileError/cannotOpen(url:reason:)`` if a log file cannot be read.
+    func read(after cursor: ActivityCursor, through end: ActivityCursor, since date: Date, file: URL?) throws -> Page {
+        try Page(log.lines.read(after: cursor, through: end, since: date, matching: matching(file: file, identity: nil)))
+    }
+
+    /// The filter a read applies; a bundle's log drops the file filter, as
+    /// ``ActivityReader``'s does, so a renamed bundle keeps its views.
+    ///
+    /// - Parameters:
+    ///   - file: Keep only views of this document, compared canonically.
+    ///   - identity: Keep only views by this reader.
+    /// - Returns: The predicate.
+    private func matching(file: URL?, identity: String?) -> @Sendable (ViewEvent) -> Bool {
+        let wanted = log.origin.holdsOneDocument ? nil : file.map(ActivityEvent.canonicalPath(for:))
+        return { view in
+            if let wanted, view.file != wanted { return false }
+            if let identity, view.identity != identity { return false }
+            return true
+        }
+    }
+}
+
+extension ViewReader.Page {
+    /// Wraps a raw page of the log's lines.
+    ///
+    /// - Parameter page: What ``JSONLinesFile`` read.
+    init(_ page: JSONLinesPage<ViewEvent>) {
+        self.init(
+            events: page.rows,
+            eventCursors: page.rowCursors,
+            cursor: page.cursor,
+            restarted: page.restarted,
+            skippedLines: page.skippedLines
+        )
     }
 }

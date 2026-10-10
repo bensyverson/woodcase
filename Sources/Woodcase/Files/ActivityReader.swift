@@ -20,6 +20,11 @@ import Foundation
 /// page = try reader.read(from: page.nextOffset, file: url)
 /// ```
 ///
+/// Those two calls read the **live file only** — `activity.jsonl`, not the archives
+/// rotation moved aside — so on a long history they see only the newest part of it.
+/// ``read(after:file:identity:)`` from ``ActivityCursor/start`` reads every archive and
+/// then the live file.
+///
 /// ## No lock, on purpose
 ///
 /// A writer appends whole lines under an exclusive lock, but a reader takes no lock at
@@ -114,11 +119,18 @@ public struct ActivityReader: Friendly {
         public var skippedLines: Int
     }
 
-    /// Reads every complete line from `offset` on.
+    /// Reads every complete line of the **live file** from `offset` on — never the
+    /// rotated archives.
+    ///
+    /// With the default offset this is the live file from its first byte, which is the
+    /// whole history only until the log first rotates (``ActivityLog/rotationThreshold``);
+    /// after that the older rows are in archives this call does not open. To read every
+    /// retained row, use ``read(after:file:identity:)`` from ``ActivityCursor/start``; to
+    /// cost or test a full-history read, time that call, not this one.
     ///
     /// - Parameters:
     ///   - offset: Where to start, from a previous ``Page/nextOffset``. Zero reads the
-    ///     whole live log.
+    ///     live file from its beginning.
     ///   - file: Show only events for this .pen file. Compared as
     ///     ``ActivityEvent/canonicalPath(for:)``, so any spelling of the path matches.
     ///   - identity: Show only events written by this `--as` name.
@@ -135,7 +147,8 @@ public struct ActivityReader: Friendly {
         try readFile(at: log.fileURL, from: offset, file: file, identity: identity)
     }
 
-    /// The last `count` matching events in the live log.
+    /// The last `count` matching events in the live file; rows rotated into archives are
+    /// not considered.
     ///
     /// - Parameters:
     ///   - count: How many events to return. The whole log if it holds fewer.

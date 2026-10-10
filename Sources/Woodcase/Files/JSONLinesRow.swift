@@ -16,6 +16,10 @@ protocol JSONLinesRow: Sendable {
     /// - Throws: `DecodingError` if the line is not a row of this kind; the reader
     ///   counts it as skipped and steps over it.
     init(line: Data, using decoder: JSONDecoder) throws
+
+    /// When the row was written, to the millisecond: what a read that starts at a time
+    /// compares.
+    var time: Date { get }
 }
 
 extension ActivityEvent: JSONLinesRow {}

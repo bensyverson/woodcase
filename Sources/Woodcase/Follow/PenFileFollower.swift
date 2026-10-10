@@ -55,7 +55,9 @@ public struct PenFileFollower: AsyncSequence, Friendly {
     ///     inside one.
     ///   - log: The activity log to read. Defaults to ``ActivityLogLocation/log(for:environment:)``.
     ///   - start: Where to begin. ``Start/end`` is resolved now, so a write made after
-    ///     this initializer returns is never missed, however late iteration begins.
+    ///     this initializer returns is never missed, however late iteration begins; so is
+    ///     where ``Start/since(_:)``'s history ends. Neither reads more than each log's last
+    ///     line here — enough to find its end — so making a follower is cheap on any thread.
     ///   - matchWindow: How long a change waits for a row to explain it, and how long a
     ///     row waits for its change, before each is delivered alone.
     ///   - pollInterval: How long the consumer sleeps between reads when nothing happened.
@@ -77,7 +79,7 @@ public struct PenFileFollower: AsyncSequence, Friendly {
         self.pollInterval = pollInterval
         self.backend = backend
         switch start {
-        case .end:
+        case .end, .since:
             origin = Position(
                 activity: ActivityReader(log: log).endCursor(),
                 views: ViewReader(log: ViewLog(beside: log)).endCursor()
@@ -112,6 +114,10 @@ public struct PenFileFollower: AsyncSequence, Friendly {
 
     /// Starts a walk from ``start``.
     ///
+    /// For ``Start/since(_:)`` this is where each log is walked back to the date — a read
+    /// proportional to the window — so make the iterator off the main actor, as a
+    /// `for await` in a task off it does.
+    ///
     /// - Returns: A fresh iterator. Two are independent; each makes its own watcher.
     public func makeAsyncIterator() -> Iterator {
         Iterator(follower: self)
@@ -119,11 +125,13 @@ public struct PenFileFollower: AsyncSequence, Friendly {
 
     // MARK: - Internal
 
-    /// ``start`` resolved to log positions.
+    /// ``start`` resolved to log positions. For ``Start/since(_:)`` it is where the history
+    /// ends — the logs' end when the follower was made — and each iterator walks back from
+    /// it to the date.
     let origin: Position
 
-    /// The document's signature when ``Start/end`` was resolved, so a write that lands
-    /// before the watcher is armed is still noticed.
+    /// The document's signature when ``Start/end`` or ``Start/since(_:)`` was resolved, so
+    /// a write that lands before the watcher is armed is still noticed.
     let baseline: FileSignature?
 
     /// The key the matcher files every change and row under: there is only one file.

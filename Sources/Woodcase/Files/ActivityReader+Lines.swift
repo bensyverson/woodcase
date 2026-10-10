@@ -26,6 +26,33 @@ extension ActivityReader {
         log.lines.endCursor()
     }
 
+    /// Where the rows at or after `date` begin, walking back from `end`: see
+    /// ``JSONLinesFile/cursor(since:through:)``.
+    ///
+    /// - Parameters:
+    ///   - date: The oldest moment in the window.
+    ///   - end: Where the window ends, from ``endCursor()``.
+    /// - Returns: The cursor just after the newest row stamped before `date`.
+    /// - Throws: ``PenFileError/cannotOpen(url:reason:)`` if a file the walk needs cannot
+    ///   be read.
+    func cursor(since date: Date, through end: ActivityCursor) throws -> ActivityCursor {
+        try log.lines.cursor(since: date, through: end)
+    }
+
+    /// Reads the rows after `cursor` up to `end` stamped at or after `date`: see
+    /// ``JSONLinesFile/read(after:through:since:matching:)``.
+    ///
+    /// - Parameters:
+    ///   - cursor: Where to start, from ``cursor(since:through:)``.
+    ///   - end: Where to stop, from ``endCursor()``.
+    ///   - date: Rows stamped before it are dropped.
+    ///   - file: Show only events for this .pen file.
+    /// - Returns: The page, whose cursor resumes just after the last complete line read.
+    /// - Throws: ``PenFileError/cannotOpen(url:reason:)`` if a log file cannot be read.
+    func read(after cursor: ActivityCursor, through end: ActivityCursor, since date: Date, file: URL?) throws -> Page {
+        try Page(log.lines.read(after: cursor, through: end, since: date, matching: matching(file: file, identity: nil)))
+    }
+
     /// Reads every complete line of one log file from `offset` on.
     ///
     /// - Parameters:

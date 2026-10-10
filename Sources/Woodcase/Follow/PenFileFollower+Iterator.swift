@@ -14,12 +14,20 @@ public extension PenFileFollower {
     struct Iterator: AsyncIteratorProtocol {
         /// Creates an iterator. Use ``PenFileFollower/makeAsyncIterator()``.
         ///
+        /// For ``Start/since(_:)`` it walks each log back from where the history ends to
+        /// the date — the one read that start costs before the first ``next()``.
+        ///
         /// - Parameter follower: What to follow, and how.
         init(follower: PenFileFollower) {
             self.follower = follower
-            position = follower.origin
-            readCursor = follower.origin.activity
-            viewCursor = follower.origin.views
+            var origin = follower.origin
+            if case let .since(date) = follower.start {
+                history = History(date: date, end: follower.origin)
+                origin = History.start(of: follower, since: date)
+            }
+            position = origin
+            readCursor = origin.activity
+            viewCursor = origin.views
             matcher = ChangeMatcher(window: follower.matchWindow)
             isReplaying = follower.start != .end
             baseline = follower.baseline
@@ -41,8 +49,7 @@ public extension PenFileFollower {
         /// - Returns: The next event, or `nil` once the consuming task is canceled.
         public mutating func next() async -> Event? {
             while true {
-                if !ready.isEmpty {
-                    let next = ready.removeFirst()
+                if let next = ready.popFirst() {
                     position = next.position
                     return next.event
                 }
@@ -70,9 +77,50 @@ public extension PenFileFollower {
         // MARK: - Private
 
         /// An event ready to return, and the position just after it.
-        private struct Ready {
+        private struct Ready: Friendly {
             var event: Event
             var position: Position
+        }
+
+        /// What is left of a ``Start/since(_:)`` history: the date, and where in each log
+        /// the history ends. Each half is cleared once it has been read.
+        private struct History: Friendly {
+            /// The window's oldest moment.
+            var date: Date
+            /// Where the activity history ends; `nil` once it has been read.
+            var activityEnd: ActivityCursor?
+            /// Where the view history ends; `nil` once it has been read.
+            var viewsEnd: ActivityCursor?
+
+            /// A history not yet read in either log.
+            ///
+            /// - Parameters:
+            ///   - date: The window's oldest moment.
+            ///   - end: Where each log's history ends.
+            init(date: Date, end: Position) {
+                self.date = date
+                activityEnd = end.activity
+                viewsEnd = end.views
+            }
+
+            /// Where the window begins in each log, walking back from `follower`'s origin.
+            ///
+            /// A log the walk cannot read starts at the history's end instead: its window
+            /// is not delivered, and what is new still is.
+            ///
+            /// - Parameters:
+            ///   - follower: The follower whose origin is where the history ends.
+            ///   - date: The window's oldest moment.
+            /// - Returns: Where each log's window begins.
+            static func start(of follower: PenFileFollower, since date: Date) -> Position {
+                let end = follower.origin
+                let activity = ActivityReader(log: follower.log)
+                let views = ViewReader(log: ViewLog(beside: follower.log))
+                return Position(
+                    activity: (try? activity.cursor(since: date, through: end.activity)) ?? end.activity,
+                    views: (try? views.cursor(since: date, through: end.views)) ?? end.views
+                )
+            }
         }
 
         private let follower: PenFileFollower
@@ -90,7 +138,7 @@ public extension PenFileFollower {
 
         /// The cursor just before each row the matcher holds, oldest first: the place a
         /// resumed follower must read from to see them again.
-        private var unclaimed: [ActivityCursor] = []
+        private var unclaimed = FIFOQueue<ActivityCursor>()
 
         /// Whether the next read is history — rows whose writes nobody watched.
         private var isReplaying: Bool
@@ -98,7 +146,11 @@ public extension PenFileFollower {
         /// The file as it was when ``Start/end`` was resolved; compared once, on arming.
         private var baseline: FileSignature?
 
-        private var ready: [Ready] = []
+        /// Events waiting to be returned, oldest first.
+        private var ready = FIFOQueue<Ready>()
+
+        /// The part of a ``Start/since(_:)`` history not yet read; `nil` for other starts.
+        private var history: History?
 
         /// Whether the walk has ended; later calls return `nil` without re-arming.
         private var isFinished = false
@@ -148,7 +200,7 @@ public extension PenFileFollower {
                 deliver(match)
             }
             for event in matcher.expireEvents(now: now) {
-                unclaimed.removeFirst(Swift.min(1, unclaimed.count))
+                unclaimed.removeFirst(upTo: 1)
                 emit(.activity(event))
             }
         }
@@ -156,7 +208,12 @@ public extension PenFileFollower {
         /// Reads the log from the cursor and hands each row on.
         private mutating func readRows(now: Date, key: String) {
             let reader = ActivityReader(log: follower.log)
-            guard let page = try? reader.read(after: readCursor, file: follower.document) else { return }
+            let read: ActivityReader.Page? = if let history, let end = history.activityEnd {
+                try? reader.read(after: readCursor, through: end, since: history.date, file: follower.document)
+            } else {
+                try? reader.read(after: readCursor, file: follower.document)
+            }
+            guard let page = read else { return }
             if page.restarted {
                 emit(.restarted)
             }
@@ -175,23 +232,30 @@ public extension PenFileFollower {
             }
             readCursor = page.cursor ?? readCursor
             isReplaying = false
+            history?.activityEnd = nil
         }
 
         /// Reads the view log from its cursor. A view needs no matching: it is delivered
         /// as read, history included.
         private mutating func readViews() {
             let reader = ViewReader(log: ViewLog(beside: follower.log))
-            guard let page = try? reader.read(after: viewCursor, file: follower.document) else { return }
+            let read: ViewReader.Page? = if let history, let end = history.viewsEnd {
+                try? reader.read(after: viewCursor, through: end, since: history.date, file: follower.document)
+            } else {
+                try? reader.read(after: viewCursor, file: follower.document)
+            }
+            guard let page = read else { return }
             for (view, after) in zip(page.events, page.eventCursors) {
                 viewCursor = after
                 emit(.viewed(view))
             }
             viewCursor = page.cursor ?? viewCursor
+            history?.viewsEnd = nil
         }
 
         /// Queues a change, and stops counting its rows as unclaimed.
         private mutating func deliver(_ match: ChangeMatcher.Match) {
-            unclaimed.removeFirst(Swift.min(match.events.count, unclaimed.count))
+            unclaimed.removeFirst(upTo: match.events.count)
             emit(.changed(FileChange(events: match.events, changedAt: match.changedAt)))
         }
 

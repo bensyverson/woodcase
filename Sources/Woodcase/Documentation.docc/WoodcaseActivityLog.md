@@ -326,6 +326,10 @@ render(page.events)
 page = try reader.read(from: page.nextOffset, file: url)
 ```
 
+Both calls read the live `activity.jsonl` only, never the archives rotation moved aside:
+on a long history they see its newest part. ``ActivityReader/read(after:file:identity:)``
+from ``ActivityCursor/start`` reads every archive and then the live file.
+
 ``ActivityReader/Page/nextOffset`` is the byte just past the last **complete** line, and
 counts lines that were filtered out as well as those returned — so a follower watching
 one file still advances past everybody else's events. ``ActivityReader/tail(count:file:identity:)``
@@ -445,14 +449,30 @@ for await event in PenFileFollower(file: url) {      // a .pen or a .umbra
 ```
 
 Like ``ActivityReader/Follow`` it is a value with no task of its own: canceling the
-consuming task stops and releases the watcher. ``PenFileFollower/Start/end`` is resolved
-when the follower is made, so a write that lands before iteration begins is still seen,
-and ``PenFileFollower/Iterator/position`` resumes a later follower without gaps. A
-delete-then-recreate write keeps the file followed, because the watcher watches the
+consuming task stops and releases the watcher. Where it begins is a
+``PenFileFollower/Start``:
+
+- ``PenFileFollower/Start/end`` — only what happens next. It is resolved when the
+  follower is made, so a write that lands before iteration begins is still seen.
+- ``PenFileFollower/Start/beginning`` — every retained row as history
+  (``PenFileFollower/Event/activity(_:)``), then every read, then what happens next.
+- ``PenFileFollower/Start/since(_:)`` — the rows and reads stamped at or after a moment,
+  as `.beginning` delivers them, then what happens next as `.end` delivers it. "Who was
+  here in the last ten minutes" costs the ten minutes, not the history: each log is walked
+  backward from its end, and an archive is opened only when the window reaches past the
+  live file's first row. The history ends where the logs ended when the follower was
+  made, so a write after that arrives live, matched to its change, and the seam loses and
+  repeats nothing. The walk runs when iteration begins (``PenFileFollower/makeAsyncIterator()``),
+  not when the follower is made.
+- ``PenFileFollower/Start/position(_:)`` — just after the last event an earlier
+  iterator took: ``PenFileFollower/Iterator/position`` resumes a later follower without
+  gaps.
+
+A delete-then-recreate write keeps the file followed, because the watcher watches the
 document's folder as well as the file; where that folder cannot be opened — a sandboxed
 app holding a grant on one bare `.pen` — the follower polls the file instead. A
-``PresenceTracker`` folds the follower's events
-into who changed and who viewed which nodes last.
+``PresenceTracker`` folds the follower's events into who changed and who viewed which
+nodes last.
 
 ## Topics
 

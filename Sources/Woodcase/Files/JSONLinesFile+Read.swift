@@ -16,6 +16,8 @@ extension JSONLinesFile {
     ///   - url: The live file or one of its archives.
     ///   - offset: Where to start. An offset past the end of the file starts over from
     ///     zero and sets ``JSONLinesPage/restarted``: the file is not the one it came from.
+    ///   - limit: Where to stop; the file's end when `nil`. Bytes after the last newline
+    ///     below it are not read, exactly as a line still being written is not.
     ///   - matching: Which decoded rows to keep.
     /// - Returns: The page. A file that does not exist reads as an empty page whose
     ///   cursor is ``ActivityCursor/start``.
@@ -24,6 +26,7 @@ extension JSONLinesFile {
     func readFile<Row: JSONLinesRow>(
         at url: URL,
         from offset: UInt64,
+        through limit: UInt64? = nil,
         matching: (Row) -> Bool
     ) throws -> JSONLinesPage<Row> {
         guard FileManager.default.fileExists(atPath: url.path) else {
@@ -43,12 +46,18 @@ extension JSONLinesFile {
         var restarted = false
         let data: Data
         do {
-            if try handle.seekToEnd() < offset {
+            let size = try handle.seekToEnd()
+            if size < offset {
                 start = 0
                 restarted = true
             }
             try handle.seek(toOffset: start)
-            data = try handle.readToEnd() ?? Data()
+            if let limit {
+                let count = min(limit, size) > start ? min(limit, size) - start : 0
+                data = try handle.read(upToCount: Int(count)) ?? Data()
+            } else {
+                data = try handle.readToEnd() ?? Data()
+            }
         } catch {
             throw PenFileError.cannotOpen(url: url, reason: PenFileError.oneLineReason(error))
         }
@@ -133,19 +142,50 @@ extension JSONLinesFile {
         return .start
     }
 
-    /// The cursor at the end of the file as it is now, taken from its size without
-    /// reading it: where a reader that wants only what comes next starts.
+    /// The cursor at the end of the file's last whole line as it is now: where a reader
+    /// that wants only what comes next starts.
     ///
-    /// - Returns: The end of the live file, else of the newest archive, else
-    ///   ``ActivityCursor/start``.
+    /// A writer appends without the reader taking a lock, so the file's size can fall
+    /// inside a line still being written. Starting there would read that line's tail as a
+    /// scrap and skip it; starting at the last newline at or before the size reads it
+    /// whole once it is finished. Only the file's last few bytes are read to find it.
+    ///
+    /// - Returns: The end of the live file's last whole line, else of the newest
+    ///   archive's, else ``ActivityCursor/start``.
     func endCursor() -> ActivityCursor {
-        if let live = FileSignature.read(at: fileURL.path) {
-            return ActivityCursor(inode: live.inode, offset: UInt64(max(0, live.size)))
+        if let live = Self.wholeLinesEnd(of: fileURL) {
+            return live
         }
-        if let newest = archives().last, let archive = FileSignature.read(at: newest.url.path) {
-            return ActivityCursor(inode: newest.inode, offset: UInt64(max(0, archive.size)))
+        if let newest = archives().last, let archive = Self.wholeLinesEnd(of: newest.url) {
+            return archive
         }
         return .start
+    }
+
+    /// The position just past a file's last newline, named by the inode it was read from.
+    ///
+    /// - Parameter url: The live file or an archive.
+    /// - Returns: The cursor, or `nil` when the file does not exist. A file that exists but
+    ///   cannot be read answers its size, which is all a reader that cannot read it has.
+    private static func wholeLinesEnd(of url: URL) -> ActivityCursor? {
+        guard let handle = try? FileHandle(forReadingFrom: url) else {
+            return FileSignature.read(at: url.path).map { ActivityCursor(inode: $0.inode, offset: UInt64(max(0, $0.size))) }
+        }
+        defer { try? handle.close() }
+        guard let signature = FileSignature.read(descriptor: handle.fileDescriptor) else { return nil }
+        var end = UInt64(max(0, signature.size))
+        while end > 0 {
+            let start = end - min(reverseChunk, end)
+            guard (try? handle.seek(toOffset: start)) != nil,
+                  let chunk = try? handle.read(upToCount: Int(end - start))
+            else { break }
+            if let last = chunk.lastIndex(of: newline) {
+                let offset = start + UInt64(chunk.distance(from: chunk.startIndex, to: last)) + 1
+                return ActivityCursor(inode: signature.inode, offset: offset)
+            }
+            end = start
+        }
+        return ActivityCursor(inode: signature.inode, offset: 0)
     }
 
     /// The newest row in the live file that matches, read backwards from the end.

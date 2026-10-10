@@ -250,6 +250,28 @@ struct PenFileFollowerTests {
         #expect(event?.change?.isAttributed == false)
     }
 
+    @Test("A row half-written when the follower is made arrives whole once it is finished")
+    func halfWrittenRowAtTheEndArrivesWhole() async throws {
+        let scratch = try Scratch()
+        defer { scratch.remove() }
+        try await scratch.log.append([scratch.row("ana", nodes: ["a"], revision: "r1")])
+        var second = try scratch.row("ana", nodes: ["b"], revision: "r2").jsonLine()
+        second.append(JSONLinesFile.newline)
+        let handle = try FileHandle(forWritingTo: scratch.log.fileURL)
+        defer { try? handle.close() }
+        try handle.seekToEnd()
+        try handle.write(contentsOf: second.prefix(20))
+
+        let recorder = FollowerRecorder(PenFileFollower(
+            file: scratch.file, log: scratch.log, matchWindow: .milliseconds(200)
+        ))
+        defer { recorder.cancel() }
+        try handle.write(contentsOf: second.dropFirst(20))
+
+        let event = await recorder.next("the finished row") { $0.activity != nil }
+        #expect(event?.activity?.revision == "r2")
+    }
+
     @Test("Canceling the consuming task ends it and releases the watcher")
     func cancelingReleasesEverything() async throws {
         let scratch = try Scratch()
