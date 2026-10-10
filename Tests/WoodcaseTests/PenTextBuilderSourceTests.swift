@@ -13,12 +13,12 @@ import Testing
 @Suite("One text attributed-string builder")
 struct PenTextBuilderSourceTests {
     /// The library's sources that may create an attributed string, relative to
-    /// `Sources/Woodcase`: the one text builder, and three that set a single glyph or a
-    /// fixed label rather than a text node — icon glyphs and the browser placeholder.
+    /// `Sources/Woodcase`: the one text builder, the one icon builder — an icon is a single
+    /// glyph in a face no text style names, which `PenIconGlyph` sets once for every
+    /// renderer and for ink — and the browser placeholder's fixed label.
     private static let allowed: Set<String> = [
         "Rendering/PenTextStyle+AttributedString.swift",
-        "Rendering/PenIconFontRenderer.swift",
-        "PenLayoutEngine+IconInk.swift",
+        "Rendering/PenIconGlyph.swift",
         "Rendering/PenBrowserPlaceholder.swift",
     ]
 

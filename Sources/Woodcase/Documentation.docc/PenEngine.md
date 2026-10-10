@@ -524,8 +524,8 @@ lays out the same lines ``PenTextRenderer`` draws and unions each line's Core Te
 bounds — modulo the Core Text/Skia glyph-metric gap `PenGoogleFonts.md` already documents
 for Inter at these sizes (`PenTextOpticalSizeTests`); `PenPaintedExtentProbeTests`' x5–x7
 hold three of Pen's exports to it, within that gap rather than to the pixel. An icon now
-counts its fitted glyph's ink too — ``PenLayoutEngine/iconInkBounds(of:box:)`` measures
-the exact Core Text glyph ``PenIconGlyph``/``PenIconFontRenderer`` already draw — modulo a
+counts its fitted glyph's ink too — ``PenLayoutEngine/iconInkBounds(of:box:)`` is
+``PenIconGlyph/inkBounds``, the outline of the one line every icon renderer draws — modulo a
 wider, font-*substitution* gap for at least one bundled icon (x8–x9 in
 `PenPaintedExtentProbeTests`; Woodcase draws icon fonts installed on the system, where Pen
 draws its own bundled vector set, and the two libraries' glyphs are not always the same

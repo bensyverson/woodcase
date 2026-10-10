@@ -11,7 +11,8 @@ import Foundation
 ///
 /// Each icon is rendered as a single Unicode glyph from the appropriate icon font, placed
 /// in the node's box by the font's metrics, as Pen places it. Which glyph, which face and
-/// where are ``PenIconGlyph``'s answer, which other renderers share.
+/// where — and the line it is set in — are ``PenIconGlyph``'s answer, which other
+/// renderers share; this only chooses how the fills paint it.
 enum PenIconFontRenderer {
     /// Default weight for Material Symbols when none is specified in the node data.
     private static let materialSymbolsDefaultWeight: Double = 200
@@ -37,30 +38,18 @@ enum PenIconFontRenderer {
         let box = CGSize(width: CGFloat(rect.width), height: CGFloat(rect.height))
         guard paint != .nothing, let glyph = PenIconGlyph(data: data, box: box) else { return }
 
-        let drawAttrs: [CFString: Any] = [
-            kCTFontAttributeName: glyph.font,
-            kCTForegroundColorAttributeName: paint.coreTextColor,
-        ]
-        let drawLine = CTLineCreateWithAttributedString(
-            CFAttributedStringCreate(kCFAllocatorDefault, glyph.string as CFString, drawAttrs as CFDictionary)!
-        )
-        // The origin is y down from the box's top; Core Text draws y up from its bottom.
-        let origin = CGPoint(x: glyph.origin.x, y: box.height - glyph.origin.y)
-
         switch paint {
         case .nothing:
             return
         case .solid:
             context.saveGState()
-            context.translateBy(x: 0, y: box.height)
-            context.scaleBy(x: 1, y: -1)
-            context.textPosition = origin
-            CTLineDraw(drawLine, context)
+            context.concatenate(glyph.textSpace)
+            context.textPosition = glyph.lineOrigin
+            CTLineDraw(glyph.line(color: paint.coreTextColor), context)
             context.restoreGState()
         case .glyphOutlines:
-            let textSpace = CGAffineTransform(translationX: 0, y: box.height).scaledBy(x: 1, y: -1)
             PenTextRenderer.paint(
-                fills, through: PenGlyphOutlines(lines: [(drawLine, origin)], textSpace: textSpace),
+                fills, through: glyph.outlines(color: paint.coreTextColor),
                 size: box, in: context, imageProvider: imageProvider
             )
         }
