@@ -23,8 +23,9 @@ testing and the renderers read one 200×200 rect while the file keeps what Pen w
 woodcase set board.pen Board/Sticky kind.width=240 kind.height=160
 ```
 
-A note's size change needs layout; a change to its text or TextStyle only a redraw,
-because a note's box never grows to fit its text.
+> Revised 2026-10-11 (leaf uAzSie, notes design decision 4): a note **grows to fit its
+> text** and never shrinks below its set height; its width stays as set. So a change to its
+> size, its text or its text style needs layout. See <doc:NoteMarkdown>.
 
 > Note: Pen strips a note's own text style (and any `fill`) when it loads a file
 > (`project/2026-10-11-what-pen-keeps-on-a-note.md`), so the style a note should keep
@@ -135,3 +136,4 @@ is not Woodcase's, and is never checked.
 - ``PenTextStyleProperties``
 - ``SchemaPostItReport``
 - <doc:PenMetadataNamespace>
+- <doc:NoteMarkdown>

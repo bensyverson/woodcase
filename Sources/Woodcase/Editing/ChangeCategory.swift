@@ -62,8 +62,17 @@ public enum ChangeCategory: Friendly {
             return .layout
         }
 
+        // A note's text style and a text's spans live in metadata, and both move a
+        // measured size: a note grows to fit its text.
+        let measured = PenMetadata.WoodcaseKey.allCases.filter { $0.group == .noteTextStyle || $0.group == .text }
+        let oldMetadata = oldCommon.metadata ?? PenMetadata(type: nil)
+        let newMetadata = newCommon.metadata ?? PenMetadata(type: nil)
+        if measured.contains(where: { oldMetadata[woodcase: $0] != newMetadata[woodcase: $0] }) {
+            return .layout
+        }
+
         // Everything else in common is render-only:
-        // name, opacity, flipX, flipY, reusable, context, metadata
+        // name, opacity, flipX, flipY, reusable, context, the rest of metadata
         return .renderOnly
     }
 
@@ -111,7 +120,7 @@ public enum ChangeCategory: Friendly {
             // change what is drawn.
             return .renderOnly
         case let (.note(old), .note(new)):
-            return categorizeSized(width: (old.width, new.width), height: (old.height, new.height))
+            return categorizeNote(old: old, new: new)
         case let (.prompt(old), .prompt(new)):
             return categorizeSized(width: (old.width, new.width), height: (old.height, new.height))
         case let (.context(old), .context(new)):
@@ -166,9 +175,27 @@ public enum ChangeCategory: Friendly {
         return .renderOnly
     }
 
-    /// A note, prompt or context: its box is its declared size and nothing else, so
-    /// only a size change moves anything. Its text and TextStyle never measure into
-    /// the layout — the box does not grow to fit them.
+    /// A note: it grows to fit its text, so its size, its text and the TextStyle keys
+    /// that measure it all need layout.
+    private static func categorizeNote(old: PenNode.NoteData, new: PenNode.NoteData) -> ChangeCategory {
+        if old.width != new.width
+            || old.height != new.height
+            || old.content != new.content
+            || old.fontFamily != new.fontFamily
+            || old.fontSize != new.fontSize
+            || old.fontWeight != new.fontWeight
+            || old.fontStyle != new.fontStyle
+            || old.letterSpacing != new.letterSpacing
+            || old.lineHeight != new.lineHeight
+        {
+            return .layout
+        }
+        return .renderOnly
+    }
+
+    /// A prompt or context: its box is its declared size and nothing else, so only a
+    /// size change moves anything. Its text and TextStyle never measure into the
+    /// layout — the box does not grow to fit them.
     private static func categorizeSized(
         width: (old: PenSizing?, new: PenSizing?),
         height: (old: PenSizing?, new: PenSizing?)

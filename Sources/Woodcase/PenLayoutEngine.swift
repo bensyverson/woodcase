@@ -43,7 +43,8 @@ public nonisolated enum PenLayoutEngine {
             letterSpacing: request.letterSpacing,
             lineHeight: request.lineHeight,
             maxWidth: request.maxWidth,
-            runs: request.runs
+            runs: request.runs,
+            indents: request.indents
         )
         return (size.width, size.height)
     }
@@ -287,6 +288,8 @@ extension PenLayoutEngine {
         let children: [PenNode]
         let isContainer: Bool
         let textInput: TextMeasurementInput?
+        /// A note's text, measured to grow the note (``PenLayoutEngine/noteTextRequest(_:)``).
+        var noteText: PenTextMeasureRequest?
     }
 
     struct ChildMeasurement {
@@ -373,7 +376,8 @@ extension PenLayoutEngine {
                 alignItems: .start,
                 children: [],
                 isContainer: false,
-                textInput: extractTextInput(node)
+                textInput: extractTextInput(node),
+                noteText: noteTextRequest(node)
             )
         }
     }
@@ -488,6 +492,8 @@ extension PenLayoutEngine {
         into rects: inout [String: PenRect]
     ) -> PenRect? {
         guard !child.kind.canHaveChildren else { return nil }
+        // A note's fixed height is its least: it grows to fit its text.
+        if case .note = child.kind { return nil }
         let wSizing = extractLeafWidth(child.kind)
         let hSizing = extractLeafHeight(child.kind)
         guard case let .fixed(w) = wSizing, case let .fixed(h) = hSizing else { return nil }
@@ -640,6 +646,11 @@ extension PenLayoutEngine {
     ) -> (width: Double, height: Double) {
         // Resolve width first — text height may depend on it (wrapping)
         let (resolvedWidth, _, _) = resolveIntrinsicSize(props.widthSizing, available: availableWidth)
+
+        if let noteText = props.noteText {
+            let (setHeight, _, _) = resolveIntrinsicSize(props.heightSizing, available: availableHeight)
+            return (resolvedWidth, grownNoteHeight(noteText, width: resolvedWidth, setHeight: setHeight, textMeasurer: textMeasurer))
+        }
 
         // Check if text measurement can provide intrinsic sizing
         if let textInput = props.textInput,

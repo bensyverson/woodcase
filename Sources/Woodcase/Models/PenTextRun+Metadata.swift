@@ -27,6 +27,8 @@ public extension PenTextRun {
         case underline
         /// Whether the run is struck through.
         case strikethrough
+        /// The name the run mentions: a non-empty string.
+        case mention
     }
 
     /// The format's `fontStyle` for an italic run.
@@ -45,6 +47,7 @@ public extension PenTextRun {
         object[WireKey.fill.rawValue] = fill.map { .string($0.hex) }
         object[WireKey.underline.rawValue] = underline.map(AnyCodable.bool)
         object[WireKey.strikethrough.rawValue] = strikethrough.map(AnyCodable.bool)
+        object[WireKey.mention.rawValue] = mention.map(AnyCodable.string)
         return .dictionary(object)
     }
 
@@ -103,6 +106,11 @@ public extension PenTextRun {
             guard let color = PenHexColor(text) else { throw refuse("has a fill that is not a hex color: #RRGGBB or #RRGGBBAA") }
             fill = color
         default: throw refuse("has a fill that is not a hex color: #RRGGBB or #RRGGBBAA")
+        }
+        switch object[WireKey.mention.rawValue] {
+        case nil: break
+        case let .string(name)? where !name.isEmpty: mention = name
+        default: throw refuse("has a mention that is not a name")
         }
         for key in [WireKey.underline, .strikethrough] {
             switch object[key.rawValue] {

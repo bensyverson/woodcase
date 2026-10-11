@@ -12,7 +12,7 @@ import Foundation
 /// their defaults are decided — SF Pro 16, regular, upright, natural line height, top-left,
 /// undecorated — so every consumer that sets text (the CG renderer, layout measurement,
 /// RapidPro's rasterizer, an editor's caret geometry) sets it the same way. It is plain
-/// data: on Apple platforms ``attributedString(_:runs:for:)`` turns it and a string into the
+/// data: on Apple platforms ``attributedString(_:runs:indents:for:)`` turns it and a string into the
 /// Core Text string all of them typeset. Being ``Friendly``, it also serves as a cache
 /// key for rasterized text.
 public struct PenTextStyle: Friendly {

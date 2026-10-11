@@ -10,7 +10,7 @@ import Foundation
 ///
 /// The style values are the node's own literals, each `nil` where the node sets none, so a
 /// measurer decides the defaults the way ``PenTextStyle`` does (``PenLayoutEngine/defaultTextMeasurer``
-/// does exactly that, through ``PenTextMeasurer/measure(_:fontFamily:fontSize:fontWeight:fontStyle:letterSpacing:lineHeight:maxWidth:runs:)``).
+/// does exactly that, through ``PenTextMeasurer/measure(_:fontFamily:fontSize:fontWeight:fontStyle:letterSpacing:lineHeight:maxWidth:runs:indents:)``).
 /// Being ``Friendly``, a request is also the key a cache of measured sizes keeps them by:
 /// nothing outside it can change the answer, except the font set.
 public struct PenTextMeasureRequest: Friendly {
@@ -42,6 +42,10 @@ public struct PenTextMeasureRequest: Friendly {
     /// code units; empty for plain text.
     public var runs: [PenTextRun]
 
+    /// The text's paragraph indents (``PenParagraphIndent``), offsets in UTF-16 code
+    /// units; empty for a text whose lines all start at the left edge.
+    public var indents: [PenParagraphIndent]
+
     /// Creates a request; every style value left out is the node's default.
     ///
     /// - Parameters:
@@ -54,6 +58,7 @@ public struct PenTextMeasureRequest: Friendly {
     ///   - lineHeight: The line height as a multiple of the font size.
     ///   - maxWidth: The width to wrap at, or `nil` for no wrapping.
     ///   - runs: The text's styled runs.
+    ///   - indents: The text's paragraph indents.
     public init(
         text: String,
         fontFamily: String? = nil,
@@ -63,7 +68,8 @@ public struct PenTextMeasureRequest: Friendly {
         letterSpacing: Double? = nil,
         lineHeight: Double? = nil,
         maxWidth: Double? = nil,
-        runs: [PenTextRun] = []
+        runs: [PenTextRun] = [],
+        indents: [PenParagraphIndent] = []
     ) {
         self.text = text
         self.fontFamily = fontFamily
@@ -74,6 +80,7 @@ public struct PenTextMeasureRequest: Friendly {
         self.lineHeight = lineHeight
         self.maxWidth = maxWidth
         self.runs = runs
+        self.indents = indents
     }
 
     /// This request for another text and width, its style kept.
@@ -82,23 +89,28 @@ public struct PenTextMeasureRequest: Friendly {
     ///   - text: The string to measure instead.
     ///   - maxWidth: The width to wrap at instead.
     ///   - runs: The runs for that string.
+    ///   - indents: The paragraph indents for that string; none by default.
     /// - Returns: The new request.
-    public func measuring(_ text: String, maxWidth: Double?, runs: [PenTextRun]) -> PenTextMeasureRequest {
+    public func measuring(
+        _ text: String, maxWidth: Double?, runs: [PenTextRun], indents: [PenParagraphIndent] = []
+    ) -> PenTextMeasureRequest {
         var request = self
         request.text = text
         request.maxWidth = maxWidth
         request.runs = runs
+        request.indents = indents
         return request
     }
 
     /// This request with everything that cannot change a size taken out: each run's
-    /// ``PenTextRun/fill``, and any run left setting nothing. Two requests that differ only
+    /// ``PenTextRun/fill`` and ``PenTextRun/mention``, and any run left setting nothing. Two requests that differ only
     /// in color answer the same size, so a cache keyed on this measures a recolored text once.
     public var ignoringColor: PenTextMeasureRequest {
         var request = self
         request.runs = runs.compactMap { run in
             var sized = run
             sized.fill = nil
+            sized.mention = nil
             return sized == PenTextRun(start: run.start, end: run.end) ? nil : sized
         }
         return request

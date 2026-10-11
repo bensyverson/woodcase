@@ -29,7 +29,8 @@ public extension PenTextStyle {
     /// Each run is clamped to the text and its edges widened outward to grapheme-cluster
     /// boundaries, so no character's glyphs are split between faces; a run that is then
     /// empty sets nothing. Where runs overlap, a later run's keys win. Stretches no run
-    /// covers are this style, with no fill of their own. Adjacent stretches may resolve
+    /// covers are this style, with no fill of their own. A stretch carries the mention of
+    /// the last run covering it that has one (``PenTextRun/mention``). Adjacent stretches may resolve
     /// to the same style; they are not merged.
     ///
     /// - Parameters:
@@ -49,11 +50,13 @@ public extension PenTextStyle {
         return zip(edges, edges.dropFirst()).map { lower, upper in
             var style = self
             var fill: PenHexColor?
+            var mention: String?
             for (range, run) in snapped where range.lowerBound <= lower && range.upperBound >= upper {
                 style = style.applying(run)
                 fill = run.fill ?? fill
+                mention = run.mention ?? mention
             }
-            return PenTextSegment(range: lower ..< upper, style: style, fill: fill)
+            return PenTextSegment(range: lower ..< upper, style: style, fill: fill, mention: mention)
         }
     }
 }

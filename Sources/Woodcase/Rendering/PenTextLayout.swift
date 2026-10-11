@@ -15,7 +15,7 @@
     /// node's ink through it, RapidPro's rasterizer draws through it, and an editor reads
     /// its caret, hit-testing and selection from its ``geometry`` — so the line a caret sits
     /// on is the line that was drawn, to the point. It builds the string once, with its
-    /// styled runs (``PenTextStyle/attributedString(_:runs:for:)``), breaks it once
+    /// styled runs (``PenTextStyle/attributedString(_:runs:indents:for:)``), breaks it once
     /// (``PenTextLines``), and decides once where the block of lines sits in the box
     /// (``blockTop``).
     ///
@@ -41,6 +41,10 @@
         /// The styled runs over the text, offsets in UTF-16 code units; empty for plain text.
         public let runs: [PenTextRun]
 
+        /// The paragraphs' indents over the text, offsets in UTF-16 code units; empty for
+        /// a text whose every line starts at the box's left edge.
+        public let indents: [PenParagraphIndent]
+
         /// The box it was placed in, in points.
         public let box: CGSize
 
@@ -55,7 +59,8 @@
         /// block taller than its box is centered or bottom-aligned, as Pen draws it.
         public let blockTop: CGFloat
 
-        /// Sets `text` in `style`, with its runs, and places it in a box of `box`.
+        /// Sets `text` in `style`, with its runs and paragraph indents, and places it in a
+        /// box of `box`.
         ///
         /// An empty text sets no lines; it draws nothing and has no ink, though its
         /// ``geometry`` still has a line for the caret.
@@ -65,17 +70,25 @@
         ///   - style: Its style: the node's, which every range no run covers keeps.
         ///   - runs: Styled runs over the text, offsets in UTF-16 code units
         ///     (``PenTextRun``); a run's fill colors its glyphs in place of `color`.
+        ///   - indents: Paragraph indents over the text (``PenParagraphIndent``): a note's
+        ///     list items hang.
         ///   - box: The box it is placed in: the wrapping width, and the height vertical
         ///     alignment is measured against.
         ///   - color: The glyphs' color, which `CTLineDraw` reads from the runs.
         public init(
-            text: String, style: PenTextStyle, runs: [PenTextRun] = [], box: CGSize, color: CGColor = defaultColor
+            text: String,
+            style: PenTextStyle,
+            runs: [PenTextRun] = [],
+            indents: [PenParagraphIndent] = [],
+            box: CGSize,
+            color: CGColor = defaultColor
         ) {
             self.text = text
             self.style = style
             self.runs = runs
+            self.indents = indents
             self.box = box
-            let styled = style.attributedString(text, runs: runs, for: .drawing(color: color))
+            let styled = style.attributedString(text, runs: runs, indents: indents, for: .drawing(color: color))
             self.styled = styled
             lines = PenTextLines(styled, width: box.width)
             blockTop = Self.blockTop(

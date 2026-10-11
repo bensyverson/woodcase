@@ -10,7 +10,7 @@ There is no Pen reference to match: Pen cannot draw runs. Parity is between Wood
 
 ### A run
 
-A ``PenTextRun`` covers ``PenTextRun/start`` up to ``PenTextRun/end`` and may set any of the character keys: family, size, CSS weight, italic, fill (a solid color, ``PenHexColor``), underline and strikethrough. Each key it leaves `nil`, and every range no run covers, inherits the node's own style. Line height, letter spacing and alignment belong to the paragraph and are the node's alone.
+A ``PenTextRun`` covers ``PenTextRun/start`` up to ``PenTextRun/end`` and may set any of the character keys: family, size, CSS weight, italic, fill (a solid color, ``PenHexColor``), underline and strikethrough. It may also name who it mentions (``PenTextRun/mention``) — not a style but an identity, which ``PenTextStyle/segments(of:runs:)`` carries onto ``PenTextSegment/mention`` for a renderer to draw as a pill. Each key it leaves `nil`, and every range no run covers, inherits the node's own style. Line height, letter spacing and alignment belong to the paragraph and are the node's alone.
 
 ```swift
 var metadata = node.common.metadata ?? PenMetadata(type: nil)
@@ -45,13 +45,17 @@ An instance that overrides a component text's content draws it plain, by the sam
 } } }
 ```
 
-Each run has `start` and `end` and only the style keys it sets, spelled as the format spells a text node's own (``PenTextRun/WireKey``): `fontWeight` a string (`"700"`; a keyword such as `"bold"` reads too), `fontStyle` `"italic"` or `"normal"`, `fill` a hex color, `fontSize` a positive number, `underline` and `strikethrough` booleans. Offsets must lie inside `text`. Anything else — an unknown key, a misspelled value — is refused on an authored write (``EditingError/textSpansRejected(nodeID:reason:)``) and read from a file as no spans, so the text draws plain. Code reads and writes them through ``PenMetadata/textSpans``, which goes through ``PenMetadata/subscript(woodcase:)`` and types metadata that had no type.
+Each run has `start` and `end` and only the style keys it sets, spelled as the format spells a text node's own (``PenTextRun/WireKey``): `fontWeight` a string (`"700"`; a keyword such as `"bold"` reads too), `fontStyle` `"italic"` or `"normal"`, `fill` a hex color, `fontSize` a positive number, `underline` and `strikethrough` booleans, `mention` a non-empty name. Offsets must lie inside `text`. Anything else — an unknown key, a misspelled value — is refused on an authored write (``EditingError/textSpansRejected(nodeID:reason:)``) and read from a file as no spans, so the text draws plain. Code reads and writes them through ``PenMetadata/textSpans``, which goes through ``PenMetadata/subscript(woodcase:)`` and types metadata that had no type.
 
 A 2.10 document's run array is moved here by ``PenRichTextMigrationRule`` when it is opened: the words flatten into `content`, the styling becomes spans over them, and only what spans cannot hold (letter spacing, a `$variable`, …) is reported as dropped.
 
 ### Setting and measuring
 
-``PenTextStyle/attributedString(_:runs:for:)`` sets each segment in its own resolved font and decorations and, when drawn, its run's fill or the node's color; the paragraph style (line pitch, alignment, letter spacing) is the node's throughout. ``PenTextLayout/init(text:style:runs:box:color:)`` is the layout call for a text with runs — RapidPro's rasterizer and an editor typing a draft call it directly — and ``PenTextMeasurer/measure(_:fontFamily:fontSize:fontWeight:fontStyle:letterSpacing:lineHeight:maxWidth:runs:)`` sizes it, so a bold run that pushes a word to the next line in the drawing pushes it there in layout too. ``PenLayoutEngine`` hands a node's applied runs to its ``TextMeasurer`` in the ``PenTextMeasureRequest`` it measures, and the run-scoped `TextSizeCache` keys its sizes on that request with the colors taken out (``PenTextMeasureRequest/ignoringColor``), so recoloring a word does not measure it again.
+``PenTextStyle/attributedString(_:runs:indents:for:)`` sets each segment in its own resolved font and decorations and, when drawn, its run's fill or the node's color; the paragraph style (line pitch, alignment, letter spacing) is the node's throughout. ``PenTextLayout/init(text:style:runs:indents:box:color:)`` is the layout call for a text with runs — RapidPro's rasterizer and an editor typing a draft call it directly — and ``PenTextMeasurer/measure(_:fontFamily:fontSize:fontWeight:fontStyle:letterSpacing:lineHeight:maxWidth:runs:indents:)`` sizes it, so a bold run that pushes a word to the next line in the drawing pushes it there in layout too. ``PenLayoutEngine`` hands a node's applied runs to its ``TextMeasurer`` in the ``PenTextMeasureRequest`` it measures, and the run-scoped `TextSizeCache` keys its sizes on that request with the colors taken out (``PenTextMeasureRequest/ignoringColor``), so recoloring a word does not measure it again.
+
+### Paragraph indents
+
+Runs style characters; a paragraph's indents cannot ride on them. ``PenParagraphIndent`` is the one paragraph-level key: a first-line indent, a head indent for the wrapped lines, and a tab stop at the head indent. ``PenTextLayout/init(text:style:runs:indents:box:color:)`` and the measurer (``PenTextMeasureRequest/indents``) both take them, so a hanging list item measures as it draws. A note's markdown sets one per list item (<doc:NoteMarkdown>); a text node's spans have none.
 
 ### Lines with mixed sizes
 
@@ -91,6 +95,7 @@ Another renderer draws a text node's spans through the same layout: `PenTextLayo
 
 ### Resolving and setting
 
+- ``PenParagraphIndent``
 - ``PenTextSegment``
 - ``PenTextStyle/segments(of:runs:)``
 - ``PenTextStyle/applying(_:)``

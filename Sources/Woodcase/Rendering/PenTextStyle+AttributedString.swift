@@ -39,7 +39,7 @@
         /// Builds the Core Text string that sets `text` in this style, with its runs.
         ///
         /// This is the one builder for a text node's content: the CG renderer, text ink
-        /// bounds and ``PenTextMeasurer/measure(_:fontFamily:fontSize:fontWeight:fontStyle:letterSpacing:lineHeight:maxWidth:runs:)``
+        /// bounds and ``PenTextMeasurer/measure(_:fontFamily:fontSize:fontWeight:fontStyle:letterSpacing:lineHeight:maxWidth:runs:indents:)``
         /// all build through it, so the fonts, kern and line pitch that are drawn are the
         /// ones that were measured. Each stretch of ``segments(of:runs:)`` is set in its own
         /// resolved font and decorations, and, when drawn, in its run's fill or else
@@ -48,15 +48,21 @@
         /// (``PenTextMeasurer/linePitch(lineHeight:fontSize:font:)`` of this style),
         /// alignment and letter spacing — is this style's throughout. Strikethrough, which
         /// Core Text does not draw, is marked with ``PenTextRenderer/strikethroughKey``
-        /// for ``PenTextRenderer/drawStrikethrough(lines:in:)``.
+        /// for ``PenTextRenderer/drawStrikethrough(lines:in:)``. Each paragraph an indent
+        /// covers (``PenParagraphIndent``) takes its indents, and a tab stop at its head
+        /// indent, on top of the same pitch and alignment.
         ///
         /// - Parameters:
         ///   - text: The string to set. An empty one builds an empty string.
         ///   - runs: Its styled runs, offsets in UTF-16 code units; none for plain text.
+        ///   - indents: Its paragraphs' indents, offsets in UTF-16 code units; none for a
+        ///     text whose lines all start at the left edge.
         ///   - purpose: Whether the string is drawn (with its color and alignment) or
         ///     only sized.
         /// - Returns: The string, with this style's font, pitch and first baseline.
-        func attributedString(_ text: String, runs: [PenTextRun] = [], for purpose: Purpose) -> PenStyledText {
+        func attributedString(
+            _ text: String, runs: [PenTextRun] = [], indents: [PenParagraphIndent] = [], for purpose: Purpose
+        ) -> PenStyledText {
             let resolved = font
             let pitch = PenTextMeasurer.linePitch(lineHeight: lineHeight, fontSize: fontSize, font: resolved)
             let alignment: CTTextAlignment? = switch purpose {
@@ -66,7 +72,7 @@
             let paragraph = PenTextMeasurer.paragraphStyle(lineHeight: pitch, alignment: alignment)
 
             let string: CFAttributedString
-            if runs.isEmpty {
+            if runs.isEmpty, indents.isEmpty {
                 var attributes = characterAttributes(font: resolved, fill: nil, for: purpose)
                 attributes[kCTParagraphStyleAttributeName] = paragraph
                 string = CFAttributedStringCreate(kCFAllocatorDefault, text as CFString, attributes as CFDictionary)!
@@ -80,6 +86,16 @@
                     attributes[kCTParagraphStyleAttributeName] = paragraph
                     let range = CFRange(location: segment.range.lowerBound, length: segment.range.count)
                     CFAttributedStringSetAttributes(mutable, range, attributes as CFDictionary, true)
+                }
+                let length = text.utf16.count
+                for indent in indents {
+                    let lower = min(max(indent.start, 0), length)
+                    let upper = min(max(indent.end, lower), length)
+                    guard lower < upper else { continue }
+                    CFAttributedStringSetAttribute(
+                        mutable, CFRange(location: lower, length: upper - lower), kCTParagraphStyleAttributeName,
+                        PenTextMeasurer.paragraphStyle(lineHeight: pitch, alignment: alignment, indent: indent)
+                    )
                 }
                 string = mutable
             }

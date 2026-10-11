@@ -20,15 +20,21 @@ public struct PenTextSegment: Friendly {
     /// The color a covering run gives its glyphs, or `nil` for the node's paint.
     public var fill: PenHexColor?
 
+    /// The name a covering run mentions (``PenTextRun/mention``), or `nil`: what a
+    /// renderer draws as a pill.
+    public var mention: String?
+
     /// Creates a segment.
     ///
     /// - Parameters:
     ///   - range: The UTF-16 range covered.
     ///   - style: The resolved style.
     ///   - fill: A run's color, or `nil` for the node's paint.
-    public init(range: Range<Int>, style: PenTextStyle, fill: PenHexColor?) {
+    ///   - mention: The name a covering run mentions, or `nil`.
+    public init(range: Range<Int>, style: PenTextStyle, fill: PenHexColor?, mention: String? = nil) {
         self.range = range
         self.style = style
         self.fill = fill
+        self.mention = mention
     }
 }

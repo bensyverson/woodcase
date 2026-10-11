@@ -59,6 +59,16 @@ public struct PenTextRun: Friendly {
     /// Whether the run is struck through, or `nil` to inherit the node's.
     public var strikethrough: Bool?
 
+    /// The name the run mentions — `claude` for `@claude` — or `nil` for a run that is
+    /// not a mention.
+    ///
+    /// It is not a style: it says *who*, so a renderer can draw the run as a pill in
+    /// that identity's color. Woodcase does not resolve names to colors; an identity's
+    /// color is the editor's presence color. It never changes a size, so it is left out
+    /// of a measurement's cache key (``PenTextMeasureRequest/ignoringColor``), and it
+    /// reaches the renderer on ``PenTextSegment/mention``.
+    public var mention: String?
+
     /// Creates a run over `start ..< end`; every style key left out inherits the node's.
     ///
     /// - Parameters:
@@ -71,6 +81,7 @@ public struct PenTextRun: Friendly {
     ///   - fill: The glyphs' color.
     ///   - underline: Whether the run is underlined.
     ///   - strikethrough: Whether the run is struck through.
+    ///   - mention: The name the run mentions, or `nil`.
     public init(
         start: Int,
         end: Int,
@@ -80,7 +91,8 @@ public struct PenTextRun: Friendly {
         isItalic: Bool? = nil,
         fill: PenHexColor? = nil,
         underline: Bool? = nil,
-        strikethrough: Bool? = nil
+        strikethrough: Bool? = nil,
+        mention: String? = nil
     ) {
         self.start = start
         self.end = end
@@ -91,6 +103,7 @@ public struct PenTextRun: Friendly {
         self.fill = fill
         self.underline = underline
         self.strikethrough = strikethrough
+        self.mention = mention
     }
 
     /// The UTF-16 range the run covers, as written; empty when `end` is not past `start`.

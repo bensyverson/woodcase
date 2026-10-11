@@ -5,7 +5,7 @@ import Foundation
 public extension PenTextRenderer {
     /// The attribute that marks a run struck through.
     ///
-    /// Core Text has no native strikethrough, so ``PenTextStyle/attributedString(_:runs:for:)``
+    /// Core Text has no native strikethrough, so ``PenTextStyle/attributedString(_:runs:indents:for:)``
     /// marks struck runs with this key and ``drawStrikethrough(lines:in:)`` strokes them.
     /// Public so that another renderer (RapidPro) draws the same bar rather than a copy.
     static var strikethroughKey: CFString {

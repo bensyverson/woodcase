@@ -286,7 +286,9 @@ struct SizedNoteTests {
         #expect(changed == ["kind.fontSize", "kind.width"])
     }
 
-    @Test("A note's size change needs layout; its TextStyle change only a redraw")
+    /// Changed 2026-10-11 (leaf uAzSie): a note now grows to fit its text, so its text
+    /// and TextStyle move its height and need layout too.
+    @Test("A note's size, text and TextStyle changes all need layout")
     func changeCategoryForNotes() throws {
         let before = try #require(makeDocument().node(id: "Nte01"))
         let resized = try NodePropertyCodec.setting(.int(240), at: "kind.width", on: before)
@@ -294,8 +296,8 @@ struct SizedNoteTests {
         let rewritten = try NodePropertyCodec.setting(.string("new"), at: "kind.content", on: before)
 
         #expect(ChangeCategory.categorize(oldKind: before.kind, newKind: resized.kind) == .layout)
-        #expect(ChangeCategory.categorize(oldKind: before.kind, newKind: restyled.kind) == .renderOnly)
-        #expect(ChangeCategory.categorize(oldKind: before.kind, newKind: rewritten.kind) == .renderOnly)
+        #expect(ChangeCategory.categorize(oldKind: before.kind, newKind: restyled.kind) == .layout)
+        #expect(ChangeCategory.categorize(oldKind: before.kind, newKind: rewritten.kind) == .layout)
     }
 
     // MARK: - Lint

@@ -11,7 +11,7 @@
     /// A text set in a ``PenTextStyle``: the Core Text string, with the font and line
     /// metrics its lines are placed by.
     ///
-    /// Built by ``PenTextStyle/attributedString(_:runs:for:)``; ``PenTextLines`` breaks its
+    /// Built by ``PenTextStyle/attributedString(_:runs:indents:for:)``; ``PenTextLines`` breaks its
     /// lines and places them. ``font``, ``pitch`` and ``firstBaseline`` are the node's own
     /// style's: every line of a text without runs is set at that pitch, and a line holding a
     /// larger run grows from it (``PenTextLines/bands``). Not ``Friendly``:

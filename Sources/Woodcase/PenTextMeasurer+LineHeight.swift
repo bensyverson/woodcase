@@ -66,26 +66,46 @@ public extension PenTextMeasurer {
     /// - Parameters:
     ///   - points: The line height in points.
     ///   - alignment: The horizontal alignment, or `nil` to leave Core Text's default.
+    ///   - indent: The paragraph's indents, or `nil` for none: its first line starts at
+    ///     ``PenParagraphIndent/firstLineIndent``, later lines at
+    ///     ``PenParagraphIndent/headIndent``, and it takes one left tab stop there.
     /// - Returns: The paragraph style.
-    internal static func paragraphStyle(lineHeight points: CGFloat, alignment: CTTextAlignment? = nil) -> CTParagraphStyle {
+    internal static func paragraphStyle(
+        lineHeight points: CGFloat, alignment: CTTextAlignment? = nil, indent: PenParagraphIndent? = nil
+    ) -> CTParagraphStyle {
         var lineHeight = points
         var ctAlignment = alignment ?? .natural
+        var firstLine = CGFloat(indent?.firstLineIndent ?? 0)
+        var head = CGFloat(indent?.headIndent ?? 0)
+        var tabStops = [CTTextTabCreate(.left, Double(head), nil)] as CFArray
+        let size = MemoryLayout<CGFloat>.size
         return withUnsafeMutablePointer(to: &lineHeight) { heightPointer in
             withUnsafeMutablePointer(to: &ctAlignment) { alignmentPointer in
-                var settings = [
-                    CTParagraphStyleSetting(
-                        spec: .minimumLineHeight, valueSize: MemoryLayout<CGFloat>.size, value: heightPointer
-                    ),
-                    CTParagraphStyleSetting(
-                        spec: .maximumLineHeight, valueSize: MemoryLayout<CGFloat>.size, value: heightPointer
-                    ),
-                ]
-                if alignment != nil {
-                    settings.append(CTParagraphStyleSetting(
-                        spec: .alignment, valueSize: MemoryLayout<CTTextAlignment>.size, value: alignmentPointer
-                    ))
+                withUnsafeMutablePointer(to: &firstLine) { firstLinePointer in
+                    withUnsafeMutablePointer(to: &head) { headPointer in
+                        withUnsafeMutablePointer(to: &tabStops) { tabsPointer in
+                            var settings = [
+                                CTParagraphStyleSetting(spec: .minimumLineHeight, valueSize: size, value: heightPointer),
+                                CTParagraphStyleSetting(spec: .maximumLineHeight, valueSize: size, value: heightPointer),
+                            ]
+                            if alignment != nil {
+                                settings.append(CTParagraphStyleSetting(
+                                    spec: .alignment, valueSize: MemoryLayout<CTTextAlignment>.size, value: alignmentPointer
+                                ))
+                            }
+                            if indent != nil {
+                                settings += [
+                                    CTParagraphStyleSetting(spec: .firstLineHeadIndent, valueSize: size, value: firstLinePointer),
+                                    CTParagraphStyleSetting(spec: .headIndent, valueSize: size, value: headPointer),
+                                    CTParagraphStyleSetting(
+                                        spec: .tabStops, valueSize: MemoryLayout<CFArray>.size, value: tabsPointer
+                                    ),
+                                ]
+                            }
+                            return CTParagraphStyleCreate(&settings, settings.count)
+                        }
+                    }
                 }
-                return CTParagraphStyleCreate(&settings, settings.count)
             }
         }
     }

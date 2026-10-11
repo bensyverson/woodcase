@@ -33,6 +33,8 @@ public enum PenTextMeasurer {
     ///   - runs: Styled runs over the text, offsets in UTF-16 code units (``PenTextRun``):
     ///     each is measured in its own face, and a line holding a larger one is as tall as
     ///     it is set (``PenTextLines/Band``). None for plain text.
+    ///   - indents: Paragraph indents over the text (``PenParagraphIndent``): an indented
+    ///     line wraps at the width its indent leaves, and its indent counts in its width.
     /// - Returns: The bounding size (width, height) of the measured text.
     public static func measure(
         _ text: String,
@@ -43,7 +45,8 @@ public enum PenTextMeasurer {
         letterSpacing: Double? = nil,
         lineHeight: Double? = nil,
         maxWidth: Double? = nil,
-        runs: [PenTextRun] = []
+        runs: [PenTextRun] = [],
+        indents: [PenParagraphIndent] = []
     ) -> CGSize {
         guard !text.isEmpty else {
             return .zero
@@ -60,7 +63,7 @@ public enum PenTextMeasurer {
             letterSpacing: letterSpacing,
             lineHeight: lineHeight
         )
-        let styled = style.attributedString(text, runs: runs, for: .sizing)
+        let styled = style.attributedString(text, runs: runs, indents: indents, for: .sizing)
         return measureBlock(styled, width: maxWidth.map { CGFloat($0) })
     }
 
