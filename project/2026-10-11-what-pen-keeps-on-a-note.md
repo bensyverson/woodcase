@@ -36,3 +36,9 @@ then a key-by-key diff of the input against the saved file (`2.21`).
 - **Decision 2 holds:** the tint belongs in `metadata.tint`, as a note `fill` does not survive.
 - **The design's model premise is wrong for current Pen.** It gives notes "the full TextStyle set", reading Pen's schema (Note extends Entity, Size, TextStyle), but Pen strips all of it on load. A font size or family set on a note — which Penumbra's inspector edits and its resize scales (spec §5.9 item 9) — would be lost the first time the board is saved in Pen. Where the note's text style should live instead (for example in metadata, like the tint) is a decision for Ben, recorded on `upM3W0`.
 - **Everything else a post-it needs survives**: kind, state, author, tint, the anchor to a node, replies and mentions in metadata, and markdown in `content`.
+
+## Rich text (styled runs)
+
+Asked by Ben the same day: can a word be bold in Pen? No. Pen's schema (`read_skill({ path: "pen-schema.md" })`, format 2.21) gives `TextContent = StringOrVariable`: one string in one style per text node. Up to 2.10, `content` could be an array of styled runs (`PenRichTextMigrationRule`), and 2.17 dropped it.
+
+**Probe 3:** a `text` node and a `note`, each with the 2.10 run array as `content` (`[{"content": "Make this "}, {"content": "bold", "fontWeight": "700"}, {"content": " please"}]`), loaded and saved the same way. Pen dropped `content` outright on both: the saved text node and note have **no words at all**. So reviving the old array shape would make a Pen round-trip delete the text, not just its styling.
