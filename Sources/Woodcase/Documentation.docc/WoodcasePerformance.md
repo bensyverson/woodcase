@@ -516,8 +516,9 @@ it an eighth.
 #### Text sizes shared across settles
 
 A `TextSizeCache` sits in front of a ``TextMeasurer`` and remembers every size it has
-answered, keyed by everything the measurer is given: the text, the family, size, weight
-and style, the letter spacing, the line height and the wrapping width. The measurer sees
+answered, keyed by everything the measurer is given — its ``PenTextMeasureRequest``: the
+text, the family, size, weight and style, the letter spacing, the line height, the
+wrapping width and the styled runs. The measurer sees
 nothing else about a node, so nothing else can change the size — except the font set,
 which is process-global and grows while the process runs (a family that becomes available
 between two settles measures differently). So the sizes belong to one

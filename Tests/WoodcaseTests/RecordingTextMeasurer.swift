@@ -35,7 +35,8 @@ final class RecordingTextMeasurer: Sendable {
 
     /// The measurer to hand the layout engine.
     var measurer: TextMeasurer {
-        { [self] text, _, _, _, _, _, _, maxWidth in
+        { [self] request in
+            let text = request.text, maxWidth = request.maxWidth
             recorded.withLock { _ = $0.insert(text) }
             let natural = Double(text.count) * Self.characterWidth
             guard let maxWidth, maxWidth > 0, natural > maxWidth else {

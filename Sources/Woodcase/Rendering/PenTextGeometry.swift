@@ -16,9 +16,9 @@ import Foundation
 /// transform and back. String positions are UTF-16 offsets, as `NSRange` and
 /// `NSTextInputClient` count them.
 ///
-/// Every line is a band one line pitch tall (``Line/band``), and the bands tile the block,
-/// so a caret is as tall as its line's pitch and a selection spanning lines leaves no gap
-/// between them. A caret stands only at a grapheme-cluster boundary: no query answers an
+/// Every line is a band (``Line/band``) — one line pitch tall, or taller where a larger
+/// run sits on it (``PenTextLines/Band``) — and the bands tile the block, so a caret is as
+/// tall as its line and a selection spanning lines leaves no gap between them. A caret stands only at a grapheme-cluster boundary: no query answers an
 /// index inside a surrogate pair, a combining sequence or an emoji ZWJ sequence.
 ///
 /// Two lines are synthesized that Core Text does not set: an empty text has one empty line

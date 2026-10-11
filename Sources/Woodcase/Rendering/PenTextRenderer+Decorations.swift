@@ -5,7 +5,7 @@ import Foundation
 public extension PenTextRenderer {
     /// The attribute that marks a run struck through.
     ///
-    /// Core Text has no native strikethrough, so ``PenTextStyle/attributedString(_:for:)``
+    /// Core Text has no native strikethrough, so ``PenTextStyle/attributedString(_:runs:for:)``
     /// marks struck runs with this key and ``drawStrikethrough(lines:in:)`` strokes them.
     /// Public so that another renderer (RapidPro) draws the same bar rather than a copy.
     static var strikethroughKey: CFString {
@@ -59,7 +59,9 @@ public extension PenTextRenderer {
         }
     }
 
-    /// The underline and strikethrough bars of one line, as rectangles.
+    /// The underline and strikethrough bars of one line, as rectangles: those of every run
+    /// the node's paint colors, leaving out runs with a fill of their own
+    /// (``runFillKey``), whose bars go with them (``decorationBars(of:in:at:)``).
     ///
     /// The glyph-outline route clips its paint to these along with the glyphs, so a
     /// decorated gradient line carries the gradient through its bars. The strikethrough sits
@@ -71,28 +73,39 @@ public extension PenTextRenderer {
     ///   - origin: Its origin in Core Text's y-up space.
     /// - Returns: The bars, in the same y-up space.
     internal static func decorationBars(of line: CTLine, at origin: CGPoint) -> [CGRect] {
-        var bars: [CGRect] = []
-        for run in CTLineGetGlyphRuns(line) as! [CTRun] {
-            let attributes = CTRunGetAttributes(run) as NSDictionary
-            guard let value = attributes[kCTFontAttributeName] else { continue }
-            let font = value as! CTFont
-            let range = CTRunGetStringRange(run)
-            let start = CTLineGetOffsetForStringIndex(line, range.location, nil)
-            let end = CTLineGetOffsetForStringIndex(line, range.location + range.length, nil)
-            let span = (x: origin.x + min(start, end), width: abs(end - start))
+        (CTLineGetGlyphRuns(line) as! [CTRun])
+            .filter { !hasOwnFill($0) }
+            .flatMap { decorationBars(of: $0, in: line, at: origin) }
+    }
 
-            if let style = attributes[kCTUnderlineStyleAttributeName] as? NSNumber, style.intValue != 0 {
-                let thickness = CTFontGetUnderlineThickness(font)
-                let center = origin.y + CTFontGetUnderlinePosition(font)
-                bars.append(CGRect(x: span.x, y: center - thickness / 2, width: span.width, height: thickness))
-            }
-            if attributes[strikethroughKey] != nil {
-                let center = origin.y + CTFontGetAscent(font) * strikethroughAscentFraction
-                bars.append(CGRect(
-                    x: span.x, y: center - strikethroughThickness / 2,
-                    width: span.width, height: strikethroughThickness
-                ))
-            }
+    /// The underline and strikethrough bars of one run, as rectangles.
+    ///
+    /// - Parameters:
+    ///   - run: The run.
+    ///   - line: The line it is on.
+    ///   - origin: The line's origin in Core Text's y-up space.
+    /// - Returns: The bars, in the same y-up space.
+    internal static func decorationBars(of run: CTRun, in line: CTLine, at origin: CGPoint) -> [CGRect] {
+        let attributes = CTRunGetAttributes(run) as NSDictionary
+        guard let value = attributes[kCTFontAttributeName] else { return [] }
+        let font = value as! CTFont
+        let range = CTRunGetStringRange(run)
+        let start = CTLineGetOffsetForStringIndex(line, range.location, nil)
+        let end = CTLineGetOffsetForStringIndex(line, range.location + range.length, nil)
+        let span = (x: origin.x + min(start, end), width: abs(end - start))
+
+        var bars: [CGRect] = []
+        if let style = attributes[kCTUnderlineStyleAttributeName] as? NSNumber, style.intValue != 0 {
+            let thickness = CTFontGetUnderlineThickness(font)
+            let center = origin.y + CTFontGetUnderlinePosition(font)
+            bars.append(CGRect(x: span.x, y: center - thickness / 2, width: span.width, height: thickness))
+        }
+        if attributes[strikethroughKey] != nil {
+            let center = origin.y + CTFontGetAscent(font) * strikethroughAscentFraction
+            bars.append(CGRect(
+                x: span.x, y: center - strikethroughThickness / 2,
+                width: span.width, height: strikethroughThickness
+            ))
         }
         return bars
     }

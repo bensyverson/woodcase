@@ -12,7 +12,7 @@ import Testing
 struct PenLayoutUnknownNodeTests {
     private func layout(_ json: String) throws -> [String: PenRect] {
         let document = try PenParser.parse(json)
-        return PenLayoutEngine.layout(document, textMeasurer: { _, _, _, _, _, _, _, _ in (0, 0) })
+        return PenLayoutEngine.layout(document, textMeasurer: { _ in (0, 0) })
     }
 
     @Test("An unknown node with numeric width and height lays out at that size")

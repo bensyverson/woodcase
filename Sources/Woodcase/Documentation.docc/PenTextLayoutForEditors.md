@@ -24,7 +24,7 @@ for (line, origin) in layout.placed {
 }
 ```
 
-An editor that is typing builds the layout from the in-progress string and the node's own style rather than from the node: `PenTextLayout(text: draft, style: PenTextStyle(textData), box: box)`. An empty string sets no lines and draws nothing, but its geometry still has a caret line.
+An editor that is typing builds the layout from the in-progress string and the node's own style rather than from the node: `PenTextLayout(text: draft, style: PenTextStyle(textData), runs: draftRuns, box: box)`, with the draft's runs (``PenTextRun``, offsets in the same UTF-16 units as the geometry's) moved along with each edit. An empty string sets no lines and draws nothing, but its geometry still has a caret line.
 
 ### Coordinates
 
@@ -34,11 +34,11 @@ A block taller than its box is not clipped (Pen draws the overflow), so lines, c
 
 ### Carets
 
-Each line is a band one line pitch tall, starting at ``PenTextLayout/blockTop`` and tiling the block (``PenTextGeometry/Line/band``). A caret is zero wide and as tall as its band: ``PenTextGeometry/caretRect(at:affinity:)``. Carets stand only at grapheme-cluster boundaries — never inside a surrogate pair, a combining sequence or an emoji ZWJ sequence — at the offsets Core Text reports for them (`CTLineEnumerateCaretOffsets`, which follows clusters and bidi).
+Each line is a band — one line pitch tall, or taller where a larger run sits on it (<doc:PenRichText>) — starting at ``PenTextLayout/blockTop`` and tiling the block (``PenTextGeometry/Line/band``). A caret is zero wide and as tall as its band: ``PenTextGeometry/caretRect(at:affinity:)``. Carets stand only at grapheme-cluster boundaries — never inside a surrogate pair, a combining sequence or an emoji ZWJ sequence — at the offsets Core Text reports for them (`CTLineEnumerateCaretOffsets`, which follows clusters and bidi).
 
 At a soft wrap one index ends a line and starts the next. ``PenTextGeometry/Affinity`` says which: `.upstream` is the end of the earlier line, `.downstream` the start of the later, as in `NSTextView`.
 
-Two lines exist only in the geometry. An empty text has one caret line where Pen would set a one-line text — its baseline at Pen's first baseline, its x by alignment (left, center or right of the box). A text that ends in a newline has an empty caret line one pitch below its last.
+Two lines exist only in the geometry. An empty text has one caret line where Pen would set a one-line text — its baseline at Pen's first baseline, its x by alignment (left, center or right of the box). A text that ends in a newline has an empty caret line, one node pitch tall, below its last.
 
 ### Hit-testing and moving
 

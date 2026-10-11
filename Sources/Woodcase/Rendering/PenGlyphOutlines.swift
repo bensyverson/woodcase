@@ -11,7 +11,8 @@ import Foundation
 ///
 /// Glyphs of a color font (emoji) are bitmaps with no outline. Their runs are kept
 /// aside and drawn by Core Text in their own colors, which is what the solid route
-/// does with them too.
+/// does with them too. So is a run with a fill of its own (``PenTextRenderer/runFillKey``):
+/// its glyphs and bars take its color, not the node's paint.
 ///
 /// Public so that another renderer paints through the same outlines rather than a copy
 /// of them: build one from ``PenTextLines/placed(inBoxOfHeight:)``'s lines (or an icon's
@@ -21,17 +22,22 @@ import Foundation
 /// Not `Friendly`: it holds a `CGPath` and `CTRun`s, which are neither `Codable` nor
 /// `Sendable`, and it lives only for the duration of one draw.
 public struct PenGlyphOutlines {
-    /// A run of color glyphs, drawn by Core Text rather than clipped to.
+    /// A run drawn by Core Text in its own color rather than clipped to: color glyphs, or
+    /// a run with a fill of its own.
     public struct ColorRun {
         /// The run to draw.
         public let run: CTRun
         /// Its line's origin in Core Text's y-up space.
         public let origin: CGPoint
+        /// Its own underline and strikethrough bars, in Core Text's y-up space, filled in
+        /// its color: a run with a fill of its own carries them; a color-glyph run's stay in
+        /// ``PenGlyphOutlines/path``, in the node's paint.
+        public let bars: [CGRect]
     }
 
     /// Every outlined glyph and decoration bar, in the node's y-down space.
     public let path: CGPath
-    /// Runs from color fonts, which have no outline.
+    /// Runs from color fonts, which have no outline, and runs with a fill of their own.
     public let colorRuns: [ColorRun]
     /// Maps Core Text's y-up layout space into the node's y-down space.
     public let textSpace: CGAffineTransform
@@ -47,8 +53,11 @@ public struct PenGlyphOutlines {
         var colorRuns: [ColorRun] = []
         for (line, origin) in lines {
             for run in CTLineGetGlyphRuns(line) as! [CTRun] {
-                if Self.appendGlyphs(of: run, at: origin, to: glyphs, textSpace: textSpace) == false {
-                    colorRuns.append(ColorRun(run: run, origin: origin))
+                if PenTextRenderer.hasOwnFill(run) {
+                    let bars = PenTextRenderer.decorationBars(of: run, in: line, at: origin)
+                    colorRuns.append(ColorRun(run: run, origin: origin, bars: bars))
+                } else if Self.appendGlyphs(of: run, at: origin, to: glyphs, textSpace: textSpace) == false {
+                    colorRuns.append(ColorRun(run: run, origin: origin, bars: []))
                 }
             }
             for bar in PenTextRenderer.decorationBars(of: line, at: origin) {
@@ -62,7 +71,8 @@ public struct PenGlyphOutlines {
         self.textSpace = textSpace
     }
 
-    /// Draws the color-glyph runs as Core Text would.
+    /// Draws the color-glyph and own-fill runs as Core Text would, each own-fill run's bars
+    /// in its color.
     ///
     /// - Parameter context: The context, in the node's y-down space.
     public func drawColorGlyphs(in context: CGContext) {
@@ -71,6 +81,13 @@ public struct PenGlyphOutlines {
             context.concatenate(textSpace)
             context.textPosition = colorRun.origin
             CTRunDraw(colorRun.run, context, CFRange(location: 0, length: 0))
+            if !colorRun.bars.isEmpty {
+                let attributes = CTRunGetAttributes(colorRun.run) as NSDictionary
+                if let color = attributes[kCTForegroundColorAttributeName] {
+                    context.setFillColor(color as! CGColor)
+                }
+                context.fill(colorRun.bars)
+            }
             context.restoreGState()
         }
     }

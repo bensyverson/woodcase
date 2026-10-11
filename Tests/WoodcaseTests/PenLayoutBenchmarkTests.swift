@@ -14,7 +14,7 @@ import Woodcase
 struct PenLayoutBenchmarkTests {
     // MARK: - No-op text measurer
 
-    private let noopMeasurer: TextMeasurer = { _, _, _, _, _, _, _, _ in (width: 100, height: 20) }
+    private let noopMeasurer: TextMeasurer = { _ in (width: 100, height: 20) }
 
     // MARK: - Document Generators
 

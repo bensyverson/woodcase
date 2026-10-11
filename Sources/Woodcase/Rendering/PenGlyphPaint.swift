@@ -49,10 +49,7 @@ public enum PenGlyphPaint: Friendly {
     /// other paint, where Core Text draws only color-font glyphs, which keep their own.
     var coreTextColor: CGColor {
         let color = if case let .solid(color) = self { color } else { Self.black }
-        return CGColor(
-            colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!,
-            components: color.unitComponents.map { CGFloat($0) }
-        )!
+        return color.sRGBColor
     }
 
     private static let black = PenHexColor(red: 0, green: 0, blue: 0)

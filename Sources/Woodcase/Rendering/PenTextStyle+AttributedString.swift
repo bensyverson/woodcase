@@ -36,24 +36,72 @@
             )
         }
 
-        /// Builds the Core Text string that sets `text` in this style.
+        /// Builds the Core Text string that sets `text` in this style, with its runs.
         ///
         /// This is the one builder for a text node's content: the CG renderer, text ink
-        /// bounds and ``PenTextMeasurer/measure(_:fontFamily:fontSize:fontWeight:fontStyle:letterSpacing:lineHeight:maxWidth:)``
-        /// all build through it, so the font, kern and line pitch that are drawn are the
-        /// ones that were measured. Every line is set at one pitch,
-        /// ``PenTextMeasurer/linePitch(lineHeight:fontSize:font:)``; strikethrough, which
+        /// bounds and ``PenTextMeasurer/measure(_:fontFamily:fontSize:fontWeight:fontStyle:letterSpacing:lineHeight:maxWidth:runs:)``
+        /// all build through it, so the fonts, kern and line pitch that are drawn are the
+        /// ones that were measured. Each stretch of ``segments(of:runs:)`` is set in its own
+        /// resolved font and decorations, and, when drawn, in its run's fill or else
+        /// `color`; a stretch with a fill of its own is marked with
+        /// ``PenTextRenderer/runFillKey``. The paragraph — line pitch
+        /// (``PenTextMeasurer/linePitch(lineHeight:fontSize:font:)`` of this style),
+        /// alignment and letter spacing — is this style's throughout. Strikethrough, which
         /// Core Text does not draw, is marked with ``PenTextRenderer/strikethroughKey``
         /// for ``PenTextRenderer/drawStrikethrough(lines:in:)``.
         ///
         /// - Parameters:
         ///   - text: The string to set. An empty one builds an empty string.
+        ///   - runs: Its styled runs, offsets in UTF-16 code units; none for plain text.
         ///   - purpose: Whether the string is drawn (with its color and alignment) or
         ///     only sized.
-        /// - Returns: The string, with its font, pitch and first baseline.
-        func attributedString(_ text: String, for purpose: Purpose) -> PenStyledText {
+        /// - Returns: The string, with this style's font, pitch and first baseline.
+        func attributedString(_ text: String, runs: [PenTextRun] = [], for purpose: Purpose) -> PenStyledText {
             let resolved = font
-            var attributes: [CFString: Any] = [kCTFontAttributeName: resolved]
+            let pitch = PenTextMeasurer.linePitch(lineHeight: lineHeight, fontSize: fontSize, font: resolved)
+            let alignment: CTTextAlignment? = switch purpose {
+            case .drawing: Self.coreTextAlignment(textAlign)
+            case .sizing: nil
+            }
+            let paragraph = PenTextMeasurer.paragraphStyle(lineHeight: pitch, alignment: alignment)
+
+            let string: CFAttributedString
+            if runs.isEmpty {
+                var attributes = characterAttributes(font: resolved, fill: nil, for: purpose)
+                attributes[kCTParagraphStyleAttributeName] = paragraph
+                string = CFAttributedStringCreate(kCFAllocatorDefault, text as CFString, attributes as CFDictionary)!
+            } else {
+                let mutable = CFAttributedStringCreateMutable(kCFAllocatorDefault, 0)!
+                CFAttributedStringReplaceString(mutable, CFRange(location: 0, length: 0), text as CFString)
+                for segment in segments(of: text, runs: runs) {
+                    var attributes = segment.style.characterAttributes(
+                        font: segment.style.font, fill: segment.fill, for: purpose
+                    )
+                    attributes[kCTParagraphStyleAttributeName] = paragraph
+                    let range = CFRange(location: segment.range.lowerBound, length: segment.range.count)
+                    CFAttributedStringSetAttributes(mutable, range, attributes as CFDictionary, true)
+                }
+                string = mutable
+            }
+            return PenStyledText(
+                string: string,
+                font: resolved,
+                pitch: pitch,
+                firstBaseline: PenTextMeasurer.firstBaseline(of: resolved, lineHeight: lineHeight, pitch: pitch),
+                lineHeight: lineHeight
+            )
+        }
+
+        /// The attributes one stretch of characters in this style is set with: its font,
+        /// kern and decorations, and when drawn its color.
+        ///
+        /// - Parameters:
+        ///   - font: This style's resolved font.
+        ///   - fill: A run's own color, or `nil` for the purpose's color.
+        ///   - purpose: Whether the string is drawn or only sized.
+        /// - Returns: The attributes, without the paragraph style.
+        private func characterAttributes(font: CTFont, fill: PenHexColor?, for purpose: Purpose) -> [CFString: Any] {
+            var attributes: [CFString: Any] = [kCTFontAttributeName: font]
             if let letterSpacing {
                 attributes[kCTKernAttributeName] = letterSpacing as CFNumber
             }
@@ -63,28 +111,14 @@
             if strikethrough {
                 attributes[PenTextRenderer.strikethroughKey] = true as CFBoolean
             }
-
-            let pitch = PenTextMeasurer.linePitch(lineHeight: lineHeight, fontSize: fontSize, font: resolved)
-            let alignment: CTTextAlignment?
-            switch purpose {
-            case let .drawing(color):
+            if case let .drawing(color) = purpose {
                 attributes[kCTForegroundColorFromContextAttributeName] = false
-                attributes[kCTForegroundColorAttributeName] = color
-                alignment = Self.coreTextAlignment(textAlign)
-            case .sizing:
-                alignment = nil
+                attributes[kCTForegroundColorAttributeName] = fill?.sRGBColor ?? color
+                if fill != nil {
+                    attributes[PenTextRenderer.runFillKey] = true as CFBoolean
+                }
             }
-            attributes[kCTParagraphStyleAttributeName] = PenTextMeasurer.paragraphStyle(
-                lineHeight: pitch, alignment: alignment
-            )
-
-            let string = CFAttributedStringCreate(kCFAllocatorDefault, text as CFString, attributes as CFDictionary)!
-            return PenStyledText(
-                string: string,
-                font: resolved,
-                pitch: pitch,
-                firstBaseline: PenTextMeasurer.firstBaseline(of: resolved, lineHeight: lineHeight, pitch: pitch)
-            )
+            return attributes
         }
 
         /// The Core Text alignment a horizontal alignment sets lines at.

@@ -39,8 +39,9 @@ struct SettledTreeReuseTests {
 
     /// A deterministic measurer: the equivalence is about which nodes were laid out, not
     /// about Core Text.
-    static let measurer: TextMeasurer = { text, _, fontSize, _, _, _, _, maxWidth in
-        let size = fontSize ?? 16
+    static let measurer: TextMeasurer = { request in
+        let text = request.text, maxWidth = request.maxWidth
+        let size = request.fontSize ?? 16
         let width = Double(text.count) * size * 0.6
         guard let maxWidth, maxWidth > 0, width > maxWidth else { return (width, size * 1.2) }
         return (maxWidth, size * 1.2 * (width / maxWidth).rounded(.up))

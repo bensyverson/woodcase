@@ -17,8 +17,9 @@ import Synchronization
 ///
 /// ## The key
 ///
-/// Everything the measurer is given: the text, the family, size, weight and style, the
-/// letter spacing, the line height and the wrapping width. A ``TextMeasurer`` sees
+/// The ``PenTextMeasureRequest`` itself: everything the measurer is given — the text, the
+/// family, size, weight and style, the letter spacing, the line height, the wrapping width
+/// and the styled runs. A ``TextMeasurer`` sees
 /// nothing else about the node, so nothing else can change its answer — except the font
 /// set, which is not an argument.
 ///
@@ -41,27 +42,6 @@ import Synchronization
 /// A class, not a `Friendly` value: it is shared state behind a lock, handed to every
 /// settle of a run by reference.
 package final class TextSizeCache: Sendable {
-    /// Everything a ``TextMeasurer`` is given, and so everything that decides a size in
-    /// one font set.
-    struct Key: Friendly {
-        /// The string.
-        let text: String
-        /// The font family, or `nil` for the default.
-        let family: String?
-        /// The font size, or `nil` for the default.
-        let size: Double?
-        /// The CSS-style weight, or `nil` for normal.
-        let weight: String?
-        /// The CSS-style style, or `nil` for normal.
-        let style: String?
-        /// The letter spacing, or `nil` for none.
-        let letterSpacing: Double?
-        /// The line height multiplier, or `nil` for the font's own.
-        let lineHeight: Double?
-        /// The wrapping width, or `nil` for one line.
-        let maxWidth: Double?
-    }
-
     /// A measured size.
     struct Size: Friendly {
         /// The width.
@@ -75,7 +55,7 @@ package final class TextSizeCache: Sendable {
         /// The ``PenFontRegistry/generation`` every size in ``sizes`` was measured at.
         var generation: Int
         /// The sizes measured so far.
-        var sizes: [Key: Size] = [:]
+        var sizes: [PenTextMeasureRequest: Size] = [:]
         /// How many texts reached the base measurer.
         var measured = 0
     }
@@ -119,27 +99,23 @@ package final class TextSizeCache: Sendable {
     /// A measurer that answers from the cache, and measures through the base measurer
     /// only a text it has not seen in the current font set.
     package var measurer: TextMeasurer {
-        { [self] text, family, size, weight, style, letterSpacing, lineHeight, maxWidth in
-            let key = Key(
-                text: text, family: family, size: size, weight: weight, style: style,
-                letterSpacing: letterSpacing, lineHeight: lineHeight, maxWidth: maxWidth
-            )
+        { [self] request in
             let before = generation()
             let hit: Size? = state.withLock { state in
                 if state.generation != before {
                     state.sizes.removeAll(keepingCapacity: true)
                     state.generation = before
                 }
-                return state.sizes[key]
+                return state.sizes[request]
             }
             if let hit { return (hit.width, hit.height) }
 
-            let measured = base(text, family, size, weight, style, letterSpacing, lineHeight, maxWidth)
+            let measured = base(request)
             let after = generation()
             state.withLock { state in
                 state.measured += 1
                 guard after == before, state.generation == before else { return }
-                state.sizes[key] = Size(width: measured.width, height: measured.height)
+                state.sizes[request] = Size(width: measured.width, height: measured.height)
             }
             return measured
         }

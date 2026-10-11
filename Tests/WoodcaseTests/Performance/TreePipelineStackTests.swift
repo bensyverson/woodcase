@@ -215,7 +215,7 @@
         // MARK: - Helpers
 
         /// A text measurer that needs no fonts; the documents hold no text.
-        private static let noText: TextMeasurer = { _, _, _, _, _, _, _, _ in (0, 0) }
+        private static let noText: TextMeasurer = { _ in (0, 0) }
 
         /// Everything a test builds or keeps, made and freed off the test thread.
         private final class Holder {

@@ -47,16 +47,17 @@ extension DocumentLinter {
               boxCannotGrow(data, node: node)
         else { return [] }
 
-        let needed = PenLayoutEngine.defaultTextMeasurer(
-            content,
-            data.fontFamily?.literalValue,
-            data.fontSize?.literalValue,
-            data.fontWeight?.literalValue,
-            data.fontStyle?.literalValue,
-            data.letterSpacing?.literalValue,
-            data.lineHeight?.literalValue,
-            rect.width
-        ).height
+        let needed = PenLayoutEngine.defaultTextMeasurer(PenTextMeasureRequest(
+            text: content,
+            fontFamily: data.fontFamily?.literalValue,
+            fontSize: data.fontSize?.literalValue,
+            fontWeight: data.fontWeight?.literalValue,
+            fontStyle: data.fontStyle?.literalValue,
+            letterSpacing: data.letterSpacing?.literalValue,
+            lineHeight: data.lineHeight?.literalValue,
+            maxWidth: rect.width,
+            runs: data.appliedRuns
+        )).height
 
         let overflow = needed - rect.height
         guard overflow > TreeRow.clipTolerance else { return [] }

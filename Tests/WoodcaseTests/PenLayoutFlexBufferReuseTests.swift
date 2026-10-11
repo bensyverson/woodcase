@@ -12,7 +12,7 @@ import Testing
 import Woodcase
 
 struct PenLayoutFlexBufferReuseTests {
-    private let noopMeasurer: TextMeasurer = { _, _, _, _, _, _, _, _ in (width: 100, height: 20) }
+    private let noopMeasurer: TextMeasurer = { _ in (width: 100, height: 20) }
 
     // MARK: - Cross-flexible container child with descendants
 

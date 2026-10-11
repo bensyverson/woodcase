@@ -60,7 +60,7 @@ struct PenTextLinePlacementTests {
         let string = try #require(CFAttributedStringCreate(
             nil, "One\nTwo\nThree" as CFString, [kCTFontAttributeName: font] as CFDictionary
         ))
-        let lines = PenTextLines(string, width: 300, pitch: 20, firstBaseline: 15)
+        let lines = PenTextLines(string, width: 300, pitch: 20, firstBaseline: 15, lineHeight: nil)
         #expect(lines.lines.count == 3)
         #expect(lines.height == 60)
         let origins = lines.placed(inBoxOfHeight: 100).map(\.1)

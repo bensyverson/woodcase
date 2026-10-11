@@ -12,19 +12,18 @@
         /// The layout's carets, lines and selection bands, as a plain value
         /// (``PenTextGeometry``).
         ///
-        /// Each line's band is one pitch tall from ``blockTop``, its baseline where it is
-        /// drawn, and its carets at Core Text's caret offsets
+        /// Each line's band is its ``PenTextLines/bands`` entry below ``blockTop`` — one
+        /// pitch tall for a line in the node's face alone — its baseline where it is drawn,
+        /// and its carets at Core Text's caret offsets
         /// (`CTLineEnumerateCaretOffsets`, which follows clusters and bidi), kept only at
         /// grapheme-cluster boundaries. Built on each read; keep the value rather than the
         /// layout.
         var geometry: PenTextGeometry {
-            let boundaries = Self.graphemeBoundaries(of: text)
-            let pitch = Double(lines.pitch)
+            let boundaries = text.graphemeBoundariesInUTF16
             var built: [PenTextGeometry.Line] = []
             for (index, line) in lines.lines.enumerated() {
-                let bandTop = Double(blockTop) + Double(index) * pitch
                 built.append(geometryLine(
-                    line, start: Double(lines.lineStarts[index]), bandTop: bandTop, boundaries: boundaries
+                    line, start: Double(lines.lineStarts[index]), band: lines.bands[index], boundaries: boundaries
                 ))
             }
             let length = text.utf16.count
@@ -35,7 +34,7 @@
                 )
                 built.append(emptyLine(at: 0, bandTop: Double(top)))
             } else if let last = built.last, last.ending == .hardBreak {
-                built.append(emptyLine(at: length, bandTop: last.band.y + pitch))
+                built.append(emptyLine(at: length, bandTop: last.band.y + last.band.height))
             }
             return PenTextGeometry(
                 box: PenSize(width: Double(box.width), height: Double(box.height)), length: length, lines: built
@@ -44,7 +43,7 @@
 
         /// One Core Text line as geometry.
         private func geometryLine(
-            _ line: CTLine, start: Double, bandTop: Double, boundaries: [Int]
+            _ line: CTLine, start: Double, band: PenTextLines.Band, boundaries: [Int]
         ) -> PenTextGeometry.Line {
             let range = CTLineGetStringRange(line)
             let lower = range.location, upper = range.location + range.length
@@ -69,11 +68,10 @@
                 let x = offset ?? Double(CTLineGetOffsetForStringIndex(line, stop, nil))
                 return PenTextGeometry.Line.Caret(index: stop, x: start + x)
             }
-            let pitch = Double(lines.pitch)
             return PenTextGeometry.Line(
                 stringRange: lower ..< upper,
-                baseline: bandTop + Double(lines.firstBaseline),
-                band: PenRect(x: 0, y: bandTop, width: Double(box.width), height: pitch),
+                baseline: Double(blockTop + band.baseline),
+                band: PenRect(x: 0, y: Double(blockTop + band.top), width: Double(box.width), height: Double(band.height)),
                 start: start,
                 trailingWhitespaceWidth: Double(CTLineGetTrailingWhitespaceWidth(line)),
                 ending: ending,
@@ -98,18 +96,6 @@
                 ending: .endOfText,
                 carets: [PenTextGeometry.Line.Caret(index: index, x: x)]
             )
-        }
-
-        /// The UTF-16 offset of every grapheme-cluster boundary in `text`, 0 and its length
-        /// included.
-        private static func graphemeBoundaries(of text: String) -> [Int] {
-            var offset = 0
-            var boundaries = [0]
-            for character in text {
-                offset += character.utf16.count
-                boundaries.append(offset)
-            }
-            return boundaries
         }
 
         /// Whether the UTF-16 span `lower..<upper` of `text` is one newline grapheme.

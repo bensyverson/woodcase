@@ -10,26 +10,10 @@ import Foundation
 
 /// A function that measures text and returns its bounding size.
 ///
-/// - Parameters:
-///   - text: The string to measure.
-///   - fontFamily: Font family name, or nil for the default.
-///   - fontSize: Font size in points, or nil for the default.
-///   - fontWeight: CSS-style weight string (e.g. "bold", "700"), or nil for normal.
-///   - fontStyle: CSS-style font style (e.g. "italic"), or nil for normal.
-///   - letterSpacing: Additional spacing between characters in points, or nil for none.
-///   - lineHeight: Line height as a multiplier of font size, or nil for the font's natural height.
-///   - maxWidth: Maximum width for wrapping, or nil for single-line (no wrapping).
+/// - Parameter request: The text, its style as the node writes it, its styled runs and the
+///   width it may wrap at (``PenTextMeasureRequest``).
 /// - Returns: The bounding size (width, height) of the measured text.
-public typealias TextMeasurer = @Sendable (
-    _ text: String,
-    _ fontFamily: String?,
-    _ fontSize: Double?,
-    _ fontWeight: String?,
-    _ fontStyle: String?,
-    _ letterSpacing: Double?,
-    _ lineHeight: Double?,
-    _ maxWidth: Double?
-) -> (width: Double, height: Double)
+public typealias TextMeasurer = @Sendable (_ request: PenTextMeasureRequest) -> (width: Double, height: Double)
 
 /// Computes layout rectangles for all nodes in a .pen document.
 ///
@@ -49,16 +33,17 @@ public typealias TextMeasurer = @Sendable (
 /// ```
 public nonisolated enum PenLayoutEngine {
     /// The default text measurer, backed by ``PenTextMeasurer`` and Core Text.
-    public static let defaultTextMeasurer: TextMeasurer = { text, fontFamily, fontSize, fontWeight, fontStyle, letterSpacing, lineHeight, maxWidth in
+    public static let defaultTextMeasurer: TextMeasurer = { request in
         let size = PenTextMeasurer.measure(
-            text,
-            fontFamily: fontFamily,
-            fontSize: fontSize,
-            fontWeight: fontWeight,
-            fontStyle: fontStyle,
-            letterSpacing: letterSpacing,
-            lineHeight: lineHeight,
-            maxWidth: maxWidth
+            request.text,
+            fontFamily: request.fontFamily,
+            fontSize: request.fontSize,
+            fontWeight: request.fontWeight,
+            fontStyle: request.fontStyle,
+            letterSpacing: request.letterSpacing,
+            lineHeight: request.lineHeight,
+            maxWidth: request.maxWidth,
+            runs: request.runs
         )
         return (size.width, size.height)
     }
@@ -286,13 +271,8 @@ public extension PenLayoutEngine {
 
 extension PenLayoutEngine {
     struct TextMeasurementInput {
-        let text: String
-        let fontFamily: String?
-        let fontSize: Double?
-        let fontWeight: String?
-        let fontStyle: String?
-        let letterSpacing: Double?
-        let lineHeight: Double?
+        /// The node's text, style and runs, unwrapped: the width is decided per measurement.
+        let request: PenTextMeasureRequest
         let textGrowth: PenTextGrowth?
     }
 
@@ -402,13 +382,16 @@ extension PenLayoutEngine {
         guard case let .text(data) = kind else { return nil }
 
         return TextMeasurementInput(
-            text: data.content?.literalValue ?? "",
-            fontFamily: data.fontFamily?.literalValue,
-            fontSize: data.fontSize?.literalValue,
-            fontWeight: data.fontWeight?.literalValue,
-            fontStyle: data.fontStyle?.literalValue,
-            letterSpacing: data.letterSpacing?.literalValue,
-            lineHeight: data.lineHeight?.literalValue,
+            request: PenTextMeasureRequest(
+                text: data.content?.literalValue ?? "",
+                fontFamily: data.fontFamily?.literalValue,
+                fontSize: data.fontSize?.literalValue,
+                fontWeight: data.fontWeight?.literalValue,
+                fontStyle: data.fontStyle?.literalValue,
+                letterSpacing: data.letterSpacing?.literalValue,
+                lineHeight: data.lineHeight?.literalValue,
+                runs: data.appliedRuns
+            ),
             textGrowth: data.textGrowth
         )
     }
@@ -665,20 +648,14 @@ extension PenLayoutEngine {
             let needsWidthFromText = props.widthSizing.isFitContent && textInput.textGrowth != .fixedWidth
             let needsHeightFromText = props.heightSizing.isFitContent
 
-            if !textInput.text.isEmpty, needsWidthFromText || needsHeightFromText {
+            let text = textInput.request.text
+            if !text.isEmpty, needsWidthFromText || needsHeightFromText {
                 // For width measurement: unconstrained unless width is already resolved
                 let measureMaxWidth: Double? = needsWidthFromText ? nil : resolvedWidth
 
-                let measured = textMeasurer(
-                    textInput.text,
-                    textInput.fontFamily,
-                    textInput.fontSize,
-                    textInput.fontWeight,
-                    textInput.fontStyle,
-                    textInput.letterSpacing,
-                    textInput.lineHeight,
-                    measureMaxWidth
-                )
+                var request = textInput.request
+                request.maxWidth = measureMaxWidth
+                let measured = textMeasurer(request)
 
                 let w = needsWidthFromText ? measured.width : resolvedWidth
                 let h = needsHeightFromText ? measured.height : resolveIntrinsicSize(props.heightSizing, available: availableHeight).size
@@ -687,17 +664,8 @@ extension PenLayoutEngine {
 
             // Empty text node: use one line height as the intrinsic height
             // so it still occupies vertical space in layout (matching Pen's behavior).
-            if textInput.text.isEmpty, needsHeightFromText {
-                let oneLineHeight = textMeasurer(
-                    " ",
-                    textInput.fontFamily,
-                    textInput.fontSize,
-                    textInput.fontWeight,
-                    textInput.fontStyle,
-                    textInput.letterSpacing,
-                    textInput.lineHeight,
-                    nil
-                )
+            if text.isEmpty, needsHeightFromText {
+                let oneLineHeight = textMeasurer(textInput.request.measuring(" ", maxWidth: nil, runs: []))
                 return (0, oneLineHeight.height)
             }
         }

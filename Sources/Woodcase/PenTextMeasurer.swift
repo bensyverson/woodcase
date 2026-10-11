@@ -17,7 +17,7 @@ public enum PenTextMeasurer {
     /// The default font size used when none is specified: ``PenTextStyle/defaultFontSize``.
     public static let defaultFontSize: Double = PenTextStyle.defaultFontSize
 
-    /// Measures the bounding size of a plain text string with the given style properties.
+    /// Measures the bounding size of a text with the given style properties and runs.
     ///
     /// - Parameters:
     ///   - text: The string to measure.
@@ -30,6 +30,9 @@ public enum PenTextMeasurer {
     ///     pitch Pen sets it at, ``linePitch(lineHeight:fontSize:font:)``: this times the
     ///     font size rounded to a whole point, or with nil the font's natural line height.
     ///   - maxWidth: Maximum width for wrapping. Nil means single-line (no wrapping).
+    ///   - runs: Styled runs over the text, offsets in UTF-16 code units (``PenTextRun``):
+    ///     each is measured in its own face, and a line holding a larger one is as tall as
+    ///     it is set (``PenTextLines/Band``). None for plain text.
     /// - Returns: The bounding size (width, height) of the measured text.
     public static func measure(
         _ text: String,
@@ -39,7 +42,8 @@ public enum PenTextMeasurer {
         fontStyle: String? = nil,
         letterSpacing: Double? = nil,
         lineHeight: Double? = nil,
-        maxWidth: Double? = nil
+        maxWidth: Double? = nil,
+        runs: [PenTextRun] = []
     ) -> CGSize {
         guard !text.isEmpty else {
             return .zero
@@ -56,8 +60,8 @@ public enum PenTextMeasurer {
             letterSpacing: letterSpacing,
             lineHeight: lineHeight
         )
-        let styled = style.attributedString(text, for: .sizing)
-        return measureCFAttributedString(styled.string, maxWidth: maxWidth, lineHeight: styled.pitch)
+        let styled = style.attributedString(text, runs: runs, for: .sizing)
+        return measureBlock(styled, width: maxWidth.map { CGFloat($0) })
     }
 
     /// Measures a CFAttributedString, optionally constrained to a maximum width.

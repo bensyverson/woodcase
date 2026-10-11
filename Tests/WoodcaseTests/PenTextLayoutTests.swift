@@ -18,9 +18,10 @@ struct PenTextLayoutTests {
     /// Deterministic text measurer for testing.
     /// Width = character count * 8 (simulating ~8pt per character).
     /// Height = fontSize (default 16). Wraps when maxWidth is set.
-    static let stubMeasurer: TextMeasurer = { text, _, fontSize, _, _, _, _, maxWidth in
+    static let stubMeasurer: TextMeasurer = { request in
+        let text = request.text, maxWidth = request.maxWidth
         let charWidth: Double = 8
-        let lineHeight = fontSize ?? 16
+        let lineHeight = request.fontSize ?? 16
         let naturalWidth = Double(text.count) * charWidth
 
         if let maxWidth, naturalWidth > maxWidth {

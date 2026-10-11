@@ -33,16 +33,51 @@ extension PenTextMeasurer {
     ///   - width: The wrapping width, or `nil` for no wrapping.
     /// - Returns: The lines' width and count.
     static func typeset(_ string: CFAttributedString, width: CGFloat?) -> Typeset {
+        let lines = lines(of: string, width: width)
+        return Typeset(width: widest(lines), lineCount: lines.count)
+    }
+
+    /// Measures a styled text's block once: its widest line and its lines' bands
+    /// (``PenTextLines/bands``), so a line holding a larger run counts as tall as it is set.
+    ///
+    /// - Parameters:
+    ///   - styled: The text, styled, with its node's line metrics.
+    ///   - width: The wrapping width, or `nil` for no wrapping.
+    /// - Returns: The block's size, rounded up to whole points.
+    static func measureBlock(_ styled: PenStyledText, width: CGFloat?) -> CGSize {
+        let lines = lines(of: styled.string, width: width)
+        let bands = PenTextLines.bands(
+            of: lines, in: styled.string,
+            strut: PenTextLines.Strut(pitch: styled.pitch, firstBaseline: styled.firstBaseline, lineHeight: styled.lineHeight)
+        )
+        let height = bands.last.map { $0.top + $0.height } ?? 0
+        return CGSize(width: ceil(widest(lines)), height: ceil(height))
+    }
+
+    /// The lines a text breaks into at `width`: a frame's for a justified paragraph, the
+    /// typesetter's otherwise.
+    ///
+    /// - Parameters:
+    ///   - string: The styled text.
+    ///   - width: The wrapping width, or `nil` for no wrapping.
+    /// - Returns: The lines, top to bottom.
+    private static func lines(of string: CFAttributedString, width: CGFloat?) -> [CTLine] {
         // An unwrapped measurement gets a width no line reaches.
         let unbounded: CGFloat = 1e7
-        let lines = isJustified(string)
+        return isJustified(string)
             ? framedLines(string, width: width ?? unbounded)
             : typesetLines(string, width: width ?? unbounded)
-        let widest = lines.reduce(CGFloat(0)) { widest, line in
+    }
+
+    /// The widest line's typographic width, less its trailing whitespace, never below zero.
+    ///
+    /// - Parameter lines: The lines.
+    /// - Returns: The width in points.
+    private static func widest(_ lines: [CTLine]) -> CGFloat {
+        lines.reduce(CGFloat(0)) { widest, line in
             let inked = CGFloat(CTLineGetTypographicBounds(line, nil, nil, nil)) - CTLineGetTrailingWhitespaceWidth(line)
             return max(widest, inked)
         }
-        return Typeset(width: widest, lineCount: lines.count)
     }
 
     /// The lines Core Text's typesetter breaks `string` into at `width`, unaligned.

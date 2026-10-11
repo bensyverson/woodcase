@@ -28,7 +28,7 @@ struct RootRectsMeasurementTests {
 
         /// The measurer to hand the layout.
         var measurer: TextMeasurer {
-            { [self] _, _, _, _, _, _, _, _ in
+            { [self] _ in
                 calls.withLock { $0 += 1 }
                 return (width: 40, height: 10)
             }

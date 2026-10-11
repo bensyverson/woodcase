@@ -78,7 +78,7 @@ struct MeasurementCacheTests {
         ])
     }
 
-    private let noopMeasurer: TextMeasurer = { _, _, _, _, _, _, _, _ in (width: 100, height: 20) }
+    private let noopMeasurer: TextMeasurer = { _ in (width: 100, height: 20) }
 
     @Test("Incremental layout with cache produces correct results")
     func incrementalWithCacheCorrect() {

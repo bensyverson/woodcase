@@ -38,11 +38,12 @@ struct TextSizeCacheTests {
 
         /// The measurer to wrap.
         var measurer: TextMeasurer {
-            { [self] text, _, fontSize, _, _, letterSpacing, _, maxWidth in
+            { [self] request in
                 calls.withLock { $0 += 1 }
                 during()
-                let width = Double(text.count) * (fontSize ?? 16) + (letterSpacing ?? 0)
-                return (width: min(width, maxWidth ?? .infinity), height: fontSize ?? 16)
+                let fontSize = request.fontSize ?? 16
+                let width = Double(request.text.count) * fontSize + (request.letterSpacing ?? 0)
+                return (width: min(width, request.maxWidth ?? .infinity), height: fontSize)
             }
         }
     }
@@ -72,9 +73,13 @@ struct TextSizeCacheTests {
         style: String? = "normal",
         letterSpacing: Double? = 0,
         lineHeight: Double? = 1.2,
-        maxWidth: Double? = 200
+        maxWidth: Double? = 200,
+        runs: [PenTextRun] = []
     ) -> (width: Double, height: Double) {
-        measurer(text, family, size, weight, style, letterSpacing, lineHeight, maxWidth)
+        measurer(PenTextMeasureRequest(
+            text: text, fontFamily: family, fontSize: size, fontWeight: weight, fontStyle: style,
+            letterSpacing: letterSpacing, lineHeight: lineHeight, maxWidth: maxWidth, runs: runs
+        ))
     }
 
     @Test("the same text with the same attributes is measured once")
@@ -106,11 +111,12 @@ struct TextSizeCacheTests {
         _ = Self.measure(measurer, letterSpacing: 1)
         _ = Self.measure(measurer, lineHeight: 1.5)
         _ = Self.measure(measurer, maxWidth: 100)
+        _ = Self.measure(measurer, runs: [PenTextRun(start: 0, end: 2, fontWeight: 700)])
         _ = Self.measure(measurer, family: nil, size: nil, weight: nil, style: nil,
                          letterSpacing: nil, lineHeight: nil, maxWidth: nil)
         _ = Self.measure(measurer)
 
-        #expect(base.count == 10, "a variant was answered from another's entry, or a repeat was not")
+        #expect(base.count == 11, "a variant was answered from another's entry, or a repeat was not")
     }
 
     @Test("a font registration between two measurements measures again")

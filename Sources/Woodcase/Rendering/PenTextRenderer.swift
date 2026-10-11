@@ -7,11 +7,13 @@ import Foundation
 /// A text node's fills are its paint. A lone solid color is handed to Core Text, which
 /// draws the glyphs in it; any other paint is drawn through the glyphs' outlines over the
 /// node's box (see ``PenGlyphPaint`` and ``PenGlyphOutlines``). Both routes share one
-/// layout. A node with no enabled paint draws nothing, as Pen draws it.
+/// layout. A node with no enabled paint draws nothing, as Pen draws it — except its runs
+/// with a fill of their own (``PenTextRun/fill``), which draw in that color on every route.
 ///
-/// Public only for its strikethrough — ``strikethroughKey``, ``drawStrikethrough(lines:in:)``
-/// and the bar's metrics — which Core Text does not draw and another renderer must draw
-/// the same way. Setting text is ``PenTextStyle``'s job.
+/// Public only for what Core Text does not decide and another renderer must draw the same
+/// way: its strikethrough — ``strikethroughKey``, ``drawStrikethrough(lines:in:)`` and the
+/// bar's metrics — and the mark on a run with its own fill, ``runFillKey``. Setting text is
+/// ``PenTextStyle``'s job.
 public enum PenTextRenderer {
     /// Renders a text node's content into the given context at the specified rect.
     ///
@@ -33,18 +35,19 @@ public enum PenTextRenderer {
     ) {
         let paint = PenGlyphPaint(fills: fills)
         let size = CGSize(width: CGFloat(rect.width), height: CGFloat(rect.height))
-        guard paint != .nothing,
-              let layout = PenTextLayout(data, box: size, color: paint.coreTextColor),
+        // A run with a fill of its own draws even where the node has no paint: the rest of
+        // the text is then set in a clear color, which draws nothing.
+        let hasOwnFills = data.appliedRuns.contains { $0.fill != nil }
+        let color = paint == .nothing ? CGColor(gray: 0, alpha: 0) : paint.coreTextColor
+        guard paint != .nothing || hasOwnFills,
+              let layout = PenTextLayout(data, box: size, color: color),
               !layout.lines.lines.isEmpty
         else { return }
         let placed = layout.placed
         let textSpace = layout.textSpace
 
         switch paint {
-        case .nothing:
-            return
-
-        case .solid:
+        case .nothing, .solid:
             context.saveGState()
             context.concatenate(textSpace)
             for (line, origin) in placed {

@@ -15,8 +15,9 @@ public extension PenTextGeometry {
         /// The line's baseline, in points below the box's top.
         public var baseline: Double
 
-        /// The line's band: the box-local rect one pitch tall that its caret and its
-        /// selection fill. Bands tile the block, top to bottom.
+        /// The line's band: the box-local rect its caret and its selection fill — one pitch
+        /// tall, or as tall as a larger run on the line needs. Bands tile the block, top to
+        /// bottom.
         public var band: PenRect
 
         /// Where the line starts, in points from the box's left edge: Core Text's origin

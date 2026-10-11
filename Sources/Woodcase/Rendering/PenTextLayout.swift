@@ -14,9 +14,10 @@
     /// Woodcase's CG renderer draws a text node through it, ``PenLayoutEngine`` measures the
     /// node's ink through it, RapidPro's rasterizer draws through it, and an editor reads
     /// its caret, hit-testing and selection from its ``geometry`` — so the line a caret sits
-    /// on is the line that was drawn, to the point. It builds the string once
-    /// (``PenTextStyle/attributedString(_:for:)``), breaks it once (``PenTextLines``), and
-    /// decides once where the block of lines sits in the box (``blockTop``).
+    /// on is the line that was drawn, to the point. It builds the string once, with its
+    /// styled runs (``PenTextStyle/attributedString(_:runs:for:)``), breaks it once
+    /// (``PenTextLines``), and decides once where the block of lines sits in the box
+    /// (``blockTop``).
     ///
     /// Coordinates are the box's own: origin at its top-left, y growing downward, except
     /// ``placed``, which is Core Text's y-up space for `CTLineDraw`; ``textSpace`` maps one to
@@ -37,10 +38,13 @@
         /// The style it was set in.
         public let style: PenTextStyle
 
+        /// The styled runs over the text, offsets in UTF-16 code units; empty for plain text.
+        public let runs: [PenTextRun]
+
         /// The box it was placed in, in points.
         public let box: CGSize
 
-        /// The styled string, with its resolved font, pitch and first baseline.
+        /// The styled string, with its node's resolved font, pitch and first baseline.
         public let styled: PenStyledText
 
         /// The lines Core Text broke the text into at the box's width.
@@ -51,32 +55,36 @@
         /// block taller than its box is centered or bottom-aligned, as Pen draws it.
         public let blockTop: CGFloat
 
-        /// Sets `text` in `style` and places it in a box of `box`.
+        /// Sets `text` in `style`, with its runs, and places it in a box of `box`.
         ///
         /// An empty text sets no lines; it draws nothing and has no ink, though its
         /// ``geometry`` still has a line for the caret.
         ///
         /// - Parameters:
         ///   - text: The text to set.
-        ///   - style: Its style.
+        ///   - style: Its style: the node's, which every range no run covers keeps.
+        ///   - runs: Styled runs over the text, offsets in UTF-16 code units
+        ///     (``PenTextRun``); a run's fill colors its glyphs in place of `color`.
         ///   - box: The box it is placed in: the wrapping width, and the height vertical
         ///     alignment is measured against.
         ///   - color: The glyphs' color, which `CTLineDraw` reads from the runs.
-        public init(text: String, style: PenTextStyle, box: CGSize, color: CGColor = defaultColor) {
+        public init(
+            text: String, style: PenTextStyle, runs: [PenTextRun] = [], box: CGSize, color: CGColor = defaultColor
+        ) {
             self.text = text
             self.style = style
+            self.runs = runs
             self.box = box
-            let styled = style.attributedString(text, for: .drawing(color: color))
+            let styled = style.attributedString(text, runs: runs, for: .drawing(color: color))
             self.styled = styled
-            lines = PenTextLines(
-                styled.string, width: box.width, pitch: styled.pitch, firstBaseline: styled.firstBaseline
-            )
+            lines = PenTextLines(styled, width: box.width)
             blockTop = Self.blockTop(
                 ofHeight: ceil(lines.height), inBoxOfHeight: box.height, alignment: style.textAlignVertical
             )
         }
 
-        /// Sets a text node's content in its style and places it in its box.
+        /// Sets a text node's content in its style, with its applied runs
+        /// (``PenNode/TextData/appliedRuns``), and places it in its box.
         ///
         /// - Parameters:
         ///   - data: The text node's data.
@@ -86,7 +94,7 @@
         ///   variable reference — there is no text to set.
         public init?(_ data: PenNode.TextData, box: CGSize, color: CGColor = defaultColor) {
             guard let text = data.content?.literalValue else { return nil }
-            self.init(text: text, style: PenTextStyle(data), box: box, color: color)
+            self.init(text: text, style: PenTextStyle(data), runs: data.appliedRuns, box: box, color: color)
         }
 
         /// The styled Core Text string.
@@ -94,13 +102,15 @@
             styled.string
         }
 
-        /// The resolved font the text is set in.
+        /// The resolved font of the node's style: the one every character no run restyles
+        /// is set in.
         public var font: CTFont {
             styled.font
         }
 
-        /// The block's height: the line count times the pitch, rounded up to a whole point,
-        /// the height vertical alignment centers.
+        /// The block's height: its lines' bands (``PenTextLines/bands``) — the line count
+        /// times the pitch for a text in one face — rounded up to a whole point, the height
+        /// vertical alignment centers.
         public var blockHeight: CGFloat {
             ceil(lines.height)
         }
