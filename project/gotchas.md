@@ -27,3 +27,7 @@ With several agents building (load 90–200) the same suites fail in full runs a
 ## 2026-09-27 — Pen's own drawing code is readable, and settles "what does Pen do" faster than probing
 
 `/Applications/Pen.app/Contents/Resources/app.asar` holds the editor's JavaScript (`out/editor/assets/index.js`); read it straight from the archive, read-only — never modify the app. The Material agent (`6vLFNQ`) found there that Pen draws icons via `getIconPath` at 14 pt with only `wght` set and fetches Material Symbols from fonts.gstatic.com, which probing exports had only hinted at. Treat it as evidence of intent and still confirm against an export (`scripts/pen-oracle`).
+
+## 2026-10-11 — `nil` in an `AnyCodable` dictionary write can store `.null`
+
+`AnyCodable` is `ExpressibleByNilLiteral`, so on a `[String: AnyCodable]`, `object[key] = cond ? nil : value` — where `value` is a variable typed `AnyCodable` — infers the ternary as `AnyCodable` and stores `.null` instead of removing the key (with a leading-dot literal such as `.dictionary(x)` in the other branch it removes, as meant). Peers then disagree on whether the key exists (leaf `dHZuBK`, the CRDT metadata entries). Remove with `removeValue(forKey:)`.

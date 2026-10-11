@@ -36,7 +36,7 @@ public enum BatchError: Error, Equatable, Sendable {
     /// A key names a parameter the component publishes, but the path that parameter
     /// declares names nothing inside the component.
     ///
-    /// The declaration is `common.metadata._props`, and a stale one is the failure
+    /// The declaration is `common.metadata.woodcase.props`, and a stale one is the failure
     /// worth catching early: the key is meaningful — the component really does publish
     /// that name — so storing it as an ordinary override would apply, read back, and
     /// draw nothing. Raised before anything is written, naming both halves of the

@@ -48,6 +48,7 @@ one kind of key, or an exception the structure forces.
 | Subject | What counts as one key | When both changed it differently |
 | --- | --- | --- |
 | A node property | One ``NodePropertyCodec`` path (`common.name`, `kind.width`) | ``MergeConflict/Subject/property(nodeID:path:)``, ``MergeConflict/Kind/bothChanged`` |
+| A metadata entry | One top-level key of `common.metadata`, or one key under `metadata.woodcase` (<doc:PenMetadataNamespace>) | ``MergeConflict/Subject/property(nodeID:path:)``, at the entry's path: `common.metadata.woodcase.state` |
 | A node extra | One `extras.<key>`: a key the file wrote that the node's type does not model | ``MergeConflict/Subject/property(nodeID:path:)`` |
 | A node's type | `kind.type`, standing for *every* `kind.*` key | ``MergeConflict/Subject/nodeType(nodeID:)``; see below |
 | A descendant override | One key of one descendant's entry in a `ref`'s `descendants` | ``MergeConflict/Subject/descendantOverride(nodeID:descendant:key:)`` |

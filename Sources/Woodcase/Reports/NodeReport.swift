@@ -35,7 +35,7 @@ public struct NodeReport: Friendly {
     /// The node itself.
     public let node: PenNode
 
-    /// The parameters the node publishes in `common.metadata._props`, resolved to the
+    /// The parameters the node publishes in `common.metadata.woodcase.props`, resolved to the
     /// descendant and property each one writes — omitted entirely for a node that
     /// publishes none, so a consumer branches on presence rather than on an empty list.
     public let props: [ComponentParameter]?

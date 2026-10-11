@@ -9,18 +9,18 @@ import Foundation
 ///
 /// `common.metadata` is a single property holding an open object, so the only way to
 /// annotate a node used to be to write the object out again — and every write that did
-/// so silently dropped `_props`, `_role` and everything else already in it. A deep key
-/// says which entry is meant: `common.metadata._role=button` merges one key and leaves
-/// the rest exactly as they were, and `common.metadata._props.label=Body/Title`
-/// reaches one entry inside a nested object.
+/// so silently dropped everything else already in it. A deep key says which entry is
+/// meant: `common.metadata.woodcase.role=button` merges one key and leaves the rest
+/// exactly as they were, and `common.metadata.woodcase.props.label=Body/Title` reaches
+/// one entry inside a nested object.
 ///
 /// The fold happens in the library, before an ``EditOperation`` exists, so what is
 /// recorded — and replicated, and undone — is an ordinary whole-object write to
 /// ``deepKeyedPaths``. Nothing downstream has to learn a second key form.
 ///
 /// ```swift
-/// NodePropertyCodec.deepKey(of: "common.metadata._props.label")
-/// // (property: "common.metadata", keyPath: ["_props", "label"])
+/// NodePropertyCodec.deepKey(of: "common.metadata.woodcase.props.label")
+/// // (property: "common.metadata", keyPath: ["woodcase", "props", "label"])
 /// ```
 public extension NodePropertyCodec {
     /// The whole-object properties a dotted key may reach inside.
@@ -32,7 +32,7 @@ public extension NodePropertyCodec {
 
     /// Splits a deep key into the property it writes into and the key path inside it.
     ///
-    /// - Parameter path: The key as written, such as `common.metadata._role`.
+    /// - Parameter path: The key as written, such as `common.metadata.woodcase.role`.
     /// - Returns: The whole-object property and the keys to walk inside it, or `nil`
     ///   when the path is not a deep key at all.
     static func deepKey(of path: String) -> (property: String, keyPath: [String])? {
@@ -49,20 +49,20 @@ public extension NodePropertyCodec {
     ///
     /// A whole-object write to the same property is applied *first* and the deep keys
     /// merge onto it, so `common.metadata={"type":"component"}` alongside
-    /// `common.metadata._role=button` means the object it reads as. A deep key whose
+    /// `common.metadata.woodcase.role=button` means the object it reads as. A deep key whose
     /// value is ``AnyCodable/null`` removes that entry, which is the same rule a null
     /// follows everywhere else.
     ///
     /// `common.metadata` carries one more rule: the `.pen` schema requires the object's
-    /// `type` key, and ``PenMetadata`` itself no longer fabricates one — it leaves
-    /// `type` exactly as the file had it, `nil` included, so a read-modify-write of an
-    /// untouched node adds no key. A deep key that *creates* the object from nothing is
-    /// a genuine write, though, so it chooses `"unknown"` here rather than leave the
-    /// object schema-invalid; a write that already named a real type is untouched.
+    /// `type` key, and ``PenMetadata`` itself fabricates none — it leaves `type` exactly as
+    /// the file had it, `nil` included, so a read-modify-write of an untouched node adds no
+    /// key. A write *is* a write, though: an object it leaves without a type takes
+    /// ``PenMetadata/woodcaseType`` (``storingWoodcaseKeysInNamespace(_:replacing:)``); a
+    /// type anyone else wrote is untouched.
     ///
-    /// - Parameters:
-    ///   - properties: The properties as the caller wrote them.
-    ///   - node: The node they will be written to, for the object as it stands.
+    /// Last, a metadata write — deep or whole — stores the Woodcase keys it changes
+    /// under `metadata.woodcase` only (``storingWoodcaseKeysInNamespace(_:replacing:)``).
+    ///
     /// - Returns: The same properties with every deep key folded into one whole-object
     ///   value, ready for ``setting(_:at:on:)``.
     /// - Throws: ``EditingError/unknownProperty(nodeID:key:nodeType:)`` if a deep-keyed
@@ -83,19 +83,21 @@ public extension NodePropertyCodec {
         for (property, writes) in deep.sorted(by: { $0.key < $1.key }) {
             let base = try folded[property] ?? value(at: property, of: node)
             var object = objectValue(of: base)
+            var writes = writes
+            if property == metadataPath {
+                (object, writes) = aimingAtWoodcaseNamespace(writes, onto: object)
+            }
             for write in writes.sorted(by: { $0.keyPath.lexicographicallyPrecedes($1.keyPath) }) {
                 object = merging(write.value, at: write.keyPath, into: object)
             }
-            if property == metadataPath, object["type"] == nil {
-                object["type"] = .string(defaultMetadataType)
-            }
             folded[property] = .dictionary(object)
+        }
+        if case let .dictionary(metadata)? = folded[metadataPath] {
+            folded[metadataPath] = storingWoodcaseKeysInNamespace(metadata, replacing: node.common.metadata)
+                .map(AnyCodable.dictionary) ?? .null
         }
         return folded
     }
-
-    /// What a deep key writes as `type` when it creates a metadata object with none.
-    private static let defaultMetadataType = "unknown"
 
     // MARK: - Private
 
@@ -108,7 +110,7 @@ public extension NodePropertyCodec {
     /// Writes one value at a key path inside an object, creating the objects on the way.
     ///
     /// A null removes the entry, and an object a null empties is removed with it, so
-    /// clearing the last declared parameter leaves no `_props: {}` behind.
+    /// clearing the last declared parameter leaves no `props: {}` behind.
     private static func merging(
         _ value: AnyCodable,
         at keyPath: [String],

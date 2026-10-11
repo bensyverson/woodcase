@@ -7,7 +7,7 @@ import Foundation
 import Testing
 @testable import Woodcase
 
-/// The scroll-aware half of `clipped`: `common.metadata._scroll` on a clipping frame
+/// The scroll-aware half of `clipped`: `common.metadata.woodcase.scroll` on a clipping frame
 /// exempts overflow along the axis it declares, an undeclared clipping frame that
 /// stacks its children folds an overflowing run into one teaching finding, and an
 /// invalid `_scroll` value is its own warning. See `DocumentLinter+Scroll.swift`.
@@ -89,7 +89,7 @@ struct DocumentLinterScrollTests {
     func collapsedFindingProposesTheCommand() throws {
         let findings = try clippedFindings("scroll-unannotated-collapse.pen")
         let collapsed = try #require(findings.first { $0.nodeID == "List1" })
-        #expect(collapsed.message.contains("woodcase set <file> List common.metadata._scroll=vertical"))
+        #expect(collapsed.message.contains("woodcase set <file> List common.metadata.woodcase.scroll=vertical"))
     }
 
     @Test("clip:true alone, with no annotation and no stacking layout, changes nothing")
@@ -110,7 +110,7 @@ struct DocumentLinterScrollTests {
     func invalidScrollValueWarns() throws {
         let findings = try clippedFindings("scroll-invalid-value.pen")
         let invalid = try #require(findings.first { $0.nodeID == "List2" && $0.message.contains("diagonal") })
-        #expect(invalid.message.contains("common.metadata._scroll=\"diagonal\""))
+        #expect(invalid.message.contains("common.metadata.woodcase.scroll=\"diagonal\""))
         #expect(invalid.message.contains("\"vertical\""))
         #expect(invalid.message.contains("\"horizontal\""))
         #expect(invalid.severity == .warning)

@@ -5,7 +5,7 @@
 
 import Foundation
 
-/// Reading a component's published parameter list off its `common.metadata._props`.
+/// Reading a component's published parameter list off its `common.metadata.woodcase.props`.
 ///
 /// One reading, used by every verb that has to turn a published name into a write:
 /// `override`, `cp`, and the `get` that prints the list. ``ComponentAnalyzer`` reads
@@ -21,7 +21,7 @@ public extension EditableDocument {
     func parameters(ofComponent id: String) -> [ComponentParameter] {
         guard let root = node(id: id),
               let metadata = root.common.metadata,
-              case let .dictionary(declared) = metadata[Self.parametersKey]
+              case let .dictionary(declared) = metadata[woodcase: .props]
         else { return [] }
         let claimed = NodePropertyCodec.rawKeys(acceptedBy: root)
         return declared
@@ -64,11 +64,6 @@ public extension EditableDocument {
     }
 
     // MARK: - Private
-
-    /// The metadata key a component's parameter list is declared under.
-    private static var parametersKey: String {
-        "_props"
-    }
 
     /// One declaration, resolved as far as the document allows.
     private func parameter(

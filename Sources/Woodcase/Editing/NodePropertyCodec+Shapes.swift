@@ -74,7 +74,7 @@ extension NodePropertyCodec {
             ))],
             detail: "writing common.metadata replaces every key already there; "
                 + "common.metadata.<key> merges one entry and leaves the rest, "
-                + "so common.metadata._role=button keeps _props",
+                + "so common.metadata.woodcase.role=button keeps woodcase.props",
             example: ##"{"type":"component"}"##
         ),
 

@@ -15,7 +15,8 @@
 ///
 /// What it teaches is what `ComponentAnalyzer` and `ReactEmitter` actually read, not what
 /// the format could carry: `_bind` is documented here as unread because no version of the
-/// analyzer has ever looked at it, and `_action` is documented as recorded-but-unemitted
+/// analyzer has ever looked at it, and `woodcase.action` is documented as
+/// recorded-but-unemitted
 /// because nothing downstream of `ComponentDefinition.actions` consumes it.
 extension HelpTopic {
     static let codegenTopic = """
@@ -29,26 +30,26 @@ extension HelpTopic {
       markup, and a document of nothing but components emits no pages/ directory at all.
 
     THE FOUR METADATA KEYS THAT ARE READ
-      Everything a component declares beyond its drawing lives in common.metadata. That is
-      one object, so writing it whole DROPS every key already there; write one key at a
-      time, a further dot goes into the map, and =null takes an entry away. The schema
-      requires metadata.type, so an object one of these writes CREATES carries
-      type="unknown" beside your key — the default, not a mistake, and read by nothing
-      here. Choose it in the same write to get {"type":"component","_role":"button"}:
-        `woodcase set design.pen Button common.metadata.type=component common.metadata._role=button`
-        _role    what the component is — its element, its extra props, its state triggers
-                 `woodcase set design.pen Button common.metadata._role=button`
-        _props   the parameters it publishes: name -> a name path to one descendant
-                 `woodcase set design.pen Button common.metadata._props.label=Label`
-        _action  a name for what a role-carrying node does
-                 `woodcase set design.pen Button common.metadata._action=submit`
-        _states  a variant the naming convention below will not find, by node id
-                 `woodcase set design.pen Button common.metadata._states.hover=<node id>`
-      Two warnings, because the format is wider than the reader: _bind is NOT read — a
-      component's bindings come from _role alone — and _action is recorded but nothing in
-      the React output reflects it yet, so declare it for intent, not for an onSubmit prop.
+      Everything a component declares beyond its drawing lives in common.metadata.woodcase.
+      Writing common.metadata whole DROPS every key already there; write one key at a time, a
+      further dot goes into the map, and =null takes an entry away. An object one of these
+      writes CREATES carries type="woodcase", which nothing here reads; add
+      common.metadata.type=component to the same write to choose it.
+        woodcase.role    what the component is — its element, its extra props, its state triggers
+          `woodcase set design.pen Button common.metadata.woodcase.role=button`
+        woodcase.props   the parameters it publishes: name -> a name path to one descendant
+          `woodcase set design.pen Button common.metadata.woodcase.props.label=Label`
+        woodcase.action  a name for what a role-carrying node does
+          `woodcase set design.pen Button common.metadata.woodcase.action=submit`
+        woodcase.states  a variant the naming convention below will not find, by node id
+          `woodcase set design.pen Button common.metadata.woodcase.states.hover=<node id>`
+      Old spellings (_role, _props, _action, _states) are still read, woodcase.* winning;
+      `woodcase migrate` moves them in. Two warnings, because the format is wider than the
+      reader: _bind is NOT read — a component's bindings come from woodcase.role alone — and
+      woodcase.action is recorded but nothing in the React output reflects it yet, so declare it
+      for intent, not for an onSubmit prop.
 
-    _role — SIX VALUES, ON THE COMPONENT'S OWN ROOT
+    woodcase.role — SIX VALUES, ON THE COMPONENT'S OWN ROOT
       button   link   toggle   textInput   select   tabBar
       Only the root of a reusable node is read for the role, and it buys three things:
         the element  button and toggle emit <button>, link an <a href={href}>, tabBar a
@@ -61,30 +62,30 @@ extension HelpTopic {
       A role on a DESCENDANT is read only into the analysis — it is what makes a textInput,
       toggle or select node a binding — and no React output reflects a binding yet.
 
-    _props — THE PARAMETERS A CONSUMER SETS
+    woodcase.props — THE PARAMETERS A CONSUMER SETS
       One entry per parameter: the name a consumer writes, and a name path from the
-      component's root down to the one descendant it stands for ("Label", "Body/Title").
-      The property and the TypeScript type are inferred from what that descendant IS — a
-      text node gives a string prop over its content, with its current content as the
-      default; a rectangle, frame or ellipse gives a color prop over its fill, or an
-      imageURL prop when that fill is an image. Read the answer back, never guess it:
-      `woodcase get design.pen Button` prints a props block of name, resolved path and
-      type, and says so in the row when a declared path resolves to no node. Give each
-      parameter its own descendant: an override is keyed by node id, so two parameters
-      naming one node cannot be told apart. `common.metadata._props.spare=null` drops one.
+      component's root down to the one descendant it stands for ("Label", "Body/Title"). The
+      property and the TypeScript type are inferred from what that descendant IS — a text node
+      gives a string prop over its content, with its current content as the default; a
+      rectangle, frame or ellipse gives a color prop over its fill, or an imageURL prop when
+      that fill is an image. Read the answer back, never guess it: `woodcase get design.pen
+      Button` prints a props block of name, resolved path and type, and says so in the row
+      when a declared path resolves to no node. Give each parameter its own descendant: an
+      override is keyed by node id, so two parameters naming one node cannot be told apart.
+      `common.metadata.woodcase.props.spare=null` drops one.
 
     INSTANCES: AN OVERRIDE BECOMES A PROP, OR INLINES THE COMPONENT
-      `cp` of a reusable node makes an instance — a ref — and `override` writes one
-      property on one descendant of it. A declared parameter name is accepted in place of
-      the property name, so `woodcase override design.pen Home/Save label=Send` lands on
-      whatever _props says label is. The emitter walks those overrides back through _props:
-      one that lands on a declared parameter's node becomes an attribute on the tag. One
-      that lands anywhere ELSE cannot be said as a prop, so the emitter gives up on the tag
-      and INLINES the component — the whole patched tree is pasted into the page under a
-      {/* Customized from: Button */} comment, and that instance stops sharing the
-      component. Declare a parameter for everything you mean to override. The instance's
-      own width, height, cornerRadius and fill are the exception: those are root overrides,
-      they become a style={{…}} on the tag, and they never inline it.
+      `cp` of a reusable node makes an instance — a ref — and `override` writes one property
+      on one descendant of it. A declared parameter name is accepted in place of the property
+      name, so `woodcase override design.pen Home/Save label=Send` lands on whatever
+      woodcase.props says label is. The emitter walks those overrides back through
+      woodcase.props: one that lands on a declared parameter's node becomes an attribute on
+      the tag. One that lands anywhere ELSE cannot be said as a prop, so the emitter gives up
+      on the tag and INLINES the component — the whole patched tree is pasted into the page
+      under a {/* Customized from: Button */} comment, and that instance stops sharing the
+      component. Declare a parameter for everything you mean to override. The instance's own
+      width, height, cornerRadius and fill are the exception: those are root overrides, they
+      become a style={{…}} on the tag, and they never inline it.
 
     STATE VARIANTS
       Draw the variant as a top-level frame named {Component}:{state} — Button:hover beside
@@ -94,7 +95,7 @@ extension HelpTopic {
       hover/active/focused; toggle on/disabled/focused; textInput focused/filled/disabled;
       select focused/open/disabled. Any other name becomes [data-<name>="true"], and a
       variant that adds or removes children becomes a boolean prop and a second render
-      function. A component with NO _role gets no states from the naming convention at all
+      function. A component with NO woodcase.role gets no states from the naming convention at all
       — the sibling is ignored in silence, so give it a role. tabBar is the other exception:
       its variants are siblings at its own level, may themselves be reusable, and merge
       into one component with selected?: "home" | "log" instead of booleans.
@@ -115,9 +116,9 @@ extension HelpTopic {
      {"type":"rectangle","name":"Dot","width":8,"height":8,"fill":"#FFFFFF"}]}
     JSON
       woodcase set design.pen Button common.reusable=true --as ana
-      woodcase set design.pen Button common.metadata._role=button --as ana
-      woodcase set design.pen Button common.metadata._props.label=Label --as ana
-      woodcase set design.pen Button common.metadata._props.tint=Dot --as ana
+      woodcase set design.pen Button common.metadata.woodcase.role=button --as ana
+      woodcase set design.pen Button common.metadata.woodcase.props.label=Label --as ana
+      woodcase set design.pen Button common.metadata.woodcase.props.tint=Dot --as ana
       woodcase get design.pen Button
       # props
       #   label  Label/kind.content  string
@@ -148,9 +149,9 @@ extension HelpTopic {
       `woodcase help design` — addressing, naming, and the read-write-verify loop every
       command above assumes. `woodcase generate react --help` — the flags: --output,
       --package, --preview; `woodcase generate swiftui --help` — --output, --name, --floor.
-      `woodcase lint` is where the traps in this topic become a report rather than a
-      surprise: a _props path that resolves to nothing, or two entries reading one field of
-      one descendant (codegen-prop-path), a _role outside the six (codegen-role), and an
+      `woodcase lint` is where the traps in this topic become a report rather than a surprise:
+      a woodcase.props path that resolves to nothing, or two entries reading one field of one
+      descendant (codegen-prop-path), a woodcase.role outside the six (codegen-role), and an
       instance the emitter would inline (codegen-unmapped-override). Run `woodcase lint
       --list` to see which checks this build carries; if those three are not in it, it
       predates them.

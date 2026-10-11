@@ -182,7 +182,11 @@ extension CRDTDocument {
         let changedProps = PropertyDiff.diffCommon(old: node.common, new: op.common)
         var ops: [CRDTOperation] = []
 
-        for property in changedProps {
+        for property in changedProps.sorted() {
+            if property == NodePropertyCodec.metadataPath {
+                ops += processLocalMetadata(nodeID: op.nodeID, from: node.common.metadata, to: op.common.metadata)
+                continue
+            }
             let value = extractCommonValue(property: property, from: op.common)
             let crdtOp = makeOp(.setProperty(CRDTOperation.SetProperty(
                 nodeID: op.nodeID,
@@ -250,6 +254,10 @@ extension CRDTDocument {
             ops.append(contentsOf: processLocalSetExtras(nodeID: op.nodeID, extras: patched.extras))
         }
         for (path, value) in op.properties where !NodePropertyCodec.isExtrasPath(path) {
+            if path == NodePropertyCodec.metadataPath {
+                ops += processLocalMetadata(nodeID: op.nodeID, from: node.common.metadata, to: patched.common.metadata)
+                continue
+            }
             let normalized = (try? NodePropertyCodec.value(at: path, of: patched)) ?? value
             let crdtOp = makeOp(.setProperty(CRDTOperation.SetProperty(
                 nodeID: op.nodeID,

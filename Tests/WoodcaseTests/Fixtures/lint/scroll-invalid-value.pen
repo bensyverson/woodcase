@@ -14,7 +14,9 @@
       "fill": "#FFFFFF",
       "metadata": {
         "type": "unknown",
-        "_scroll": "diagonal"
+        "woodcase": {
+          "scroll": "diagonal"
+        }
       },
       "children": [
         {

@@ -5,11 +5,12 @@
 
 import Foundation
 
-/// Holding a write to a post-it's metadata to the convention.
+/// Holding a write to a node's `metadata.woodcase` to the convention.
 ///
-/// Only what a write *changes* is checked: a key whose value equals what the node
-/// already holds passes, so a file written before the convention — or by hand, with a
-/// misspelling — still opens and can still be edited around the legacy value.
+/// Only what a write *changes* is checked, each key read through
+/// ``PenMetadata/subscript(woodcase:)``: a key whose value equals what the node already
+/// holds — in either spelling — passes, so a file written before the convention, or by
+/// hand with a misspelling, still opens and can still be edited around the legacy value.
 public extension PenPostIt {
     /// One key of a metadata write the convention does not accept.
     struct Violation: Friendly {
@@ -20,7 +21,7 @@ public extension PenPostIt {
         ///   - value: The refused value.
         ///   - accepted: The spellings the key takes, or `["a string"]` for a free-text key.
         ///   - suggestion: The closest accepted spelling, when one is close.
-        public init(key: Key, value: AnyCodable, accepted: [String], suggestion: String?) {
+        public init(key: PenMetadata.WoodcaseKey, value: AnyCodable, accepted: [String], suggestion: String?) {
             self.key = key
             self.value = value
             self.accepted = accepted
@@ -28,7 +29,7 @@ public extension PenPostIt {
         }
 
         /// The key whose value is refused.
-        public var key: Key
+        public var key: PenMetadata.WoodcaseKey
         /// The refused value.
         public var value: AnyCodable
         /// The spellings the key takes, or `["a string"]` for a free-text key.
@@ -37,21 +38,22 @@ public extension PenPostIt {
         public var suggestion: String?
     }
 
-    /// The first key of a metadata write the convention refuses, in ``Key`` order.
+    /// The first key of a metadata write the convention refuses, in
+    /// ``PenMetadata/WoodcaseKey`` order.
     ///
     /// - Parameters:
     ///   - metadata: The whole metadata object as it will be written.
     ///   - current: The metadata the node holds now, if any; a key left at its current
     ///     value is not checked.
-    /// - Returns: The refusal, or `nil` when the write is a post-it's and every key it
-    ///   changes is well formed, or when it is not a post-it's at all.
+    /// - Returns: The refusal, or `nil` when every Woodcase key the write changes is
+    ///   well formed.
     static func violation(
         in metadata: [String: AnyCodable],
         comparedTo current: PenMetadata?
     ) -> Violation? {
-        guard metadata[Key.type.rawValue] == .string(typeValue) else { return nil }
-        for key in Key.allCases where key != .type {
-            guard let value = metadata[key.rawValue], value != .null, value != current?[key.rawValue]
+        let written = PenMetadata(object: metadata)
+        for key in PenMetadata.WoodcaseKey.allCases {
+            guard let value = written[woodcase: key], value != .null, value != current?[woodcase: key]
             else { continue }
             if let violation = violation(of: key, value) { return violation }
         }
@@ -71,28 +73,33 @@ public extension PenPostIt {
     /// What a free-text key's refusal says it takes.
     private static let anyString = "a string"
 
+    /// What a numeric key's refusal says it takes.
+    private static let anyNumber = "a number"
+
     /// Whether one key's value is refused.
-    private static func violation(of key: Key, _ value: AnyCodable) -> Violation? {
-        guard case let .string(text) = value else {
-            let accepted = key.spellings.isEmpty ? [anyString] : key.spellings
-            return Violation(key: key, value: value, accepted: accepted, suggestion: nil)
-        }
-        switch key {
-        case .kind, .state:
-            guard !key.spellings.contains(text) else { return nil }
-            return Violation(key: key, value: value, accepted: key.spellings, suggestion: closest(to: text, in: key.spellings))
-        case .tint:
+    private static func violation(of key: PenMetadata.WoodcaseKey, _ value: AnyCodable) -> Violation? {
+        switch (key.shape, value) {
+        case (.any, _), (.string, .string), (.number, .int), (.number, .double):
+            return nil
+        case (.string, _):
+            return Violation(key: key, value: value, accepted: [anyString], suggestion: nil)
+        case (.number, _):
+            return Violation(key: key, value: value, accepted: [anyNumber], suggestion: nil)
+        case let (.oneOf(spellings), .string(text)):
+            guard !spellings.contains(text) else { return nil }
+            return Violation(key: key, value: value, accepted: spellings, suggestion: closest(to: text, in: spellings))
+        case let (.hexColor, .string(text)):
             guard tint(text) == nil else { return nil }
             return Violation(key: key, value: value, accepted: key.spellings, suggestion: nil)
-        case .type, .author, .leaf, .stage, .copiedFrom:
-            return nil
+        case (.oneOf, _), (.hexColor, _):
+            return Violation(key: key, value: value, accepted: key.spellings, suggestion: nil)
         }
     }
 
     /// The spelling a misspelling most likely meant, or `nil` when none is close.
     ///
     /// Case is ignored, and a spelling counts as close within two edits, or a third of
-    /// its length for a longer one, so `questoin` finds `question` while `zebra` finds
+    /// its length for a longer one, so `reslved` finds `resolved` while `zebra` finds
     /// nothing.
     private static func closest(to text: String, in spellings: [String]) -> String? {
         let needle = text.lowercased()

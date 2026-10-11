@@ -5,7 +5,7 @@
 
 import Foundation
 
-/// The authoring check on a post-it's metadata.
+/// The authoring check on a node's `metadata.woodcase`.
 ///
 /// ``checkAuthored(_:on:)`` calls ``checkAuthoredPostIt(_:on:)`` for a `set`'s metadata,
 /// after deep keys are folded, and the batch planner calls
@@ -37,9 +37,7 @@ public extension NodePropertyCodec {
     ///   for the first refused key, depth first.
     static func checkAuthoredPostIts(in subtree: PenNode, current: (String) -> PenNode?) throws {
         if let metadata = subtree.common.metadata {
-            var object = metadata.extensions
-            object[PenPostIt.Key.type.rawValue] = metadata.type.map(AnyCodable.string)
-            try check(object, comparedTo: current(subtree.id)?.common.metadata, nodeID: subtree.id)
+            try check(metadata.object, comparedTo: current(subtree.id)?.common.metadata, nodeID: subtree.id)
         }
         for child in ComponentAnalyzer.childNodes(of: subtree) {
             try checkAuthoredPostIts(in: child, current: current)
@@ -55,7 +53,7 @@ public extension NodePropertyCodec {
         guard let violation = PenPostIt.violation(in: object, comparedTo: current) else { return }
         throw EditingError.postItMetadataRejected(
             nodeID: nodeID,
-            key: "common.metadata.\(violation.key.rawValue)",
+            key: violation.key.path,
             value: PenPostIt.json(violation.value),
             accepted: violation.accepted,
             suggestion: violation.suggestion

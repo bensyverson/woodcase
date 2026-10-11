@@ -13,6 +13,9 @@ public extension PenPostIt {
     /// refusing the file or losing the value. Writing is strict — an agent's write is
     /// held to the convention by ``NodePropertyCodec/checkAuthored(_:on:)``.
     ///
+    /// Every key is read through ``PenMetadata/subscript(woodcase:)``, so the old bare
+    /// spellings of a `type: postit` object read too, the namespace winning.
+    ///
     /// ```swift
     /// if let postIt = PenPostIt.Metadata(node), postIt.state == .valid(.open) {
     ///     print(postIt.author ?? "anonymous")
@@ -36,9 +39,13 @@ public extension PenPostIt {
         /// Reads a node's metadata as a post-it's.
         ///
         /// - Parameter node: Any node.
-        /// - Returns: The post-it metadata, or `nil` unless `metadata.type` is
-        ///   ``PenPostIt/typeValue``.
+        /// - Returns: The post-it metadata — every `note` has it, metadata or not — or,
+        ///   for another node, what ``init(_:)-(PenMetadata)`` reads.
         public init?(_ node: PenNode) {
+            if case .note = node.kind {
+                self.init(reading: node.common.metadata ?? PenMetadata(type: nil))
+                return
+            }
             guard let metadata = node.common.metadata else { return nil }
             self.init(metadata)
         }
@@ -46,22 +53,29 @@ public extension PenPostIt {
         /// Reads a metadata object as a post-it's.
         ///
         /// - Parameter metadata: A node's metadata.
-        /// - Returns: The post-it metadata, or `nil` unless its `type` is
-        ///   ``PenPostIt/typeValue``.
+        /// - Returns: The post-it metadata, or `nil` unless the object carries a
+        ///   convention key in either spelling (an old-style `type: postit` included).
         public init?(_ metadata: PenMetadata) {
-            guard metadata.type == PenPostIt.typeValue else { return nil }
-            let read = { (key: Key) in metadata[key.rawValue] }
-            kind = read(.kind).map { Self.field($0, Kind.init(rawValue:)) }
+            guard PenPostIt.keys.contains(where: { metadata[woodcase: $0] != nil }) else { return nil }
+            self.init(reading: metadata)
+        }
+
+        /// Reads every convention key, from either spelling.
+        private init(reading metadata: PenMetadata) {
+            let read = { (key: PenMetadata.WoodcaseKey) in metadata[woodcase: key] }
+            type = read(.type).map { Self.field($0, NoteType.init(rawValue:)) }
             state = read(.state).map { Self.field($0, State.init(rawValue:)) }
             tint = read(.tint).map { Self.field($0, PenPostIt.tint) }
             author = read(.author).flatMap(Self.string)
             leaf = read(.leaf).flatMap(Self.string)
             stage = read(.stage).flatMap(Self.string)
             copiedFrom = read(.copiedFrom).flatMap(Self.string)
+            anchor = read(.anchor)
+            replyTo = read(.replyTo).flatMap(Self.string)
         }
 
-        /// What the post-it is for.
-        public var kind: Field<Kind>?
+        /// What the note is; `nil` is a post-it too.
+        public var type: Field<NoteType>?
         /// Whether it still asks for attention.
         public var state: Field<State>?
         /// Who wrote it.
@@ -74,6 +88,10 @@ public extension PenPostIt {
         public var tint: Field<PenHexColor>?
         /// On a copy, the original author, until the copier first edits it.
         public var copiedFrom: String?
+        /// On a comment thread's first message, what the comment is about, as written.
+        public var anchor: AnyCodable?
+        /// On a comment reply, the id of the thread's first message.
+        public var replyTo: String?
 
         // MARK: - Reading
 

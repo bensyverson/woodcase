@@ -5,9 +5,9 @@
 
 import Foundation
 
-/// The one rule that turns a `common.metadata._props` path into the descendant it names.
+/// The one rule that turns a `common.metadata.woodcase.props` path into the descendant it names.
 ///
-/// A `_props` entry is `{"<prop name>": "<path>"}`, and the path is a run of `/`-separated
+/// A `woodcase.props` entry is `{"<prop name>": "<path>"}`, and the path is a run of `/`-separated
 /// child *names* starting at the component's own children — `"Label"`, `"Row/Title"`.
 /// ``ComponentAnalyzer`` resolves it as it extracts a component's props, to give each
 /// prop its target node; `codegen-prop-path` (`DocumentLinter+CodegenPropPath.swift`)
@@ -16,7 +16,7 @@ import Foundation
 /// codegen wires, and the two cannot drift apart — the reason it lives here rather than
 /// being re-derived on the lint side.
 public extension ComponentAnalyzer {
-    /// The descendant a `_props` path names.
+    /// The descendant a `woodcase.props` path names.
     ///
     /// - Parameters:
     ///   - path: The `/`-separated run of child names, relative to `node`'s own children.
@@ -39,7 +39,7 @@ public extension ComponentAnalyzer {
     ///
     /// A `ref` holds none: an instance's children come from the component it names, and
     /// neither the analyzer nor the linter expands one while resolving a path, so a
-    /// `_props` path never reaches into a nested component.
+    /// `woodcase.props` path never reaches into a nested component.
     static func childNodes(of node: PenNode) -> [PenNode] {
         switch node.kind {
         case let .frame(data): data.children ?? []

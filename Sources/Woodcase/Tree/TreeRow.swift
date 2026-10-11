@@ -61,7 +61,7 @@ public struct TreeRow: Friendly {
     /// One axis a row's rect can extend past its parent's box on.
     ///
     /// The same two values ``PenNode/FrameData/layout`` uses for a frame's own
-    /// stacking direction, and the same two values `common.metadata._scroll`
+    /// stacking direction, and the same two values `common.metadata.woodcase.scroll`
     /// accepts to declare a designed scroll axis — the vocabulary composes because
     /// all three answer the same question: horizontal or vertical.
     public enum OverflowAxis: String, Friendly, CaseIterable {

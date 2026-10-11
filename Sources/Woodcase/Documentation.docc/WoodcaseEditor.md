@@ -1105,11 +1105,12 @@ you, faithfully, forever.
 
 A component can publish the handful of things an instance is *meant* to vary, so a
 caller does not have to know which node inside it holds the title. The declaration is
-`common.metadata._props` — the one code generation has always read — mapping a name to
+`common.metadata.woodcase.props` — the one code generation reads (files from before the
+namespace spell it `_props`; <doc:PenMetadataNamespace>) — mapping a name to
 the name path of the node the value belongs to:
 
 ```text
-$ woodcase set design.pen StatCard common.metadata._props.label=Body/Title
+$ woodcase set design.pen StatCard common.metadata.woodcase.props.label=Body/Title
 $ woodcase get design.pen StatCard
 Stc01  StatCard  rev 91b0c2d3e4f50617
 props
@@ -1118,30 +1119,30 @@ props
 ```
 
 `common.metadata` is a whole object, and writing it replaces everything in it — which
-is how `_props` used to get dropped by a write that only meant to add `_role`.
+is how `woodcase.props` used to get dropped by a write that only meant to add `woodcase.role`.
 `common.metadata.<key>` writes one entry and leaves the rest; a dot goes deeper, and a
 null takes one entry away. Nothing else takes a deep key.
 
 A deep key that *creates* the object writes a `type` beside your key:
 
 ```text
-$ woodcase set design.pen Button common.metadata._role=button
+$ woodcase set design.pen Button common.metadata.woodcase.role=button
 $ woodcase get design.pen Button --json | jq .node.metadata
-{ "type": "unknown", "_role": "button" }
+{ "type": "woodcase", "woodcase": { "role": "button" } }
 ```
 
 That is the schema, not a stray: `.pen` declares `metadata` as an object whose `type` is
-required, so an object created from nothing has to carry one, and `unknown` is the
-default this write fills in — a read of a file that already has a typeless metadata
-object leaves it exactly as it was; only a write that creates the object from nothing
-chooses a type. Nothing reads it — code generation decides what a node is
-from `common.reusable` and `_role` — so it is free to leave. Choose it in the same write
+required, so Woodcase never writes one without: an object created from nothing — or
+any metadata a write leaves without a type — takes `woodcase`, Woodcase's own name (Ben's
+ruling, 2026-10-11). A read of a file that already has a typeless metadata object leaves
+it exactly as it was, and a type anyone else wrote is never touched. Nothing reads it — code generation decides what a node is
+from `common.reusable` and `woodcase.role` — so it is free to leave. Choose it in the same write
 when you have a better answer, and the two keys land together:
 
 ```text
-$ woodcase set design.pen Button common.metadata.type=component common.metadata._role=button
+$ woodcase set design.pen Button common.metadata.type=component common.metadata.woodcase.role=button
 $ woodcase get design.pen Button --json | jq .node.metadata
-{ "type": "component", "_role": "button" }
+{ "type": "component", "woodcase": { "role": "button" } }
 ```
 
 Once a parameter is declared, its name is a key `override` and `cp` accept, resolved to
@@ -1513,12 +1514,12 @@ woodcase lint design.pen && woodcase render design.pen
 Filter what's reported with `--exclude <check-id>` (repeatable) and `--severity
 <level>` — the gate still exits 1 for anything left *after* filtering, 0 otherwise. A
 phone screen whose scrolling list is meant to overflow the fold trips `clipped` on
-purpose — or say so instead of excluding it: `common.metadata._scroll` on the clipping
+purpose — or say so instead of excluding it: `common.metadata.woodcase.scroll` on the clipping
 frame declares which axis is a designed scroll, and lint stays quiet there while still
 catching a genuine bug on the other axis.
 
 ```bash
-woodcase set design.pen banking-home/list common.metadata._scroll=vertical
+woodcase set design.pen banking-home/list common.metadata.woodcase.scroll=vertical
 ```
 
 For a pre-render gate that wants everything past clipping out of the way regardless:

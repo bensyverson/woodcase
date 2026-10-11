@@ -1,0 +1,64 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "content": "Label",
+          "fill": "#000000",
+          "id": "Lbl01",
+          "name": "Label",
+          "type": "text"
+        }
+      ],
+      "height": 40,
+      "id": "Btn01",
+      "metadata": {
+        "_props": {
+          "label": "Label"
+        },
+        "_role": "button",
+        "type": "component"
+      },
+      "name": "Button",
+      "reusable": true,
+      "type": "frame",
+      "width": 120,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "content": "Old-style post-it",
+      "height": 200,
+      "id": "Nte01",
+      "metadata": {
+        "author": "claude",
+        "kind": "question",
+        "state": "open",
+        "tint": "#A5D6A7",
+        "type": "postit"
+      },
+      "name": "Old",
+      "type": "note",
+      "width": 200,
+      "x": 300,
+      "y": 0
+    },
+    {
+      "content": "Namespaced post-it",
+      "height": 200,
+      "id": "Nte02",
+      "metadata": {
+        "woodcase": {
+          "author": "ana",
+          "state": "resolved"
+        }
+      },
+      "name": "New",
+      "type": "note",
+      "width": 200,
+      "x": 600,
+      "y": 0
+    }
+  ],
+  "version": "2.20"
+}

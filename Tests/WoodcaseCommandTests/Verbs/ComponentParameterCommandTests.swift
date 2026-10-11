@@ -206,7 +206,7 @@ struct ComponentParameterCommandTests {
         let overrideHelp = try fixture.run("override", "--help")
         let copyHelp = try fixture.run("cp", "--help")
 
-        #expect(overrideHelp.stdout.contains("_props"))
-        #expect(copyHelp.stdout.contains("_props"))
+        #expect(overrideHelp.stdout.contains("woodcase.props"))
+        #expect(copyHelp.stdout.contains("woodcase.props"))
     }
 }

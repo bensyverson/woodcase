@@ -51,7 +51,7 @@ extension BatchApplier {
                 instancePath: document.namePath(of: resolved.targetID)
             )
         }
-        // A deep key — `common.metadata._role` — is folded onto the object the node
+        // A deep key — `common.metadata.woodcase.role` — is folded onto the object the node
         // already carries before the edit exists, so what is recorded, replicated and
         // undone is the ordinary whole-object write the format has always had.
         let props = try document.node(id: id).map { try NodePropertyCodec.folding(op.props, onto: $0) }

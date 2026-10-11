@@ -53,8 +53,10 @@
       "fill": "#EEEEEE",
       "metadata": {
         "type": "unknown",
-        "_props": {
-          "title": "Label"
+        "woodcase": {
+          "props": {
+            "title": "Label"
+          }
         }
       },
       "children": [

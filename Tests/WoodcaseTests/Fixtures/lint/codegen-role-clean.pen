@@ -35,7 +35,9 @@
       "fill": "#EEEEEE",
       "metadata": {
         "type": "unknown",
-        "_role": "button"
+        "woodcase": {
+          "role": "button"
+        }
       },
       "children": [
         {
@@ -61,7 +63,9 @@
           "fill": "#DDDDDD",
           "metadata": {
             "type": "unknown",
-            "_role": "textInput"
+            "woodcase": {
+              "role": "textInput"
+            }
           },
           "children": [
             {

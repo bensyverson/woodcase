@@ -13,11 +13,18 @@ import Woodcase
 ///
 /// `common.metadata` is a whole-object property, so the only way to annotate a node
 /// used to be to write the object out again — and every write that did so dropped
-/// `_props`, `_role` and anything else already there. These are the tests that a deep
-/// key merges, that the whole object still replaces, and that a null takes one key
-/// away.
+/// `woodcase.props`, `woodcase.role` and anything else already there. These are the
+/// tests that a deep key merges, that the whole object still replaces, that a null takes
+/// one key away, and that a write lands under `metadata.woodcase` even when the file —
+/// `component-props.pen` declares `_props` — still uses the old spelling.
 @Suite("woodcase set writes one metadata key")
 struct MetadataDeepKeyTests {
+    /// The `woodcase` object of a metadata object, or empty.
+    private func namespace(_ metadata: [String: AnyCodable]) -> [String: AnyCodable] {
+        guard case let .dictionary(keys)? = metadata["woodcase"] else { return [:] }
+        return keys
+    }
+
     /// The metadata object a node carries, as the file writes it.
     private func metadata(of node: PenNode?) -> [String: AnyCodable] {
         guard let metadata = node?.common.metadata else { return [:] }
@@ -33,14 +40,15 @@ struct MetadataDeepKeyTests {
         let fixture = try CommandFixture(fixture: "component-props.pen")
 
         let run = try fixture.run(
-            "set", fixture.file.path, "StatCard", "common.metadata._role=button", "--as", "ana"
+            "set", fixture.file.path, "StatCard", "common.metadata.woodcase.role=button", "--as", "ana"
         )
 
         #expect(run.status == 0)
         #expect(run.stderr.isEmpty)
         let written = try metadata(of: PenFileProbe(fixture.file).node("StatCard"))
-        #expect(written["_role"] == .string("button"))
+        #expect(namespace(written)["role"] == .string("button"))
         #expect(written["type"] == .string("component"))
+        // A sibling the write does not name keeps the spelling the file gave it.
         guard case let .dictionary(props)? = written["_props"] else {
             Issue.record("_props was dropped: \(written)")
             return
@@ -52,22 +60,22 @@ struct MetadataDeepKeyTests {
     func aDeepKeyCreatesTheObject() throws {
         let fixture = try CommandFixture(fixture: "component-props.pen")
 
-        let run = try fixture.run("set", fixture.file.path, "Plain", "common.metadata._role=button")
+        let run = try fixture.run("set", fixture.file.path, "Plain", "common.metadata.woodcase.role=button")
 
         #expect(run.status == 0)
-        #expect(try metadata(of: PenFileProbe(fixture.file).node("Plain"))["_role"] == .string("button"))
+        #expect(try namespace(metadata(of: PenFileProbe(fixture.file).node("Plain")))["role"] == .string("button"))
     }
 
     @Test("The object a deep key creates carries the schema's required type, defaulted")
     func aCreatedObjectCarriesTheRequiredType() throws {
         let fixture = try CommandFixture(fixture: "component-props.pen")
 
-        let run = try fixture.run("set", fixture.file.path, "Plain", "common.metadata._role=button")
+        let run = try fixture.run("set", fixture.file.path, "Plain", "common.metadata.woodcase.role=button")
 
         #expect(run.status == 0)
-        // `type` is required by the .pen schema (Pen-Schema-2.17 line 105), so an object
-        // the fold creates has to carry one; "unknown" is PenMetadata's default.
-        #expect(try metadata(of: PenFileProbe(fixture.file).node("Plain"))["type"] == .string("unknown"))
+        // `type` is required by the .pen schema (Pen-Schema-2.20 line 117), so an object
+        // the fold creates has to carry one; Woodcase writes its own name (Ben, 2026-10-11).
+        #expect(try metadata(of: PenFileProbe(fixture.file).node("Plain"))["type"] == .string("woodcase"))
     }
 
     @Test("Two deep keys in one write choose the metadata type as well as the role")
@@ -76,17 +84,36 @@ struct MetadataDeepKeyTests {
 
         let run = try fixture.run(
             "set", fixture.file.path, "Plain",
-            "common.metadata.type=component", "common.metadata._role=button"
+            "common.metadata.type=component", "common.metadata.woodcase.role=button"
         )
 
         #expect(run.status == 0)
         #expect(run.stderr.isEmpty)
         let written = try metadata(of: PenFileProbe(fixture.file).node("Plain"))
-        #expect(written == ["type": .string("component"), "_role": .string("button")])
+        #expect(written == ["type": .string("component"), "woodcase": .dictionary(["role": .string("button")])])
     }
 
-    @Test("A nested deep key declares one parameter without rewriting the rest")
+    @Test("A nested deep key declares one parameter without rewriting the rest, moving the old _props in")
     func aNestedDeepKeyDeclaresAParameter() throws {
+        let fixture = try CommandFixture(fixture: "component-props.pen")
+
+        let run = try fixture.run(
+            "set", fixture.file.path, "StatCard", "common.metadata.woodcase.props.caption=Body/Title"
+        )
+
+        #expect(run.status == 0)
+        let written = try metadata(of: PenFileProbe(fixture.file).node("StatCard"))
+        guard case let .dictionary(props)? = namespace(written)["props"] else {
+            Issue.record("woodcase.props is not an object: \(written)")
+            return
+        }
+        #expect(props["caption"] == .string("Body/Title"))
+        #expect(props["label"] == .string("Body/Title"))
+        #expect(written["_props"] == nil)
+    }
+
+    @Test("A deep key at an old spelling is written under the namespace")
+    func anOldSpellingIsWrittenUnderTheNamespace() throws {
         let fixture = try CommandFixture(fixture: "component-props.pen")
 
         let run = try fixture.run(
@@ -95,8 +122,9 @@ struct MetadataDeepKeyTests {
 
         #expect(run.status == 0)
         let written = try metadata(of: PenFileProbe(fixture.file).node("StatCard"))
-        guard case let .dictionary(props)? = written["_props"] else {
-            Issue.record("_props is not an object: \(written)")
+        #expect(written["_props"] == nil)
+        guard case let .dictionary(props)? = namespace(written)["props"] else {
+            Issue.record("woodcase.props is not an object: \(written)")
             return
         }
         #expect(props["caption"] == .string("Body/Title"))
@@ -107,14 +135,14 @@ struct MetadataDeepKeyTests {
     func aNullDeepKeyRemovesOneKey() throws {
         let fixture = try CommandFixture(fixture: "component-props.pen")
 
-        let seeded = try fixture.run("set", fixture.file.path, "StatCard", "common.metadata._role=button")
+        let seeded = try fixture.run("set", fixture.file.path, "StatCard", "common.metadata.woodcase.role=button")
         #expect(seeded.status == 0)
 
-        let run = try fixture.run("set", fixture.file.path, "StatCard", "common.metadata._role=null")
+        let run = try fixture.run("set", fixture.file.path, "StatCard", "common.metadata.woodcase.role=null")
 
         #expect(run.status == 0)
         let written = try metadata(of: PenFileProbe(fixture.file).node("StatCard"))
-        #expect(written["_role"] == nil)
+        #expect(namespace(written)["role"] == nil)
         #expect(written["_props"] != nil)
         #expect(written["type"] == .string("component"))
     }
@@ -124,13 +152,13 @@ struct MetadataDeepKeyTests {
         let fixture = try CommandFixture(fixture: "component-props.pen")
 
         let run = try fixture.run(
-            "set", fixture.file.path, "StatCard", "common.metadata._props.gone=null"
+            "set", fixture.file.path, "StatCard", "common.metadata.woodcase.props.gone=null"
         )
 
         #expect(run.status == 0)
         let written = try metadata(of: PenFileProbe(fixture.file).node("StatCard"))
-        guard case let .dictionary(props)? = written["_props"] else {
-            Issue.record("_props is not an object: \(written)")
+        guard case let .dictionary(props)? = namespace(written)["props"] else {
+            Issue.record("woodcase.props is not an object: \(written)")
             return
         }
         #expect(props["gone"] == nil)
@@ -157,13 +185,13 @@ struct MetadataDeepKeyTests {
 
         let run = try fixture.run(
             "set", fixture.file.path, "StatCard",
-            #"common.metadata={"type":"component"}"#, "common.metadata._role=button"
+            #"common.metadata={"type":"component"}"#, "common.metadata.woodcase.role=button"
         )
 
         #expect(run.status == 0)
         let written = try metadata(of: PenFileProbe(fixture.file).node("StatCard"))
         #expect(written["type"] == .string("component"))
-        #expect(written["_role"] == .string("button"))
+        #expect(namespace(written)["role"] == .string("button"))
         #expect(written["_props"] == nil)
     }
 
@@ -171,14 +199,14 @@ struct MetadataDeepKeyTests {
     func aBatchSetTakesDeepKeys() throws {
         let fixture = try CommandFixture(fixture: "component-props.pen")
         let batch = fixture.root.appendingPathComponent("batch.jsonl")
-        try #"{"op":"set","target":"StatCard","props":{"common.metadata._role":"button"}}"#
+        try #"{"op":"set","target":"StatCard","props":{"common.metadata.woodcase.role":"button"}}"#
             .write(to: batch, atomically: true, encoding: .utf8)
 
         let run = try fixture.run("apply", fixture.file.path, "-F", batch.path)
 
         #expect(run.status == 0)
         let written = try metadata(of: PenFileProbe(fixture.file).node("StatCard"))
-        #expect(written["_role"] == .string("button"))
+        #expect(namespace(written)["role"] == .string("button"))
         #expect(written["_props"] != nil)
     }
 

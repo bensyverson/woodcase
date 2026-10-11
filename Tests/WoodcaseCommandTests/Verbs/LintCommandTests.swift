@@ -210,7 +210,7 @@ struct LintCommandTests {
         #expect(run.status == 1)
         let line = run.stdoutLines.first { $0.contains("codegen-prop-path") && $0.contains("`title`") }
         #expect(line?.hasPrefix("error codegen-prop-path  Card (Cmp01)  ") == true)
-        #expect(line?.contains("woodcase set <file> Cmp01 common.metadata._props.title=") == true)
+        #expect(line?.contains("woodcase set <file> Cmp01 common.metadata.woodcase.props.title=") == true)
     }
 
     @Test("An unmapped instance override prints the _props entry that would map it")
@@ -220,6 +220,6 @@ struct LintCommandTests {
         #expect(run.status == 1)
         let line = run.stdoutLines.first { $0.contains("codegen-unmapped-override") }
         #expect(line?.hasPrefix("warning codegen-unmapped-override  Root/Chip (Rf001)  ") == true)
-        #expect(line?.contains("woodcase set <file> Cmp01 common.metadata._props.subtitle=Subtitle") == true)
+        #expect(line?.contains("woodcase set <file> Cmp01 common.metadata.woodcase.props.subtitle=Subtitle") == true)
     }
 }

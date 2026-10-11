@@ -16,7 +16,7 @@ import Foundation
 /// pixels are right; the code is not. The component's reuse is gone at that call site,
 /// and a design with a dozen such instances generates a dozen copies of one component.
 ///
-/// **A definition that declares no `_props` is never a finding.** Nothing was declared,
+/// **A definition that declares no `woodcase.props` is never a finding.** Nothing was declared,
 /// so nothing failed to map, and a component nobody has parameterized yet is a normal
 /// stage of a design rather than a fault — reporting it would fire the check at every
 /// instance of every plain component in the file.
@@ -27,17 +27,17 @@ import Foundation
 ///
 /// What is left divides in two, and the message says which one it is holding:
 ///
-/// - a **named** descendant the definition never declared, which one `_props` entry
+/// - a **named** descendant the definition never declared, which one `woodcase.props` entry
 ///   fixes — so the message hands that entry over, prop name and path and all;
-/// - an **unnamed** one, which no `_props` entry can reach at all, because a path is a
+/// - an **unnamed** one, which no `woodcase.props` entry can reach at all, because a path is a
 ///   run of child *names* (see ``ComponentAnalyzer/resolveDescendantPath(_:from:)``).
 ///   That instance inlines until the descendant is given a name, so the message asks for
 ///   the name first and the declaration second. It is the common case in a file drawn in
 ///   an editor rather than written by hand, where a wrapper frame is left unnamed.
 ///
-/// Both remedies use the deep metadata key — `common.metadata._props.<name>=<path>` —
-/// which merges one key rather than overwriting the object and dropping `_role` or
-/// `_scroll` with it.
+/// Both remedies use the deep metadata key — `common.metadata.woodcase.props.<name>=<path>` —
+/// which merges one key rather than overwriting the object and dropping `woodcase.role` or
+/// `woodcase.scroll` with it.
 ///
 /// The check reads the ref's own `descendants` map, like the three override checks and
 /// `unresolved-variable`, rather than expanding the instance.
@@ -58,7 +58,7 @@ extension DocumentLinter {
               let descendants = refData.descendants, !descendants.isEmpty,
               let definition = context.components[refData.ref],
               let metadata = definition.common.metadata,
-              case let .dictionary(props) = metadata["_props"], !props.isEmpty
+              case let .dictionary(props) = metadata[woodcase: .props], !props.isEmpty
         else { return [] }
 
         let declared = Set(props.values.compactMap { value -> String? in
@@ -89,13 +89,13 @@ extension DocumentLinter {
         }
         let reads: String = unmapped.count == 1 ? "reads that descendant" : "read those descendants"
         var sentence = "overrides \(PenPropertyShape.list(named)) on \(component), which declares props in "
-            + "common.metadata._props but none that \(reads), so `generate react` inlines a whole copy of "
+            + "common.metadata.woodcase.props but none that \(reads), so `generate react` inlines a whole copy of "
             + "\(component) here instead of emitting a `<\(component) />` tag."
 
         let declarable: [String] = unmapped.compactMap { entry in
             guard let path = entry.node.path else { return nil }
             let prop: String = propName(for: entry.node.name ?? entry.key)
-            return "common.metadata._props.\(prop)=\(path)"
+            return "common.metadata.woodcase.props.\(prop)=\(path)"
         }
         if !declarable.isEmpty {
             sentence += " Declare \(declarable.count == 1 ? "it" : "them"): run `woodcase set <file> "
@@ -109,7 +109,7 @@ extension DocumentLinter {
             let commands: [String] = anonymous.map { "`woodcase set <file> \($0.key) common.name=<name>`" }
             let subject: String = PenPropertyShape.list(keys)
             let runs: String = PenPropertyShape.list(commands)
-            sentence += " \(subject) \(one ? "has" : "have") no name, and a _props path is a run of child "
+            sentence += " \(subject) \(one ? "has" : "have") no name, and a woodcase.props path is a run of child "
                 + "names, so no entry can reach \(one ? "it" : "them") until \(one ? "it is" : "they are") "
                 + "named: run \(runs), then declare the prop the same way."
         }
@@ -118,18 +118,18 @@ extension DocumentLinter {
 
     // MARK: - Reading the definition
 
-    /// One descendant of a definition: the name it carries, and the `_props` path that
+    /// One descendant of a definition: the name it carries, and the `woodcase.props` path that
     /// reaches it — `nil` when it, or an ancestor inside the component, has no name.
     struct Descendant: Friendly {
         /// The node's own name, or `nil` when it has none.
         let name: String?
 
-        /// The `/`-separated path a `_props` entry would spell, or `nil` when no path
+        /// The `/`-separated path a `woodcase.props` entry would spell, or `nil` when no path
         /// can name it.
         let path: String?
     }
 
-    /// Every descendant of a definition by id, with the `_props` path it answers to.
+    /// Every descendant of a definition by id, with the `woodcase.props` path it answers to.
     ///
     /// Walked with ``ComponentAnalyzer/childNodes(of:)`` so the paths here are the ones
     /// ``ComponentAnalyzer/resolveDescendantPath(_:from:)`` resolves: a remedy this

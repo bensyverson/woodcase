@@ -20,6 +20,14 @@ struct Migrate: AsyncParsableCommand {
         file's bytes, not its document, so its revision is unchanged and `undo` passes \
         over the row.
 
+        Each file's old-style Woodcase metadata — the underscore code-gen keys (_props, \
+        _role, _states, _action, _scroll) and a post-it's bare keys beside \
+        metadata.type "postit" — moves under metadata.woodcase as well, current version \
+        or not. Old spellings are still read, so nothing draws or generates differently; \
+        this is an ordinary edit, logged under --as and undone by `undo`. A post-it's \
+        legacy `kind` is left as written. `woodcase lint --severity notice` names the old \
+        spellings first (metadata-old-style).
+
         One unusable file does not stop the rest: every failure is reported, the run \
         finishes, and the exit is 4. A path that names nothing is 4 as well; naming a \
         file that is not a .pen file is 2. --dry-run always exits 0 when nothing failed.
@@ -78,15 +86,30 @@ struct Migrate: AsyncParsableCommand {
             if let note = transaction.lineage.note(naming: url) {
                 warn("note  \(note)")
             }
+            let moved: Int
+            do {
+                moved = try await PenFileTransaction.moveOldStyleWoodcaseKeys(
+                    at: url, identity: writer, effect: dryRun ? .dryRun : .commit
+                ).value
+            } catch {
+                report(error, for: url)
+                failed += 1
+                continue
+            }
 
-            guard transaction.wouldWrite else {
+            guard transaction.wouldWrite || moved > 0 else {
                 skipped += 1
                 continue
             }
-            let outcome = transaction.value
-            let from = outcome.declaredVersion ?? "no version"
-            let verb = transaction.didWrite ? "migrated" : "would migrate"
-            print("\(verb) \(url.path) (\(from) → \(outcome.writtenVersion))")
+            let verb = dryRun ? "would migrate" : "migrated"
+            if transaction.wouldWrite {
+                let outcome = transaction.value
+                let from = outcome.declaredVersion ?? "no version"
+                print("\(verb) \(url.path) (\(from) → \(outcome.writtenVersion))")
+            }
+            if moved > 0 {
+                print("\(verb) \(url.path) (old-style metadata on \(moved) node(s) → metadata.\(PenMetadata.woodcaseNamespace))")
+            }
             migrated += 1
         }
 

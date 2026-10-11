@@ -35,10 +35,12 @@
       "fill": "#EEEEEE",
       "metadata": {
         "type": "unknown",
-        "_props": {
-          "title": "Nope",
-          "tag": "Row/Missing",
-          "count": 7
+        "woodcase": {
+          "props": {
+            "title": "Nope",
+            "tag": "Row/Missing",
+            "count": 7
+          }
         }
       },
       "children": [

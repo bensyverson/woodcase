@@ -87,7 +87,7 @@ extension ThreeWayResolver {
     }
 
     /// One key both sides of a map set differently.
-    private struct Clash: Friendly {
+    struct Clash: Friendly {
         let key: String
         let base: AnyCodable?
         let ours: AnyCodable?
@@ -97,7 +97,7 @@ extension ThreeWayResolver {
     /// Merges a string-keyed map per key, starting from ours: a key theirs changed is
     /// taken when ours left it alone, and returned as a clash when both changed it
     /// differently. A missing key is `nil` throughout.
-    private static func mergeMap(
+    static func mergeMap(
         _ base: [String: AnyCodable]?,
         _ ours: [String: AnyCodable]?,
         _ theirs: [String: AnyCodable]?

@@ -13,7 +13,7 @@ import Foundation
 /// key is absent, and is written back out only when it holds a value, so reading and
 /// re-writing a file that never had `type` round-trips exactly, adding no key Pen
 /// never wrote. A caller that must satisfy the schema when *creating* a metadata
-/// object from nothing (`woodcase set common.metadata._role=…`) chooses its own
+/// object from nothing (`woodcase set common.metadata.woodcase.role=…`) chooses its own
 /// default explicitly, rather than relying on one here — see
 /// `NodePropertyCodec.folding(_:onto:)`.
 ///
@@ -21,7 +21,7 @@ import Foundation
 ///
 /// Encodes as a flat JSON dictionary:
 /// ```json
-/// {"type": "component", "_role": "button", "_action": "submit"}
+/// {"type": "component", "woodcase": {"role": "button", "action": "submit"}}
 /// ```
 /// This matches the existing `.pen` wire format — there is no nesting
 /// or wrapper key. The `type` key is extracted during decoding; all other
@@ -32,9 +32,13 @@ import Foundation
 ///
 /// A convenience subscript allows accessing any metadata key:
 /// ```swift
-/// metadata["_role"]   // Returns AnyCodable? from extensions
-/// metadata["type"]    // Returns .string(type), or nil if type is absent
+/// metadata["woodcase"]  // Returns AnyCodable? from extensions
+/// metadata["type"]      // Returns .string(type), or nil if type is absent
 /// ```
+///
+/// Woodcase's own keys live under ``woodcaseNamespace``; read and write them through
+/// ``subscript(woodcase:)``, which also reads their old spellings. See
+/// <doc:PenMetadataNamespace>.
 public struct PenMetadata: Friendly {
     /// Describes the node's metadata type (e.g. `"component"`, `"screen"`), or
     /// `nil` when the `.pen` file's metadata object never declared one.
@@ -127,7 +131,7 @@ extension PenMetadata: ExpressibleByDictionaryLiteral {
     /// ``type`` is left `nil`.
     ///
     /// ```swift
-    /// let metadata: PenMetadata = ["type": "component", "_role": .string("button")]
+    /// let metadata: PenMetadata = ["type": "component", "woodcase": .dictionary(["role": .string("button")])]
     /// ```
     public init(dictionaryLiteral elements: (String, AnyCodable)...) {
         var typeValue: String?

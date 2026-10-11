@@ -35,10 +35,12 @@
       "fill": "#EEEEEE",
       "metadata": {
         "type": "unknown",
-        "_props": {
-          "label": "Label",
-          "width": "Label",
-          "tag": "Row/Tag"
+        "woodcase": {
+          "props": {
+            "label": "Label",
+            "width": "Label",
+            "tag": "Row/Tag"
+          }
         }
       },
       "children": [

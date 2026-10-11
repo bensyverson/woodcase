@@ -39,8 +39,8 @@ import Foundation
 /// — three from what Pen does to a file it opens: a mesh gradient it paints nothing for
 /// or paints distorted (see `DocumentLinter+MeshGradient.swift`), and a text stroke,
 /// underline or strikethrough it strips (see `DocumentLinter+TextStripped.swift`)
-/// — three from the metadata `generate react` reads: a `_props` entry that resolves to
-/// no descendant, a `_role` outside ``ComponentRole``, and an instance whose overrides no
+/// — three from the metadata `generate react` reads: a `woodcase.props` entry that resolves to
+/// no descendant, a `woodcase.role` outside ``ComponentRole``, and an instance whose overrides no
 /// declared prop covers (see `DocumentLinter+Codegen*.swift`) — one from the component
 /// graph, components that contain each other (see `DocumentLinter+ComponentLoops.swift`) — and one,
 /// ``LintCheck/pipeline``, is whatever diagnostics the caller hands in.
@@ -170,7 +170,7 @@ public enum DocumentLinter {
     ///
     /// Not `private`: ``DocumentLinter/clippedFindings(rows:in:)`` in
     /// `DocumentLinter+Scroll.swift` needs ``resolved(_:)`` to read a clipping
-    /// frame's own `clip` flag and `_scroll` metadata, the same way every other
+    /// frame's own `clip` flag and `woodcase.scroll` metadata, the same way every other
     /// check reads a settled node.
     struct Context {
         let document: EditableDocument
@@ -251,6 +251,7 @@ public enum DocumentLinter {
         found += shaderFindings(row, node: node)
         found += perSideStrokeOnShape(row, node: node)
         found += noteUnsized(row, node: node)
+        found += metadataOldStyle(row, in: context)
         found += codegenPropPathFindings(row, node: node, in: context)
         found += codegenUnmappedOverrideFindings(row, node: node, in: context)
         return found

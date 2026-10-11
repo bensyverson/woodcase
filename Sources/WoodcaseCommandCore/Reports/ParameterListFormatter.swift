@@ -8,7 +8,7 @@ import Woodcase
 
 /// The block `woodcase get` prints for a component's published parameters.
 ///
-/// A component's `common.metadata._props` is its public interface — the names an
+/// A component's `common.metadata.woodcase.props` is its public interface — the names an
 /// agent may write and code generation will emit — but until now it was legible only
 /// by reading the raw metadata and walking the tree by hand. One row per parameter:
 /// the name, the key that means the same thing the long way, the type codegen infers,

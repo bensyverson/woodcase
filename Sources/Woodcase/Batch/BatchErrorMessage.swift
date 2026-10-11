@@ -100,9 +100,9 @@ public enum BatchErrorMessage {
                     + "\(component) answers to \(path), so the write would draw nothing",
                 batch: "point the declaration at a node that exists — "
                     + #"`{"op":"set","target":"\#(component)","props":"#
-                    + #"{"common.metadata._props.\#(name)":"<name path>"}}`"#,
+                    + #"{"common.metadata.woodcase.props.\#(name)":"<name path>"}}`"#,
                 command: "run `woodcase tree \(file) \(component)` for the names inside it, then "
-                    + "`woodcase set \(file) \(component) common.metadata._props.\(name)=<name path>`",
+                    + "`woodcase set \(file) \(component) common.metadata.woodcase.props.\(name)=<name path>`",
                 in: dialect
             )
 

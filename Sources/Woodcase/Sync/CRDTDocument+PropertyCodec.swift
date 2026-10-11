@@ -35,6 +35,9 @@ extension CRDTDocument {
         if property == Self.extrasProperty {
             return applyExtras(value, to: node)
         }
+        if let written = NodePropertyCodec.settingMetadataEntry(value, at: property, on: node) {
+            return written
+        }
         return (try? NodePropertyCodec.setting(value, at: property, on: node)) ?? node
     }
 

@@ -35,9 +35,11 @@
       "fill": "#EEEEEE",
       "metadata": {
         "type": "unknown",
-        "_props": {
-          "title": "Label",
-          "tag": "Row/Tag"
+        "woodcase": {
+          "props": {
+            "title": "Label",
+            "tag": "Row/Tag"
+          }
         }
       },
       "children": [

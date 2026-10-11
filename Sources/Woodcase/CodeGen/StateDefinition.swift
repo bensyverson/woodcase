@@ -55,7 +55,7 @@ public enum StateSource: String, Friendly {
     /// Auto-generated from the component's role.
     case smartDefault
 
-    /// Explicitly designed via a `{Name}:{state}` sibling or `_states` metadata.
+    /// Explicitly designed via a `{Name}:{state}` sibling or `woodcase.states` metadata.
     case designerOverride
 
     /// Driven by a bound prop value.

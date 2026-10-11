@@ -7,7 +7,7 @@ import Foundation
 
 /// The post-it metadata convention, flattened for a machine reader.
 ///
-/// What `woodcase schema postit --json` prints. Every row comes from ``PenPostIt/Key``,
+/// What `woodcase schema postit --json` prints. Every row comes from ``PenPostIt/keys``,
 /// the same vocabulary a refused write lists back, so the table cannot drift from the
 /// check. See <doc:PenPostItConvention>.
 public struct SchemaPostItReport: Friendly {
@@ -15,10 +15,10 @@ public struct SchemaPostItReport: Friendly {
     public init() {
         type = PenPostIt.typeValue
         summary = Self.summaryText
-        keys = PenPostIt.Key.allCases.map(Key.init)
+        keys = PenPostIt.keys.map(Key.init)
     }
 
-    /// The `metadata.type` that marks a node as a post-it.
+    /// The name the convention goes by in `woodcase schema`: `postit`.
     public let type: String
 
     /// One sentence saying what the convention is.
@@ -29,7 +29,7 @@ public struct SchemaPostItReport: Friendly {
 
     /// The summary every rendering of the table opens with.
     public static let summaryText =
-        "keys of a note's metadata when metadata.type is \"\(PenPostIt.typeValue)\"; a write is held to them, a file is not"
+        "keys of a note's metadata.woodcase (every note is a post-it); a write is held to them, a file is not"
 
     // MARK: - Key
 
@@ -38,17 +38,26 @@ public struct SchemaPostItReport: Friendly {
         /// Describes one key.
         ///
         /// - Parameter key: The convention key.
-        public init(_ key: PenPostIt.Key) {
-            self.key = "common.metadata.\(key.rawValue)"
+        public init(_ key: PenMetadata.WoodcaseKey) {
+            self.key = key.path
             spellings = key.spellings
+            takes = switch key.shape {
+            case .number: "any number"
+            case .any: "any JSON"
+            case .string, .oneOf, .hexColor: "any string"
+            }
             summary = key.summary
         }
 
-        /// The path `set` writes it at, such as `common.metadata.kind`.
+        /// The path `set` writes it at, such as `common.metadata.woodcase.state`.
         public let key: String
 
-        /// The values it takes; empty for any string.
+        /// The values it takes; empty for any value of the kind ``takes`` names.
         public let spellings: [String]
+
+        /// What it takes when ``spellings`` is empty: `any string`, `any number` or
+        /// `any JSON`.
+        public let takes: String
 
         /// One sentence saying what it holds.
         public let summary: String

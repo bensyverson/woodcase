@@ -86,7 +86,7 @@ return are listed here, so a script knows what it must branch on.
 | `undo` | write | Replay the inverse of the last recorded edits | 0 1 2 3 4 5 |
 | `vars set/rm` | write | Add, change or remove a variable or theme axis | 0 2 3 4 5 |
 | `imports set/rm` | write | Add, repoint or drop a library import | 0 2 3 4 5 |
-| `migrate` | write | Rewrite older files in the current format, in place | 0 2 4 |
+| `migrate` | write | Rewrite older files in the current format, and old-style metadata under `woodcase`, in place | 0 2 4 |
 | `shot` | render | One node to a PNG, scaled, with the scale printed | 0 2 3 4 |
 | `render` | render | The whole document to PNG or PDF | 0 1 2 4 |
 | `generate react` | render | React + Tailwind source from the document | 0 2 4 |
@@ -1221,6 +1221,13 @@ and `--force` keeps a newer minor's own version. A file of another major is read
 it counts as a failure, and is left untouched. Every migration diagnostic goes to stderr, prefixed
 with the file's path, so discarded legacy data (a stroke `dashPattern`, per-run text
 styling) is visible rather than silent.
+
+Each file's old-style Woodcase metadata — `_props`, `_role`, `_states`, `_action`,
+`_scroll`, and a post-it's bare keys beside `metadata.type: "postit"` — then moves under
+`metadata.woodcase`, current version or not, as an ordinary edit: logged under `--as`
+(a `set` row per node) and undone by `undo`. Old spellings are still read, so nothing
+draws or generates differently; `lint --severity notice` names them first as
+`metadata-old-style`. See <doc:PenMetadataNamespace>.
 
 ```bash
 woodcase migrate myfile.pen

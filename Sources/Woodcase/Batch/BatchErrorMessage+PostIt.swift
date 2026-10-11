@@ -5,7 +5,7 @@
 
 import Foundation
 
-/// The sentence for a refused write to a post-it's metadata.
+/// The sentence for a refused write to a node's `metadata.woodcase`.
 extension BatchErrorMessage {
     /// Describes a post-it metadata value the convention does not spell.
     ///
@@ -13,7 +13,7 @@ extension BatchErrorMessage {
     /// one it points at the convention's table.
     ///
     /// - Parameters:
-    ///   - key: The path written, such as `common.metadata.kind`.
+    ///   - key: The path written, such as `common.metadata.woodcase.state`.
     ///   - nodeID: The node written to.
     ///   - value: The rejected value, as JSON.
     ///   - accepted: The spellings the key takes.
@@ -32,7 +32,7 @@ extension BatchErrorMessage {
     ) -> String {
         let table = "the postit table of `woodcase schema` lists every key and spelling"
         let statement = """
-        \(key) on the post-it \(name(nodeID, in: document)) takes \(oneOf(accepted)), but the value \
+        \(key) on \(name(nodeID, in: document)) takes \(oneOf(accepted)), but the value \
         given is \(value)
         """
         guard let suggestion else {

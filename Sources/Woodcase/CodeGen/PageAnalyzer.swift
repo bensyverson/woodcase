@@ -13,7 +13,7 @@ public enum PageAnalyzer {
     ///
     /// A page is a top-level frame (direct child of the document) that is not
     /// marked as `reusable: true`, and not a top-level component's state variant — a
-    /// `{Name}:{state}` sibling, or a frame its `_states` metadata names.
+    /// `{Name}:{state}` sibling, or a frame its `woodcase.states` metadata names.
     ///
     /// A page is named by the rule a component is (``ComponentAnalyzer``), a leading
     /// `Screen/` or `Component/Screen/` folder dropped as well as `Component/`, and each name
@@ -28,7 +28,7 @@ public enum PageAnalyzer {
         let reusable = document.children.filter { $0.common.reusable == true }
         let reusableNames: Set<String> = Set(reusable.compactMap(\.common.name))
         let variantIDs: Set<String> = Set(reusable.flatMap { node -> [String] in
-            guard case let .dictionary(states)? = node.common.metadata?["_states"] else { return [] }
+            guard case let .dictionary(states)? = node.common.metadata?[woodcase: .states] else { return [] }
             return states.values.compactMap { if case let .string(id) = $0 { id } else { nil } }
         })
 

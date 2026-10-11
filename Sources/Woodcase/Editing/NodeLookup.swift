@@ -62,7 +62,7 @@ public enum NodeLookup {
         /// The node itself.
         public let node: PenNode
 
-        /// The parameters the node publishes in `common.metadata._props`, empty for a
+        /// The parameters the node publishes in `common.metadata.woodcase.props`, empty for a
         /// node that publishes none.
         public var parameters: [ComponentParameter] = []
 

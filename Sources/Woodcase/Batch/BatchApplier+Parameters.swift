@@ -7,7 +7,7 @@ import Foundation
 
 /// Routing an override's keys through the parameters a component publishes.
 ///
-/// A component declares its parameters in `common.metadata._props` — the same
+/// A component declares its parameters in `common.metadata.woodcase.props` — the same
 /// declaration code generation has always read — and a published name is a key the
 /// editing verbs accept: `override Card label=Hi` means the content of whatever node
 /// `label` names. The redirect happens while the line is planned, so one `override`

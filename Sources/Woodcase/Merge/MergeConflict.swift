@@ -21,7 +21,8 @@ public struct MergeConflict: Friendly {
     /// What the conflict is about.
     public enum Subject: Friendly {
         /// A property of a node, by its ``NodePropertyCodec`` path (`common.name`,
-        /// `kind.width`, `extras.<key>`).
+        /// `kind.width`, `extras.<key>`) — or one metadata entry, by its entry path
+        /// (`common.metadata.woodcase.state`; ``NodePropertyCodec/metadataEntries(of:)``).
         case property(nodeID: String, path: String)
 
         /// One key of a `ref` node's override for one descendant, by the descendant's key

@@ -39,16 +39,16 @@ public struct ComponentDefinition: Friendly {
     /// The reusable node itself.
     public var sourceNode: PenNode
 
-    /// Props derived from `_props` metadata.
+    /// Props derived from `woodcase.props` metadata.
     public var props: [PropDefinition]
 
-    /// Actions derived from `_role` on this node or a descendant, named by `_action`
+    /// Actions derived from `woodcase.role` on this node or a descendant, named by `woodcase.action`
     /// where one is written and `click` by default on a `button` or a `link`.
     ///
     /// Collected but not yet emitted: no emitter reads this.
     public var actions: [ActionDefinition]
 
-    /// Bindings derived from `_role` alone — a `textInput`, `toggle` or `select` node
+    /// Bindings derived from `woodcase.role` alone — a `textInput`, `toggle` or `select` node
     /// becomes one, named after the node. There is no `_bind` key; nothing reads one.
     ///
     /// Collected but not yet emitted: no emitter reads this.
@@ -56,7 +56,7 @@ public struct ComponentDefinition: Friendly {
 
     /// The interactive role of this component (e.g., button, toggle).
     ///
-    /// Read from `_role` on the reusable node's own root only. `_role` on a descendant
+    /// Read from `woodcase.role` on the reusable node's own root only. `woodcase.role` on a descendant
     /// contributes an action or a binding instead, and never sets this.
     public var role: ComponentRole?
 
@@ -146,7 +146,7 @@ public struct ActionDefinition: Friendly {
     /// Action name (e.g., "submit").
     public var name: String
 
-    /// The `_role` value (e.g., "button").
+    /// The `woodcase.role` value (e.g., "button").
     public var role: String
 
     /// Node that declares the action.
@@ -170,7 +170,7 @@ public struct BindingDefinition: Friendly {
     /// Binding name (e.g., "email").
     public var name: String
 
-    /// The `_role` value (e.g., "textInput").
+    /// The `woodcase.role` value (e.g., "textInput").
     public var role: String
 
     /// Node that declares the binding.

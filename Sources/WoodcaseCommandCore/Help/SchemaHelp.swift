@@ -86,8 +86,8 @@ enum SchemaHelp {
 
         \(SchemaTableFormatter.nested(PenSchema.rootShapes))
 
-        POST-IT CONVENTION — `woodcase schema \(PenPostIt.typeValue)` prints the metadata keys a note \
-        carries when metadata.type is "\(PenPostIt.typeValue)"
+        POST-IT CONVENTION — `woodcase schema \(PenPostIt.typeValue)` prints the keys a note carries \
+        under common.metadata.woodcase
 
         \(legend)
         """
@@ -125,7 +125,7 @@ enum SchemaHelp {
         let width = report.keys.map(\.key.count).max() ?? 0
         let rows = report.keys.map { key in
             let path = key.key.padding(toLength: width, withPad: " ", startingAt: 0)
-            let spellings = key.spellings.isEmpty ? "any string" : key.spellings.joined(separator: " | ")
+            let spellings = key.spellings.isEmpty ? key.takes : key.spellings.joined(separator: " | ")
             return "  \(path)  \(spellings) — \(key.summary)"
         }
         return """
@@ -133,7 +133,9 @@ enum SchemaHelp {
 
         \(rows.joined(separator: "\n"))
 
-        Write one key with a deep key: woodcase set <file> <note> common.metadata.kind=question
+        Write one key with a deep key: woodcase set <file> <note> common.metadata.woodcase.state=resolved
+        A note written before the namespace keeps bare keys beside metadata.type "\(PenPostIt.typeValue)"; \
+        they are still read, and `woodcase migrate` moves them in.
         """
     }
 

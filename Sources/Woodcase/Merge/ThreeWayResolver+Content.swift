@@ -65,6 +65,10 @@ extension ThreeWayResolver {
                 mergeOverrides(path, id: id, base: base, ours: ours, theirs: theirs, into: &merged, kind: kind)
                 continue
             }
+            if path == NodePropertyCodec.metadataPath {
+                mergeMetadata(id: id, base: base, ours: ours, theirs: theirs, into: &merged, kind: kind)
+                continue
+            }
             mergeValue(at: path, id: id, base: base, ours: ours, theirs: theirs, into: &merged, kind: kind)
         }
         return merged

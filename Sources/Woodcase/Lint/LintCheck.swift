@@ -50,7 +50,7 @@ public enum LintCheck: String, Friendly, CaseIterable {
     /// A node whose settled rect falls outside its parent's.
     ///
     /// A clipping frame (`clip:true`) exempts overflow along the axis its
-    /// `common.metadata._scroll` declares — a designed scroll, not a bug — and folds
+    /// `common.metadata.woodcase.scroll` declares — a designed scroll, not a bug — and folds
     /// several children overflowing only its own stacking axis into one finding on
     /// the frame when nothing declares it. See <doc:WoodcaseLint>.
     case clipped
@@ -96,17 +96,17 @@ public enum LintCheck: String, Friendly, CaseIterable {
     /// silently absorbed and never applies.
     case overrideKeyUnread = "override-key-unread"
 
-    /// A reusable node's `common.metadata._props` entry that `generate react` cannot
+    /// A reusable node's `common.metadata.woodcase.props` entry that `generate react` cannot
     /// turn into a prop: a value that is not a path, a path naming no descendant, or two
     /// entries reading the same field of one descendant.
     case codegenPropPath = "codegen-prop-path"
 
-    /// A `common.metadata._role` value outside ``ComponentRole``, which
+    /// A `common.metadata.woodcase.role` value outside ``ComponentRole``, which
     /// `generate react` reads and drops.
     case codegenRole = "codegen-role"
 
     /// An instance whose descendant override no declared prop reads, on a definition
-    /// that declares `_props` at all — the emitter inlines the component rather than
+    /// that declares `woodcase.props` at all — the emitter inlines the component rather than
     /// writing a tag for it.
     case codegenUnmappedOverride = "codegen-unmapped-override"
 
@@ -140,6 +140,11 @@ public enum LintCheck: String, Friendly, CaseIterable {
     /// notice: the note draws, at the default, and writing the size only makes it
     /// explicit.
     case noteUnsized = "note-unsized"
+
+    /// A node whose metadata keeps Woodcase keys under their spelling from before
+    /// `metadata.woodcase` — `_props`, `_role`, a post-it's bare `state` — which are
+    /// still read. A notice: nothing is wrong, and `woodcase migrate` moves them in.
+    case metadataOldStyle = "metadata-old-style"
 
     /// Components that contain each other — a component that renders an instance of
     /// itself, directly or through others (``ComponentLoop``). One finding per loop, at
@@ -178,11 +183,12 @@ public enum LintCheck: String, Friendly, CaseIterable {
     /// is well formed and Pen draws it as written; only Woodcase's render and code differ.
     /// ``perSideStrokeOnShape`` is a warning because the node draws, Pen and Woodcase alike,
     /// only not with the widths the file writes. ``noteUnsized`` is a notice: nothing is
-    /// wrong with the note, which draws at the post-it default. ``componentLoop`` is an
+    /// wrong with the note, which draws at the post-it default; ``metadataOldStyle`` is one
+    /// too, since old spellings are still read. ``componentLoop`` is an
     /// error: an edit refuses to make one, and the nesting it closes draws nothing.
     public var severity: PenDiagnostic.Severity {
         switch self {
-        case .noteUnsized:
+        case .noteUnsized, .metadataOldStyle:
             .notice
         case .pipeline, .textWithoutFill, .fillContainerInFitParent, .emptyFitContent, .clipped,
              .artboardOverlap, .duplicateName, .textOverflow, .codegenUnmappedOverride, .collapsedText,
@@ -240,9 +246,9 @@ public enum LintCheck: String, Friendly, CaseIterable {
         case .overrideKeyUnread:
             "A ref's stored override carries a property path instead of the raw .pen key the merge reads."
         case .codegenPropPath:
-            "A component's _props entry is not a path, names no descendant, or reads a field another entry already reads."
+            "A component's woodcase.props entry is not a path, names no descendant, or reads a field another entry already reads."
         case .codegenRole:
-            "A component's _role is not one generate react knows, so the role is read and dropped."
+            "A component's woodcase.role is not one generate react knows, so the role is read and dropped."
         case .codegenUnmappedOverride:
             "An instance overrides a descendant no declared prop reads, so codegen inlines the component."
         case .meshGradientDropped:
@@ -257,6 +263,8 @@ public enum LintCheck: String, Friendly, CaseIterable {
             "A per-side stroke width on an ellipse, polygon, path or line, which Pen draws at the top width alone."
         case .noteUnsized:
             "A note with no width or height of its own, which lays out at the 200×200 post-it default."
+        case .metadataOldStyle:
+            "Woodcase metadata kept under its old spelling (_props, a post-it's bare state); still read, and woodcase migrate moves it in."
         case .componentLoop:
             "Components that contain each other, directly or through others; that nesting is not drawn."
         }

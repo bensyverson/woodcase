@@ -18,9 +18,9 @@ struct Generate: AsyncParsableCommand {
             component and page, plus the theme as Tailwind tokens. --package wraps \
             them in an npm package; --preview adds a viewer app to browse them.
 
-            Building the component this reads -- reusable, _role, _props, state variants \
+            Building the component this reads -- reusable, woodcase.role, woodcase.props, state variants \
             and what an override does -- is `woodcase help codegen`. Run `woodcase lint \
-            <file> --severity error` first: it reports the _props and _role faults this \
+            <file> --severity error` first: it reports the woodcase.props and woodcase.role faults this \
             emitter reads and silently discards.
 
               woodcase generate react design.pen --output ui --package --name @acme/ui

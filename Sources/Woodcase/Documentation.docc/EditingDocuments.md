@@ -94,10 +94,11 @@ on, so an edit, a CRDT write and a dirty-tracking diff all name a property the s
   ``NodePropertyCodec/checkAuthored(_:on:)`` refuses the path — and
   ``PropertyDiff/diffExtras(old:new:)`` names the keys that differ between two nodes.
 
-A `common.metadata` write is also held to the post-it convention when the metadata's
-`type` is `postit`: a misspelled kind or state, or a malformed tint, is refused with
+A `common.metadata` write stores the Woodcase keys it changes under
+`metadata.woodcase` only, and holds them to their shapes: a misspelled post-it state, or
+a malformed tint, is refused with
 ``EditingError/postItMetadataRejected(nodeID:key:value:accepted:suggestion:)``. See
-<doc:PenPostItConvention>.
+<doc:PenMetadataNamespace> and <doc:PenPostItConvention>.
 
 ``NodePropertyCodec/paths(for:)`` lists what a given node accepts, and
 ``NodePropertyCodec/value(at:of:)`` reads one back. `"kind.type"` is deliberately not a

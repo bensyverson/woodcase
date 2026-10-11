@@ -64,6 +64,14 @@ concurrently keep only the later peer's set. Extras are rarely edited at all —
 merge or an undo is the only writer — so per-key registers are not worth a second
 granularity the replacement path would have to reconcile with.
 
+A node's `common.metadata` goes the other way: it replicates **per entry**, and never as
+the whole object. Each top-level key is a register, and so is each key under the
+Woodcase namespace (`common.metadata.type`, `common.metadata.woodcase.tint`); a local
+metadata change — a `set` folds to a whole-object write — is sent as one write per entry
+that changed (``NodePropertyCodec/metadataEntryWrites(from:to:)``), so two peers changing
+one note's tint and its state both keep their edit, and no whole-object write exists to
+race an entry write. See <doc:PenMetadataNamespace>.
+
 ### RGA Lists
 
 Child ordering within a parent uses a Replicated Growable Array (``RGAList``).

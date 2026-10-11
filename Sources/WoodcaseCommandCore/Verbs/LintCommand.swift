@@ -27,8 +27,8 @@ struct Lint: AsyncParsableCommand {
         or a patch folded over itself), and a stroke, underline or strikethrough on text, which Pen strips \
         on load and never draws. \
         Three more read only the metadata `generate react` reads, and say what it will \
-        choke on: a component's `_props` entry that resolves to no descendant, a \
-        `_role` outside the roles it knows, and an instance whose overrides no declared \
+        choke on: a component's `woodcase.props` entry that resolves to no descendant, a \
+        `woodcase.role` outside the roles it knows, and an instance whose overrides no declared \
         prop covers — which makes the emitter inline a copy of the component instead of \
         writing a tag for it.
 
@@ -49,7 +49,7 @@ struct Lint: AsyncParsableCommand {
         --severity (report only findings at or above the level); both also narrow what \
         --list prints. A phone screen whose scrolling list is meant to overflow the \
         fold trips `clipped` on purpose — or, better, say so: set \
-        common.metadata._scroll to "vertical" or "horizontal" on the clipping frame \
+        common.metadata.woodcase.scroll to "vertical" or "horizontal" on the clipping frame \
         (clip:true) and lint stays quiet on overflow along that axis alone, still \
         catching a real bug on the other one. Left unannotated, a clipping frame that \
         stacks its children folds every child that only overflows its own stacking axis \
