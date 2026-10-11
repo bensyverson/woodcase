@@ -1,5 +1,7 @@
 # 2026-10-04 — Sized notes, the post-it convention and the Post-it look: design and plan
 
+> Revised 2026-10-11 by Ben (Penumbra [notes, comments and spans, rev 2](../../Penumbra/project/2026-10-11-notes-comments-and-spans.md)): kinds are removed; every convention key moves under `metadata.woodcase`; the look in "The look, v1" is replaced by rev 2; notes grow to fit instead of clipping with a fade; markdown and @mentions in `content`; spans return in all three repos. Read that doc first.
+
 **Task:** `SuCn6G` in [2026-10-04-penumbra-editor-support.md](2026-10-04-penumbra-editor-support.md); RapidPro's `uVJjI9` "Draw post-its at parity with Woodcase" follows it ([../../RapidPro/project/2026-10-04-post-it-parity.md](../../RapidPro/project/2026-10-04-post-it-parity.md)).\
 **Source:** read-only research by a subagent of Penumbra's main thread; decisions by the main thread under Ben's delegation.\
 **Ben's ruling R10:** Woodcase owns the post-it convention and the default Post-it look; RapidPro matches pixel for pixel. A flat square with a soft shadow and slight rounding; 200×200 Post-it yellow by default, tintable to any color; the author's name in lighter text bottom-left; author = creator, or whoever edited it after copying; font and size editable; resolved notes visibly resolved.
