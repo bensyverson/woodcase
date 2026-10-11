@@ -54,6 +54,28 @@ struct PresenceTrackerTests {
         #expect(identities.map(\.order) == [0, 1, 2])
     }
 
+    @Test("A registered identity takes its place in the order before it has done anything")
+    func registersWithoutAnEvent() {
+        var tracker = PresenceTracker()
+        tracker.register("ben")
+        tracker.record(event("ana", at: 10))
+        tracker.register("ben")
+
+        var identities = tracker.snapshot().identities
+        #expect(identities.map(\.name) == ["ben", "ana"])
+        #expect(identities.map(\.order) == [0, 1])
+        #expect(identities[0].changes == 0)
+        #expect(identities[0].files.isEmpty)
+        #expect(identities[0].lastSeen == .distantPast)
+        #expect(identities[0].latestChange == nil)
+
+        tracker.record(event("ben", at: 40))
+        identities = tracker.snapshot().identities
+        #expect(identities[0].order == 0)
+        #expect(identities[0].changes == 1)
+        #expect(identities[0].lastSeen == Date(timeIntervalSince1970: 40))
+    }
+
     @Test("Last seen is the newest event's time and the count accumulates")
     func tallies() {
         var tracker = PresenceTracker()

@@ -18,6 +18,17 @@ public struct PresenceTracker: Friendly {
     /// Creates an empty tracker.
     public init() {}
 
+    /// Enters an identity before it has done anything, so it takes its place in the
+    /// order of appearance now: an editor's own user, shown from the moment a document
+    /// opens. It is seen at `Date.distantPast`, with no files and no changes, until an
+    /// event of its own arrives; registering a known identity changes nothing.
+    ///
+    /// - Parameter name: The identity's `--as` name.
+    public mutating func register(_ name: String) {
+        guard indexByName[name] == nil else { return }
+        add(name, seenAt: .distantPast)
+    }
+
     /// Folds one event in.
     ///
     /// - Parameter event: The event, as read from the log.
@@ -82,18 +93,22 @@ public struct PresenceTracker: Friendly {
     ///
     /// - Returns: The identity's index.
     private mutating func touch(_ name: String, file: String, at time: Date) -> Int {
-        let index: Int
-        if let known = indexByName[name] {
-            index = known
-        } else {
-            index = identities.count
-            indexByName[name] = index
-            identities.append(Presence.Identity(name: name, order: index, lastSeen: time, changes: 0))
-            batches.append(nil)
-        }
+        let index = indexByName[name] ?? add(name, seenAt: time)
         identities[index].lastSeen = max(identities[index].lastSeen, time)
         identities[index].files.removeAll { $0 == file }
         identities[index].files.insert(file, at: 0)
+        return index
+    }
+
+    /// Adds an identity at the end of the order, seen at `time`.
+    ///
+    /// - Returns: Its index.
+    @discardableResult
+    private mutating func add(_ name: String, seenAt time: Date) -> Int {
+        let index = identities.count
+        indexByName[name] = index
+        identities.append(Presence.Identity(name: name, order: index, lastSeen: time, changes: 0))
+        batches.append(nil)
         return index
     }
 
