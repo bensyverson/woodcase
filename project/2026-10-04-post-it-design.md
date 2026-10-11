@@ -29,6 +29,8 @@ Under `Sources/Woodcase`.
 
 ## Design
 
+> Corrected 2026-10-11 ([what Pen keeps on a note](2026-10-11-what-pen-keeps-on-a-note.md)): Pen strips a note's whole text style (and any `fill`) when it loads a file, though it keeps `width`, `height` and every `metadata` key. So a text style written as note keys, as below, does not survive a save in Pen. Where it lives instead is open for Ben.
+
 **Model.** Note, Prompt and Context gain `width`, `height` (`PenSizing?`) and the full TextStyle set with `TextData`'s Swift types and CodingKeys; no fills. A note whose resolved width or height is ≤ 0 or absent lays out at `PenPostIt.Style.defaultSize` (200) per axis — in layout, so `tree`, hit-testing and `canvasRects` agree. Prompt and context keep 0 when unsized. Lint `note-unsized` (info) suggests writing the size.
 
 **Convention** (`Models/PenPostIt+Convention.swift`): `typeValue = "postit"`; key constants `type, kind, state, author, leaf, stage, tint`; `enum Kind: String { question, answer, reference }`; `enum State: String { open, resolved }`; `struct Metadata { kind, state, author, leaf, stage, tint: PenHexColor? }` parsed leniently into `Field<T> = .valid(T) | .unrecognized(String)`; `PenPostIt.Metadata(node)` is nil unless `metadata.type == "postit"`. `checkAuthored` gains a metadata branch after deep-key folding: refuse a misspelled kind or state with the closest spelling and a stable code, refuse a malformed tint, pass untouched legacy values through. `add -F` routes through it. DocC "The post-it convention" and `woodcase schema postit`.
