@@ -71,7 +71,7 @@ extension PenRenderer {
             )
         case let .text(data):
             PenTextRenderer.renderText(
-                data: data, rect: rect, fills: own.overrideFills ?? data.fills,
+                node: node, rect: rect, fills: own.overrideFills ?? data.fills,
                 in: context, imageProvider: imageProvider
             )
             renderGlyphInnerShadows(own.innerShadows, node: node, rect: rect, imageProvider: imageProvider, in: context)

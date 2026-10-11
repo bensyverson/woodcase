@@ -1,0 +1,66 @@
+{
+  "version": "2.20",
+  "children": [
+    {
+      "id": "Brd01",
+      "name": "Board",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "width": 400,
+      "height": 300,
+      "layout": "vertical",
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "id": "Sty01",
+          "name": "Styled",
+          "type": "text",
+          "content": "Make this bold",
+          "fontFamily": "Inter",
+          "fontSize": 16,
+          "fill": "#000000",
+          "metadata": {
+            "type": "woodcase",
+            "woodcase": {
+              "spans": {
+                "text": "Make this bold",
+                "runs": [
+                  { "start": 10, "end": 14, "fontWeight": "700", "fill": "#E5484D" },
+                  { "start": 0, "end": 4, "fontStyle": "italic" }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": "Stl01",
+          "name": "Stale",
+          "type": "text",
+          "content": "Make this bold, please",
+          "fontFamily": "Inter",
+          "fontSize": 16,
+          "fill": "#000000",
+          "metadata": {
+            "type": "woodcase",
+            "woodcase": {
+              "spans": {
+                "text": "Make this bold",
+                "runs": [ { "start": 10, "end": 14, "fontWeight": "700" } ]
+              }
+            }
+          }
+        },
+        {
+          "id": "Pln01",
+          "name": "Plain",
+          "type": "text",
+          "content": "Nothing styled",
+          "fontFamily": "Inter",
+          "fontSize": 16,
+          "fill": "#000000"
+        }
+      ]
+    }
+  ]
+}

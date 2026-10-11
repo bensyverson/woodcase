@@ -51,10 +51,10 @@ public extension PenLayoutEngine {
             return bounds
         case .polygon:
             return polygonVertices(of: node, box: box).flatMap(PenRect.bounds(of:)) ?? box
-        case let .text(data):
+        case .text:
             // `nil` (no content) keeps the box: an empty text node has nothing Pen would
             // paint differently, and the box is still a rect worth pointing at.
-            return textInkBounds(of: data, box: box) ?? box
+            return textInkBounds(of: node, box: box) ?? box
         case let .icon(data):
             // `nil` (no library, no icon, or an unresolvable one) keeps the box, for the
             // same reason: nothing paints differently there.

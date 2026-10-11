@@ -56,8 +56,8 @@ enum PenShadowSilhouette {
         switch node.kind {
         case .line:
             break // Pen casts no shadow from a line's stroke.
-        case let .text(data):
-            PenTextRenderer.renderText(data: data, rect: rect, fills: ink, in: context, imageProvider: imageProvider)
+        case .text:
+            PenTextRenderer.renderText(node: node, rect: rect, fills: ink, in: context, imageProvider: imageProvider)
         case let .icon(data):
             PenIconFontRenderer.render(data: data, rect: rect, fills: ink, in: context, imageProvider: imageProvider)
         case .group:

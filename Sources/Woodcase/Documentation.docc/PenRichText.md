@@ -4,7 +4,7 @@ Styled runs over a text node's content: a bold word, an italic phrase, a colored
 
 ## Overview
 
-The `.pen` format has had no rich text since 2.17: a text node's `content` is one string, or a `$variable`, in one style. Woodcase goes ahead of the format. A text node keeps its plain string in `content` — the words Pen shows — and its styling beside it as ``PenTextSpans``: the runs, and the text they were made for. Pen deletes a 2.10-style run array written into `content` (the node loses its words), so runs are never written there; their storage is the node's `woodcase.spans` metadata key. Pen keeps metadata it does not understand, so a file edited in Pen keeps its styling — and when Pen changes the words, the styling goes stale rather than wrong (see Stale styling below).
+The `.pen` format has had no rich text since 2.17: a text node's `content` is one string, or a `$variable`, in one style. Woodcase goes ahead of the format. A text node keeps its plain string in `content` — the words Pen shows — and its styling beside it as ``PenTextSpans``: the runs, and the text they were made for. Pen deletes a 2.10-style run array written into `content` (the node loses its words), so runs are never written there. They live **only** in the node's `metadata.woodcase.spans` (Ben's ruling, 2026-10-11): one source of truth, which the per-entry metadata merge already resolves, key by key (<doc:PenMetadataNamespace>). Pen keeps metadata it does not understand, so a file edited in Pen keeps its styling — and when Pen changes the words, the styling goes stale rather than wrong (see Stale styling below).
 
 There is no Pen reference to match: Pen cannot draw runs. Parity is between Woodcase's CG renderer and RapidPro, which draws the same runs through the same ``PenTextLayout``.
 
@@ -13,11 +13,12 @@ There is no Pen reference to match: Pen cannot draw runs. Parity is between Wood
 A ``PenTextRun`` covers ``PenTextRun/start`` up to ``PenTextRun/end`` and may set any of the character keys: family, size, CSS weight, italic, fill (a solid color, ``PenHexColor``), underline and strikethrough. Each key it leaves `nil`, and every range no run covers, inherits the node's own style. Line height, letter spacing and alignment belong to the paragraph and are the node's alone.
 
 ```swift
-let spans = PenTextSpans(text: "Make this bold", runs: [
+var metadata = node.common.metadata ?? PenMetadata(type: nil)
+metadata.textSpans = PenTextSpans(text: "Make this bold", runs: [
     PenTextRun(start: 10, end: 14, fontWeight: 700),
 ])
-var data = PenNode.TextData(content: .literal("Make this bold"), spans: spans)
-let layout = PenTextLayout(data, box: box)   // sets "bold" in the 700 face
+node.common.metadata = metadata
+let layout = PenTextLayout(node, box: box)   // sets "bold" in the 700 face
 ```
 
 **Offsets are UTF-16 code units** — the unit Core Text, `NSString`, `NSRange`, `NSTextInputClient` and ``PenTextGeometry`` count in, so an editor's caret index is a run offset with no conversion. Not graphemes ("👍🏽" is one grapheme, four code units), not scalars, not bytes. A run edge that falls inside a grapheme cluster is widened outward to the whole cluster when the text is set, so one character's glyphs are never split between faces; an editor should still write runs on caret boundaries.
@@ -28,11 +29,29 @@ let layout = PenTextLayout(data, box: box)   // sets "bold" in the 700 face
 
 ### Stale styling
 
-``PenTextSpans/text`` is the content the runs were made for. ``PenTextSpans/appliedRuns(to:)`` returns the runs only while the content still equals it, code unit for code unit — two strings equal only by Unicode equivalence have different offsets — and an empty list otherwise. ``PenNode/TextData/appliedRuns`` asks that of the node's literal content, and every consumer reads it: measurement, ink, the renderer, ``PenTextLayout/init(_:box:color:)``. So a node whose words were changed by a tool that does not know about runs draws plain everywhere at once. Anything that changes `content` must restate the spans for the new text, or they go stale.
+``PenTextSpans/text`` is the content the runs were made for. ``PenTextSpans/appliedRuns(to:)`` returns the runs only while the content still equals it, code unit for code unit — two strings equal only by Unicode equivalence have different offsets — and an empty list otherwise. ``PenNode/appliedRuns`` asks that of the node's literal content, read from its metadata, and every consumer reads it: measurement, ink, the renderer, ``PenTextLayout/init(_:box:color:)``, the overflow lint. ``PenNode/hasStaleTextSpans`` says when they are stale, which the `spans-stale` lint, `tree` (`⚠ stale runs`) and a `set` that changes the words report (<doc:WoodcaseLint>, <doc:WoodcaseEditor>). Stale runs are kept, not moved: re-anchoring them by diffing the old text against the new can come later.
+
+An instance that overrides a component text's content draws it plain, by the same rule: the spans were made for the component's words. So a node whose words were changed by a tool that does not know about runs draws plain everywhere at once. Anything that changes `content` must restate the spans for the new text, or they go stale.
+
+### Storage
+
+`metadata.woodcase.spans` holds ``PenTextSpans/metadataValue``, read back by ``PenTextSpans/init(metadataValue:)``:
+
+```json
+"metadata": { "type": "woodcase", "woodcase": { "spans": {
+  "text": "Make this bold",
+  "runs": [ { "start": 10, "end": 14, "fontWeight": "700", "fill": "#E5484D" },
+            { "start": 0, "end": 4, "fontStyle": "italic" } ]
+} } }
+```
+
+Each run has `start` and `end` and only the style keys it sets, spelled as the format spells a text node's own (``PenTextRun/WireKey``): `fontWeight` a string (`"700"`; a keyword such as `"bold"` reads too), `fontStyle` `"italic"` or `"normal"`, `fill` a hex color, `fontSize` a positive number, `underline` and `strikethrough` booleans. Offsets must lie inside `text`. Anything else — an unknown key, a misspelled value — is refused on an authored write (``EditingError/textSpansRejected(nodeID:reason:)``) and read from a file as no spans, so the text draws plain. Code reads and writes them through ``PenMetadata/textSpans``, which goes through ``PenMetadata/subscript(woodcase:)`` and types metadata that had no type.
+
+A 2.10 document's run array is moved here by ``PenRichTextMigrationRule`` when it is opened: the words flatten into `content`, the styling becomes spans over them, and only what spans cannot hold (letter spacing, a `$variable`, …) is reported as dropped.
 
 ### Setting and measuring
 
-``PenTextStyle/attributedString(_:runs:for:)`` sets each segment in its own resolved font and decorations and, when drawn, its run's fill or the node's color; the paragraph style (line pitch, alignment, letter spacing) is the node's throughout. ``PenTextLayout/init(text:style:runs:box:color:)`` is the layout call for a text with runs — RapidPro's rasterizer and an editor typing a draft call it directly — and ``PenTextMeasurer/measure(_:fontFamily:fontSize:fontWeight:fontStyle:letterSpacing:lineHeight:maxWidth:runs:)`` sizes it, so a bold run that pushes a word to the next line in the drawing pushes it there in layout too. ``PenLayoutEngine`` hands a node's applied runs to its ``TextMeasurer`` in the ``PenTextMeasureRequest`` it measures, and the run-scoped `TextSizeCache` keys its sizes on that request.
+``PenTextStyle/attributedString(_:runs:for:)`` sets each segment in its own resolved font and decorations and, when drawn, its run's fill or the node's color; the paragraph style (line pitch, alignment, letter spacing) is the node's throughout. ``PenTextLayout/init(text:style:runs:box:color:)`` is the layout call for a text with runs — RapidPro's rasterizer and an editor typing a draft call it directly — and ``PenTextMeasurer/measure(_:fontFamily:fontSize:fontWeight:fontStyle:letterSpacing:lineHeight:maxWidth:runs:)`` sizes it, so a bold run that pushes a word to the next line in the drawing pushes it there in layout too. ``PenLayoutEngine`` hands a node's applied runs to its ``TextMeasurer`` in the ``PenTextMeasureRequest`` it measures, and the run-scoped `TextSizeCache` keys its sizes on that request with the colors taken out (``PenTextMeasureRequest/ignoringColor``), so recoloring a word does not measure it again.
 
 ### Lines with mixed sizes
 
@@ -49,14 +68,26 @@ So a larger run pushes its line's baseline down and every later line lower; a sm
 
 On the solid route a run's fill is its Core Text color. On the glyph-outline route (a gradient, an image, a stack) a run with a fill of its own is marked with ``PenTextRenderer/runFillKey``: it is kept out of the paint's clip and drawn by Core Text in its own color, its underline and strikethrough bars with it (``PenGlyphOutlines/ColorRun``). A node with no paint of its own draws nothing — except its runs that have a fill, which draw in their color. Underline follows each run's own font; strikethrough is struck per run in its color, as for a whole node.
 
+Another renderer draws a text node's spans through the same layout: `PenTextLayout(node, box: box, color: color)` reads the node's applied runs from its metadata, or, for a renderer that carries the text and its style apart from the node (RapidPro's `RenderTextContent`), `PenTextLayout(text: content, style: PenTextStyle(data), runs: node.appliedRuns, box: box, color: color)`. It then draws ``PenTextLayout/placed`` through ``PenTextLayout/textSpace`` as for any text, and honors ``PenTextRenderer/runFillKey`` on the outline route.
+
 ## Topics
 
 ### The model
 
 - ``PenTextRun``
 - ``PenTextSpans``
-- ``PenNode/TextData/spans``
-- ``PenNode/TextData/appliedRuns``
+- ``PenNode/textSpans``
+- ``PenNode/appliedRuns``
+- ``PenNode/hasStaleTextSpans``
+
+### Storage
+
+- ``PenMetadata/textSpans``
+- ``PenTextSpans/init(metadataValue:)``
+- ``PenTextSpans/metadataValue``
+- ``PenTextSpans/WireError``
+- ``PenTextRun/WireKey``
+- ``PenHexColor/hex``
 
 ### Resolving and setting
 

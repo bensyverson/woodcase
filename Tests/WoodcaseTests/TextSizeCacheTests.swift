@@ -119,6 +119,24 @@ struct TextSizeCacheTests {
         #expect(base.count == 11, "a variant was answered from another's entry, or a repeat was not")
     }
 
+    @Test("recoloring a run does not measure again; restyling it does")
+    func aRunsColorIsNotKeyed() {
+        let base = RecordingMeasurer()
+        let generation = Generation()
+        let cache = TextSizeCache(measuring: base.measurer, fontGeneration: { generation.current })
+        let measurer = cache.measurer
+        let red = PenHexColor(red: 255, green: 0, blue: 0)
+        let blue = PenHexColor(red: 0, green: 0, blue: 255)
+
+        _ = Self.measure(measurer, runs: [PenTextRun(start: 0, end: 2, fontWeight: 700, fill: red)])
+        _ = Self.measure(measurer, runs: [PenTextRun(start: 0, end: 2, fontWeight: 700, fill: blue)])
+        _ = Self.measure(measurer, runs: [PenTextRun(start: 0, end: 2, fontWeight: 700)])
+        #expect(base.count == 1, "a run's fill reached the key")
+
+        _ = Self.measure(measurer, runs: [PenTextRun(start: 0, end: 2, fontWeight: 800, fill: red)])
+        #expect(base.count == 2)
+    }
+
     @Test("a font registration between two measurements measures again")
     func aRegistrationDiscardsTheSizes() {
         let base = RecordingMeasurer()

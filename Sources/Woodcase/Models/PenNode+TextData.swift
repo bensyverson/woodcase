@@ -32,8 +32,7 @@ public extension PenNode {
             strokeLinejoin: PenStrokeJoin? = nil,
             strokeAlignment: PenStrokeAlign? = nil,
             effects: PenEffects? = nil,
-            blendMode: PenBlendMode? = nil,
-            spans: PenTextSpans? = nil
+            blendMode: PenBlendMode? = nil
         ) {
             self.width = width
             self.height = height
@@ -58,7 +57,6 @@ public extension PenNode {
             self.strokeAlignment = strokeAlignment
             self.effects = effects
             self.blendMode = blendMode
-            self.spans = spans
         }
 
         public var width: PenSizing?
@@ -84,13 +82,6 @@ public extension PenNode {
         public var strokeAlignment: PenStrokeAlign?
         public var effects: PenEffects?
         public var blendMode: PenBlendMode?
-
-        /// The node's rich text: styled runs over its content, or `nil` for plain text.
-        ///
-        /// Not one of the format's keys, so the node's own encoding never writes it: Pen
-        /// deletes a run array in `content`, and its storage is the `woodcase.spans`
-        /// metadata key. Read ``appliedRuns`` to set the text, which drops stale runs.
-        public var spans: PenTextSpans?
 
         public enum CodingKeys: String, CodingKey {
             case width, height, content, textGrowth

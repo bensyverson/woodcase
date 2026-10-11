@@ -34,8 +34,8 @@ struct PenTextMeasureRequestTests {
 
     private static let runs = [PenTextRun(start: 0, end: 4, fontWeight: 700)]
 
-    private static func layout(_ data: PenNode.TextData, with measurer: TextMeasurer) {
-        let node = PenNode(id: "t", common: PenNodeCommon(), kind: .text(data))
+    private static func layout(_ data: PenNode.TextData, spans: PenTextSpans? = nil, with measurer: TextMeasurer) {
+        let node = PenNode.text(data, spans: spans)
         _ = PenLayoutEngine.layout(PenDocument(version: "2.20", children: [node]), textMeasurer: measurer)
     }
 
@@ -45,9 +45,8 @@ struct PenTextMeasureRequestTests {
         Self.layout(PenNode.TextData(
             width: .fixed(120), content: .literal("Bold text"), textGrowth: .fixedWidth,
             fontFamily: .literal("Inter"), fontSize: .literal(14), fontWeight: .literal("500"),
-            fontStyle: .literal("italic"), letterSpacing: .literal(0.5), lineHeight: .literal(1.25),
-            spans: PenTextSpans(text: "Bold text", runs: Self.runs)
-        ), with: recorder.measurer)
+            fontStyle: .literal("italic"), letterSpacing: .literal(0.5), lineHeight: .literal(1.25)
+        ), spans: PenTextSpans(text: "Bold text", runs: Self.runs), with: recorder.measurer)
         let request = try #require(recorder.all.first)
         #expect(request == PenTextMeasureRequest(
             text: "Bold text", fontFamily: "Inter", fontSize: 14, fontWeight: "500", fontStyle: "italic",

@@ -21,13 +21,13 @@ public enum PenTextRenderer {
     /// in the node's paint. Empty content draws nothing.
     ///
     /// - Parameters:
-    ///   - data: The text node's data containing content and style.
+    ///   - node: The text node: its content, style and — in its metadata — its runs.
     ///   - rect: The bounding rect (zero-origin) to draw text within: the paint's domain.
     ///   - fills: The fills to paint the glyphs with — the node's own, or an override's.
     ///   - context: The CoreGraphics context (already flipped to top-left origin).
     ///   - imageProvider: Resolves an image fill's URL to an image.
     static func renderText(
-        data: PenNode.TextData,
+        node: PenNode,
         rect: PenRect,
         fills: PenFills?,
         in context: CGContext,
@@ -37,10 +37,10 @@ public enum PenTextRenderer {
         let size = CGSize(width: CGFloat(rect.width), height: CGFloat(rect.height))
         // A run with a fill of its own draws even where the node has no paint: the rest of
         // the text is then set in a clear color, which draws nothing.
-        let hasOwnFills = data.appliedRuns.contains { $0.fill != nil }
+        let hasOwnFills = node.appliedRuns.contains { $0.fill != nil }
         let color = paint == .nothing ? CGColor(gray: 0, alpha: 0) : paint.coreTextColor
         guard paint != .nothing || hasOwnFills,
-              let layout = PenTextLayout(data, box: size, color: color),
+              let layout = PenTextLayout(node, box: size, color: color),
               !layout.lines.lines.isEmpty
         else { return }
         let placed = layout.placed

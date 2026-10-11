@@ -214,6 +214,9 @@ extension BatchErrorMessage {
                 dialect: dialect
             )
 
+        case let .textSpansRejected(nodeID, reason):
+            return textSpansRejected(on: nodeID, reason: reason, in: document, dialect: dialect)
+
         case let .unknownDocumentProperty(key):
             return unknownDocumentProperty(key, in: dialect)
 

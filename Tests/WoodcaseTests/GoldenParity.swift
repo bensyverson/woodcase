@@ -106,9 +106,10 @@ enum GoldenParity {
     ///
     /// The 2.9 fixture gives it three styled runs — "Bold ", "Italic ", "Colored".
     /// Pen.app 1.2.7 drops the property outright on save, losing the words;
-    /// ``PenRichTextMigrationRule`` keeps them as one string. The override asserts exactly
-    /// that shape on both sides before equalizing, so any *other* drift in the node — or
-    /// anywhere else in the document — still fails the comparison.
+    /// ``PenRichTextMigrationRule`` keeps them as one string, and keeps their styling as
+    /// spans in `metadata.woodcase.spans`, which Pen's re-save cannot have. The override
+    /// asserts exactly that shape on both sides before equalizing, so any *other* drift in
+    /// the node — or anywhere else in the document — still fails the comparison.
     private static let pinRichTextNode: Override = { legacy, golden in
         let index = 1
         #expect(legacy.children[index].id == "rich-text")
@@ -125,8 +126,15 @@ enum GoldenParity {
             "The migrator should keep the words of the discarded styled runs"
         )
         #expect(pen.content == nil, "Pen.app should have dropped the rich text content")
+        #expect(legacy.children[index].textSpans == PenTextSpans(text: "Bold Italic Colored", runs: [
+            PenTextRun(start: 0, end: 5, fontWeight: 700),
+            PenTextRun(start: 5, end: 12, isItalic: true),
+            PenTextRun(start: 12, end: 19, fill: PenHexColor(red: 255, green: 0, blue: 0), underline: true),
+        ]), "The migrator should keep the runs' styling as spans")
+        #expect(golden.children[index].common.metadata == nil)
 
         legacy.children[index].kind = .text(pen)
+        legacy.children[index].common.metadata = nil
     }
 
     // MARK: - Loading

@@ -94,6 +94,7 @@ struct LintFormatterTests {
             "per-side-stroke-on-shape",
             "pipeline",
             "shader-not-drawn",
+            "spans-stale",
             "text-overflow",
             "text-style-stripped",
             "text-without-fill",

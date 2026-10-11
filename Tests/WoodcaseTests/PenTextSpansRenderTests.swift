@@ -25,11 +25,9 @@ struct PenTextSpansRenderTests {
         _ runs: [PenTextRun], text: String = text, family: String = "Inter",
         fills: PenFills? = .single(.shorthand("#000000"))
     ) throws -> PenFillDomainTests.RGBA {
-        let data = PenNode.TextData(
-            content: .literal(text), fontFamily: .literal(family), fontSize: .literal(32),
-            fills: fills, spans: PenTextSpans(text: text, runs: runs)
-        )
-        let node = PenNode(id: "t", common: PenNodeCommon(), kind: .text(data))
+        let node = PenNode.text(PenNode.TextData(
+            content: .literal(text), fontFamily: .literal(family), fontSize: .literal(32), fills: fills
+        ), spans: PenTextSpans(text: text, runs: runs))
         let document = PenDocument(version: "2.20", children: [node])
         let rect = PenRect(x: 0, y: 0, width: Double(size.width), height: Double(size.height))
         let image = try #require(PenRenderer.render(document, layoutRects: ["t": rect], size: size))

@@ -278,6 +278,7 @@ interface TreeRow {
   clip: 'none' | 'partial' | 'full';
   overflowAxes: ('horizontal' | 'vertical')[];
   isReusable: boolean; isInstance: boolean; isSlot: boolean; childCount: number;
+  spans?: { runs: number; isStale: boolean };  // a text's rich text, when it has some
   properties?: Props;     // only the paths the `props` option asked for
   props?: Props;          // the same bag under find's spelling — one guarded view
 }
@@ -414,7 +415,7 @@ lists the ones it has:
 $ woodcase find banking.pen 'r => r.fontSize < 12'
 The predicate threw on row #j4hLC (j4hLC): a row has no fontSize. Its members are
 absRect, address, childCount, clip, depth, id, isInstance, isReusable, isSlot, name,
-overflowAxes, properties, rect, rev, type, and a property of the node itself is read
+overflowAxes, properties, rect, rev, spans, type, and a property of the node itself is read
 as r.props['kind.fontSize'] with --props kind.fontSize on the command line.
 [exit 2]
 ```

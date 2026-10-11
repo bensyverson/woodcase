@@ -94,6 +94,7 @@ struct SetCommand: AsyncParsableCommand {
                 do {
                     let findings = try effect.preview(of: document)
                     let id = try document.resolve(target).targetID
+                    let spansWereStale = DocumentLinter.spansStaleFinding(nodeID: id, in: document) != nil
                     let result = try BatchApplier.applyOne(
                         .set(BatchOperation.SetOp(
                             target: target, props: properties, rev: expected, guards: pins
@@ -105,7 +106,7 @@ struct SetCommand: AsyncParsableCommand {
                     )
                     let warnings = RootOverlapWarnings.lines(
                         since: overlapping, in: document, file: url.path
-                    )
+                    ) + SpansStaleWarnings.lines(for: id, wereStale: spansWereStale, in: document)
                     return try WrittenOutcome(
                         rendered: WriteReport(
                             path: result.path ?? document.namePath(of: id),

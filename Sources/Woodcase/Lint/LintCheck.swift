@@ -146,6 +146,11 @@ public enum LintCheck: String, Friendly, CaseIterable {
     /// still read. A notice: nothing is wrong, and `woodcase migrate` moves them in.
     case metadataOldStyle = "metadata-old-style"
 
+    /// A text node whose `metadata.woodcase.spans` were made for other content than its
+    /// own — its words were changed by a tool that does not know about runs, such as Pen —
+    /// so its styling is ignored and it draws plain (``PenNode/hasStaleTextSpans``).
+    case spansStale = "spans-stale"
+
     /// Components that contain each other — a component that renders an instance of
     /// itself, directly or through others (``ComponentLoop``). One finding per loop, at
     /// the top of the report.
@@ -182,7 +187,8 @@ public enum LintCheck: String, Friendly, CaseIterable {
     /// ``shaderNotDrawn`` is a warning on the same reading from the other side: the file
     /// is well formed and Pen draws it as written; only Woodcase's render and code differ.
     /// ``perSideStrokeOnShape`` is a warning because the node draws, Pen and Woodcase alike,
-    /// only not with the widths the file writes. ``noteUnsized`` is a notice: nothing is
+    /// only not with the widths the file writes. ``spansStale`` is a warning on the same
+    /// reading: the text draws, but plain, not as its styling says. ``noteUnsized`` is a notice: nothing is
     /// wrong with the note, which draws at the post-it default; ``metadataOldStyle`` is one
     /// too, since old spellings are still read. ``componentLoop`` is an
     /// error: an edit refuses to make one, and the nesting it closes draws nothing.
@@ -193,7 +199,7 @@ public enum LintCheck: String, Friendly, CaseIterable {
         case .pipeline, .textWithoutFill, .fillContainerInFitParent, .emptyFitContent, .clipped,
              .artboardOverlap, .duplicateName, .textOverflow, .codegenUnmappedOverride, .collapsedText,
              .collapsedAbsoluteFrame, .meshGradientDistorted, .textStyleStripped, .importNotFollowed,
-             .shaderNotDrawn, .perSideStrokeOnShape:
+             .shaderNotDrawn, .perSideStrokeOnShape, .spansStale:
             .warning
         case .brokenRef, .importNotFound, .importUnreadable, .unresolvedVariable, .unknownIcon, .unknownIconLibrary,
              .overrideValueRejected, .overrideTargetNotFound, .overrideKeyUnread,
@@ -265,6 +271,8 @@ public enum LintCheck: String, Friendly, CaseIterable {
             "A note with no width or height of its own, which lays out at the 200×200 post-it default."
         case .metadataOldStyle:
             "Woodcase metadata kept under its old spelling (_props, a post-it's bare state); still read, and woodcase migrate moves it in."
+        case .spansStale:
+            "A text whose styled runs were made for other words than its content, so it draws plain."
         case .componentLoop:
             "Components that contain each other, directly or through others; that nesting is not drawn."
         }

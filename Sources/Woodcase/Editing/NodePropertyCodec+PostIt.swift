@@ -20,7 +20,8 @@ public extension NodePropertyCodec {
     ///   - node: The node it will be written to; a key left at the value the node holds
     ///     is not checked.
     /// - Throws: ``EditingError/postItMetadataRejected(nodeID:key:value:accepted:suggestion:)``
-    ///   for the first refused key.
+    ///   for the first refused key, or ``EditingError/textSpansRejected(nodeID:reason:)``
+    ///   when that key is malformed spans.
     static func checkAuthoredPostIt(_ metadata: AnyCodable, on node: PenNode) throws {
         guard case let .dictionary(object) = metadata else { return }
         try check(object, comparedTo: node.common.metadata, nodeID: node.id)
@@ -51,6 +52,9 @@ public extension NodePropertyCodec {
         nodeID: String
     ) throws {
         guard let violation = PenPostIt.violation(in: object, comparedTo: current) else { return }
+        if let reason = violation.reason {
+            throw EditingError.textSpansRejected(nodeID: nodeID, reason: reason)
+        }
         throw EditingError.postItMetadataRejected(
             nodeID: nodeID,
             key: violation.key.path,

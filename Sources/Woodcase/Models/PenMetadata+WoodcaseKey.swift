@@ -87,6 +87,12 @@ public extension PenMetadata {
         /// The vertical alignment of the note's text.
         case textAlignVertical
 
+        // MARK: A text node's rich text
+
+        /// A text node's styled runs and the content they were made for
+        /// (``PenTextSpans``, read and written as ``PenMetadata/textSpans``).
+        case spans
+
         /// Which part of Woodcase a key belongs to.
         public enum Group: String, Friendly, CaseIterable {
             /// Read by code generation and its lints.
@@ -95,6 +101,8 @@ public extension PenMetadata {
             case note
             /// A note's text style, which Pen strips from the node itself.
             case noteTextStyle
+            /// A text node's rich text, which Pen's format cannot hold.
+            case text
         }
 
         /// What an authored value of a key must be.
@@ -109,6 +117,9 @@ public extension PenMetadata {
             case oneOf([String])
             /// `#` and six hex digits.
             case hexColor
+            /// A text node's spans: `{text, runs: [{start, end, …}]}`, as
+            /// ``PenTextSpans/init(metadataValue:)`` reads them.
+            case textSpans
         }
 
         /// Which part of Woodcase the key belongs to.
@@ -118,6 +129,7 @@ public extension PenMetadata {
             case .type, .state, .author, .leaf, .stage, .tint, .copiedFrom, .anchor, .replyTo: .note
             case .fontFamily, .fontSize, .fontWeight, .fontStyle, .letterSpacing, .lineHeight, .textAlign,
                  .textAlignVertical: .noteTextStyle
+            case .spans: .text
             }
         }
 
@@ -132,7 +144,7 @@ public extension PenMetadata {
             case .props, .role, .states, .action, .scroll: "_\(rawValue)"
             case .type, .state, .author, .leaf, .stage, .tint, .copiedFrom: rawValue
             case .anchor, .replyTo, .fontFamily, .fontSize, .fontWeight, .fontStyle, .letterSpacing,
-                 .lineHeight, .textAlign, .textAlignVertical: nil
+                 .lineHeight, .textAlign, .textAlignVertical, .spans: nil
             }
         }
 
@@ -147,6 +159,7 @@ public extension PenMetadata {
             case .tint: .hexColor
             case .author, .leaf, .stage, .copiedFrom, .replyTo, .fontFamily, .fontWeight, .fontStyle: .string
             case .fontSize, .letterSpacing, .lineHeight: .number
+            case .spans: .textSpans
             }
         }
 
@@ -156,6 +169,7 @@ public extension PenMetadata {
             switch shape {
             case let .oneOf(spellings): spellings
             case .hexColor: [PenPostIt.tintForm]
+            case .textSpans: [PenTextSpans.wireForm]
             case .any, .string, .number: []
             }
         }
@@ -185,6 +199,7 @@ public extension PenMetadata {
             case .lineHeight: "The line height, as a multiple of the font size."
             case .textAlign: "The horizontal alignment of the note's lines."
             case .textAlignVertical: "The vertical alignment of the note's text."
+            case .spans: "A text node's styled runs, and the content they were made for."
             }
         }
 

@@ -150,6 +150,8 @@ public extension PenMetadata {
         switch key.group {
         case .codegen:
             return extensions[spelling]
+        case .text:
+            return nil
         case .note, .noteTextStyle:
             guard readsBareNoteKeys else { return nil }
             if key == .type { return type == Self.oldPostItType ? .string(Self.oldPostItType) : nil }

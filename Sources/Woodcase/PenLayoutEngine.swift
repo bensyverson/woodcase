@@ -373,13 +373,13 @@ extension PenLayoutEngine {
                 alignItems: .start,
                 children: [],
                 isContainer: false,
-                textInput: extractTextInput(node.kind)
+                textInput: extractTextInput(node)
             )
         }
     }
 
-    static func extractTextInput(_ kind: PenNode.Kind) -> TextMeasurementInput? {
-        guard case let .text(data) = kind else { return nil }
+    static func extractTextInput(_ node: PenNode) -> TextMeasurementInput? {
+        guard case let .text(data) = node.kind else { return nil }
 
         return TextMeasurementInput(
             request: PenTextMeasureRequest(
@@ -390,7 +390,7 @@ extension PenLayoutEngine {
                 fontStyle: data.fontStyle?.literalValue,
                 letterSpacing: data.letterSpacing?.literalValue,
                 lineHeight: data.lineHeight?.literalValue,
-                runs: data.appliedRuns
+                runs: node.appliedRuns
             ),
             textGrowth: data.textGrowth
         )

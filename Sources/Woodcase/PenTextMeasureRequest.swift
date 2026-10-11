@@ -38,7 +38,7 @@ public struct PenTextMeasureRequest: Friendly {
     /// The width to wrap at, or `nil` for one unwrapped line per paragraph.
     public var maxWidth: Double?
 
-    /// The text's applied styled runs (``PenNode/TextData/appliedRuns``), offsets in UTF-16
+    /// The text's applied styled runs (``PenNode/appliedRuns``), offsets in UTF-16
     /// code units; empty for plain text.
     public var runs: [PenTextRun]
 
@@ -88,6 +88,19 @@ public struct PenTextMeasureRequest: Friendly {
         request.text = text
         request.maxWidth = maxWidth
         request.runs = runs
+        return request
+    }
+
+    /// This request with everything that cannot change a size taken out: each run's
+    /// ``PenTextRun/fill``, and any run left setting nothing. Two requests that differ only
+    /// in color answer the same size, so a cache keyed on this measures a recolored text once.
+    public var ignoringColor: PenTextMeasureRequest {
+        var request = self
+        request.runs = runs.compactMap { run in
+            var sized = run
+            sized.fill = nil
+            return sized == PenTextRun(start: run.start, end: run.end) ? nil : sized
+        }
         return request
     }
 }

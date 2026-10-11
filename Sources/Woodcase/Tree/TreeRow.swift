@@ -173,6 +173,29 @@ public struct TreeRow: Friendly {
     /// is present with ``AnyCodable/null``.
     public let properties: [String: AnyCodable]?
 
+    /// A text node's rich text, or `nil` for a node that holds no readable spans.
+    public let spans: Spans?
+
+    /// What a row says about a text node's rich text (``PenNode/textSpans``).
+    public struct Spans: Friendly {
+        /// How many runs the spans hold.
+        public var runs: Int
+
+        /// Whether the spans were made for other content than the node's, so they are
+        /// ignored and the text draws plain (``PenNode/hasStaleTextSpans``).
+        public var isStale: Bool
+
+        /// Creates the summary.
+        ///
+        /// - Parameters:
+        ///   - runs: How many runs the spans hold.
+        ///   - isStale: Whether they no longer match the content.
+        public init(runs: Int, isStale: Bool) {
+            self.runs = runs
+            self.isStale = isStale
+        }
+    }
+
     /// Creates a row.
     ///
     /// - Parameters:
@@ -195,6 +218,7 @@ public struct TreeRow: Friendly {
     ///   - isSlot: Whether the node is a slot frame.
     ///   - childCount: How many children the node has.
     ///   - properties: The requested property columns, or `nil` if none were requested.
+    ///   - spans: A text node's rich text, or `nil` for none.
     public init(
         id: String,
         address: String,
@@ -210,7 +234,8 @@ public struct TreeRow: Friendly {
         isInstance: Bool,
         isSlot: Bool,
         childCount: Int,
-        properties: [String: AnyCodable]?
+        properties: [String: AnyCodable]?,
+        spans: Spans? = nil
     ) {
         self.id = id
         self.address = address
@@ -228,5 +253,6 @@ public struct TreeRow: Friendly {
         self.isSlot = isSlot
         self.childCount = childCount
         self.properties = properties
+        self.spans = spans
     }
 }

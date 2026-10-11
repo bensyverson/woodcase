@@ -43,7 +43,7 @@ node types it again.
 
 ### The keys
 
-``PenMetadata/WoodcaseKey`` lists every key, in three groups
+``PenMetadata/WoodcaseKey`` lists every key, in four groups
 (``PenMetadata/WoodcaseKey/Group``):
 
 | Group | Keys | Read by |
@@ -51,6 +51,7 @@ node types it again.
 | code generation | `props`, `role`, `states`, `action`, `scroll` | ``ComponentAnalyzer``, ``PageAnalyzer``, ``EditableDocument/parameters(ofComponent:)``, the `codegen-*` and `clipped` lints |
 | notes | `type`, `state`, `author`, `leaf`, `stage`, `tint`, `copiedFrom`, `anchor`, `replyTo` | ``PenPostIt/Metadata``; see <doc:PenPostItConvention> |
 | a note's text style | `fontFamily`, `fontSize`, `fontWeight`, `fontStyle`, `letterSpacing`, `lineHeight`, `textAlign`, `textAlignVertical` | the note's look; Pen strips a note's own text style on load, so it lives here |
+| a text's rich text | `spans` | ``PenMetadata/textSpans`` and ``PenNode/appliedRuns``: the layout, the renderer and the `spans-stale` lint; see <doc:PenRichText> |
 
 ### One accessor
 
@@ -63,6 +64,12 @@ metadata[woodcase: .tint]                       // either spelling, the namespac
 metadata[woodcase: .state] = .string("resolved") // stored under woodcase; old spelling removed
 metadata[woodcase: .leaf] = nil                  // both spellings removed
 ```
+
+`spans` is the one key whose value is structured: its shape,
+``PenMetadata/WoodcaseKey/Shape/textSpans``, holds an authored write to
+``PenTextSpans/init(metadataValue:)``, and a refusal names what is wrong
+(``EditingError/textSpansRejected(nodeID:reason:)``). Code reads it as typed spans through
+``PenMetadata/textSpans``, which goes through the same subscript.
 
 **Adding a key** is one case of ``PenMetadata/WoodcaseKey``: its
 ``PenMetadata/WoodcaseKey/group``, its ``PenMetadata/WoodcaseKey/shape`` (what an
@@ -135,6 +142,7 @@ percent-escaped in an entry path (`%2E`, `%25`).
 - ``PenMetadata/woodcaseType``
 - ``PenMetadata/WoodcaseKey``
 - ``PenMetadata/subscript(woodcase:)``
+- ``PenMetadata/textSpans``
 - ``PenMetadata/oldStyleWoodcaseKeys``
 - ``PenMetadata/migratingOldStyleWoodcaseKeys()``
 

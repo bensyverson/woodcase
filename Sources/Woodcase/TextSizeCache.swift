@@ -17,9 +17,10 @@ import Synchronization
 ///
 /// ## The key
 ///
-/// The ``PenTextMeasureRequest`` itself: everything the measurer is given — the text, the
+/// The ``PenTextMeasureRequest`` itself — everything the measurer is given: the text, the
 /// family, size, weight and style, the letter spacing, the line height, the wrapping width
-/// and the styled runs. A ``TextMeasurer`` sees
+/// and the styled runs — with the runs' colors taken out (``PenTextMeasureRequest/ignoringColor``),
+/// since a color never changes a size. A ``TextMeasurer`` sees
 /// nothing else about the node, so nothing else can change its answer — except the font
 /// set, which is not an argument.
 ///
@@ -100,13 +101,14 @@ package final class TextSizeCache: Sendable {
     /// only a text it has not seen in the current font set.
     package var measurer: TextMeasurer {
         { [self] request in
+            let key = request.ignoringColor
             let before = generation()
             let hit: Size? = state.withLock { state in
                 if state.generation != before {
                     state.sizes.removeAll(keepingCapacity: true)
                     state.generation = before
                 }
-                return state.sizes[request]
+                return state.sizes[key]
             }
             if let hit { return (hit.width, hit.height) }
 
@@ -115,7 +117,7 @@ package final class TextSizeCache: Sendable {
             state.withLock { state in
                 state.measured += 1
                 guard after == before, state.generation == before else { return }
-                state.sizes[request] = Size(width: measured.width, height: measured.height)
+                state.sizes[key] = Size(width: measured.width, height: measured.height)
             }
             return measured
         }

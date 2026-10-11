@@ -288,7 +288,8 @@ woodcase find design.pen 'r => r.childCount > 8' --json | jq -r '.rows[].address
 ```
 
 A row carries `type`, `name`, `address`, `id`, `rev`, `depth`, `rect`, `absRect`,
-`clip`, `overflowAxes`, `isReusable`, `isInstance`, `isSlot` and `childCount` — and the
+`clip`, `overflowAxes`, `isReusable`, `isInstance`, `isSlot`, `childCount` and, on a
+text with rich text, `spans` (`{runs, isStale}`) — and the
 columns `--props` asked for, read as `r.props["kind.fontSize"]`. **A member a row does
 not have is refused, not read as `undefined`**: `r.fontSize` written for
 `r.props["kind.fontSize"]` would compare `undefined < 12`, which is `false`, and print

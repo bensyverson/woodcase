@@ -1167,6 +1167,39 @@ The type in the `props` block is the one code generation will emit for that para
 `string` for a text node's content, `color` or `imageURL` for a shape's fill — read from
 the same inference, so the list is what the generated component's props will be.
 
+## Styling words in a text
+
+A text node's `content` is one plain string — Pen has no rich text. To make a word bold,
+italic, colored, larger or underlined, write **spans** beside it, under
+`common.metadata.woodcase.spans`: the text the runs are made for, and the runs, each
+covering `start` up to `end` in UTF-16 units of that text (an emoji like 👍🏽 counts 4).
+
+```text
+$ woodcase set design.pen Hero/Title 'common.metadata.woodcase.spans={"text":"Make this bold","runs":[{"start":10,"end":14,"fontWeight":"700","fill":"#E5484D"}]}'
+```
+
+A run may set `fontFamily`, `fontSize`, `fontWeight` (`"700"`, or a keyword such as
+`"bold"`), `fontStyle` (`"italic"` or `"normal"`), `fill` (`#RRGGBB` or `#RRGGBBAA`),
+`underline` and `strikethrough`; anything else is refused, with the reason, before the
+file is touched. `add` and `replace` take the same object inside a subtree's `metadata`.
+`tree` marks a styled text `[2 runs]`, `tree --json` and `find` rows carry
+`spans: {runs, isStale}`, and `get` prints the spans with the node.
+
+**Changing the words leaves the spans stale.** The runs record the text they were made
+for, so a `set` of `kind.content` that does not restate the spans in the same write
+leaves them in place and ignored: the text draws plain, `tree` marks it `⚠ stale runs`,
+`lint` reports `spans-stale`, and the `set` itself prints that finding on standard
+error. The write is not refused and the runs are not moved — guessing where a bold word
+went after an edit would style the wrong characters. Restate both in one write, or clear
+the spans:
+
+```text
+$ woodcase set design.pen Hero/Title kind.content='Make this BOLD' 'common.metadata.woodcase.spans={"text":"Make this BOLD","runs":[{"start":10,"end":14,"fontWeight":"700"}]}'
+$ woodcase set design.pen Hero/Title common.metadata.woodcase.spans=null
+```
+
+See <doc:PenRichText> for how runs set, measure and draw.
+
 ## Filling a slot
 
 A component may leave a hole for its instances: a frame whose `slot` lists the types it

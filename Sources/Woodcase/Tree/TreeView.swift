@@ -239,7 +239,8 @@ public enum TreeView {
             isInstance: isInstance,
             isSlot: isSlot(node.kind),
             childCount: children.count,
-            properties: propertyColumns(of: node, paths: context.properties)
+            properties: propertyColumns(of: node, paths: context.properties),
+            spans: node.textSpans.map { TreeRow.Spans(runs: $0.runs.count, isStale: node.hasStaleTextSpans) }
         ))
 
         if let limit = context.limit, depth >= limit { return [] }

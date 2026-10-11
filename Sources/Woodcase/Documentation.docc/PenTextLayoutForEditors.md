@@ -16,7 +16,7 @@ The layout is three layers:
 
 ```swift
 let box = CGSize(width: rect.width, height: rect.height)
-guard let layout = PenTextLayout(textData, box: box) else { return } // no literal content
+guard let layout = PenTextLayout(node, box: box) else { return } // not a text, or no literal content
 context.concatenate(layout.textSpace)
 for (line, origin) in layout.placed {
     context.textPosition = origin
@@ -24,7 +24,7 @@ for (line, origin) in layout.placed {
 }
 ```
 
-An editor that is typing builds the layout from the in-progress string and the node's own style rather than from the node: `PenTextLayout(text: draft, style: PenTextStyle(textData), runs: draftRuns, box: box)`, with the draft's runs (``PenTextRun``, offsets in the same UTF-16 units as the geometry's) moved along with each edit. An empty string sets no lines and draws nothing, but its geometry still has a caret line.
+The layout takes the node, not its ``PenNode/TextData``: a text's runs live in its metadata (<doc:PenRichText>), and the data alone would set it plain. An editor that is typing builds the layout from the in-progress string and the node's own style rather than from the node: `PenTextLayout(text: draft, style: PenTextStyle(textData), runs: draftRuns, box: box)`, with the draft's runs (``PenTextRun``, offsets in the same UTF-16 units as the geometry's) moved along with each edit. An empty string sets no lines and draws nothing, but its geometry still has a caret line.
 
 ### Coordinates
 

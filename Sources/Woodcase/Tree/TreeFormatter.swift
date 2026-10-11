@@ -30,8 +30,9 @@ import Foundation
 ///
 /// Markers ride on the name: a `*` before it marks a reusable component definition, a
 /// `+N` after it counts children the listing left out (a depth limit, or an
-/// unexpanded instance), and `⚠ partial` / `⚠ clipped` marks a node that falls
-/// outside its parent. An unnamed node shows its id marker (`#Out01`), which is also
+/// unexpanded instance), `[N runs]` marks a text styled by N runs (<doc:PenRichText>) and
+/// `⚠ stale runs` one whose runs were made for other words, and `⚠ partial` /
+/// `⚠ clipped` marks a node that falls outside its parent. An unnamed node shows its id marker (`#Out01`), which is also
 /// what its address uses. No line ever ends in a space, so the output is byte-stable.
 ///
 /// Requested property columns sit between the rect and the id, labeled by the header.
@@ -135,10 +136,13 @@ public enum TreeFormatter {
         case .partial: " ⚠ partial"
         case .full: " ⚠ clipped"
         }
+        let spans = row.spans.map { spans in
+            spans.isStale ? " ⚠ stale runs" : spans.runs == 1 ? " [1 run]" : " [\(spans.runs) runs]"
+        } ?? ""
         let columns = properties.map { path in
             row.properties?[path].map(display) ?? "-"
         }
-        return [indent + label + hidden + clip, row.type, rect(absolute ? row.absRect : row.rect)]
+        return [indent + label + hidden + spans + clip, row.type, rect(absolute ? row.absRect : row.rect)]
             + columns + [row.id]
     }
 

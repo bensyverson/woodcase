@@ -20,13 +20,13 @@ extension PenLayoutEngine {
     /// all reach past the box on one axis or more — `PenPaintedExtentProbeTests`' x5–x7 hold three of Pen's exports to it.
     ///
     /// - Parameters:
-    ///   - data: The text node's data.
+    ///   - node: The text node; its runs are read from its metadata.
     ///   - box: Its box, in its own coordinates (zero-origin).
     /// - Returns: The tight ink bounds, or `nil` when there is no content to draw — Pen
     ///   draws nothing, so nothing paints.
-    static func textInkBounds(of data: PenNode.TextData, box: PenRect) -> PenRect? {
+    static func textInkBounds(of node: PenNode, box: PenRect) -> PenRect? {
         let size = CGSize(width: CGFloat(box.width), height: CGFloat(box.height))
-        guard let ink = PenTextLayout(data, box: size)?.inkBounds else { return nil }
+        guard let ink = PenTextLayout(node, box: size)?.inkBounds else { return nil }
         return PenRect(x: Double(ink.minX), y: Double(ink.minY), width: Double(ink.width), height: Double(ink.height))
     }
 }

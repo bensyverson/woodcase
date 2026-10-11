@@ -53,3 +53,30 @@ extension BatchErrorMessage {
         return rest.isEmpty ? last : "\(rest.joined(separator: ", ")) or \(last)"
     }
 }
+
+extension BatchErrorMessage {
+    /// Describes a `metadata.woodcase.spans` value that is not spans Woodcase can draw.
+    ///
+    /// - Parameters:
+    ///   - nodeID: The node written to.
+    ///   - reason: What is wrong, from ``PenTextSpans/WireError``.
+    ///   - document: The document, for the node's name path.
+    ///   - dialect: Which grammar the remedy is written in.
+    /// - Returns: The sentence.
+    static func textSpansRejected(
+        on nodeID: String,
+        reason: String,
+        in document: EditableDocument,
+        dialect: RemedyDialect
+    ) -> String {
+        let key = PenMetadata.WoodcaseKey.spans.path
+        let shape = "spans take \(PenTextSpans.wireForm), offsets in UTF-16 units of text"
+        let example = #"{"text":"Make this bold","runs":[{"start":10,"end":14,"fontWeight":"700"}]}"#
+        return sentence(
+            "\(key) on \(name(nodeID, in: document)) is not spans Woodcase can draw: \(reason)",
+            batch: "\(shape), for example `\"\(key)\":\(example)`",
+            command: "\(shape), for example `woodcase set \(dialect.file) \(nodeID) \(key)='\(example)'`",
+            in: dialect
+        )
+    }
+}

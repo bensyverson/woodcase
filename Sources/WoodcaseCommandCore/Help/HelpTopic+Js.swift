@@ -188,6 +188,7 @@ extension HelpTopic {
         clip: 'none' | 'partial' | 'full';
         overflowAxes: ('horizontal' | 'vertical')[];
         isReusable: boolean; isInstance: boolean; isSlot: boolean; childCount: number;
+        spans?: { runs: number; isStale: boolean };  // a text's rich text, when it has some
         properties?: Props;     // only the paths the `props` option asked for
         props?: Props;          // the same bag under find's spelling — one guarded view
       }

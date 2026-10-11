@@ -93,6 +93,13 @@ public enum EditingError: Error, Equatable, Sendable {
     /// free key), and `suggestion` the closest of them, when one is close.
     case postItMetadataRejected(nodeID: String, key: String, value: String, accepted: [String], suggestion: String?)
 
+    /// A write to a text node's `metadata.woodcase.spans` gives it a value that is not
+    /// spans Woodcase can draw (``PenTextSpans/init(metadataValue:)``): `reason` says what
+    /// is wrong, such as `run 2 has an unknown key "bold"`. Held to the same rule as
+    /// ``postItMetadataRejected(nodeID:key:value:accepted:suggestion:)``: only an authored
+    /// write that changes the key.
+    case textSpansRejected(nodeID: String, reason: String)
+
     // MARK: - Addressing
 
     /// An address matched more than one node. Every candidate is listed with its

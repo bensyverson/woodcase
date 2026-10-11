@@ -204,15 +204,15 @@ struct PenTextSpansLayoutTests {
     @Test("A text node's layout sets its applied runs")
     func nodeLayoutUsesRuns() throws {
         let runs = [PenTextRun(start: 0, end: 4, fontSize: 30)]
-        let data = PenNode.TextData(
-            content: .literal("Bold text"), fontFamily: .literal("Inter"), fontSize: .literal(14),
+        let node = PenNode.text(
+            PenNode.TextData(content: .literal("Bold text"), fontFamily: .literal("Inter"), fontSize: .literal(14)),
             spans: PenTextSpans(text: "Bold text", runs: runs)
         )
-        let layout = try #require(PenTextLayout(data, box: CGSize(width: 400, height: 100)))
+        let layout = try #require(PenTextLayout(node, box: CGSize(width: 400, height: 100)))
         #expect(layout.runs == runs)
         #expect(CTFontGetSize(Self.font(at: 1, in: layout)) == 30)
-        let stale = PenNode.TextData(
-            content: .literal("Bold text!"), fontFamily: .literal("Inter"), fontSize: .literal(14),
+        let stale = PenNode.text(
+            PenNode.TextData(content: .literal("Bold text!"), fontFamily: .literal("Inter"), fontSize: .literal(14)),
             spans: PenTextSpans(text: "Bold text", runs: runs)
         )
         let plain = try #require(PenTextLayout(stale, box: CGSize(width: 400, height: 100)))
@@ -223,10 +223,10 @@ struct PenTextSpansLayoutTests {
     @Test("The layout engine sizes a fit-content text node by its runs")
     func layoutEngineMeasuresRuns() throws {
         func layout(_ spans: PenTextSpans?) throws -> PenRect {
-            let node = PenNode(id: "t", common: PenNodeCommon(), kind: .text(PenNode.TextData(
+            let node = PenNode.text(PenNode.TextData(
                 content: .literal("Bold text"), fontFamily: .literal("Inter"), fontSize: .literal(14),
-                lineHeight: .literal(1.25), spans: spans
-            )))
+                lineHeight: .literal(1.25)
+            ), spans: spans)
             return try #require(PenLayoutEngine.layout(PenDocument(version: "2.20", children: [node]))["t"])
         }
         let plain = try layout(nil)

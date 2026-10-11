@@ -23,10 +23,10 @@ struct PenRichTextMigrationRuleTests {
         )
     }
 
-    /// A text node whose `content` is an array of styled runs.
-    private func richTextNode(id: String, runs: [[String: AnyCodable]]) -> AnyCodable {
+    /// A text node — or another node `type` — whose `content` is an array of styled runs.
+    private func richTextNode(id: String, type: String = "text", runs: [[String: AnyCodable]]) -> AnyCodable {
         .dictionary([
-            "type": .string("text"),
+            "type": .string(type),
             "id": .string(id),
             "content": .array(runs.map { AnyCodable.dictionary($0) }),
             "fontSize": .double(16),
@@ -205,11 +205,12 @@ struct PenRichTextMigrationRuleTests {
 
     // MARK: - Diagnostics
 
-    @Test("Flattening a rich text node emits one diagnostic naming the node")
+    /// A note: its styling would be markdown, not spans, so flattening still discards it.
+    @Test("Flattening a rich note emits one diagnostic naming the node")
     func flatteningEmitsOneDiagnostic() throws {
         let collector = PenDiagnosticCollector()
         let document: [String: AnyCodable] = [
-            "children": .array([richTextNode(id: "rich", runs: [
+            "children": .array([richTextNode(id: "rich", type: "note", runs: [
                 ["content": .string("Bold "), "fontWeight": .string("700")],
                 ["content": .string("Italic "), "fontStyle": .string("italic")],
             ])]),
@@ -230,8 +231,8 @@ struct PenRichTextMigrationRuleTests {
         let collector = PenDiagnosticCollector()
         let document: [String: AnyCodable] = [
             "children": .array([
-                richTextNode(id: "first", runs: [["content": .string("a")]]),
-                richTextNode(id: "second", runs: [["content": .string("b")]]),
+                richTextNode(id: "first", type: "note", runs: [["content": .string("a")]]),
+                richTextNode(id: "second", type: "prompt", runs: [["content": .string("b")]]),
             ]),
         ]
 

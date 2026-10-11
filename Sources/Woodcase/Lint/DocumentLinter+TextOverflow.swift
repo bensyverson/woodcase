@@ -56,7 +56,7 @@ extension DocumentLinter {
             letterSpacing: data.letterSpacing?.literalValue,
             lineHeight: data.lineHeight?.literalValue,
             maxWidth: rect.width,
-            runs: data.appliedRuns
+            runs: node.appliedRuns
         )).height
 
         let overflow = needed - rect.height

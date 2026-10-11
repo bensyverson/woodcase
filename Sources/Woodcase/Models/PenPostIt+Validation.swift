@@ -21,11 +21,16 @@ public extension PenPostIt {
         ///   - value: The refused value.
         ///   - accepted: The spellings the key takes, or `["a string"]` for a free-text key.
         ///   - suggestion: The closest accepted spelling, when one is close.
-        public init(key: PenMetadata.WoodcaseKey, value: AnyCodable, accepted: [String], suggestion: String?) {
+        ///   - reason: What is wrong inside a structured value, such as spans.
+        public init(
+            key: PenMetadata.WoodcaseKey, value: AnyCodable, accepted: [String], suggestion: String?,
+            reason: String? = nil
+        ) {
             self.key = key
             self.value = value
             self.accepted = accepted
             self.suggestion = suggestion
+            self.reason = reason
         }
 
         /// The key whose value is refused.
@@ -36,6 +41,9 @@ public extension PenPostIt {
         public var accepted: [String]
         /// The closest accepted spelling, when one is close.
         public var suggestion: String?
+        /// What is wrong inside a structured value (``PenMetadata/WoodcaseKey/Shape/textSpans``),
+        /// or `nil` for a key whose value is a single spelling.
+        public var reason: String?
     }
 
     /// The first key of a metadata write the convention refuses, in
@@ -93,6 +101,13 @@ public extension PenPostIt {
             return Violation(key: key, value: value, accepted: key.spellings, suggestion: nil)
         case (.oneOf, _), (.hexColor, _):
             return Violation(key: key, value: value, accepted: key.spellings, suggestion: nil)
+        case (.textSpans, _):
+            do {
+                _ = try PenTextSpans(metadataValue: value)
+                return nil
+            } catch {
+                return Violation(key: key, value: value, accepted: key.spellings, suggestion: nil, reason: error.reason)
+            }
         }
     }
 

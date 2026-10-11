@@ -85,14 +85,20 @@ struct PenTextLayoutPublicTests {
         #expect(layout.inkBounds == nil)
     }
 
-    @Test("A text node lays out its literal content in its own style, and nothing for an unresolved variable")
-    func fromTextData() throws {
+    @Test("A text node lays out its literal content in its own style; nothing for a variable or another kind")
+    func fromTextNode() throws {
+        func node(_ data: PenNode.TextData) -> PenNode {
+            PenNode(id: "t", common: PenNodeCommon(), kind: .text(data))
+        }
         let literal = PenNode.TextData(content: .literal("Hello"), fontFamily: .literal("Inter"))
-        let layout = try #require(PenTextLayout(literal, box: CGSize(width: 100, height: 30)))
+        let layout = try #require(PenTextLayout(node(literal), box: CGSize(width: 100, height: 30)))
         #expect(layout.text == "Hello")
         #expect(layout.style == PenTextStyle(literal))
+        #expect(layout.runs.isEmpty)
         let variable = PenNode.TextData(content: .variable("$copy"))
-        #expect(PenTextLayout(variable, box: CGSize(width: 100, height: 30)) == nil)
-        #expect(PenTextLayout(PenNode.TextData(), box: CGSize(width: 100, height: 30)) == nil)
+        #expect(PenTextLayout(node(variable), box: CGSize(width: 100, height: 30)) == nil)
+        #expect(PenTextLayout(node(PenNode.TextData()), box: CGSize(width: 100, height: 30)) == nil)
+        let rectangle = PenNode(id: "r", common: PenNodeCommon(), kind: .rectangle(PenNode.RectangleData()))
+        #expect(PenTextLayout(rectangle, box: CGSize(width: 100, height: 30)) == nil)
     }
 }

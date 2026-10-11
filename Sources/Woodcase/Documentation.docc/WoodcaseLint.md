@@ -84,6 +84,7 @@ no document, so accepting any of those would be accepting an argument it ignores
 | `per-side-stroke-on-shape` | warning | An ellipse, polygon, path or line with a stroke paint and a per-side `strokeWidth` whose sides differ from its `top`, or that has no `top`: Pen draws the `top` width alone, all round |
 | `note-unsized` | notice | A `note` with no `width` or `height` of its own, or the `0` Pen saves an unsized note with, which lays out at the 200-pt post-it default on that axis |
 | `metadata-old-style` | notice | A node keeps Woodcase metadata under its spelling from before `metadata.woodcase` (`_props`, a post-it's bare `state`); still read, and `woodcase migrate` moves it in |
+| `spans-stale` | warning | A text whose `metadata.woodcase.spans` were made for other words than its content, so its styling is ignored and it draws plain |
 
 The two sizing checks fire only where the engine has *nothing to fall back on*:
 `fill_container(200)` under a `fit_content` parent, and `fit_content(200)` with no
@@ -474,6 +475,19 @@ legacy `kind` is not named: it is no longer Woodcase's key.
 
 ```text
 notice metadata-old-style  Button (Btn01)  keeps Woodcase metadata under its old spelling (`_props`, `_role`), which is still read. Run `woodcase migrate <file>` to move it under `metadata.woodcase`.
+```
+
+`spans-stale` is a warning, one finding per text node whose spans
+(`metadata.woodcase.spans`, <doc:PenRichText>) record other words than its content — Pen,
+which keeps metadata but has no rich text, changed the words, or a `set` changed
+`kind.content` without restating the spans. The runs are ignored, so the text draws
+plain rather than styling the wrong characters: a warning, on the reading
+`text-style-stripped` has, because the node draws, only not as its styling says. A row
+inside an instance is skipped (an instance that overrides the content draws it plain by
+design). A `set` that makes a text's spans stale prints this same line on standard error.
+
+```text
+warning spans-stale  Board/Stale (Stl01)  has 1 styled run made for "Make this bold", not its content, so it draws plain. Restate `common.metadata.woodcase.spans` for the new words, or remove it with `woodcase set <file> Stl01 common.metadata.woodcase.spans=null`.
 ```
 
 ## What `generate react` will choke on

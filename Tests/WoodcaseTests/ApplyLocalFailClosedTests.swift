@@ -353,6 +353,7 @@ struct ApplyLocalFailClosedTests {
         case .unknownDocumentProperty: "unknownDocumentProperty"
         case .documentPropertyTypeMismatch: "documentPropertyTypeMismatch"
         case .postItMetadataRejected: "postItMetadataRejected"
+        case .textSpansRejected: "textSpansRejected"
         case .ambiguousAddress: "ambiguousAddress"
         case .addressNotFound: "addressNotFound"
         case .componentHasInstances: "componentHasInstances"

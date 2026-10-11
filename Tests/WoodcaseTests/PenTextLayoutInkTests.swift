@@ -34,11 +34,11 @@ struct PenTextLayoutInkTests {
             switch node.kind {
             case let .frame(data): stack += data.children ?? []
             case let .group(data): stack += data.children ?? []
-            case let .text(data):
+            case .text:
                 guard let rect = rects[node.id] else { continue }
                 let box = PenRect(x: 0, y: 0, width: rect.width, height: rect.height)
-                let expected = PenLayoutEngine.textInkBounds(of: data, box: box)
-                let layout = PenTextLayout(data, box: CGSize(width: rect.width, height: rect.height))
+                let expected = PenLayoutEngine.textInkBounds(of: node, box: box)
+                let layout = PenTextLayout(node, box: CGSize(width: rect.width, height: rect.height))
                 let ink = layout?.inkBounds.map {
                     PenRect(x: Double($0.minX), y: Double($0.minY), width: Double($0.width), height: Double($0.height))
                 }

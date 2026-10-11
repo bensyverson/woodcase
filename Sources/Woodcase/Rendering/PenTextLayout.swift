@@ -84,17 +84,21 @@
         }
 
         /// Sets a text node's content in its style, with its applied runs
-        /// (``PenNode/TextData/appliedRuns``), and places it in its box.
+        /// (``PenNode/appliedRuns``, read from its `metadata.woodcase.spans`), and places it
+        /// in its box.
+        ///
+        /// It takes the node rather than its ``PenNode/TextData`` because the runs live in
+        /// the node's metadata: the data alone would set the text plain.
         ///
         /// - Parameters:
-        ///   - data: The text node's data.
+        ///   - node: The text node.
         ///   - box: The node's box size.
-        ///   - color: The glyphs' color.
-        /// - Returns: The layout, or `nil` when the content is absent or an unresolved
-        ///   variable reference — there is no text to set.
-        public init?(_ data: PenNode.TextData, box: CGSize, color: CGColor = defaultColor) {
-            guard let text = data.content?.literalValue else { return nil }
-            self.init(text: text, style: PenTextStyle(data), runs: data.appliedRuns, box: box, color: color)
+        ///   - color: The glyphs' color; a run's own fill takes its place for that run.
+        /// - Returns: The layout, or `nil` when the node is not a `text`, or its content is
+        ///   absent or an unresolved variable reference — there is no text to set.
+        public init?(_ node: PenNode, box: CGSize, color: CGColor = defaultColor) {
+            guard case let .text(data) = node.kind, let text = data.content?.literalValue else { return nil }
+            self.init(text: text, style: PenTextStyle(data), runs: node.appliedRuns, box: box, color: color)
         }
 
         /// The styled Core Text string.

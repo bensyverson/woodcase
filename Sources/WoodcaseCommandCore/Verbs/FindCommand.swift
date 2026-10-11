@@ -32,7 +32,8 @@ struct Find: AsyncParsableCommand {
           woodcase find design.pen 'r => r.props["kind.fontSize"] < 12' --props kind.fontSize
 
         A ROW carries type, name, address, id, rev, depth, rect, absRect, clip, \
-        overflowAxes, isReusable, isInstance, isSlot, childCount — and the columns \
+        overflowAxes, isReusable, isInstance, isSlot, childCount, spans (a text's \
+        rich text, when it has some) — and the columns \
         --props asked for, read as `r.props["kind.fontSize"]`. A member a row does not \
         have is refused rather than read as `undefined`, because `undefined < 12` is \
         `false` and a query that answers a question nobody asked is worse than one that \
