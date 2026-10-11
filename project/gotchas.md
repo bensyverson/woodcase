@@ -31,3 +31,7 @@ With several agents building (load 90–200) the same suites fail in full runs a
 ## 2026-10-11 — `nil` in an `AnyCodable` dictionary write can store `.null`
 
 `AnyCodable` is `ExpressibleByNilLiteral`, so on a `[String: AnyCodable]`, `object[key] = cond ? nil : value` — where `value` is a variable typed `AnyCodable` — infers the ternary as `AnyCodable` and stores `.null` instead of removing the key (with a leading-dot literal such as `.dictionary(x)` in the other branch it removes, as meant). Peers then disagree on whether the key exists (leaf `dHZuBK`, the CRDT metadata entries). Remove with `removeValue(forKey:)`.
+
+## 2026-10-11 — `scripts/mae-check` after a filtered test run checks only that run
+
+**A `swift test --filter …` rerun rewrites `performance/mae-test.csv` with its few rows, so the commit hook's `mae-check` then lists every other id as MISSING and prints "MAE baseline updated".** The tracked baseline did not change on 2026-10-11 (`git status` clean), but the check covered 11–12 rows, not the suite. To gate a commit on MAE, run the full `swift test --quiet` last, after any filtered reruns of load flakes.
