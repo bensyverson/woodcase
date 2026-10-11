@@ -290,6 +290,8 @@ extension PenLayoutEngine {
         let textInput: TextMeasurementInput?
         /// A note's text, measured to grow the note (``PenLayoutEngine/noteTextRequest(_:)``).
         var noteText: PenTextMeasureRequest?
+        /// The space around a note's text, its chrome included (``PenPostIt/bodyInsets(of:style:)``).
+        var noteInsets: PenPadding.Edges?
     }
 
     struct ChildMeasurement {
@@ -377,7 +379,8 @@ extension PenLayoutEngine {
                 children: [],
                 isContainer: false,
                 textInput: extractTextInput(node),
-                noteText: noteTextRequest(node)
+                noteText: noteTextRequest(node),
+                noteInsets: PenPostIt.bodyInsets(of: node)
             )
         }
     }
@@ -412,8 +415,8 @@ extension PenLayoutEngine {
         case let .script(d): d.width ?? .fitContent(fallback: nil)
         case let .browser(d): d.width ?? .fitContent(fallback: nil)
         case let .note(d): PenPostIt.layoutSizing(d.width)
-        case let .prompt(d): d.width ?? .fitContent(fallback: nil)
-        case let .context(d): d.width ?? .fitContent(fallback: nil)
+        case let .prompt(d): PenPostIt.layoutSizing(d.width, default: PenPostIt.cardDefaultWidth)
+        case let .context(d): PenPostIt.layoutSizing(d.width, default: PenPostIt.cardDefaultWidth)
         case let .unknown(_, properties): PenSizing(declared: properties["width"]) ?? .fitContent(fallback: nil)
         default: .fitContent(fallback: nil)
         }
@@ -431,8 +434,8 @@ extension PenLayoutEngine {
         case let .script(d): d.height ?? .fitContent(fallback: nil)
         case let .browser(d): d.height ?? .fitContent(fallback: nil)
         case let .note(d): PenPostIt.layoutSizing(d.height)
-        case let .prompt(d): d.height ?? .fitContent(fallback: nil)
-        case let .context(d): d.height ?? .fitContent(fallback: nil)
+        case let .prompt(d): PenPostIt.layoutSizing(d.height, default: PenPostIt.cardDefaultHeight)
+        case let .context(d): PenPostIt.layoutSizing(d.height, default: PenPostIt.cardDefaultHeight)
         case let .unknown(_, properties): PenSizing(declared: properties["height"]) ?? .fitContent(fallback: nil)
         default: .fitContent(fallback: nil)
         }
@@ -492,8 +495,8 @@ extension PenLayoutEngine {
         into rects: inout [String: PenRect]
     ) -> PenRect? {
         guard !child.kind.canHaveChildren else { return nil }
-        // A note's fixed height is its least: it grows to fit its text.
-        if case .note = child.kind { return nil }
+        // A note's, prompt's or context's fixed height is its least: it grows to fit its text.
+        if PenPostIt.Variant(child.kind) != nil { return nil }
         let wSizing = extractLeafWidth(child.kind)
         let hSizing = extractLeafHeight(child.kind)
         guard case let .fixed(w) = wSizing, case let .fixed(h) = hSizing else { return nil }
@@ -649,7 +652,11 @@ extension PenLayoutEngine {
 
         if let noteText = props.noteText {
             let (setHeight, _, _) = resolveIntrinsicSize(props.heightSizing, available: availableHeight)
-            return (resolvedWidth, grownNoteHeight(noteText, width: resolvedWidth, setHeight: setHeight, textMeasurer: textMeasurer))
+            let grown = grownNoteHeight(
+                noteText, insets: props.noteInsets ?? PenPostIt.textInsets,
+                width: resolvedWidth, setHeight: setHeight, textMeasurer: textMeasurer
+            )
+            return (resolvedWidth, grown)
         }
 
         // Check if text measurement can provide intrinsic sizing

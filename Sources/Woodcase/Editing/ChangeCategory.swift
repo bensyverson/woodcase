@@ -63,8 +63,11 @@ public enum ChangeCategory: Friendly {
         }
 
         // A note's text style and a text's spans live in metadata, and both move a
-        // measured size: a note grows to fit its text.
-        let measured = PenMetadata.WoodcaseKey.allCases.filter { $0.group == .noteTextStyle || $0.group == .text }
+        // measured size: a note grows to fit its text. Its author and state decide whether
+        // it has an author line, which adds to its height too.
+        let measured = PenMetadata.WoodcaseKey.allCases.filter {
+            $0.group == .noteTextStyle || $0.group == .text || $0 == .author || $0 == .state
+        }
         let oldMetadata = oldCommon.metadata ?? PenMetadata(type: nil)
         let newMetadata = newCommon.metadata ?? PenMetadata(type: nil)
         if measured.contains(where: { oldMetadata[woodcase: $0] != newMetadata[woodcase: $0] }) {
@@ -120,11 +123,11 @@ public enum ChangeCategory: Friendly {
             // change what is drawn.
             return .renderOnly
         case let (.note(old), .note(new)):
-            return categorizeNote(old: old, new: new)
+            return categorizeGrowing(old: old, new: new, width: \.width, height: \.height, content: \.content)
         case let (.prompt(old), .prompt(new)):
-            return categorizeSized(width: (old.width, new.width), height: (old.height, new.height))
+            return categorizeGrowing(old: old, new: new, width: \.width, height: \.height, content: \.content)
         case let (.context(old), .context(new)):
-            return categorizeSized(width: (old.width, new.width), height: (old.height, new.height))
+            return categorizeGrowing(old: old, new: new, width: \.width, height: \.height, content: \.content)
         default:
             // ref, unknown — conservatively layout
             return .layout
@@ -175,12 +178,26 @@ public enum ChangeCategory: Friendly {
         return .renderOnly
     }
 
-    /// A note: it grows to fit its text, so its size, its text and the TextStyle keys
-    /// that measure it all need layout.
-    private static func categorizeNote(old: PenNode.NoteData, new: PenNode.NoteData) -> ChangeCategory {
-        if old.width != new.width
-            || old.height != new.height
-            || old.content != new.content
+    /// A note, prompt or context: it grows to fit its text, so its size, its text and the
+    /// TextStyle keys that measure it all need layout.
+    ///
+    /// - Parameters:
+    ///   - old: The payload before.
+    ///   - new: The payload after.
+    ///   - width: Where the payload keeps its width.
+    ///   - height: Where it keeps its height.
+    ///   - content: Where it keeps its text.
+    /// - Returns: `.layout` when anything that measures it changed, else `.renderOnly`.
+    private static func categorizeGrowing<Data: PenTextStyleProperties>(
+        old: Data,
+        new: Data,
+        width: KeyPath<Data, PenSizing?>,
+        height: KeyPath<Data, PenSizing?>,
+        content: KeyPath<Data, PenValue<String>?>
+    ) -> ChangeCategory {
+        if old[keyPath: width] != new[keyPath: width]
+            || old[keyPath: height] != new[keyPath: height]
+            || old[keyPath: content] != new[keyPath: content]
             || old.fontFamily != new.fontFamily
             || old.fontSize != new.fontSize
             || old.fontWeight != new.fontWeight
@@ -191,16 +208,6 @@ public enum ChangeCategory: Friendly {
             return .layout
         }
         return .renderOnly
-    }
-
-    /// A prompt or context: its box is its declared size and nothing else, so only a
-    /// size change moves anything. Its text and TextStyle never measure into the
-    /// layout — the box does not grow to fit them.
-    private static func categorizeSized(
-        width: (old: PenSizing?, new: PenSizing?),
-        height: (old: PenSizing?, new: PenSizing?)
-    ) -> ChangeCategory {
-        width.old != width.new || height.old != height.new ? .layout : .renderOnly
     }
 
     private static func categorizeRectangle(

@@ -53,6 +53,14 @@ Under `Sources/Woodcase`.
 | Empty | author only |
 | Inherited | the note's opacity, rotation, flips, enabled |
 
+> Superseded 2026-10-11 (leaf dbLtoJ): the expansion is typed parts, not a node subtree —
+> `PenPostIt.expansion(of:width:height:style:measure:)` returns a `PenPostItExpansion` of shape
+> parts (each drawable as a rectangle or ellipse node) and text parts (set with
+> `PenTextLayout`). A text node cannot carry a markdown body's paragraph indents, and typed
+> roles let an editor repaint the identity dot and lay mention pills. The look's numbers are
+> `PenPostIt.Style.standard` (rev 2), documented in DocC `PenPostItLook.md`; contact sheet at
+> [2026-10-11-note-look-rev2/contact-sheet.png](2026-10-11-note-look-rev2/contact-sheet.png).
+
 **Expansion.** `PenPostIt.expansion(of: PenNode, size: PenRect) -> Expansion { root: PenNode; rects: [String: PenRect] }`: a frame with the **note's id** (common minus metadata, `layout: none`, `clip: true`, fill, radius, shadows) and children text `<id>/postit-body`, rectangle `<id>/postit-fade` (only when overflowing), text `<id>/postit-author`, text `<id>/postit-resolved`, with explicit parent-local rects. CG renders it at PenRenderer.swift:243 via `renderNodesIteratively([exp.root], layoutRects: exp.rects, …)`; RapidPro walks it with the note's `parentLocalToWorld`. `paintedExtent(.note)` returns the expansion's painted extent, shadows included. Text goes through `PenTextLayout` ([2026-10-04-text-layout-design.md](2026-10-04-text-layout-design.md)); Penumbra's caret engine lays out `postit-body`'s text in its rect.
 
 **CLI.** `value(at:)` reads deep keys (absent → null), fixing metadata columns in `tree`/`find`. A `woodcase postits <file> [--kind] [--state] [--author] [--leaf] [--stage] [--json]` verb lists id, address, kind, state, author, leaf, stage and the first line of content, with typed filters that refuse misspellings.

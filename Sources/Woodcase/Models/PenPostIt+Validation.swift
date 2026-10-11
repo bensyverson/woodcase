@@ -53,17 +53,22 @@ public extension PenPostIt {
     ///   - metadata: The whole metadata object as it will be written.
     ///   - current: The metadata the node holds now, if any; a key left at its current
     ///     value is not checked.
+    ///   - kind: The kind of the node written to, when known: a prompt's `state` is held
+    ///     to ``RunState`` (``PenMetadata/WoodcaseKey/shape(on:)``). `nil` holds every key
+    ///     to its ``PenMetadata/WoodcaseKey/shape``.
     /// - Returns: The refusal, or `nil` when every Woodcase key the write changes is
     ///   well formed.
     static func violation(
         in metadata: [String: AnyCodable],
-        comparedTo current: PenMetadata?
+        comparedTo current: PenMetadata?,
+        on kind: PenNode.Kind? = nil
     ) -> Violation? {
         let written = PenMetadata(object: metadata)
         for key in PenMetadata.WoodcaseKey.allCases {
             guard let value = written[woodcase: key], value != .null, value != current?[woodcase: key]
             else { continue }
-            if let violation = violation(of: key, value) { return violation }
+            let shape = kind.map { key.shape(on: $0) } ?? key.shape
+            if let violation = violation(of: key, shape: shape, value) { return violation }
         }
         return nil
     }
@@ -85,8 +90,10 @@ public extension PenPostIt {
     private static let anyNumber = "a number"
 
     /// Whether one key's value is refused.
-    private static func violation(of key: PenMetadata.WoodcaseKey, _ value: AnyCodable) -> Violation? {
-        switch (key.shape, value) {
+    private static func violation(
+        of key: PenMetadata.WoodcaseKey, shape: PenMetadata.WoodcaseKey.Shape, _ value: AnyCodable
+    ) -> Violation? {
+        switch (shape, value) {
         case (.any, _), (.string, .string), (.number, .int), (.number, .double):
             return nil
         case (.string, _):
@@ -99,7 +106,9 @@ public extension PenPostIt {
         case let (.hexColor, .string(text)):
             guard tint(text) == nil else { return nil }
             return Violation(key: key, value: value, accepted: key.spellings, suggestion: nil)
-        case (.oneOf, _), (.hexColor, _):
+        case let (.oneOf(spellings), _):
+            return Violation(key: key, value: value, accepted: spellings, suggestion: nil)
+        case (.hexColor, _):
             return Violation(key: key, value: value, accepted: key.spellings, suggestion: nil)
         case (.textSpans, _):
             do {

@@ -186,7 +186,7 @@ public enum PenRenderer {
     /// debug builds. Production callers (CLI main thread, app dispatch queues) have
     /// 8 MB+ stacks and are unaffected. Regression tests run on the main actor for this
     /// reason.
-    private static func renderNodesIteratively(
+    static func renderNodesIteratively(
         _ nodes: [PenNode],
         layoutRects: [String: PenRect],
         canvasRects: [String: PenRect] = [:],
@@ -240,7 +240,10 @@ public enum PenRenderer {
         // Skip non-visual node types; a connection has no box, and is drawn from where
         // its endpoints are.
         switch ref.node.kind {
-        case .note, .prompt, .context, .ref, .unknown:
+        case .note, .prompt, .context:
+            renderPostIt(ref, layoutRects: layoutRects, overrides: nodeOverrides, in: context, imageProvider: imageProvider)
+            return
+        case .ref, .unknown:
             return
         case let .connection(data):
             PenConnectionRenderer.render(

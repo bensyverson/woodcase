@@ -67,6 +67,8 @@ public extension PenMetadata {
         case anchor
         /// On a comment reply, the id of the thread's first message.
         case replyTo
+        /// On a prompt, who pressed Run: the identity that queued its work.
+        case requestedBy
 
         // MARK: A note's text style
 
@@ -126,7 +128,7 @@ public extension PenMetadata {
         public var group: Group {
             switch self {
             case .props, .role, .states, .action, .scroll: .codegen
-            case .type, .state, .author, .leaf, .stage, .tint, .copiedFrom, .anchor, .replyTo: .note
+            case .type, .state, .author, .leaf, .stage, .tint, .copiedFrom, .anchor, .replyTo, .requestedBy: .note
             case .fontFamily, .fontSize, .fontWeight, .fontStyle, .letterSpacing, .lineHeight, .textAlign,
                  .textAlignVertical: .noteTextStyle
             case .spans: .text
@@ -143,7 +145,7 @@ public extension PenMetadata {
             switch self {
             case .props, .role, .states, .action, .scroll: "_\(rawValue)"
             case .type, .state, .author, .leaf, .stage, .tint, .copiedFrom: rawValue
-            case .anchor, .replyTo, .fontFamily, .fontSize, .fontWeight, .fontStyle, .letterSpacing,
+            case .anchor, .replyTo, .requestedBy, .fontFamily, .fontSize, .fontWeight, .fontStyle, .letterSpacing,
                  .lineHeight, .textAlign, .textAlignVertical, .spans: nil
             }
         }
@@ -157,10 +159,22 @@ public extension PenMetadata {
             case .textAlign: .oneOf(PenTextAlign.allCases.map(\.rawValue))
             case .textAlignVertical: .oneOf(PenTextAlignVertical.allCases.map(\.rawValue))
             case .tint: .hexColor
-            case .author, .leaf, .stage, .copiedFrom, .replyTo, .fontFamily, .fontWeight, .fontStyle: .string
+            case .author, .leaf, .stage, .copiedFrom, .replyTo, .requestedBy, .fontFamily, .fontWeight, .fontStyle:
+                .string
             case .fontSize, .letterSpacing, .lineHeight: .number
             case .spans: .textSpans
             }
+        }
+
+        /// What an authored value must be on a node of `kind`: ``shape``, except that a
+        /// prompt's ``state`` is a run state (``PenPostIt/RunState``) — Run queues work in
+        /// the file — where every other node's is ``PenPostIt/State``.
+        ///
+        /// - Parameter kind: The kind of the node the value is written to.
+        /// - Returns: The shape the value is held to.
+        func shape(on kind: PenNode.Kind) -> Shape {
+            guard self == .state, case .prompt = kind else { return shape }
+            return .oneOf(PenPostIt.RunState.allCases.map(\.rawValue))
         }
 
         /// The values the key takes, spelled as the file writes them; empty for a key
@@ -183,7 +197,7 @@ public extension PenMetadata {
             case .action: "The action an interactive node fires in generated code."
             case .scroll: "The axis a clipping frame scrolls along."
             case .type: "What the note is: a post-it, or a comment message."
-            case .state: "Whether it still asks for attention; a resolved post-it draws faded."
+            case .state: "Whether it still asks for attention; a resolved post-it draws faded. A prompt's: queued, running or done."
             case .author: "Who wrote it: the creator, or whoever first edited a copy."
             case .leaf: "The task it belongs to, such as a job id."
             case .stage: "The part of the work, or the board lane, it sits in."
@@ -191,6 +205,7 @@ public extension PenMetadata {
             case .copiedFrom: "On a copy, the original author, until the copier first edits it."
             case .anchor: "On a comment's first message, the node and point it is about."
             case .replyTo: "On a comment reply, the id of the thread's first message."
+            case .requestedBy: "On a prompt, who pressed Run."
             case .fontFamily: "The note's font family."
             case .fontSize: "The note's font size, in points."
             case .fontWeight: "The note's font weight."

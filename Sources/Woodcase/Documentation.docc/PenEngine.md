@@ -45,9 +45,9 @@ The document model supports 16 node types via ``PenNode/Kind``:
 | `line` | ``PenNode/LineData`` | Line between two points |
 | `polygon` | ``PenNode/PolygonData`` | Regular polygon with N sides |
 | `ref` | ``PenNode/RefData`` | Reference to a reusable component |
-| `note` | ``PenNode/NoteData`` | A post-it: sized, with the TextStyle keys; an unsized or 0×0 note lays out at 200×200 — see <doc:PenPostItConvention> |
-| `prompt` | ``PenNode/PromptData`` | AI prompt node, sized, with the TextStyle keys; not drawn |
-| `context` | ``PenNode/ContextData`` | Guidance for an agent, sized, with the TextStyle keys; not drawn |
+| `note` | ``PenNode/NoteData`` | A post-it: sized, with the TextStyle keys; an unsized or 0×0 note lays out at 200×200 — see <doc:PenPostItConvention>; drawn in the rev 2 look (<doc:PenPostItLook>) |
+| `prompt` | ``PenNode/PromptData`` | AI prompt node, sized, with the TextStyle keys; drawn as a card (<doc:PenPostItLook>) |
+| `context` | ``PenNode/ContextData`` | Guidance for an agent, sized, with the TextStyle keys; drawn as a card (<doc:PenPostItLook>) |
 | `icon` | ``PenNode/IconData`` | Icon font glyph |
 | `script` | ``PenNode/ScriptData`` | Sized placeholder for a user-authored script; never executed — see <doc:PenRendering> |
 | `browser` | ``PenNode/BrowserData`` | An embedded web page (Pen 2.19): laid out like a rectangle, drawn as a placeholder, never loaded — see <doc:PenRendering> |
@@ -579,7 +579,7 @@ let image = PenRenderer.render(expanded, layoutRects: rects, size: CGSize(width:
 
 **Key behaviors:**
 
-- **Tree walk:** Traverses the document tree, drawing each node at its layout position. Disabled nodes and non-visual types (note, prompt, context, ref) are skipped.
+- **Tree walk:** Traverses the document tree, drawing each node at its layout position. Disabled nodes and non-visual types (ref, unknown) are skipped; a note, prompt or context is drawn from its expansion (<doc:PenPostItLook>), and a comment message is left to the editor.
 - **Shapes:** Rectangles, ellipses, polygons, lines, and SVG paths are outlined by `PenShapeGeometry` (SVG paths parsed into ``PenPath``) and drawn with fills and strokes.
 - **Fills:** Solid colors, linear/radial/angular gradients. Each fill respects enabled state, blend mode, and opacity. Colors are parsed from hex strings by ``PenColorParser``.
 - **Text:** Rendered via Core Text. Supports horizontal alignment (left/center/right/justify), vertical alignment (top/middle/bottom), letter spacing, line height, underline and strikethrough. Style is node-level: 2.17 has no styled runs.

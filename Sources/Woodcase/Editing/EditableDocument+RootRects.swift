@@ -81,9 +81,11 @@ extension EditableDocument {
     /// layout engine gives it whatever its children are.
     ///
     /// - Parameter root: A variable-resolved root node, children stripped or not.
-    /// - Returns: Its width and height, or `nil` when either depends on layout.
+    /// - Returns: Its width and height, or `nil` when either depends on layout — as a
+    ///   note's, prompt's or context's height always does: it grows to fit its text.
     private static func declaredSize(of root: PenNode) -> (width: Double, height: Double)? {
-        guard case let .fixed(width) = PenLayoutEngine.widthSizing(of: root),
+        guard PenPostIt.Variant(root.kind) == nil,
+              case let .fixed(width) = PenLayoutEngine.widthSizing(of: root),
               case let .fixed(height) = PenLayoutEngine.heightSizing(of: root)
         else { return nil }
         return (width, height)

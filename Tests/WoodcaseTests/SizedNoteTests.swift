@@ -147,7 +147,10 @@ struct SizedNoteTests {
 
     // MARK: - Layout
 
-    @Test("An unsized note lays out at 200×200, while an unsized prompt and context keep 0×0")
+    /// Changed 2026-10-11 (leaf dbLtoJ): prompts and contexts are drawn as cards in the
+    /// rev 2 look, so an unsized one lays out at the card size rather than 0×0, which
+    /// would draw nothing.
+    @Test("An unsized note lays out at 200×200, and an unsized prompt and context at the card size")
     func unsizedNoteIs200() throws {
         let all = try rects()
         let rect = try #require(all["Nte01"])
@@ -155,7 +158,8 @@ struct SizedNoteTests {
         #expect(rect.height == 200)
         for id in ["Prm01", "Ctx01"] {
             let other = try #require(all[id])
-            #expect(other.width == 0 && other.height == 0, "\(id) laid out at \(other)")
+            #expect(other.width == PenPostIt.cardDefaultWidth, "\(id) laid out at \(other)")
+            #expect(other.height == PenPostIt.cardDefaultHeight, "\(id) laid out at \(other)")
         }
     }
 

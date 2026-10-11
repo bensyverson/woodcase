@@ -11,8 +11,10 @@ public extension PenNode {
     /// A context node: guidance for an agent attached to a place in the tree.
     ///
     /// Pen declares `Context extends Entity, Size, TextStyle`, so it carries ``width``,
-    /// ``height`` and the eleven ``PenTextStyleProperties`` keys. Unlike a note it is not drawn,
-    /// and an unsized one keeps a 0×0 rect.
+    /// ``height`` and the eleven ``PenTextStyleProperties`` keys. It is drawn as a quiet card with
+    /// an ⓘ mark (<doc:PenPostItLook>); an unsized one lays out at
+    /// ``PenPostIt/cardDefaultWidth`` × ``PenPostIt/cardDefaultHeight`` and, like a note, grows
+    /// to fit its text.
     struct ContextData: Friendly, PenTextStyleProperties {
         /// Creates a context payload.
         ///

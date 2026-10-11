@@ -6,16 +6,26 @@
 import Foundation
 
 public extension PenNode {
-    /// The style a note's text is set in, or `nil` for a node that is not a note.
+    /// The style a note's text is set in, or `nil` for a node that is not a note, prompt
+    /// or context.
     ///
     /// Pen strips a note's own text style when it loads a file, so the style lives in
     /// `metadata.woodcase` (``PenMetadata/WoodcaseKey/Group/noteTextStyle``). Each key is
     /// read from there first, then from the note's own property (a file Pen has not
-    /// loaded may still carry one), then takes ``PenTextStyle``'s default. A metadata
-    /// value of the wrong JSON type, or a misspelled alignment, is skipped as if absent.
-    /// Comments are notes, so they read the same way.
+    /// loaded may still carry one), then takes the default: ``PenPostIt/defaultFontSize``
+    /// at ``PenPostIt/defaultLineHeight`` — the rev 2 look's 13 points at 1.35 — and
+    /// ``PenTextStyle``'s default for every other key. A metadata value of the wrong JSON
+    /// type, or a misspelled alignment, is skipped as if absent. Comments are notes, and
+    /// prompts and contexts are drawn as cards in the same family, so all of them read
+    /// the same way.
     var noteTextStyle: PenTextStyle? {
-        guard case let .note(data) = kind else { return nil }
+        let data: any PenTextStyleProperties
+        switch kind {
+        case let .note(note): data = note
+        case let .prompt(prompt): data = prompt
+        case let .context(context): data = context
+        default: return nil
+        }
         let metadata = common.metadata ?? PenMetadata(type: nil)
         func number(_ key: PenMetadata.WoodcaseKey) -> Double? {
             switch metadata[woodcase: key] {
@@ -35,11 +45,12 @@ public extension PenNode {
         let own = PenTextStyle(data)
         return PenTextStyle(
             fontFamily: string(.fontFamily) ?? own.fontFamily,
-            fontSize: number(.fontSize).flatMap { $0 > 0 ? $0 : nil } ?? own.fontSize,
+            fontSize: number(.fontSize).flatMap { $0 > 0 ? $0 : nil }
+                ?? data.fontSize?.literalValue.flatMap { $0 > 0 ? $0 : nil } ?? PenPostIt.defaultFontSize,
             fontWeight: string(.fontWeight).map(PenTextStyle.weight) ?? own.fontWeight,
             isItalic: string(.fontStyle).map(PenTextStyle.isItalic) ?? own.isItalic,
             letterSpacing: number(.letterSpacing) ?? own.letterSpacing,
-            lineHeight: number(.lineHeight) ?? own.lineHeight,
+            lineHeight: number(.lineHeight) ?? own.lineHeight ?? PenPostIt.defaultLineHeight,
             textAlign: string(.textAlign).flatMap(PenTextAlign.init(rawValue:)) ?? own.textAlign,
             textAlignVertical: string(.textAlignVertical).flatMap(PenTextAlignVertical.init(rawValue:))
                 ?? own.textAlignVertical,
@@ -48,14 +59,18 @@ public extension PenNode {
         )
     }
 
-    /// A note's `content` parsed as markdown at its font size, or `nil` for a node that
-    /// is not a note, or whose content is absent or an unresolved `$variable`.
+    /// A note's, prompt's or context's `content` parsed as markdown at its font size, or
+    /// `nil` for another node, or one whose content is absent or an unresolved `$variable`.
     ///
     /// Derived on every read and never stored: the file keeps only the markdown.
     var noteMarkdown: PenNoteMarkdown? {
-        guard case let .note(data) = kind, let source = data.content?.literalValue, let style = noteTextStyle else {
-            return nil
+        let content: PenValue<String>? = switch kind {
+        case let .note(data): data.content
+        case let .prompt(data): data.content
+        case let .context(data): data.content
+        default: nil
         }
+        guard let source = content?.literalValue, let style = noteTextStyle else { return nil }
         return PenNoteMarkdown(source, fontSize: style.fontSize)
     }
 }

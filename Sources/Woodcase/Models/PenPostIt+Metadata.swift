@@ -38,16 +38,22 @@ public extension PenPostIt {
 
         /// Reads a node's metadata as a post-it's.
         ///
+        /// A prompt's `state` reads as ``runState`` rather than ``state``: a prompt's
+        /// state is where its run stands (``PenPostIt/RunState``).
+        ///
         /// - Parameter node: Any node.
-        /// - Returns: The post-it metadata — every `note` has it, metadata or not — or,
-        ///   for another node, what ``init(_:)-(PenMetadata)`` reads.
+        /// - Returns: The post-it metadata — every `note` and `prompt` has it, metadata or
+        ///   not — or, for another node, what ``init(_:)-(PenMetadata)`` reads.
         public init?(_ node: PenNode) {
-            if case .note = node.kind {
-                self.init(reading: node.common.metadata ?? PenMetadata(type: nil))
-                return
+            switch node.kind {
+            case .note:
+                self.init(reading: node.common.metadata ?? PenMetadata(type: nil), isPrompt: false)
+            case .prompt:
+                self.init(reading: node.common.metadata ?? PenMetadata(type: nil), isPrompt: true)
+            default:
+                guard let metadata = node.common.metadata else { return nil }
+                self.init(metadata)
             }
-            guard let metadata = node.common.metadata else { return nil }
-            self.init(metadata)
         }
 
         /// Reads a metadata object as a post-it's.
@@ -57,14 +63,18 @@ public extension PenPostIt {
         ///   convention key in either spelling (an old-style `type: postit` included).
         public init?(_ metadata: PenMetadata) {
             guard PenPostIt.keys.contains(where: { metadata[woodcase: $0] != nil }) else { return nil }
-            self.init(reading: metadata)
+            self.init(reading: metadata, isPrompt: false)
         }
 
-        /// Reads every convention key, from either spelling.
-        private init(reading metadata: PenMetadata) {
+        /// Reads every convention key, from either spelling; a prompt's state as a run state.
+        private init(reading metadata: PenMetadata, isPrompt: Bool) {
             let read = { (key: PenMetadata.WoodcaseKey) in metadata[woodcase: key] }
             type = read(.type).map { Self.field($0, NoteType.init(rawValue:)) }
-            state = read(.state).map { Self.field($0, State.init(rawValue:)) }
+            if isPrompt {
+                runState = read(.state).map { Self.field($0, RunState.init(rawValue:)) }
+            } else {
+                state = read(.state).map { Self.field($0, State.init(rawValue:)) }
+            }
             tint = read(.tint).map { Self.field($0, PenPostIt.tint) }
             author = read(.author).flatMap(Self.string)
             leaf = read(.leaf).flatMap(Self.string)
@@ -72,12 +82,17 @@ public extension PenPostIt {
             copiedFrom = read(.copiedFrom).flatMap(Self.string)
             anchor = read(.anchor)
             replyTo = read(.replyTo).flatMap(Self.string)
+            requestedBy = read(.requestedBy).flatMap(Self.string)
         }
 
         /// What the note is; `nil` is a post-it too.
         public var type: Field<NoteType>?
-        /// Whether it still asks for attention.
+        /// Whether it still asks for attention; `nil` on a prompt, whose state is ``runState``.
         public var state: Field<State>?
+        /// On a prompt, where its run stands; `nil` on any other node.
+        public var runState: Field<RunState>?
+        /// On a prompt, who pressed Run.
+        public var requestedBy: String?
         /// Who wrote it.
         public var author: String?
         /// The task it belongs to.

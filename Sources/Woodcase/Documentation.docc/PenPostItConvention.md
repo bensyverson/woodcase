@@ -8,7 +8,8 @@ and a text style.
 A `note` is a sticky note on the canvas. Pen's schema declares
 `Note extends Entity, Size, TextStyle`, so a note carries a `width`, a `height` and the
 eleven TextStyle keys (``PenTextStyleProperties``) beside its `content`, and nothing paintable —
-no fill, no stroke. `prompt` and `context` take the same keys but are not drawn.
+no fill, no stroke. `prompt` and `context` take the same keys; all three are drawn in the rev 2
+look (<doc:PenPostItLook>).
 
 ### Size
 
@@ -45,7 +46,7 @@ under the Woodcase namespace, `metadata.woodcase`, rather than in properties of 
 | Key | Takes | Holds |
 |---|---|---|
 | `type` | `postit`, `comment` | What the note is (``PenPostIt/NoteType``); absent is a post-it |
-| `state` | `open`, `resolved` | Whether it still asks for attention (``PenPostIt/State``) |
+| `state` | `open`, `resolved`; on a prompt `queued`, `running`, `done` | Whether it still asks for attention (``PenPostIt/State``); on a prompt, where its run stands (``PenPostIt/RunState``) |
 | `author` | any string | Who wrote it |
 | `leaf` | any string | The task it belongs to, such as a `job` id |
 | `stage` | any string | The part of the work, or the board lane, it sits in |
@@ -53,6 +54,7 @@ under the Woodcase namespace, `metadata.woodcase`, rather than in properties of 
 | `copiedFrom` | any string | On a copy, the original author, until the copier first edits it |
 | `anchor` | any JSON | On a comment's first message, the node and point it is about |
 | `replyTo` | any string | On a comment reply, the id of the thread's first message |
+| `requestedBy` | any string | On a prompt, who pressed Run |
 | `fontFamily`, `fontWeight`, `fontStyle` | any string | The note's text style |
 | `fontSize`, `letterSpacing`, `lineHeight` | any number | The note's text style |
 | `textAlign`, `textAlignVertical` | as on a text node | The note's text alignment |
@@ -77,6 +79,13 @@ as written and read by nothing.
 identity and clears `copiedFrom` (Ben's ruling of 2026-10-04 on R10's "whoever edited it
 after copying"). The convention types and validates both keys; performing the rewrite on
 copy and edit belongs to the editing session, not to this convention.
+
+**Prompts** queue work in the file (Penumbra's notes design rev 2, decision 14): Run sets
+`state: queued` and `requestedBy`; a watching agent claims it (`running`), answers in a comment
+thread anchored to the prompt, and marks it `done`. A prompt's state is held to those three
+spellings (``PenMetadata/WoodcaseKey/shape(on:)``), a note's to `open` and `resolved`, and
+``PenPostIt/Metadata`` reads a prompt's as ``PenPostIt/Metadata/runState``. The card draws the
+state with who requested it.
 
 **Comments** are notes too, one per message: `woodcase.type: comment`, the first message
 carrying `anchor` and `state`, each reply `replyTo` and `author`. The keys are typed
@@ -132,8 +141,12 @@ is not Woodcase's, and is never checked.
 - ``PenPostIt/keys``
 - ``PenPostIt/NoteType``
 - ``PenPostIt/State``
+- ``PenPostIt/RunState``
+- ``PenPostIt/Variant``
+- ``PenPostIt/Tint``
 - ``PenPostIt/Violation``
 - ``PenTextStyleProperties``
 - ``SchemaPostItReport``
 - <doc:PenMetadataNamespace>
 - <doc:NoteMarkdown>
+- <doc:PenPostItLook>

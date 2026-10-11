@@ -1,0 +1,146 @@
+{
+  "version": "2.20",
+  "children": [
+    {
+      "id": "PiRt0",
+      "name": "Post-its",
+      "type": "frame",
+      "x": 0,
+      "y": 0,
+      "width": 1560,
+      "height": 680,
+      "layout": "none",
+      "fill": "#F2F1EE",
+      "children": [
+        {
+          "id": "PiN01",
+          "name": "Default, inline mention",
+          "type": "note",
+          "x": 40,
+          "y": 40,
+          "width": 200,
+          "height": 200,
+          "content": "@claude should the inspector show the override dot on every row, or only on rows that differ?",
+          "metadata": { "type": "woodcase", "woodcase": { "author": "ben", "state": "open" } }
+        },
+        {
+          "id": "PiN02",
+          "name": "Markdown",
+          "type": "note",
+          "x": 280,
+          "y": 40,
+          "width": 200,
+          "height": 200,
+          "content": "### Override rules\n**Spec §8.3** is the source; *never* guess.\n- Set on a definition\n- Override on an instance\n- [x] Inspector dot\n- [ ] Reset menu",
+          "metadata": { "type": "woodcase", "woodcase": { "author": "codex", "tint": "#B3E5FC" } }
+        },
+        {
+          "id": "PiN03",
+          "name": "Dark tint",
+          "type": "note",
+          "x": 520,
+          "y": 40,
+          "width": 200,
+          "height": 200,
+          "content": "Ask @claude whether the dark tint keeps the author legible.",
+          "metadata": { "type": "woodcase", "woodcase": { "author": "ben", "tint": "#37474F" } }
+        },
+        {
+          "id": "PiN04",
+          "name": "Grows to fit",
+          "type": "note",
+          "x": 760,
+          "y": 40,
+          "width": 200,
+          "height": 200,
+          "content": "Yes. Layout treats a 0×0 note as 200×200, so tree, hit-testing and canvasRects agree. A long note grows instead of clipping, and never shrinks below the size it was given. @ben the font lives in metadata now, since Pen strips a note's text style. The last line must still draw inside the grown paper.",
+          "metadata": { "type": "woodcase", "woodcase": { "author": "claude", "tint": "#C5E1A5" } }
+        },
+        {
+          "id": "PiP01",
+          "name": "Prompt",
+          "type": "prompt",
+          "x": 1000,
+          "y": 40,
+          "width": 240,
+          "height": 160,
+          "model": "claude-opus-5-5",
+          "content": "Tighten the checkout card's copy to one line, and keep the price visible.",
+          "metadata": { "type": "woodcase", "woodcase": { "state": "queued", "requestedBy": "ben" } }
+        },
+        {
+          "id": "PiX01",
+          "name": "Context",
+          "type": "context",
+          "x": 1280,
+          "y": 40,
+          "width": 240,
+          "height": 160,
+          "content": "This card is the checkout call to action. The price must stay visible at every width."
+        },
+        {
+          "id": "PiN05",
+          "name": "Pen-saved, empty, no author",
+          "type": "note",
+          "x": 40,
+          "y": 400,
+          "width": 0,
+          "height": 0,
+          "content": ""
+        },
+        {
+          "id": "PiN06",
+          "name": "Resolved",
+          "type": "note",
+          "x": 280,
+          "y": 400,
+          "width": 200,
+          "height": 200,
+          "content": "Shipped: the inspector shows the dot only on rows that differ.",
+          "metadata": { "type": "woodcase", "woodcase": { "author": "claude", "state": "resolved" } }
+        },
+        {
+          "id": "PiN07",
+          "name": "Rotated",
+          "type": "note",
+          "x": 520,
+          "y": 400,
+          "width": 200,
+          "height": 200,
+          "rotation": 4,
+          "content": "Turned a little, as a post-it on a wall.",
+          "metadata": { "type": "woodcase", "woodcase": { "author": "ana", "tint": "#F8BBD0" } }
+        },
+        {
+          "id": "PiN08",
+          "name": "20 point",
+          "type": "note",
+          "x": 760,
+          "y": 400,
+          "width": 240,
+          "height": 200,
+          "content": "Text and chrome scale together.",
+          "metadata": { "type": "woodcase", "woodcase": { "author": "ben", "tint": "#FFCC80", "fontSize": 20 } }
+        },
+        {
+          "id": "PiN09",
+          "name": "Old-style keys",
+          "type": "note",
+          "x": 1040,
+          "y": 400,
+          "content": "Written before the namespace: bare keys still read.",
+          "metadata": { "type": "postit", "kind": "question", "author": "claude", "state": "open", "tint": "#D1C4E9" }
+        },
+        {
+          "id": "PiC01",
+          "name": "Comment",
+          "type": "note",
+          "x": 1280,
+          "y": 400,
+          "content": "Comments are Penumbra's to draw.",
+          "metadata": { "type": "woodcase", "woodcase": { "type": "comment", "author": "ben", "state": "open" } }
+        }
+      ]
+    }
+  ]
+}

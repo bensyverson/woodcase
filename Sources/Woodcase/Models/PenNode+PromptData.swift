@@ -12,7 +12,9 @@ public extension PenNode {
     ///
     /// Pen declares `Prompt extends Entity, Size, TextStyle` plus a `model`, so it
     /// carries ``width``, ``height``, ``model`` and the eleven ``PenTextStyleProperties`` keys.
-    /// Unlike a note it is not drawn, and an unsized one keeps a 0×0 rect.
+    /// It is drawn as a white card with its model, ▶ Run and the run's status
+    /// (<doc:PenPostItLook>); an unsized one lays out at ``PenPostIt/cardDefaultWidth`` ×
+    /// ``PenPostIt/cardDefaultHeight`` and, like a note, grows to fit its text.
     struct PromptData: Friendly, PenTextStyleProperties {
         /// Creates a prompt payload.
         ///

@@ -11,7 +11,7 @@ import Foundation
 /// after deep keys are folded, and the batch planner calls
 /// ``checkAuthoredPostIts(in:current:)`` for every node of an `add` or `replace`
 /// subtree. Both hold the write to ``PenPostIt``'s convention through
-/// ``PenPostIt/violation(in:comparedTo:)``; a file is never checked on load.
+/// ``PenPostIt/violation(in:comparedTo:on:)``; a file is never checked on load.
 public extension NodePropertyCodec {
     /// Refuses a whole `common.metadata` value that breaks the post-it convention.
     ///
@@ -24,7 +24,7 @@ public extension NodePropertyCodec {
     ///   when that key is malformed spans.
     static func checkAuthoredPostIt(_ metadata: AnyCodable, on node: PenNode) throws {
         guard case let .dictionary(object) = metadata else { return }
-        try check(object, comparedTo: node.common.metadata, nodeID: node.id)
+        try check(object, comparedTo: node.common.metadata, kind: node.kind, nodeID: node.id)
     }
 
     /// Refuses a subtree, about to be inserted, holding a post-it that breaks the
@@ -38,7 +38,9 @@ public extension NodePropertyCodec {
     ///   for the first refused key, depth first.
     static func checkAuthoredPostIts(in subtree: PenNode, current: (String) -> PenNode?) throws {
         if let metadata = subtree.common.metadata {
-            try check(metadata.object, comparedTo: current(subtree.id)?.common.metadata, nodeID: subtree.id)
+            try check(
+                metadata.object, comparedTo: current(subtree.id)?.common.metadata, kind: subtree.kind, nodeID: subtree.id
+            )
         }
         for child in ComponentAnalyzer.childNodes(of: subtree) {
             try checkAuthoredPostIts(in: child, current: current)
@@ -49,9 +51,10 @@ public extension NodePropertyCodec {
     private static func check(
         _ object: [String: AnyCodable],
         comparedTo current: PenMetadata?,
+        kind: PenNode.Kind,
         nodeID: String
     ) throws {
-        guard let violation = PenPostIt.violation(in: object, comparedTo: current) else { return }
+        guard let violation = PenPostIt.violation(in: object, comparedTo: current, on: kind) else { return }
         if let reason = violation.reason {
             throw EditingError.textSpansRejected(nodeID: nodeID, reason: reason)
         }

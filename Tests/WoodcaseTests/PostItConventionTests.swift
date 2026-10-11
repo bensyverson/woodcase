@@ -118,12 +118,14 @@ struct PostItConventionTests {
         #expect(node.common.metadata?.extensions["kind"] == .string("question"))
     }
 
+    /// Changed 2026-10-11 (leaf dbLtoJ): `requestedBy` joins the note keys, for a
+    /// prompt's Run (notes design rev 2, decision 14).
     @Test("The convention's keys and spellings are public and typed")
     func keysAndSpellings() {
         #expect(PenPostIt.NoteType.allCases.map(\.rawValue) == ["postit", "comment"])
         #expect(PenPostIt.State.allCases.map(\.rawValue) == ["open", "resolved"])
         #expect(PenPostIt.keys.map(\.rawValue) == [
-            "type", "state", "author", "leaf", "stage", "tint", "copiedFrom", "anchor", "replyTo",
+            "type", "state", "author", "leaf", "stage", "tint", "copiedFrom", "anchor", "replyTo", "requestedBy",
             "fontFamily", "fontSize", "fontWeight", "fontStyle", "letterSpacing", "lineHeight",
             "textAlign", "textAlignVertical",
         ])

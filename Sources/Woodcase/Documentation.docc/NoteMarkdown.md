@@ -1,6 +1,6 @@
 # Note Markdown
 
-A note's or comment's `content` is markdown: headings, bold, italic, lists, checklists and
+A note's, comment's, prompt's or context's `content` is markdown: headings, bold, italic, lists, checklists and
 `@mentions`, drawn styled while the file keeps the source.
 
 ## Overview
@@ -103,11 +103,21 @@ if let item = markdown.checklistItem(atDisplayOffset: hit) {
 
 A note's text style is read by ``PenNode/noteTextStyle``: each key from `metadata.woodcase`
 first (Pen strips a note's own style, <doc:PenPostItConvention>), then the note's own property,
-then ``PenTextStyle``'s default. The text is set in the note's box less
-``PenPostIt/textInsets`` (``PenPostIt/textFrame(inNoteOfWidth:height:)``).
+then the default: ``PenPostIt/defaultFontSize`` (13) at ``PenPostIt/defaultLineHeight``
+(1.35), as the rev 2 mockup sets a post-it, and ``PenTextStyle``'s default for every other key.
+Prompts and contexts read and parse the same way: they are drawn as cards in the same family
+(<doc:PenPostItLook>). The text is set in the note's box less its
+``PenPostIt/bodyInsets(of:style:)`` — ``PenPostIt/textInsets`` plus its chrome: a note's author
+line, a card's header and run row (``PenPostIt/textFrame(of:width:height:style:)``).
 
 A note grows to fit its text and never shrinks: ``PenLayoutEngine`` lays a note out at the
-larger of its set height and its text's height at its width plus the insets. Its width stays
+larger of its set height and its text's height at its width plus those insets, so a note's
+author line never covers its last line of text. Prompts and contexts grow the same way.
+
+> No space follows a heading or a list: the source is line-oriented and
+> ``PenParagraphIndent`` is the span model's only paragraph key, so block spacing would need a
+> paragraph-spacing key in the span model, measurement and every renderer. Not done (leaf
+> dbLtoJ); a blank line in the source gives the space today. Its width stays
 as set, and nothing is clipped, faded or linted. The growth is the layout's, so `tree`, hit
 testing and every renderer read one grown rect, and the file keeps the height that was set. A
 change to a note's content or text style — on the node, or in `metadata.woodcase` — therefore
@@ -127,5 +137,8 @@ needs layout (``ChangeCategory``), as does a change to a text node's spans.
 - ``PenNode/noteTextStyle``
 - ``PenParagraphIndent``
 - ``PenPostIt/textInsets``
-- ``PenPostIt/textFrame(inNoteOfWidth:height:)``
+- ``PenPostIt/bodyInsets(of:style:)``
+- ``PenPostIt/textFrame(of:width:height:style:)``
+- ``PenPostIt/defaultFontSize``
+- ``PenPostIt/defaultLineHeight``
 - ``PenTextLayout/init(note:size:color:)``

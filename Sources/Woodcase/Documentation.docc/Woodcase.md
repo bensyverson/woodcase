@@ -47,6 +47,7 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 - <doc:PenImportNamespaces>
 - <doc:PenInteroperability>
 - <doc:PenPostItConvention>
+- <doc:PenPostItLook>
 - <doc:NoteMarkdown>
 - <doc:PenMetadataNamespace>
 - ``WoodcaseResources``

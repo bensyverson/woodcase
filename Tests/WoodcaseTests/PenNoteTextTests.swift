@@ -92,9 +92,10 @@ struct PenNoteTextTests {
     }
 
     @Test("A note's text frame is its box less the insets")
-    func textFrame() {
-        let frame = PenPostIt.textFrame(inNoteOfWidth: 200, height: 100)
+    func textFrame() throws {
+        let node = try note(#"{"id": "N1", "type": "note", "content": "hi"}"#)
+        let frame = PenPostIt.textFrame(of: node, width: 200, height: 100)
         #expect(frame == PenRect(x: 14, y: 14, width: 172, height: 72))
-        #expect(PenPostIt.textFrame(inNoteOfWidth: 10, height: 10).width == 0)
+        #expect(PenPostIt.textFrame(of: node, width: 10, height: 10).width == 0)
     }
 }

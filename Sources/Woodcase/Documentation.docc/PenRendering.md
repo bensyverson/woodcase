@@ -149,6 +149,9 @@ A `browser` node (``PenNode/BrowserData``, new in Pen 2.19) embeds a live web pa
 
 All of it is clipped to the node's corner radius. The node's effects are drawn as on any other shape. A browser takes no fill in the format, so the placeholder fill is always drawn. These values are one public value, ``PenBrowserPlaceholder/Style/standard``, with the URL-or-`browser` rule as ``PenBrowserPlaceholder/Style/label(for:)``: a renderer that draws browsers itself (RapidPro does) reads them from there rather than keeping a copy. `PenBrowserRenderTests` pins the look with pixel probes and against `Fixtures/browser.png`, a reference Woodcase itself rendered — there is no Pen reference to hold it against.
 
+### Notes, Prompts and Contexts
+A `note`, `prompt` or `context` is drawn from its expansion, ``PenPostIt/expansion(of:width:height:style:measure:)``, in the node's placement and opacity: shape parts through the renderer's own rectangle and ellipse path, text parts through ``PenTextLayout`` (``PenRenderer/draw(_:in:)``). A comment message (`woodcase.type: comment`) has no expansion and draws nothing; Penumbra draws comments. The paper's shadows count in the node's painted extent. `PenPostItRenderTests` pins the look with pixel probes and against `Fixtures/postits.png`, Woodcase's own render — Pen draws notes its own way and cannot draw rich text. See <doc:PenPostItLook>.
+
 ### Connections
 
 A `connection` (``PenNode/ConnectionData``) is drawn as a straight segment from its source's anchor to its target's — the center of a node's box, or the middle of one of its edges — painted by the connection's own stroke exactly as a `line` is: every paint a stroke takes, its width, cap and join, and the connection's opacity. With no stroke paint it draws nothing, as a line does. Its `x`, `y`, rotation and flips play no part; a connector is where its endpoints are. The endpoints are found in canvas coordinates, composed once per render by ``PenLayoutEngine/canvasRects(in:layoutRects:)``, so an endpoint nested in a frame, or inside a component instance by its `instance/child` path, is found where it is drawn. A connection whose endpoint names no node draws nothing.
@@ -289,4 +292,5 @@ let titleImage = PenRenderer.render(
 - ``PenPathCommand``
 - ``PenPoint``
 - ``PenBrowserPlaceholder``
+- ``PenPostItExpansion``
 - ``ShaderFills``

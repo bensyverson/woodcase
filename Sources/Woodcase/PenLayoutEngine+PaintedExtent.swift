@@ -18,7 +18,8 @@ public extension PenLayoutEngine {
     /// enabled outer shadow adds a copy of that extent moved by its offset and grown by
     /// 1.5 × its blur (Pen does not count a shadow's spread), and each enabled layer blur
     /// grows the whole by 1.5 × its radius; a background blur and an inner shadow add
-    /// nothing. Last, the extent goes through the node's own placement
+    /// nothing. A note's or prompt's paper casts its look's shadows
+    /// (``PenPostIt/Style/shadows``) as if they were its effects. Last, the extent goes through the node's own placement
     /// (``placement(of:rect:layoutRects:)``), corner by corner, so a turned node's band
     /// reaches past its bounds at its mitered corners.
     ///
@@ -135,7 +136,7 @@ extension PenLayoutEngine {
     /// a copy of the extent before any shadow, moved by its offset and grown by 1.5 × its
     /// blur, and every enabled layer blur then grows the whole by 1.5 × its radius.
     private static func withEffects(_ extent: PenRect, of node: PenNode) -> PenRect {
-        guard let effects = PenRenderer.effects(for: node)?.all else { return extent }
+        guard let effects = PenRenderer.effects(for: node)?.all ?? PenPostIt.paperEffects(of: node) else { return extent }
         var grown = extent
         for case let .shadow(shadow) in effects
             where shadow.enabled?.literalValue != false && (shadow.shadowType ?? .outer) == .outer

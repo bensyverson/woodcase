@@ -21,6 +21,13 @@ public enum PenPostIt {
     /// The width and height, in points, a note lays out at on an axis it does not size.
     public static let defaultSize: Double = 200
 
+    /// The width, in points, a prompt or context lays out at when it does not size it: the
+    /// rev 2 mockup's card.
+    public static let cardDefaultWidth: Double = 240
+
+    /// The height, in points, a prompt or context lays out at when it does not size it.
+    public static let cardDefaultHeight: Double = 160
+
     /// The sizing a note lays out by on one axis, given the sizing it declares.
     ///
     /// An absent size, and any size that would settle at zero or less — a fixed value
@@ -32,9 +39,14 @@ public enum PenPostIt {
     /// The default is applied in layout rather than written into the file, so `tree`,
     /// hit testing and the renderers read one rect and the file keeps what Pen wrote.
     ///
-    /// - Parameter declared: The note's `width` or `height`, after variable resolution.
+    /// A prompt or context takes the same rule with the card's size
+    /// (``cardDefaultWidth``, ``cardDefaultHeight``) as its default.
+    ///
+    /// - Parameters:
+    ///   - declared: The note's `width` or `height`, after variable resolution.
+    ///   - defaultSize: The size an unsized axis takes; ``defaultSize`` for a note.
     /// - Returns: The sizing the layout engine uses on that axis.
-    public static func layoutSizing(_ declared: PenSizing?) -> PenSizing {
+    public static func layoutSizing(_ declared: PenSizing?, default defaultSize: Double = defaultSize) -> PenSizing {
         switch declared {
         case nil:
             .fixed(defaultSize)
