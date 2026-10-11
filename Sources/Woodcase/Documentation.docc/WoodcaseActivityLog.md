@@ -255,6 +255,16 @@ the file (``SessionOrigin/file(_:author:)``) before saving again. If the file ho
 what the session expected but the log does not explain it, an `external` row goes first,
 exactly as a transaction records one. See <doc:Session> under "Saving from an app".
 
+### A folded row
+
+An editor that commits every keystroke may fold a run of its own changes before saving
+(``CommittedChange/folding(_:)``, <doc:Session> "Saving from an app"). The log then holds
+one row for the run: its **inverse** takes the whole run back — newest edit's steps first,
+with a property write that an older step rewrites anyway left out — its **forward**
+replays it from the start, and its **time**, **revision** and **paths** are the run's
+last. A reader cannot tell a folded row from a single edit, and needs not: undoing it
+restores the state before the run.
+
 ### The merge row
 
 The rows a save appends carry the revisions their changes had *in the session*. When the
@@ -492,6 +502,7 @@ nodes last.
 - ``ActivityRecorder``
 - ``ActivityLog``
 - ``PenFileTransaction/save(_:changes:to:log:timeout:)``
+- ``ActivityEvent/folding(_:)``
 
 ### Reading
 

@@ -173,6 +173,24 @@ case let .fileChanged(found, lineage):
    presenter. Either way the check in step 3 is the backstop: a notification that
    arrives late, or not at all, cannot make a save overwrite an agent's write.
 
+#### Folding a run of changes before it goes out
+
+An editor that commits every keystroke — so its own view is always the document — would
+log one row per keystroke. It can fold a run first: ``CommittedChange/folding(_:)``
+turns consecutive changes of one origin by one author into one change whose
+``CommittedChange/activity`` is one row per kind of edit on the same nodes
+(``ActivityEvent/folding(_:)``). A typed word becomes one row whose inverse restores the
+text before it and whose forward writes the text after; a property write that a later
+write of the same keys covers is dropped from both, and structural operations are kept
+whole. The folded change carries the run's last ``CommittedChange/sequence`` and
+``CommittedChange/documentRevision``, so replacing the run with it in the unsaved list
+saves the same snapshot with fewer rows, and the `merge` row still appears when a file
+merge follows. Folding touches only the values the app holds: the session's undo
+history is unchanged, and `woodcase undo` takes the folded row back as one step. Fold
+only what goes out together — Penumbra folds a typing step at its boundary — and never
+across a file merge or a collaborator's change, which ``CommittedChange/folding(_:)``
+refuses.
+
 #### When the document moves
 
 ``DocumentSession/retarget(to:)`` points a session at its document's new file and keeps
@@ -340,6 +358,7 @@ variable, a theme axis or an import alias — go through
 
 - ``CommittedChange``
 - ``CommittedChange/UndoEffect``
+- ``CommittedChange/folding(_:)``
 - ``AppliedOperation``
 - ``ChangeInvalidation``
 - ``KeptChange``
