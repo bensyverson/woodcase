@@ -24,7 +24,23 @@ extension EditableDocument {
     ///   ``EditingError/rootOverrideValueRejected(refID:key:expected:actual:)`` for a
     ///   value the component root cannot take.
     func applyOverrideRoot(_ op: EditOperation.OverrideRoot) throws {
-        var (node, refData) = try requireRef(op.refNodeID)
+        nodes[op.refNodeID] = try overriddenNode(for: op)
+
+        // A root override can change the instance's size — invalidate its layout.
+        invalidateLayoutCache(for: op.refNodeID, category: .layout)
+    }
+
+    /// The ref node an ``EditOperation/OverrideRoot`` would store, checked as
+    /// ``applyOverrideRoot(_:)`` checks it, with nothing written.
+    ///
+    /// - Parameters:
+    ///   - op: The override operation parameters.
+    ///   - base: The ref node to merge into in place of the stored one: an earlier
+    ///     preview of it (``previewNodes(for:)``); `nil` merges into the node as it stands.
+    /// - Returns: The ref node with the root overrides merged in.
+    /// - Throws: What ``applyOverrideRoot(_:)`` throws.
+    func overriddenNode(for op: EditOperation.OverrideRoot, onto base: PenNode? = nil) throws -> PenNode {
+        var (node, refData) = try requireRef(op.refNodeID, onto: base)
         try validateRootOverrideKeys(op)
         try validateRootOverrideValues(op)
         try refuseComponentLoops(closedBy: .overrideRoot(op))
@@ -35,10 +51,7 @@ extension EditableDocument {
         refData.rootOverrides = overrides.isEmpty ? nil : overrides
 
         node.kind = .ref(refData)
-        nodes[op.refNodeID] = node
-
-        // A root override can change the instance's size — invalidate its layout.
-        invalidateLayoutCache(for: op.refNodeID, category: .layout)
+        return node
     }
 
     /// Refuses a root override whose key the ref node reserves for itself.

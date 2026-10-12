@@ -74,14 +74,19 @@ extension EditableDocument {
     /// ``applySetProperties(_:)`` refuse exactly the same patches and nothing is
     /// written until the whole patch has been accepted.
     ///
-    /// - Parameter op: The patch to resolve.
+    /// - Parameters:
+    ///   - op: The patch to resolve.
+    ///   - base: The node to patch in place of the stored one: an earlier preview of it
+    ///     (``previewNodes(for:)``); `nil` patches the node as it stands.
     /// - Returns: The node as it stands and the node the patch would produce.
     /// - Throws: ``EditingError/nodeNotFound(id:)``,
     ///   ``EditingError/unknownProperty(nodeID:key:nodeType:)`` or
     ///   ``EditingError/propertyTypeMismatch(nodeID:key:expected:actual:)``.
-    func patchedNode(for op: EditOperation.SetProperties) throws -> (old: PenNode, new: PenNode) {
+    func patchedNode(
+        for op: EditOperation.SetProperties, onto base: PenNode? = nil
+    ) throws -> (old: PenNode, new: PenNode) {
         let oldNode = try requireNode(op.nodeID)
-        var newNode = oldNode
+        var newNode = base ?? oldNode
         for (path, value) in op.properties {
             newNode = try NodePropertyCodec.setting(value, at: path, on: newNode)
         }
@@ -91,12 +96,16 @@ extension EditableDocument {
     /// Checks a ``EditOperation/SetProperties``: every key and value resolves, and the
     /// patched node closes no component loop.
     ///
-    /// - Parameter op: The patch to check.
+    /// - Parameters:
+    ///   - op: The patch to check.
+    ///   - base: The node to patch in place of the stored one; `nil` for the stored one.
     /// - Returns: The node as it stands and the node the patch would produce.
-    /// - Throws: Whatever ``patchedNode(for:)`` throws, or
+    /// - Throws: Whatever ``patchedNode(for:onto:)`` throws, or
     ///   ``EditingError/wouldCloseComponentLoop(path:)``.
-    func validateSetProperties(_ op: EditOperation.SetProperties) throws -> (old: PenNode, new: PenNode) {
-        let patch = try patchedNode(for: op)
+    func validateSetProperties(
+        _ op: EditOperation.SetProperties, onto base: PenNode? = nil
+    ) throws -> (old: PenNode, new: PenNode) {
+        let patch = try patchedNode(for: op, onto: base)
         try refuseComponentLoops(closedBy: .setProperties(op))
         return patch
     }

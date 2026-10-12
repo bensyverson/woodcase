@@ -20,7 +20,23 @@ extension EditableDocument {
     ///   ``EditingError/overrideValueRejected(refID:descendantKey:key:expected:actual:)``
     ///   if a value is not one the node it patches can take.
     func applyOverrideDescendant(_ op: EditOperation.OverrideDescendant) throws {
-        var (node, refData) = try requireRef(op.refNodeID)
+        nodes[op.refNodeID] = try overriddenNode(for: op)
+
+        // Overrides can affect expanded size — invalidate layout for the ref node
+        invalidateLayoutCache(for: op.refNodeID, category: .layout)
+    }
+
+    /// The ref node an ``EditOperation/OverrideDescendant`` would store, checked as
+    /// ``applyOverrideDescendant(_:)`` checks it, with nothing written.
+    ///
+    /// - Parameters:
+    ///   - op: The override operation parameters.
+    ///   - base: The ref node to merge into in place of the stored one: an earlier
+    ///     preview of it (``previewNodes(for:)``); `nil` merges into the node as it stands.
+    /// - Returns: The ref node with the override merged in.
+    /// - Throws: What ``applyOverrideDescendant(_:)`` throws.
+    func overriddenNode(for op: EditOperation.OverrideDescendant, onto base: PenNode? = nil) throws -> PenNode {
+        var (node, refData) = try requireRef(op.refNodeID, onto: base)
         try validateOverrideTarget(op)
         try validateOverrideValues(op)
         try refuseComponentLoops(closedBy: .overrideDescendant(op))
@@ -37,10 +53,22 @@ extension EditableDocument {
         refData.descendants = descendants.isEmpty ? nil : descendants
 
         node.kind = .ref(refData)
-        nodes[op.refNodeID] = node
+        return node
+    }
 
-        // Overrides can affect expanded size — invalidate layout for the ref node
-        invalidateLayoutCache(for: op.refNodeID, category: .layout)
+    /// The ref node and its payload: `base` when given, which must be a ref, else the
+    /// stored node.
+    ///
+    /// - Parameters:
+    ///   - nodeID: The id of the ref node, which must be stored.
+    ///   - base: A preview of the node to read in place of the stored one, or `nil`.
+    /// - Returns: The node and the ref data it carries.
+    /// - Throws: ``EditingError/nodeNotFound(id:)`` or ``EditingError/notARefNode(id:)``.
+    func requireRef(_ nodeID: String, onto base: PenNode?) throws -> (node: PenNode, data: PenNode.RefData) {
+        let stored = try requireRef(nodeID)
+        guard let base else { return stored }
+        guard case let .ref(data) = base.kind else { throw EditingError.notARefNode(id: nodeID) }
+        return (base, data)
     }
 
     /// Merges one override map into another, then drops the keys a write unsets.

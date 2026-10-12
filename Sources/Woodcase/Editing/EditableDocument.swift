@@ -234,11 +234,20 @@ public final class EditableDocument {
     /// UI actor is free while it happens. ``materialize()`` is the synchronous form and
     /// does the same work in place.
     ///
-    /// - Parameter isolation: The actor the caller runs on, filled in by `#isolation`.
-    ///   It is what lets the snapshot be taken without hopping, whichever actor owns
-    ///   the document.
+    /// An overlay draws the document with some stored nodes swapped for others — an
+    /// editor's preview of edits it has not committed (``previewNodes(for:)``) — and
+    /// changes nothing in the document.
+    ///
+    /// - Parameters:
+    ///   - overlay: Stored nodes to draw in place of the ones with the same ids, as
+    ///     ``previewNodes(for:)`` returns them; inline children are ignored, and an id
+    ///     the store does not hold is passed over. Empty by default.
+    ///   - isolation: The actor the caller runs on, filled in by `#isolation`.
+    ///     It is what lets the snapshot be taken without hopping, whichever actor owns
+    ///     the document.
     /// - Returns: A fully reconstructed `PenDocument`.
     public func materializeSnapshot(
+        overlaying overlay: [String: PenNode] = [:],
         isolation _: isolated (any Actor)? = #isolation
     ) async -> PenDocument {
         let snapshot = FlatStoreSnapshot(
@@ -246,7 +255,7 @@ public final class EditableDocument {
             version: version, themes: themes, imports: imports, variables: variables,
             fileToken: fileToken, fonts: fonts, extras: extras
         )
-        return await Self.buildDocumentOffActor(from: snapshot)
+        return await Self.buildDocumentOffActor(from: snapshot, overlaying: overlay)
     }
 
     /// Runs ``buildDocument(from:)`` on a detached task, off whatever actor asked for it.
@@ -258,12 +267,19 @@ public final class EditableDocument {
     /// The snapshot is `Sendable`, so hoisting the detach one call out is only a
     /// workaround for the diagnostic and changes nothing about what runs where.
     ///
-    /// - Parameter snapshot: The flat store to rebuild a tree from.
+    /// The overlay is applied on the detached task too, so the copy of the store it
+    /// makes costs the owner nothing.
+    ///
+    /// - Parameters:
+    ///   - snapshot: The flat store to rebuild a tree from.
+    ///   - overlay: Stored nodes to swap in, by id (``FlatStoreSnapshot/overlaying(_:)``).
     /// - Returns: A fully reconstructed `PenDocument`.
     private nonisolated static func buildDocumentOffActor(
-        from snapshot: FlatStoreSnapshot
+        from snapshot: FlatStoreSnapshot, overlaying overlay: [String: PenNode]
     ) async -> PenDocument {
-        await Task.detached { buildDocument(from: snapshot) }.value
+        await Task.detached {
+            buildDocument(from: overlay.isEmpty ? snapshot : snapshot.overlaying(overlay))
+        }.value
     }
 
     /// Reconstructs a single subtree from the flat store.
@@ -315,7 +331,7 @@ public final class EditableDocument {
 
     /// A CoW snapshot of the flat store's value-type dictionaries.
     struct FlatStoreSnapshot {
-        let nodes: [String: PenNode]
+        var nodes: [String: PenNode]
         let children: [String: [String]]
         let rootOrder: [String]
         let version: String
@@ -325,5 +341,21 @@ public final class EditableDocument {
         let fileToken: String?
         let fonts: [PenFontDeclaration]?
         let extras: PenExtras
+
+        /// The snapshot with each stored node `overlay` names swapped for its entry,
+        /// stripped of inline children as the store keeps them, so the structure maps
+        /// still decide every child. An entry naming no stored node is ignored.
+        ///
+        /// - Parameter overlay: The nodes to swap in, by id.
+        /// - Returns: The overlaid snapshot.
+        func overlaying(_ overlay: [String: PenNode]) -> FlatStoreSnapshot {
+            var result = self
+            for (id, node) in overlay where nodes[id] != nil {
+                result.nodes[id] = PenNode(
+                    id: id, common: node.common, kind: node.kind.withEmptyChildren(), extras: node.extras
+                )
+            }
+            return result
+        }
     }
 }

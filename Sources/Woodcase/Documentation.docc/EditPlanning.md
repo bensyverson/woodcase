@@ -78,6 +78,23 @@ A value that is legal on its own but wrong beside another — `fill_container` i
 `fit_content` parent, a per-side stroke on a shape — is not refused. `woodcase lint`
 reports it, and a write rehearsed with `--dry-run` lists the findings it would introduce.
 
+### Previewing a plan
+
+An editor shows a gesture in progress (a scrubbed value, a dragged gradient stop, a
+number being typed) on its own canvas before committing it, without sending each step
+to collaborators, the undo stack or the file. It plans each step as above, and hands the
+plan's operations to ``EditableDocument/previewNodes(for:)``. That returns the stored
+nodes a commit would leave, using the commit's own patch and override code, and changes
+nothing. ``EditableDocument/materializeSnapshot(overlaying:isolation:)`` then draws the
+document with those nodes swapped in. A plan's operations are always property edits; a
+structural one throws ``EditableDocument/PreviewError/notAPropertyEdit(_:)``.
+
+```swift
+let plan = try EditPlanner.plan(.set(["common.opacity": 0.4]), at: address, in: document)
+let preview = try document.previewNodes(for: plan.operations)
+let drawn = await document.materializeSnapshot(overlaying: preview)
+```
+
 ## Topics
 
 ### Planning
@@ -85,6 +102,12 @@ reports it, and a write rehearsed with `--dry-run` lists the findings it would i
 - ``EditPlanner``
 - ``EditIntent``
 - ``EditPlan``
+
+### Previewing
+
+- ``EditableDocument/previewNodes(for:)``
+- ``EditableDocument/PreviewError``
+- ``EditableDocument/materializeSnapshot(overlaying:isolation:)``
 
 ### Refusals
 
