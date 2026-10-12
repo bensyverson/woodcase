@@ -7,55 +7,61 @@ import Foundation
 import Testing
 @testable import Woodcase
 
-/// An insert, move or delete inside a component lays out the component's own board
-/// and exactly the boards that hold an instance of it — transitively, through
-/// components that nest one — and nothing else (Penumbra ruling R20).
+/// An insert, move or delete inside a component lays out exactly the placed instances
+/// of it — transitively, through components that nest one — and their spines, and
+/// nothing else (Penumbra ruling R20, narrowed to instances 2026-10-12).
 @MainActor
 struct StructuralLayoutComponentScopeTests {
-    /// The roots that draw `Card`: itself, `Panel` (nests it), `B2` (an instance),
-    /// `B3` (an instance of `Panel`) and `R5` (a top-level instance).
-    private static let cardDependents: Set<String> = ["Card", "Panel", "B2", "B3", "R5"]
+    /// The placed instances that draw `Card`, with their spines: `b2Card` in `B2`,
+    /// `b3Panel` (an instance of `Panel`, which nests it) in `B3`, and `R5` (a top-level
+    /// instance).
+    private static let cardInstanceSpines: Set<String> = ["b2Card", "B2", "b3Panel", "B3", "R5"]
 
-    /// The roots among ``cardDependents`` a layout pass walks: the components themselves
-    /// are not laid out on their own.
-    private static let cardWalked: Set<String> = ["B2", "B3", "R5"]
+    /// The roots a layout pass lays out, by expanded id: the
+    /// components themselves are not laid out on their own, and the top-level instance
+    /// `R5` expands to `R5/Card`.
+    private static let cardWalked: Set<String> = ["B2", "B3", "R5/Card"]
 
     @Test("An insert inside a component lays out exactly the boards that draw it")
     func insertInsideComponent() throws {
         let fixture = try StructuralLayoutFixture()
-        let walked = try fixture.applyAndLayOut(.insertNode(EditOperation.InsertNode(
+        let change = try fixture.applyAndLayOut(.insertNode(EditOperation.InsertNode(
             node: StructuralLayoutFixture.text("cardBodyMore", "Card body more"), parentID: "cardBody"
         )))
-        #expect(walked == Self.cardWalked)
-        #expect(fixture.document.dirtyLayoutRootIDs == Self.cardDependents)
+        #expect(change.affectedRoots == Self.cardWalked)
+        #expect(fixture.document.dirtyLayoutNodeIDs.isSuperset(of: Self.cardInstanceSpines))
+        #expect(fixture.document.layoutInvalidation.roots.isEmpty)
     }
 
     @Test("A delete inside a component lays out exactly the boards that draw it")
     func deleteInsideComponent() throws {
         let fixture = try StructuralLayoutFixture()
-        let walked = try fixture.applyAndLayOut(.deleteNode(EditOperation.DeleteNode(nodeID: "cardBodyText")))
-        #expect(walked == Self.cardWalked)
-        #expect(fixture.document.dirtyLayoutRootIDs == Self.cardDependents)
+        let change = try fixture.applyAndLayOut(.deleteNode(EditOperation.DeleteNode(nodeID: "cardBodyText")))
+        #expect(change.affectedRoots == Self.cardWalked)
+        #expect(fixture.document.dirtyLayoutNodeIDs.isSuperset(of: Self.cardInstanceSpines))
+        #expect(fixture.document.layoutInvalidation.roots.isEmpty)
     }
 
     @Test("A move inside a component lays out exactly the boards that draw it")
     func moveInsideComponent() throws {
         let fixture = try StructuralLayoutFixture()
-        let walked = try fixture.applyAndLayOut(.moveNode(EditOperation.MoveNode(
+        let change = try fixture.applyAndLayOut(.moveNode(EditOperation.MoveNode(
             nodeID: "cardTitle", newParentID: "cardBody", index: 0
         )))
-        #expect(walked == Self.cardWalked)
-        #expect(fixture.document.dirtyLayoutRootIDs == Self.cardDependents)
+        #expect(change.affectedRoots == Self.cardWalked)
+        #expect(fixture.document.dirtyLayoutNodeIDs.isSuperset(of: Self.cardInstanceSpines))
+        #expect(fixture.document.layoutInvalidation.roots.isEmpty)
     }
 
     @Test("An edit inside the nesting component skips boards that hold only the inner one")
     func insertInsideOuterComponent() throws {
         let fixture = try StructuralLayoutFixture()
-        let walked = try fixture.applyAndLayOut(.insertNode(EditOperation.InsertNode(
+        let change = try fixture.applyAndLayOut(.insertNode(EditOperation.InsertNode(
             node: StructuralLayoutFixture.text("panelFooter", "Panel footer"), parentID: "Panel"
         )))
-        #expect(walked == ["B3"])
-        #expect(fixture.document.dirtyLayoutRootIDs == ["Panel", "B3"])
+        #expect(change.affectedRoots == ["B3"])
+        #expect(fixture.document.dirtyLayoutNodeIDs.isSuperset(of: ["b3Panel", "B3"]))
+        #expect(!fixture.document.dirtyLayoutNodeIDs.contains("b2Card"))
     }
 
     @Test("Components that render each other end the dependency walk")
@@ -77,6 +83,6 @@ struct StructuralLayoutComponentScopeTests {
         try document.apply(.insertNode(EditOperation.InsertNode(
             node: StructuralLayoutFixture.text("laText", "Loop"), parentID: "LA"
         )))
-        #expect(document.dirtyLayoutRootIDs == ["LA", "LB", "Board"])
+        #expect(document.dirtyLayoutNodeIDs.isSuperset(of: ["boardA", "Board"]))
     }
 }

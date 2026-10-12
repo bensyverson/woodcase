@@ -16,7 +16,7 @@ import Testing
 /// layout of a fresh copy. The comparison is exact, rect by rect, and runs on every
 /// incremental path: ``EditableDocument/computeLayout(textMeasurer:)``; a host's own
 /// pipeline calling
-/// ``PenLayoutEngine/layoutIncremental(_:previousRects:invalidation:textMeasurer:measurementCache:)``
+/// ``PenLayoutEngine/layoutIncremental(_:previousRects:invalidation:textMeasurer:options:measurementCache:)``
 /// with ``EditableDocument/layoutInvalidation``, as Penumbra does; and a host holding a
 /// ``PenLayoutState``, whose reported change must name exactly the rects that differ.
 ///
@@ -28,7 +28,7 @@ struct IncrementalLayoutEquivalenceTests {
     enum Write: String, CaseIterable {
         case nudge, editText, resize, reorder, insertChild, disable, theme
         case editDefinition, resizeDefinition, overrideInstance, toggleReusable
-        case moveToAnotherRoot, editVariable, addRoot, deleteRoot
+        case moveToAnotherRoot, editVariable, addRoot, deleteRoot, deleteChild
     }
 
     /// Which incremental path lays the document out.
@@ -127,7 +127,8 @@ struct IncrementalLayoutEquivalenceTests {
     ) -> [String: PenRect] {
         switch path {
         case .document:
-            let rects = document.computeLayout(textMeasurer: measurer)
+            document.computeLayout(textMeasurer: measurer)
+            let rects = document.layoutRects
             document.clearDirtyNodes()
             return rects
         case .host:
@@ -254,6 +255,10 @@ struct IncrementalLayoutEquivalenceTests {
                     )]
                 ))
             ))))
+        case .deleteChild:
+            guard let node = placedChildren.last(where: { document.nodes[$0]?.common.reusable != true })
+            else { return false }
+            try document.apply(.deleteNode(EditOperation.DeleteNode(nodeID: node)))
         case .deleteRoot:
             guard let root = document.rootOrder.first(where: { document.nodes[$0]?.common.reusable != true })
             else { return false }

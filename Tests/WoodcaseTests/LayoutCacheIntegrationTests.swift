@@ -93,22 +93,22 @@ struct LayoutCacheIntegrationTests {
         #expect(!cache.isFullyInvalidated)
     }
 
-    // MARK: - Delete Node → Its Board
+    // MARK: - Delete Node → Its Spine
 
-    @Test("Delete node marks only its board for layout")
-    func deleteNodeMarksItsBoard() throws {
+    @Test("Delete node marks only its parent's spine for layout")
+    func deleteNodeMarksItsSpine() throws {
         let editable = makeDocument()
         try editable.apply(.deleteNode(EditOperation.DeleteNode(nodeID: "child2")))
 
         let cache = try #require(editable._layoutCache)
         #expect(!cache.isFullyInvalidated)
-        #expect(cache.dirtyLayoutRoots == ["root1"])
+        #expect(cache.dirtyLayoutNodes == ["child2", "root1"])
     }
 
-    // MARK: - Insert Node → Its Board
+    // MARK: - Insert Node → Its Spine
 
-    @Test("Insert node marks only its board for layout")
-    func insertNodeMarksItsBoard() throws {
+    @Test("Insert node marks only its parent's spine for layout")
+    func insertNodeMarksItsSpine() throws {
         let editable = makeDocument()
         let newNode = PenNode(
             id: "child3",
@@ -121,13 +121,13 @@ struct LayoutCacheIntegrationTests {
 
         let cache = try #require(editable._layoutCache)
         #expect(!cache.isFullyInvalidated)
-        #expect(cache.dirtyLayoutRoots == ["root1"])
+        #expect(cache.dirtyLayoutNodes == ["child3", "root1"])
     }
 
-    // MARK: - Move Node → Both Boards
+    // MARK: - Move Node → Both Spines
 
-    @Test("Move node marks the boards it leaves and enters for layout")
-    func moveNodeMarksBothBoards() throws {
+    @Test("Move node marks the spines it leaves and enters for layout")
+    func moveNodeMarksBothSpines() throws {
         // Need a second root to move into
         let doc = PenDocument(
             version: "1",
@@ -155,7 +155,7 @@ struct LayoutCacheIntegrationTests {
 
         let cache = try #require(editable._layoutCache)
         #expect(!cache.isFullyInvalidated)
-        #expect(cache.dirtyLayoutRoots == ["root1", "root2"])
+        #expect(cache.dirtyLayoutNodes == ["child1", "root1", "root2"])
     }
 
     // MARK: - Variable Change → Full Invalidation

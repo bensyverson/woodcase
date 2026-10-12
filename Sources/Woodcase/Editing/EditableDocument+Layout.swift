@@ -6,37 +6,38 @@
 import Foundation
 
 public extension EditableDocument {
-    /// Computes or incrementally updates layout rectangles.
+    /// Lays the document out, or lays out again what the edits since the last pass
+    /// named, and reports what changed.
     ///
-    /// On the first call, performs a full layout pass (materialize → expand → resolve → layout).
-    /// Subsequent calls lay out again only what ``layoutInvalidation`` names, translated
-    /// to the expanded tree — see
-    /// ``PenLayoutEngine/layoutIncremental(_:previousRects:invalidation:textMeasurer:measurementCache:)``.
-    /// Variables are resolved with inherited per-node theming (via `common.theme`).
+    /// The layout lives in one ``PenLayoutState`` the document's layout cache holds. The
+    /// first pass — and any pass after a change no narrower rule covers (variables,
+    /// themes, imports) — lays the document out in full; every later one updates the
+    /// state node by node from ``layoutInvalidation``, as
+    /// ``PenLayoutState/update(to:invalidation:)`` does. Either way the document is
+    /// materialized, expanded and resolved, with inherited per-node theming (via
+    /// `common.theme`). The rects are ``layoutRects`` afterwards.
     ///
-    /// - Parameter textMeasurer: A function that measures text bounding boxes.
-    ///   Defaults to ``PenLayoutEngine/defaultTextMeasurer``.
-    /// - Returns: A dictionary mapping node IDs to their computed layout rectangles.
+    /// The pass does not clear the dirty tracking: call ``clearDirtyNodes()`` once the
+    /// change is handled, or the next pass lays the same nodes out again.
+    ///
+    /// - Parameter textMeasurer: A function that measures text bounding boxes. Defaults
+    ///   to ``PenLayoutEngine/defaultTextMeasurer``. A state keeps the measurer of the
+    ///   pass that made it, so this one is used by a full pass only.
+    /// - Returns: What changed against the rects before the pass: on the first pass,
+    ///   every rect.
     @discardableResult
     func computeLayout(
-        textMeasurer: TextMeasurer = PenLayoutEngine.defaultTextMeasurer
-    ) -> [String: PenRect] {
-        // Ensure the layout cache exists
-        if _layoutCache == nil {
-            _layoutCache = LayoutCache()
-        }
-        let cache = _layoutCache!
-
-        // Expand refs and resolve variables
+        textMeasurer: @escaping TextMeasurer = PenLayoutEngine.defaultTextMeasurer
+    ) -> PenLayoutChange {
         let (expandedDoc, _) = expandedDocument()
         let resolvedDoc = PenVariableResolver.resolve(expandedDoc)
+        return layoutCache.commit(resolvedDoc, invalidation: layoutInvalidation, textMeasurer: textMeasurer)
+    }
 
-        let rects = PenLayoutEngine.layoutIncremental(
-            resolvedDoc, previousRects: cache.rects, invalidation: layoutInvalidation,
-            textMeasurer: textMeasurer, measurementCache: &cache.measurementCache
-        )
-        cache.store(rects: rects)
-        return rects
+    /// Every expanded node's rect, in its parent's coordinates, as the last layout pass
+    /// left it — or as a host stored it (``primeLayoutCache(with:)``). Empty before any.
+    var layoutRects: [String: PenRect] {
+        _layoutCache?.rects ?? [:]
     }
 
     /// All nodes needing visual update since last ``clearDirtyNodes()``.
@@ -59,7 +60,7 @@ public extension EditableDocument {
     ///
     /// A host that runs its own pipeline takes it with the rest of the dirty tracking and
     /// hands it to
-    /// ``PenLayoutEngine/layoutIncremental(_:previousRects:invalidation:textMeasurer:measurementCache:)``,
+    /// ``PenLayoutEngine/layoutIncremental(_:previousRects:invalidation:textMeasurer:options:measurementCache:)``,
     /// which translates it to the expanded tree. Everything is named when the layout
     /// cache was never primed or needs a full pass.
     var layoutInvalidation: PenLayoutInvalidation {
@@ -67,14 +68,16 @@ public extension EditableDocument {
         return PenLayoutInvalidation(
             everything: cache.isFullyInvalidated,
             nodes: cache.dirtyLayoutNodes,
-            subtrees: cache.dirtyLayoutSubtrees,
-            roots: cache.dirtyLayoutRoots
+            subtrees: cache.dirtyLayoutSubtrees
         )
     }
 
-    /// Top-level nodes a structural edit requires laying out afresh, by source id.
-    var dirtyLayoutRootIDs: Set<String> {
-        _layoutCache?.dirtyLayoutRoots ?? []
+    /// The nodes inserts, moves and deletes since the last ``clearDirtyNodes()``
+    /// touched, by source id: every node inserted, deleted or moved, and the parent each
+    /// lands under. Empty when no structural edit landed — and while
+    /// ``isLayoutFullyInvalidated``, which a host already treats as a full pass.
+    var structurallyEditedNodeIDs: Set<String> {
+        _layoutCache?.structuralSubjects ?? []
     }
 
     /// Nodes needing re-render only (visual-only change like color/opacity).
@@ -97,7 +100,9 @@ public extension EditableDocument {
     ///
     /// Returns `true` when no cache exists (never primed) or after a change the cache
     /// cannot scope (variable, theme or import change, replace, detach). An insert,
-    /// move or delete marks only the roots it can change — ``dirtyLayoutRootIDs``.
+    /// move or delete marks only the spines it touches, and those of the placed instances
+    /// drawing a component it touched (``dirtyLayoutNodeIDs``); it is listed in
+    /// ``structurallyEditedNodeIDs``.
     /// The pipeline uses this to decide between the incremental and full paths.
     var isLayoutFullyInvalidated: Bool {
         _layoutCache?.isFullyInvalidated ?? true
@@ -106,45 +111,35 @@ public extension EditableDocument {
     /// Initializes or replaces the layout cache with externally computed rects.
     ///
     /// Call this after a full pipeline run so that subsequent edits produce
-    /// targeted dirty tracking instead of full invalidation.
+    /// targeted dirty tracking instead of full invalidation. The cache's
+    /// ``PenLayoutState`` is dropped, so the next ``computeLayout(textMeasurer:)`` or
+    /// ``layoutIncremental(document:textMeasurer:)`` lays out in full.
     ///
     /// - Parameter rects: The layout rects computed by a full `PenLayoutEngine.layout()` call.
     func primeLayoutCache(with rects: [String: PenRect]) {
-        if _layoutCache == nil {
-            _layoutCache = LayoutCache()
-        }
-        _layoutCache!.store(rects: rects)
+        layoutCache.store(rects: rects)
     }
 
-    /// Performs incremental layout using the cache's dirty state and previous rects.
+    /// Lays out what the edits since the last pass named, on a document the host
+    /// expanded and resolved itself.
     ///
     /// Designed for hosts that run their own pipeline (expansion, resolution,
-    /// font preparation) and need to call layout separately. Uses the layout
-    /// cache's dirty nodes and measurement cache for efficient re-layout.
-    ///
-    /// Falls back to a full layout if the cache has no previous rects or needs a full
-    /// pass. Stores the result in the cache automatically.
+    /// font preparation) and need to call layout separately. It is
+    /// ``computeLayout(textMeasurer:)`` without the expansion: the same state, updated
+    /// node by node from ``layoutInvalidation``, or laid out in full when there is none
+    /// yet or a full pass is needed.
     ///
     /// - Parameters:
     ///   - document: A fully resolved `PenDocument` (refs expanded, variables resolved).
-    ///   - textMeasurer: A function that measures text bounding boxes.
+    ///   - textMeasurer: A function that measures text bounding boxes, for a full pass.
     ///     Defaults to ``PenLayoutEngine/defaultTextMeasurer``.
     /// - Returns: A dictionary mapping node IDs to their computed layout rectangles.
     func layoutIncremental(
         document: PenDocument,
-        textMeasurer: TextMeasurer = PenLayoutEngine.defaultTextMeasurer
+        textMeasurer: @escaping TextMeasurer = PenLayoutEngine.defaultTextMeasurer
     ) -> [String: PenRect] {
-        if _layoutCache == nil {
-            _layoutCache = LayoutCache()
-        }
-        let cache = _layoutCache!
-
-        let rects = PenLayoutEngine.layoutIncremental(
-            document, previousRects: cache.rects, invalidation: layoutInvalidation,
-            textMeasurer: textMeasurer, measurementCache: &cache.measurementCache
-        )
-        cache.store(rects: rects)
-        return rects
+        layoutCache.commit(document, invalidation: layoutInvalidation, textMeasurer: textMeasurer)
+        return layoutRects
     }
 
     // MARK: - Content Hash
@@ -161,7 +156,7 @@ public extension EditableDocument {
         guard let node = nodes[nodeID] else { return nil }
         var hasher = Hasher()
         hasher.combine(node)
-        if let rect = _layoutCache?.rects[nodeID] {
+        if let rect = layoutRects[nodeID] {
             hasher.combine(rect)
         }
         for childID in children[nodeID] ?? [] {
@@ -170,5 +165,15 @@ public extension EditableDocument {
             }
         }
         return hasher.finalize()
+    }
+}
+
+extension EditableDocument {
+    /// The document's layout cache, made on first use.
+    var layoutCache: LayoutCache {
+        if let cache = _layoutCache { return cache }
+        let cache = LayoutCache()
+        _layoutCache = cache
+        return cache
     }
 }

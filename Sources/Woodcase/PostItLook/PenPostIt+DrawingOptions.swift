@@ -54,5 +54,11 @@ public extension PenPostIt {
         public func bodyText(for id: String) -> BodyText {
             rawBodies.contains(id) ? .raw : .styled
         }
+
+        /// The layout options that grow the cards these options draw raw, so layout and
+        /// drawing agree on which cards are raw.
+        public var layoutOptions: PenLayoutOptions {
+            PenLayoutOptions(rawBodies: rawBodies)
+        }
     }
 }

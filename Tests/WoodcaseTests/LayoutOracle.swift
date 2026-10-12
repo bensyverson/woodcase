@@ -22,13 +22,18 @@ enum LayoutOracle {
     /// - Parameters:
     ///   - document: The document to lay out; it is only read.
     ///   - textMeasurer: The measurer the incremental layout used.
+    ///   - options: The options the incremental layout used — the cards it drew raw.
     /// - Returns: Every expanded node's rect.
     @MainActor
-    static func fullLayout(of document: EditableDocument, textMeasurer: @escaping TextMeasurer) -> [String: PenRect] {
+    static func fullLayout(
+        of document: EditableDocument,
+        textMeasurer: @escaping TextMeasurer,
+        options: PenLayoutOptions = PenLayoutOptions()
+    ) -> [String: PenRect] {
         let fresh = EditableDocument(from: document.materialize())
         fresh.readContext = document.readContext
         let (expanded, _) = fresh.expandedDocument()
-        return PenLayoutEngine.layout(PenVariableResolver.resolve(expanded), textMeasurer: textMeasurer)
+        return PenLayoutEngine.layout(PenVariableResolver.resolve(expanded), textMeasurer: textMeasurer, options: options)
     }
 
     /// The ids whose rects differ between two layouts, each with both sides, sorted and

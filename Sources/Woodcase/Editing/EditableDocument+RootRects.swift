@@ -91,7 +91,7 @@ extension EditableDocument {
         return (width, height)
     }
 
-    /// A root's rect, the way ``PenLayoutEngine/layout(_:textMeasurer:)`` writes it:
+    /// A root's rect, the way ``PenLayoutEngine/layout(_:textMeasurer:options:)`` writes it:
     /// placed by its own `x`/`y`, or the origin, turned and flipped about that anchor
     /// (``PenLayoutEngine/freeRect(of:x:y:width:height:)``).
     ///

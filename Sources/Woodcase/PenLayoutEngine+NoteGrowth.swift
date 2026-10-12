@@ -13,18 +13,31 @@ extension PenLayoutEngine {
     /// - Returns: The request, unwrapped, or `nil` for a node that is not a note, prompt or
     ///   context, or has no literal content.
     static func noteTextRequest(_ node: PenNode) -> PenTextMeasureRequest? {
-        guard let markdown = node.noteMarkdown, let style = node.noteTextStyle else { return nil }
+        guard let markdown = node.noteMarkdown, var request = noteRawTextRequest(node) else { return nil }
+        request.text = markdown.displayText
+        request.runs = markdown.runs
+        request.indents = markdown.indents
+        return request
+    }
+
+    /// What a note's, prompt's or context's raw text measures as: its markdown source
+    /// verbatim in its style (``PenNode/noteTextStyle``), with no runs and no indents —
+    /// the body an editor draws while the card is edited (``PenPostIt/BodyText/raw``).
+    ///
+    /// - Parameter node: Any node.
+    /// - Returns: The request, unwrapped, or `nil` for a node that is not a note, prompt or
+    ///   context, or has no literal content.
+    static func noteRawTextRequest(_ node: PenNode) -> PenTextMeasureRequest? {
+        guard let source = node.noteSource, let style = node.noteTextStyle else { return nil }
         let weight = style.fontWeight
         return PenTextMeasureRequest(
-            text: markdown.displayText,
+            text: source,
             fontFamily: style.fontFamily,
             fontSize: style.fontSize,
             fontWeight: weight.rounded() == weight ? String(Int(weight)) : String(weight),
             fontStyle: style.isItalic ? "italic" : nil,
             letterSpacing: style.letterSpacing,
-            lineHeight: style.lineHeight,
-            runs: markdown.runs,
-            indents: markdown.indents
+            lineHeight: style.lineHeight
         )
     }
 

@@ -9,7 +9,8 @@ import Woodcase
 
 extension PerformanceBudgets {
     /// Measures node-granular layout on a 2,000-node board: a hypothetical reorder and
-    /// resize, as a live gesture previews them, and a committed edit.
+    /// resize, as a live gesture previews them, a committed edit, and a committed edit
+    /// inside the component every card instance draws.
     ///
     /// Each gesture is timed on a ``PenLayoutState`` built once — what a host holds between
     /// frames — with real CoreText text measurement. The committed edit times
@@ -36,6 +37,15 @@ extension PerformanceBudgets {
         private static let resizeBudget = PerformanceBudget(
             name: "hypothetical resize of a list row on a 2000-node board",
             release: .milliseconds(2),
+            repetitions: 20
+        )
+        /// Every instance of the component is laid out whole, with its spine: 25.4 ms when
+        /// such an edit laid out the whole board, 13.7 ms naming the instances (2026-10-12,
+        /// `WoodcasePerformance.md`). The limit sits between, so the board-wide fallback
+        /// coming back fails it.
+        private static let definitionBudget = PerformanceBudget(
+            name: "committed edit inside the component, node-granular update on a 2000-node board",
+            release: .milliseconds(20),
             repetitions: 20
         )
         private static let updateBudget = PerformanceBudget(
@@ -94,6 +104,29 @@ extension PerformanceBudgets {
             #expect(documents.count == Self.updateBudget.repetitions + 1)
         }
 
+        @Test("A committed edit inside the component lays out its instances within budget")
+        func committedDefinitionEdit() throws {
+            let board = try Board()
+            var elapsed: [Duration] = []
+            var documents: [PenDocument] = [board.state.document]
+            for attempt in 0 ..< Self.definitionBudget.repetitions {
+                board.document.clearDirtyNodes()
+                try board.document.apply(.setProperties(EditOperation.SetProperties(
+                    nodeID: board.definitionText,
+                    properties: ["kind.content": .string("Edited card text" + String(repeating: " x", count: attempt % 3 + 1))]
+                )))
+                let resolved = PenVariableResolver.resolve(board.document.expandedDocument().0)
+                let invalidation = board.document.layoutInvalidation
+                documents.append(resolved)
+                let clock = ContinuousClock.now
+                let change = board.state.update(to: resolved, invalidation: invalidation)
+                elapsed.append(clock.duration(to: ContinuousClock.now))
+                try #require(!change.stats.containersLaidOut.isEmpty)
+            }
+            Self.definitionBudget.check(PerformanceSample(elapsed: elapsed))
+            #expect(documents.count == Self.definitionBudget.repetitions + 1)
+        }
+
         /// A 2,000-node board laid out once, and the ids the gestures act on.
         @MainActor
         private final class Board {
@@ -101,17 +134,25 @@ extension PerformanceBudgets {
             var state: PenLayoutState
             let rows: [String]
             let titles: [String]
+            /// A text inside the component definition that no instance overrides.
+            let definitionText: String
 
             init() throws {
                 let source = SyntheticPenDocument.makeEditorBoard(nodeCount: LayoutEditTests.nodeCount)
                 let list = try #require(Self.find(SyntheticPenDocument.editorBoardListName, in: source.children))
                 rows = list.kind.inlineChildren.map(\.id)
                 titles = list.kind.inlineChildren.compactMap { $0.kind.inlineChildren.first?.id }
+                definitionText = try #require(Self.texts(in: source.children[0]).last)
                 document = EditableDocument(from: source)
                 document.primeLayoutCache(with: [:])
                 // The first layout is the cold one a host pays once; the budgets are for
                 // the gestures after it.
                 state = PenLayoutState(document: PenVariableResolver.resolve(document.expandedDocument().0))
+            }
+
+            private static func texts(in node: PenNode) -> [String] {
+                let own: [String] = if case .text = node.kind { [node.id] } else { [] }
+                return own + node.kind.inlineChildren.flatMap(texts(in:))
             }
 
             private static func find(_ name: String, in nodes: [PenNode]) -> PenNode? {

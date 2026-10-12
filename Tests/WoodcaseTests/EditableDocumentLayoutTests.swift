@@ -59,7 +59,8 @@ struct EditableDocumentLayoutTests {
     @Test("First computeLayout does full layout")
     func firstComputeLayoutIsFull() {
         let editable = makeDocument()
-        let rects = editable.computeLayout()
+        editable.computeLayout()
+        let rects = editable.layoutRects
 
         #expect(rects["frame1"] != nil)
         #expect(rects["rect1"] != nil)
@@ -74,7 +75,8 @@ struct EditableDocumentLayoutTests {
     @Test("Color change produces render-only dirty, same rects")
     func colorChangeRenderOnlyDirty() throws {
         let editable = makeDocument()
-        let firstRects = editable.computeLayout()
+        editable.computeLayout()
+        let firstRects = editable.layoutRects
         editable.clearDirtyNodes()
 
         // Change fill color only
@@ -89,7 +91,8 @@ struct EditableDocumentLayoutTests {
         #expect(editable.dirtyRenderNodeIDs.contains("rect1"))
         #expect(!editable.dirtyLayoutNodeIDs.contains("rect1"))
 
-        let secondRects = editable.computeLayout()
+        editable.computeLayout()
+        let secondRects = editable.layoutRects
         // Rects should be identical (no layout change)
         #expect(secondRects["frame1"] == firstRects["frame1"])
         #expect(secondRects["rect1"] == firstRects["rect1"])
@@ -116,7 +119,8 @@ struct EditableDocumentLayoutTests {
         #expect(editable.dirtyLayoutNodeIDs.contains("rect1"))
         #expect(editable.dirtyLayoutNodeIDs.contains("frame1")) // ancestor
 
-        let updatedRects = editable.computeLayout()
+        editable.computeLayout()
+        let updatedRects = editable.layoutRects
         #expect(updatedRects["rect1"]?.width == 200)
     }
 
@@ -205,7 +209,8 @@ struct EditableDocumentLayoutTests {
             ]
         )
         let editable = EditableDocument(from: doc)
-        let rects = editable.computeLayout()
+        editable.computeLayout()
+        let rects = editable.layoutRects
 
         // With inherited dark theme, frameWidth should resolve to 400
         #expect(rects["frame1"]?.width == 400)

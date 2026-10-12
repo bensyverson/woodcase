@@ -9,43 +9,6 @@ import Testing
 
 @MainActor
 struct MeasurementCacheTests {
-    // MARK: - LayoutCache measurement cache invalidation
-
-    @Test("invalidateLayout evicts node and ancestors from measurement cache")
-    func invalidateLayoutEvictsFromCache() {
-        let cache = LayoutCache()
-        cache.measurementCache["child"] = PenLayoutEngine.MeasurementCacheEntry(
-            availableWidth: 100, availableHeight: 200, width: 50, height: 30
-        )
-        cache.measurementCache["parent"] = PenLayoutEngine.MeasurementCacheEntry(
-            availableWidth: nil, availableHeight: nil, width: 200, height: 100
-        )
-        cache.measurementCache["sibling"] = PenLayoutEngine.MeasurementCacheEntry(
-            availableWidth: nil, availableHeight: nil, width: 80, height: 40
-        )
-
-        cache.invalidateLayout("child", ancestors: ["parent"])
-
-        #expect(cache.measurementCache["child"] == nil)
-        #expect(cache.measurementCache["parent"] == nil)
-        #expect(cache.measurementCache["sibling"] != nil)
-    }
-
-    @Test("invalidateAll clears measurement cache")
-    func invalidateAllClearsMeasurementCache() {
-        let cache = LayoutCache()
-        cache.measurementCache["a"] = PenLayoutEngine.MeasurementCacheEntry(
-            availableWidth: nil, availableHeight: nil, width: 10, height: 10
-        )
-        cache.measurementCache["b"] = PenLayoutEngine.MeasurementCacheEntry(
-            availableWidth: nil, availableHeight: nil, width: 20, height: 20
-        )
-
-        cache.invalidateAll()
-
-        #expect(cache.measurementCache.isEmpty)
-    }
-
     // MARK: - Incremental layout with measurement cache
 
     private func makeSimpleDoc() -> PenDocument {

@@ -135,7 +135,7 @@ struct EditableDocumentIncrementalPipelineTests {
         _ = runFullPipeline(editable)
         #expect(editable.isLayoutFullyInvalidated == false)
 
-        // An insert marks its board, not the whole document
+        // An insert marks its parent's spine, not the whole document
         try editable.apply(.insertNode(EditOperation.InsertNode(
             node: PenNode(
                 id: "newRect",
@@ -147,7 +147,7 @@ struct EditableDocumentIncrementalPipelineTests {
             parentID: "frame1"
         )))
         #expect(editable.isLayoutFullyInvalidated == false)
-        #expect(editable.dirtyLayoutRootIDs == ["frame1"])
+        #expect(editable.dirtyLayoutNodeIDs == ["newRect", "frame1"])
     }
 
     // MARK: - Color edit produces render-only dirty state
@@ -172,10 +172,10 @@ struct EditableDocumentIncrementalPipelineTests {
         #expect(editable.dirtyRenderNodeIDs.count == 1)
     }
 
-    // MARK: - Structural edit marks its board
+    // MARK: - Structural edit marks its spine
 
-    @Test("Insert after priming marks only its board for layout")
-    func structuralEditMarksItsBoard() throws {
+    @Test("Insert after priming marks only its parent's spine for layout")
+    func structuralEditMarksItsSpine() throws {
         let editable = makeDocument()
         _ = runFullPipeline(editable)
         editable.clearDirtyNodes()
@@ -195,7 +195,6 @@ struct EditableDocumentIncrementalPipelineTests {
         )))
 
         #expect(editable.isLayoutFullyInvalidated == false)
-        #expect(editable.dirtyLayoutRootIDs == ["frame2"])
-        #expect(editable.dirtyLayoutNodeIDs.isSuperset(of: ["newEllipse", "frame2"]))
+        #expect(editable.dirtyLayoutNodeIDs == ["newEllipse", "frame2"])
     }
 }

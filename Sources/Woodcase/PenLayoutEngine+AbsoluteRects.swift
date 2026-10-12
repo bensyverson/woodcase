@@ -30,7 +30,7 @@ public extension PenLayoutEngine {
 
     /// Every node under `rootID`, in the root's own coordinate frame.
     ///
-    /// ``layout(_:textMeasurer:)`` settles a rect **relative to the node's parent** — to
+    /// ``layout(_:textMeasurer:options:)`` settles a rect **relative to the node's parent** — to
     /// its parent's own coordinates: a leaf six levels down reads `x: 0, y: 0` when it sits
     /// at its parent frame's top-left corner, or at its parent group's anchor — and only a
     /// top-level node's rect is in canvas coordinates. ``PenRenderer``

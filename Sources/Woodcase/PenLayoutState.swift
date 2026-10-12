@@ -7,7 +7,7 @@ import Foundation
 
 /// A laid-out document and everything needed to lay it out again node by node.
 ///
-/// ``PenLayoutEngine/layout(_:textMeasurer:)`` answers once and forgets. A state keeps the
+/// ``PenLayoutEngine/layout(_:textMeasurer:options:)`` answers once and forgets. A state keeps the
 /// expanded document, its ``PenLayoutIndex``, every rect, and what the walk remembers of
 /// each node's size (the engine's memo: the offer and size of each node's last final
 /// call, and a few sizes from measuring calls). With those, a later pass skips every
@@ -44,20 +44,52 @@ public struct PenLayoutState: Sendable {
     /// What the walk remembers of each node's size.
     var memo = PenLayoutEngine.Memo()
 
-    /// The measurer every pass uses.
+    /// The cards the rects were laid out with drawn raw.
+    public private(set) var options: PenLayoutOptions
+
+    /// The sizes of the texts the passes have typeset, bounded; every pass measures
+    /// through it (design decision 4).
+    public let textSizes: TextSizeCache
+
+    /// The measurer every pass uses: ``textSizes``' measurer.
     let textMeasurer: TextMeasurer
 
-    /// Lays a document out in full.
+    /// The font set's generation when the rects were laid out (``TextSizeCache/fontGeneration``).
+    /// When it has moved, every remembered size may be wrong, so the next update lays
+    /// out everything.
+    private(set) var fontGeneration: Int
+
+    /// Lays a document out in full, measuring text through a new ``TextSizeCache`` of the
+    /// default capacity.
     ///
     /// - Parameters:
-    ///   - document: An expanded, resolved document, as ``PenLayoutEngine/layout(_:textMeasurer:)``
+    ///   - document: An expanded, resolved document, as ``PenLayoutEngine/layout(_:textMeasurer:options:)``
     ///     takes it.
-    ///   - textMeasurer: The text measurer every pass of this state uses.
-    public init(document: PenDocument, textMeasurer: @escaping TextMeasurer = PenLayoutEngine.defaultTextMeasurer) {
+    ///   - textMeasurer: The text measurer behind the state's text cache.
+    ///   - options: The cards drawn raw. Defaults to none.
+    public init(
+        document: PenDocument,
+        textMeasurer: @escaping TextMeasurer = PenLayoutEngine.defaultTextMeasurer,
+        options: PenLayoutOptions = PenLayoutOptions()
+    ) {
+        self.init(document: document, textSizes: TextSizeCache(measuring: textMeasurer), options: options)
+    }
+
+    /// Lays a document out in full, measuring text through a text cache the caller made.
+    ///
+    /// - Parameters:
+    ///   - document: An expanded, resolved document.
+    ///   - textSizes: The text cache every pass of this state measures through, with the
+    ///     measurer behind it.
+    ///   - options: The cards drawn raw. Defaults to none.
+    public init(document: PenDocument, textSizes: TextSizeCache, options: PenLayoutOptions = PenLayoutOptions()) {
         self.document = document
         index = PenLayoutIndex(document)
-        self.textMeasurer = textMeasurer
-        Self.pass(over: document, roots: nil, rects: &rects, memo: &memo, textMeasurer: textMeasurer)
+        self.textSizes = textSizes
+        self.options = options
+        textMeasurer = textSizes.measurer
+        fontGeneration = textSizes.fontGeneration
+        Self.pass(over: document, roots: nil, rects: &rects, memo: &memo, textMeasurer: textMeasurer, options: options)
         memo.clearLog()
     }
 
@@ -66,7 +98,10 @@ public struct PenLayoutState: Sendable {
     /// The invalidation is translated to expanded ids against the new document
     /// (``PenLayoutIndex/expandedIDs(for:)``); what each names is forgotten, with its
     /// ancestors, and the roots holding one are walked — every clean subtree on the way
-    /// answering from memory. An invalidation of everything lays the document out in full.
+    /// answering from memory. An invalidation of everything lays the document out in full,
+    /// and so does any update after a font registration
+    /// (``PenFontRegistry/generation`` moved): every remembered size may be wrong. Texts
+    /// the state has typeset before are answered by ``textSizes``.
     ///
     /// - Parameters:
     ///   - document: The document as edited, expanded and resolved.
@@ -74,10 +109,31 @@ public struct PenLayoutState: Sendable {
     ///     ``EditableDocument/layoutInvalidation``.
     /// - Returns: What changed against the rects before the call.
     public mutating func update(to document: PenDocument, invalidation: PenLayoutInvalidation) -> PenLayoutChange {
+        update(to: document, invalidation: invalidation, options: options)
+    }
+
+    /// Lays out again what an invalidation names, with other cards drawn raw, and takes
+    /// the edited document.
+    ///
+    /// As ``update(to:invalidation:)``, and every card that started or stopped being
+    /// drawn raw is laid out again too (``PenLayoutOptions/invalidation(from:)``): an
+    /// editor passes the cards it draws raw on every update, and a card entering or
+    /// leaving editing grows or shrinks back.
+    ///
+    /// - Parameters:
+    ///   - document: The document as edited, expanded and resolved.
+    ///   - invalidation: What the edits since the last update named.
+    ///   - options: The cards drawn raw from now on.
+    /// - Returns: What changed against the rects before the call.
+    public mutating func update(
+        to document: PenDocument, invalidation: PenLayoutInvalidation, options: PenLayoutOptions
+    ) -> PenLayoutChange {
+        let invalidation = invalidation.union(options.invalidation(from: self.options))
+        self.options = options
         let before = rects
-        guard !invalidation.everything else {
+        guard !invalidation.everything, textSizes.fontGeneration == fontGeneration else {
             let oldIndex = index
-            self = PenLayoutState(document: document, textMeasurer: textMeasurer)
+            self = PenLayoutState(document: document, textSizes: textSizes, options: options)
             let candidates = Set(before.keys).union(rects.keys)
             var change = Self.change(from: before, to: rects, among: candidates, index: index, oldIndex: oldIndex)
             change.affectedRoots = Set(index.roots)
@@ -101,7 +157,9 @@ public struct PenLayoutState: Sendable {
         }
 
         memo.clearLog()
-        Self.pass(over: document, roots: dirtyRoots, rects: &rects, memo: &memo, textMeasurer: textMeasurer)
+        Self.pass(
+            over: document, roots: dirtyRoots, rects: &rects, memo: &memo, textMeasurer: textMeasurer, options: options
+        )
         gone.formUnion(Self.dropUnplaced(memo.unplaced, index: newIndex, from: &rects))
 
         let candidates = Set(memo.written).union(gone)
@@ -124,17 +182,19 @@ public struct PenLayoutState: Sendable {
     ///   - rects: The rects, updated in place.
     ///   - memo: The walk's memory, read and filled.
     ///   - textMeasurer: The text measurer.
+    ///   - options: The cards drawn raw.
     static func pass(
         over document: PenDocument,
         roots: Set<String>?,
         rects: inout [String: PenRect],
         memo: inout PenLayoutEngine.Memo,
-        textMeasurer: TextMeasurer
+        textMeasurer: TextMeasurer,
+        options: PenLayoutOptions
     ) {
         for node in document.children where roots?.contains(node.id) ?? true {
             let size = PenLayoutEngine.layoutNode(
                 node, availableWidth: nil, availableHeight: nil,
-                textMeasurer: textMeasurer, into: &rects, memo: &memo
+                textMeasurer: textMeasurer, options: options, into: &rects, memo: &memo
             )
             rects[node.id] = PenLayoutEngine.freeRect(
                 of: node, x: node.common.x?.literalValue ?? 0, y: node.common.y?.literalValue ?? 0,

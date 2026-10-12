@@ -19,10 +19,8 @@ import Testing
 /// R5       a top-level instance of Card (title overridden)
 /// ```
 ///
-/// Every board holds one string no other root draws — ``signatures`` — so a
-/// ``RecordingTextMeasurer`` says which roots a layout pass walked. `Card` and `Panel`
-/// have none: ``EditableDocument/expandedDocument()`` leaves reusable roots out, so no
-/// layout pass walks them on their own.
+/// `Card` and `Panel` are never laid out on their own:
+/// ``EditableDocument/expandedDocument()`` leaves reusable roots out.
 @MainActor
 struct StructuralLayoutFixture {
     /// The document under test, laid out once and with its dirty tracking cleared.
@@ -30,15 +28,6 @@ struct StructuralLayoutFixture {
 
     /// The measurer every layout of ``document`` uses.
     let recorder = RecordingTextMeasurer()
-
-    /// The one string each identifiable root draws, by root id.
-    static let signatures: [String: String] = [
-        "B1": "B1 title",
-        "B2": "B2 title",
-        "B3": "B3 title",
-        "B4": "B4 title",
-        "R5": "R5 title",
-    ]
 
     /// Loads the document and primes its layout cache with a full pass.
     init() throws {
@@ -52,20 +41,30 @@ struct StructuralLayoutFixture {
     /// ``LayoutOracle``.
     ///
     /// - Parameter operation: The edit.
-    /// - Returns: The roots, among those with a ``signatures`` entry, the layout walked.
+    /// - Returns: What the layout pass reported — which roots it laid out
+    ///   (``PenLayoutChange/affectedRoots``), which containers
+    ///   (``PenLayoutStats/containersLaidOut``), and which rects changed.
     @discardableResult
     func applyAndLayOut(
         _ operation: EditOperation,
         sourceLocation: SourceLocation = #_sourceLocation
-    ) throws -> Set<String> {
+    ) throws -> PenLayoutChange {
         try document.apply(operation)
+        return try layOut(sourceLocation: sourceLocation)
+    }
+
+    /// Lays the document out again after edits already applied, and checks the result
+    /// against ``LayoutOracle``.
+    ///
+    /// - Returns: What the layout pass reported.
+    @discardableResult
+    func layOut(sourceLocation: SourceLocation = #_sourceLocation) throws -> PenLayoutChange {
         recorder.reset()
-        let incremental = document.computeLayout(textMeasurer: recorder.measurer)
-        let walked = Set(Self.signatures.filter { recorder.texts.contains($0.value) }.keys)
+        let change = document.computeLayout(textMeasurer: recorder.measurer)
         // A measurer of its own, so the oracle's pass stays out of the record.
         let full = LayoutOracle.fullLayout(of: document, textMeasurer: RecordingTextMeasurer().measurer)
-        #expect(incremental == full, "incremental layout differs from full layout", sourceLocation: sourceLocation)
-        return walked
+        #expect(document.layoutRects == full, "incremental layout differs from full layout", sourceLocation: sourceLocation)
+        return change
     }
 
     /// A text node with the given id and content.

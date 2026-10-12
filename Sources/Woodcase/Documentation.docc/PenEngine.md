@@ -478,7 +478,7 @@ The details worth stating, because they are all askable questions:
   fill nor a fallback, an absolute frame's `fill_container` still takes its
   children's extent from its origin — Pen has not been measured there.
 
-- **Incremental layout:** ``PenLayoutEngine/layoutIncremental(_:previousRects:dirtyNodeIDs:textMeasurer:)`` accepts cached rects and dirty node IDs, re-laying out only the root subtrees that contain dirty descendants. Clean roots have their previous rects copied unchanged. Since `.pen` documents are organized as independent top-level artboards, skipping clean artboards is the highest-value optimization. A host editing a document passes ``PenLayoutEngine/layoutIncremental(_:previousRects:invalidation:textMeasurer:measurementCache:)`` a ``PenLayoutInvalidation`` instead: it names nodes by *source* id, and the engine translates them to the expanded tree through a ``PenLayoutIndex`` — see <doc:EditingDocuments>.
+- **Incremental layout:** ``PenLayoutEngine/layoutIncremental(_:previousRects:dirtyNodeIDs:textMeasurer:options:)`` accepts cached rects and dirty node IDs, re-laying out only the root subtrees that contain dirty descendants. Clean roots have their previous rects copied unchanged. Since `.pen` documents are organized as independent top-level artboards, skipping clean artboards is the highest-value optimization. A host editing a document passes ``PenLayoutEngine/layoutIncremental(_:previousRects:invalidation:textMeasurer:options:measurementCache:)`` a ``PenLayoutInvalidation`` instead: it names nodes by *source* id, and the engine translates them to the expanded tree through a ``PenLayoutIndex`` — see <doc:EditingDocuments>.
 
 ### Three extents
 
@@ -491,7 +491,7 @@ sibling, a `fit_content` parent or a group's union, turned or not, and not even 
 
 | Extent | What it is | API | Readers |
 |---|---|---|---|
-| (i) Bounds | The axis-aligned bounds of the node's turned, flipped box, in its parent's coordinates | ``PenRect``, as ``PenLayoutEngine/layout(_:textMeasurer:)`` settles it; ``PenLayoutEngine/absoluteRects(under:in:layoutRects:)`` composes it | The layout engine; `tree`'s `rect` and `absRect`; `shot`'s `rect=`, `--outline` and `--crop`; overlap lint; snapping and marquee selection; codegen's positioned wrappers |
+| (i) Bounds | The axis-aligned bounds of the node's turned, flipped box, in its parent's coordinates | ``PenRect``, as ``PenLayoutEngine/layout(_:textMeasurer:options:)`` settles it; ``PenLayoutEngine/absoluteRects(under:in:layoutRects:)`` composes it | The layout engine; `tree`'s `rect` and `absRect`; `shot`'s `rect=`, `--outline` and `--crop`; overlap lint; snapping and marquee selection; codegen's positioned wrappers |
 | (ii) Placement | The box `0, 0, w, h` (a group's: its children's union, from its anchor) and the map that turns, flips and moves it into the parent, or the canvas | ``PenPlacement``, from ``PenLayoutEngine/placement(of:rect:layoutRects:)`` and ``PenLayoutEngine/canvasPlacement(of:in:layoutRects:)`` | Every renderer; the space children's rects are measured in; hit-testing the turned quad; selection handles and drag |
 | (iii) Painted extent | What may carry ink: the box grown by its stroke band, unclipped children, shadows and blur | ``PenLayoutEngine/paintedExtent(of:rect:layoutRects:)``, ``PenLayoutEngine/canvasPaintedExtent(of:in:layoutRects:)`` | Export and render canvas size; `shot --extent painted`; the render tests that place Pen's references; viewport culling; dirty-rect invalidation; stroke-band hit-testing |
 

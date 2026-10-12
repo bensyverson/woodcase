@@ -183,4 +183,44 @@ struct TextSizeCacheTests {
 
         #expect(base.count == 2)
     }
+
+    // MARK: - Bounded
+
+    @Test("the cache never holds more sizes than its capacity")
+    func theCacheIsBounded() {
+        let base = RecordingMeasurer()
+        let cache = TextSizeCache(measuring: base.measurer, capacity: 4, fontGeneration: { 0 })
+
+        for number in 0 ..< 50 {
+            _ = Self.measure(cache.measurer, "Text \(number)")
+            #expect(cache.count <= 4)
+        }
+        #expect(cache.capacity == 4)
+        #expect(cache.count > 0)
+    }
+
+    @Test("the least recently used size is the one forgotten")
+    func theLeastRecentlyUsedIsForgotten() {
+        let base = RecordingMeasurer()
+        let cache = TextSizeCache(measuring: base.measurer, capacity: 4, fontGeneration: { 0 })
+        let measurer = cache.measurer
+
+        for text in ["a", "b", "c", "d"] {
+            _ = Self.measure(measurer, text)
+        }
+        _ = Self.measure(measurer, "a")
+        _ = Self.measure(measurer, "e")
+        #expect(base.count == 5, "a repeat of a was measured again")
+
+        _ = Self.measure(measurer, "a")
+        #expect(base.count == 5, "the recently used a was forgotten")
+        _ = Self.measure(measurer, "b")
+        #expect(base.count == 6, "b, the least recently used, was kept past the capacity")
+    }
+
+    @Test("a cache made without a capacity holds the default one")
+    func theDefaultCapacity() {
+        #expect(TextSizeCache().capacity == TextSizeCache.defaultCapacity)
+        #expect(TextSizeCache.defaultCapacity == 20000)
+    }
 }

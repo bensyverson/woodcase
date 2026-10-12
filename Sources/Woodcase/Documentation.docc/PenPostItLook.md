@@ -148,6 +148,13 @@ mentions and no checkboxes. An editor sets its draft in the same style in
 ``PenPostIt/textFrame(of:width:height:style:)``, so the draft lies over the drawn body line
 for line, caret included.
 
+Layout grows the card to fit too (Ben's ruling 2026-10-12): pass the same cards to layout
+as ``PenLayoutOptions`` (``PenPostIt/DrawingOptions/layoutOptions``), and a card drawn raw
+is laid out at the most of its set height, its styled text's and its raw text's — so it
+neither jumps when editing starts nor clips its draft. Without the card named, layout is
+unchanged. See <doc:EditingDocuments> for laying out again when a card enters or leaves
+editing.
+
 Only the body changes. The paper, the labels, the author line, the Run button and the body's
 frame are the same parts either way (`PostItRawBodyTests`), so a card does not move when
 editing begins. The box is the caller's, and the layout grows a card by its *styled* text, so a

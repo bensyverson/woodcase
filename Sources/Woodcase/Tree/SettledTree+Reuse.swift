@@ -9,7 +9,7 @@ extension SettledTree {
     /// Settles a document, laying out only the roots that an earlier settle cannot
     /// answer for.
     ///
-    /// Roots lay out independently — ``PenLayoutEngine/layout(_:textMeasurer:)`` lays
+    /// Roots lay out independently — ``PenLayoutEngine/layout(_:textMeasurer:options:)`` lays
     /// each one out with nothing around it — so a settled tree is a set of per-root
     /// pieces (``Ledger``), and a piece stays true for as long as everything it was built
     /// from does:

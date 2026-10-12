@@ -19,7 +19,7 @@ public extension PDFExporter.Page {
     /// - Parameters:
     ///   - nodeID: The node to draw, usually a top-level frame.
     ///   - document: The resolved, ref-expanded document.
-    ///   - layoutRects: The document's layout, from ``PenLayoutEngine/layout(_:textMeasurer:)``.
+    ///   - layoutRects: The document's layout, from ``PenLayoutEngine/layout(_:textMeasurer:options:)``.
     ///   - imageProvider: Loads the images that image fills name.
     /// - Returns: `nil` when the layout has no rect for `nodeID`.
     init?(

@@ -641,7 +641,27 @@ the engine's own per-child cost — each of the list's 400 rows answers from mem
 (measured, then arranged), about 1 µs a row — so a deeper engine optimization, not more
 caching, is the next step if a bigger board needs it.
 
+> **Re-taken 2026-10-12 (leaves `df281f`, `WfbzYQ`), and a fourth gesture.** With the
+> state's bounded text cache, structural edits scoped to spines and raw cards in place:
+> hypothetical reorder 0.8 ms, hypothetical resize 0.9 ms, committed text edit 0.9 ms
+> (minimum of 20; `uptime` 9.9 before the build, 19.2 after). The new gesture is a
+> committed edit to a text inside the board's `Card` component, which every card instance
+> draws: **25.4 ms** while such an edit named every drawing board whole (`uptime` 6–118,
+> other agents building), **13.7 ms** once it names the placed instances, each laid out
+> whole with its spine (`uptime` 10–19). Its enforced limit is 20 ms, between the two.
+> What remains is the instances themselves: each is laid out whole because a source id
+> inside a definition names no expanded node. Translating it to its counterpart in each
+> instance would lay out only those spines — the next step if a component-heavy board
+> needs it. Same command as above.
+
 ## Structural edits on a many-board document
+
+> **Narrowed 2026-10-12 (leaf `df281f`).** An insert, move or delete now names only the
+> spines it touches — and, inside a component, the spines of the placed instances drawing
+> it — and ``EditableDocument/computeLayout(textMeasurer:)`` updates one ``PenLayoutState``.
+> The one-node insert below: **7.3 ms** (minimum of 5, under its 8 ms target), `uptime`
+> 10–19, same command. Most of what is left is the call's whole-document expansion and
+> resolution, not layout.
 
 An insert, move or delete lays out only the top-level boards it can change — the board
 that holds it, plus every board drawing a component it lands inside (Penumbra ruling

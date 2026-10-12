@@ -17,7 +17,7 @@ public extension PenLayoutEngine {
     /// instance it changes — the measurements of every translated id are forgotten, and
     /// the top-level nodes holding one are laid out again.
     ///
-    /// The result equals ``layout(_:textMeasurer:)`` of the same document, bit for bit:
+    /// The result equals ``layout(_:textMeasurer:options:)`` of the same document, bit for bit:
     /// `IncrementalLayoutEquivalenceTests` holds it to that over every fixture and a
     /// spread of writes.
     ///
@@ -27,6 +27,8 @@ public extension PenLayoutEngine {
     ///     laid out.
     ///   - invalidation: What the edits since that layout named, by source id.
     ///   - textMeasurer: A function that measures text bounding boxes.
+    ///   - options: The cards drawn raw. When they differ from the last call's, merge
+    ///     ``PenLayoutOptions/invalidation(from:)`` into `invalidation`. Defaults to none.
     ///   - measurementCache: The host's measurement cache, kept across calls and only
     ///     ever filled by them.
     /// - Returns: Every expanded node's rect.
@@ -35,13 +37,14 @@ public extension PenLayoutEngine {
         previousRects: [String: PenRect],
         invalidation: PenLayoutInvalidation,
         textMeasurer: TextMeasurer = defaultTextMeasurer,
+        options: PenLayoutOptions = PenLayoutOptions(),
         measurementCache: inout [String: MeasurementCacheEntry]
     ) -> [String: PenRect] {
         guard !invalidation.everything, !previousRects.isEmpty else {
             // A full pass fills no measurement cache, and nothing in the old one is known
             // to be good any more.
             measurementCache.removeAll()
-            return layout(document, textMeasurer: textMeasurer)
+            return layout(document, textMeasurer: textMeasurer, options: options)
         }
         let index = PenLayoutIndex(document)
         let dirty = index.expandedIDs(for: invalidation)
@@ -53,7 +56,7 @@ public extension PenLayoutEngine {
         let rects = layOutRoots(
             of: document, previousRects: previousRects,
             isDirty: { dirtyRoots.contains($0.id) },
-            textMeasurer: textMeasurer, memo: &memo
+            textMeasurer: textMeasurer, options: options, memo: &memo
         )
         measurementCache = memo.finals
         return rects

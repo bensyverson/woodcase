@@ -32,8 +32,8 @@ struct LayoutInvalidationTests {
         #expect(!invalidation.everything)
     }
 
-    @Test("An edit inside a component falls back to the roots whose revision moved")
-    func definitionEditFallsBackToRevisionMovedRoots() throws {
+    @Test("An edit inside a component names the placed instances in the roots whose revision moved")
+    func definitionEditNamesPlacedInstances() throws {
         let fixture = try StructuralLayoutFixture()
         let before = rootRevisions(of: fixture.document)
         try fixture.document.apply(.setProperties(EditOperation.SetProperties(
@@ -43,17 +43,24 @@ struct LayoutInvalidationTests {
         let moved = Set(before.keys.filter { before[$0] != after[$0] })
 
         #expect(moved == ["Card", "Panel", "B2", "B3", "R5"])
-        #expect(fixture.document.layoutInvalidation.roots == moved)
-        #expect(fixture.document.layoutInvalidation.nodes.isSuperset(of: ["cardBodyText", "cardBody", "Card"]))
+        let invalidation = fixture.document.layoutInvalidation
+        #expect(invalidation.roots.isEmpty)
+        // Each placed instance with its spine, up to exactly the boards whose revision
+        // moved; the definitions' own spines lay nothing out (they are not expanded).
+        #expect(invalidation.nodes.isSuperset(of: ["b2Card", "B2", "b3Panel", "B3", "R5"]))
+        #expect(!invalidation.nodes.contains("panelCard"))
+        #expect(invalidation.nodes.isSuperset(of: ["cardBodyText", "cardBody", "Card"]))
+        let placedRoots = invalidation.nodes.filter { fixture.document.parents[$0] == nil }
+        #expect(placedRoots.union(["Panel"]) == moved, "the named spines reach exactly the moved roots")
     }
 
-    @Test("Toggling reusable falls back to the roots drawing the node")
+    @Test("Toggling reusable names the placed instances drawing the node")
     func reusableToggle() throws {
         let fixture = try StructuralLayoutFixture()
         try fixture.document.apply(.setProperties(EditOperation.SetProperties(
             nodeID: "Card", properties: ["common.reusable": .bool(false)]
         )))
-        #expect(fixture.document.layoutInvalidation.roots.isSuperset(of: ["B2", "B3", "R5"]))
+        #expect(fixture.document.layoutInvalidation.nodes.isSuperset(of: ["b2Card", "b3Panel", "R5", "Card"]))
     }
 
     @Test("A theme change names the node's whole subtree")

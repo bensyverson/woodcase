@@ -134,9 +134,11 @@ extension EditableDocument {
     ///
     /// A layout change records the node and its spine. When expansion can carry the
     /// change into other boards — a node on the spine is a component, or something
-    /// renders it by name — it also records every root whose revision the change moved
-    /// (``layoutRootsDrawing(_:)``): the cache's dirty ids are source ids, and the
-    /// instances that draw the change are laid out under other ids in other roots.
+    /// renders it by name — it also records every placed instance that draws the change
+    /// (``layoutInstancesDrawing(_:)``), with its spine: the cache's dirty ids are source
+    /// ids, and the instances lay the change out under other ids in other boards. Each
+    /// instance is laid out whole and its ancestors again; the rest of its board answers
+    /// from memory.
     ///
     /// - Parameters:
     ///   - nodeID: The node that changed.
@@ -158,25 +160,32 @@ extension EditableDocument {
             let drawn = ([nodeID] + ancestorIDs).filter {
                 nodes[$0]?.common.reusable == true || !referrers.referrers(of: $0).isEmpty
             }
-            if !drawn.isEmpty {
-                cache.invalidateRoots(layoutRootsDrawing(drawn))
+            for ref in layoutInstancesDrawing(drawn) {
+                cache.invalidateLayout(ref, ancestors: ancestors(of: ref))
             }
         case .structural:
             cache.invalidateAll()
         }
     }
 
-    /// The top-level nodes whose revision a change to the given nodes moves: the roots
-    /// holding them, every root drawing one of them, and so on through nested components.
+    /// The placed instances that draw the given nodes: every `ref` outside a component
+    /// definition whose expansion holds one of them, directly or through components
+    /// nesting it.
     ///
-    /// These are the tops of the spines in the nodes' revision closure
+    /// They are the placed refs in the nodes' revision closure
     /// (``revisionDependents(of:)``), so it costs what the nodes reach rather than a pass
-    /// over the document. A name that resolves to nothing yet is in the closure too, and
-    /// may come back here; it names no expanded node, so layout passes over it.
+    /// over the document. A ref inside a definition is left out: it is expanded only
+    /// inside the placed instance of its definition, which the closure also holds. Naming
+    /// a ref in ``PenLayoutInvalidation/nodes`` lays out its instance whole, and its
+    /// ancestors (``PenLayoutIndex/expandedIDs(for:)``). A ref whose target resolves to
+    /// nothing yet is named too; it has no instance, so layout passes over it.
     ///
     /// - Parameter drawn: Nodes that are components, or are rendered by name.
-    /// - Returns: The top-level node ids.
-    func layoutRootsDrawing(_ drawn: [String]) -> Set<String> {
-        Set(revisionDependents(of: drawn).filter { parents[$0] == nil })
+    /// - Returns: The refs' source ids.
+    func layoutInstancesDrawing(_ drawn: [String]) -> Set<String> {
+        revisionDependents(of: drawn).filter { id in
+            guard case .ref = nodes[id]?.kind else { return false }
+            return !([id] + ancestors(of: id)).contains { nodes[$0]?.common.reusable == true }
+        }
     }
 }

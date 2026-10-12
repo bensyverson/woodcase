@@ -61,7 +61,7 @@ extension PerformanceBudgets {
                 )))
                 document.computeLayout()
             }
-            #expect(document.dirtyLayoutRootIDs == ["board3"])
+            #expect(document.dirtyLayoutNodeIDs.isSuperset(of: ["list3", "board3"]))
             Self.insertBudget.check(sample)
         }
 

@@ -84,7 +84,7 @@ public extension PenLayoutState {
         }
         let roots = Set(seeds.subtracting(removed).compactMap { index[$0]?.root })
         memo.clearLog()
-        Self.pass(over: tree, roots: roots, rects: &laidOut, memo: &memo, textMeasurer: textMeasurer)
+        Self.pass(over: tree, roots: roots, rects: &laidOut, memo: &memo, textMeasurer: textMeasurer, options: options)
         let dropped = Self.dropUnplaced(memo.unplaced, index: index, from: &laidOut)
 
         let candidates = Set(memo.written).union(removed).union(dropped)

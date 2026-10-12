@@ -338,11 +338,15 @@ if let surface = editable.inspectComponent("comp1") {
 
 For interactive editing, ``EditableDocument`` provides an incremental layout pipeline
 that avoids full re-layout after every edit. The system classifies each change and
-re-layouts only the affected root subtrees.
+lays out again only the containers it reaches. The layout lives in one
+``PenLayoutState`` the document's ``LayoutCache`` holds, and
+``EditableDocument/computeLayout(textMeasurer:)`` returns a ``PenLayoutChange`` naming
+exactly the rects that differ; ``EditableDocument/layoutRects`` holds them all.
 
 ```swift
-// First call does a full layout pass
-let rects = editable.computeLayout()
+// First call does a full layout pass: every rect is new
+let change = editable.computeLayout()
+let rects = editable.layoutRects
 
 // After an edit, check what's dirty
 try editable.apply(.updateKind(EditOperation.UpdateKind(
@@ -358,8 +362,8 @@ try editable.apply(.updateKind(EditOperation.UpdateKind(
 // dirtyNodeIDs: union of both sets
 print(editable.dirtyLayoutNodeIDs)  // ["rect1", "frame1"]
 
-// Re-compute layout (incremental — skips clean root subtrees)
-let updatedRects = editable.computeLayout()
+// Lay out again node by node: the change names rect1, frame1 and what they moved
+let update = editable.computeLayout()
 
 // After rendering dirty nodes, clear tracking
 editable.clearDirtyNodes()
@@ -368,17 +372,18 @@ editable.clearDirtyNodes()
 **Three-tier change categorization** (``ChangeCategory``):
 - **Render-only** — color, opacity, fills, stroke, effects, blendMode, etc. Skip re-layout.
 - **Layout** — x, y, width, height, gap, padding, font props, rotation, enabled, theme,
-  reusable, etc. Re-layout the node's root subtree. A `theme` change names the node's
+  reusable, etc. Names the node and its spine. A `theme` change names the node's
   whole subtree, since every descendant resolves its variables through it. When the
   node is a component, sits inside one, or is drawn by a `ref` — so expansion carries
-  the change into other boards — it also names every root whose
-  ``EditableDocument/revision(of:)`` the change moved: the boards that draw it, through
-  components nesting it.
-- **Structural** — insert, delete, move. Re-lays out only the top-level boards the edit
-  can change: the board that holds it (both boards, for a move between them), plus —
-  when the edit is inside a component — every board that draws that component, through
-  components nesting it. ``EditableDocument/dirtyLayoutRootIDs`` names them by source id;
-  every other board keeps its rects.
+  the change into other boards — it also names every placed instance that draws it, by
+  its `ref`, through components nesting it: each instance is laid out whole with its
+  ancestors, and the rest of its board answers from memory.
+- **Structural** — insert, delete, move. Names only the spines it touches: the parent a
+  node leaves and the parent it enters, with their ancestors — plus, when the edit is
+  inside a component, the placed instances that draw it, as above. Every sibling answers
+  from memory and moves at most. ``EditableDocument/structurallyEditedNodeIDs`` lists the
+  nodes inserted, deleted or moved and the parents they land under, for a host whose own
+  pipeline must still take a full path for a change of the tree's shape.
 - **Document-level** — variable, import and theme changes, plus replace, detach and
   remote edits. Full re-layout (``EditableDocument/isLayoutFullyInvalidated``).
 
@@ -390,11 +395,14 @@ document — parent, index, depth and root per expanded id, and each ref's insta
 and ``PenLayoutIndex/expandedIDs(for:)`` translates: a node keeps its id, a `ref` names its
 instance whole, a root names its expanded root whole. A host that runs its own pipeline
 hands the invalidation to
-``PenLayoutEngine/layoutIncremental(_:previousRects:invalidation:textMeasurer:measurementCache:)``,
+``PenLayoutEngine/layoutIncremental(_:previousRects:invalidation:textMeasurer:options:measurementCache:)``,
 the one call that translates, forgets the measurements of the translated ids and lays out
-the roots holding them — exactly what ``EditableDocument/computeLayout(textMeasurer:)``
-does. `IncrementalLayoutEquivalenceTests` holds both to a full layout, bit for bit, over
-every fixture and a spread of writes.
+the roots holding them. A host that lays out every frame holds a ``PenLayoutState``
+instead (below) — what ``EditableDocument/computeLayout(textMeasurer:)`` does, and the
+host keeps no measurement cache of its own. `IncrementalLayoutEquivalenceTests` holds all
+three to a full layout, bit for bit, over every fixture and a spread of writes, structural
+ones included. ``PenLayoutInvalidation/formUnion(_:)`` merges the invalidations of runs a
+newer one superseded.
 
 ```swift
 // A host pipeline: take the dirty tracking with the document, lay out elsewhere.
@@ -417,7 +425,18 @@ removed, moved to another index among its siblings, or given another size — on
 leaving the state and the document untouched. Both return a ``PenLayoutChange`` naming
 exactly the rects that differ, with what moved, what resized, and the topmost changed
 subtrees a renderer produces again; both equal a full layout bit for bit, so a preview
-hands off to its commit without a flash.
+hands off to its commit without a flash. The state measures text through its own
+bounded ``TextSizeCache`` (``PenLayoutState/textSizes``), so a text it has typeset is not
+typeset again, and after a font registration its next update lays out everything.
+
+**Cards drawn raw.** An editor draws the note, prompt or context being edited raw — its
+markdown as written — and the card grows to fit that text too: its height is the most of
+its set height, its styled text's and its raw text's. Every layout entry point takes a
+``PenLayoutOptions`` naming the cards drawn raw (``PenPostIt/DrawingOptions/layoutOptions``
+gives a renderer's); ``PenLayoutState/update(to:invalidation:options:)`` lays out again
+each card that starts or stops being raw, and a host with its own measurement cache
+merges ``PenLayoutOptions/invalidation(from:)`` into its invalidation.
+`RawCardLayoutEquivalenceTests` holds both to a full layout with the same raw cards.
 
 ```swift
 var state = PenLayoutState(document: resolved)            // once, in full
@@ -974,6 +993,8 @@ counts, so a file that arrived with one still takes its fix. See <doc:ComponentL
 - ``PenLayoutChange``
 - ``PenLayoutEdit``
 - ``PenLayoutStats``
+- ``PenLayoutOptions``
+- ``TextSizeCache``
 
 ### Component Editing
 

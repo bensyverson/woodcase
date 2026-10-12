@@ -39,6 +39,7 @@ extension PenLayoutEngine {
     ///   - availableWidth: The width its parent offers it, or `nil`.
     ///   - availableHeight: The height its parent offers it, or `nil`.
     ///   - textMeasurer: A function that measures text bounding boxes.
+    ///   - options: The cards drawn raw.
     ///   - rects: The map the descendants' rects are written to. A subtree skipped on a
     ///     remembered size keeps the rects the map already holds for it.
     ///   - memo: The sizes remembered so far, read and filled.
@@ -48,6 +49,7 @@ extension PenLayoutEngine {
         availableWidth: Double?,
         availableHeight: Double?,
         textMeasurer: TextMeasurer,
+        options: PenLayoutOptions,
         into rects: inout [String: PenRect],
         memo: inout Memo
     ) -> (width: Double, height: Double) {
@@ -61,7 +63,7 @@ extension PenLayoutEngine {
             target: 0, isFinal: true
         )
         var stack: [LayoutFrame] = []
-        switch begin(root, textMeasurer: textMeasurer, stores: &stores, memo: &memo) {
+        switch begin(root, textMeasurer: textMeasurer, options: options, stores: &stores, memo: &memo) {
         case let .finished(width, height): return (width, height)
         case let .pending(frame): stack.append(frame)
         }
@@ -70,7 +72,7 @@ extension PenLayoutEngine {
         while let last = stack.indices.last {
             switch stack[last].advance(resuming: resumed, stores: &stores) {
             case let .call(child):
-                switch begin(child, textMeasurer: textMeasurer, stores: &stores, memo: &memo) {
+                switch begin(child, textMeasurer: textMeasurer, options: options, stores: &stores, memo: &memo) {
                 case let .finished(width, height):
                     resumed = (width, height)
                 case let .pending(frame):
@@ -96,6 +98,7 @@ extension PenLayoutEngine {
     private static func begin(
         _ call: LayoutFrame.Call,
         textMeasurer: TextMeasurer,
+        options: PenLayoutOptions,
         stores: inout [[String: PenRect]],
         memo: inout Memo
     ) -> LayoutFrame.Start {
@@ -105,8 +108,11 @@ extension PenLayoutEngine {
             return .finished(width: size.width, height: size.height)
         }
 
-        let props = extractLayoutProperties(call.node)
+        var props = extractLayoutProperties(call.node)
         guard props.isContainer else {
+            if props.noteText != nil, options.rawBodies.contains(call.node.id) {
+                props.noteRawText = noteRawTextRequest(call.node)
+            }
             let size = layoutLeafNode(
                 props, availableWidth: call.availableWidth, availableHeight: call.availableHeight,
                 textMeasurer: textMeasurer

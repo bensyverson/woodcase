@@ -62,7 +62,8 @@ struct RootPlacementMarginTests {
         // The rightmost edge is Bbb01's, at 400.
         #expect(rect.x == 400 + RootOverlap.margin)
         for id in existing.rootOrder {
-            let other = try #require(existing.computeLayout()[id])
+            existing.computeLayout()
+            let other = try #require(existing.layoutRects[id])
             #expect(rect.x - (other.x + other.width) >= RootOverlap.margin)
         }
     }
@@ -77,7 +78,8 @@ struct RootPlacementMarginTests {
         let placed = BatchApplier.placedAtRoot(unplaced("Ddd01"), in: existing, coordinates: .authored)
         let rect = try rect(of: placed)
 
-        let rects = existing.computeLayout()
+        existing.computeLayout()
+        let rects = existing.layoutRects
         for id in existing.rootOrder {
             let other = try #require(rects[id])
             #expect(rect.x - (other.x + other.width) >= RootOverlap.margin)
@@ -94,7 +96,8 @@ struct RootPlacementMarginTests {
         let placed = BatchApplier.placedAtRoot(unplaced("Ddd01"), in: existing, coordinates: .authored)
         let mine = try RootOverlap.Root(id: "Ddd01", name: "New", rect: rect(of: placed))
 
-        let rects = existing.computeLayout()
+        existing.computeLayout()
+        let rects = existing.layoutRects
         let others = try existing.rootOrder.map { id in
             try RootOverlap.Root(id: id, name: nil, rect: #require(rects[id]))
         }
