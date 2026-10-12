@@ -14,9 +14,11 @@ import Foundation
 /// exactly as they were, and `common.metadata.woodcase.props.label=Body/Title` reaches
 /// one entry inside a nested object.
 ///
-/// The fold happens in the library, before an ``EditOperation`` exists, so what is
-/// recorded — and replicated, and undone — is an ordinary whole-object write to
-/// ``deepKeyedPaths``. Nothing downstream has to learn a second key form.
+/// The fold happens in the library — in the batch planner before an ``EditOperation``
+/// exists, and in ``EditOperation/normalized(in:)`` for an operation a session is
+/// handed — so what is applied is an ordinary whole-object write to ``deepKeyedPaths``.
+/// Nothing downstream has to learn a second key form; a metadata write is keyed, undone
+/// and replicated per entry it changes (<doc:PenMetadataNamespace>).
 ///
 /// ```swift
 /// NodePropertyCodec.deepKey(of: "common.metadata.woodcase.props.label")

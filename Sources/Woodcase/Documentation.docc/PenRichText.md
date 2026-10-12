@@ -33,6 +33,24 @@ let layout = PenTextLayout(node, box: box)   // sets "bold" in the 700 face
 
 An instance that overrides a component text's content draws it plain, by the same rule: the spans were made for the component's words. So a node whose words were changed by a tool that does not know about runs draws plain everywhere at once. Anything that changes `content` must restate the spans for the new text, or they go stale.
 
+### Editing runs
+
+An editor moves runs with every keystroke, so it keeps them flat: ``PenFlatTextRuns`` holds a text's runs sorted, never overlapping, each setting a key, touching neighbors with the same keys merged. Flattening a file's overlapping runs gives the same styling (a later run still wins for the keys it sets), and from then on every edit is plain arithmetic:
+
+```swift
+var runs = PenFlatTextRuns(spans: node.textSpans, content: text)
+runs.replace(range, insertedLength: typed.utf16.count, keys: runs.keys(at: range.lowerBound - 1))
+runs.set(PenTextRun(start: 0, end: 0, fontWeight: 700), over: selection)   // bold
+runs.clear(.fontWeight, over: selection)                                   // un-bold
+let spans = runs.spans(for: draft)   // nil once no run is left: remove the spans
+```
+
+``PenFlatTextRuns/replace(_:insertedLength:keys:)`` follows an insert, a delete or a replacement: runs before it stay, runs after it shift, a run it cuts keeps its parts outside it, and the inserted text takes the keys given. Un-bolding a range *clears* its weight (``PenFlatTextRuns/clear(_:over:)``) so the node's own weight shows there, rather than writing a regular weight over it. ``PenFlatTextRuns/stretches(in:)`` and ``PenFlatTextRuns/keys(at:)`` read the keys back for an inspector or a Format menu.
+
+Stale spans start as no runs at all (``PenFlatTextRuns/init(spans:content:)``): they draw plain, so nothing visible is lost, and the spans written back are fresh for the current content and replace them — which is what a Format command on stale text does.
+
+A run's keys are one list, ``PenTextRun/StyleKey``: overlaying (``PenTextRun/overlaid(by:)``), clearing (``PenTextRun/clear(_:)``), comparing (``PenTextRun/hasSameKeys(as:)``) and flattening all walk it, so a key added to ``PenTextRun`` reaches all of them, and a test fails until the new property has its case.
+
 ### Storage
 
 `metadata.woodcase.spans` holds ``PenTextSpans/metadataValue``, read back by ``PenTextSpans/init(metadataValue:)``:
@@ -83,6 +101,21 @@ Another renderer draws a text node's spans through the same layout: `PenTextLayo
 - ``PenNode/textSpans``
 - ``PenNode/appliedRuns``
 - ``PenNode/hasStaleTextSpans``
+
+### Editing
+
+- ``PenFlatTextRuns``
+- ``PenTextRun/StyleKey``
+- ``PenTextRun/noKeys``
+- ``PenTextRun/keysOnly``
+- ``PenTextRun/setsNoKey``
+- ``PenTextRun/hasSameKeys(as:)``
+- ``PenTextRun/over(_:)``
+- ``PenTextRun/overlaid(by:)``
+- ``PenTextRun/sets(_:)``
+- ``PenTextRun/clear(_:)``
+- ``PenTextRun/clearing(_:)``
+- ``PenTextRun/taking(_:from:)``
 
 ### Storage
 

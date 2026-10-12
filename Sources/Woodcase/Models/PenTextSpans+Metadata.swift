@@ -42,7 +42,7 @@ public extension PenTextSpans {
 
     /// The shape spans are written in, for a message: `{text, runs: [{start, end, …}]}`.
     static let wireForm = "{text, runs: [{start, end, fontFamily?, fontSize?, fontWeight?, fontStyle?, fill?, "
-        + "underline?, strikethrough?}]}"
+        + "underline?, strikethrough?, mention?}]}"
 
     /// Reads spans from their stored form.
     ///

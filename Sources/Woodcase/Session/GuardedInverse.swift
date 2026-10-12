@@ -42,13 +42,14 @@ public struct GuardedInverse: Friendly {
     /// The operation to apply now, its index re-derived from ``placement``.
     ///
     /// A move or an insert takes its parent and index from the placement, resolved
-    /// against the document as it stands; every other operation, and any step without
-    /// a placement, is returned unchanged.
+    /// against the document as it stands. A step that restores one metadata entry
+    /// writes that entry back onto the node's metadata as it stands, keeping every
+    /// other entry. Every other operation is returned unchanged.
     ///
     /// - Parameter document: The document the step is about to be applied to.
     /// - Returns: The operation to apply.
     public func resolved(in document: EditableDocument) -> EditOperation {
-        guard let placement else { return operation }
+        guard let placement else { return resolvedMetadataEntry(in: document) ?? operation }
         switch operation {
         case var .moveNode(move):
             move.newParentID = placement.parentID

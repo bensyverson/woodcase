@@ -12,7 +12,9 @@ public extension EditableDocument {
     /// returns steps a session can apply around other authors' later work:
     ///
     /// - A property write (after ``EditOperation/normalized(in:)``) undoes as one
-    ///   ``EditOperation/setProperties(_:)`` per path, restoring that path's old value.
+    ///   ``EditOperation/setProperties(_:)`` per path, restoring that path's old value —
+    ///   and a write of `common.metadata` as one per metadata entry it changes, each
+    ///   guarded by that entry's key (<doc:PenMetadataNamespace>).
     /// - An override undoes as one step per key: restore the key's old value, or unset a
     ///   key the edit added. A key the edit unset that was never there needs no step.
     /// - A move, a delete and a detach put nodes back through a ``Placement`` anchored
@@ -48,17 +50,21 @@ public extension EditableDocument {
 }
 
 extension EditableDocument {
-    /// One step per path, each writing back that path's value as it stands.
+    /// One step per path, each writing back that path's value as it stands; one per
+    /// entry a `common.metadata` write changes.
     private func propertySteps(_ op: EditOperation.SetProperties) throws -> [GuardedInverse] {
         let node = try requireNode(op.nodeID)
-        return try op.properties.keys.sorted().map { path in
-            try GuardedInverse(
+        return try op.properties.keys.sorted().flatMap { path -> [GuardedInverse] in
+            if path == NodePropertyCodec.metadataPath, let value = op.properties[path] {
+                return try metadataEntrySteps(writing: value, on: node)
+            }
+            return try [GuardedInverse(
                 operation: .setProperties(EditOperation.SetProperties(
                     nodeID: op.nodeID,
                     properties: [path: NodePropertyCodec.value(at: path, of: node)]
                 )),
                 keys: [.property(node: op.nodeID, path: path)]
-            )
+            )]
         }
     }
 

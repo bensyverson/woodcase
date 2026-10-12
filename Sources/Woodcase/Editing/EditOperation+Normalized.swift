@@ -15,6 +15,14 @@ public extension EditOperation {
     /// differ from the document (found by ``PropertyDiff``), which applies to the same
     /// node.
     ///
+    /// A ``setProperties(_:)`` naming a deep key — `common.metadata.woodcase.spans` —
+    /// is folded onto the node's metadata by ``NodePropertyCodec/folding(_:onto:)``, the
+    /// same fold the batch planner runs, so it becomes a write of the whole object with
+    /// every key it does not name kept. Its keys, inverse and replication are then per
+    /// metadata entry (``ChangeKey/keys(of:in:)``,
+    /// ``EditableDocument/granularInverse(of:)``), so it merges with other authors'
+    /// writes to sibling entries.
+    ///
     /// Left as they are:
     /// - An ``updateKind(_:)`` that changes the node's type: there is no path for
     ///   "become a text node", so it stays whole (its key is
@@ -56,6 +64,12 @@ public extension EditOperation {
             let paths = PropertyDiff.diffKind(old: node.kind, new: target.kind)
             guard !paths.contains(Self.kindTypePath) else { return self }
             return Self.patch(node: node, target: target, paths: paths) ?? self
+        case let .setProperties(op):
+            guard op.properties.keys.contains(where: { NodePropertyCodec.deepKey(of: $0) != nil }),
+                  let node = document.nodes[op.nodeID],
+                  let folded = try? NodePropertyCodec.folding(op.properties, onto: node)
+            else { return self }
+            return .setProperties(SetProperties(nodeID: op.nodeID, properties: folded))
         default:
             return self
         }

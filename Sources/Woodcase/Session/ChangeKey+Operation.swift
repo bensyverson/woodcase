@@ -22,6 +22,9 @@ public extension ChangeKey {
     ///   the existence of each ref removed and of every node its expansion inserts — the
     ///   ids come from the same detach plan the operation carries out.
     /// - ``EditOperation/setDocumentProperties(_:)`` writes ``document(_:)`` per key.
+    /// - A write of `common.metadata` writes one key per metadata entry it changes
+    ///   (`common.metadata.woodcase.tint`), the keys a collaborator's replicated entry
+    ///   write stamps (<doc:PenMetadataNamespace>).
     ///
     /// - Parameters:
     ///   - operation: The operation about to be applied.
@@ -40,12 +43,11 @@ public extension ChangeKey {
         case let .replaceSubtree(op):
             try replaceKeys(op, in: document)
         case let .updateCommon(op):
-            try PropertyDiff.diffCommon(old: document.requireNode(op.nodeID).common, new: op.common)
-                .sorted().map { .property(node: op.nodeID, path: $0) }
+            try commonKeys(nodeID: op.nodeID, old: document.requireNode(op.nodeID).common, new: op.common)
         case let .updateKind(op):
             try kindKeys(nodeID: op.nodeID, old: document.requireNode(op.nodeID).kind, new: op.kind)
         case let .setProperties(op):
-            op.properties.keys.sorted().map { .property(node: op.nodeID, path: $0) }
+            propertyKeys(op, in: document)
         case let .overrideDescendant(op):
             Set(op.properties.keys).union(op.unset).sorted().map {
                 .override(ref: op.refNodeID, descendant: op.descendantID, key: $0)
@@ -126,8 +128,7 @@ public extension ChangeKey {
         in document: EditableDocument
     ) throws -> [ChangeKey] {
         let root = try document.requireNode(op.node.id)
-        var keys = PropertyDiff.diffCommon(old: root.common, new: op.node.common)
-            .sorted().map { ChangeKey.property(node: root.id, path: $0) }
+        var keys = commonKeys(nodeID: root.id, old: root.common, new: op.node.common)
         keys += kindKeys(nodeID: root.id, old: root.kind, new: op.node.kind.withEmptyChildren())
         keys += Set(root.extras.values.keys).union(op.node.extras.values.keys).sorted()
             .filter { root.extras[$0] != op.node.extras[$0] }

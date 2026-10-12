@@ -99,7 +99,7 @@ so a bare one still moves into the namespace like any other; the `note-state` li
 (<doc:WoodcaseLint>) names one on a plain note, and nothing drops it.
 
 **A write converts what it touches.** An authored metadata write — a `set`, deep key or
-whole object, and every node of an `add` or `replace` subtree — stores the Woodcase keys
+whole object, a session edit's deep key, and every node of an `add` or `replace` subtree — stores the Woodcase keys
 it changes under the namespace only
 (``NodePropertyCodec/storingWoodcaseKeysInNamespace(_:replacing:)``): a key written in
 the namespace removes its old spelling, and a key written under its old spelling
@@ -142,6 +142,25 @@ note's tint and its author both keep their edit.
 Below an entry a value is whole: two edits to different parameters inside
 `woodcase.props` are one entry both sides changed. A key holding `.` or `%` is
 percent-escaped in an entry path (`%2E`, `%25`).
+
+### Writing one entry from an app
+
+A ``DocumentSession`` edit takes the same deep keys as `woodcase set`: an
+``EditOperation/setProperties(_:)`` of `common.metadata.woodcase.spans` (or `null`, to
+remove it) is folded onto the node's metadata by ``NodePropertyCodec/folding(_:onto:)``
+when it is normalized (``EditOperation/normalized(in:)``), the one fold the batch planner
+also runs, so it follows every rule above. A metadata write is then entry by entry
+throughout:
+
+- **Keys.** It stamps one ``ChangeKey/property(node:path:)`` per entry it changes, at the
+  entry's path — the key a collaborator's replicated entry write stamps — so the two meet.
+- **Undo.** Its inverse is one guarded step per entry (``EditableDocument/granularInverse(of:)``).
+  Undo restores each entry exactly, old spelling and missing `type` included, and keeps
+  an entry another author has written since (``CommittedChange/kept``), restoring the
+  rest around it (``GuardedInverse/resolved(in:)``).
+- **Replay.** Each step also carries the whole object as it stands after the steps
+  before it, so an activity row's inverse or a batch's undo, replayed on the document
+  the write left, restores it exactly.
 
 ## Topics
 

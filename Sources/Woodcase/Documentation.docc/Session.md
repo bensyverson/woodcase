@@ -40,8 +40,16 @@ origin, the owner reacts to the same value:
 So there is no second path that edits the document and forgets to log, broadcast or
 invalidate. Each ``AppliedOperation`` carries the operation as applied — normalized to
 per-path ``EditOperation/setProperties(_:)`` where a whole-struct write changed only some
-paths (``EditOperation/normalized(in:)``) — and its complete inverse, as guarded steps
+paths, and with deep metadata keys folded onto the node's metadata
+(``EditOperation/normalized(in:)``) — and its complete inverse, as guarded steps
 (``EditableDocument/granularInverse(of:)``).
+
+A ``LocalEdit`` may write one metadata entry by its deep key —
+`common.metadata.woodcase.spans` — and the session folds it onto the node's metadata
+exactly as the CLI's batch planner does (``NodePropertyCodec/folding(_:onto:)``), so an
+editor never rewrites the object to change one entry. A metadata write is keyed, undone
+and replicated per entry it changes, so it merges with other authors' writes to sibling
+entries and an undo keeps theirs (<doc:PenMetadataNamespace>).
 
 The invalidation names what only the document *before* the change knows, which the
 document's own cache bookkeeping does not: the parent a node was moved or deleted out
