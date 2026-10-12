@@ -41,7 +41,7 @@ struct SetCommandTests {
         let fixture = try CommandFixture(fixture: "batch.pen")
 
         let run = try fixture.run(
-            "set", fixture.file.path, "Canvas/Title", "common.x=12", "common.y=34", "--as", "ana"
+            "set", fixture.file.path, "Board", "common.x=12", "common.y=34", "--as", "ana"
         )
 
         #expect(run.status == 0)
@@ -179,17 +179,26 @@ struct SetCommandTests {
         #expect(run.stderr.contains("key=value"))
     }
 
-    @Test("A node inside a component instance is sent to override, in CLI words")
-    func insideAnInstanceIsUsage() throws {
-        let fixture = try CommandFixture(fixture: "addressing.pen")
+    /// Changed 2026-10-12 (leaf 2gTcuM): a set inside an instance used to be refused with a
+    /// pointer at `override`; it now writes that override and says so in a note.
+    @Test("A node inside a component instance is written as the override it has to be")
+    func insideAnInstanceIsAnOverride() throws {
+        let viaSet = try CommandFixture(fixture: "addressing.pen")
+        let viaOverride = try CommandFixture(fixture: "addressing.pen")
 
-        let run = try fixture.run(
-            "set", fixture.file.path, "Dashboard/Body/Nav/Label", "kind.content=Menu"
+        let run = try viaSet.run(
+            "set", viaSet.file.path, "Dashboard/Body/Nav/Label", "kind.content=Menu"
+        )
+        let override = try viaOverride.run(
+            "override", viaOverride.file.path, "Dashboard/Body/Nav/Label", "content=Menu"
         )
 
-        #expect(run.status == ExitCode.usage.rawValue)
-        #expect(run.stderr.contains("woodcase override"))
-        #expect(!run.stderr.contains("{\"op\""))
+        #expect(run.status == 0, "\(run.stderr)")
+        #expect(override.status == 0)
+        #expect(run.stdoutLines.first == "Dashboard/Body/Nav  Nav01")
+        #expect(run.stdout.contains("note  "))
+        #expect(run.stdout.contains("stored as an override"))
+        #expect(try PenParser.parse(contentsOf: viaSet.file) == PenParser.parse(contentsOf: viaOverride.file))
     }
 
     @Test("A fill array with an unknown type is refused with the spelling that is wrong")
@@ -251,7 +260,7 @@ struct SetCommandTests {
         #expect(run.status == 0)
         // The divergence is part of the answer, not an aside, so it is on stdout.
         #expect(run.stdout.contains(
-            "kind.content resolved $v-muted as a reference to the color variable "
+            "kind.content resolved $v-muted as a reference to the string variable "
                 + "v-muted — write \\$v-muted for the literal"
         ))
         #expect(run.stderr.isEmpty)

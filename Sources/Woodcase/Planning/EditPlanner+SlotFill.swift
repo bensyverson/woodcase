@@ -1,11 +1,11 @@
 //
-//  BatchApplier+SlotFill.swift
+//  EditPlanner+SlotFill.swift
 //  Woodcase
 //
 
 import Foundation
 
-extension BatchApplier {
+extension EditPlanner {
     /// The note an `override` line reports when its write was rewritten into a slot fill.
     ///
     /// The line still answers with the instance, as every `override` does; this is what

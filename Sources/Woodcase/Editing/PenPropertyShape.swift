@@ -41,10 +41,17 @@ public struct PenPropertyShape: Friendly {
     ///   - detail: A clause qualifying the forms, usually the spellings a nested
     ///     `"type"` key accepts.
     ///   - example: A literal this property accepts.
-    public init(forms: [PenValueForm], detail: String? = nil, example: String? = nil) {
+    ///   - constraint: The range, step and unit a numeric value must keep to on write.
+    public init(
+        forms: [PenValueForm],
+        detail: String? = nil,
+        example: String? = nil,
+        constraint: PenValueConstraint? = nil
+    ) {
         self.forms = forms
         self.detail = detail
         self.example = example
+        self.constraint = constraint
     }
 
     /// The accepted forms, in the order they should read.
@@ -55,6 +62,22 @@ public struct PenPropertyShape: Friendly {
 
     /// A literal this property accepts, ready to paste after an `=`.
     public let example: String?
+
+    /// The range, step and unit a number written here must keep to, or `nil` when any
+    /// number the forms accept is taken.
+    ///
+    /// It applies to the property's own number and to each number in its per-corner,
+    /// per-side or per-edge slots. ``EditPlanner`` enforces it on write; nothing
+    /// enforces it on read.
+    public let constraint: PenValueConstraint?
+
+    /// The same shape with a constraint on its numbers.
+    ///
+    /// - Parameter constraint: The constraint.
+    /// - Returns: A copy of this shape carrying `constraint`.
+    public func constrained(_ constraint: PenValueConstraint) -> PenPropertyShape {
+        PenPropertyShape(forms: forms, detail: detail, example: example, constraint: constraint)
+    }
 
     // MARK: - For a refusal
 

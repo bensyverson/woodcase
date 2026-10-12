@@ -91,9 +91,9 @@ struct WriteDivergenceTests {
         #expect(divergence.kind == .variableReference)
         #expect(divergence.target == "kind.content")
         #expect(divergence.requested == "$v-muted")
-        #expect(divergence.applied == "the color variable v-muted")
+        #expect(divergence.applied == "the string variable v-muted")
         #expect(divergence.note == """
-        kind.content resolved $v-muted as a reference to the color variable v-muted \
+        kind.content resolved $v-muted as a reference to the string variable v-muted \
         — write \\$v-muted for the literal
         """)
     }

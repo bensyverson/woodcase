@@ -139,7 +139,7 @@ enum HelpTopic: String, CaseIterable, ExpressibleByArgument {
       set, cp   codec paths — common.name, kind.width, kind.fills. null clears one.
       override  raw .pen names — content, not kind.content — because that is what a
                 component instance's descendants map holds in the file.
-      Each verb points at the other when it is handed the other's target.
+      set inside an instance writes that override and says so; override elsewhere names set.
 
     COMPONENTS AND INSTANCES
       `set <node> common.reusable=true` makes a definition; the next `cp` of it is an
@@ -176,8 +176,8 @@ enum HelpTopic: String, CaseIterable, ExpressibleByArgument {
       is a variable reference. Text content forgives one that names no variable in the document,
       restoring the literal it probably was — whichever verb wrote it, `set kind.content=` and
       `override content=` alike — but a name the document DOES define substitutes, and stays a
-      finding when nothing resolves it. In any other property a bare $name naming nothing stays
-      a dangling reference, drawing nothing and reported by `lint` as unresolved-variable.
+      finding when nothing resolves it. Elsewhere a write refuses a $name naming nothing or the
+      wrong type; numbers are range-checked (`schema <type>`); an x/y layout ignores is refused.
       A variable name that starts with a dash — every name in a design-token file — needs a
       bare -- before it, or the parser reads it as an option:
         woodcase vars set f.pen -- --accent=#e0561a

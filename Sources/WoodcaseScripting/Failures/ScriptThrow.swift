@@ -54,7 +54,9 @@
         /// carries its ``Woodcase/EditingError/code`` and candidates, and a
         /// ``Woodcase/BatchError`` — the grammar's own refusals, which a write member
         /// raises as readily as a batch line does — carries
-        /// ``Woodcase/BatchError/code``. Anything else is the host's own bug and says so.
+        /// ``Woodcase/BatchError/code``, and an ``Woodcase/EditRefusal`` — a value the
+        /// planner refused — carries its ``Woodcase/EditRefusal/code``. Anything else is
+        /// the host's own bug and says so.
         static func editing(
             _ error: any Error,
             in document: EditableDocument,
@@ -65,6 +67,7 @@
                 message: BatchErrorMessage.describe(error, in: document, dialect: remedy),
                 code: editing?.code
                     ?? (error as? BatchError)?.code
+                    ?? (error as? EditRefusal)?.code.rawValue
                     ?? ScriptErrorCode.scriptError,
                 candidates: editing?.candidates ?? []
             )

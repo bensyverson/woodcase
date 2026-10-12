@@ -265,7 +265,7 @@ struct ApplyCommandTests {
         #expect(run.status == 0)
         #expect(run.stdoutLines[0] == "line 0  applied  Title")
         #expect(run.stdoutLines[1] == "        kind.content resolved $v-muted as a reference to "
-            + "the color variable v-muted — write \\$v-muted for the literal")
+            + "the string variable v-muted — write \\$v-muted for the literal")
         #expect(run.stderr.isEmpty)
     }
 

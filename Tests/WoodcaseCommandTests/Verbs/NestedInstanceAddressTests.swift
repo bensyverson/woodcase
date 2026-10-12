@@ -40,14 +40,18 @@ struct NestedInstanceAddressTests {
         }
     }
 
-    @Test("set refuses a node inside the instance and names override instead")
-    func setIsRefusedInsideTheInstance() throws {
-        let fixture = try CommandFixture(fixture: Self.penFile)
-        let run = try fixture.run("set", fixture.file.path, "Card1/Btn02/Lbl02", "kind.content=Sold")
+    /// Changed 2026-10-12 (leaf 2gTcuM): set used to refuse inside an instance; it now
+    /// writes the override `override` would.
+    @Test("set inside a nested instance writes the override override would")
+    func setInsideTheInstanceIsTheOverride() throws {
+        let viaSet = try CommandFixture(fixture: Self.penFile)
+        let viaOverride = try CommandFixture(fixture: Self.penFile)
+        let run = try viaSet.run("set", viaSet.file.path, "Card1/Btn02/Lbl02", "kind.content=Sold")
+        let override = try viaOverride.run("override", viaOverride.file.path, "Card1/Btn02/Lbl02", "content=Sold")
 
-        #expect(run.status == ExitCode.usage.rawValue)
-        #expect(run.stderr.contains("is inside the component instance"))
-        #expect(run.stderr.contains("woodcase override"))
+        #expect(run.status == 0, "\(run.stderr)")
+        #expect(override.status == 0)
+        #expect(try PenParser.parse(contentsOf: viaSet.file) == PenParser.parse(contentsOf: viaOverride.file))
     }
 
     @Test("override writes the key Pen stores for a node below a group in a nested instance")

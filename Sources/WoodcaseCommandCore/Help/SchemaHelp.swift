@@ -82,6 +82,8 @@ enum SchemaHelp {
 
         \(SchemaTableFormatter.rows(of: PenSchema.common))
 
+        \(SchemaTableFormatter.constraints(of: PenSchema.common) ?? "")
+
         DOCUMENT ROOT — keys beside "children"; a key marked * is required
 
         \(SchemaTableFormatter.nested(PenSchema.rootShapes))
@@ -102,6 +104,9 @@ enum SchemaHelp {
             "\(type.rawValue) — \(table.summary)",
             SchemaTableFormatter.rows(of: table),
         ]
+        if let constraints = SchemaTableFormatter.constraints(of: table) {
+            sections.append(constraints)
+        }
         if !table.nested.isEmpty {
             sections.append("NESTED SHAPES\n\n" + SchemaTableFormatter.nested(table.nested))
         }

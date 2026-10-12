@@ -1,5 +1,5 @@
 //
-//  BatchApplier+Divergence.swift
+//  EditPlanner+Divergence.swift
 //  Woodcase
 //
 
@@ -10,13 +10,14 @@ import Foundation
 /// Planning is the one place both halves exist at once: the operation as it was
 /// written, and the document it is about to change. Every divergence a write can
 /// report is decided here, so a single verb and a batch line say the same thing about
-/// the same edit — ``BatchApplier/applyOne(_:to:recorder:)`` and
-/// ``BatchApplier/apply(_:to:atomic:identity:recorder:)`` share one planner.
+/// the same edit — ``BatchApplier/applyOne(_:to:recorder:log:file:)``,
+/// ``BatchApplier/apply(_:to:atomic:identity:recorder:)`` and an editor calling
+/// ``EditPlanner/plan(_:at:in:)-(_,NodeAddress,_)`` share one planner.
 ///
 /// This file holds the divergences a write's own properties and overrides imply;
 /// `BatchApplier+Divergence+Structural.swift` holds the ones the rest of the document
 /// implies — a variable table it grew, a placement it chose, an instance it detached.
-extension BatchApplier {
+extension EditPlanner {
     // MARK: - Properties written to a node
 
     /// The divergences a `set`'s property map implies.

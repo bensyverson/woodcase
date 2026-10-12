@@ -124,15 +124,12 @@ struct DesignTopicClaimsTests {
         let literal = try fixture.run("tree", fixture.file.path, "Card/Title", "--props", "kind.content")
         #expect(!literal.stdout.contains("SALE"), "the escape did not keep the literal")
 
-        // Outside text content, a $name naming nothing stays a dangling reference.
-        #expect(try fixture.run(
+        // Outside text content, a $name naming nothing is refused on write.
+        let dangling = try fixture.run(
             "set", fixture.file.path, "Card/Title", "kind.fills=$--nope", "--as", "ana"
-        ).status == 0)
-        let dirty = try fixture.run("lint", fixture.file.path)
-        #expect(
-            dirty.stdout.contains("unresolved-variable"),
-            "a dangling reference in a color property was not linted"
         )
+        #expect(dangling.status == 2, "a dangling reference in a color property was written")
+        #expect(dangling.stderr.contains("--nope"))
     }
 
     @Test("A dash-prefixed variable name needs the bare `--` the topic shows")

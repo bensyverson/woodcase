@@ -27,6 +27,7 @@ public struct SchemaPropertyReport: Friendly {
         variable = property.variable?.rawValue
         nested = property.nested.map(\.name)
         example = property.example
+        constraint = property.constraint?.summary
     }
 
     /// The codec path `set` and `cp` accept.
@@ -50,4 +51,8 @@ public struct SchemaPropertyReport: Friendly {
 
     /// A literal this property accepts, or absent.
     public let example: String?
+
+    /// The range, step and unit a number written here must keep to, in one phrase —
+    /// `"0 to 1, a fraction"` — or absent when any number the forms accept is taken.
+    public let constraint: String?
 }

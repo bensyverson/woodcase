@@ -179,7 +179,9 @@ struct DesignTopicComponentClaimsTests {
         let root = try fixture.run("override", fixture.file.path, "Filled", "gap=20", "--as", "ana")
         #expect(root.status == 0, "\(root.stderr)")
 
-        let ref = try fixture.run("set", fixture.file.path, "Filled", "common.x=20", "--as", "ana")
+        // Filled sits in Page's default horizontal layout, so an x would be refused as one
+        // layout ignores; whether it draws is the ref node's own too.
+        let ref = try fixture.run("set", fixture.file.path, "Filled", "common.enabled=false", "--as", "ana")
         #expect(ref.status == 0, "\(ref.stderr)")
 
         // A key the ref reserves for itself belongs to `set`, and the refusal says so.

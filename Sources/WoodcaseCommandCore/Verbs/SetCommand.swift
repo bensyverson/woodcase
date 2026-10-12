@@ -33,8 +33,16 @@ struct SetCommand: AsyncParsableCommand {
         Properties can also come from a JSON object with -F, and a key=value on the \
         command line wins over the same key in that file.
 
-        A node *inside* a component instance stores nothing of its own; `set` says \
-        so and points at `woodcase override`.
+        A node *inside* a component instance stores nothing of its own, so `set` there \
+        writes an override on the instance — exactly what `woodcase override` writes — \
+        and says so in a note. The answer names the instance, which is what --rev guards.
+
+        Values are checked on write: a number outside its property's range (opacity \
+        0 to 1, sizes at least 0, kind.lineHeight a multiple of fontSize — `woodcase \
+        schema` prints each), a $name naming no variable or one of the wrong type, \
+        and a common.x or common.y on a node its parent's layout places are refused. \
+        Set common.layoutPosition=absolute in the same write to place a node by x and \
+        y. A file that already holds such a value still opens.
 
         On a component INSTANCE itself, `set` writes the ref node — where it sits and \
         whether it draws, so common.x, common.opacity, kind.ref. The properties of the \

@@ -89,5 +89,10 @@ public struct PenSchemaTable: Friendly {
         public var example: String? {
             shape.example
         }
+
+        /// The range, step and unit a number written here must keep to, or `nil`.
+        public var constraint: PenValueConstraint? {
+            shape.constraint
+        }
     }
 }

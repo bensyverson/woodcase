@@ -62,7 +62,7 @@ extension BatchApplier {
     /// A variable's stored value as a sentence reads it — a string bare, since a color
     /// in quotes reads as a caption rather than a value.
     private static func spelling(ofValue value: AnyCodable) -> String {
-        guard case let .string(text) = value else { return spelling(of: value) }
+        guard case let .string(text) = value else { return EditPlanner.spelling(of: value) }
         return text
     }
 

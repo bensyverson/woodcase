@@ -155,7 +155,7 @@ extension BatchApplier {
             operations.append(.setProperties(EditOperation.SetProperties(
                 nodeID: node.id, properties: rootProperties
             )))
-            divergences += propertyDivergences(rootProperties, on: node, in: document)
+            divergences += EditPlanner.propertyDivergences(rootProperties, on: node, in: document)
         }
         let placedCoordinates = rootProperties["common.x"] == nil && rootProperties["common.y"] == nil
         if placedCoordinates, let moved = placement(of: renamed(node, by: rootProperties), from: carried, coordinates: .copied) {

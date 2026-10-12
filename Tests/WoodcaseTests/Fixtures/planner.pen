@@ -1,0 +1,41 @@
+{
+  "version": "2.17",
+  "themes": { "mode": ["light", "dark"] },
+  "variables": {
+    "brand": { "type": "color", "value": "#E5484D" },
+    "spacing": { "type": "number", "value": 8 },
+    "headline": { "type": "string", "value": "Hello" },
+    "visible": { "type": "boolean", "value": true },
+    "ink": { "type": "color", "value": [
+      { "value": "#111111", "theme": { "mode": "light" } },
+      { "value": "#EEEEEE", "theme": { "mode": "dark" } }
+    ] }
+  },
+  "children": [
+    {
+      "id": "Brd01", "name": "Board", "type": "frame", "layout": "none",
+      "x": 0, "y": 0, "width": 600, "height": 400,
+      "children": [
+        { "id": "Fre01", "name": "Free", "type": "rectangle", "x": 10, "y": 10, "width": 40, "height": 40, "opacity": 7 },
+        { "id": "Chi01", "name": "Chip", "type": "ref", "ref": "Cmp01", "x": 100, "y": 100 },
+        {
+          "id": "Row01", "name": "Row", "type": "frame", "layout": "horizontal",
+          "x": 200, "y": 200, "width": 300, "height": 60,
+          "children": [
+            { "id": "Flo01", "name": "Flow", "type": "rectangle", "width": 20, "height": 20, "fill": "$brand" },
+            { "id": "Pin01", "name": "Pinned", "type": "rectangle", "layoutPosition": "absolute", "x": 4, "y": 4, "width": 20, "height": 20 },
+            { "id": "Txt01", "name": "Caption", "type": "text", "content": "Hi", "fontSize": 14 }
+          ]
+        },
+        { "id": "Pol01", "name": "Shape", "type": "polygon", "x": 300, "y": 10, "width": 40, "height": 40, "polygonCount": 5 }
+      ]
+    },
+    {
+      "id": "Cmp01", "name": "Component", "type": "frame", "reusable": true,
+      "layout": "horizontal", "x": 0, "y": 600, "width": 80, "height": 24,
+      "children": [
+        { "id": "Lbl01", "name": "Label", "type": "text", "content": "chip", "fill": "#000000" }
+      ]
+    }
+  ]
+}

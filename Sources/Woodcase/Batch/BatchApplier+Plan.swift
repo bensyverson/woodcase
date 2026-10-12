@@ -39,32 +39,16 @@ extension BatchApplier {
 
     // MARK: - Node operations
 
+    /// A `set` line: the public planner's ``EditIntent/set(_:)``, guarded by the line's
+    /// `rev` on whichever node the plan stores into — the instance, for a node inside one.
     private static func planSet(
         _ op: BatchOperation.SetOp,
         in document: EditableDocument,
         tags: [String: String]
     ) throws -> BatchPlan {
-        let resolved = try document.resolve(op.target, tags: tags)
-        guard case let .node(id) = resolved else {
-            throw BatchError.setInsideInstance(
-                address: op.target.description,
-                instancePath: document.namePath(of: resolved.targetID)
-            )
-        }
-        // A deep key — `common.metadata.woodcase.role` — is folded onto the object the node
-        // already carries before the edit exists, so what is recorded, replicated and
-        // undone is the ordinary whole-object write the format has always had.
-        let props = try document.node(id: id).map { try NodePropertyCodec.folding(op.props, onto: $0) }
-            ?? op.props
-        if let node = document.node(id: id) {
-            try NodePropertyCodec.checkAuthored(props, on: node)
-        }
-        return BatchPlan(
-            operations: [.setProperties(EditOperation.SetProperties(nodeID: id, properties: props))],
-            expecting: expecting(op.rev, on: id),
-            actedOnID: id,
-            divergences: document.node(id: id)
-                .map { propertyDivergences(props, on: $0, in: document) } ?? []
+        try BatchPlan(
+            EditPlanner.planning(.set(op.props), at: op.target, in: document, tags: tags),
+            rev: op.rev
         )
     }
 
@@ -102,91 +86,15 @@ extension BatchApplier {
         )
     }
 
+    /// An `override` line: the public planner's ``EditIntent/override(_:unset:)``.
     private static func planOverride(
         _ op: BatchOperation.OverrideOp,
         in document: EditableDocument,
         tags: [String: String]
     ) throws -> BatchPlan {
-        guard !op.props.isEmpty || !op.unset.isEmpty else {
-            throw BatchError.overrideWithoutProperties(address: op.target.description)
-        }
-        let resolved = try document.resolve(op.target, tags: tags)
-        let refID: String
-        let descendantKey: String?
-        switch resolved {
-        case let .instanceDescendant(instance, key):
-            (refID, descendantKey) = (instance, key)
-        case let .node(id):
-            // The instance's own address writes the component root's properties as this
-            // instance shows them — `rootOverrides`, which the format spells as the ref
-            // node's own non-reserved keys. Anything that is not an instance is a node
-            // with storage of its own, and belongs to `set`.
-            guard case .ref = document.node(id: id)?.kind else {
-                throw BatchError.overrideOutsideInstance(
-                    address: op.target.description,
-                    path: document.namePath(of: resolved)
-                )
-            }
-            (refID, descendantKey) = (id, nil)
-        }
-        // A key the component publishes as a parameter is routed to the node that
-        // parameter names before the vocabularies are reconciled, so `label=Hi` and
-        // `Body/Title content=Hi` produce the same descendants entry.
-        let definition = descendantKey.map {
-            document.patchedDefinitionNode(ofInstance: refID, descendantKey: $0)
-        } ?? document.componentRoot(ofInstance: refID)
-        let routed = try routing(
-            op.props, at: descendantKey, of: definition, in: document
-        )
-        let unset = op.unset.map { NodePropertyCodec.rawKey(for: $0) }
-
-        var operations: [EditOperation] = []
-        var divergences: [WriteDivergence] = routed.notes
-        for group in routed.groups(keepingTarget: !unset.isEmpty) {
-            // The two vocabularies meet here. The caller may write either —
-            // `kind.content` or `content` — and the `descendants` map keys only the raw
-            // one, so the write is translated rather than refused; the values then take
-            // the same number-to-string rule a `set` gives them, judged against the node
-            // inside the component the override will patch.
-            let requested = NodePropertyCodec.rawKeyed(group.props)
-            let patched = group.descendantKey == descendantKey
-                ? definition
-                : group.descendantKey.flatMap {
-                    document.patchedDefinitionNode(ofInstance: refID, descendantKey: $0)
-                }
-            let properties = patched
-                .map { NodePropertyCodec.coercingOverrides(requested, on: $0.kind) } ?? requested
-            try NodePropertyCodec.checkAuthoredOverride(
-                properties, on: patched, refID: refID, descendantKey: group.descendantKey
-            )
-            let keys = group.descendantKey == descendantKey ? unset : []
-            let edit: EditOperation = group.descendantKey.map { key in
-                .overrideDescendant(EditOperation.OverrideDescendant(
-                    refNodeID: refID, descendantID: key, properties: properties, unset: keys
-                ))
-            } ?? .overrideRoot(EditOperation.OverrideRoot(
-                refNodeID: refID, properties: properties, unset: keys
-            ))
-            // Content the instance wrote into its own slot takes no `descendants` key —
-            // Pen drops one — so the write goes into the fill that holds it.
-            if case let .overrideDescendant(override) = edit,
-               let rewrite = try document.slotFillRewrite(of: override)
-            {
-                operations.append(.overrideDescendant(rewrite.operation))
-                divergences.append(slotFillNote(override, landingIn: rewrite))
-            } else {
-                operations.append(edit)
-            }
-            divergences += overrideDivergences(
-                properties, requested: requested,
-                descendantKey: group.descendantKey, on: refID, in: document
-            )
-        }
-        return BatchPlan(
-            operations: operations,
-            expecting: expecting(op.rev, on: refID),
-            actedOnID: refID,
-            divergences: divergences
+        try BatchPlan(
+            EditPlanner.planning(.override(op.props, unset: op.unset), at: op.target, in: document, tags: tags),
+            rev: op.rev
         )
     }
 

@@ -29,6 +29,27 @@ enum SchemaTableFormatter {
         return ([heading] + body).joined(separator: "\n")
     }
 
+    /// The section listing each constrained property's range and unit, or `nil` when no
+    /// row of the table has a constraint.
+    ///
+    /// A section of its own rather than a fourth column, for the reason the variable
+    /// column was dropped: the value column is already the widest, and only the numeric
+    /// rows have anything to say here.
+    ///
+    /// - Parameter table: The table whose rows to read.
+    /// - Returns: A heading and one indented `path  constraint` line per constrained row.
+    static func constraints(of table: PenSchemaTable) -> String? {
+        let rows = table.properties.compactMap { row in row.constraint.map { (row.path, $0.summary) } }
+        guard !rows.isEmpty else { return nil }
+        let width = rows.map(\.0.count).max() ?? 0
+        let lines = rows.map { "  \($0.0.padding(toLength: width, withPad: " ", startingAt: 0))  \($0.1)" }
+        return ([constraintsHeading, ""] + lines).joined(separator: "\n")
+    }
+
+    /// The heading the constraints section is titled with.
+    static let constraintsHeading = "CONSTRAINTS — a write outside these is refused; a file that already "
+        + "holds one still opens"
+
     /// Every nested key table, each with its variants and their keys.
     ///
     /// - Parameter shapes: The shapes to lay out, in the order they should read.

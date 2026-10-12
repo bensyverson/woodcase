@@ -76,17 +76,19 @@ struct InjectedAddressCommandTests {
 
     // MARK: - The verbs that refuse
 
-    @Test("set points at override rather than saying the address matches nothing")
-    func setPointsAtOverride() throws {
+    /// Changed 2026-10-12 (leaf 2gTcuM): set used to refuse here and point at override; it
+    /// now writes that override.
+    @Test("set resolves an injected child rather than saying the address matches nothing")
+    func setResolvesAnInjectedChild() throws {
         let fixture = try CommandFixture(fixture: "slot-fill.pen")
 
         let run = try fixture.run(
             "set", fixture.file.path, "Inst0/Note0", "kind.content=Hi", "--as", "ana"
         )
 
-        #expect(run.status != 0)
+        #expect(run.status == 0, "\(run.stderr)")
         #expect(!run.stderr.contains("matches no node"), "\(run.stderr)")
-        #expect(run.stderr.contains("woodcase override"), "\(run.stderr)")
+        #expect(run.stdout.contains("stored as an override"), "\(run.stdout)")
     }
 
     @Test("rm of an injected child says to rewrite the slot's children")

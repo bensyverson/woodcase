@@ -135,6 +135,8 @@ struct CommandFailure: Error, Friendly, CustomStringConvertible {
                 message: BatchErrorMessage.describe(batch, dialect: dialect(editing: file)),
                 exitCode: exitCode(for: batch)
             )
+        case let refusal as EditRefusal:
+            CommandFailure(message: refusal.message, exitCode: .usage)
         case is CocoaError, is URLError:
             CommandFailure(message: error.localizedDescription, exitCode: .environment)
         default:
@@ -168,6 +170,8 @@ struct CommandFailure: Error, Friendly, CustomStringConvertible {
                 message: BatchErrorMessage.describe(batch, in: document, dialect: dialect(editing: file)),
                 exitCode: exitCode(for: batch)
             )
+        case let refusal as EditRefusal:
+            CommandFailure(message: refusal.message, exitCode: .usage)
         default:
             describing(error, editing: file)
         }

@@ -40,3 +40,18 @@ struct BatchPlan {
     /// for the ordinary write, which is what keeps the report quiet.
     var divergences: [WriteDivergence] = []
 }
+
+extension BatchPlan {
+    /// The line a public ``EditPlan`` becomes: its edits, guarded by `rev` on the node it
+    /// stores into, and reported as acting on that node.
+    ///
+    /// - Parameters:
+    ///   - plan: What ``EditPlanner`` planned.
+    ///   - rev: The line's revision guard, if it has one.
+    init(_ plan: EditPlan, rev: String?) {
+        operations = plan.operations
+        expecting = BatchApplier.expecting(rev, on: plan.targetID)
+        actedOnID = plan.targetID
+        divergences = plan.divergences
+    }
+}

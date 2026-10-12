@@ -164,6 +164,7 @@ let image = PenRenderer.render(
 
 - [Woodcase CLI](Sources/Woodcase/Documentation.docc/WoodcaseCLI.md) — every verb, its options, and the exit codes it can return
 - [Editing from the Command Line](Sources/Woodcase/Documentation.docc/WoodcaseEditor.md) — the read–write–verify loop, addressing, property paths, batches, revisions and undo
+- [Planning Edits](Sources/Woodcase/Documentation.docc/EditPlanning.md) — the one edit planner the CLI and editors share: intents, overrides inside instances, value constraints and refusal codes
 - [PenEngine Pipeline](Sources/Woodcase/Documentation.docc/PenEngine.md) — pipeline stages, design patterns, and key architectural decisions
 - [Rendering](Sources/Woodcase/Documentation.docc/PenRendering.md) — rendering architecture overview
 - [Text Layout for Editors](Sources/Woodcase/Documentation.docc/PenTextLayoutForEditors.md) — the one layout call renderers and an editor's caret share: lines in a box, carets, hit-testing and selection

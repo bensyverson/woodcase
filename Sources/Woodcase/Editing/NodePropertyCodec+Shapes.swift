@@ -44,16 +44,48 @@ extension NodePropertyCodec {
         example: ##"[{"type":"color","color":"#FFD166"}]"##
     )
 
+    // MARK: - Constraints
+
+    // A write rule only: ``EditPlanner`` refuses a number outside these, and nothing
+    // refuses one a file already holds.
+
+    /// A coordinate or an offset: any number of points.
+    private static let points = PenValueConstraint(unit: .points)
+    /// A size, a radius, a padding or a stroke: never negative.
+    private static let length = PenValueConstraint(unit: .points, minimum: .inclusive(0))
+    /// A rotation or an angle: any number of degrees.
+    private static let degrees = PenValueConstraint(unit: .degrees)
+    /// An opacity or a ring's inner radius.
+    private static let fraction = PenValueConstraint(unit: .fraction, minimum: .inclusive(0), maximum: .inclusive(1))
+    /// An arc's sweep, which the format bounds at one turn either way.
+    private static let sweep = PenValueConstraint(unit: .degrees, minimum: .inclusive(-360), maximum: .inclusive(360))
+    /// A polygon's sides: whole, and at least a triangle.
+    private static let sides = PenValueConstraint(unit: .count, minimum: .inclusive(3), step: 1)
+    /// A font size: a face at 0 points draws nothing.
+    private static let fontSize = PenValueConstraint(unit: .points, minimum: .exclusive(0))
+    /// Line height is a multiple of fontSize. The ceiling is what catches the common
+    /// mistake — 24 meant as points is a line box twenty-four lines tall — and no
+    /// design sets ten lines of leading on purpose.
+    private static let lineHeight = PenValueConstraint(
+        unit: .fontSizeMultiple, minimum: .exclusive(0), maximum: .inclusive(10)
+    )
+    /// A variable icon font's weight axis, which the format documents as 100–700.
+    private static let iconWeight = PenValueConstraint(
+        unit: .fontWeight, minimum: .inclusive(100), maximum: .inclusive(700)
+    )
+    /// A browser's zoom: a positive scale.
+    private static let zoom = PenValueConstraint(unit: .factor, minimum: .exclusive(0))
+
     // MARK: - The table
 
     /// Field name → the shape a value must have to be accepted.
     static let shapes: [String: PenPropertyShape] = [
         // Common properties
         "name": PenPropertyShape(forms: [.text(.plain)]),
-        "x": numberOrVariable,
-        "y": numberOrVariable,
-        "rotation": numberOrVariable,
-        "opacity": numberOrVariable,
+        "x": numberOrVariable.constrained(points),
+        "y": numberOrVariable.constrained(points),
+        "rotation": numberOrVariable.constrained(degrees),
+        "opacity": numberOrVariable.constrained(fraction),
         "enabled": booleanOrVariable,
         "flipX": booleanOrVariable,
         "flipY": booleanOrVariable,
@@ -79,11 +111,12 @@ extension NodePropertyCodec {
         ),
 
         // Geometry and layout
-        "width": sizing,
-        "height": sizing,
+        "width": sizing.constrained(length),
+        "height": sizing.constrained(length),
         "cornerRadius": PenPropertyShape(
             forms: [.number, .variable(.number), .slots(["topLeft", "topRight", "bottomRight", "bottomLeft"])],
-            example: "[8, 8, 0, 0]"
+            example: "[8, 8, 0, 0]",
+            constraint: length
         ),
         "padding": PenPropertyShape(
             forms: [
@@ -91,9 +124,10 @@ extension NodePropertyCodec {
                 .slots(["vertical", "horizontal"]),
                 .slots(["top", "right", "bottom", "left"]),
             ],
-            example: "[12, 16]"
+            example: "[12, 16]",
+            constraint: length
         ),
-        "gap": numberOrVariable,
+        "gap": numberOrVariable.constrained(points),
         "layout": PenPropertyShape.oneOf(PenLayoutDirection.self),
         "justifyContent": PenPropertyShape.oneOf(PenJustifyContent.self),
         "alignItems": PenPropertyShape.oneOf(PenAlignItems.self),
@@ -102,10 +136,10 @@ extension NodePropertyCodec {
             forms: [.open(PenValueForm.OpenShape(phrase: "an array of strings", signature: "[string, …]"))],
             example: ##"["content"]"##
         ),
-        "innerRadius": numberOrVariable,
-        "startAngle": numberOrVariable,
-        "sweepAngle": numberOrVariable,
-        "polygonCount": numberOrVariable,
+        "innerRadius": numberOrVariable.constrained(fraction),
+        "startAngle": numberOrVariable.constrained(degrees),
+        "sweepAngle": numberOrVariable.constrained(sweep),
+        "polygonCount": numberOrVariable.constrained(sides),
         "geometry": PenPropertyShape(forms: [.text(.svgPathData)], example: ##""M0 0 L10 10""##),
         "viewBox": PenPropertyShape(forms: [.slots(["x", "y", "width", "height"])], example: "[0, 0, 24, 24]"),
         "fillRule": PenPropertyShape.oneOf(PenFillRule.self),
@@ -115,7 +149,8 @@ extension NodePropertyCodec {
         "stroke": paint,
         "strokeWidth": PenPropertyShape(
             forms: [.number, .variable(.number), .one(PenStrokeWidth.schema)],
-            example: ##"{"top":1,"right":1,"bottom":2,"left":1}"##
+            example: ##"{"top":1,"right":1,"bottom":2,"left":1}"##,
+            constraint: length
         ),
         "strokeLinecap": PenPropertyShape.oneOf(PenStrokeCap.self),
         "strokeLinejoin": PenPropertyShape.oneOf(PenStrokeJoin.self),
@@ -136,17 +171,18 @@ extension NodePropertyCodec {
         "content": stringOrVariable,
         "textGrowth": PenPropertyShape.oneOf(PenTextGrowth.self),
         "fontFamily": stringOrVariable,
-        "fontSize": numberOrVariable,
+        "fontSize": numberOrVariable.constrained(fontSize),
         "fontWeight": stringOrVariable,
         "fontStyle": stringOrVariable,
-        "letterSpacing": numberOrVariable,
+        "letterSpacing": numberOrVariable.constrained(points),
         // The one number in the format that is not points. A reader who assumes the
         // house unit writes 23 for a 15pt face and gets a 345pt line box, silently —
         // so the fact rides on the shape, where a refusal and the schema both see it.
         "lineHeight": PenPropertyShape(
             forms: [.number, .variable(.number)],
             detail: "a multiple of fontSize, not points",
-            example: "1.4"
+            example: "1.4",
+            constraint: lineHeight
         ),
         "textAlign": PenPropertyShape.oneOf(PenTextAlign.self),
         "textAlignVertical": PenPropertyShape.oneOf(PenTextAlignVertical.self),
@@ -166,7 +202,7 @@ extension NodePropertyCodec {
         ))]),
         "icon": stringOrVariable,
         "library": stringOrVariable,
-        "weight": numberOrVariable,
+        "weight": numberOrVariable.constrained(iconWeight),
         "model": PenPropertyShape(forms: [.text(.plain)]),
         "scriptUri": PenPropertyShape(forms: [.text(.plain)]),
         "inputs": PenPropertyShape(
@@ -184,9 +220,9 @@ extension NodePropertyCodec {
             example: ##""example.com""##
         ),
         "deviceId": PenPropertyShape(forms: [.text(.plain)]),
-        "zoom": PenPropertyShape(forms: [.number], detail: "absent means 1", example: "1.5"),
-        "scrollX": PenPropertyShape(forms: [.number]),
-        "scrollY": PenPropertyShape(forms: [.number]),
+        "zoom": PenPropertyShape(forms: [.number], detail: "absent means 1", example: "1.5", constraint: zoom),
+        "scrollX": PenPropertyShape(forms: [.number], constraint: points),
+        "scrollY": PenPropertyShape(forms: [.number], constraint: points),
 
         // Connections.
         "source": PenPropertyShape(

@@ -2,8 +2,8 @@
   "version": "2.17",
   "variables": {
     "v-muted": {
-      "type": "color",
-      "value": "#888888"
+      "type": "string",
+      "value": "muted"
     }
   },
   "children": [

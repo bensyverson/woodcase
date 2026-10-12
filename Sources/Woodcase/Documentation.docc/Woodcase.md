@@ -37,6 +37,7 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 - <doc:WoodcaseActivityLog>
 - <doc:PenBundles>
 - <doc:WoodcaseBatches>
+- <doc:EditPlanning>
 - <doc:WoodcaseScripting>
 - <doc:WoodcaseViewer>
 - <doc:WoodcasePerformance>
@@ -142,12 +143,21 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 - ``ResolvedNodeAddress``
 - ``NodePropertyCodec``
 - ``PenPropertyShape``
+- ``PenValueConstraint``
 - ``PenValueForm``
 - ``PenNestedShape``
 - ``PenSchema``
 - ``PenSchemaTable``
 - ``PenID``
 - ``SubtreeIDPlan``
+
+### Planning Edits
+
+- <doc:EditPlanning>
+- ``EditPlanner``
+- ``EditIntent``
+- ``EditPlan``
+- ``EditRefusal``
 
 ### Sessions
 

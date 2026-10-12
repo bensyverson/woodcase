@@ -275,8 +275,8 @@ The instance's **own** address — `qa1`, with nothing after it — is the ref n
 is also how the component root's properties are overridden. There is no
 `qa1/<component id>` form; see **Overrides**, below.
 
-Writing to a node inside an instance is `override`, not `set` — see **Overrides**,
-below. The underlying resolver is documented in <doc:EditingDocuments> under
+Writing to a node inside an instance is stored as an override — `override` writes one,
+and `set` aimed there writes the same one and says so — see **Overrides**, below. The underlying resolver is documented in <doc:EditingDocuments> under
 *Addressing Nodes*.
 
 ## Property paths
@@ -405,8 +405,9 @@ literal it almost certainly was, so `$120,000` draws as `$120,000` and `lint` sa
 nothing (``PenVariableResolver``). That is the *property's* rule, not the verb's: it
 holds for `set … kind.content=` on a text node and for `override … content=` into an
 instance's `descendants` map alike, and the two lint and draw identically. Every
-*other* property is strict, on both routes: a bare `$name` naming nothing stays a
-dangling reference, draws nothing, and `lint` reports it as `unresolved-variable`. So
+*other* property is strict, on both routes: `set` and `override` refuse a bare `$name`
+naming nothing (exit 2), and one already in a file stays a dangling reference, draws
+nothing, and `lint` reports it as `unresolved-variable`. So
 does a name the document *does* define but nothing resolves — a circular chain, say —
 so the forgiveness can never hide a real dangling reference. Write the escape anyway
 in content: the stored value is what `get`, the code generators and a later theme all
@@ -414,8 +415,22 @@ read, and a theme that one day defines that name would swallow your text.
 
 **`kind.lineHeight` is a multiple of `kind.fontSize`, not a length in points.** It is
 the one number in the schema that is not points: `1.4` is 140% leading, and `23` on a
-15pt face is a 345pt line box, laid out and rendered without complaint. The schema's
-legend says so at the foot of every table, and a refusal names it too.
+15pt face is a 345pt line box. The schema's legend says so at the foot of every
+table, and `set` refuses a `lineHeight` above 10 as the points it almost certainly is.
+
+**Values are checked on write.** `set` and `override` refuse, with exit 2 and the range
+that would have been taken:
+
+- a number outside its property's range — opacity 0 to 1, sizes, radii, padding and
+  strokes at least 0, `fontSize` above 0, a whole `polygonCount` of at least 3.
+  `woodcase schema <type>` prints each property's range under **CONSTRAINTS**;
+- a `$name` naming no variable, or a variable of a type the property does not take — a
+  color bound to `common.opacity`;
+- a `common.x` or `common.y` on a node its parent's layout places, which would be stored
+  and ignored. Write `common.layoutPosition=absolute` in the same `set` to place it.
+
+A value the node already holds is never refused, and a file that breaks these rules
+still opens, reads and takes other writes — only a new out-of-range value is turned away.
 
 ## Adding a subtree
 
@@ -1033,7 +1048,8 @@ through `woodcase`, so the lock, the log and undo all keep working.
 
 A node inside a component instance stores nothing of its own. Writing to it creates an
 entry in the instance's `descendants` map, exactly as the format writes it — that is
-`override`, and `set` will tell you so if you aim it there.
+`override`. `set` aimed there writes the same override (property paths translated to raw
+keys) and adds a `note` line naming the instance it was stored on.
 
 ```text
 $ woodcase override banking.pen banking-home/quick-actions/qa1/label content=Top-up
@@ -1431,13 +1447,15 @@ banking-home/quick-actions/qa1 (zHahn) is a ref, and only a frame or a group can
 [exit 2]
 ```
 
-Aiming `set` at a node inside an instance is refused the same way, and hands you the
-command that *would* work:
+Aiming `set` at a node inside an instance is not refused: it is written as the override
+it has to be, and the answer names the instance and says so:
 
 ```text
-$ woodcase set banking.pen banking-home/quick-actions/qa1/label kind.content=x
-banking-home/quick-actions/qa1/label is inside the component instance banking-home/quick-actions/qa1, which stores no properties of its own — run `woodcase override banking.pen banking-home/quick-actions/qa1/label name=value` instead, with raw .pen property names (content, not kind.content)
-[exit 2]
+$ woodcase set banking.pen banking-home/quick-actions/qa1/label kind.content=Top-up
+banking-home/quick-actions/qa1  zHahn
+rev  …
+document  …
+note  banking-home/quick-actions/qa1/label is inside the instance banking-home/quick-actions/qa1, so the set was stored as an override there — the component's own node is unchanged
 ```
 
 All of these are exit 2, not 1: the check ran and the *invocation* is incomplete — a

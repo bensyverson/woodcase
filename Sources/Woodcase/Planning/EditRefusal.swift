@@ -1,0 +1,150 @@
+//
+//  EditRefusal.swift
+//  Woodcase
+//
+
+import Foundation
+
+/// Why ``EditPlanner`` would not plan an edit: a stable code, the property it is
+/// about, the form that would have been accepted, and a sentence for a person.
+///
+/// An inspector branches on ``code`` and shows ``expected`` beside the field that was
+/// refused; the CLI prints ``message``. Nothing has been written when one is thrown.
+///
+/// ```swift
+/// do {
+///     _ = try EditPlanner.plan(.set(["common.opacity": 7]), at: address, in: document)
+/// } catch {
+///     error.code      // .outOfRange
+///     error.property  // "common.opacity"
+///     error.expected  // "0 to 1, a fraction"
+/// }
+/// ```
+///
+/// Loading is never refused. A file holding an opacity of 7 opens, and an operation
+/// that did not come through the planner — a merge, an undo, a peer's write — is
+/// applied as it is; see ``EditPlanner``.
+public struct EditRefusal: Error, Friendly {
+    /// The family a refusal belongs to: the token a program branches on.
+    ///
+    /// The raw values are stable; a sentence may be reworded, a code does not move.
+    public enum Code: String, Friendly, CaseIterable {
+        // MARK: Addressing
+
+        /// The address names no node.
+        case addressNotFound
+
+        /// The address names more than one node.
+        case ambiguousAddress
+
+        /// An override names a node the instance's component does not hold.
+        case overrideTargetNotFound
+
+        /// An override was addressed at a node that is neither an instance nor inside one.
+        case overrideOutsideInstance
+
+        /// The intent carried nothing to write and nothing to unset.
+        case noProperties
+
+        // MARK: Keys and forms
+
+        /// The node's type has no such property.
+        case unknownProperty
+
+        /// The value is not one of the forms the property accepts.
+        case invalidForm
+
+        /// The key cannot be overridden on an instance root — it belongs to the `ref`
+        /// node, or to the format.
+        case reservedOverrideKey
+
+        /// A key names a parameter the component publishes, whose declared path names
+        /// nothing inside it.
+        case parameterPathNotFound
+
+        // MARK: Value constraints
+
+        /// A number lies outside the property's range.
+        case outOfRange
+
+        /// A number falls between the property's steps — a fractional polygon count.
+        case offStep
+
+        // MARK: Variables
+
+        /// A `$name` names no variable the document defines.
+        case undefinedVariable
+
+        /// A `$name` names a variable of a type the property does not take.
+        case variableTypeMismatch
+
+        /// An unbind named a property that holds no variable binding.
+        case notBound
+
+        // MARK: Layout
+
+        /// An `x` or `y` on a node its parent's layout places, which would be stored and
+        /// ignored.
+        case positionIgnoredByLayout
+
+        // MARK: Everything else
+
+        /// The document refused the edit for a reason no other code names; ``errorCode``
+        /// says which.
+        case documentRefused
+    }
+
+    /// Creates a refusal.
+    ///
+    /// - Parameters:
+    ///   - code: The family it belongs to.
+    ///   - address: The address the intent was aimed at, as written.
+    ///   - property: The property path or raw key refused, when one was.
+    ///   - expected: The form or range that would have been accepted, when there is one.
+    ///   - suggestion: A literal write that would have been accepted, when there is one.
+    ///   - message: One sentence: what was refused, and what to do instead.
+    ///   - errorCode: The ``EditingError/code`` or ``BatchError/code`` the refusal came
+    ///     from, when it came from one.
+    public init(
+        code: Code,
+        address: String,
+        property: String? = nil,
+        expected: String? = nil,
+        suggestion: String? = nil,
+        message: String,
+        errorCode: String? = nil
+    ) {
+        self.code = code
+        self.address = address
+        self.property = property
+        self.expected = expected
+        self.suggestion = suggestion
+        self.message = message
+        self.errorCode = errorCode
+    }
+
+    /// The family this refusal belongs to.
+    public var code: Code
+
+    /// The address the intent was aimed at, as written.
+    public var address: String
+
+    /// The property path or raw key refused, or `nil` when the refusal is about the
+    /// address rather than one property.
+    public var property: String?
+
+    /// The form or range that would have been accepted — `"0 to 1, a fraction"`, `"a
+    /// $color variable"` — or `nil` when there is none to state.
+    public var expected: String?
+
+    /// A write that would have been accepted, ready to show or paste —
+    /// `common.layoutPosition=absolute` — or `nil`.
+    public var suggestion: String?
+
+    /// One sentence: what was refused, and what to do instead.
+    public var message: String
+
+    /// The ``EditingError/code`` or ``BatchError/code`` this refusal came from, or `nil`
+    /// for one the planner raised itself.
+    public var errorCode: String?
+}

@@ -44,6 +44,11 @@ struct OverrideCommand: AsyncParsableCommand {
         will not merge is dropped when the instance expands, and a dropped override \
         reads back forever without ever drawing.
 
+        Values are held to the rules `set` holds them to: a number outside its \
+        property's range, a $name naming no variable or one of the wrong type, and an \
+        x or y on a node the component's layout places are refused. `set` on the same \
+        address writes the same override.
+
         --unset KEY REMOVES an override, so the component's own value shows again. \
         That is not what key=null does: a null is *stored*, and clears the property \
         wherever this instance draws — the override is still there, and `get` still \

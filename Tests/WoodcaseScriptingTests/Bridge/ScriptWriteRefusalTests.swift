@@ -211,11 +211,20 @@ struct ScriptWriteRefusalTests {
 
     // MARK: - The batch grammar's own refusals
 
+    /// Changed 2026-10-12 (leaf 2gTcuM): this used a set inside an instance, which now
+    /// plans as an override, so an override on a plain node stands in.
     @Test("a refusal from the batch grammar carries its own case name as the code")
     func aBatchGrammarRefusalCarriesItsCode() throws {
-        let error = try failure(of: "doc.set('Chi01/Label', { 'kind.content': 'x' })")
-        #expect(error.code == "setInsideInstance", "BatchError.code should reach the script")
-        #expect(error.message.contains("override"))
+        let error = try failure(of: "doc.override('Canvas/Title', { content: 'x' })")
+        #expect(error.code == "overrideOutsideInstance", "BatchError.code should reach the script")
+        #expect(error.message.contains("set"))
+    }
+
+    @Test("a value the planner refuses carries the refusal's code")
+    func aPlannerRefusalCarriesItsCode() throws {
+        let error = try failure(of: "doc.set('Canvas/Title', { 'common.opacity': 7 })")
+        #expect(error.code == "outOfRange", "EditRefusal.code should reach the script")
+        #expect(error.message.contains("0 to 1"))
     }
 
     @Test("a stale rev on a root-level add is a document conflict, not a node one")

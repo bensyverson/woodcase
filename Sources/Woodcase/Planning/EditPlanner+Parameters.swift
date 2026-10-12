@@ -1,5 +1,5 @@
 //
-//  BatchApplier+Parameters.swift
+//  EditPlanner+Parameters.swift
 //  Woodcase
 //
 
@@ -13,7 +13,7 @@ import Foundation
 /// `label` names. The redirect happens while the line is planned, so one `override`
 /// may become writes to several nodes inside the instance, and every one of them is
 /// judged, coerced and reported exactly as if it had been addressed the long way.
-extension BatchApplier {
+extension EditPlanner {
     /// One group of overrides bound for one node.
     struct OverrideGroup {
         /// The key inside the instance, or `nil` for the instance's root overrides.

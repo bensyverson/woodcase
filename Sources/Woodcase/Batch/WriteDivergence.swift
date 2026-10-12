@@ -87,6 +87,12 @@ public struct WriteDivergence: Friendly {
         /// than as a `descendants` key Pen would drop. ``WriteDivergence/applied`` is the
         /// slot's name path.
         case slotFillRewrite
+
+        /// A `set` addressed a node inside a component instance, which stores nothing of
+        /// its own, so the write became an override on that instance. A
+        /// ``Severity/note``: edits inside an instance are overrides, and the report
+        /// names the instance because that is where the write is stored.
+        case storedAsOverride
     }
 
     /// How loudly a report says it.

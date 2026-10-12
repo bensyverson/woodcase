@@ -45,6 +45,7 @@ public enum BatchErrorMessage {
     ) -> String {
         if let editing = error as? EditingError { return describe(editing, in: document, dialect: dialect) }
         if let batch = error as? BatchError { return describe(batch, dialect: dialect) }
+        if let refusal = error as? EditRefusal { return refusal.message }
         return "\(error)"
     }
 
