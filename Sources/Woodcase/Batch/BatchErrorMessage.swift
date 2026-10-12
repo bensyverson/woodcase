@@ -169,19 +169,20 @@ public enum BatchErrorMessage {
                 in: dialect
             )
 
-        case let .setInsideInstance(address, instancePath):
+        case let .setInsideInstance(address, instancePath, properties):
             return sentence(
                 """
                 \(address) is inside the component instance \(instancePath), which stores no \
-                properties of its own
+                properties of its own; a write there changes this instance only, never the \
+                component
                 """,
                 batch: """
-                write it as `{"op":"override","target":"\(address)",…}` instead, using raw .pen \
+                write it as `\(overrideLine(address, properties))` instead, using raw .pen \
                 property names (content, not kind.content)
                 """,
                 command: """
-                run `woodcase override \(file) \(address) name=value` instead, with raw .pen \
-                property names (content, not kind.content)
+                run `woodcase override \(file) \(shellQuoted(address)) \(overrideArguments(properties))` \
+                instead, with raw .pen property names (content, not kind.content)
                 """,
                 in: dialect
             )

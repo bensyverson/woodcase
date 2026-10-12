@@ -29,33 +29,37 @@ struct EditPlannerTests {
         #expect(plan.divergences.isEmpty)
     }
 
-    @Test("A set on an instance descendant plans as an override on the instance")
-    func setOnDescendantIsOverride() throws {
+    @Test("A set on an instance descendant is refused, suggesting the override to write")
+    func setOnDescendantIsRefused() throws {
         let document = try PlannerFixture.document()
-        let plan = try plan(.set(["kind.fills": "#FF0000"]), at: "Board/Chip/Label", in: document)
+        let refusal = try #require(PlannerFixture.refusal(.set(["kind.fills": "#FF0000"]), at: "Board/Chip/Label", in: document))
 
-        #expect(plan.storage == .instanceOverride)
-        #expect(plan.targetID == "Chi01")
-        #expect(plan.operations == [
-            .overrideDescendant(EditOperation.OverrideDescendant(
-                refNodeID: "Chi01", descendantID: "Lbl01", properties: ["fill": "#FF0000"], unset: []
-            )),
-        ])
-        #expect(plan.divergences.map(\.kind) == [.storedAsOverride])
-        #expect(plan.divergences.first?.severity == .note)
+        #expect(refusal.code == .setInsideInstance)
+        #expect(refusal.errorCode == "setInsideInstance")
+        #expect(refusal.suggestion == "fill=#FF0000")
+        #expect(refusal.message.contains("Board/Chip"))
+        #expect(refusal.message.contains(##"{"op":"override","target":"Board/Chip/Label","props":{"fill":"#FF0000"}}"##),
+                "\(refusal.message)")
     }
 
-    @Test("A set on an instance descendant accepts the same plan by resolved address")
+    @Test("A set on an instance descendant is refused the same way by resolved address")
     func setByResolvedAddress() throws {
         let document = try PlannerFixture.document()
-        let byAddress = try plan(.set(["kind.content": "Go"]), at: "Board/Chip/Label", in: document)
-        let byResolved = try EditPlanner.plan(
-            .set(["kind.content": "Go"]),
-            at: ResolvedNodeAddress.instanceDescendant(refID: "Chi01", descendantKey: "Lbl01"),
-            in: document
-        )
+        let byAddress = PlannerFixture.refusal(.set(["kind.content": "Go"]), at: "Board/Chip/Label", in: document)
+        var byResolved: EditRefusal?
+        do {
+            _ = try EditPlanner.plan(
+                .set(["kind.content": "Go"]),
+                at: ResolvedNodeAddress.instanceDescendant(refID: "Chi01", descendantKey: "Lbl01"),
+                in: document
+            )
+        } catch {
+            byResolved = error
+        }
 
-        #expect(byResolved == byAddress)
+        #expect(byAddress?.code == .setInsideInstance)
+        #expect(byResolved?.code == .setInsideInstance)
+        #expect(byResolved?.suggestion == byAddress?.suggestion)
     }
 
     @Test("A set on an instance root writes the ref node's own properties")
@@ -154,16 +158,27 @@ struct EditPlannerTests {
         ])
     }
 
-    @Test("A bind inside an instance is an override, and a leading $ is optional")
+    @Test("A bind inside an instance is refused, suggesting the override that binds it")
     func bindInsideInstance() throws {
         let document = try PlannerFixture.document()
-        let plan = try plan(.bind(property: "kind.fills", variable: "$brand"), at: "Board/Chip/Label", in: document)
+        let refusal = try #require(PlannerFixture.refusal(
+            .bind(property: "kind.fills", variable: "$brand"), at: "Board/Chip/Label", in: document
+        ))
 
-        #expect(plan.operations == [
-            .overrideDescendant(EditOperation.OverrideDescendant(
-                refNodeID: "Chi01", descendantID: "Lbl01", properties: ["fill": "$brand"], unset: []
-            )),
-        ])
+        #expect(refusal.code == .setInsideInstance)
+        #expect(refusal.suggestion == "fill=$brand")
+    }
+
+    @Test("An unbind inside an instance is refused, suggesting the override of the resolved value")
+    func unbindInsideInstance() throws {
+        let document = try PlannerFixture.document()
+        try document.apply(.overrideDescendant(EditOperation.OverrideDescendant(
+            refNodeID: "Chi01", descendantID: "Lbl01", properties: ["fill": "$brand"]
+        )))
+        let refusal = try #require(PlannerFixture.refusal(.unbind(property: "kind.fills"), at: "Board/Chip/Label", in: document))
+
+        #expect(refusal.code == .setInsideInstance)
+        #expect(refusal.suggestion == "fill=#E5484D")
     }
 
     @Test("An unbind writes the value the variable resolves to")

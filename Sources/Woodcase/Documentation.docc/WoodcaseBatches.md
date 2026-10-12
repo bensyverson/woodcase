@@ -117,8 +117,9 @@ names — `"content"`, not `"kind.content"` — because a ref's `descendants` ma
 written that way and storing anything else would make the file disagree with what the
 format stores. The asymmetry is in the storage, not in what a line may write: a path an
 `override` is given is translated to the raw key on the way in, so a caller can write
-whichever vocabulary is at hand. A `set` addressed inside an instance is written as the
-override it has to be, with a note saying so; an `override` addressed at a node that is
+whichever vocabulary is at hand. A `set` addressed inside an instance is refused with
+`setInsideInstance`, naming the `override` line to write instead — a write there changes
+that instance only, never the component; an `override` addressed at a node that is
 neither an instance nor inside one is refused. Both lines plan through ``EditPlanner``,
 so they write and refuse exactly what an editor's plan does — see <doc:EditPlanning>.
 

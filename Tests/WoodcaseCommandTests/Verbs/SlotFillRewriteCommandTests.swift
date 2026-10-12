@@ -108,20 +108,14 @@ struct SlotFillRewriteCommandTests {
         #expect(try descendants(in: fixture) == before)
     }
 
-    /// Changed 2026-10-12 (leaf 2gTcuM): set used to refuse here and point at override; it
-    /// now plans as that override, slot-fill rewrite included.
-    @Test("set on an injected child writes into the slot fill, as override on the same address does")
-    func setWritesTheSlotFillLikeOverride() throws {
-        let viaSet = try CommandFixture(fixture: "slot-fill.pen")
-        let viaOverride = try CommandFixture(fixture: "slot-fill.pen")
+    @Test("set on an injected child points at override on the same address")
+    func setPointsAtOverrideOnTheAddress() throws {
+        let fixture = try CommandFixture(fixture: "slot-fill.pen")
 
-        let run = try viaSet.run("set", viaSet.file.path, "Inst0/Note0", "kind.content=Hi", "--as", "ana")
-        let override = try viaOverride.run(
-            "override", viaOverride.file.path, "Inst0/Note0", "content=Hi", "--as", "ana"
-        )
+        let run = try fixture.run("set", fixture.file.path, "Inst0/Note0", "kind.content=Hi", "--as", "ana")
 
-        #expect(run.status == 0, "\(run.stderr)")
-        #expect(override.status == 0)
-        #expect(try PenParser.parse(contentsOf: viaSet.file) == PenParser.parse(contentsOf: viaOverride.file))
+        #expect(run.status != 0)
+        #expect(run.stderr.contains("woodcase override \(fixture.file.path) 'Inst0/Note0' 'content=Hi'"),
+                "\(run.stderr)")
     }
 }

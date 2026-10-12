@@ -14,32 +14,39 @@ the same intent, and refuse the same writes.
 
 ```swift
 let address = NodeAddress("Board/Chip/Label")!
-let plan = try EditPlanner.plan(.set(["kind.fills": "#E5484D"]), at: address, in: document)
+let plan = try EditPlanner.plan(.override(["kind.fills": "#E5484D"]), at: address, in: document)
 plan.storage      // .instanceOverride — Label is inside the instance Chip
 plan.operations   // [.overrideDescendant(Chi01, Lbl01, ["fill": "#E5484D"])]
 try session.submit(.local(LocalEdit(operations: plan.operations)))
 ```
 
 An editor that already holds a ``ResolvedNodeAddress`` passes it instead of a
-``NodeAddress``; the plan is the same.
+``NodeAddress``; the plan is the same. An editor holding an id from the **expanded** tree
+gets that address from ``EditableDocument/resolve(expandedID:)`` or
+``EditableDocument/inspect(expandedID:)`` — see <doc:InspectingNodes>.
 
 ### Intents
 
 | Intent | Plans as |
 |---|---|
-| ``EditIntent/set(_:)`` | `setProperties` on a node with storage of its own; an override on the instance for a node inside one |
+| ``EditIntent/set(_:)`` | `setProperties` on a node with storage of its own; refused inside an instance |
 | ``EditIntent/override(_:unset:)`` | a `descendants` entry, or the instance's root overrides when aimed at the instance itself |
 | ``EditIntent/resetOverride(_:)`` | an override that only unsets keys |
 | ``EditIntent/bind(property:variable:)`` | a set of `$name`, refused unless the variable exists with the right type |
 | ``EditIntent/unbind(property:)`` | a set of the value the bound variable has under the node's theme |
 
-**Edits inside an instance are overrides.** A set aimed inside an instance is planned
-exactly as the override it has to be — property paths translated to the raw keys the
-`descendants` map uses, published parameters routed, content the instance wrote into its
-own slot written into that slot's fill — and carries a
-``WriteDivergence/Kind/storedAsOverride`` note. Aimed at an instance root, a set writes
-the `ref` node's own properties (`common.x`, `common.enabled`); the component root's
-properties as the instance shows them are an override.
+**A set inside an instance is refused; an override is asked for by name.** A write to
+a node inside an instance changes that instance only, never the component, and a caller
+that reached for `set` — an agent above all — meant to change the node. So
+``EditIntent/set(_:)``, ``EditIntent/bind(property:variable:)`` and
+``EditIntent/unbind(property:)`` aimed inside an instance throw
+``EditRefusal/Code/setInsideInstance``; its ``EditRefusal/suggestion`` is the override's
+`key=value` payload (`fill=$brand` for a bind) and its message the exact `override` line or
+command. ``EditIntent/override(_:unset:)`` plans that override — property paths translated
+to the raw keys the `descendants` map uses, published parameters routed, content the
+instance wrote into its own slot written into that slot's fill. Aimed at an instance root,
+a set writes the `ref` node's own properties (`common.x`, `common.enabled`); the component
+root's properties as the instance shows them are an override.
 
 ### What is refused
 
@@ -48,6 +55,7 @@ properties as the instance shows them are an override.
 | ``EditRefusal/Code/outOfRange``, ``EditRefusal/Code/offStep`` | a number outside the property's ``PenValueConstraint`` — an opacity of 7, a negative width, a fractional polygon count, a `lineHeight` written in points |
 | ``EditRefusal/Code/undefinedVariable`` | a `$name` the document (and the libraries read with it) does not define; text content alone keeps an undefined `$word` as literal text |
 | ``EditRefusal/Code/variableTypeMismatch`` | a `$name` of a type the property does not take — a color bound to an opacity |
+| ``EditRefusal/Code/setInsideInstance`` | a set, bind or unbind aimed inside a component instance; ``EditRefusal/suggestion`` is the override to request instead |
 | ``EditRefusal/Code/positionIgnoredByLayout`` | an `x` or `y` on a node its parent's layout places; ``EditRefusal/suggestion`` is the `layoutPosition` write that would honor it |
 | ``EditRefusal/Code/unknownProperty``, ``EditRefusal/Code/invalidForm`` | a key the node's type lacks, a value of a form it does not take |
 
@@ -82,3 +90,7 @@ reports it, and a write rehearsed with `--dry-run` lists the findings it would i
 
 - ``EditRefusal``
 - ``PenValueConstraint``
+
+### Inspecting
+
+- <doc:InspectingNodes>

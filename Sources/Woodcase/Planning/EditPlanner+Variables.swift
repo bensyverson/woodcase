@@ -27,10 +27,9 @@ extension EditPlanner {
         in document: EditableDocument
     ) throws -> EditPlan {
         let name = variable.hasPrefix(PenDollarEscape.dollar) ? String(variable.dropFirst()) : variable
-        let field = NodePropertyCodec.fieldName(of: property) ?? NodePropertyCodec.fieldName(forRawKey: property)
         try checkBinding(
             property, to: name,
-            expecting: NodePropertyCodec.shape(of: field)?.variable,
+            expecting: NodePropertyCodec.bindableVariableType(of: property),
             address: written, in: document
         )
         return try planSet([property: .string(PenDollarEscape.dollar + name)], at: target, written: written, in: document)
@@ -64,12 +63,7 @@ extension EditPlanner {
             throw notBound(property, address: written)
         }
         let name = String(text.dropFirst())
-        let theme = placed?.theme(axes: document.themes) ?? [:]
-        let table = PenVariableResolver.buildTable(
-            from: (document.variables ?? [:]).merging(document.importedVariables) { own, _ in own },
-            theme: theme,
-            overrides: [:]
-        )
+        let table = document.resolvedVariables(under: placed?.theme(axes: document.themes) ?? [:])
         guard let value = table[name] else {
             throw notBound(property, address: written)
         }

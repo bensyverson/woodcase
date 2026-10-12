@@ -92,23 +92,18 @@ struct BatchApplierOperationTests {
         #expect(data.descendants?["Lbl01"]?.properties["content"] == .string("Menu"))
     }
 
-    /// Changed 2026-10-12 (leaf 2gTcuM): this line used to fail with setInsideInstance;
-    /// edits inside an instance are now overrides.
-    @Test("A set addressed inside an instance writes the override, and notes it")
-    func setInsideInstanceOverrides() throws {
+    @Test("A set addressed inside an instance fails, giving the override line to write instead")
+    func setInsideInstanceFails() throws {
         let doc = try makeDocument()
         let report = try apply(#"""
         {"op":"set","target":"Board/Chip/Label","props":{"kind.content":"Menu"}}
         """#, to: doc)
 
-        #expect(report.lines[0].status == .applied)
-        #expect(report.lines[0].path == "Board/Chip")
-        #expect(report.lines[0].divergences.map(\.kind) == [.storedAsOverride])
-        guard case let .ref(data) = try #require(doc.node(id: "Chi01")).kind else {
-            Issue.record("expected Chi01 to be a ref")
-            return
-        }
-        #expect(data.descendants?["Lbl01"]?.properties["content"] == .string("Menu"))
+        #expect(report.lines[0].status == .failed)
+        let message = try #require(report.lines[0].error)
+        #expect(message.contains("Board/Chip/Label"))
+        #expect(message.contains(#"{"op":"override","target":"Board/Chip/Label","props":{"content":"Menu"}}"#),
+                "\(message)")
     }
 
     @Test("An override addressed at a plain node fails, saying it is not inside an instance")

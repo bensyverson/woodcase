@@ -28,14 +28,17 @@ struct EditPlannerParityTests {
             == plannerOperations(.set(props), at: "Board/Free"))
     }
 
-    @Test("A set line inside an instance gives the planner's override, as does the override line")
+    @Test("A set line inside an instance fails with the planner's refusal")
     func setInsideInstance() throws {
+        let document = try PlannerFixture.document()
         let target = PlannerFixture.address("Board/Chip/Label")
-        let editor = try plannerOperations(.set(["kind.content": "Go"]), at: "Board/Chip/Label")
+        let report = BatchApplier.apply(
+            [.set(BatchOperation.SetOp(target: target, props: ["kind.content": "Go"]))], to: document
+        )
 
-        #expect(try batchOperations(.set(BatchOperation.SetOp(target: target, props: ["kind.content": "Go"]))) == editor)
-        #expect(try batchOperations(.override(BatchOperation.OverrideOp(target: target, props: ["content": "Go"])))
-            == editor)
+        #expect(report.lines[0].status == .failed)
+        #expect(report.lines[0].error
+            == PlannerFixture.refusal(.set(["kind.content": "Go"]), at: "Board/Chip/Label", in: document)?.message)
     }
 
     @Test("An override line with unset gives the planner's override")

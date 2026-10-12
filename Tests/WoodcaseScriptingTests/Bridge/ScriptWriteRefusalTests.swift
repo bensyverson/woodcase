@@ -211,10 +211,15 @@ struct ScriptWriteRefusalTests {
 
     // MARK: - The batch grammar's own refusals
 
-    /// Changed 2026-10-12 (leaf 2gTcuM): this used a set inside an instance, which now
-    /// plans as an override, so an override on a plain node stands in.
     @Test("a refusal from the batch grammar carries its own case name as the code")
     func aBatchGrammarRefusalCarriesItsCode() throws {
+        let error = try failure(of: "doc.set('Chi01/Label', { 'kind.content': 'x' })")
+        #expect(error.code == "setInsideInstance", "BatchError.code should reach the script")
+        #expect(error.message.contains("override"))
+    }
+
+    @Test("an override aimed at a plain node carries its own case name as the code")
+    func anOverrideOutsideAnInstanceCarriesItsCode() throws {
         let error = try failure(of: "doc.override('Canvas/Title', { content: 'x' })")
         #expect(error.code == "overrideOutsideInstance", "BatchError.code should reach the script")
         #expect(error.message.contains("set"))

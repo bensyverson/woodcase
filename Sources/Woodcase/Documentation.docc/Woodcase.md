@@ -38,6 +38,7 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 - <doc:PenBundles>
 - <doc:WoodcaseBatches>
 - <doc:EditPlanning>
+- <doc:InspectingNodes>
 - <doc:WoodcaseScripting>
 - <doc:WoodcaseViewer>
 - <doc:WoodcasePerformance>
@@ -158,6 +159,9 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 - ``EditIntent``
 - ``EditPlan``
 - ``EditRefusal``
+- <doc:InspectingNodes>
+- ``NodeInspection``
+- ``BindableVariable``
 
 ### Sessions
 

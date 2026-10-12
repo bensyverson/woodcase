@@ -33,9 +33,9 @@ struct EditPlannerPositionTests {
         #expect(refusal.suggestion == "layoutPosition=absolute")
     }
 
-    @Test("A y set on an in-flow descendant through set is refused the same way")
-    func inFlowSetInsideInstance() throws {
-        #expect(try refusal(.set(["common.y": 10]), at: "Board/Chip/Label")?.code == .positionIgnoredByLayout)
+    @Test("A y override on an in-flow descendant is refused the same way")
+    func inFlowYOverride() throws {
+        #expect(try refusal(.override(["y": 10]), at: "Board/Chip/Label")?.code == .positionIgnoredByLayout)
     }
 
     @Test("Positions layout honors plan")

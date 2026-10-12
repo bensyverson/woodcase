@@ -31,7 +31,10 @@ extension EditRefusal {
                 message: message, errorCode: editing.code
             )
         } else if let batch = error as? BatchError {
-            self.init(code: Self.classify(batch), address: address, message: message, errorCode: batch.code)
+            self.init(
+                code: Self.classify(batch), address: address, suggestion: Self.suggestion(for: batch),
+                message: message, errorCode: batch.code
+            )
         } else {
             self.init(code: .documentRefused, address: address, message: message)
         }
@@ -63,16 +66,24 @@ extension EditRefusal {
         }
     }
 
+    /// The write that would have been accepted instead: for a set inside an instance,
+    /// the override's `key=value` assignments.
+    private static func suggestion(for error: BatchError) -> String? {
+        guard case let .setInsideInstance(_, _, properties) = error, !properties.isEmpty else { return nil }
+        return BatchErrorMessage.overrideAssignments(properties).joined(separator: " ")
+    }
+
     /// The family a ``BatchError`` belongs to.
     private static func classify(_ error: BatchError) -> Code {
         switch error {
         case .overrideOutsideInstance: .overrideOutsideInstance
+        case .setInsideInstance: .setInsideInstance
         case .overrideWithoutProperties: .noProperties
         case .parameterPathNotFound: .parameterPathNotFound
         case .malformedLine, .malformedRow, .copyPathNotInSource, .emptyCopyRows, .copyTagWithRows,
-             .unnamedNode, .literalRootOverridesKey, .replacementIDMismatch, .setInsideInstance,
-             .structureInsideSlot, .parentInsideInstance, .documentRevisionConflict, .guardConflict,
-             .guardNodeMissing, .guardOnTag, .guardWithoutTarget:
+             .unnamedNode, .literalRootOverridesKey, .replacementIDMismatch, .structureInsideSlot,
+             .parentInsideInstance, .documentRevisionConflict, .guardConflict, .guardNodeMissing,
+             .guardOnTag, .guardWithoutTarget:
             .documentRefused
         }
     }

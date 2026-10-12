@@ -275,8 +275,9 @@ The instance's **own** address — `qa1`, with nothing after it — is the ref n
 is also how the component root's properties are overridden. There is no
 `qa1/<component id>` form; see **Overrides**, below.
 
-Writing to a node inside an instance is stored as an override — `override` writes one,
-and `set` aimed there writes the same one and says so — see **Overrides**, below. The underlying resolver is documented in <doc:EditingDocuments> under
+Writing to a node inside an instance is `override`, not `set` — a write there changes that
+instance only, never the component, so it has to be asked for by name; see **Overrides**,
+below. The underlying resolver is documented in <doc:EditingDocuments> under
 *Addressing Nodes*.
 
 ## Property paths
@@ -1048,8 +1049,8 @@ through `woodcase`, so the lock, the log and undo all keep working.
 
 A node inside a component instance stores nothing of its own. Writing to it creates an
 entry in the instance's `descendants` map, exactly as the format writes it — that is
-`override`. `set` aimed there writes the same override (property paths translated to raw
-keys) and adds a `note` line naming the instance it was stored on.
+`override`, and `set` refuses if you aim it there, handing you the exact `override`
+command to run instead.
 
 ```text
 $ woodcase override banking.pen banking-home/quick-actions/qa1/label content=Top-up
@@ -1447,15 +1448,14 @@ banking-home/quick-actions/qa1 (zHahn) is a ref, and only a frame or a group can
 [exit 2]
 ```
 
-Aiming `set` at a node inside an instance is not refused: it is written as the override
-it has to be, and the answer names the instance and says so:
+Aiming `set` at a node inside an instance is refused the same way, and hands you the
+command that *would* work — an override changes that one instance, never the component,
+so it is never written unless asked for:
 
 ```text
 $ woodcase set banking.pen banking-home/quick-actions/qa1/label kind.content=Top-up
-banking-home/quick-actions/qa1  zHahn
-rev  …
-document  …
-note  banking-home/quick-actions/qa1/label is inside the instance banking-home/quick-actions/qa1, so the set was stored as an override there — the component's own node is unchanged
+banking-home/quick-actions/qa1/label is inside the component instance banking-home/quick-actions/qa1, which stores no properties of its own; a write there changes this instance only, never the component — run `woodcase override banking.pen 'banking-home/quick-actions/qa1/label' 'content=Top-up'` instead, with raw .pen property names (content, not kind.content)
+[exit 2]
 ```
 
 All of these are exit 2, not 1: the check ran and the *invocation* is incomplete — a

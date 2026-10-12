@@ -7,10 +7,11 @@ import Foundation
 
 /// What a caller wants to change about one node, before anything decides how it is stored.
 ///
-/// An intent says *what*; ``EditPlanner`` decides *how*. The same "make this label red"
-/// is a `setProperties` on a node with storage of its own and an `overrideDescendant`
-/// on a node inside a component instance, and the caller — an inspector, an agent's
-/// `woodcase set`, a script — should not have to know which before it asks.
+/// An intent says *what*; ``EditPlanner`` decides *how*: the paths translated, the
+/// values checked, the parameters routed. The one choice left to the caller is whether
+/// it means the node or this instance of it — ``set(_:)`` changes a node with storage of
+/// its own and is refused inside an instance; ``override(_:unset:)`` changes one
+/// instance and is asked for by name, so nobody writes an override without meaning to.
 ///
 /// Keys are property paths (`kind.fills`, `common.opacity`), the vocabulary every read
 /// prints. Where the write lands in an instance's override map they are translated to
@@ -24,9 +25,10 @@ public enum EditIntent: Friendly {
     /// Writes properties on the addressed node.
     ///
     /// On a node with storage of its own this sets them in place. On a node inside a
-    /// component instance it plans as an override on that instance — edits inside an
-    /// instance are overrides — and the plan says so with a
-    /// ``WriteDivergence/Kind/storedAsOverride`` note. On an instance root it sets the
+    /// component instance it is refused with ``EditRefusal/Code/setInsideInstance``: a
+    /// write there changes this instance only, never the component, so it has to be asked
+    /// for as ``override(_:unset:)``, whose payload ``EditRefusal/suggestion`` spells out.
+    /// On an instance root it sets the
     /// `ref` node's own properties (where it sits, whether it draws); the component
     /// root's properties as the instance shows them are ``override(_:unset:)``'s.
     ///
@@ -55,7 +57,8 @@ public enum EditIntent: Friendly {
     ///
     /// Refused when the document defines no such variable, or one of a type the
     /// property does not take. Planned like ``set(_:)``, so a binding inside an instance
-    /// is an override.
+    /// is refused with ``EditRefusal/Code/setInsideInstance`` — override the property
+    /// with `$name` instead.
     ///
     /// - Parameters:
     ///   - property: The property path to bind.
@@ -65,7 +68,8 @@ public enum EditIntent: Friendly {
     /// Replaces a property's variable binding with the value it resolves to now.
     ///
     /// The value is the variable's under the theme the node inherits, so the node
-    /// looks the same afterward. Refused when the property is not bound.
+    /// looks the same afterward. Refused when the property is not bound, and, like
+    /// ``set(_:)``, inside an instance — the suggestion is the override of that value.
     ///
     /// - Parameter property: The property path to unbind.
     case unbind(property: String)

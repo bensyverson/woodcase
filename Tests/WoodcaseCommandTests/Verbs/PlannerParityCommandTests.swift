@@ -3,6 +3,7 @@
 //  WoodcaseCommandTests
 //
 
+import ArgumentParser
 import Foundation
 import Testing
 import Woodcase
@@ -39,24 +40,25 @@ struct PlannerParityCommandTests {
         #expect(try written(fixture) == editorResult(.set(["common.opacity": 0.5]), at: "Board/Free"))
     }
 
-    @Test("set inside an instance writes the planner's override, and says it did")
+    @Test("set inside an instance is refused, as the planner refuses it, naming the override to run")
     func setInsideInstance() throws {
         let fixture = try CommandFixture(fixture: "planner.pen")
+        let before = try written(fixture)
         let run = try fixture.run("set", fixture.file.path, "Board/Chip/Label", "kind.content=Go", "--as", "t")
 
-        #expect(run.status == 0)
-        #expect(run.stdoutLines.first == "Board/Chip  Chi01")
-        #expect(run.stdout.contains("override"))
-        #expect(try written(fixture) == editorResult(.set(["kind.content": "Go"]), at: "Board/Chip/Label"))
+        #expect(run.status == ExitCode.usage.rawValue)
+        #expect(run.stderr.contains("woodcase override \(fixture.file.path) 'Board/Chip/Label' 'content=Go'"),
+                "\(run.stderr)")
+        #expect(try written(fixture) == before)
     }
 
-    @Test("override writes what the planner's set writes for the same descendant")
-    func overrideMatchesEditorSet() throws {
+    @Test("override writes what the planner's override writes for the same descendant")
+    func overrideMatchesEditorOverride() throws {
         let fixture = try CommandFixture(fixture: "planner.pen")
         let run = try fixture.run("override", fixture.file.path, "Board/Chip/Label", "fill=#FF0000", "--as", "t")
 
         #expect(run.status == 0)
-        #expect(try written(fixture) == editorResult(.set(["kind.fills": "#FF0000"]), at: "Board/Chip/Label"))
+        #expect(try written(fixture) == editorResult(.override(["fill": "#FF0000"]), at: "Board/Chip/Label"))
     }
 
     @Test("An out-of-range value is a usage error that names the range")

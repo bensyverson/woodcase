@@ -13,8 +13,10 @@ import Foundation
 /// about what this edit means" cannot happen. It decides:
 ///
 /// - **where the edit is stored.** A node with storage of its own is set in place; a
-///   node inside a component instance is overridden on that instance. Edits inside an
-///   instance are overrides, and that is a Woodcase rule, not each caller's.
+///   node inside a component instance is overridden on that instance, and only when the
+///   caller asks for ``EditIntent/override(_:unset:)`` — a set, bind or unbind aimed there
+///   is refused with ``EditRefusal/Code/setInsideInstance``, because a write there changes
+///   that instance only, never the component. That is a Woodcase rule, not each caller's.
 /// - **what the value becomes**: deep `common.metadata.<key>` paths folded onto the
 ///   object the node carries, a number written to a text property stored as its text,
 ///   a published parameter routed to the node it names, content an instance wrote into
@@ -30,8 +32,8 @@ import Foundation
 /// be merged.
 ///
 /// ```swift
-/// let plan = try EditPlanner.plan(.set(["kind.fills": "#E5484D"]), at: address, in: document)
-/// plan.storage     // .instanceOverride, when address is inside an instance
+/// let plan = try EditPlanner.plan(.override(["kind.fills": "#E5484D"]), at: address, in: document)
+/// plan.storage     // .instanceOverride
 /// try session.submit(.local(LocalEdit(operations: plan.operations)))
 /// ```
 ///

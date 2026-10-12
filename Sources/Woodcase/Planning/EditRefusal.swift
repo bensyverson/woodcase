@@ -43,6 +43,12 @@ public struct EditRefusal: Error, Friendly {
         /// An override was addressed at a node that is neither an instance nor inside one.
         case overrideOutsideInstance
 
+        /// A set, bind or unbind was aimed at a node inside a component instance. Writing
+        /// there changes this instance only, not the component, so it has to be asked for
+        /// as an ``EditIntent/override(_:unset:)``; ``EditRefusal/suggestion`` is its
+        /// payload.
+        case setInsideInstance
+
         /// The intent carried nothing to write and nothing to unset.
         case noProperties
 

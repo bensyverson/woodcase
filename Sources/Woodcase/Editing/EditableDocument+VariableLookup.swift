@@ -40,5 +40,5 @@ extension EditableDocument {
     }
 
     /// What joins an import alias to the name of a variable it contributes.
-    private static let importSeparator: Character = ":"
+    static let importSeparator: Character = ":"
 }

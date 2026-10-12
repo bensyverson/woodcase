@@ -89,7 +89,7 @@ struct EditingErrorRemedyTests {
         #expect(atPrompt.hasPrefix(statement))
         #expect(inBatch.contains("{\"op\":\"override\""))
         #expect(!inBatch.contains("woodcase override"))
-        #expect(atPrompt.contains("`woodcase override \(penFile.path) Board/Chip/Label name=value`"))
+        #expect(atPrompt.contains("`woodcase override \(penFile.path) 'Board/Chip/Label' name=value`"))
         #expect(!atPrompt.contains("{\"op\":\"override\""))
     }
 
@@ -251,7 +251,7 @@ struct EditingErrorRemedyTests {
         case let .unnamedNode(_, locator): locator
         case let .literalRootOverridesKey(locator): locator
         case let .replacementIDMismatch(address, _, _): address
-        case let .setInsideInstance(address, _): address
+        case let .setInsideInstance(address, _, _): address
         case let .structureInsideSlot(address, _): address
         case let .overrideOutsideInstance(address, _): address
         case let .overrideWithoutProperties(address): address

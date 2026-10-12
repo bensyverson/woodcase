@@ -6,8 +6,8 @@
 import Foundation
 
 extension EditPlanner {
-    /// Plans a ``EditIntent/set(_:)``: in place on a node with storage of its own, as an
-    /// override on the instance for a node inside one.
+    /// Plans a ``EditIntent/set(_:)``: in place on a node with storage of its own, and
+    /// refused for a node inside an instance.
     ///
     /// - Parameters:
     ///   - properties: The values to write, keyed by property path.
@@ -15,7 +15,9 @@ extension EditPlanner {
     ///   - written: The address as written, for messages.
     ///   - document: The document, as it stands.
     /// - Returns: The plan.
-    /// - Throws: ``EditingError``, ``BatchError`` or ``EditRefusal``.
+    /// - Throws: ``BatchError/setInsideInstance(address:instancePath:properties:)`` for a
+    ///   node inside an instance; otherwise ``EditingError``, ``BatchError`` or
+    ///   ``EditRefusal``.
     static func planSet(
         _ properties: [String: AnyCodable],
         at target: ResolvedNodeAddress,
@@ -26,7 +28,7 @@ extension EditPlanner {
         case let .node(id):
             try planNodeSet(properties, on: id, written: written, in: document)
         case let .instanceDescendant(refID, key):
-            try planSetAsOverride(properties, refID: refID, descendantKey: key, written: written, in: document)
+            throw setInsideInstance(properties, refID: refID, descendantKey: key, written: written, in: document)
         }
     }
 
@@ -81,46 +83,27 @@ extension EditPlanner {
 
     // MARK: - Inside an instance
 
-    /// A set on a node inside an instance, planned as the override it has to be.
+    /// The refusal of a set inside an instance, carrying the override it should have been.
     ///
-    /// Deep keys fold onto the node as the instance shows it, then every path is
-    /// translated to the raw key the `descendants` map uses, and the override is
-    /// planned exactly as an ``EditIntent/override(_:unset:)`` would be — one rule
-    /// for the value, whichever verb the caller reached for.
-    private static func planSetAsOverride(
+    /// A write there changes this instance only, never the component, and an agent that
+    /// reached for `set` meant to change the node — so the planner does not quietly store
+    /// an override. The override is planned only when it is asked for by name,
+    /// ``EditIntent/override(_:unset:)``, and this refusal spells out that request: deep
+    /// keys folded onto the node the override patches, paths turned into the raw keys
+    /// the `descendants` map uses.
+    private static func setInsideInstance(
         _ properties: [String: AnyCodable],
         refID: String,
         descendantKey: String,
         written: String,
         in document: EditableDocument
-    ) throws -> EditPlan {
-        let shown = document.patchedDefinitionNode(ofInstance: refID, descendantKey: descendantKey)
-        let folded = try shown.map { try NodePropertyCodec.folding(properties, onto: $0) } ?? properties
-        var plan = try planOverride(
-            folded, unset: [],
-            at: .instanceDescendant(refID: refID, descendantKey: descendantKey),
-            written: written, in: document
-        )
-        let path = document.namePath(of: ResolvedNodeAddress.instanceDescendant(refID: refID, descendantKey: descendantKey))
-        plan.divergences.insert(storedAsOverride(path, refID: refID, in: document), at: 0)
-        return plan
-    }
-
-    /// The note a set inside an instance carries: where the write was stored.
-    private static func storedAsOverride(
-        _ path: String,
-        refID: String,
-        in document: EditableDocument
-    ) -> WriteDivergence {
-        let instance = document.namePath(of: refID)
-        return WriteDivergence(
-            kind: .storedAsOverride,
-            severity: .note,
-            target: path,
-            requested: "a set on \(path)",
-            applied: "an override on the instance \(instance)",
-            note: "\(path) is inside the instance \(instance), so the set was stored as an "
-                + "override there — the component's own node is unchanged"
+    ) -> BatchError {
+        let patched = document.patchedDefinitionNode(ofInstance: refID, descendantKey: descendantKey)
+        let folded = patched.flatMap { try? NodePropertyCodec.folding(properties, onto: $0) } ?? properties
+        return BatchError.setInsideInstance(
+            address: written,
+            instancePath: document.namePath(of: refID),
+            properties: NodePropertyCodec.rawKeyed(folded)
         )
     }
 }

@@ -139,7 +139,7 @@ enum HelpTopic: String, CaseIterable, ExpressibleByArgument {
       set, cp   codec paths — common.name, kind.width, kind.fills. null clears one.
       override  raw .pen names — content, not kind.content — because that is what a
                 component instance's descendants map holds in the file.
-      set inside an instance writes that override and says so; override elsewhere names set.
+      set inside an instance refuses and prints the override to run; override elsewhere names set.
 
     COMPONENTS AND INSTANCES
       `set <node> common.reusable=true` makes a definition; the next `cp` of it is an

@@ -81,9 +81,12 @@ public enum BatchError: Error, Equatable, Sendable {
 
     /// A `set` was addressed at a node inside a component instance.
     ///
-    /// Such a node has no storage of its own, so the edit has to be written as
-    /// an override on the instance instead.
-    case setInsideInstance(address: String, instancePath: String)
+    /// Such a node has no storage of its own, and writing there changes this instance
+    /// only, never the component — so the edit has to be asked for as an override on the
+    /// instance, deliberately. `properties` is that override's payload, keyed by raw .pen
+    /// key, so the message can spell out the exact command; it is empty when the verb
+    /// that refused carried no properties.
+    case setInsideInstance(address: String, instancePath: String, properties: [String: AnyCodable] = [:])
 
     /// A structural verb — `rm`, `mv`, `cp` — was addressed at a child an instance
     /// injected into a slot.
