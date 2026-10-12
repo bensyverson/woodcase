@@ -45,13 +45,12 @@ struct LayoutInvalidationTests {
         #expect(moved == ["Card", "Panel", "B2", "B3", "R5"])
         let invalidation = fixture.document.layoutInvalidation
         #expect(invalidation.roots.isEmpty)
-        // Each placed instance with its spine, up to exactly the boards whose revision
-        // moved; the definitions' own spines lay nothing out (they are not expanded).
-        #expect(invalidation.nodes.isSuperset(of: ["b2Card", "B2", "b3Panel", "B3", "R5"]))
-        #expect(!invalidation.nodes.contains("panelCard"))
+        // Each instance with its spine, up to exactly the roots whose revision moved —
+        // `panelCard` inside `Panel` too, which a canvas lays out like a board.
+        #expect(invalidation.nodes.isSuperset(of: ["b2Card", "B2", "b3Panel", "B3", "R5", "panelCard", "Panel"]))
         #expect(invalidation.nodes.isSuperset(of: ["cardBodyText", "cardBody", "Card"]))
-        let placedRoots = invalidation.nodes.filter { fixture.document.parents[$0] == nil }
-        #expect(placedRoots.union(["Panel"]) == moved, "the named spines reach exactly the moved roots")
+        let namedRoots = invalidation.nodes.filter { fixture.document.parents[$0] == nil }
+        #expect(namedRoots == moved, "the named spines reach exactly the moved roots")
     }
 
     @Test("Toggling reusable names the placed instances drawing the node")

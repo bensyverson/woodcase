@@ -64,8 +64,8 @@ struct ComponentInstanceLayoutScopeTests {
         )))
         let invalidation = document.layoutInvalidation
         #expect(invalidation.roots.isEmpty)
-        #expect(invalidation.nodes.isSuperset(of: ["inst", "otherPanel"]))
-        #expect(!invalidation.nodes.contains("panelCard"), "a ref inside a definition has no instance of its own")
+        // `panelCard` too: a canvas lays the `Panel` definition out like a board.
+        #expect(invalidation.nodes.isSuperset(of: ["inst", "otherPanel", "panelCard", "Panel"]))
 
         let change = document.computeLayout(textMeasurer: measurer)
         let laidOut = Set(change.stats.containersLaidOut)

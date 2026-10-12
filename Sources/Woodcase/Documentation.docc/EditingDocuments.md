@@ -375,12 +375,12 @@ editable.clearDirtyNodes()
   reusable, etc. Names the node and its spine. A `theme` change names the node's
   whole subtree, since every descendant resolves its variables through it. When the
   node is a component, sits inside one, or is drawn by a `ref` — so expansion carries
-  the change into other boards — it also names every placed instance that draws it, by
+  the change into other boards — it also names every instance that draws it, by
   its `ref`, through components nesting it: each instance is laid out whole with its
   ancestors, and the rest of its board answers from memory.
 - **Structural** — insert, delete, move. Names only the spines it touches: the parent a
   node leaves and the parent it enters, with their ancestors — plus, when the edit is
-  inside a component, the placed instances that draw it, as above. Every sibling answers
+  inside a component, the instances that draw it — in other components too — as above. Every sibling answers
   from memory and moves at most. ``EditableDocument/structurallyEditedNodeIDs`` lists the
   nodes inserted, deleted or moved and the parents they land under, for a host whose own
   pipeline must still take a full path for a change of the tree's shape.

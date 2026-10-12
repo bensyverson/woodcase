@@ -42,8 +42,27 @@ struct IncrementalLayoutEquivalenceTests {
         case state
     }
 
+    /// A path and what the document it lays out was expanded for.
+    ///
+    /// ``Path/document`` always expands for export; a host may expand for a canvas, as
+    /// Penumbra does, where component definitions are laid out like boards.
+    struct Run: CustomTestStringConvertible {
+        let path: Path
+        let purpose: PenRefExpander.Purpose
+
+        var testDescription: String {
+            "\(path), \(purpose)"
+        }
+
+        /// Every path for export, and the host paths for a canvas too.
+        static let all: [Run] = Path.allCases.map { Run(path: $0, purpose: .export) }
+            + [Run(path: .host, purpose: .canvas), Run(path: .state, purpose: .canvas)]
+    }
+
     /// A host pipeline's layout state between runs.
     struct Host {
+        /// What the host expands the document for.
+        var purpose: PenRefExpander.Purpose = .export
         var rects: [String: PenRect] = [:]
         var measurementCache: [String: PenLayoutEngine.MeasurementCacheEntry] = [:]
         var state: PenLayoutState?
@@ -61,13 +80,13 @@ struct IncrementalLayoutEquivalenceTests {
     /// Writes some fixtures have nothing to apply to, compared less often.
     private static let rarer: Set<Write> = [.theme, .toggleReusable, .resizeDefinition]
 
-    @Test("every write to every fixture lays out exactly what a full layout gives", arguments: Path.allCases)
-    func everyFixture(path: Path) throws {
+    @Test("every write to every fixture lays out exactly what a full layout gives", arguments: Run.all)
+    func everyFixture(run: Run) throws {
         var coverage = Coverage()
         for url in try FixtureFlatStore.fixtureURLs() {
             guard let parsed = try? PenParser.parse(Data(contentsOf: url)) else { continue }
             coverage.documents += 1
-            compareWrites(to: parsed, at: url, path: path, coverage: &coverage)
+            compareWrites(to: parsed, at: url, run: run, coverage: &coverage)
         }
 
         #expect(coverage.documents > 100, "Only \(coverage.documents) fixtures parsed.")
@@ -77,23 +96,72 @@ struct IncrementalLayoutEquivalenceTests {
         }
     }
 
+    // MARK: - Components drawn on the canvas
+
+    /// Penumbra's `ComponentRelayoutTests` document: an instance of `card`, an instance
+    /// of `primary` — an alias component that is itself a ref to `card` — and an
+    /// instance of `panel`, a component nesting `card`. On a canvas the three
+    /// definitions are laid out like boards, so an edit to `card` reaches `primary` and
+    /// `panel` themselves as well as every instance.
+    static let componentRelayoutJSON = """
+    {
+      "version": "2.17",
+      "children": [
+        { "id": "board", "type": "frame", "x": 0, "y": 0, "layout": "vertical",
+          "children": [ { "id": "inst", "type": "ref", "ref": "card" } ] },
+        { "id": "board2", "type": "frame", "x": 300, "y": 0, "layout": "vertical",
+          "children": [ { "id": "inst2", "type": "ref", "ref": "primary" } ] },
+        { "id": "board3", "type": "frame", "x": 600, "y": 0, "layout": "vertical",
+          "children": [ { "id": "inst3", "type": "ref", "ref": "panel" } ] },
+        { "id": "card", "type": "frame", "reusable": true, "x": 0, "y": 300,
+          "layout": "horizontal", "padding": 8,
+          "children": [ { "id": "swatch", "type": "rectangle", "width": 40, "height": 20 } ] },
+        { "id": "primary", "type": "ref", "ref": "card", "reusable": true, "x": 300, "y": 300 },
+        { "id": "panel", "type": "frame", "reusable": true, "x": 600, "y": 300,
+          "layout": "vertical", "padding": 4,
+          "children": [ { "id": "panelCard", "type": "ref", "ref": "card" } ] }
+      ]
+    }
+    """
+
+    @Test("an edit to a component lays out its alias, its nesting component and every instance", arguments: Run.all)
+    func componentRelayout(run: Run) throws {
+        let measurer = SettledTreeReuseTests.measurer
+        let document = try EditableDocument(from: PenParser.parse(Self.componentRelayoutJSON))
+        var host = Host(purpose: run.purpose)
+        _ = layOut(document, path: run.path, host: &host, measurer: measurer)
+        let edits: [(String, String, AnyCodable)] = [
+            ("card", "kind.padding", .int(14)),
+            ("swatch", "kind.width", .int(64)),
+        ]
+        for (node, property, value) in edits {
+            try setProperty(property, value, on: node, in: document)
+            let incremental = layOut(document, path: run.path, host: &host, measurer: measurer)
+            let full = LayoutOracle.fullLayout(of: document, textMeasurer: measurer, purpose: run.purpose)
+            let differences = LayoutOracle.differences(incremental, full)
+            #expect(differences.isEmpty, "after \(node).\(property) (\(run.testDescription)): \(differences.joined(separator: "; "))")
+            #expect(host.changeProblem == nil, "after \(node).\(property): \(host.changeProblem ?? "")")
+        }
+    }
+
     // MARK: - One fixture
 
     /// Lays a fixture out, then lands each write and compares the incremental layout
     /// after it with a full one.
-    private func compareWrites(to parsed: PenDocument, at url: URL, path: Path, coverage: inout Coverage) {
+    private func compareWrites(to parsed: PenDocument, at url: URL, run: Run, coverage: inout Coverage) {
         let measurer = SettledTreeReuseTests.measurer
+        let path = run.path
         let document = PenFileTransaction.editableDocument(from: parsed, at: url, fonts: nil)
-        var host = Host()
+        var host = Host(purpose: run.purpose)
         _ = layOut(document, path: path, host: &host, measurer: measurer)
         for write in Write.allCases {
             guard (try? apply(write, to: document)) == true else { continue }
             let incremental = layOut(document, path: path, host: &host, measurer: measurer)
-            let full = LayoutOracle.fullLayout(of: document, textMeasurer: measurer)
+            let full = LayoutOracle.fullLayout(of: document, textMeasurer: measurer, purpose: host.purpose)
             let differences = LayoutOracle.differences(incremental, full)
             #expect(
                 differences.isEmpty,
-                "\(url.lastPathComponent) after \(write) (\(path)): \(differences.joined(separator: "; "))"
+                "\(url.lastPathComponent) after \(write) (\(run.testDescription)): \(differences.joined(separator: "; "))"
             )
             #expect(host.changeProblem == nil, "\(url.lastPathComponent) after \(write): \(host.changeProblem ?? "")")
             coverage.comparisons[write, default: 0] += 1
@@ -114,9 +182,9 @@ struct IncrementalLayoutEquivalenceTests {
             document._layoutCache = nil
             _ = layOut(document, path: path, host: &host, measurer: measurer)
         case .host:
-            host = Host(rects: full)
+            host = Host(purpose: host.purpose, rects: full)
         case .state:
-            host = Host()
+            host = Host(purpose: host.purpose)
             _ = layOut(document, path: path, host: &host, measurer: measurer)
         }
     }
@@ -133,7 +201,7 @@ struct IncrementalLayoutEquivalenceTests {
             return rects
         case .host:
             let invalidation = document.layoutInvalidation
-            let resolved = PenVariableResolver.resolve(document.expandedDocument().0)
+            let resolved = PenVariableResolver.resolve(document.expanded(for: host.purpose))
             document.primeLayoutCache(with: [:])
             document.clearDirtyNodes()
             if host.rects.isEmpty {
@@ -147,7 +215,7 @@ struct IncrementalLayoutEquivalenceTests {
             return host.rects
         case .state:
             let invalidation = document.layoutInvalidation
-            let resolved = PenVariableResolver.resolve(document.expandedDocument().0)
+            let resolved = PenVariableResolver.resolve(document.expanded(for: host.purpose))
             document.primeLayoutCache(with: [:])
             document.clearDirtyNodes()
             guard var state = host.state else {

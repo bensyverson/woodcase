@@ -36,7 +36,7 @@ public struct PenLayoutInvalidation: Friendly {
     ///
     /// An ``EditableDocument`` names none. An edit that expansion carries into other
     /// boards — anything inside a component, structural or not, or a change to whether a
-    /// node *is* one — names the refs of the placed instances that draw it in ``nodes``,
+    /// node *is* one — names the refs of the instances that draw it in ``nodes``,
     /// each laid out whole with its ancestors, rather than the boards holding them.
     public var roots: Set<String>
 

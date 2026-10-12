@@ -23,16 +23,19 @@ enum LayoutOracle {
     ///   - document: The document to lay out; it is only read.
     ///   - textMeasurer: The measurer the incremental layout used.
     ///   - options: The options the incremental layout used — the cards it drew raw.
+    ///   - purpose: What the incremental layout's document was expanded for: export
+    ///     strips component definitions, a canvas lays them out like any board.
     /// - Returns: Every expanded node's rect.
     @MainActor
     static func fullLayout(
         of document: EditableDocument,
         textMeasurer: @escaping TextMeasurer,
-        options: PenLayoutOptions = PenLayoutOptions()
+        options: PenLayoutOptions = PenLayoutOptions(),
+        purpose: PenRefExpander.Purpose = .export
     ) -> [String: PenRect] {
         let fresh = EditableDocument(from: document.materialize())
         fresh.readContext = document.readContext
-        let (expanded, _) = fresh.expandedDocument()
+        let expanded = fresh.expanded(for: purpose)
         return PenLayoutEngine.layout(PenVariableResolver.resolve(expanded), textMeasurer: textMeasurer, options: options)
     }
 

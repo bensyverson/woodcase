@@ -100,7 +100,7 @@ public extension EditableDocument {
     ///
     /// Returns `true` when no cache exists (never primed) or after a change the cache
     /// cannot scope (variable, theme or import change, replace, detach). An insert,
-    /// move or delete marks only the spines it touches, and those of the placed instances
+    /// move or delete marks only the spines it touches, and those of the instances
     /// drawing a component it touched (``dirtyLayoutNodeIDs``); it is listed in
     /// ``structurallyEditedNodeIDs``.
     /// The pipeline uses this to decide between the incremental and full paths.

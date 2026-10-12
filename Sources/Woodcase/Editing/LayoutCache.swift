@@ -97,7 +97,7 @@ public final class LayoutCache {
     /// - Parameters:
     ///   - subjects: The nodes the edit inserted, deleted or moved, and the parent each
     ///     lands under, by source id.
-    ///   - spine: The touched nodes and the placed instances drawing a touched
+    ///   - spine: The touched nodes and the instances drawing a touched
     ///     component, with their ancestors, by source id.
     func invalidateStructure(subjects: Set<String>, spine: Set<String>) {
         structuralSubjects.formUnion(subjects)

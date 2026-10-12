@@ -25,7 +25,7 @@ import Foundation
 /// where it went afterwards.
 extension EditableDocument {
     /// Runs a structural mutation, marking for layout only the spines it touches and
-    /// those of the placed instances drawing a component it touched.
+    /// those of the instances drawing a component it touched.
     ///
     /// Does nothing beyond running `body` when the layout cache is absent or already
     /// needs a full pass: there is nothing finer to keep.
@@ -54,7 +54,7 @@ extension EditableDocument {
     ///
     /// - Parameter subjects: The touched nodes.
     /// - Returns: Their spines and — when one of them is a component or inside one — the
-    ///   spines of the placed instances that draw an affected component.
+    ///   spines of the instances that draw an affected component.
     func structuralLayoutSpine(of subjects: [String]) -> Set<String> {
         var spine: Set<String> = []
         var components: Set<String> = []
