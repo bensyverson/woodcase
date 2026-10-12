@@ -67,12 +67,17 @@ public enum NodePropertyCodec {
     /// Reads the value at a property path as it would appear in a .pen file.
     ///
     /// - Parameters:
-    ///   - path: A path from ``paths(for:)``.
+    ///   - path: A path from ``paths(for:)``, or a deep key inside one of
+    ///     ``deepKeyedPaths`` such as `common.metadata.woodcase.author`, which reads the
+    ///     way ``deepValue(in:at:of:)`` describes.
     ///   - node: The node to read from.
     /// - Returns: The property's JSON value, or ``AnyCodable/null`` if it is unset.
     /// - Throws: ``EditingError/unknownProperty(nodeID:key:nodeType:)`` if the path
     ///   is not a property of this node's kind.
     public static func value(at path: String, of node: PenNode) throws -> AnyCodable {
+        if let (property, keyPath) = deepKey(of: path) {
+            return try deepValue(in: property, at: keyPath, of: node)
+        }
         if path.hasPrefix("common.") {
             return try commonValue(at: path, of: node.common, nodeID: node.id, nodeType: node.kind.typeName)
         }

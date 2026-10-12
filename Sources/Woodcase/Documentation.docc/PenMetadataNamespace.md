@@ -106,6 +106,13 @@ its old spelling (`common.metadata.woodcase.props.caption=…` beside an old `_p
 moves that value in first, so the entry merges with it. Keys the write leaves alone keep
 their spelling, so a write never rewrites more than it names.
 
+**A deep-key read sees what a write would touch.** `tree --props` and `find` read a deep
+key through the same accessor (``NodePropertyCodec/deepValue(in:at:of:)``):
+`common.metadata.woodcase.leaf` answers from either spelling, and an old spelling such as
+`common.metadata.leaf` reads the namespaced value exactly where a write to it would land
+in the namespace — on a `type: postit` object, or one that names its `woodcase.type` —
+and the bare key as written anywhere else.
+
 **`woodcase migrate`** converts a whole file at once — current format version or not —
 as one ordinary, logged and undoable edit
 (``EditableDocument/oldStyleWoodcaseKeyMigration()``,

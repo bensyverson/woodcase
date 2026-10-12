@@ -1121,7 +1121,9 @@ props
 `common.metadata` is a whole object, and writing it replaces everything in it — which
 is how `woodcase.props` used to get dropped by a write that only meant to add `woodcase.role`.
 `common.metadata.<key>` writes one entry and leaves the rest; a dot goes deeper, and a
-null takes one entry away. Nothing else takes a deep key.
+null takes one entry away. Nothing else takes a deep key. The same key reads one entry
+back — `woodcase tree design.pen --props common.metadata.woodcase.role`, or `r.props[…]`
+in `find` — and an absent entry reads as `null`.
 
 A deep key that *creates* the object writes a `type` beside your key:
 

@@ -91,6 +91,26 @@ state with who requested it.
 carrying `anchor` and `state`, each reply `replyTo` and `author`. The keys are typed
 here; the comment workflow is not.
 
+### Listing
+
+``PenNoteBoard`` reads a document's post-its, comment threads and prompts for listing —
+what `woodcase notes`, `comments` and `prompts` print (<doc:WoodcaseCLI>). A thread
+(``PenCommentThread``) is a first message and every reply naming it in `replyTo`, in
+document order; its anchor reads as `{"node": "<id>", "x": …, "y": …}`
+(``PenCommentThread/Anchor``), and a reply whose first message is gone is a thread of its
+own, flagged, never dropped. ``PenNoteBoard/threads(_:)`` keeps the threads a
+``PenNoteBoard/CommentQuery`` asks for — asking for mentions keeps open threads unless a
+state is named — and ``PenNoteBoard/identity(_:for:)`` refuses a filter value that is a
+near miss of an identity the file names.
+
+```swift
+let board = try PenNoteBoard(document: document)
+for thread in board.threads(PenNoteBoard.CommentQuery(mentions: "claude")) {
+    print(thread.anchor?.node ?? "-", thread.messages.map(\.firstLine))
+}
+let work = board.prompts(PenNoteBoard.PromptQuery(state: .queued))
+```
+
 ### Reading
 
 ``PenPostIt/Metadata`` reads a note's metadata as typed values — every note has one —
@@ -147,6 +167,12 @@ is not Woodcase's, and is never checked.
 - ``PenPostIt/Violation``
 - ``PenTextStyleProperties``
 - ``SchemaPostItReport``
+
+### Listing notes, comments and prompts
+
+- ``PenNoteBoard``
+- ``PenCommentThread``
+- ``PenNoteBoardFormatter``
 - <doc:PenMetadataNamespace>
 - <doc:NoteMarkdown>
 - <doc:PenPostItLook>

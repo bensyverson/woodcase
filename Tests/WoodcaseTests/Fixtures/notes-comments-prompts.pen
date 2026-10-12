@@ -1,0 +1,257 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "fill": "#2E7D32",
+          "height": 40,
+          "id": "Btn01",
+          "name": "Button",
+          "type": "frame",
+          "width": 120,
+          "x": 20,
+          "y": 20
+        }
+      ],
+      "fill": "#FFFFFF",
+      "height": 200,
+      "id": "Card1",
+      "name": "Card",
+      "type": "frame",
+      "width": 320,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "content": "# Plan\n- [ ] Ship the **comments** verb",
+      "height": 160,
+      "id": "Nte01",
+      "metadata": {
+        "type": "woodcase",
+        "woodcase": {
+          "author": "ana",
+          "leaf": "Wq5asV",
+          "tint": "#A5D6A7"
+        }
+      },
+      "name": "Plan",
+      "type": "note",
+      "width": 200,
+      "x": 400,
+      "y": 0
+    },
+    {
+      "content": "Old-style post-it\nsecond line",
+      "height": 200,
+      "id": "Nte02",
+      "metadata": {
+        "author": "claude",
+        "leaf": "pODcm0",
+        "tint": "#90CAF9",
+        "type": "postit"
+      },
+      "name": "Old",
+      "type": "note",
+      "width": 200,
+      "x": 640,
+      "y": 0
+    },
+    {
+      "content": "",
+      "id": "Nte03",
+      "type": "note",
+      "x": 880,
+      "y": 0
+    },
+    {
+      "content": "Should this be **44pt** tall, @claude?",
+      "height": 80,
+      "id": "Cm01",
+      "metadata": {
+        "type": "woodcase",
+        "woodcase": {
+          "anchor": {
+            "node": "Btn01",
+            "x": 12,
+            "y": 4
+          },
+          "author": "ana",
+          "state": "open",
+          "type": "comment"
+        }
+      },
+      "type": "note",
+      "width": 200,
+      "x": 0,
+      "y": 400
+    },
+    {
+      "content": "Yes, per the HIG. @ana",
+      "height": 80,
+      "id": "Cm02",
+      "metadata": {
+        "type": "woodcase",
+        "woodcase": {
+          "author": "claude",
+          "replyTo": "Cm01",
+          "type": "comment"
+        }
+      },
+      "type": "note",
+      "width": 200,
+      "x": 0,
+      "y": 500
+    },
+    {
+      "content": "Agreed.",
+      "height": 80,
+      "id": "Cm03",
+      "metadata": {
+        "type": "woodcase",
+        "woodcase": {
+          "author": "ben",
+          "replyTo": "Cm01",
+          "type": "comment"
+        }
+      },
+      "type": "note",
+      "width": 200,
+      "x": 0,
+      "y": 600
+    },
+    {
+      "content": "@claude rename Card to StatCard",
+      "height": 80,
+      "id": "Cm04",
+      "metadata": {
+        "type": "woodcase",
+        "woodcase": {
+          "anchor": {
+            "node": "Card1",
+            "x": 0,
+            "y": 0
+          },
+          "author": "ben",
+          "state": "resolved",
+          "type": "comment"
+        }
+      },
+      "type": "note",
+      "width": 200,
+      "x": 240,
+      "y": 400
+    },
+    {
+      "content": "Done.",
+      "height": 80,
+      "id": "Cm05",
+      "metadata": {
+        "type": "woodcase",
+        "woodcase": {
+          "author": "claude",
+          "replyTo": "Cm04",
+          "type": "comment"
+        }
+      },
+      "type": "note",
+      "width": 200,
+      "x": 240,
+      "y": 500
+    },
+    {
+      "content": "The tint looks off here.",
+      "height": 80,
+      "id": "Cm06",
+      "metadata": {
+        "type": "woodcase",
+        "woodcase": {
+          "anchor": {
+            "node": "Nte01",
+            "x": 190,
+            "y": 10
+          },
+          "author": "ana",
+          "state": "open",
+          "type": "comment"
+        }
+      },
+      "type": "note",
+      "width": 200,
+      "x": 480,
+      "y": 400
+    },
+    {
+      "content": "Following up on a thread that was deleted.",
+      "height": 80,
+      "id": "Cm07",
+      "metadata": {
+        "type": "woodcase",
+        "woodcase": {
+          "author": "ben",
+          "replyTo": "Gone1",
+          "type": "comment"
+        }
+      },
+      "type": "note",
+      "width": 200,
+      "x": 720,
+      "y": 400
+    },
+    {
+      "content": "Make the button **primary**",
+      "id": "Pr01",
+      "metadata": {
+        "type": "woodcase",
+        "woodcase": {
+          "author": "ben",
+          "requestedBy": "ben",
+          "state": "queued"
+        }
+      },
+      "model": "claude-opus",
+      "name": "Primary",
+      "type": "prompt",
+      "x": 0,
+      "y": 800
+    },
+    {
+      "content": "Tighten the card's padding",
+      "id": "Pr02",
+      "metadata": {
+        "type": "woodcase",
+        "woodcase": {
+          "author": "ana",
+          "requestedBy": "ana",
+          "state": "running"
+        }
+      },
+      "model": "claude-sonnet",
+      "type": "prompt",
+      "x": 280,
+      "y": 800
+    },
+    {
+      "content": "Rename the card",
+      "id": "Pr03",
+      "metadata": {
+        "type": "woodcase",
+        "woodcase": {
+          "author": "ben",
+          "requestedBy": "ben",
+          "state": "done"
+        }
+      },
+      "type": "prompt",
+      "x": 560,
+      "y": 800
+    },
+    {
+      "content": "Draft a dark theme",
+      "id": "Pr04",
+      "type": "prompt",
+      "x": 840,
+      "y": 800
+    }
+  ],
+  "version": "2.20"
+}

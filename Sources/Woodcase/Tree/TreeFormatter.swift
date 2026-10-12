@@ -89,7 +89,7 @@ public enum TreeFormatter {
                 absolute: absolute
             ))
         }
-        return align(table)
+        return AlignedTable.text(table)
     }
 
     /// Renders rows as the `--json` report: pretty-printed, keys sorted, the document
@@ -153,7 +153,7 @@ public enum TreeFormatter {
     }
 
     /// A number with no decimal point when it is integral, and two places when it is not.
-    private static func number(_ value: Double) -> String {
+    static func number(_ value: Double) -> String {
         guard value.isFinite else { return value.isNaN ? "nan" : (value > 0 ? "inf" : "-inf") }
         guard value.rounded() == value, abs(value) < 1e15 else { return String(format: "%.2f", value) }
         return String(Int64(value))
@@ -172,7 +172,7 @@ public enum TreeFormatter {
     }
 
     /// A string with its line breaks and tabs escaped, so a value can never split a row.
-    private static func oneLine(_ text: String) -> String {
+    static func oneLine(_ text: String) -> String {
         text
             .replacingOccurrences(of: "\\", with: "\\\\")
             .replacingOccurrences(of: "\r\n", with: "\\n")
@@ -187,36 +187,5 @@ public enum TreeFormatter {
         encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
         guard let data = try? encoder.encode(value) else { return "?" }
         return oneLine(String(decoding: data, as: UTF8.self))
-    }
-
-    // MARK: - Alignment
-
-    /// Pads every cell to its column's width, never leaving a trailing space.
-    private static func align(_ table: [[String]]) -> String {
-        let columnCount = table.map(\.count).max() ?? 0
-        let widths = (0 ..< columnCount).map { column in
-            table.map { $0.indices.contains(column) ? $0[column].count : 0 }.max() ?? 0
-        }
-
-        return table
-            .map { row in
-                let cells = widths.indices.map { column -> String in
-                    let cell = row.indices.contains(column) ? row[column] : ""
-                    return cell + String(repeating: " ", count: max(0, widths[column] - cell.count))
-                }
-                return cells.joined(separator: "  ").trimmedTrailingSpaces
-            }
-            .joined(separator: "\n")
-    }
-}
-
-private extension String {
-    /// The string with any trailing spaces removed.
-    var trimmedTrailingSpaces: String {
-        var result = self
-        while result.hasSuffix(" ") {
-            result.removeLast()
-        }
-        return result
     }
 }

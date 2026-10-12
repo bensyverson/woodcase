@@ -63,6 +63,9 @@ return are listed here, so a script knows what it must branch on.
 | `find` | read | The rows of that tree a JavaScript predicate keeps | 0 1 2 3 4 |
 | `get` | read | One node as canonical .pen JSON, with its revision | 0 2 3 4 |
 | `lint` | read | What is wrong with the file, from its settled layout | 0 1 2 3 4 |
+| `notes` | read | The post-its: author, tint, settled size and first line | 0 1 2 3 4 |
+| `comments` | read | Comment threads with replies, anchor and state; `--mentions` finds yours | 0 1 2 3 4 |
+| `prompts` | read | The Run queue: each prompt's run state and who requested it | 0 1 2 3 4 |
 | `vars` | read | The variables and theme axes the document defines | 0 2 3 4 |
 | `imports` | read | The component libraries the document imports | 0 2 3 4 |
 | `themes` | read | The theme axes and their options | 0 4 |
@@ -273,6 +276,16 @@ woodcase tree design.pen --expand --json
 | `--expand` | `false` | Walk into component instances, addressing their nodes by id path |
 | `--json` | `false` | The machine-readable form, including the revision |
 
+**Metadata columns.** `--props` takes a deep key inside `common.metadata`, the same
+form `set` writes: `--props common.metadata.woodcase.author,common.metadata.woodcase.leaf`.
+A key Woodcase owns reads as Woodcase reads it (<doc:PenMetadataNamespace>), so
+`common.metadata.woodcase.leaf` answers from an old-style post-it's bare `leaf` too. The
+old spelling, `common.metadata.leaf`, reads the same value wherever a write to it would
+land in the namespace — on an old-style `type: postit` object, or one that names its
+`woodcase.type` — and reads the bare key as written anywhere else, so prefer the
+namespaced spelling. An absent key is `null`: `-` in the listing, `null` in `--json`.
+`find` reads the same columns as `r.props["common.metadata.woodcase.author"]`.
+
 ### `find`
 
 Print the rows of that same settled tree that a JavaScript predicate answers truthy
@@ -358,6 +371,91 @@ woodcase lint design.pen Dashboard/Header --theme "mode=dark" --json
 |--------|---------|-------------|
 | `--theme` | — | Pin theme axes before settling the layout |
 | `--json` | `false` | One JSON object per finding |
+
+### `notes`
+
+List the post-its: plain notes that are not comment messages or prompts. A note has
+no state and no kind; each row is its author, its tint (`-` is Post-it yellow), the size
+it lays out at — it grows to fit its text — the first line of its markdown, and its id.
+The header carries the document revision; `--json` carries each note's rev and whole
+content. An empty listing prints nothing and exits 1. See <doc:PenPostItConvention>.
+
+```text
+$ woodcase notes board.pen
+rev 4f2a1b0c9d8e7f60  3 notes
+author  tint     size     text               id
+ana     #A5D6A7  200×160  Plan               Nte01
+claude  #90CAF9  200×200  Old-style post-it  Nte02
+-       -        200×200                     Nte03
+```
+
+**Options:**
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--author` | — | Only this author's notes; a misspelling of a name the file holds is refused |
+| `--json` | `false` | `{"revision":…,"notes":[…]}` |
+
+### `comments`
+
+List comment threads, so an agent can find the ones that mention it. A comment is a
+note, one per message (`woodcase.type: comment`), at the document root: the first
+message carries the thread's `anchor` — `{"node": "<id>", "x": …, "y": …}`, the point in
+the node's coordinates — and its `state`, `open` or `resolved` (absent reads as open);
+each reply carries `replyTo`, the first message's id. One row per message: the first
+leads with the thread's state and anchor, each reply with `reply`, then the author, the
+names it `@mentions`, its first line and its id. A reply whose first message is gone
+leads with `⚠ orphan` rather than vanishing.
+
+```text
+$ woodcase comments design.pen --mentions claude
+rev 4f2a1b0c9d8e7f60  1 thread  3 messages
+state    anchor       author  mentions  text                                id
+open     Btn01 @12,4  ana     @claude   Should this be 44pt tall, @claude?  Cm01
+  reply  -            claude  @ana      Yes, per the HIG. @ana              Cm02
+  reply  -            ben     -         Agreed.                             Cm03
+```
+
+Filters combine. `--mentions` keeps threads in which any message mentions the name
+(with or without its `@`); `--author` threads in which they wrote any message;
+`--state` takes `open`, `resolved` or `all`. **With `--mentions` the state defaults to
+`open`** — the work waiting on you (Penumbra's notes design, decision 7); without it,
+every thread is listed. An identity filter is checked against every identity the file
+names (authors, mentions, requesters): a value close to one but not exactly it —
+another case, or two slips away — is refused with exit 2, naming the one meant and the
+valid choices; a name nothing is close to lists nothing, exits 1, and says on standard
+error who the file does name. A misspelled `--state` is refused with its choices.
+
+**Options:**
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--mentions` | — | Threads that `@mention` this identity |
+| `--state` | `open` with `--mentions`, else `all` | `open`, `resolved` or `all` |
+| `--author` | — | Threads this identity wrote any message in |
+| `--json` | `false` | `{"revision":…,"threads":[{"id","state","anchor","messages":[…]}]}`, each message with its `rev` and whole `content` |
+
+### `prompts`
+
+List the prompts and where each run stands. Run queues work in the file (decision 14):
+pressing it sets `woodcase.state: queued` and `woodcase.requestedBy`; an agent claims the
+work by writing `running`, answers in a comment thread anchored to the prompt, and writes
+`done`. Each row is the state (`-` for a prompt never run), who requested it, the model it
+names, its first line and its id. To claim, quote the prompt's rev, so a second agent's
+claim fails with exit 3 instead of both taking it:
+
+```bash
+woodcase prompts design.pen --state queued --json
+woodcase set design.pen Pr01 common.metadata.woodcase.state=running --rev <rev> --as claude
+```
+
+**Options:**
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--state` | all | `queued`, `running`, `done` or `all` |
+| `--requested-by` | — | Prompts this identity pressed Run on; a misspelling is refused |
+| `--json` | `false` | `{"revision":…,"prompts":[…]}`, each with its `rev` and whole `content` |
 
 ### `activity`
 
