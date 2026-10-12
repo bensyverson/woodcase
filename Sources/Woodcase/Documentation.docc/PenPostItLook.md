@@ -58,7 +58,7 @@ if let expansion = PenPostIt.expansion(
 | ``PenPostItExpansion/Role/plate`` | all | shape | The paper: the whole node, filled, with a hairline inside its edge and its shadows |
 | ``PenPostItExpansion/Role/mentionPill`` | all | shape | A mention's pill, behind its text, in the person's identity color; one per line it sits on |
 | ``PenPostItExpansion/Role/bullet`` | all | shape | A list bullet: a 5-point dot in the primary ink |
-| ``PenPostItExpansion/Role/checkbox`` | all | shape | A checklist box, the body's cap height square; its frame is the hit rect (``PenPostItExpansion/checkboxes``) |
+| ``PenPostItExpansion/Role/checkbox`` | all | shape | A checklist box, ``PenPostIt/Style/checkboxScale`` (1.17) times the body's cap height square, centered on the capitals; its frame is the hit rect (``PenPostItExpansion/checkboxes``) |
 | ``PenPostItExpansion/Role/checkMark`` | all | shape | The check in a done box, stroked in the paper's color |
 | ``PenPostItExpansion/Role/body`` | all | text | The markdown's display text, runs and indents, in ``PenPostIt/textFrame(of:width:height:style:)`` |
 | ``PenPostItExpansion/Role/identityDot`` | note | shape | The author's dot, bottom left, in their identity color; ringed on dark paper |
@@ -93,7 +93,9 @@ There is no kind mark: the post-it kinds are gone (decision 1).
   placeholder for each (``PenNoteMarkdown/markerPlaceholder``, an em space) that holds its
   room before the tab, so the display text and its offset map stay one for one; the expansion
   sets the body with ``PenTextLayout`` and places each mark on its line: a bullet centered on
-  the x-height, a checkbox standing on the baseline, as tall and wide as the body's cap height.
+  the x-height, a checkbox centered on the capitals' midline and 1.17 times the body's cap
+  height square (``PenPostIt/Style/checkboxScale``; Ben chose it on 2026-10-11 over a
+  cap-height box, which read small).
   A done box is filled and carries a check mark; an open one is only edged.
 - **Headings** stand off the text below by half a body line (``PenNoteMarkdown/headingSpacing``),
   a paragraph's ``PenParagraphIndent/spacingAfter``.

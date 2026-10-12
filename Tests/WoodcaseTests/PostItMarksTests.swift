@@ -51,19 +51,33 @@ struct PostItMarksTests {
         }
     }
 
-    @Test("A checkbox is as tall and wide as the body's cap height, on its line, at the item's indent")
+    @Test("A checkbox is 1.17 times the body's cap height, on its line, at the item's indent")
     func checkboxGeometry() throws {
         let expansion = try expansion(Self.checklist)
         let body = try #require(expansion.part(.body))
         let first = try #require(expansion.checkboxes.first?.frame)
         let second = try #require(expansion.checkboxes.last?.frame)
         #expect(first.width == first.height)
-        // Inter's cap height is 0.727 em: 9.45 at 13 points.
-        #expect(abs(first.height - 13 * 0.727) < 0.3, "\(first.height)")
+        // About 0.7 em of cap height at 13 points, so the box is about 11; the exact ratio is
+        // pinned in checkboxCenteredOnCapitals.
+        #expect(abs(first.height - 13 * 0.72 * 1.17) < 0.5, "\(first.height)")
         #expect(abs(first.x - body.frame.x) < 0.5)
         #expect(first.y > body.frame.y && first.y + first.height < body.frame.y + 13 * 1.35)
         // One line apart: the 1.35 line height's pitch, which Pen rounds to a whole point.
         #expect(abs(second.y - first.y - (13 * 1.35).rounded()) < 0.01, "\(second.y - first.y)")
+    }
+
+    @Test("A checkbox is 1.17 cap-sized boxes on a side, centered on the capitals' midline")
+    func checkboxCenteredOnCapitals() throws {
+        var capSized = PenPostIt.Style.standard
+        capSized.checkboxScale = 1
+        let node = try PostItExpansionTests.node(Self.checklist)
+        let reference = try #require(PenPostIt.expansion(
+            of: node, width: 200, height: 200, style: capSized, measure: PostItExpansionTests.measure
+        )?.checkboxes.first?.frame)
+        let scaled = try #require(try expansion(Self.checklist).checkboxes.first?.frame)
+        #expect(abs(scaled.height - reference.height * 1.17) < 0.01)
+        #expect(abs((scaled.y + scaled.height / 2) - (reference.y + reference.height / 2)) < 0.01)
     }
 
     @Test("A done item's box is filled and carries a check mark; an open one is only edged")

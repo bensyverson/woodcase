@@ -22,7 +22,7 @@
         ///   font's ascent and descent around the line's baseline, fully rounded.
         /// - A **bullet**: a ``Style/bulletDiameter`` dot in the primary ink, centered on the
         ///   x-height, on the axis a checkbox would have.
-        /// - A **checkbox**: a square the body's cap height on a side, standing on the baseline
+        /// - A **checkbox**: a square ``Style/checkboxScale`` times the body's cap height on a side, centered on the capitals' midline
         ///   at the item's indent; a done one is filled in the secondary ink and carries a
         ///   ``PenPostItExpansion/Role/checkMark`` cut in the paper's color, an open one is only
         ///   edged.
@@ -65,10 +65,10 @@
             var checkboxes: [PenPostItExpansion.Checkbox] = []
             for item in markdown.checklistItems {
                 guard let line = metrics.line(containing: item.boxDisplayRange.lowerBound) else { continue }
-                let side = metrics.capHeight
+                let side = metrics.capHeight * style.checkboxScale
                 let box = PenRect(
                     x: metrics.x(of: item.boxDisplayRange.lowerBound, on: line),
-                    y: metrics.baseline(of: line) - side, width: side, height: side
+                    y: metrics.baseline(of: line) - (metrics.capHeight + side) / 2, width: side, height: side
                 )
                 checkboxes.append(PenPostItExpansion.Checkbox(item: item, frame: box))
                 parts += checkboxParts(box, isChecked: item.isChecked, ink: ink, paper: paper, chrome: chrome)

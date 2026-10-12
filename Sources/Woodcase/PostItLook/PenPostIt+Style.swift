@@ -98,7 +98,11 @@ public extension PenPostIt {
 
         /// A list bullet's diameter: a dot that reads at 13 points, drawn in the body ink.
         public var bulletDiameter: Double = 5
-        /// A checkbox's corner radius. The box itself is the body's cap height square.
+        /// A checkbox's side, as a multiple of the body's cap height. The box is centered on
+        /// the capitals' midline, so it lines up with the text at any size (Ben, 2026-10-11:
+        /// a cap-height box read small).
+        public var checkboxScale: Double = 1.17
+        /// A checkbox's corner radius.
         public var checkboxCornerRadius: Double = 2.5
         /// The edge of an open checkbox.
         public var checkboxStroke: Double = 1.25
