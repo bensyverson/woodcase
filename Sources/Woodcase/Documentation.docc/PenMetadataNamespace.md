@@ -13,7 +13,7 @@ metadata:
 
 ```json
 { "type": "note", "name": "Device check", "content": "Does the scanner …",
-  "metadata": { "woodcase": { "type": "postit", "state": "open", "author": "claude",
+  "metadata": { "woodcase": { "type": "postit", "author": "claude",
                               "tint": "#A5D6A7", "fontSize": 15 } } }
 ```
 
@@ -61,7 +61,7 @@ All Woodcase code reads and writes its keys through
 ```swift
 var metadata = node.common.metadata ?? PenMetadata(type: nil)
 metadata[woodcase: .tint]                       // either spelling, the namespace winning
-metadata[woodcase: .state] = .string("resolved") // stored under woodcase; old spelling removed
+metadata[woodcase: .author] = .string("claude") // stored under woodcase; old spelling removed
 metadata[woodcase: .leaf] = nil                  // both spellings removed
 ```
 
@@ -93,7 +93,10 @@ stage's "no backward compatibility", because Ben has internal files that use the
 
 Where both spellings are written, `woodcase.*` wins. A post-it's legacy `kind`
 (`question`, `answer`, `reference`) is no longer part of the convention: it is left as
-written and nothing reads it.
+written and nothing reads it. A plain note's `state` is no longer drawn either — only
+comments and prompts have one (Ben's ruling, 2026-10-11) — but `state` is still a live key,
+so a bare one still moves into the namespace like any other; the `note-state` lint
+(<doc:WoodcaseLint>) names one on a plain note, and nothing drops it.
 
 **A write converts what it touches.** An authored metadata write — a `set`, deep key or
 whole object, and every node of an `add` or `replace` subtree — stores the Woodcase keys
@@ -126,7 +129,7 @@ as one ordinary, logged and undoable edit
 Both merges resolve metadata per **entry** rather than as one value: each top-level key
 of the object, except `woodcase`, which splits one level deeper — each key under it is
 its own entry (``NodePropertyCodec/metadataEntries(of:)``). So two people changing one
-note's tint and its state both keep their edit.
+note's tint and its author both keep their edit.
 
 - **The CRDT** replicates a metadata change as one LWW write per changed entry, at the
   entry's path (`common.metadata.type`, `common.metadata.woodcase.tint`), never the whole

@@ -43,7 +43,7 @@ struct PostItCardExpansionTests {
     @Test("A prompt's header names it, and its model chip sits at the right inset")
     func promptHeader() throws {
         let expansion = try expansion(Self.queued)
-        #expect(expansion.text(.header)?.string == style.promptTitle)
+        #expect(expansion.text(.header)?.string == "\u{25B6}\u{FE0E} PROMPT")
         #expect(expansion.part(.header)?.frame.x == 14)
         let chip = try #require(expansion.part(.modelChip))
         let label = try #require(expansion.part(.modelLabel))
@@ -72,7 +72,7 @@ struct PostItCardExpansionTests {
         guard case let .shape(shape) = button.paint else { throw CocoaError(.coderInvalidValue) }
         #expect(shape.fill == style.runButtonFill)
         let label = try #require(expansion.text(.runLabel))
-        #expect(label.string == style.runLabel)
+        #expect(label.string == "\u{25B6}\u{FE0E} Run")
         #expect(label.color == style.runButtonInk)
     }
 
@@ -94,7 +94,7 @@ struct PostItCardExpansionTests {
         let expansion = try expansion("""
         {"id": "P1", "type": "prompt", "content": "Go", "metadata": {"woodcase": {"state": "\(state.rawValue)"}}}
         """)
-        #expect(expansion.text(.status)?.string == style.statusLabel(state))
+        #expect(expansion.text(.status)?.string == PenPostIt.Label.status(state, requestedBy: nil).english)
         guard case let .shape(shape) = expansion.part(.statusDot)?.paint else { throw CocoaError(.coderInvalidValue) }
         #expect(shape.fill == style.statusColor(state))
     }
@@ -137,7 +137,7 @@ struct PostItCardExpansionTests {
         #expect(ring.fill == nil)
         #expect(ring.hairline?.width == style.infoMarkStroke)
         #expect(expansion.text(.infoGlyph)?.string == "i")
-        #expect(expansion.text(.header)?.string == style.contextTitle)
+        #expect(expansion.text(.header)?.string == "CONTEXT")
         #expect(expansion.part(.runButton) == nil)
         #expect(expansion.part(.author) == nil)
     }

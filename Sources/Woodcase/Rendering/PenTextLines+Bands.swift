@@ -58,11 +58,16 @@ public extension PenTextLines {
         let lineHeight: Double?
     }
 
-    /// Places lines in bands, each below the last.
+    /// Places lines in bands, each below the last, with a paragraph's spacing
+    /// (``PenParagraphIndent/spacingAfter``) between its last line and the next.
+    ///
+    /// The spacing is a gap between bands, not part of either: a band stays as tall as its
+    /// line, so a caret's height and a selection's rect are the line's own.
     ///
     /// - Parameters:
     ///   - lines: The lines, top to bottom.
-    ///   - string: The string they were set from, whose font attributes name each line's faces.
+    ///   - string: The string they were set from, whose font attributes name each line's
+    ///     faces and whose paragraph styles carry each paragraph's spacing.
     ///   - strut: The node's own line metrics.
     /// - Returns: One band per line.
     internal static func bands(of lines: [CTLine], in string: CFAttributedString, strut: Strut) -> [Band] {
@@ -82,9 +87,39 @@ public extension PenTextLines {
                 }
             }
             let band = Band(top: top, height: above + below, baseline: top + above)
-            top += band.height
+            top += band.height + paragraphSpacing(after: line, in: string)
             return band
         }
+    }
+
+    /// The space a line leaves below it before the next: its paragraph's spacing when it
+    /// is the paragraph's last line — it ends in a paragraph separator — else 0.
+    ///
+    /// The last line of a text never ends in a separator unless an empty line follows it,
+    /// so a block's height never ends in spacing; an editor's caret on that empty line
+    /// sits below the gap (``PenTextLayout/geometry``).
+    ///
+    /// - Parameters:
+    ///   - line: A line set from `string`.
+    ///   - string: The styled string.
+    /// - Returns: The spacing in points.
+    internal static func paragraphSpacing(after line: CTLine, in string: CFAttributedString) -> CGFloat {
+        let range = CTLineGetStringRange(line)
+        guard range.length > 0 else { return 0 }
+        let last = range.location + range.length - 1
+        let text = CFAttributedStringGetString(string)
+        let unit = CFStringGetCharacterAtIndex(text, last)
+        // The separators Core Text ends a paragraph at; a CRLF ends at its LF.
+        let separators: Set<UniChar> = [0x0A, 0x0D, 0x85, 0x2029]
+        guard separators.contains(unit),
+              let value = CFAttributedStringGetAttribute(string, last, kCTParagraphStyleAttributeName, nil),
+              CFGetTypeID(value) == CTParagraphStyleGetTypeID()
+        else { return 0 }
+        var spacing: CGFloat = 0
+        CTParagraphStyleGetValueForSpecifier(
+            value as! CTParagraphStyle, .paragraphSpacing, MemoryLayout<CGFloat>.size, &spacing
+        )
+        return max(0, spacing)
     }
 
     /// Whether one font attribute covers the whole string, so every line is set in it.

@@ -50,7 +50,8 @@ public extension PenMetadata {
 
         /// What the note is: a post-it, or one message of a comment thread.
         case type
-        /// Whether a post-it or a comment thread still asks for attention.
+        /// Whether a comment thread still asks for attention (open or resolved), or where a
+        /// prompt's run stands. A plain note has no state.
         case state
         /// Who wrote the note: its creator, or whoever first edited a copy of it.
         case author
@@ -168,7 +169,7 @@ public extension PenMetadata {
 
         /// What an authored value must be on a node of `kind`: ``shape``, except that a
         /// prompt's ``state`` is a run state (``PenPostIt/RunState``) — Run queues work in
-        /// the file — where every other node's is ``PenPostIt/State``.
+        /// the file — where every other node's is ``PenPostIt/State``, a comment's.
         ///
         /// - Parameter kind: The kind of the node the value is written to.
         /// - Returns: The shape the value is held to.
@@ -197,7 +198,7 @@ public extension PenMetadata {
             case .action: "The action an interactive node fires in generated code."
             case .scroll: "The axis a clipping frame scrolls along."
             case .type: "What the note is: a post-it, or a comment message."
-            case .state: "Whether it still asks for attention; a resolved post-it draws faded. A prompt's: queued, running or done."
+            case .state: "A comment thread's: open or resolved. A prompt's: queued, running or done. A plain note has none."
             case .author: "Who wrote it: the creator, or whoever first edited a copy."
             case .leaf: "The task it belongs to, such as a job id."
             case .stage: "The part of the work, or the board lane, it sits in."

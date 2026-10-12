@@ -1,13 +1,16 @@
 //
 //  ActorColorTests.swift
-//  WoodcaseViewerTests
+//  WoodcaseTests
 //
 
 import Foundation
 import Testing
-@testable import WoodcaseViewer
+@testable import Woodcase
 
 /// The identity color, pinned against the Jobs dashboard's own values.
+///
+/// It lives in the Woodcase library so the note look, the viewer and Penumbra draw one
+/// color per identity (Penumbra's notes design, decision 7, ruled 2026-10-11).
 ///
 /// The whole point of porting the hash is that an agent is the same color in both
 /// tools, so these two rows are a contract with `jobs/internal/web/render/actor_color.go`
@@ -30,6 +33,47 @@ struct ActorColorTests {
         #expect(color.saturation == 60)
         #expect(color.css == "hsl(149 60% 48%)")
         #expect(color.hex == "#31C478")
+    }
+
+    /// More names, each pinned to what the Jobs dashboard's own Go prints. The hue and
+    /// saturation come from running `actor_color.go`'s `ActorColor` verbatim (`go run`,
+    /// 2026-10-11); the hex from Python's `colorsys.hls_to_rgb` at 48% lightness, an HSL
+    /// conversion independent of this type's.
+    @Test(
+        "More names match the Jobs dashboard's hsl and its hex",
+        arguments: [
+            ("claude", "hsl(6 55% 48%)", "#BE4537"),
+            ("codex", "hsl(91 74% 48%)", "#77D520"),
+            ("ana", "hsl(192 51% 48%)", "#3CA0B9"),
+            ("w-look", "hsl(165 52% 48%)", "#3BBA9A"),
+            ("Ben Syverson", "hsl(84 79% 48%)", nil),
+            ("", "hsl(328 93% 48%)", nil),
+        ] as [(String, String, String?)]
+    )
+    func moreNamesMatchJobs(name: String, css: String, hex: String?) {
+        let color = ActorColor(name: name)
+        #expect(color.css == css)
+        if let hex { #expect(color.hex == hex) }
+    }
+
+    @Test("The color as a PenHexColor is the hex, opaque")
+    func colorIsTheHex() {
+        let color = ActorColor(name: "claude")
+        #expect(color.color == PenHexColor("#BE4537"))
+        #expect(color.color.alpha == 255)
+    }
+
+    @Test("The ink as a color is black or white, opaque")
+    func inkColor() {
+        #expect(ActorColor.Ink.black.color == PenHexColor("#000000"))
+        #expect(ActorColor.Ink.white.color == PenHexColor("#FFFFFF"))
+    }
+
+    @Test("Any fill picks its ink by the same pivot, so a chosen color is lettered legibly")
+    func inkOnAnyFill() throws {
+        #expect(try ActorColor.Ink(on: #require(PenHexColor("#12E281"))) == .black)
+        #expect(try ActorColor.Ink(on: #require(PenHexColor("#150AEB"))) == .white)
+        #expect(ActorColor.Ink(on: ActorColor(name: "claude").color) == ActorColor(name: "claude").ink)
     }
 
     @Test("FNV-1a is the 32-bit variant, seeded and multiplied by the standard constants")

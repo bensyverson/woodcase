@@ -69,6 +69,17 @@ public struct PenTextRun: Friendly {
     /// reaches the renderer on ``PenTextSegment/mention``.
     public var mention: String?
 
+    /// Horizontal padding on each side of the run, in points, or `nil` for none: CSS's
+    /// `padding-inline` on an inline element.
+    ///
+    /// It is laid out, not drawn: the run's text starts this much after what precedes it
+    /// and what follows starts this much after the run, so wrapping, measuring, carets and
+    /// every renderer see it (``PenTextStyle/attributedString(_:runs:indents:for:)``). At a
+    /// paragraph's start the run's text starts this far in from the text column. A note's
+    /// mention takes ``PenNoteMarkdown/mentionPadding``, the room its pill is drawn in. It
+    /// is not a `woodcase.spans` wire key: a text node's spans cannot set it.
+    public var inlinePadding: Double?
+
     /// Creates a run over `start ..< end`; every style key left out inherits the node's.
     ///
     /// - Parameters:
@@ -82,6 +93,7 @@ public struct PenTextRun: Friendly {
     ///   - underline: Whether the run is underlined.
     ///   - strikethrough: Whether the run is struck through.
     ///   - mention: The name the run mentions, or `nil`.
+    ///   - inlinePadding: The horizontal padding on each side, in points.
     public init(
         start: Int,
         end: Int,
@@ -92,7 +104,8 @@ public struct PenTextRun: Friendly {
         fill: PenHexColor? = nil,
         underline: Bool? = nil,
         strikethrough: Bool? = nil,
-        mention: String? = nil
+        mention: String? = nil,
+        inlinePadding: Double? = nil
     ) {
         self.start = start
         self.end = end
@@ -104,6 +117,7 @@ public struct PenTextRun: Friendly {
         self.underline = underline
         self.strikethrough = strikethrough
         self.mention = mention
+        self.inlinePadding = inlinePadding
     }
 
     /// The UTF-16 range the run covers, as written; empty when `end` is not past `start`.

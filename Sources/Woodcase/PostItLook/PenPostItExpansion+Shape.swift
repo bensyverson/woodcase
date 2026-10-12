@@ -6,14 +6,15 @@
 import Foundation
 
 public extension PenPostItExpansion {
-    /// A shape part: a rounded rectangle or an ellipse, with an optional fill, a hairline
-    /// inside its edge, and outer shadows.
+    /// A shape part: a rounded rectangle, an ellipse or a check mark, with an optional fill,
+    /// a hairline, and outer shadows.
     struct Shape: Friendly {
         /// The outline.
         public var form: Form
         /// The fill, or `nil` for none.
         public var fill: PenHexColor?
-        /// The edge, drawn inside the outline, or `nil` for none.
+        /// The edge, drawn inside the outline — or, for a ``Form/checkMark``, the mark's
+        /// stroke, centered on its path with round ends — or `nil` for none.
         public var hairline: Hairline?
         /// The outer shadows, nearest first.
         public var shadows: [Shadow]
@@ -38,10 +39,19 @@ public extension PenPostItExpansion {
             case roundedRect(cornerRadius: Double)
             /// The ellipse inscribed in the frame.
             case ellipse
+            /// A check mark stroked across the frame: an open path, never filled.
+            case checkMark
         }
 
-        /// The shape as a node a renderer already draws: a `rectangle` or an `ellipse`
-        /// with the frame's size, a solid fill, an inner stroke and outer shadow effects.
+        /// The check mark's path, in a 12 × 12 viewBox mapped onto the part's frame.
+        static let checkMarkGeometry = "M3.2 6.3 L5.3 8.4 L8.9 3.8"
+
+        /// The viewBox ``checkMarkGeometry`` is drawn in.
+        static let checkMarkViewBox = PenViewBox(x: 0, y: 0, width: 12, height: 12)
+
+        /// The shape as a node a renderer already draws: a `rectangle`, an `ellipse` or a
+        /// `path` with the frame's size, a solid fill, a stroke — inner for a closed form,
+        /// centered with round caps and joins for the check mark — and outer shadow effects.
         ///
         /// Drawing it at `frame` through the renderer's own node path draws the part with
         /// the renderer's own shadow and stroke code, so two renderers agree on the part
@@ -69,6 +79,12 @@ public extension PenPostItExpansion {
                 .ellipse(PenNode.EllipseData(
                     width: width, height: height, fills: fills,
                     stroke: stroke, strokeWidth: strokeWidth, strokeAlignment: alignment, effects: effects
+                ))
+            case .checkMark:
+                .path(PenNode.PathData(
+                    width: width, height: height, geometry: Self.checkMarkGeometry, viewBox: Self.checkMarkViewBox,
+                    stroke: stroke, strokeWidth: strokeWidth, strokeLinecap: .round, strokeLinejoin: .round,
+                    strokeAlignment: hairline == nil ? nil : .center, effects: effects
                 ))
             }
             return PenNode(id: id, common: PenNodeCommon(x: .literal(frame.x), y: .literal(frame.y)), kind: kind)

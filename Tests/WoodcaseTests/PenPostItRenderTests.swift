@@ -9,7 +9,7 @@ import Testing
 @testable import Woodcase
 
 /// The CG renderer draws notes, prompts and contexts from their expansion
-/// (``PenPostIt/expansion(of:width:height:style:measure:)``) in the rev 2 look, and leaves
+/// (``PenPostIt/expansion(of:width:height:style:measure:labels:identityColor:)``) in the rev 2 look, and leaves
 /// comments to Penumbra.
 ///
 /// There is no Pen reference: Pen draws notes its own way and cannot draw rich text
@@ -105,7 +105,7 @@ struct PenPostItRenderTests {
         #expect(pixel(grid, 1400, 202) == Self.board)
     }
 
-    @Test("The author's identity dot is drawn in the fallback identity color")
+    @Test("The author's identity dot is drawn in their ActorColor")
     func identityDot() throws {
         let (document, rects) = try load()
         let grid = try #require(PixelGrid(render()))
@@ -116,7 +116,22 @@ struct PenPostItRenderTests {
               let dot = expansion.part(.identityDot)
         else { throw CocoaError(.coderInvalidValue) }
         let center = pixel(grid, rect.x + dot.frame.midX, rect.y + dot.frame.midY)
-        #expect(near(center, PenPostIt.identityColor(for: "ben"), tolerance: 6), "\(center)")
+        #expect(near(center, ActorColor(name: "ben").color, tolerance: 6), "\(center)")
+    }
+
+    @Test("A mention's pill is painted in the person's ActorColor, and a checkbox draws no glyph")
+    func pillsAndBoxes() throws {
+        let (document, rects) = try load()
+        let grid = try #require(PixelGrid(render()))
+        guard case let .frame(frame) = document.children.first?.kind,
+              let note = frame.children?.first(where: { $0.id == "PiN01" }),
+              let rect = rects["PiN01"],
+              let expansion = PenPostIt.expansion(of: note, width: rect.width, height: rect.height),
+              let pill = expansion.part(.mentionPill)
+        else { throw CocoaError(.coderInvalidValue) }
+        // The pill's left cap, inside its padding, is the color; the text starts past it.
+        let edge = pixel(grid, rect.x + pill.frame.x + pill.frame.height / 2, rect.y + pill.frame.y + 2)
+        #expect(near(edge, ActorColor(name: "claude").color, tolerance: 6), "\(edge)")
     }
 
     @Test("A long note draws all its text in its grown height, with no clip or fade")

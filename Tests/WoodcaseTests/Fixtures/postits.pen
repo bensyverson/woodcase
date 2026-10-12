@@ -21,7 +21,7 @@
           "width": 200,
           "height": 200,
           "content": "@claude should the inspector show the override dot on every row, or only on rows that differ?",
-          "metadata": { "type": "woodcase", "woodcase": { "author": "ben", "state": "open" } }
+          "metadata": { "type": "woodcase", "woodcase": { "author": "ben" } }
         },
         {
           "id": "PiN02",
@@ -90,14 +90,14 @@
         },
         {
           "id": "PiN06",
-          "name": "Resolved",
+          "name": "Heading, checklist and mentions",
           "type": "note",
           "x": 280,
           "y": 400,
           "width": 200,
           "height": 200,
-          "content": "Shipped: the inspector shows the dot only on rows that differ.",
-          "metadata": { "type": "woodcase", "woodcase": { "author": "claude", "state": "resolved" } }
+          "content": "## Ship list\n- [x] Pills for @claude\n- [ ] Ring on dark, @ana\n- Bullets at body ink",
+          "metadata": { "type": "woodcase", "woodcase": { "author": "claude", "tint": "#E0E0E0" } }
         },
         {
           "id": "PiN07",

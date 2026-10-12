@@ -8,7 +8,7 @@ import Foundation
 /// A note, prompt or context expanded into the parts every renderer draws: the single
 /// source of the rev 2 look.
 ///
-/// ``PenPostIt/expansion(of:width:height:style:measure:)`` makes one from a node and its
+/// ``PenPostIt/expansion(of:width:height:style:measure:labels:identityColor:)`` makes one from a node and its
 /// laid-out size. Woodcase's CG renderer draws it, and RapidPro draws the same parts, so
 /// the look is decided once, here, and a renderer only paints: shapes through their node
 /// (``Shape/node(id:frame:)``), which every renderer already draws, and text through
@@ -17,9 +17,10 @@ import Foundation
 ///
 /// Every frame is in the node's own coordinates — origin at its top-left, unturned — so a
 /// renderer draws the parts inside the node's placement, as it draws a frame's children.
-/// The parts are in paint order. Two kinds of facts ride beside them for an editor that
-/// knows more than Woodcase: who the note is by (``identity``) and whom it mentions
-/// (``mentions``), so it can repaint the dot and draw the mention pills in presence colors.
+/// The parts are in paint order. Facts ride beside them for an editor: who the note is by
+/// (``identity``), whom it mentions (``mentions``), and where each checklist box is
+/// (``checkboxes``), so a click can toggle it. The identity colors are already in the parts —
+/// the caller's, or ``ActorColor``'s hash.
 public struct PenPostItExpansion: Friendly {
     /// Which card this is.
     public var variant: PenPostIt.Variant
@@ -31,11 +32,14 @@ public struct PenPostItExpansion: Friendly {
     public var ink: PenPostIt.Ink
     /// The parts, in paint order.
     public var parts: [Part]
-    /// The body's mentions: a range of the ``Role/body`` text and the name it mentions.
+    /// The body's mentions: a range of the ``Role/body`` text, the name it mentions, and
+    /// the color its pill is drawn in.
     public var mentions: [Mention]
-    /// The author whose dot is drawn, and the fallback color it is drawn in; `nil` when no
-    /// author is drawn.
+    /// The author whose dot is drawn, and the color it is drawn in; `nil` when no author is
+    /// drawn.
     public var identity: Identity?
+    /// The body's checklist boxes, in order, each with the rect a click toggles it in.
+    public var checkboxes: [Checkbox]
 
     /// Creates an expansion.
     ///
@@ -47,9 +51,10 @@ public struct PenPostItExpansion: Friendly {
     ///   - parts: The parts, in paint order.
     ///   - mentions: The body's mentions.
     ///   - identity: The author drawn, if any.
+    ///   - checkboxes: The checklist boxes drawn.
     public init(
         variant: PenPostIt.Variant, width: Double, height: Double, ink: PenPostIt.Ink,
-        parts: [Part], mentions: [Mention] = [], identity: Identity? = nil
+        parts: [Part], mentions: [Mention] = [], identity: Identity? = nil, checkboxes: [Checkbox] = []
     ) {
         self.variant = variant
         self.width = width
@@ -58,6 +63,7 @@ public struct PenPostItExpansion: Friendly {
         self.parts = parts
         self.mentions = mentions
         self.identity = identity
+        self.checkboxes = checkboxes
     }
 
     /// The first part playing a role.
@@ -113,12 +119,19 @@ public struct PenPostItExpansion: Friendly {
         case plate
         /// The note's text, from its markdown.
         case body
+        /// A mention's pill, behind its text, in the person's identity color.
+        case mentionPill
+        /// A list item's bullet: a dot in the body ink.
+        case bullet
+        /// A checklist item's box, as tall as the body's cap height; its frame is the
+        /// item's hit rect (``PenPostItExpansion/checkboxes``).
+        case checkbox
+        /// The check mark in a done item's box.
+        case checkMark
         /// The author's identity dot, at the bottom left of a note.
         case identityDot
         /// The author's name, beside the dot.
         case author
-        /// "Resolved", at the bottom right of a resolved note.
-        case resolvedLabel
         /// A card's header: "▶ PROMPT" or "CONTEXT".
         case header
         /// A context's ⓘ ring.
@@ -139,23 +152,26 @@ public struct PenPostItExpansion: Friendly {
         case runLabel
     }
 
-    /// One mention in the body: an editor draws it as a pill in the person's identity
-    /// color. The CG renderer, which knows no identity colors, draws it as the bold ink
-    /// its run sets.
+    /// One mention in the body, drawn as a ``Role/mentionPill`` part per line it sits on
+    /// and lettered in its color's ink by a fill run over ``range``.
     public struct Mention: Friendly {
         /// The mention's UTF-16 range in the ``Role/body`` part's text, `@` included.
         public var range: Range<Int>
         /// Who is mentioned: `claude` for `@claude`.
         public var name: String
+        /// The pill's color: the caller's for that identity, or its ``ActorColor``.
+        public var color: PenHexColor
 
         /// Creates a mention.
         ///
         /// - Parameters:
         ///   - range: Its UTF-16 range in the body's text.
         ///   - name: Who is mentioned.
-        public init(range: Range<Int>, name: String) {
+        ///   - color: Its pill's color.
+        public init(range: Range<Int>, name: String, color: PenHexColor) {
             self.range = range
             self.name = name
+            self.color = color
         }
     }
 
@@ -163,14 +179,15 @@ public struct PenPostItExpansion: Friendly {
     public struct Identity: Friendly {
         /// The author, as `woodcase.author` spells it, never cut.
         public var author: String
-        /// The fallback color the dot is drawn in (``PenPostIt/identityColor(for:style:)``).
+        /// The color the dot is drawn in: the caller's for that identity, or its
+        /// ``ActorColor``.
         public var color: PenHexColor
 
         /// Creates an identity.
         ///
         /// - Parameters:
         ///   - author: The author.
-        ///   - color: The dot's fallback color.
+        ///   - color: The dot's color.
         public init(author: String, color: PenHexColor) {
             self.author = author
             self.color = color

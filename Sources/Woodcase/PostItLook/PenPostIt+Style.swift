@@ -6,13 +6,17 @@
 import Foundation
 
 public extension PenPostIt {
-    /// The rev 2 look's numbers: every color, radius, size and label a note, prompt or
-    /// context is drawn with.
+    /// The rev 2 look's numbers: every color, radius and size a note, prompt or context is
+    /// drawn with.
     ///
     /// Penumbra's notes design (`../Penumbra/project/2026-10-11-notes-comments-and-spans.md`,
     /// decision 12) and its mockup set them; ``standard`` is that look. The expansion
-    /// (``PenPostIt/expansion(of:width:height:style:measure:)``) reads them, so a renderer
-    /// never does: it draws the parts it is given. See <doc:PenPostItLook>.
+    /// (``PenPostIt/expansion(of:width:height:style:measure:labels:identityColor:)``) reads
+    /// them, so a renderer never does: it draws the parts it is given. See
+    /// <doc:PenPostItLook>.
+    ///
+    /// It holds no words: the chrome's labels are ``PenPostIt/Label``s, which the
+    /// expansion's caller turns into strings, so an editor can localize them.
     ///
     /// Geometry is in points at a body size of ``PenPostIt/defaultFontSize``. The text of
     /// the chrome — the author line, a card's header, chip, status and Run — scales with
@@ -84,27 +88,22 @@ public extension PenPostIt {
         public var identityDotDiameter: Double = 8
         /// The space between the identity dot and the name.
         public var identityDotGap: Double = 5
-        /// The colors an author falls back to when the editor knows no presence color
-        /// for them (``PenPostIt/identityColor(for:style:)``).
-        public var identityPalette: [PenHexColor] = [
-            PenHexColor(red: 0x5B, green: 0x6C, blue: 0xFF),
-            PenHexColor(red: 0xD9, green: 0x77, blue: 0x57),
-            PenHexColor(red: 0x10, green: 0xA3, blue: 0x7F),
-            PenHexColor(red: 0xC2, green: 0x18, blue: 0x5B),
-            PenHexColor(red: 0x7E, green: 0x57, blue: 0xC2),
-            PenHexColor(red: 0x00, green: 0x83, blue: 0x8F),
-            PenHexColor(red: 0xE0, green: 0x8E, blue: 0x0B),
-            PenHexColor(red: 0x3D, green: 0x5A, blue: 0x80),
-        ]
+        /// The light ring an identity dot takes on paper that takes ``inkOnDark``, so a
+        /// dark hue still reads: white at 80%.
+        public var identityRingOnDark = PenHexColor(red: 0xFF, green: 0xFF, blue: 0xFF, alpha: 0xCC)
+        /// The ring's width, inside the dot's edge.
+        public var identityRingWidth: Double = 1
 
-        // MARK: Resolved
+        // MARK: Body marks
 
-        /// The gray a resolved note's tint is mixed toward.
-        public var resolvedPaper = PenHexColor(red: 0xE7, green: 0xE7, blue: 0xE7)
-        /// How far a resolved note's tint is mixed toward ``resolvedPaper``.
-        public var resolvedMix: Double = 0.55
-        /// The label at the bottom right of a resolved note.
-        public var resolvedLabel = "Resolved"
+        /// A list bullet's diameter: a dot that reads at 13 points, drawn in the body ink.
+        public var bulletDiameter: Double = 5
+        /// A checkbox's corner radius. The box itself is the body's cap height square.
+        public var checkboxCornerRadius: Double = 2.5
+        /// The edge of an open checkbox.
+        public var checkboxStroke: Double = 1.25
+        /// The stroke of a done checkbox's check mark.
+        public var checkMarkStroke: Double = 1.6
 
         // MARK: Cards
 
@@ -114,10 +113,9 @@ public extension PenPostIt {
         public var headerTracking: Double = 0.02
         /// The space between a card's header, body and run row.
         public var sectionGap: Double = 10
-        /// A prompt's header. U+FE0E keeps the triangle a glyph, never an emoji.
-        public var promptTitle = "\u{25B6}\u{FE0E} PROMPT"
-        /// A context's header.
-        public var contextTitle = "CONTEXT"
+        /// The triangle before a prompt's header and the Run label, a space apart. U+FE0E
+        /// keeps it a glyph, never an emoji.
+        public var playGlyph = "\u{25B6}\u{FE0E}"
         /// The model chip's horizontal padding.
         public var chipPaddingX: Double = 7
         /// The model chip's vertical padding.
@@ -126,8 +124,6 @@ public extension PenPostIt {
         public var chipFill = PenHexColor(red: 0, green: 0, blue: 0, alpha: 0x0F)
         /// The model name's weight.
         public var chipWeight: Double = 500
-        /// The Run button's label.
-        public var runLabel = "\u{25B6}\u{FE0E} Run"
         /// The Run label's size.
         public var runFontSize: Double = 12
         /// The Run label's weight.
@@ -146,15 +142,13 @@ public extension PenPostIt {
         public var statusDotDiameter: Double = 8
         /// The space between the status dot and its label.
         public var statusDotGap: Double = 5
-        /// Between a status and who requested it, as in "Queued · ben".
-        public var statusSeparator = " · "
         /// The ⓘ mark's diameter.
         public var infoMarkDiameter: Double = 16
         /// The ⓘ mark's ring width.
         public var infoMarkStroke: Double = 1.5
         /// The ⓘ mark's ring and glyph color: 45% black.
         public var infoMarkColor = PenHexColor(red: 0, green: 0, blue: 0, alpha: 0x73)
-        /// The glyph inside the ⓘ mark.
+        /// The glyph inside the ⓘ mark: the information symbol's letter, not a word.
         public var infoGlyph = "i"
         /// The glyph's size.
         public var infoGlyphFontSize: Double = 10
@@ -162,23 +156,12 @@ public extension PenPostIt {
         public var infoGlyphWeight: Double = 800
         /// The space between the ⓘ mark and the header.
         public var infoMarkGap: Double = 6
-        /// The status labels, by run state.
-        public var statusLabels: [String] = ["Queued", "Running", "Done"]
         /// The status dot colors, by run state: amber, blue, green.
         public var statusColors: [PenHexColor] = [
             PenHexColor(red: 0xF5, green: 0xA6, blue: 0x23),
             PenHexColor(red: 0x0A, green: 0x84, blue: 0xFF),
             PenHexColor(red: 0x34, green: 0xC7, blue: 0x59),
         ]
-
-        /// The status label for a run state.
-        ///
-        /// - Parameter state: Where the prompt's run stands.
-        /// - Returns: Its label, from ``statusLabels`` in ``RunState`` order.
-        public func statusLabel(_ state: RunState) -> String {
-            let index = RunState.allCases.firstIndex(of: state) ?? 0
-            return statusLabels.indices.contains(index) ? statusLabels[index] : state.rawValue
-        }
 
         /// The status dot's color for a run state.
         ///

@@ -15,7 +15,8 @@ public extension PenNoteMarkdown {
         /// toggle rewrites.
         public var markerSourceRange: Range<Int>
 
-        /// The UTF-16 range of the box glyph in the display text: what a click hits.
+        /// The UTF-16 range of the box's placeholder in the display text
+        /// (``PenNoteMarkdown/markerPlaceholder``): where the look draws the box.
         public var boxDisplayRange: Range<Int>
 
         /// The UTF-16 range of the whole item in the display text, box to line end,
@@ -27,7 +28,7 @@ public extension PenNoteMarkdown {
         /// - Parameters:
         ///   - isChecked: Whether the box is ticked.
         ///   - markerSourceRange: The source range of `[ ]` or `[x]`.
-        ///   - boxDisplayRange: The display range of the box glyph.
+        ///   - boxDisplayRange: The display range of the box's placeholder.
         ///   - lineDisplayRange: The display range of the item.
         public init(isChecked: Bool, markerSourceRange: Range<Int>, boxDisplayRange: Range<Int>, lineDisplayRange: Range<Int>) {
             self.isChecked = isChecked

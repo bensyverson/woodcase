@@ -253,6 +253,7 @@ public enum DocumentLinter {
         found += perSideStrokeOnShape(row, node: node)
         found += noteUnsized(row, node: node)
         found += metadataOldStyle(row, in: context)
+        found += noteState(row, in: context)
         found += codegenPropPathFindings(row, node: node, in: context)
         found += codegenUnmappedOverrideFindings(row, node: node, in: context)
         return found

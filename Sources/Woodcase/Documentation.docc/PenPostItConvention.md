@@ -46,7 +46,7 @@ under the Woodcase namespace, `metadata.woodcase`, rather than in properties of 
 | Key | Takes | Holds |
 |---|---|---|
 | `type` | `postit`, `comment` | What the note is (``PenPostIt/NoteType``); absent is a post-it |
-| `state` | `open`, `resolved`; on a prompt `queued`, `running`, `done` | Whether it still asks for attention (``PenPostIt/State``); on a prompt, where its run stands (``PenPostIt/RunState``) |
+| `state` | on a comment `open`, `resolved`; on a prompt `queued`, `running`, `done` | Whether a comment thread still asks for attention (``PenPostIt/State``); on a prompt, where its run stands (``PenPostIt/RunState``). A plain note has none |
 | `author` | any string | Who wrote it |
 | `leaf` | any string | The task it belongs to, such as a `job` id |
 | `stage` | any string | The part of the work, or the board lane, it sits in |
@@ -61,7 +61,7 @@ under the Woodcase namespace, `metadata.woodcase`, rather than in properties of 
 
 ```json
 { "type": "note", "name": "Device check", "content": "Does the scanner …",
-  "metadata": { "woodcase": { "state": "open", "author": "claude",
+  "metadata": { "woodcase": { "tint": "#A5D6A7", "author": "claude",
                               "leaf": "pODcm0", "stage": "Capture" } } }
 ```
 
@@ -83,13 +83,22 @@ copy and edit belongs to the editing session, not to this convention.
 **Prompts** queue work in the file (Penumbra's notes design rev 2, decision 14): Run sets
 `state: queued` and `requestedBy`; a watching agent claims it (`running`), answers in a comment
 thread anchored to the prompt, and marks it `done`. A prompt's state is held to those three
-spellings (``PenMetadata/WoodcaseKey/shape(on:)``), a note's to `open` and `resolved`, and
+spellings (``PenMetadata/WoodcaseKey/shape(on:)``), a comment's to `open` and `resolved`, and
 ``PenPostIt/Metadata`` reads a prompt's as ``PenPostIt/Metadata/runState``. The card draws the
 state with who requested it.
 
 **Comments** are notes too, one per message: `woodcase.type: comment`, the first message
 carrying `anchor` and `state`, each reply `replyTo` and `author`. The keys are typed
 here; the comment workflow is not.
+
+**A plain note has no state** (Ben's ruling, 2026-10-11, Penumbra's notes design decision 8):
+only comments are open or resolved, since resolving is how a conversation ends. A note's
+`state` is still held to `open` and `resolved` when written, because a note becomes a comment
+by its `type` and the two keys may be written in either order. One a note already carries —
+Ben's files from before the ruling have them, bare or namespaced — draws nothing, and
+`woodcase lint` names it as a `note-state` notice rather than `woodcase migrate` dropping it:
+the value is the author's, and may say the note should be a comment. A legacy `kind` is
+treated the same way, minus the notice: left as written, read by nothing.
 
 ### Listing
 
@@ -121,8 +130,8 @@ is lenient, because a file is: a value the convention does not spell reads as
 
 ```swift
 if let postIt = PenPostIt.Metadata(node) {
-    if postIt.type != .valid(.comment), postIt.state == .valid(.open) {
-        print("open post-it from \(postIt.author ?? "someone")")
+    if postIt.type == .valid(.comment), postIt.state == .valid(.open) {
+        print("open thread from \(postIt.author ?? "someone")")
     }
     let paper = postIt.tint?.value // a PenHexColor, or nil for Post-it yellow
 }

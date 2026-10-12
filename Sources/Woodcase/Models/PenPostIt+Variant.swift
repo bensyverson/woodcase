@@ -9,7 +9,7 @@ public extension PenPostIt {
     /// Which of the three canvas notes a node is: a post-it, or one of the format's two
     /// special variants.
     ///
-    /// All three are drawn as artwork in the rev 2 look (``PenPostIt/expansion(of:width:height:style:measure:)``),
+    /// All three are drawn as artwork in the rev 2 look (``PenPostIt/expansion(of:width:height:style:measure:labels:identityColor:)``),
     /// take markdown in `content` and grow to fit it. A note that is a comment message
     /// (``NoteType/comment``) is still a ``note`` here; it is Penumbra's to draw.
     enum Variant: String, Friendly, CaseIterable {

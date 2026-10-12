@@ -19,6 +19,7 @@ extension PenPostIt.Chrome {
     ///   - origin: Its top-left, in the node's coordinates.
     ///   - maxWidth: The most it may take; a wider label is cut.
     ///   - color: Its color.
+    ///   - label: The chrome label `string` spells, if it is one.
     ///   - measure: The text measurer.
     /// - Returns: The part, as wide as its (cut) text and one line tall.
     func labelPart(
@@ -28,13 +29,14 @@ extension PenPostIt.Chrome {
         at origin: (x: Double, y: Double),
         maxWidth: Double,
         color: PenHexColor,
+        label: PenPostIt.Label? = nil,
         measure: TextMeasurer
     ) -> PenPostItExpansion.Part {
         let (text, width) = fitted(string, style: style, maxWidth: maxWidth, measure: measure)
         return PenPostItExpansion.Part(
             role: role,
             frame: PenRect(x: origin.x, y: origin.y, width: width, height: lineHeight(of: style)),
-            paint: .text(PenPostItExpansion.Text(string: text, style: style, color: color))
+            paint: .text(PenPostItExpansion.Text(string: text, style: style, color: color, label: label))
         )
     }
 

@@ -146,6 +146,12 @@ public enum LintCheck: String, Friendly, CaseIterable {
     /// still read. A notice: nothing is wrong, and `woodcase migrate` moves them in.
     case metadataOldStyle = "metadata-old-style"
 
+    /// A plain note — not a comment, not a prompt — that still carries a `state`. Only
+    /// comments are open or resolved (Ben's ruling, 2026-10-11), so a note's state draws
+    /// nothing. A notice: the value is the author's, so it is named rather than dropped,
+    /// as a legacy `kind` is left as written.
+    case noteState = "note-state"
+
     /// A text node whose `metadata.woodcase.spans` were made for other content than its
     /// own — its words were changed by a tool that does not know about runs, such as Pen —
     /// so its styling is ignored and it draws plain (``PenNode/hasStaleTextSpans``).
@@ -190,11 +196,12 @@ public enum LintCheck: String, Friendly, CaseIterable {
     /// only not with the widths the file writes. ``spansStale`` is a warning on the same
     /// reading: the text draws, but plain, not as its styling says. ``noteUnsized`` is a notice: nothing is
     /// wrong with the note, which draws at the post-it default; ``metadataOldStyle`` is one
-    /// too, since old spellings are still read. ``componentLoop`` is an
+    /// too, since old spellings are still read, and so is ``noteState``, since a note's state
+    /// only draws nothing. ``componentLoop`` is an
     /// error: an edit refuses to make one, and the nesting it closes draws nothing.
     public var severity: PenDiagnostic.Severity {
         switch self {
-        case .noteUnsized, .metadataOldStyle:
+        case .noteUnsized, .metadataOldStyle, .noteState:
             .notice
         case .pipeline, .textWithoutFill, .fillContainerInFitParent, .emptyFitContent, .clipped,
              .artboardOverlap, .duplicateName, .textOverflow, .codegenUnmappedOverride, .collapsedText,
@@ -271,6 +278,8 @@ public enum LintCheck: String, Friendly, CaseIterable {
             "A note with no width or height of its own, which lays out at the 200×200 post-it default."
         case .metadataOldStyle:
             "Woodcase metadata kept under its old spelling (_props, a post-it's bare state); still read, and woodcase migrate moves it in."
+        case .noteState:
+            "A plain note that carries a state, which only a comment has; it is not drawn."
         case .spansStale:
             "A text whose styled runs were made for other words than its content, so it draws plain."
         case .componentLoop:

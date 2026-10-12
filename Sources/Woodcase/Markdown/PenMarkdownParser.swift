@@ -21,14 +21,18 @@ struct PenMarkdownParser {
         var indents: [PenParagraphIndent]
         /// The checklist items.
         var checklistItems: [PenNoteMarkdown.ChecklistItem]
+        /// Where each bullet's placeholder is.
+        var bulletDisplayOffsets: [Int]
         /// The offset map.
         var offsetMap: PenTextOffsetMap
     }
 
-    /// A list item's indent, waiting for its line's newline to close it.
+    /// A paragraph's indent and spacing, waiting for its line's newline to close it.
     private struct OpenIndent {
         let start: Int
-        let level: Int
+        let firstLineIndent: Double
+        let headIndent: Double
+        var spacingAfter: Double = 0
     }
 
     /// The source.
@@ -48,21 +52,28 @@ struct PenMarkdownParser {
             let open = parseLine(lineStart ..< contentEnd, into: &output)
             output.keep(contentEnd ..< min(newline + 1, units.count))
             if let open {
-                let step = PenNoteMarkdown.listIndent * fontSize
                 output.indents.append(PenParagraphIndent(
-                    start: open.start, end: output.offset,
-                    firstLineIndent: Double(open.level) * step, headIndent: Double(open.level + 1) * step
+                    start: open.start, end: output.offset, firstLineIndent: open.firstLineIndent,
+                    headIndent: open.headIndent, spacingAfter: open.spacingAfter
                 ))
             }
             guard newline < units.count else { break }
             lineStart = newline + 1
+        }
+        let padding = PenNoteMarkdown.mentionPadding * fontSize
+        output.runs = output.runs.map { run in
+            guard run.mention != nil else { return run }
+            var padded = run
+            padded.inlinePadding = padding
+            return padded
         }
         return output.parsed()
     }
 
     /// Parses one line, its newline excluded.
     ///
-    /// - Returns: The indent a list item opens, closed by the caller after the newline.
+    /// - Returns: The indent a list item opens, or the spacing a heading leaves after
+    ///   it, closed by the caller after the newline.
     private func parseLine(_ line: Range<Int>, into output: inout PenMarkdownOutput) -> OpenIndent? {
         let units = output.source
         if let level = headingLevel(of: line, in: units) {
@@ -77,7 +88,9 @@ struct PenMarkdownParser {
                     at: runIndex
                 )
             }
-            return nil
+            return OpenIndent(
+                start: start, firstLineIndent: 0, headIndent: 0, spacingAfter: PenNoteMarkdown.headingSpacing * fontSize
+            )
         }
         guard let item = PenMarkdownListItem(line: line, in: units) else {
             PenMarkdownInline(range: line, isBold: false).parse(into: &output)
@@ -86,14 +99,14 @@ struct PenMarkdownParser {
         let start = output.offset
         switch item.marker {
         case .bullet:
-            output.replace(line.lowerBound ..< item.contentStart, with: PenNoteMarkdown.bulletGlyph + "\t")
+            output.bulletDisplayOffsets.append(start)
+            output.replace(line.lowerBound ..< item.contentStart, with: PenNoteMarkdown.markerPlaceholder + "\t")
         case let .number(digits):
             output.replace(line.lowerBound ..< digits.lowerBound, with: "")
             output.keep(digits)
             output.replace(digits.upperBound ..< item.contentStart, with: "\t")
         case let .checkbox(marker, isChecked):
-            let glyph = isChecked ? PenNoteMarkdown.checkedGlyph : PenNoteMarkdown.uncheckedGlyph
-            output.replace(line.lowerBound ..< item.contentStart, with: glyph + "\t")
+            output.replace(line.lowerBound ..< item.contentStart, with: PenNoteMarkdown.markerPlaceholder + "\t")
             output.checklistItems.append(PenNoteMarkdown.ChecklistItem(
                 isChecked: isChecked, markerSourceRange: marker, boxDisplayRange: start ..< start + 1,
                 lineDisplayRange: start ..< start
@@ -103,7 +116,8 @@ struct PenMarkdownParser {
         if case .checkbox = item.marker {
             output.checklistItems[output.checklistItems.count - 1].lineDisplayRange = start ..< output.offset
         }
-        return OpenIndent(start: start, level: item.level)
+        let step = PenNoteMarkdown.listIndent * fontSize
+        return OpenIndent(start: start, firstLineIndent: Double(item.level) * step, headIndent: Double(item.level + 1) * step)
     }
 
     /// The heading level a line opens with — `#`, `##` or `###` and a space — or `nil`.

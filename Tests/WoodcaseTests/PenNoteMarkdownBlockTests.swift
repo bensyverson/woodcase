@@ -54,22 +54,23 @@ struct PenNoteMarkdownBlockTests {
         }
     }
 
-    @Test("Bullet items draw a bullet and a tab, and hang")
+    @Test("Bullet items set a placeholder and a tab, record where the bullet is drawn, and hang")
     func bulletItems() {
         let note = parse("- one\n* two\n+ three")
-        #expect(note.displayText == "•\tone\n•\ttwo\n•\tthree")
+        #expect(note.displayText == "\u{2003}\tone\n\u{2003}\ttwo\n\u{2003}\tthree")
         let indent = PenNoteMarkdown.listIndent * Self.size
         #expect(note.indents == [
             PenParagraphIndent(start: 0, end: 6, firstLineIndent: 0, headIndent: indent),
             PenParagraphIndent(start: 6, end: 12, firstLineIndent: 0, headIndent: indent),
             PenParagraphIndent(start: 12, end: 19, firstLineIndent: 0, headIndent: indent),
         ])
+        #expect(note.bulletDisplayOffsets == [0, 6, 12])
     }
 
     @Test("Two leading spaces nest a list item one level in")
     func nestedBullet() {
         let note = parse("- a\n  - b")
-        #expect(note.displayText == "•\ta\n•\tb")
+        #expect(note.displayText == "\u{2003}\ta\n\u{2003}\tb")
         let indent = PenNoteMarkdown.listIndent * Self.size
         #expect(note.indents.last == PenParagraphIndent(start: 4, end: 7, firstLineIndent: indent, headIndent: 2 * indent))
     }
@@ -81,10 +82,10 @@ struct PenNoteMarkdownBlockTests {
         #expect(note.indents.map(\.range) == [0 ..< 7, 7 ..< 13])
     }
 
-    @Test("Checklist items draw a box and record where their marker is")
+    @Test("Checklist items set a placeholder for their box and record where their marker is")
     func checklistItems() {
         let note = parse("- [ ] todo\n- [x] done\n* [X] also")
-        #expect(note.displayText == "☐\ttodo\n☑\tdone\n☑\talso")
+        #expect(note.displayText == "\u{2003}\ttodo\n\u{2003}\tdone\n\u{2003}\talso")
         #expect(note.checklistItems == [
             PenNoteMarkdown.ChecklistItem(
                 isChecked: false, markerSourceRange: 2 ..< 5, boxDisplayRange: 0 ..< 1, lineDisplayRange: 0 ..< 6
@@ -111,7 +112,7 @@ struct PenNoteMarkdownBlockTests {
     @Test("Inline styling inside a list item and a heading is parsed")
     func inlineInsideBlocks() {
         let note = parse("# **Big** plan\n- [ ] ship *it*")
-        #expect(note.displayText == "Big plan\n☐\tship it")
+        #expect(note.displayText == "Big plan\n\u{2003}\tship it")
         #expect(note.runs.contains { $0.range == 0 ..< 8 && $0.fontSize != nil })
         #expect(note.runs.contains { $0.range == 0 ..< 3 && $0.fontWeight == PenNoteMarkdown.boldWeight })
         #expect(note.runs.contains { $0.range == 16 ..< 18 && $0.isItalic == true })

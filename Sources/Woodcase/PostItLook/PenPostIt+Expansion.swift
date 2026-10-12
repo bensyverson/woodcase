@@ -10,9 +10,10 @@ public extension PenPostIt {
     ///
     /// A note is tinted paper — `woodcase.tint`, absent or malformed is Post-it yellow —
     /// with its markdown body and, when it names an author, the author's identity dot and
-    /// name at the bottom; resolved, it fades. A prompt is a white card with its model chip,
-    /// ▶ Run and its run's status; a context is a quiet card with an ⓘ mark. No note carries
-    /// a kind mark. See <doc:PenPostItLook>.
+    /// name at the bottom. A note has no state: a `state` it still carries draws nothing
+    /// (only comments are open or resolved). A prompt is a white card with its model chip,
+    /// ▶ Run and its run's status; a context is a quiet card with an ⓘ mark. No note
+    /// carries a kind mark. See <doc:PenPostItLook>.
     ///
     /// - Parameters:
     ///   - node: The node.
@@ -20,6 +21,10 @@ public extension PenPostIt {
     ///   - height: Its laid-out height, grown to fit its text.
     ///   - style: The look.
     ///   - measure: The text measurer the chrome's labels are measured with; the layout's.
+    ///   - labels: The words for the chrome's labels; English by default. The labels are
+    ///     measured as this spells them, so a localized label is fitted, not the English.
+    ///   - identityColor: The color a person chose, by identity, or `nil` to draw them in
+    ///     their ``ActorColor``. Their dot and their mention pills take it.
     /// - Returns: The expansion, or `nil` for a node that is not a note, prompt or context,
     ///   and for a comment message (`woodcase.type: comment`), which Penumbra draws.
     static func expansion(
@@ -27,17 +32,22 @@ public extension PenPostIt {
         width: Double,
         height: Double,
         style: Style = .standard,
-        measure: TextMeasurer = PenLayoutEngine.defaultTextMeasurer
+        measure: @escaping TextMeasurer = PenLayoutEngine.defaultTextMeasurer,
+        labels: @escaping (Label) -> String = { $0.english },
+        identityColor: @escaping (String) -> PenHexColor? = { _ in nil }
     ) -> PenPostItExpansion? {
         guard let variant = Variant(node.kind), let text = node.noteTextStyle else { return nil }
         let metadata = Metadata(node)
         if metadata?.type == .valid(.comment) { return nil }
-        let chrome = Chrome(style: style, fontSize: text.fontSize)
+        let drawing = Drawing(
+            chrome: Chrome(style: style, fontSize: text.fontSize), measure: measure, labels: labels,
+            identityColors: identityColor
+        )
         let box = (width: width, height: height)
         return switch variant {
-        case .note: noteExpansion(node, metadata: metadata, box: box, chrome: chrome, measure: measure)
-        case .prompt: promptExpansion(node, metadata: metadata, box: box, chrome: chrome, measure: measure)
-        case .context: contextExpansion(node, box: box, chrome: chrome, measure: measure)
+        case .note: noteExpansion(node, metadata: metadata, box: box, drawing: drawing)
+        case .prompt: promptExpansion(node, metadata: metadata, box: box, drawing: drawing)
+        case .context: contextExpansion(node, box: box, drawing: drawing)
         }
     }
 }
@@ -45,66 +55,56 @@ public extension PenPostIt {
 extension PenPostIt {
     /// A post-it: its paper, its body, and its author line.
     static func noteExpansion(
-        _ node: PenNode, metadata: Metadata?, box: (width: Double, height: Double), chrome: Chrome,
-        measure: TextMeasurer
+        _ node: PenNode, metadata: Metadata?, box: (width: Double, height: Double), drawing: Drawing
     ) -> PenPostItExpansion {
-        let style = chrome.style
-        let footer = Chrome.Footer(metadata)
-        let isResolved = footer?.isResolved ?? false
-        let tint = metadata?.tint?.value ?? Tint.default.color
-        let paper = isResolved ? tint.mixed(toward: style.resolvedPaper, by: style.resolvedMix) : tint
+        let style = drawing.style
+        let paper = metadata?.tint?.value ?? Tint.default.color
         let ink = Ink(on: paper, style: style)
         var parts = [plate(
             paper, box: box, cornerRadius: style.noteCornerRadius, hairline: style.hairline,
-            shadows: isResolved ? Array(style.shadows.prefix(1)) : style.shadows, style: style
+            shadows: style.shadows, style: style
         )]
-        let body = bodyPart(of: node, box: box, color: isResolved ? ink.secondary : ink.primary, ink: ink, style: style)
-        if let part = body.part { parts.append(part) }
+        let content = body(of: node, box: box, color: ink.primary, ink: ink, paper: paper, drawing: drawing)
+        parts += content.parts
         var identity: PenPostItExpansion.Identity?
-        if let footer {
-            let footerParts = footerParts(footer, box: box, ink: ink, chrome: chrome, measure: measure)
-            parts += footerParts.parts
-            identity = footerParts.identity
+        if let author = Chrome.author(metadata) {
+            let footer = footerParts(author, box: box, ink: ink, drawing: drawing)
+            parts += footer.parts
+            identity = footer.identity
         }
         return PenPostItExpansion(
             variant: .note, width: box.width, height: box.height, ink: ink,
-            parts: parts, mentions: body.mentions, identity: identity
+            parts: parts, mentions: content.mentions, identity: identity, checkboxes: content.checkboxes
         )
     }
 
-    /// The author's dot and name at the bottom left, and "Resolved" at the bottom right.
+    /// The author's dot and name at the bottom left. On dark paper the dot takes a light
+    /// ring (``Style/identityRingOnDark``), so a dark hue still reads against it.
     private static func footerParts(
-        _ footer: Chrome.Footer, box: (width: Double, height: Double), ink: Ink, chrome: Chrome,
-        measure: TextMeasurer
-    ) -> (parts: [PenPostItExpansion.Part], identity: PenPostItExpansion.Identity?) {
+        _ author: String, box: (width: Double, height: Double), ink: Ink, drawing: Drawing
+    ) -> (parts: [PenPostItExpansion.Part], identity: PenPostItExpansion.Identity) {
+        let chrome = drawing.chrome
         let style = chrome.style
         let label = chrome.label(weight: style.authorWeight)
         let top = box.height - textInsets.bottom - chrome.labelLine
         let left = textInsets.left
-        var right = box.width - textInsets.right
-        var parts: [PenPostItExpansion.Part] = []
-        if footer.isResolved {
-            let width = chrome.width(of: style.resolvedLabel, style: label, measure: measure)
-            let x = max(left, right - width)
-            parts.append(chrome.labelPart(
-                .resolvedLabel, style.resolvedLabel, style: label, at: (x, top),
-                maxWidth: right - x, color: ink.secondary, measure: measure
-            ))
-            right = x - style.identityDotGap * chrome.scale
-        }
-        guard let author = footer.author else { return (parts, nil) }
+        let right = box.width - textInsets.right
         let diameter = style.identityDotDiameter * chrome.scale
-        let color = identityColor(for: author, style: style)
+        let color = drawing.identityColor(for: author)
+        let ring = ink == style.inkOnDark
+            ? PenPostItExpansion.Hairline(color: style.identityRingOnDark, width: style.identityRingWidth)
+            : nil
         let dot = PenPostItExpansion.Part(
             role: .identityDot,
             frame: PenRect(x: left, y: top + (chrome.labelLine - diameter) / 2, width: diameter, height: diameter),
-            paint: .shape(PenPostItExpansion.Shape(form: .ellipse, fill: color))
+            paint: .shape(PenPostItExpansion.Shape(form: .ellipse, fill: color, hairline: ring))
         )
         let x = left + diameter + style.identityDotGap * chrome.scale
         let name = chrome.labelPart(
-            .author, author, style: label, at: (x, top), maxWidth: max(0, right - x), color: ink.secondary, measure: measure
+            .author, author, style: label, at: (x, top), maxWidth: max(0, right - x), color: ink.secondary,
+            measure: drawing.measure
         )
-        return ([dot, name] + parts, PenPostItExpansion.Identity(author: author, color: color))
+        return ([dot, name], PenPostItExpansion.Identity(author: author, color: color))
     }
 
     /// The shadows a node's paper casts, as effects, for its painted extent: a note's or a

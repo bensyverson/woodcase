@@ -8,7 +8,7 @@ import Testing
 @testable import Woodcase
 
 /// The values the rev 2 look is drawn from: the tint presets, the ink chosen by the paper's
-/// brightness, and the identity color an author falls back to when the editor has none.
+/// brightness.
 /// Penumbra's notes design, decision 12, and spec §10.
 struct PostItLookTests {
     @Test("Post-it yellow is the default tint, and the six presets of spec §10 follow it")
@@ -50,25 +50,6 @@ struct PostItLookTests {
         #expect(try abs(#require(PenHexColor("#FFFFFF")).relativeLuminance - 1) < 1e-9)
         let gray = try #require(PenHexColor("#777777")).relativeLuminance
         #expect(gray > 0.17 && gray < 0.2)
-    }
-
-    @Test("An author's fallback identity color is stable and from the palette")
-    func identityColor() {
-        let palette = PenPostIt.Style.standard.identityPalette
-        #expect(palette.count >= 6)
-        let names = ["ben", "claude", "codex", "ana", "w-look", "Ben Syverson", "", "🦊"]
-        for name in names {
-            let color = PenPostIt.identityColor(for: name)
-            #expect(palette.contains(color), "\(name) took \(color.hex)")
-            #expect(PenPostIt.identityColor(for: name) == color)
-        }
-        #expect(Set(names.map { PenPostIt.identityColor(for: $0) }).count > 2, "the hash does not spread")
-    }
-
-    @Test("The identity hash is FNV-1a over UTF-8, so every platform and run agrees")
-    func identityHashIsPinned() {
-        #expect(PenPostIt.identityHash("") == 0xCBF2_9CE4_8422_2325)
-        #expect(PenPostIt.identityHash("a") == 0xAF63_DC4C_8601_EC8C)
     }
 
     @Test("Mixing toward a color moves each channel by the fraction")

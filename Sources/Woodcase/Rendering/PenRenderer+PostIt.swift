@@ -17,7 +17,7 @@ public extension PenRenderer {
     /// renderer draws every note this way, and an editor can call it to draw one alone.
     ///
     /// - Parameters:
-    ///   - expansion: The expansion (``PenPostIt/expansion(of:width:height:style:measure:)``).
+    ///   - expansion: The expansion (``PenPostIt/expansion(of:width:height:style:measure:labels:identityColor:)``).
     ///   - context: The context, flipped to a top-left origin and moved to the node.
     static func draw(_ expansion: PenPostItExpansion, in context: CGContext) {
         for (index, part) in expansion.parts.enumerated() {

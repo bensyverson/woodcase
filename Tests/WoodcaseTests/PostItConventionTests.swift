@@ -133,4 +133,18 @@ struct PostItConventionTests {
         #expect(PenMetadata.WoodcaseKey.state.spellings == ["open", "resolved"])
         #expect(PenMetadata.WoodcaseKey.author.spellings.isEmpty)
     }
+
+    @Test("Comments and prompts still validate their state values")
+    func commentAndPromptStatesValidate() throws {
+        let note = PenNode.Kind.note(PenNode.NoteData())
+        let comment: [String: AnyCodable] = ["woodcase": .dictionary(["type": .string("comment"), "state": .string("closed")])]
+        let refused = try #require(PenPostIt.violation(in: comment, comparedTo: nil, on: note))
+        #expect(refused.key == .state)
+        #expect(refused.accepted == ["open", "resolved"])
+        let resolved: [String: AnyCodable] = ["woodcase": .dictionary(["type": .string("comment"), "state": .string("resolved")])]
+        #expect(PenPostIt.violation(in: resolved, comparedTo: nil, on: note) == nil)
+        let prompt = PenNode.Kind.prompt(PenNode.PromptData())
+        let open: [String: AnyCodable] = ["woodcase": .dictionary(["state": .string("open")])]
+        #expect(PenPostIt.violation(in: open, comparedTo: nil, on: prompt)?.accepted == ["queued", "running", "done"])
+    }
 }

@@ -50,7 +50,9 @@
         /// Core Text does not draw, is marked with ``PenTextRenderer/strikethroughKey``
         /// for ``PenTextRenderer/drawStrikethrough(lines:in:)``. Each paragraph an indent
         /// covers (``PenParagraphIndent``) takes its indents, and a tab stop at its head
-        /// indent, on top of the same pitch and alignment.
+        /// indent, on top of the same pitch and alignment. A run's
+        /// ``PenTextRun/inlinePadding`` is laid out as extra advance on each side of it
+        /// (``InlinePadding``).
         ///
         /// - Parameters:
         ///   - text: The string to set. An empty one builds an empty string.
@@ -88,7 +90,8 @@
                     CFAttributedStringSetAttributes(mutable, range, attributes as CFDictionary, true)
                 }
                 let length = text.utf16.count
-                for indent in indents {
+                let padding = InlinePadding(text: text, runs: runs, letterSpacing: letterSpacing)
+                for indent in padding.indents(merging: indents) {
                     let lower = min(max(indent.start, 0), length)
                     let upper = min(max(indent.end, lower), length)
                     guard lower < upper else { continue }
@@ -97,6 +100,7 @@
                         PenTextMeasurer.paragraphStyle(lineHeight: pitch, alignment: alignment, indent: indent)
                     )
                 }
+                padding.applyKerns(to: mutable)
                 string = mutable
             }
             return PenStyledText(

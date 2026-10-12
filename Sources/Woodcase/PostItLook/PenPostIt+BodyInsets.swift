@@ -9,7 +9,7 @@ public extension PenPostIt {
     /// The space between a note's, prompt's or context's edges and its body text: the
     /// ``textInsets``, plus the chrome above or below the text.
     ///
-    /// A note with an author, or resolved, adds its author line to the bottom inset; a
+    /// A note with an author adds its author line to the bottom inset; a
     /// prompt adds its header row to the top and its run row to the bottom; a context adds
     /// its header row to the top. The chrome scales with the node's font size. The layout
     /// grows a node by its text plus these insets (Penumbra's notes design, decision 4), and
@@ -26,7 +26,7 @@ public extension PenPostIt {
         let base = textInsets
         switch variant {
         case .note:
-            let footer = Chrome.Footer(PenPostIt.Metadata(node)) == nil ? 0 : chrome.footerGap + chrome.labelLine
+            let footer = Chrome.author(PenPostIt.Metadata(node)) == nil ? 0 : chrome.footerGap + chrome.labelLine
             return PenPadding.Edges(top: base.top, right: base.right, bottom: base.bottom + footer, left: base.left)
         case .prompt:
             return PenPadding.Edges(

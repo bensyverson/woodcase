@@ -60,6 +60,14 @@ Under `Sources/Woodcase`.
 > roles let an editor repaint the identity dot and lay mention pills. The look's numbers are
 > `PenPostIt.Style.standard` (rev 2), documented in DocC `PenPostItLook.md`; contact sheet at
 > [2026-10-11-note-look-rev2/contact-sheet.png](2026-10-11-note-look-rev2/contact-sheet.png).
+>
+> > Revised 2026-10-11 (leaves ZQJKak, Xrcy4F, AxWcJS, Ben's session 12 rulings): notes carry no
+> > state, so the resolved note look is gone; identity dots and mention pills are drawn in
+> > `ActorColor` (or a caller-chosen color) as expansion parts; bullets and checkboxes are drawn
+> > shapes; headings take paragraph spacing; chrome words are typed `PenPostIt.Label`s. The
+> > contact sheet was re-rendered with these (fixture render via `UPDATE_GOLDEN=1 swift test
+> > --filter PenPostItRenderTests`, c41x lane via `woodcase shot <scratch copy> klbxB --scale 2`,
+> > composed as HTML and shot with `sleepy shot file://… --full-page --size 2080 --scale 2`).
 
 **Expansion.** `PenPostIt.expansion(of: PenNode, size: PenRect) -> Expansion { root: PenNode; rects: [String: PenRect] }`: a frame with the **note's id** (common minus metadata, `layout: none`, `clip: true`, fill, radius, shadows) and children text `<id>/postit-body`, rectangle `<id>/postit-fade` (only when overflowing), text `<id>/postit-author`, text `<id>/postit-resolved`, with explicit parent-local rects. CG renders it at PenRenderer.swift:243 via `renderNodesIteratively([exp.root], layoutRects: exp.rects, …)`; RapidPro walks it with the note's `parentLocalToWorld`. `paintedExtent(.note)` returns the expansion's painted extent, shadows included. Text goes through `PenTextLayout` ([2026-10-04-text-layout-design.md](2026-10-04-text-layout-design.md)); Penumbra's caret engine lays out `postit-body`'s text in its rect.
 

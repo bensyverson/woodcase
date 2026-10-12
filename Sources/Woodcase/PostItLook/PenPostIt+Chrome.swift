@@ -69,22 +69,16 @@ extension PenPostIt {
             )
         }
 
-        /// What a note's author line shows: its author, whether it is resolved, or both.
-        struct Footer: Friendly {
-            /// The author, when the note names one.
-            let author: String?
-            /// Whether the note is resolved.
-            let isResolved: Bool
-
-            /// The footer a note's metadata asks for, or `nil` when it has neither an author
-            /// nor a resolved state.
-            init?(_ metadata: PenPostIt.Metadata?) {
-                let author = metadata?.author.flatMap { $0.isEmpty ? nil : $0 }
-                let isResolved = metadata?.state == .valid(.resolved)
-                guard author != nil || isResolved else { return nil }
-                self.author = author
-                self.isResolved = isResolved
-            }
+        /// The author a note's author line names: its `woodcase.author`, or `nil` when it
+        /// names none (or an empty one), and the note has no author line.
+        ///
+        /// A note's `state` plays no part: only comments are open or resolved (Ben's
+        /// ruling, 2026-10-11), and a comment is not drawn here.
+        ///
+        /// - Parameter metadata: The note's metadata.
+        /// - Returns: The author, or `nil`.
+        static func author(_ metadata: PenPostIt.Metadata?) -> String? {
+            metadata?.author.flatMap { $0.isEmpty ? nil : $0 }
         }
     }
 }

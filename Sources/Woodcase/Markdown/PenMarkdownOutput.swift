@@ -5,8 +5,8 @@
 
 import Foundation
 
-/// The display text a markdown parse writes, with the offset map, runs, indents and
-/// checklist items it gathers on the way.
+/// The display text a markdown parse writes, with the offset map, runs, indents,
+/// checklist items and bullets it gathers on the way.
 ///
 /// Every source code unit goes through ``keep(_:)`` or ``replace(_:with:)`` exactly once,
 /// in order, so the pieces tile the source and the display text by construction.
@@ -29,6 +29,9 @@ struct PenMarkdownOutput {
     /// The checklist items.
     var checklistItems: [PenNoteMarkdown.ChecklistItem] = []
 
+    /// Where each bullet's placeholder is in the display text.
+    var bulletDisplayOffsets: [Int] = []
+
     /// Where the next display code unit goes.
     var offset: Int {
         display.count
@@ -50,7 +53,8 @@ struct PenMarkdownOutput {
         }
     }
 
-    /// Writes syntax as what it displays: nothing (`**`) or a glyph (`- ` → `•⇥`).
+    /// Writes syntax as what it displays: nothing (`**`), or a placeholder and a tab
+    /// (`- ` → `␣⇥`).
     ///
     /// - Parameters:
     ///   - range: The syntax's UTF-16 range in the source.
@@ -69,6 +73,7 @@ struct PenMarkdownOutput {
             runs: runs,
             indents: indents,
             checklistItems: checklistItems,
+            bulletDisplayOffsets: bulletDisplayOffsets,
             offsetMap: PenTextOffsetMap(pieces: pieces)
         )
     }

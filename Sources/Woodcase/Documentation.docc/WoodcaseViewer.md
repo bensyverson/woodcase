@@ -951,13 +951,16 @@ because the file's history is not a record of what *you* have seen.
 
 ### Identity color
 
-`ActorColor` is the Jobs dashboard's hash, ported so an agent is the same color in
+``ActorColor`` is the Jobs dashboard's hash, ported so an agent is the same color in
 both tools: FNV-1a 32-bit, `hue = h(name + "u") % 360`, `saturation = h(name +
-"zzzzzzzz") % 50 + 50`, lightness 48%. It appears in exactly two places — the avatar disc
-and the edit markers — because a hashed hue collides with the accent green often enough
-that colored text would read as a link.
+"zzzzzzzz") % 50 + 50`, lightness 48%. It lives in the Woodcase library, not here, because it
+is the one identity color everywhere (Penumbra's notes design, decision 7, ruled
+2026-10-11): the note look draws author dots and mention pills in it too
+(<doc:PenPostItLook>). In the viewer it appears in exactly two places — the avatar disc and
+the edit markers — because a hashed hue collides with the accent green often enough that
+colored text would read as a link.
 
-The **ink** on that hue is Woodcase's own, not the dashboard's: `ActorColor.ink` is
+The **ink** on that hue is Woodcase's own, not the dashboard's: ``ActorColor/ink`` is
 black when the disc's WCAG relative luminance exceeds `0.179` and white below it. That
 number is where the two inks cross — solving `(L + 0.05) / 0.05 = 1.05 / (L + 0.05)`
 gives `√1.05 − 0.05` — so both land on 4.58:1 there and the better one is better still

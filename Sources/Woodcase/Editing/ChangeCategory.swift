@@ -63,10 +63,10 @@ public enum ChangeCategory: Friendly {
         }
 
         // A note's text style and a text's spans live in metadata, and both move a
-        // measured size: a note grows to fit its text. Its author and state decide whether
-        // it has an author line, which adds to its height too.
+        // measured size: a note grows to fit its text. Its author decides whether it has
+        // an author line, which adds to its height too; its state draws nothing.
         let measured = PenMetadata.WoodcaseKey.allCases.filter {
-            $0.group == .noteTextStyle || $0.group == .text || $0 == .author || $0 == .state
+            $0.group == .noteTextStyle || $0.group == .text || $0 == .author
         }
         let oldMetadata = oldCommon.metadata ?? PenMetadata(type: nil)
         let newMetadata = newCommon.metadata ?? PenMetadata(type: nil)

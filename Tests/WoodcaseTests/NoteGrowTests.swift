@@ -139,7 +139,7 @@ struct NoteGrowTests {
 
     // MARK: - Invalidation
 
-    @Test("A change to a note's author or state needs layout: the footer moves its height")
+    @Test("A change to a note's author needs layout, since the footer moves its height; its state does not")
     func footerKeysNeedLayout() throws {
         let before = try noteNode(board(content: "hi"))
         func with(_ key: PenMetadata.WoodcaseKey, _ value: AnyCodable) -> PenNodeCommon {
@@ -150,7 +150,7 @@ struct NoteGrowTests {
             return common
         }
         #expect(ChangeCategory.categorize(oldCommon: before.common, newCommon: with(.author, .string("ben"))) == .layout)
-        #expect(ChangeCategory.categorize(oldCommon: before.common, newCommon: with(.state, .string("resolved"))) == .layout)
+        #expect(ChangeCategory.categorize(oldCommon: before.common, newCommon: with(.state, .string("resolved"))) == .renderOnly)
         #expect(ChangeCategory.categorize(oldCommon: before.common, newCommon: with(.requestedBy, .string("ben"))) == .renderOnly)
     }
 

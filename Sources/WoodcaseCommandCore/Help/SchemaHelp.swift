@@ -133,7 +133,7 @@ enum SchemaHelp {
 
         \(rows.joined(separator: "\n"))
 
-        Write one key with a deep key: woodcase set <file> <note> common.metadata.woodcase.state=resolved
+        Write one key with a deep key: woodcase set <file> <note> common.metadata.woodcase.tint=#A5D6A7
         A note written before the namespace keeps bare keys beside metadata.type "\(PenPostIt.typeValue)"; \
         they are still read, and `woodcase migrate` moves them in.
         """

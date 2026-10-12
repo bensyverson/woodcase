@@ -84,6 +84,7 @@ no document, so accepting any of those would be accepting an argument it ignores
 | `per-side-stroke-on-shape` | warning | An ellipse, polygon, path or line with a stroke paint and a per-side `strokeWidth` whose sides differ from its `top`, or that has no `top`: Pen draws the `top` width alone, all round |
 | `note-unsized` | notice | A `note` with no `width` or `height` of its own, or the `0` Pen saves an unsized note with, which lays out at the 200-pt post-it default on that axis |
 | `metadata-old-style` | notice | A node keeps Woodcase metadata under its spelling from before `metadata.woodcase` (`_props`, a post-it's bare `state`); still read, and `woodcase migrate` moves it in |
+| `note-state` | notice | A plain note — not a comment, not a prompt — carries a `state`, in either spelling. Only comments are open or resolved, so it draws nothing; remove it, or make the note a comment |
 | `spans-stale` | warning | A text whose `metadata.woodcase.spans` were made for other words than its content, so its styling is ignored and it draws plain |
 
 The two sizing checks fire only where the engine has *nothing to fall back on*:

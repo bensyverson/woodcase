@@ -9,9 +9,10 @@ extension PenPostIt {
     /// A prompt: a white card with its header and model chip, its body, and a run row of
     /// the run's status and ▶ Run.
     static func promptExpansion(
-        _ node: PenNode, metadata: Metadata?, box: (width: Double, height: Double), chrome: Chrome,
-        measure: TextMeasurer
+        _ node: PenNode, metadata: Metadata?, box: (width: Double, height: Double), drawing: Drawing
     ) -> PenPostItExpansion {
+        let chrome = drawing.chrome
+        let measure = drawing.measure
         let style = chrome.style
         let ink = Ink(on: style.promptPaper, style: style)
         let left = textInsets.left
@@ -26,8 +27,8 @@ extension PenPostIt {
         let headerStyle = chrome.label(weight: style.headerWeight, tracking: style.headerTracking)
         let headerY = top + (chrome.chipHeight - chrome.labelLine) / 2
         let header = chrome.labelPart(
-            .header, style.promptTitle, style: headerStyle, at: (left, headerY),
-            maxWidth: max(0, right - left), color: ink.secondary, measure: measure
+            .header, drawing.text(.promptTitle), style: headerStyle, at: (left, headerY),
+            maxWidth: max(0, right - left), color: ink.secondary, label: .promptTitle, measure: measure
         )
         parts.append(header)
         if case let .prompt(data) = node.kind, let model = data.model, !model.isEmpty {
@@ -46,14 +47,15 @@ extension PenPostIt {
             ))
         }
 
-        let body = bodyPart(of: node, box: box, color: ink.primary, ink: ink, style: style)
-        if let part = body.part { parts.append(part) }
+        let content = body(of: node, box: box, color: ink.primary, ink: ink, paper: style.promptPaper, drawing: drawing)
+        parts += content.parts
 
         // The run row: ▶ Run at the right, the status at the left.
         let rowTop = box.height - textInsets.bottom - chrome.runRow
         let runStyle = chrome.label(size: chrome.runSize, weight: style.runWeight)
         let padX = style.runPaddingX * chrome.scale
-        let labelWidth = chrome.width(of: style.runLabel, style: runStyle, measure: measure)
+        let runLabel = drawing.text(.run)
+        let labelWidth = chrome.width(of: runLabel, style: runStyle, measure: measure)
         let button = PenRect(x: right - labelWidth - 2 * padX, y: rowTop, width: labelWidth + 2 * padX, height: chrome.runRow)
         parts.append(PenPostItExpansion.Part(
             role: .runButton, frame: button,
@@ -62,8 +64,8 @@ extension PenPostIt {
             ))
         ))
         parts.append(chrome.labelPart(
-            .runLabel, style.runLabel, style: runStyle, at: (button.x + padX, rowTop + style.runPaddingY * chrome.scale),
-            maxWidth: labelWidth, color: style.runButtonInk, measure: measure
+            .runLabel, runLabel, style: runStyle, at: (button.x + padX, rowTop + style.runPaddingY * chrome.scale),
+            maxWidth: labelWidth, color: style.runButtonInk, label: .run, measure: measure
         ))
         if let state = metadata?.runState?.value {
             let diameter = style.statusDotDiameter * chrome.scale
@@ -72,23 +74,27 @@ extension PenPostIt {
                 frame: PenRect(x: left, y: rowTop + (chrome.runRow - diameter) / 2, width: diameter, height: diameter),
                 paint: .shape(PenPostItExpansion.Shape(form: .ellipse, fill: style.statusColor(state)))
             ))
-            let label = style.statusLabel(state) + (metadata?.requestedBy.map { style.statusSeparator + $0 } ?? "")
+            let label = Label.status(state, requestedBy: metadata?.requestedBy)
             let x = left + diameter + style.statusDotGap * chrome.scale
             parts.append(chrome.labelPart(
-                .status, label, style: chrome.label(weight: PenTextStyle.defaultFontWeight),
+                .status, drawing.text(label), style: chrome.label(weight: PenTextStyle.defaultFontWeight),
                 at: (x, rowTop + (chrome.runRow - chrome.labelLine) / 2),
-                maxWidth: max(0, button.x - style.footerGap * chrome.scale - x), color: ink.secondary, measure: measure
+                maxWidth: max(0, button.x - style.footerGap * chrome.scale - x), color: ink.secondary, label: label,
+                measure: measure
             ))
         }
         return PenPostItExpansion(
-            variant: .prompt, width: box.width, height: box.height, ink: ink, parts: parts, mentions: body.mentions
+            variant: .prompt, width: box.width, height: box.height, ink: ink, parts: parts, mentions: content.mentions,
+            checkboxes: content.checkboxes
         )
     }
 
     /// A context: a quiet card with an ⓘ mark and its header, then its body.
     static func contextExpansion(
-        _ node: PenNode, box: (width: Double, height: Double), chrome: Chrome, measure: TextMeasurer
+        _ node: PenNode, box: (width: Double, height: Double), drawing: Drawing
     ) -> PenPostItExpansion {
+        let chrome = drawing.chrome
+        let measure = drawing.measure
         let style = chrome.style
         let ink = Ink(on: style.contextPaper, style: style)
         let left = textInsets.left
@@ -116,14 +122,17 @@ extension PenPostIt {
         ))
         let x = left + diameter + style.infoMarkGap * chrome.scale
         parts.append(chrome.labelPart(
-            .header, style.contextTitle, style: chrome.label(weight: style.headerWeight, tracking: style.headerTracking),
+            .header, drawing.text(.contextTitle),
+            style: chrome.label(weight: style.headerWeight, tracking: style.headerTracking),
             at: (x, top + (chrome.contextHeader - chrome.labelLine) / 2),
-            maxWidth: max(0, box.width - textInsets.right - x), color: ink.secondary, measure: measure
+            maxWidth: max(0, box.width - textInsets.right - x), color: ink.secondary, label: .contextTitle,
+            measure: measure
         ))
-        let body = bodyPart(of: node, box: box, color: ink.primary, ink: ink, style: style)
-        if let part = body.part { parts.append(part) }
+        let content = body(of: node, box: box, color: ink.primary, ink: ink, paper: style.contextPaper, drawing: drawing)
+        parts += content.parts
         return PenPostItExpansion(
-            variant: .context, width: box.width, height: box.height, ink: ink, parts: parts, mentions: body.mentions
+            variant: .context, width: box.width, height: box.height, ink: ink, parts: parts, mentions: content.mentions,
+            checkboxes: content.checkboxes
         )
     }
 }

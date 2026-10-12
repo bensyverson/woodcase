@@ -68,7 +68,9 @@ public extension PenTextMeasurer {
     ///   - alignment: The horizontal alignment, or `nil` to leave Core Text's default.
     ///   - indent: The paragraph's indents, or `nil` for none: its first line starts at
     ///     ``PenParagraphIndent/firstLineIndent``, later lines at
-    ///     ``PenParagraphIndent/headIndent``, and it takes one left tab stop there.
+    ///     ``PenParagraphIndent/headIndent``, and it takes one left tab stop there — when
+    ///     either is not zero. Its ``PenParagraphIndent/spacingAfter`` is set as the
+    ///     paragraph spacing, which ``PenTextLines/bands`` reads back to place the lines.
     /// - Returns: The paragraph style.
     internal static func paragraphStyle(
         lineHeight points: CGFloat, alignment: CTTextAlignment? = nil, indent: PenParagraphIndent? = nil
@@ -78,31 +80,40 @@ public extension PenTextMeasurer {
         var firstLine = CGFloat(indent?.firstLineIndent ?? 0)
         var head = CGFloat(indent?.headIndent ?? 0)
         var tabStops = [CTTextTabCreate(.left, Double(head), nil)] as CFArray
+        var spacing = CGFloat(indent?.spacingAfter ?? 0)
+        let isSpaced = spacing > 0
         let size = MemoryLayout<CGFloat>.size
         return withUnsafeMutablePointer(to: &lineHeight) { heightPointer in
             withUnsafeMutablePointer(to: &ctAlignment) { alignmentPointer in
                 withUnsafeMutablePointer(to: &firstLine) { firstLinePointer in
                     withUnsafeMutablePointer(to: &head) { headPointer in
                         withUnsafeMutablePointer(to: &tabStops) { tabsPointer in
-                            var settings = [
-                                CTParagraphStyleSetting(spec: .minimumLineHeight, valueSize: size, value: heightPointer),
-                                CTParagraphStyleSetting(spec: .maximumLineHeight, valueSize: size, value: heightPointer),
-                            ]
-                            if alignment != nil {
-                                settings.append(CTParagraphStyleSetting(
-                                    spec: .alignment, valueSize: MemoryLayout<CTTextAlignment>.size, value: alignmentPointer
-                                ))
-                            }
-                            if indent != nil {
-                                settings += [
-                                    CTParagraphStyleSetting(spec: .firstLineHeadIndent, valueSize: size, value: firstLinePointer),
-                                    CTParagraphStyleSetting(spec: .headIndent, valueSize: size, value: headPointer),
-                                    CTParagraphStyleSetting(
-                                        spec: .tabStops, valueSize: MemoryLayout<CFArray>.size, value: tabsPointer
-                                    ),
+                            withUnsafeMutablePointer(to: &spacing) { spacingPointer in
+                                var settings = [
+                                    CTParagraphStyleSetting(spec: .minimumLineHeight, valueSize: size, value: heightPointer),
+                                    CTParagraphStyleSetting(spec: .maximumLineHeight, valueSize: size, value: heightPointer),
                                 ]
+                                if alignment != nil {
+                                    settings.append(CTParagraphStyleSetting(
+                                        spec: .alignment, valueSize: MemoryLayout<CTTextAlignment>.size, value: alignmentPointer
+                                    ))
+                                }
+                                if indent?.isIndented == true {
+                                    settings += [
+                                        CTParagraphStyleSetting(spec: .firstLineHeadIndent, valueSize: size, value: firstLinePointer),
+                                        CTParagraphStyleSetting(spec: .headIndent, valueSize: size, value: headPointer),
+                                        CTParagraphStyleSetting(
+                                            spec: .tabStops, valueSize: MemoryLayout<CFArray>.size, value: tabsPointer
+                                        ),
+                                    ]
+                                }
+                                if isSpaced {
+                                    settings.append(CTParagraphStyleSetting(
+                                        spec: .paragraphSpacing, valueSize: size, value: spacingPointer
+                                    ))
+                                }
+                                return CTParagraphStyleCreate(&settings, settings.count)
                             }
-                            return CTParagraphStyleCreate(&settings, settings.count)
                         }
                     }
                 }

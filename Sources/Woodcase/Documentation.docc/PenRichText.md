@@ -55,7 +55,7 @@ A 2.10 document's run array is moved here by ``PenRichTextMigrationRule`` when i
 
 ### Paragraph indents
 
-Runs style characters; a paragraph's indents cannot ride on them. ``PenParagraphIndent`` is the one paragraph-level key: a first-line indent, a head indent for the wrapped lines, and a tab stop at the head indent. ``PenTextLayout/init(text:style:runs:indents:box:color:)`` and the measurer (``PenTextMeasureRequest/indents``) both take them, so a hanging list item measures as it draws. A note's markdown sets one per list item (<doc:NoteMarkdown>); a text node's spans have none.
+Runs style characters; a paragraph's indents and spacing cannot ride on them. ``PenParagraphIndent`` is the one paragraph-level key: a first-line indent, a head indent for the wrapped lines, a tab stop at the head indent, and the space after the paragraph (``PenParagraphIndent/spacingAfter``), which ``PenTextLines/bands`` leaves between its last line and the next. ``PenTextLayout/init(text:style:runs:indents:box:color:)`` and the measurer (``PenTextMeasureRequest/indents``) both take them, so a hanging list item, or a heading's space after, measures as it draws. A note's markdown sets one per list item and per heading (<doc:NoteMarkdown>); a text node's spans have none yet — no `.pen` key carries them.
 
 ### Lines with mixed sizes
 

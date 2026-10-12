@@ -9,10 +9,10 @@ import Foundation
 /// offsets on both sides.
 ///
 /// A note's file keeps its markdown (`**bold**`, `- [ ] item`); its layout sets the
-/// display text (`bold`, `☐⇥item`). The map is a list of ``Piece``s that tile both strings
+/// display text (`bold`, `␣⇥item`, where `␣` is ``PenNoteMarkdown/markerPlaceholder``). The map is a list of ``Piece``s that tile both strings
 /// in order. A *verbatim* piece is the same characters on both sides and maps offset for
-/// offset; a *replaced* piece is syntax — removed (`**` → nothing) or drawn as a glyph
-/// (`- ` → `•⇥`) — and maps as a whole.
+/// offset; a *replaced* piece is syntax — removed (`**` → nothing) or set as a
+/// placeholder (`- ` → `␣⇥`) — and maps as a whole.
 ///
 /// ```swift
 /// let note = PenNoteMarkdown("**Ship** it")
@@ -80,7 +80,7 @@ public struct PenTextOffsetMap: Friendly {
     /// The source offset of the display character at a display offset.
     ///
     /// Hidden syntax before the character is skipped: display offset 0 of `**bold**` is
-    /// source offset 2, the `b`. A glyph that stands for syntax (`•` for `- `) maps to
+    /// source offset 2, the `b`. A placeholder that stands for syntax (`␣` for `- `) maps to
     /// the start of that syntax. The end of the display text is the end of the source.
     ///
     /// - Parameter displayOffset: A UTF-16 offset into the display text, clamped to it.

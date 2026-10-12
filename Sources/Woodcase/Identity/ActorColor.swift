@@ -1,10 +1,9 @@
 //
 //  ActorColor.swift
-//  WoodcaseViewer
+//  Woodcase
 //
 
 import Foundation
-import Woodcase
 
 /// The color an identity is drawn in, hashed from its name.
 ///
@@ -25,13 +24,21 @@ import Woodcase
 /// below reaches AA on every hue the hash can produce **without touching the hash**,
 /// which is the only reason it is a second property rather than a different lightness.
 ///
-/// ## Where the color may appear
+/// ## One color per identity
 ///
-/// In the avatar disc and in the edit markers over the render — nowhere else. A hashed
-/// hue lands on the accent green often enough (`claude-a` and `ben` both do) that
-/// colored *text* would read as a link or as liveness. That rule is the design's, not
-/// this type's, but it is the reason ``css`` is offered as a custom property rather than
-/// as a class.
+/// It lives in the Woodcase library so every surface draws an identity in one color
+/// (Penumbra's notes design, decision 7, ruled 2026-10-11): the viewer's avatar discs and
+/// edit markers, and a note's identity dot and mention pills
+/// (``PenPostIt/expansion(of:width:height:style:measure:labels:identityColor:)``). An
+/// editor that lets a person choose their own color passes it to the expansion, which
+/// falls back to this hash.
+///
+/// In the viewer the color appears in the avatar disc and in the edit markers over the
+/// render — nowhere else. A hashed hue lands on the accent green often enough
+/// (`claude-a` and `ben` both do) that colored *text* would read as a link or as
+/// liveness. That rule is the viewer's design, not this type's, but it is the reason
+/// ``css`` is offered as a custom property rather than as a class. A note's mention is a
+/// filled pill lettered in ``ink``, not colored text.
 public struct ActorColor: Friendly {
     /// The color for an identity.
     ///
@@ -72,6 +79,13 @@ public struct ActorColor: Friendly {
         return String(format: "#%02X%02X%02X", red, green, blue)
     }
 
+    /// The same color as a ``PenHexColor``, opaque: what the note look fills a dot or a
+    /// pill with.
+    public var color: PenHexColor {
+        let (red, green, blue) = Self.rgb(hue: Double(hue), saturation: Double(saturation) / 100, lightness: Double(lightness) / 100)
+        return PenHexColor(red: UInt8(red), green: UInt8(green), blue: UInt8(blue))
+    }
+
     /// The two inks a filled disc can be lettered in.
     ///
     /// Two values rather than a `Bool`, because "is this disc light?" is a question about
@@ -82,6 +96,23 @@ public struct ActorColor: Friendly {
         case black = "#000000"
         /// `#FFFFFF`, for a disc dark enough to read white on.
         case white = "#FFFFFF"
+
+        /// The ink a fill takes, by the same pivot as ``ActorColor/ink``: black above a
+        /// relative luminance of ``ActorColor/inkThreshold``, white below. For a color
+        /// that is not hashed — one a person chose — so it is lettered as legibly.
+        ///
+        /// - Parameter fill: The fill; its alpha is ignored.
+        public init(on fill: PenHexColor) {
+            self = ActorColor.ink(red: Int(fill.red), green: Int(fill.green), blue: Int(fill.blue))
+        }
+
+        /// The ink as a ``PenHexColor``, opaque.
+        public var color: PenHexColor {
+            switch self {
+            case .black: PenHexColor(red: 0, green: 0, blue: 0)
+            case .white: PenHexColor(red: 255, green: 255, blue: 255)
+            }
+        }
     }
 
     /// The ink the initial is drawn in on this disc.

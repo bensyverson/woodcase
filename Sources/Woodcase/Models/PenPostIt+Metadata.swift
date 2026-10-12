@@ -17,7 +17,7 @@ public extension PenPostIt {
     /// spellings of a `type: postit` object read too, the namespace winning.
     ///
     /// ```swift
-    /// if let postIt = PenPostIt.Metadata(node), postIt.state == .valid(.open) {
+    /// if let postIt = PenPostIt.Metadata(node), postIt.type == .valid(.comment), postIt.state == .valid(.open) {
     ///     print(postIt.author ?? "anonymous")
     /// }
     /// ```
@@ -87,7 +87,9 @@ public extension PenPostIt {
 
         /// What the note is; `nil` is a post-it too.
         public var type: Field<NoteType>?
-        /// Whether it still asks for attention; `nil` on a prompt, whose state is ``runState``.
+        /// On a comment, whether its thread still asks for attention; `nil` on a prompt,
+        /// whose state is ``runState``. Read on a plain note too, as the file wrote it, but
+        /// a note has no state and nothing draws it.
         public var state: Field<State>?
         /// On a prompt, where its run stands; `nil` on any other node.
         public var runState: Field<RunState>?

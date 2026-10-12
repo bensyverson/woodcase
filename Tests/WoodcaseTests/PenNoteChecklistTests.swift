@@ -29,7 +29,7 @@ struct PenNoteChecklistTests {
         try #require(note.checklistItems.count == 2)
         let toggled = PenNoteMarkdown(note.toggling(note.checklistItems[0]))
         #expect(toggled.checklistItems.map(\.isChecked) == [true, true])
-        #expect(toggled.displayText == "Plan\n☑\ttodo\n☑\tdone")
+        #expect(toggled.displayText == "Plan\n\u{2003}\ttodo\n\u{2003}\tdone")
     }
 
     @Test("A display offset on an item's box or words finds the item; elsewhere none")

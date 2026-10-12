@@ -21,10 +21,14 @@ public extension PenPostItExpansion {
         public var style: PenTextStyle
         /// Its styled runs, offsets in UTF-16 code units; a run's fill overrides ``color``.
         public var runs: [PenTextRun]
-        /// Its paragraph indents: a list item's hanging indent.
+        /// Its paragraph indents and spacing: a list item's hanging indent, a heading's
+        /// space after.
         public var indents: [PenParagraphIndent]
         /// The glyphs' color where no run sets one.
         public var color: PenHexColor
+        /// The chrome label the string spells, or `nil` for a body, a name or a model: an
+        /// editor that relabels or restyles chrome finds it by this.
+        public var label: PenPostIt.Label?
 
         /// Creates a text part's paint.
         ///
@@ -34,15 +38,17 @@ public extension PenPostItExpansion {
         ///   - runs: Its styled runs.
         ///   - indents: Its paragraph indents.
         ///   - color: The glyphs' color.
+        ///   - label: The chrome label it spells, if any.
         public init(
             string: String, style: PenTextStyle, runs: [PenTextRun] = [], indents: [PenParagraphIndent] = [],
-            color: PenHexColor
+            color: PenHexColor, label: PenPostIt.Label? = nil
         ) {
             self.string = string
             self.style = style
             self.runs = runs
             self.indents = indents
             self.color = color
+            self.label = label
         }
     }
 }

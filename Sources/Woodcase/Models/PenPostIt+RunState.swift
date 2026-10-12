@@ -11,7 +11,7 @@ public extension PenPostIt {
     /// Run queues work in the file (Penumbra's notes design rev 2, decision 14): pressing
     /// it sets `queued` and ``PenMetadata/WoodcaseKey/requestedBy``; a watching agent claims
     /// it (`running`), answers in a comment thread anchored to the prompt, and marks it
-    /// `done`. A prompt with no state has never been run. A note's state is
+    /// `done`. A prompt with no state has never been run. A comment's state is
     /// ``PenPostIt/State`` instead; each is held to its own spellings when written
     /// (``PenMetadata/WoodcaseKey/shape(on:)``).
     enum RunState: String, Friendly, CaseIterable {

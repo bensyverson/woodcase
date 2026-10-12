@@ -81,7 +81,10 @@ struct PenNoteMarkdownInlineTests {
     func mention() {
         let note = parse("Ask @claude now")
         #expect(note.displayText == "Ask @claude now")
-        #expect(note.runs == [PenTextRun(start: 4, end: 11, fontWeight: PenNoteMarkdown.mentionWeight, mention: "claude")])
+        #expect(note.runs == [PenTextRun(
+            start: 4, end: 11, fontWeight: PenNoteMarkdown.mentionWeight, mention: "claude",
+            inlinePadding: PenNoteMarkdown.mentionPadding * note.fontSize
+        )])
         #expect(note.mentionedNames == ["claude"])
     }
 

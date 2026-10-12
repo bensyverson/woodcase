@@ -17,7 +17,7 @@ size, and ``PenTextLayout/init(note:size:color:)`` sets it:
 
 ```swift
 let markdown = node.noteMarkdown!            // "# Plan\n- [ ] Ship it, @claude"
-markdown.displayText                         // "Plan\n☐\tShip it, @claude"
+markdown.displayText                         // "Plan\n\u{2003}\tShip it, @claude"
 markdown.runs                                // the heading, and the mention
 markdown.checklistItems[0].markerSourceRange // where "[ ]" is in the source
 let layout = PenTextLayout(note: node, size: noteSize)
@@ -30,12 +30,12 @@ paragraph reflow, as in a chat message — and inline styling never crosses a li
 
 | Source | Displays | Styling |
 |---|---|---|
-| `# `, `## `, `### ` at a line's start | the heading's words | ``PenNoteMarkdown/headingScales`` (1.5×, 1.25×, 1.1× the note's size), weight 700 |
+| `# `, `## `, `### ` at a line's start | the heading's words | ``PenNoteMarkdown/headingScales`` (1.5×, 1.25×, 1.1× the note's size), weight 700, and ``PenNoteMarkdown/headingSpacing`` after |
 | `**bold**` | `bold` | weight 700 |
 | `*italic*`, `_italic_` | `italic` | italic |
-| `- `, `* `, `+ ` | `•` and a tab | a hanging indent |
+| `- `, `* `, `+ ` | a placeholder and a tab | a hanging indent; the look draws a bullet over the placeholder (``PenNoteMarkdown/bulletDisplayOffsets``) |
 | `1. `, `1) ` | the number as written and a tab | a hanging indent |
-| `- [ ] `, `- [x] ` | `☐` or `☑` and a tab | a hanging indent; a ``PenNoteMarkdown/ChecklistItem`` |
+| `- [ ] `, `- [x] ` | a placeholder and a tab | a hanging indent; a ``PenNoteMarkdown/ChecklistItem``, whose box the look draws over the placeholder |
 | `@name` | `@name` as written | weight 600 (700 in bold or a heading), carrying ``PenTextRun/mention`` |
 | `\*` (a backslash before punctuation) | `*` | none: the backslash is removed |
 
@@ -112,16 +112,21 @@ line, a card's header and run row (``PenPostIt/textFrame(of:width:height:style:)
 
 A note grows to fit its text and never shrinks: ``PenLayoutEngine`` lays a note out at the
 larger of its set height and its text's height at its width plus those insets, so a note's
-author line never covers its last line of text. Prompts and contexts grow the same way.
-
-> No space follows a heading or a list: the source is line-oriented and
-> ``PenParagraphIndent`` is the span model's only paragraph key, so block spacing would need a
-> paragraph-spacing key in the span model, measurement and every renderer. Not done (leaf
-> dbLtoJ); a blank line in the source gives the space today. Its width stays
+author line never covers its last line of text. Prompts and contexts grow the same way. Its width stays
 as set, and nothing is clipped, faded or linted. The growth is the layout's, so `tree`, hit
 testing and every renderer read one grown rect, and the file keeps the height that was set. A
 change to a note's content or text style — on the node, or in `metadata.woodcase` — therefore
 needs layout (``ChangeCategory``), as does a change to a text node's spans.
+
+A heading is followed by half a body line (``PenNoteMarkdown/headingSpacing``, 0.675 × the
+font size): the markdown gives each heading a ``PenParagraphIndent`` with no indent and that
+``PenParagraphIndent/spacingAfter``. The spacing is a text-layout value, not a note's:
+``PenTextLines/bands`` leaves it between a paragraph's last line and the next, so drawing,
+measuring (and so growth) and an editor's carets all see it, and any text set with indents can
+use it. A text node has no `.pen` key for it yet. No space follows a list.
+
+> Corrected 2026-10-11 (leaf AxWcJS): this said no space follows a heading, for want of a
+> paragraph-spacing key; ``PenParagraphIndent/spacingAfter`` is that key.
 
 ## Topics
 

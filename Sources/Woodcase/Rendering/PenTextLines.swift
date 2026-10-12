@@ -38,11 +38,12 @@ public struct PenTextLines {
     public let firstBaseline: CGFloat
 
     /// Each line's band, top to bottom: where it starts, how tall it is, and where its
-    /// baseline sits, in points below the top of the block. The bands tile the block.
+    /// baseline sits, in points below the top of the block. The bands tile the block, but
+    /// for a paragraph's spacing (``PenParagraphIndent/spacingAfter``), left between them.
     public let bands: [Band]
 
-    /// The block's height: the bands' total — the line count times the pitch for a text in
-    /// one face.
+    /// The block's height: the bands' total, with any paragraph spacing between them — the
+    /// line count times the pitch for a text in one face and no spacing.
     public var height: CGFloat {
         bands.last.map { $0.top + $0.height } ?? 0
     }

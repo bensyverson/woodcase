@@ -30,11 +30,17 @@ public extension PenPostIt {
         case comment
     }
 
-    /// Whether a post-it still asks for attention.
+    /// Whether a comment thread still asks for attention, as its first message's
+    /// `woodcase.state` spells it.
+    ///
+    /// Only comments have this state (Ben's ruling, 2026-10-11): resolving is how a
+    /// conversation ends. A plain note has none — a `state` one still carries is not drawn,
+    /// and `woodcase lint` names it (``LintCheck/noteState``) — and a prompt's is a
+    /// ``RunState``.
     enum State: String, Friendly, CaseIterable {
-        /// Still asks for attention.
+        /// The thread still asks for attention.
         case open
-        /// Dealt with; kept for the record and drawn faded.
+        /// The thread is dealt with and kept for the record.
         case resolved
     }
 

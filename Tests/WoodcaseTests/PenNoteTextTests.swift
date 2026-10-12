@@ -84,7 +84,7 @@ struct PenNoteTextTests {
         """)
         let markdown = try #require(node.noteMarkdown)
         let layout = try #require(PenTextLayout(note: node, size: CGSize(width: 200, height: 240)))
-        #expect(layout.text == "Plan\n•\tone")
+        #expect(layout.text == "Plan\n\u{2003}\tone")
         #expect(layout.runs == markdown.runs)
         #expect(layout.indents == markdown.indents)
         #expect(layout.style.fontSize == 14)

@@ -13,18 +13,23 @@ import Foundation
 /// styling is derived from the source every time, never stored — the file keeps only
 /// the markdown. Parsing gives:
 ///
-/// - ``displayText``: the words with the syntax removed (`**bold**` → `bold`) and list
-///   markers drawn as glyphs (`- ` → `•⇥`, `- [ ] ` → `☐⇥`);
+/// - ``displayText``: the words with the syntax removed (`**bold**` → `bold`), a bullet's
+///   or a checkbox's marker replaced by ``markerPlaceholder`` and a tab (`- ` → `␣⇥`), and
+///   a number kept (`1. ` → `1.⇥`). The bullet and the box are not glyphs: the look draws
+///   them as shapes over the placeholder (<doc:PenPostItLook>), which only holds their
+///   room so offsets stay one for one;
 /// - ``runs``: ``PenTextRun``s over the display text — headings larger and bold, bold,
 ///   italic, and each `@mention` carrying the name it mentions;
-/// - ``indents``: a hanging indent per list item (``PenParagraphIndent``);
+/// - ``indents``: a hanging indent per list item, and the spacing after each heading
+///   (``PenParagraphIndent``);
+/// - ``bulletDisplayOffsets``: where each bullet's placeholder is;
 /// - ``checklistItems``: each `[ ]`/`[x]`, with its source range, so a click can toggle
 ///   it in the file;
 /// - ``offsetMap``: display offsets to source offsets and back.
 ///
 /// ```swift
 /// let note = PenNoteMarkdown("# Plan\n- [ ] Ship it, @claude", fontSize: 14)
-/// note.displayText                        // "Plan\n☐\tShip it, @claude"
+/// note.displayText                        // "Plan\n\u{2003}\tShip it, @claude"
 /// note.runs.first?.fontSize               // 21: the heading, 1.5 × 14
 /// note.checklistItems[0].markerSourceRange // 9 ..< 12: the "[ ]"
 /// note.toggling(note.checklistItems[0])   // "# Plan\n- [x] Ship it, @claude"
@@ -51,14 +56,19 @@ public struct PenNoteMarkdown: Friendly {
     /// How many leading spaces make one list nesting level (a tab is one level).
     public static let spacesPerLevel = 2
 
-    /// The glyph a bullet list item (`-`, `*`, `+`) draws as.
-    public static let bulletGlyph = "•"
+    /// What a bullet's or a checkbox's marker is set as: an em space, which draws nothing
+    /// and holds the marker's room before the tab. The look draws the bullet or the box
+    /// over it as a shape.
+    public static let markerPlaceholder = "\u{2003}"
 
-    /// The glyph an open checklist item (`- [ ]`) draws as.
-    public static let uncheckedGlyph = "☐"
+    /// The padding on each side of a mention, in multiples of the note's font size: 3
+    /// points at the default 13. It is the mention run's ``PenTextRun/inlinePadding``, so
+    /// the pill the look draws behind it has room laid out for it.
+    public static let mentionPadding: Double = 3.0 / 13.0
 
-    /// The glyph a done checklist item (`- [x]`) draws as.
-    public static let checkedGlyph = "☑"
+    /// The space after a heading, in multiples of the note's font size: half a line of a
+    /// note's default 1.35 line height.
+    public static let headingSpacing: Double = 0.675
 
     // MARK: Parsed
 
@@ -74,8 +84,13 @@ public struct PenNoteMarkdown: Friendly {
     /// The styled runs over ``displayText``, offsets in UTF-16 code units.
     public let runs: [PenTextRun]
 
-    /// The list items' hanging indents over ``displayText``.
+    /// The paragraphs' indents and spacing over ``displayText``: each list item's hanging
+    /// indent, and each heading's ``headingSpacing`` after it.
     public let indents: [PenParagraphIndent]
+
+    /// The UTF-16 offset of each bullet item's ``markerPlaceholder`` in ``displayText``, in
+    /// order: where the look draws its bullet.
+    public let bulletDisplayOffsets: [Int]
 
     /// The checklist items, in order.
     public let checklistItems: [ChecklistItem]
@@ -95,6 +110,7 @@ public struct PenNoteMarkdown: Friendly {
         displayText = parsed.displayText
         runs = parsed.runs
         indents = parsed.indents
+        bulletDisplayOffsets = parsed.bulletDisplayOffsets
         checklistItems = parsed.checklistItems
         offsetMap = parsed.offsetMap
     }

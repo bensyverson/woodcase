@@ -72,7 +72,7 @@ struct PostItExpansionTests {
 
     // MARK: - The body
 
-    @Test("The body is the markdown's display text and runs, set in the box above the author line")
+    @Test("The body is the markdown's display text and runs, with its mentions' ink, set in the box above the author line")
     func body() throws {
         let node = try Self.node(Self.authored)
         let expansion = try expansion(Self.authored)
@@ -80,7 +80,9 @@ struct PostItExpansionTests {
         guard case let .text(text) = body.paint else { throw CocoaError(.coderInvalidValue) }
         let markdown = try #require(node.noteMarkdown)
         #expect(text.string == markdown.displayText)
-        #expect(text.runs == markdown.runs)
+        // The markdown's runs, then fill-only runs that letter each mention in its pill's ink.
+        #expect(Array(text.runs.prefix(markdown.runs.count)) == markdown.runs)
+        #expect(text.runs.dropFirst(markdown.runs.count).allSatisfy { $0.fill != nil && $0.fontWeight == nil })
         #expect(text.style == node.noteTextStyle)
         #expect(body.frame == PenPostIt.textFrame(of: node, width: 200, height: 200))
         #expect(body.frame.x == 14 && body.frame.y == 14 && body.frame.width == 172)
@@ -104,12 +106,12 @@ struct PostItExpansionTests {
         #expect(expansion.part(.body)?.frame == PenRect(x: 14, y: 14, width: 172, height: 172))
     }
 
-    @Test("A mention is listed with its display range and name, and drawn as bold ink")
+    @Test("A mention is listed with its display range, name and identity color")
     func mentions() throws {
         let expansion = try expansion(Self.authored)
-        #expect(expansion.mentions == [PenPostItExpansion.Mention(range: 0 ..< 7, name: "claude")])
-        let run = try #require(expansion.text(.body)?.runs.first { $0.mention == "claude" })
-        #expect((run.fontWeight ?? 0) >= 600)
+        #expect(expansion.mentions == [
+            PenPostItExpansion.Mention(range: 0 ..< 7, name: "claude", color: ActorColor(name: "claude").color),
+        ])
     }
 
     @Test("A ticked checklist item's words are dimmed to the tertiary ink; an open one's are not")
@@ -123,13 +125,6 @@ struct PostItExpansionTests {
         let dimmed = try #require(expansion.text(.body)?.runs.filter { $0.fill == dim })
         #expect(dimmed.contains { $0.start == ticked.boxDisplayRange.upperBound && $0.end == ticked.lineDisplayRange.upperBound })
         #expect(!dimmed.contains { $0.range.overlaps(open.lineDisplayRange) })
-    }
-
-    @Test("A bullet is drawn in the tertiary ink")
-    func bulletsDim() throws {
-        let expansion = try expansion(#"{"id": "N1", "type": "note", "content": "- one"}"#)
-        let runs = try #require(expansion.text(.body)?.runs)
-        #expect(runs.contains { $0.start == 0 && $0.end == 1 && $0.fill == PenPostIt.Style.standard.inkOnLight.tertiary })
     }
 
     // MARK: - The author
@@ -149,8 +144,8 @@ struct PostItExpansionTests {
         #expect(name.string == "ben")
         #expect(name.style.fontSize == style.labelFontSize)
         #expect(disc.form == .ellipse)
-        #expect(disc.fill == PenPostIt.identityColor(for: "ben"))
-        #expect(expansion.identity == PenPostItExpansion.Identity(author: "ben", color: PenPostIt.identityColor(for: "ben")))
+        #expect(disc.fill == ActorColor(name: "ben").color)
+        #expect(expansion.identity == PenPostItExpansion.Identity(author: "ben", color: ActorColor(name: "ben").color))
     }
 
     @Test("An author name too wide for the footer is cut with an ellipsis")
@@ -174,21 +169,30 @@ struct PostItExpansionTests {
         #expect(expansion.text(.author)?.style.fontSize == 2 * PenPostIt.Style.standard.labelFontSize)
     }
 
-    // MARK: - Resolved
+    // MARK: - No state
 
-    @Test("A resolved note fades: its tint mixes toward gray, one shadow, secondary body ink and a Resolved label")
-    func resolved() throws {
-        let style = PenPostIt.Style.standard
-        let expansion = try expansion("""
-        {"id": "N1", "type": "note", "content": "x", "metadata": {"woodcase": {"author": "ben", "state": "resolved"}}}
+    @Test(
+        "A note with state resolved draws exactly like the same note without it",
+        arguments: ["resolved", "open", "closed"]
+    )
+    func stateIsNotDrawn(state: String) throws {
+        let with = try expansion("""
+        {"id": "N1", "type": "note", "content": "x", "metadata": {"woodcase": {"author": "ben", "state": "\(state)"}}}
         """)
-        guard case let .shape(shape) = expansion.parts.first?.paint else { throw CocoaError(.coderInvalidValue) }
-        #expect(shape.fill == PenPostIt.Tint.yellow.color.mixed(toward: style.resolvedPaper, by: style.resolvedMix))
-        #expect(shape.shadows == Array(style.shadows.prefix(1)))
-        #expect(expansion.text(.body)?.color == expansion.ink.secondary)
-        let label = try #require(expansion.part(.resolvedLabel))
-        #expect(expansion.text(.resolvedLabel)?.string == style.resolvedLabel)
-        #expect(abs(label.frame.x + label.frame.width - (200 - 14)) < 0.001)
+        let without = try expansion("""
+        {"id": "N1", "type": "note", "content": "x", "metadata": {"woodcase": {"author": "ben"}}}
+        """)
+        #expect(with == without)
+        let legacy = try expansion("""
+        {"id": "N1", "type": "note", "content": "x", "metadata": {"type": "postit", "author": "ben", "state": "\(state)"}}
+        """)
+        #expect(legacy == without)
+    }
+
+    @Test("A note with only a state and no author has no footer")
+    func stateAloneHasNoFooter() throws {
+        let node = try Self.node(#"{"id": "N1", "type": "note", "content": "x", "metadata": {"woodcase": {"state": "resolved"}}}"#)
+        #expect(PenPostIt.bodyInsets(of: node) == PenPostIt.textInsets)
     }
 
     // MARK: - What is not drawn here

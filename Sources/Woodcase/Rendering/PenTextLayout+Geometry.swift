@@ -33,8 +33,9 @@
                     ofHeight: ceil(lines.pitch), inBoxOfHeight: box.height, alignment: style.textAlignVertical
                 )
                 built.append(emptyLine(at: 0, bandTop: Double(top)))
-            } else if let last = built.last, last.ending == .hardBreak {
-                built.append(emptyLine(at: length, bandTop: last.band.y + last.band.height))
+            } else if let last = built.last, last.ending == .hardBreak, let line = lines.lines.last {
+                let spacing = Double(PenTextLines.paragraphSpacing(after: line, in: attributedString))
+                built.append(emptyLine(at: length, bandTop: last.band.y + last.band.height + spacing))
             }
             return PenTextGeometry(
                 box: PenSize(width: Double(box.width), height: Double(box.height)), length: length, lines: built
