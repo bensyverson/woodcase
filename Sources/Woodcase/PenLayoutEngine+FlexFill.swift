@@ -67,12 +67,11 @@ extension PenLayoutEngine.FlexLayout {
         }
         guard next < measurements.count else { return nil }
         measurements[next].mainSize = fillMainSize
-        return PenLayoutEngine.LayoutFrame.Call(
-            node: measurements[next].node,
+        return childCall(
+            measurements[next].node,
             availableWidth: isHorizontal ? fillMainSize : nil,
             availableHeight: isHorizontal ? nil : fillMainSize,
-            target: scratch,
-            usesCache: false
+            isLaidOutAgain: measurements[next].isFlexibleCross
         )
     }
 

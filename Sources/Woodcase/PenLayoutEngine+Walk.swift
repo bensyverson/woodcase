@@ -20,10 +20,18 @@ import Foundation
 /// recursive algorithm's.
 ///
 /// Rect maps are **stores** indexed by ``LayoutFrame/Call/target``: store `0` is the
-/// caller's map, and each flex container owns a scratch store for its measuring passes,
-/// freed when it finishes — frames finish in the reverse of the order they start, so
-/// the scratch stores do too.
+/// caller's map, store `1` (``discardStore``) takes what calls that are not final write
+/// below their node, and each flex container owns a scratch store for its measuring
+/// passes, freed when it finishes — frames finish in the reverse of the order they start,
+/// so the scratch stores do too.
+///
+/// Every call consults the ``Memo``: a remembered size skips the subtree, under the rules
+/// set out there.
 extension PenLayoutEngine {
+    /// The store that calls that are not final write below their node: never merged into
+    /// the caller's map.
+    static let discardStore = 1
+
     /// Sizes a node and writes the rects of all its descendants — not its own.
     ///
     /// - Parameters:
@@ -31,8 +39,9 @@ extension PenLayoutEngine {
     ///   - availableWidth: The width its parent offers it, or `nil`.
     ///   - availableHeight: The height its parent offers it, or `nil`.
     ///   - textMeasurer: A function that measures text bounding boxes.
-    ///   - rects: The map the descendants' rects are written to.
-    ///   - cache: A measurement cache to read and fill, or `nil` for none.
+    ///   - rects: The map the descendants' rects are written to. A subtree skipped on a
+    ///     remembered size keeps the rects the map already holds for it.
+    ///   - memo: The sizes remembered so far, read and filled.
     /// - Returns: The node's size.
     static func layoutNode(
         _ node: PenNode,
@@ -40,19 +49,19 @@ extension PenLayoutEngine {
         availableHeight: Double?,
         textMeasurer: TextMeasurer,
         into rects: inout [String: PenRect],
-        cache: inout [String: MeasurementCacheEntry]?
+        memo: inout Memo
     ) -> (width: Double, height: Double) {
         // The caller's map is moved in and back out rather than copied.
-        var stores: [[String: PenRect]] = [[:]]
+        var stores: [[String: PenRect]] = [[:], [:]]
         swap(&stores[0], &rects)
         defer { swap(&stores[0], &rects) }
 
         let root = LayoutFrame.Call(
             node: node, availableWidth: availableWidth, availableHeight: availableHeight,
-            target: 0, usesCache: true
+            target: 0, isFinal: true
         )
         var stack: [LayoutFrame] = []
-        switch begin(root, textMeasurer: textMeasurer, stores: &stores, cache: &cache) {
+        switch begin(root, textMeasurer: textMeasurer, stores: &stores, memo: &memo) {
         case let .finished(width, height): return (width, height)
         case let .pending(frame): stack.append(frame)
         }
@@ -61,7 +70,7 @@ extension PenLayoutEngine {
         while let last = stack.indices.last {
             switch stack[last].advance(resuming: resumed, stores: &stores) {
             case let .call(child):
-                switch begin(child, textMeasurer: textMeasurer, stores: &stores, cache: &cache) {
+                switch begin(child, textMeasurer: textMeasurer, stores: &stores, memo: &memo) {
                 case let .finished(width, height):
                     resumed = (width, height)
                 case let .pending(frame):
@@ -70,7 +79,8 @@ extension PenLayoutEngine {
                 }
             case let .done(width, height):
                 let finished = stack.removeLast()
-                remember((width, height), for: finished.call, in: &cache)
+                memo.remember((width, height), for: finished.call)
+                memo.log(finished)
                 if finished.scratch != nil {
                     stores.removeLast()
                 }
@@ -81,21 +91,18 @@ extension PenLayoutEngine {
         preconditionFailure("the layout walk ended without sizing its root")
     }
 
-    /// Starts one call: answers it from the cache or, for a leaf, at once; otherwise
+    /// Starts one call: answers it from the memo or, for a leaf, at once; otherwise
     /// opens a frame for the container, with a scratch store if it is a flex one.
     private static func begin(
         _ call: LayoutFrame.Call,
         textMeasurer: TextMeasurer,
         stores: inout [[String: PenRect]],
-        cache: inout [String: MeasurementCacheEntry]?
+        memo: inout Memo
     ) -> LayoutFrame.Start {
-        // A cache hit skips the whole subtree. That is safe for incremental layout
-        // because the caller's map is pre-populated from the previous rects.
-        if call.usesCache, let entry = cache?[call.node.id],
-           entry.availableWidth == call.availableWidth,
-           entry.availableHeight == call.availableHeight
-        {
-            return .finished(width: entry.width, height: entry.height)
+        if let size = memo.size(for: call) {
+            memo.stats.hits += 1
+            restoreGroupChildren(of: call, in: &stores)
+            return .finished(width: size.width, height: size.height)
         }
 
         let props = extractLayoutProperties(call.node)
@@ -104,7 +111,8 @@ extension PenLayoutEngine {
                 props, availableWidth: call.availableWidth, availableHeight: call.availableHeight,
                 textMeasurer: textMeasurer
             )
-            remember(size, for: call, in: &cache)
+            memo.remember(size, for: call)
+            memo.stats.leavesSized += 1
             return .finished(width: size.width, height: size.height)
         }
 
@@ -115,18 +123,19 @@ extension PenLayoutEngine {
         return .pending(LayoutFrame(call: call, flex: FlexLayout(call: call, props: props, scratch: stores.count - 1)))
     }
 
-    /// Records a call's size in the measurement cache, when it uses one.
-    private static func remember(
-        _ size: (width: Double, height: Double),
-        for call: LayoutFrame.Call,
-        in cache: inout [String: MeasurementCacheEntry]?
-    ) {
-        guard call.usesCache, cache != nil else { return }
-        cache?[call.node.id] = MeasurementCacheEntry(
-            availableWidth: call.availableWidth,
-            availableHeight: call.availableHeight,
-            width: size.width,
-            height: size.height
-        )
+    /// Copies a skipped group's children's rects from the caller's map into the store the
+    /// call writes to.
+    ///
+    /// A group's parent places it by the union of its children's rects
+    /// (``freeRect(of:x:y:size:placedIn:)``), read from that store. A group is skipped only
+    /// on its last final call's offer, so the caller's map holds the rects that call wrote,
+    /// and a group lays its children out at their own x/y whatever it is offered.
+    private static func restoreGroupChildren(of call: LayoutFrame.Call, in stores: inout [[String: PenRect]]) {
+        guard call.target != 0, case let .group(data) = call.node.kind else { return }
+        for child in data.children ?? [] {
+            if let rect = stores[0][child.id] {
+                stores[call.target][child.id] = rect
+            }
+        }
     }
 }

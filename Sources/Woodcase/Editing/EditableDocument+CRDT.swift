@@ -488,7 +488,9 @@ extension EditableDocument {
                 let kindCategory = ChangeCategory.categorize(oldKind: oldNode.kind, newKind: node.kind.withEmptyChildren())
                 let category = ChangeCategory.merge(commonCategory, kindCategory)
                 if let category {
-                    invalidateLayoutCache(for: node.id, category: category)
+                    invalidateLayoutCache(
+                        for: node.id, category: category, subtree: oldNode.common.theme != node.common.theme
+                    )
                 }
             } else {
                 // New node via CRDT — structural change

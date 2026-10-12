@@ -27,7 +27,7 @@ extension EditableDocument {
 
         // Invalidate layout cache based on what changed
         if let category = ChangeCategory.categorize(oldCommon: oldCommon, newCommon: op.common) {
-            invalidateLayoutCache(for: op.nodeID, category: category)
+            invalidateLayoutCache(for: op.nodeID, category: category, subtree: oldCommon.theme != op.common.theme)
         }
     }
 
@@ -120,7 +120,9 @@ extension EditableDocument {
             ChangeCategory.categorize(oldKind: oldNode.kind, newKind: newNode.kind)
         )
         if let category {
-            invalidateLayoutCache(for: op.nodeID, category: category)
+            invalidateLayoutCache(
+                for: op.nodeID, category: category, subtree: oldNode.common.theme != newNode.common.theme
+            )
         }
     }
 }
@@ -129,16 +131,52 @@ extension EditableDocument {
 
 extension EditableDocument {
     /// Invalidates the layout cache for a node based on the change category.
-    func invalidateLayoutCache(for nodeID: String, category: ChangeCategory) {
+    ///
+    /// A layout change records the node and its spine. When expansion can carry the
+    /// change into other boards — a node on the spine is a component, or something
+    /// renders it by name — it also records every root whose revision the change moved
+    /// (``layoutRootsDrawing(_:)``): the cache's dirty ids are source ids, and the
+    /// instances that draw the change are laid out under other ids in other roots.
+    ///
+    /// - Parameters:
+    ///   - nodeID: The node that changed.
+    ///   - category: How its change bears on layout.
+    ///   - subtree: Whether every descendant's layout can change too — a `theme` change.
+    func invalidateLayoutCache(for nodeID: String, category: ChangeCategory, subtree: Bool = false) {
         guard let cache = _layoutCache else { return }
         switch category {
         case .renderOnly:
             cache.invalidateRender(nodeID)
         case .layout:
             let ancestorIDs = ancestors(of: nodeID)
-            cache.invalidateLayout(nodeID, ancestors: ancestorIDs)
+            if subtree {
+                cache.invalidateSubtreeLayout(nodeID, ancestors: ancestorIDs)
+            } else {
+                cache.invalidateLayout(nodeID, ancestors: ancestorIDs)
+            }
+            let referrers = componentReferrers
+            let drawn = ([nodeID] + ancestorIDs).filter {
+                nodes[$0]?.common.reusable == true || !referrers.referrers(of: $0).isEmpty
+            }
+            if !drawn.isEmpty {
+                cache.invalidateRoots(layoutRootsDrawing(drawn))
+            }
         case .structural:
             cache.invalidateAll()
         }
+    }
+
+    /// The top-level nodes whose revision a change to the given nodes moves: the roots
+    /// holding them, every root drawing one of them, and so on through nested components.
+    ///
+    /// These are the tops of the spines in the nodes' revision closure
+    /// (``revisionDependents(of:)``), so it costs what the nodes reach rather than a pass
+    /// over the document. A name that resolves to nothing yet is in the closure too, and
+    /// may come back here; it names no expanded node, so layout passes over it.
+    ///
+    /// - Parameter drawn: Nodes that are components, or are rendered by name.
+    /// - Returns: The top-level node ids.
+    func layoutRootsDrawing(_ drawn: [String]) -> Set<String> {
+        Set(revisionDependents(of: drawn).filter { parents[$0] == nil })
     }
 }

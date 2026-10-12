@@ -58,6 +58,8 @@ public enum ChangeCategory: Friendly {
             || oldCommon.enabled != newCommon.enabled
             || oldCommon.layoutPosition != newCommon.layoutPosition
             || oldCommon.theme != newCommon.theme
+            // Whether a node is a component decides what every ref naming it expands to.
+            || oldCommon.reusable != newCommon.reusable
         {
             return .layout
         }
@@ -75,7 +77,7 @@ public enum ChangeCategory: Friendly {
         }
 
         // Everything else in common is render-only:
-        // name, opacity, flipX, flipY, reusable, context, the rest of metadata
+        // name, opacity, flipX, flipY, context, the rest of metadata
         return .renderOnly
     }
 

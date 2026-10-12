@@ -367,7 +367,13 @@ editable.clearDirtyNodes()
 
 **Three-tier change categorization** (``ChangeCategory``):
 - **Render-only** — color, opacity, fills, stroke, effects, blendMode, etc. Skip re-layout.
-- **Layout** — x, y, width, height, gap, padding, font props, rotation, enabled, theme, etc. Re-layout the node's root subtree.
+- **Layout** — x, y, width, height, gap, padding, font props, rotation, enabled, theme,
+  reusable, etc. Re-layout the node's root subtree. A `theme` change names the node's
+  whole subtree, since every descendant resolves its variables through it. When the
+  node is a component, sits inside one, or is drawn by a `ref` — so expansion carries
+  the change into other boards — it also names every root whose
+  ``EditableDocument/revision(of:)`` the change moved: the boards that draw it, through
+  components nesting it.
 - **Structural** — insert, delete, move. Re-lays out only the top-level boards the edit
   can change: the board that holds it (both boards, for a move between them), plus —
   when the edit is inside a component — every board that draws that component, through
@@ -375,6 +381,55 @@ editable.clearDirtyNodes()
   every other board keeps its rects.
 - **Document-level** — variable, import and theme changes, plus replace, detach and
   remote edits. Full re-layout (``EditableDocument/isLayoutFullyInvalidated``).
+
+**Source ids in, expanded ids out.** The dirty sets name nodes as the document stores
+them, but layout runs on the expanded document, where an instance's nodes answer to
+`<ref>/<id>` in another board. ``EditableDocument/layoutInvalidation`` gathers the dirty
+tracking into one ``PenLayoutInvalidation`` value; ``PenLayoutIndex`` indexes an expanded
+document — parent, index, depth and root per expanded id, and each ref's instance roots —
+and ``PenLayoutIndex/expandedIDs(for:)`` translates: a node keeps its id, a `ref` names its
+instance whole, a root names its expanded root whole. A host that runs its own pipeline
+hands the invalidation to
+``PenLayoutEngine/layoutIncremental(_:previousRects:invalidation:textMeasurer:measurementCache:)``,
+the one call that translates, forgets the measurements of the translated ids and lays out
+the roots holding them — exactly what ``EditableDocument/computeLayout(textMeasurer:)``
+does. `IncrementalLayoutEquivalenceTests` holds both to a full layout, bit for bit, over
+every fixture and a spread of writes.
+
+```swift
+// A host pipeline: take the dirty tracking with the document, lay out elsewhere.
+let invalidation = editable.layoutInvalidation
+editable.clearDirtyNodes()
+let resolved = PenVariableResolver.resolve(editable.expandedDocument().0)
+rects = PenLayoutEngine.layoutIncremental(
+    resolved, previousRects: rects, invalidation: invalidation,
+    measurementCache: &measurementCache
+)
+```
+
+**Node-granular layout and previews.** A host that lays out every frame of a gesture
+holds a ``PenLayoutState``: the expanded document, its index, every rect, and what the
+walk remembers of each node's size. ``PenLayoutState/update(to:invalidation:)`` commits an
+edit and lays out only the containers on the edited node's spine — each walking its
+children, which answer from memory and only move — plus the descendants whose offered
+space changed. ``PenLayoutState/hypothetical(_:)`` previews a ``PenLayoutEdit`` — a node
+removed, moved to another index among its siblings, or given another size — on a copy,
+leaving the state and the document untouched. Both return a ``PenLayoutChange`` naming
+exactly the rects that differ, with what moved, what resized, and the topmost changed
+subtrees a renderer produces again; both equal a full layout bit for bit, so a preview
+hands off to its commit without a flash.
+
+```swift
+var state = PenLayoutState(document: resolved)            // once, in full
+let preview = state.hypothetical([.move("row7", toIndex: 2)])
+draw(preview.applied(to: state.rects))                      // the document is untouched
+
+try editable.apply(.moveNode(EditOperation.MoveNode(nodeID: "row7", newParentID: "list", index: 2)))
+let invalidation = editable.layoutInvalidation
+editable.clearDirtyNodes()
+let change = state.update(to: PenVariableResolver.resolve(editable.expandedDocument().0),
+                          invalidation: invalidation)  // equals the preview
+```
 
 **Content hashing** for tile caches: ``EditableDocument/contentHash(for:)`` combines
 node properties, layout rect, and children's hashes. The editor stores this alongside
@@ -913,6 +968,12 @@ counts, so a file that arrived with one still takes its fix. See <doc:ComponentL
 
 - ``LayoutCache``
 - ``ChangeCategory``
+- ``PenLayoutInvalidation``
+- ``PenLayoutIndex``
+- ``PenLayoutState``
+- ``PenLayoutChange``
+- ``PenLayoutEdit``
+- ``PenLayoutStats``
 
 ### Component Editing
 

@@ -61,7 +61,7 @@ extension PenLayoutEngine {
                 }
                 return .call(LayoutFrame.Call(
                     node: child, availableWidth: nil, availableHeight: nil,
-                    target: call.target, usesCache: call.usesCache
+                    target: call.target, isFinal: call.isFinal
                 ))
             }
 

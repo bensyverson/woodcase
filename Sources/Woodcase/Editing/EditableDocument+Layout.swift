@@ -9,7 +9,9 @@ public extension EditableDocument {
     /// Computes or incrementally updates layout rectangles.
     ///
     /// On the first call, performs a full layout pass (materialize → expand → resolve → layout).
-    /// Subsequent calls re-layout only root subtrees that contain dirty nodes.
+    /// Subsequent calls lay out again only what ``layoutInvalidation`` names, translated
+    /// to the expanded tree — see
+    /// ``PenLayoutEngine/layoutIncremental(_:previousRects:invalidation:textMeasurer:measurementCache:)``.
     /// Variables are resolved with inherited per-node theming (via `common.theme`).
     ///
     /// - Parameter textMeasurer: A function that measures text bounding boxes.
@@ -29,13 +31,10 @@ public extension EditableDocument {
         let (expandedDoc, _) = expandedDocument()
         let resolvedDoc = PenVariableResolver.resolve(expandedDoc)
 
-        let rects: [String: PenRect] = if cache.isFullyInvalidated || cache.rects.isEmpty {
-            // Full layout pass
-            PenLayoutEngine.layout(resolvedDoc, textMeasurer: textMeasurer)
-        } else {
-            layOutDirtyRoots(of: resolvedDoc, cache: cache, textMeasurer: textMeasurer)
-        }
-
+        let rects = PenLayoutEngine.layoutIncremental(
+            resolvedDoc, previousRects: cache.rects, invalidation: layoutInvalidation,
+            textMeasurer: textMeasurer, measurementCache: &cache.measurementCache
+        )
         cache.store(rects: rects)
         return rects
     }
@@ -53,6 +52,24 @@ public extension EditableDocument {
     /// A subset of ``dirtyNodeIDs``. Includes the changed node and all its ancestors.
     var dirtyLayoutNodeIDs: Set<String> {
         _layoutCache?.dirtyLayoutNodes ?? []
+    }
+
+    /// What the edits since the last ``clearDirtyNodes()`` require laying out again, by
+    /// source id.
+    ///
+    /// A host that runs its own pipeline takes it with the rest of the dirty tracking and
+    /// hands it to
+    /// ``PenLayoutEngine/layoutIncremental(_:previousRects:invalidation:textMeasurer:measurementCache:)``,
+    /// which translates it to the expanded tree. Everything is named when the layout
+    /// cache was never primed or needs a full pass.
+    var layoutInvalidation: PenLayoutInvalidation {
+        guard let cache = _layoutCache else { return PenLayoutInvalidation(everything: true) }
+        return PenLayoutInvalidation(
+            everything: cache.isFullyInvalidated,
+            nodes: cache.dirtyLayoutNodes,
+            subtrees: cache.dirtyLayoutSubtrees,
+            roots: cache.dirtyLayoutRoots
+        )
     }
 
     /// Top-level nodes a structural edit requires laying out afresh, by source id.
@@ -105,8 +122,8 @@ public extension EditableDocument {
     /// font preparation) and need to call layout separately. Uses the layout
     /// cache's dirty nodes and measurement cache for efficient re-layout.
     ///
-    /// Falls back to a full layout if the cache has no previous rects.
-    /// Stores the result in the cache automatically.
+    /// Falls back to a full layout if the cache has no previous rects or needs a full
+    /// pass. Stores the result in the cache automatically.
     ///
     /// - Parameters:
     ///   - document: A fully resolved `PenDocument` (refs expanded, variables resolved).
@@ -122,49 +139,12 @@ public extension EditableDocument {
         }
         let cache = _layoutCache!
 
-        let rects: [String: PenRect] = if cache.rects.isEmpty {
-            PenLayoutEngine.layout(document, textMeasurer: textMeasurer)
-        } else {
-            layOutDirtyRoots(of: document, cache: cache, textMeasurer: textMeasurer)
-        }
-
+        let rects = PenLayoutEngine.layoutIncremental(
+            document, previousRects: cache.rects, invalidation: layoutInvalidation,
+            textMeasurer: textMeasurer, measurementCache: &cache.measurementCache
+        )
         cache.store(rects: rects)
         return rects
-    }
-
-    /// Lays out the top-level nodes holding a dirty node or named by a structural
-    /// edit, and copies every other one's rects from the cache.
-    ///
-    /// An expanded top-level node is matched to its source by the id before its first
-    /// `/`. A root a structural edit named is measured afresh throughout: an edit inside
-    /// a component changes nodes of its instances that no source spine names.
-    ///
-    /// - Parameters:
-    ///   - document: The expanded, resolved document.
-    ///   - cache: The cache holding the previous rects and the dirty state.
-    ///   - textMeasurer: A function that measures text bounding boxes.
-    /// - Returns: Every expanded node's rect.
-    private func layOutDirtyRoots(
-        of document: PenDocument,
-        cache: LayoutCache,
-        textMeasurer: TextMeasurer
-    ) -> [String: PenRect] {
-        var dirty = cache.dirtyLayoutNodes
-        if !cache.dirtyLayoutRoots.isEmpty {
-            for root in document.children {
-                let sourceID = root.id.split(separator: "/", maxSplits: 1).first.map(String.init) ?? root.id
-                guard cache.dirtyLayoutRoots.contains(sourceID) else { continue }
-                dirty.insert(root.id)
-                cache.forgetMeasurements(under: root)
-            }
-        }
-        return PenLayoutEngine.layoutIncremental(
-            document,
-            previousRects: cache.rects,
-            dirtyNodeIDs: dirty,
-            textMeasurer: textMeasurer,
-            measurementCache: &cache.measurementCache
-        )
     }
 
     // MARK: - Content Hash

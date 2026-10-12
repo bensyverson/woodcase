@@ -614,6 +614,33 @@ ask for. A structural edit now lays out only the boards it can change (next sect
 on this one-board document that is still the whole `Board`, so the reorder baseline
 keeps its shape.
 
+### Node-granular: `PenLayoutState`
+
+The same three gestures on a ``PenLayoutState`` held between frames
+(`PerformanceBudgets.LayoutStateTests`): the reorder and resize as
+``PenLayoutState/hypothetical(_:)`` previews, the text edit as
+``PenLayoutState/update(to:invalidation:)``. The update is timed alone — the edit is
+applied and the document expanded and resolved outside the clock, as a host's pipeline
+does them, and the document the state lets go of is kept alive past the clock, since
+freeing a 2,000-node tree (about 0.5 ms here) is the host's churn, not layout. These are
+**enforced** budgets.
+
+| Gesture | Budget (release) | Root-granular, same run | Node-granular, minimum of 20 |
+|---|---|---|---|
+| Hypothetical reorder in the 400-row list | 1 ms | 70.9 ms (a committed move) | 0.8 ms |
+| Hypothetical resize of a list row | 2 ms | 21.1 ms | 0.9 ms |
+| Committed text edit, `update(to:invalidation:)` | 1 ms | 21.0 ms | 0.9 ms |
+
+`WOODCASE_BUDGET_STRICT=1 swift test -c release --filter PerformanceBudgets.LayoutStateTests
+2>&1 | grep BUDGET` (and `…LayoutEditTests` for the root-granular column), on `e2fff0a`
+with leaves `bDA99O`, `njlNrI` and `UjnrLt` on top, 2026-10-12. Load: the root-granular
+column and a first state run at `uptime` 65–68 (reorder 0.8, resize 0.9, update 3.7 ms
+before the update kept its index); the node-granular column at load 8/11/15, with other
+agents building. Re-take both on a quiet machine. The margins are thin: what is left is
+the engine's own per-child cost — each of the list's 400 rows answers from memory twice
+(measured, then arranged), about 1 µs a row — so a deeper engine optimization, not more
+caching, is the next step if a bigger board needs it.
+
 ## Structural edits on a many-board document
 
 An insert, move or delete lays out only the top-level boards it can change — the board

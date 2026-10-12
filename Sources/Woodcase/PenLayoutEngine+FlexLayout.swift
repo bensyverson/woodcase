@@ -193,20 +193,51 @@ extension PenLayoutEngine {
             return (mainFlex, mainFallback, crossSize, crossFlex, crossFallback)
         }
 
+        /// A measuring or filling call for a flow child.
+        ///
+        /// The call is final — its subtree's rects reach the target through the scratch
+        /// map — unless the child is a container the arranging pass lays out again at its
+        /// resolved cross size (``nextArrangingCall(stores:)``); then it writes below the
+        /// child to ``PenLayoutEngine/discardStore``, so the scratch map never carries a
+        /// measurement's rects over the final ones.
+        ///
+        /// - Parameters:
+        ///   - child: The child.
+        ///   - availableWidth: The width offered.
+        ///   - availableHeight: The height offered.
+        ///   - isLaidOutAgain: Whether the child fills the cross axis.
+        /// - Returns: The call.
+        func childCall(
+            _ child: PenNode, availableWidth: Double?, availableHeight: Double?, isLaidOutAgain: Bool
+        ) -> LayoutFrame.Call {
+            let isFinal = call.isFinal && !(isLaidOutAgain && Self.isContainer(child))
+            return LayoutFrame.Call(
+                node: child, availableWidth: availableWidth, availableHeight: availableHeight,
+                target: isFinal ? scratch : PenLayoutEngine.discardStore, isFinal: isFinal
+            )
+        }
+
+        /// Whether a node holds children the flex arrangement lays out again.
+        static func isContainer(_ node: PenNode) -> Bool {
+            switch node.kind {
+            case .frame, .group: true
+            default: false
+            }
+        }
+
         /// Records every `fill_container` child up to the next one to measure, and asks
-        /// for that one — sized into the scratch map, uncached, and offered the resolved
-        /// cross-axis content size so a fill_container grandchild resolves correctly.
+        /// for that one — sized into the scratch map and offered the resolved cross-axis
+        /// content size so a fill_container grandchild resolves correctly.
         private mutating func nextMeasuringCall() -> LayoutFrame.Call? {
             while next < flowChildren.count {
                 let child = flowChildren[next]
                 let axes = axes(of: child)
                 guard axes.mainFlex else {
-                    return LayoutFrame.Call(
-                        node: child,
+                    return childCall(
+                        child,
                         availableWidth: isHorizontal ? nil : availableCrossForChildren,
                         availableHeight: isHorizontal ? availableCrossForChildren : nil,
-                        target: scratch,
-                        usesCache: false
+                        isLaidOutAgain: axes.crossFlex
                     )
                 }
                 measurements.append(ChildMeasurement(
@@ -299,18 +330,14 @@ extension PenLayoutEngine {
         private mutating func nextArrangingCall(stores: inout [[String: PenRect]]) -> LayoutFrame.Call? {
             while next < measurements.count {
                 let measurement = measurements[next]
-                let isContainer = switch measurement.node.kind {
-                case .frame, .group: true
-                default: false
-                }
-                if isContainer, measurement.isFlexibleCross {
+                if Self.isContainer(measurement.node), measurement.isFlexibleCross {
                     let placed = placement(of: measurement)
                     return LayoutFrame.Call(
                         node: measurement.node,
                         availableWidth: placed.unrotatedWidth,
                         availableHeight: placed.unrotatedHeight,
                         target: call.target,
-                        usesCache: call.usesCache
+                        isFinal: call.isFinal
                     )
                 }
                 place(measurement, into: &stores)
@@ -370,7 +397,7 @@ extension PenLayoutEngine {
                 }
                 return LayoutFrame.Call(
                     node: child, availableWidth: nil, availableHeight: nil,
-                    target: call.target, usesCache: call.usesCache
+                    target: call.target, isFinal: call.isFinal
                 )
             }
             return nil

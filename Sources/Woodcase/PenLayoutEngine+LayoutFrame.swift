@@ -29,9 +29,10 @@ extension PenLayoutEngine {
             /// map for its measuring passes.
             let target: Int
 
-            /// Whether the call reads and writes the measurement cache. A measuring pass
-            /// never does, and nothing below it does either.
-            let usesCache: Bool
+            /// Whether this is the last call for its node in the layout, and the rects it
+            /// writes below the node reach the caller's map. A call that is not final
+            /// writes to ``PenLayoutEngine/discardStore``, and so does everything below it.
+            let isFinal: Bool
         }
 
         /// What a container's layout asks of the walk next.
@@ -45,7 +46,7 @@ extension PenLayoutEngine {
 
         /// How starting a call turned out.
         enum Start {
-            /// The call was answered at once: a leaf, or a measurement cache hit.
+            /// The call was answered at once: a leaf, or a remembered size.
             case finished(width: Double, height: Double)
 
             /// The call is a container with children to size.

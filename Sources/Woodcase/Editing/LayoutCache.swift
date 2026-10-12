@@ -23,8 +23,13 @@ public final class LayoutCache {
     /// Node IDs needing re-layout (size/position changed).
     public private(set) var dirtyLayoutNodes: Set<String> = []
 
-    /// Top-level nodes a structural edit requires laying out afresh, by source id.
+    /// Top-level nodes to lay out afresh, by source id: the boards a structural edit
+    /// can change, and the roots whose revision an edit inside a component moved.
     public private(set) var dirtyLayoutRoots: Set<String> = []
+
+    /// Nodes whose whole subtree needs re-layout, by source id: a `theme` change, which
+    /// every descendant resolves its variables through.
+    public private(set) var dirtyLayoutSubtrees: Set<String> = []
 
     /// Node IDs needing re-render only (visual-only change).
     public private(set) var dirtyRenderNodes: Set<String> = []
@@ -65,19 +70,26 @@ public final class LayoutCache {
         }
     }
 
-    /// Marks a node and its ancestors as needing re-layout due to a subtree change
-    /// (e.g. theme change that affects all descendants).
+    /// Marks a node's whole subtree as needing re-layout (a theme change, which every
+    /// descendant resolves through), and its ancestors.
+    ///
+    /// The subtree is recorded by its root; its nodes' measurements are forgotten when
+    /// the next layout translates it against the expanded tree.
     ///
     /// - Parameters:
     ///   - nodeID: The root of the affected subtree.
     ///   - ancestors: The ancestor chain from nearest parent to root.
     func invalidateSubtreeLayout(_ nodeID: String, ancestors: [String]) {
-        dirtyLayoutNodes.insert(nodeID)
-        measurementCache.removeValue(forKey: nodeID)
-        for ancestor in ancestors {
-            dirtyLayoutNodes.insert(ancestor)
-            measurementCache.removeValue(forKey: ancestor)
-        }
+        invalidateLayout(nodeID, ancestors: ancestors)
+        dirtyLayoutSubtrees.insert(nodeID)
+    }
+
+    /// Marks top-level nodes for a whole fresh pass.
+    ///
+    /// - Parameter roots: The top-level nodes, by source id.
+    func invalidateRoots(_ roots: Set<String>) {
+        dirtyLayoutNodes.formUnion(roots)
+        dirtyLayoutRoots.formUnion(roots)
     }
 
     /// Marks the spine of a structural edit for re-layout, and the top-level nodes it
@@ -95,17 +107,6 @@ public final class LayoutCache {
         dirtyLayoutRoots.formUnion(roots)
         for id in spine {
             measurementCache.removeValue(forKey: id)
-        }
-    }
-
-    /// Forgets the measurement of every node in an expanded subtree.
-    ///
-    /// - Parameter root: The subtree's root, as the layout engine sees it.
-    func forgetMeasurements(under root: PenNode) {
-        var pending = [root]
-        while let node = pending.popLast() {
-            measurementCache.removeValue(forKey: node.id)
-            pending.append(contentsOf: PenLayoutEngine.nodeChildren(node) ?? [])
         }
     }
 
@@ -139,6 +140,7 @@ public final class LayoutCache {
     public func clearDirtyNodes() {
         dirtyLayoutNodes.removeAll()
         dirtyLayoutRoots.removeAll()
+        dirtyLayoutSubtrees.removeAll()
         dirtyRenderNodes.removeAll()
         isFullyInvalidated = false
     }

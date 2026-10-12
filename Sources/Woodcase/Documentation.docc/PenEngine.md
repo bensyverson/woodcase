@@ -478,7 +478,7 @@ The details worth stating, because they are all askable questions:
   fill nor a fallback, an absolute frame's `fill_container` still takes its
   children's extent from its origin — Pen has not been measured there.
 
-- **Incremental layout:** ``PenLayoutEngine/layoutIncremental(_:previousRects:dirtyNodeIDs:textMeasurer:)`` accepts cached rects and dirty node IDs, re-laying out only the root subtrees that contain dirty descendants. Clean roots have their previous rects copied unchanged. Since `.pen` documents are organized as independent top-level artboards, skipping clean artboards is the highest-value optimization.
+- **Incremental layout:** ``PenLayoutEngine/layoutIncremental(_:previousRects:dirtyNodeIDs:textMeasurer:)`` accepts cached rects and dirty node IDs, re-laying out only the root subtrees that contain dirty descendants. Clean roots have their previous rects copied unchanged. Since `.pen` documents are organized as independent top-level artboards, skipping clean artboards is the highest-value optimization. A host editing a document passes ``PenLayoutEngine/layoutIncremental(_:previousRects:invalidation:textMeasurer:measurementCache:)`` a ``PenLayoutInvalidation`` instead: it names nodes by *source* id, and the engine translates them to the expanded tree through a ``PenLayoutIndex`` — see <doc:EditingDocuments>.
 
 ### Three extents
 

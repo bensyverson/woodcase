@@ -73,6 +73,13 @@ struct ChangeCategoryTests {
         #expect(ChangeCategory.categorize(oldCommon: old, newCommon: new) == .layout)
     }
 
+    @Test("Reusable change is layout-affecting: it changes what instances expand to")
+    func reusableChangeIsLayout() {
+        let old = PenNodeCommon(reusable: true)
+        let new = PenNodeCommon(reusable: false)
+        #expect(ChangeCategory.categorize(oldCommon: old, newCommon: new) == .layout)
+    }
+
     @Test("No change returns nil")
     func noChangeReturnsNil() {
         let common = PenNodeCommon(name: "Button", x: .literal(10))

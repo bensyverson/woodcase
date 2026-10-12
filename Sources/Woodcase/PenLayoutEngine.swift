@@ -64,11 +64,11 @@ public nonisolated enum PenLayoutEngine {
         textMeasurer: TextMeasurer = defaultTextMeasurer
     ) -> [String: PenRect] {
         var rects: [String: PenRect] = [:]
-        var noCache: [String: MeasurementCacheEntry]? = nil
+        var memo = Memo()
         for node in document.children {
             let x = node.common.x?.literalValue ?? 0
             let y = node.common.y?.literalValue ?? 0
-            let size = layoutNode(node, availableWidth: nil, availableHeight: nil, textMeasurer: textMeasurer, into: &rects, cache: &noCache)
+            let size = layoutNode(node, availableWidth: nil, availableHeight: nil, textMeasurer: textMeasurer, into: &rects, memo: &memo)
             rects[node.id] = freeRect(of: node, x: x, y: y, size: size, placedIn: rects)
         }
         return rects
@@ -93,7 +93,7 @@ public nonisolated enum PenLayoutEngine {
         textMeasurer: TextMeasurer = defaultTextMeasurer
     ) -> [String: PenRect] {
         var rects: [String: PenRect] = [:]
-        var noCache: [String: MeasurementCacheEntry]? = nil
+        var memo = Memo()
 
         for node in document.children {
             if subtreeContainsDirty(node, dirtyNodeIDs: dirtyNodeIDs) {
@@ -102,7 +102,7 @@ public nonisolated enum PenLayoutEngine {
                 let y = node.common.y?.literalValue ?? 0
                 let size = layoutNode(
                     node, availableWidth: nil, availableHeight: nil,
-                    textMeasurer: textMeasurer, into: &rects, cache: &noCache
+                    textMeasurer: textMeasurer, into: &rects, memo: &memo
                 )
                 rects[node.id] = freeRect(of: node, x: x, y: y, size: size, placedIn: rects)
             } else {
@@ -118,8 +118,11 @@ public nonisolated enum PenLayoutEngine {
     ///
     /// Like ``layoutIncremental(_:previousRects:dirtyNodeIDs:textMeasurer:)``, but uses
     /// a measurement cache to skip re-computing unchanged subtrees within dirty roots.
-    /// The cache stores per-node sizes keyed by available dimensions; on a cache hit,
-    /// the subtree is skipped entirely (descendant rects come from `previousRects`).
+    /// The cache holds, per node, the offered space and size of its last *final* call —
+    /// the one whose rects below the node reach the result; on a hit the subtree is
+    /// skipped entirely and its rects come from `previousRects`. The caller must forget
+    /// the entries of every dirty node and its ancestors, and pass the rects the cache
+    /// was filled alongside.
     ///
     /// - Parameters:
     ///   - document: A fully parsed, variable-resolved, ref-expanded document.
@@ -135,30 +138,50 @@ public nonisolated enum PenLayoutEngine {
         textMeasurer: TextMeasurer = defaultTextMeasurer,
         measurementCache: inout [String: MeasurementCacheEntry]
     ) -> [String: PenRect] {
+        var memo = Memo(finals: measurementCache)
+        let rects = layOutRoots(
+            of: document, previousRects: previousRects,
+            isDirty: { subtreeContainsDirty($0, dirtyNodeIDs: dirtyNodeIDs) },
+            textMeasurer: textMeasurer, memo: &memo
+        )
+        measurementCache = memo.finals
+        return rects
+    }
+
+    /// Lays out the top-level nodes `isDirty` picks, through the measurement cache, and
+    /// copies every other one's rects from the previous layout.
+    ///
+    /// A dirty root's map starts from its previous rects, so a cache hit — which skips a
+    /// subtree — leaves that subtree's rects as they were.
+    ///
+    /// - Parameters:
+    ///   - document: A fully parsed, variable-resolved, ref-expanded document.
+    ///   - previousRects: The rects of the previous layout.
+    ///   - isDirty: Whether a top-level node must be laid out again.
+    ///   - textMeasurer: A function that measures text bounding boxes.
+    ///   - memo: The sizes remembered so far, read and filled.
+    /// - Returns: Every node's rect.
+    static func layOutRoots(
+        of document: PenDocument,
+        previousRects: [String: PenRect],
+        isDirty: (PenNode) -> Bool,
+        textMeasurer: TextMeasurer,
+        memo: inout Memo
+    ) -> [String: PenRect] {
         var rects: [String: PenRect] = [:]
-        var cache: [String: MeasurementCacheEntry]? = measurementCache
-
         for node in document.children {
-            if subtreeContainsDirty(node, dirtyNodeIDs: dirtyNodeIDs) {
-                // Pre-populate rects from previousRects so cache hits
-                // can skip writing descendant rects
-                copySubtreeRects(node, from: previousRects, into: &rects)
-
-                // Re-layout — cache hits skip unchanged subtrees
-                let x = node.common.x?.literalValue ?? 0
-                let y = node.common.y?.literalValue ?? 0
-                let size = layoutNode(
-                    node, availableWidth: nil, availableHeight: nil,
-                    textMeasurer: textMeasurer, into: &rects, cache: &cache
-                )
-                rects[node.id] = freeRect(of: node, x: x, y: y, size: size, placedIn: rects)
-            } else {
-                // Clean root — copy previous rects for entire subtree
-                copySubtreeRects(node, from: previousRects, into: &rects)
-            }
+            // Clean or dirty, the map starts from the previous rects; a dirty root is then
+            // laid out over them, and cache hits keep what they skip.
+            copySubtreeRects(node, from: previousRects, into: &rects)
+            guard isDirty(node) else { continue }
+            let x = node.common.x?.literalValue ?? 0
+            let y = node.common.y?.literalValue ?? 0
+            let size = layoutNode(
+                node, availableWidth: nil, availableHeight: nil,
+                textMeasurer: textMeasurer, into: &rects, memo: &memo
+            )
+            rects[node.id] = freeRect(of: node, x: x, y: y, size: size, placedIn: rects)
         }
-
-        measurementCache = cache!
         return rects
     }
 
@@ -181,10 +204,10 @@ public nonisolated enum PenLayoutEngine {
         existingRects: [String: PenRect],
         textMeasurer: TextMeasurer = defaultTextMeasurer
     ) -> [String: PenRect] {
-        var noCache: [String: MeasurementCacheEntry]? = nil
+        var memo = Memo()
         return layoutSubtreeImpl(
             rootID: rootID, in: document, existingRects: existingRects,
-            textMeasurer: textMeasurer, cache: &noCache
+            textMeasurer: textMeasurer, memo: &memo
         )
     }
 
@@ -207,12 +230,12 @@ public nonisolated enum PenLayoutEngine {
         textMeasurer: TextMeasurer = defaultTextMeasurer,
         measurementCache: inout [String: MeasurementCacheEntry]
     ) -> [String: PenRect] {
-        var cache: [String: MeasurementCacheEntry]? = measurementCache
+        var memo = Memo(finals: measurementCache)
         let result = layoutSubtreeImpl(
             rootID: rootID, in: document, existingRects: existingRects,
-            textMeasurer: textMeasurer, cache: &cache
+            textMeasurer: textMeasurer, memo: &memo
         )
-        measurementCache = cache!
+        measurementCache = memo.finals
         return result
     }
 
@@ -231,6 +254,10 @@ public nonisolated enum PenLayoutEngine {
     }
 
     /// Copies previous rects for all nodes in a subtree into the output dict.
+    ///
+    /// A disabled child of a flex container is skipped with everything under it: the flow
+    /// gives it no rect, so a rect it had before it was disabled must not survive. A
+    /// container that places its children at their own x/y places a disabled one too.
     private static func copySubtreeRects(
         _ node: PenNode,
         from previousRects: [String: PenRect],
@@ -241,7 +268,12 @@ public nonisolated enum PenLayoutEngine {
             if let rect = previousRects[next.id] {
                 rects[next.id] = rect
             }
-            pending.append(contentsOf: nodeChildren(next) ?? [])
+            guard let children = nodeChildren(next) else { continue }
+            if extractLayoutProperties(next).layout == PenLayoutDirection.none {
+                pending.append(contentsOf: children)
+            } else {
+                pending.append(contentsOf: children.filter { $0.common.enabled?.literalValue != false })
+            }
         }
     }
 }
@@ -252,7 +284,8 @@ public extension PenLayoutEngine {
     /// A cached measurement result for a single node, keyed by available dimensions.
     ///
     /// Used by ``layoutIncremental(_:previousRects:dirtyNodeIDs:textMeasurer:measurementCache:)``
-    /// to skip re-computing unchanged subtrees.
+    /// to skip re-computing unchanged subtrees: the offered space and size of the node's
+    /// last final call in the layout that produced the rects passed with it.
     struct MeasurementCacheEntry: Friendly {
         public let availableWidth: Double?
         public let availableHeight: Double?
@@ -544,7 +577,7 @@ private extension PenLayoutEngine {
         in document: PenDocument,
         existingRects: [String: PenRect],
         textMeasurer: TextMeasurer,
-        cache: inout [String: MeasurementCacheEntry]?
+        memo: inout Memo
     ) -> [String: PenRect] {
         guard let (node, parent) = findNodeWithParent(
             id: rootID, in: document.children, parent: nil
@@ -559,7 +592,7 @@ private extension PenLayoutEngine {
         var rects: [String: PenRect] = [:]
         let size = layoutNode(
             node, availableWidth: availableWidth, availableHeight: availableHeight,
-            textMeasurer: textMeasurer, into: &rects, cache: &cache
+            textMeasurer: textMeasurer, into: &rects, memo: &memo
         )
 
         // layoutNode writes descendant rects but NOT the root's own rect. A node placed by

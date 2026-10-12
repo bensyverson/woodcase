@@ -82,25 +82,9 @@ extension EditableDocument {
             scope.roots.insert(topLevelID(of: subject))
         }
         if !components.isEmpty {
-            scope.roots.formUnion(rootsDrawing(components))
+            scope.roots.formUnion(layoutRootsDrawing(Array(components)))
         }
         return scope
-    }
-
-    /// Every top-level node that draws one of the given components, directly or
-    /// through a component that nests one, plus the top-level nodes holding each
-    /// component so reached.
-    ///
-    /// These are the tops of the spines in the components' revision closure
-    /// (``revisionDependents(of:)``): the closure walks up from each component, and from
-    /// every node that renders something on the way — names that resolve to nothing yet
-    /// included, so a component just inserted reaches the refs that were dangling — so
-    /// it costs what the components reach rather than a pass over the document.
-    ///
-    /// - Parameter components: The components whose content changed.
-    /// - Returns: The top-level node ids.
-    private func rootsDrawing(_ components: Set<String>) -> Set<String> {
-        Set(revisionDependents(of: Array(components)).filter { parents[$0] == nil })
     }
 
     /// The top-level node holding a node, or the node itself at the top level.
