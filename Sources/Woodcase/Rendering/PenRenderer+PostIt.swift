@@ -42,12 +42,14 @@ extension PenRenderer {
         layoutRects: [String: PenRect],
         overrides: NodeOverrides?,
         in context: CGContext,
-        imageProvider _: ImageProvider
+        options: PenPostIt.DrawingOptions
     ) {
         // Saves the graphics state; restored below.
         guard let box = enter(ref, layoutRects: layoutRects, overrides: overrides, in: context) else { return }
         defer { context.restoreGState() }
-        guard let expansion = PenPostIt.expansion(of: ref.node, width: box.width, height: box.height) else { return }
+        guard let expansion = PenPostIt.expansion(
+            of: ref.node, width: box.width, height: box.height, labels: options.labels, identityColor: options.identityColor
+        ) else { return }
         let opacity = overrides?.opacity ?? ref.node.common.opacity?.literalValue
         let isTranslucent = opacity.map { $0 < 1 } ?? false
         if let opacity, isTranslucent {

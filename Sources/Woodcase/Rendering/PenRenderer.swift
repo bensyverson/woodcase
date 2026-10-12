@@ -34,6 +34,8 @@ public enum PenRenderer {
     ///   - rootNodeID: If provided, render only this node and its children.
     ///   - overrides: Per-node property overrides for animation.
     ///   - imageProvider: Callback to load images for image fills.
+    ///   - postIt: The words and identity colors notes, prompts and contexts are drawn with.
+    ///     Defaults to English and each identity's ``ActorColor``.
     /// - Returns: A rendered `CGImage`, or `nil` if context creation fails.
     public static func render(
         _ document: PenDocument,
@@ -43,7 +45,8 @@ public enum PenRenderer {
         colorSpace: CGColorSpace? = nil,
         rootNodeID: String? = nil,
         overrides: [String: NodeOverrides] = [:],
-        imageProvider: ImageProvider = { _ in nil }
+        imageProvider: ImageProvider = { _ in nil },
+        postIt: PenPostIt.DrawingOptions = PenPostIt.DrawingOptions()
     ) -> CGImage? {
         let space = colorSpace ?? CGColorSpace(name: CGColorSpace.sRGB)!
         let pixelWidth = Int(size.width * scale)
@@ -79,9 +82,9 @@ public enum PenRenderer {
             if let rootRect = layoutRects[rootNodeID] {
                 context.translateBy(x: CGFloat(-rootRect.x), y: CGFloat(-rootRect.y))
             }
-            renderNodesIteratively([targetNode], layoutRects: layoutRects, in: context, overrides: overrides, imageProvider: imageProvider)
+            renderNodesIteratively([targetNode], layoutRects: layoutRects, in: context, overrides: overrides, imageProvider: imageProvider, postIt: postIt)
         } else {
-            render(document, layoutRects: layoutRects, into: context, overrides: overrides, imageProvider: imageProvider)
+            render(document, layoutRects: layoutRects, into: context, overrides: overrides, imageProvider: imageProvider, postIt: postIt)
         }
 
         return context.makeImage()
@@ -91,24 +94,28 @@ public enum PenRenderer {
     ///
     /// The context should already have its coordinate system set up (typically
     /// flipped so that (0,0) is top-left).
+    ///
+    /// - Parameter postIt: The words and identity colors notes, prompts and contexts are
+    ///   drawn with.
     public static func render(
         _ document: PenDocument,
         layoutRects: [String: PenRect],
         into context: CGContext,
         rootNodeID: String? = nil,
         overrides: [String: NodeOverrides] = [:],
-        imageProvider: ImageProvider = { _ in nil }
+        imageProvider: ImageProvider = { _ in nil },
+        postIt: PenPostIt.DrawingOptions = PenPostIt.DrawingOptions()
     ) {
         if let rootNodeID {
             // Subtree rendering: find target node, render only that node
             // No coordinate translation — caller manages positioning
             guard let targetNode = findNode(id: rootNodeID, in: document.children) else { return }
-            renderNodesIteratively([targetNode], layoutRects: layoutRects, in: context, overrides: overrides, imageProvider: imageProvider)
+            renderNodesIteratively([targetNode], layoutRects: layoutRects, in: context, overrides: overrides, imageProvider: imageProvider, postIt: postIt)
         } else {
             renderNodesIteratively(
                 document.children, layoutRects: layoutRects,
                 canvasRects: PenConnectionRenderer.canvasRects(for: document, layoutRects: layoutRects),
-                in: context, overrides: overrides, imageProvider: imageProvider
+                in: context, overrides: overrides, imageProvider: imageProvider, postIt: postIt
             )
         }
     }
@@ -192,7 +199,8 @@ public enum PenRenderer {
         canvasRects: [String: PenRect] = [:],
         in context: CGContext,
         overrides: [String: NodeOverrides],
-        imageProvider: ImageProvider
+        imageProvider: ImageProvider,
+        postIt: PenPostIt.DrawingOptions = PenPostIt.DrawingOptions()
     ) {
         var stack: [WorkItem] = nodes.reversed().map { .renderNode(NodeRef($0)) }
 
@@ -202,7 +210,7 @@ public enum PenRenderer {
                 processNode(
                     ref, stack: &stack,
                     layoutRects: layoutRects, canvasRects: canvasRects, in: context,
-                    overrides: overrides, imageProvider: imageProvider
+                    overrides: overrides, imageProvider: imageProvider, postIt: postIt
                 )
             case .restoreGState:
                 context.restoreGState()
@@ -232,7 +240,8 @@ public enum PenRenderer {
         canvasRects: [String: PenRect],
         in context: CGContext,
         overrides: [String: NodeOverrides],
-        imageProvider: ImageProvider
+        imageProvider: ImageProvider,
+        postIt: PenPostIt.DrawingOptions
     ) {
         let nodeOverrides = overrides[ref.node.id]
         guard isEnabled(ref.node, overrides: nodeOverrides) else { return }
@@ -241,7 +250,7 @@ public enum PenRenderer {
         // its endpoints are.
         switch ref.node.kind {
         case .note, .prompt, .context:
-            renderPostIt(ref, layoutRects: layoutRects, overrides: nodeOverrides, in: context, imageProvider: imageProvider)
+            renderPostIt(ref, layoutRects: layoutRects, overrides: nodeOverrides, in: context, options: postIt)
             return
         case .ref, .unknown:
             return
@@ -347,7 +356,7 @@ public enum PenRenderer {
                 renderChildren(
                     ref, drawRect: drawRect, children: children,
                     layoutRects: layoutRects, in: offscreenCtx,
-                    overrides: overrides, imageProvider: imageProvider
+                    overrides: overrides, imageProvider: imageProvider, postIt: postIt
                 )
                 if case .group = ref.node.kind {
                     renderGroupInnerShadows(innerShadows, bounds: drawRect.cgRect, in: offscreenCtx, silhouette: castGroupSilhouette)
@@ -412,7 +421,8 @@ public enum PenRenderer {
         layoutRects: [String: PenRect],
         in context: CGContext,
         overrides: [String: NodeOverrides],
-        imageProvider: ImageProvider
+        imageProvider: ImageProvider,
+        postIt: PenPostIt.DrawingOptions
     ) {
         guard let children, !children.isEmpty else { return }
         switch ref.node.kind {
@@ -426,7 +436,7 @@ public enum PenRenderer {
             }
             renderNodesIteratively(
                 children, layoutRects: layoutRects,
-                in: context, overrides: overrides, imageProvider: imageProvider
+                in: context, overrides: overrides, imageProvider: imageProvider, postIt: postIt
             )
             if shouldClip {
                 context.restoreGState()
@@ -434,7 +444,7 @@ public enum PenRenderer {
         case .group:
             renderNodesIteratively(
                 children, layoutRects: layoutRects,
-                in: context, overrides: overrides, imageProvider: imageProvider
+                in: context, overrides: overrides, imageProvider: imageProvider, postIt: postIt
             )
         default:
             break
