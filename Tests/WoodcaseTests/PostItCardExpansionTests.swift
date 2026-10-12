@@ -24,6 +24,13 @@ struct PostItCardExpansionTests {
      "metadata": {"type": "woodcase", "woodcase": {"state": "queued", "requestedBy": "ben"}}}
     """
 
+    /// The queued prompt with another run state, or none.
+    private static func prompt(state: PenPostIt.RunState?) -> String {
+        let metadata = state.map { #", "metadata": {"type": "woodcase", "woodcase": {"state": "\#($0.rawValue)"}}"# } ?? ""
+        return #"{"id": "P1", "type": "prompt", "content": "Tighten the checkout card's copy.", "model": "claude-opus-5-5""#
+            + metadata + "}"
+    }
+
     // MARK: - Prompt
 
     @Test("A prompt is a white card, radius 8, with the hairline and the note's shadows")
@@ -65,7 +72,9 @@ struct PostItCardExpansionTests {
 
     @Test("▶ Run is a dark button at the bottom right inset")
     func runButton() throws {
-        let expansion = try expansion(Self.queued)
+        // Changed for qoGTON: a queued prompt's button reads Cancel now (`queuedCancels`), so
+        // Run is shown on a prompt that is done.
+        let expansion = try expansion(Self.prompt(state: .done))
         let button = try #require(expansion.part(.runButton))
         #expect(abs(button.frame.x + button.frame.width - (240 - 14)) < 0.001)
         #expect(abs(button.frame.y + button.frame.height - (160 - 14)) < 0.001)
@@ -74,6 +83,32 @@ struct PostItCardExpansionTests {
         let label = try #require(expansion.text(.runLabel))
         #expect(label.string == "\u{25B6}\u{FE0E} Run")
         #expect(label.color == style.runButtonInk)
+    }
+
+    @Test("A queued prompt's button reads Cancel, with no ▶, sized to its word at Run's place")
+    func queuedCancels() throws {
+        let queued = try expansion(Self.queued)
+        let done = try expansion(Self.prompt(state: .done))
+        let label = try #require(queued.text(.runLabel))
+        #expect(label.string == "Cancel")
+        #expect(label.label == .cancel)
+        #expect(label.color == style.runButtonInk)
+        let button = try #require(queued.part(.runButton))
+        let doneButton = try #require(done.part(.runButton))
+        let doneLabel = try #require(done.part(.runLabel))
+        let cancelLabel = try #require(queued.part(.runLabel))
+        #expect(abs(button.frame.x + button.frame.width - (doneButton.frame.x + doneButton.frame.width)) < 0.001)
+        #expect(button.frame.y == doneButton.frame.y)
+        #expect(button.frame.height == doneButton.frame.height)
+        #expect(abs((button.frame.width - cancelLabel.frame.width) - (doneButton.frame.width - doneLabel.frame.width)) < 0.001)
+        #expect(button.paint == doneButton.paint)
+    }
+
+    @Test("A prompt never run, running or done keeps ▶ Run", arguments: [nil, PenPostIt.RunState.running, .done])
+    func othersRun(state: PenPostIt.RunState?) throws {
+        let label = try #require(expansion(Self.prompt(state: state)).text(.runLabel))
+        #expect(label.string == "\u{25B6}\u{FE0E} Run")
+        #expect(label.label == .run)
     }
 
     @Test("The run's status shows its state, who requested it, and a state-colored dot")

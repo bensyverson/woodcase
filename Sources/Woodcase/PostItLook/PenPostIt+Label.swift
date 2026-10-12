@@ -13,7 +13,7 @@ public extension PenPostIt {
     /// strings and the chrome is measured in the words drawn; Woodcase's renderer and CLI
     /// pass ``english``. Each chrome text part names the label it shows
     /// (``PenPostItExpansion/Text/label``). The ▶ before a prompt's header and Run is the
-    /// look's (``Style/playGlyph``), not the label's.
+    /// look's (``Style/playGlyph``), not the label's; Cancel has none.
     enum Label: Friendly {
         /// A prompt's header: "PROMPT".
         case promptTitle
@@ -21,6 +21,8 @@ public extension PenPostIt {
         case contextTitle
         /// The Run button: "Run".
         case run
+        /// The Run button of a queued prompt, which takes it off the queue: "Cancel".
+        case cancel
         /// Where a prompt's run stands and who queued it: "Queued · ben".
         case status(RunState, requestedBy: String?)
 
@@ -30,6 +32,7 @@ public extension PenPostIt {
             case .promptTitle: "PROMPT"
             case .contextTitle: "CONTEXT"
             case .run: "Run"
+            case .cancel: "Cancel"
             case let .status(state, requestedBy):
                 Self.englishState(state) + (requestedBy.map { " · \($0)" } ?? "")
             }

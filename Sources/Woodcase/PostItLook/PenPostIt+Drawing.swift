@@ -37,14 +37,14 @@ extension PenPostIt {
         }
 
         /// A label as the caller spells it, with the look's ▶ before a prompt's header and
-        /// the Run label.
+        /// the Run label — not before Cancel, which plays nothing.
         ///
         /// - Parameter label: The label.
         /// - Returns: The string drawn.
         func text(_ label: Label) -> String {
             switch label {
             case .promptTitle, .run: style.playGlyph + " " + labels(label)
-            case .contextTitle, .status: labels(label)
+            case .contextTitle, .cancel, .status: labels(label)
             }
         }
     }

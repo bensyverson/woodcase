@@ -7,7 +7,10 @@ import Foundation
 
 extension PenPostIt {
     /// A prompt: a white card with its header and model chip, its body, and a run row of
-    /// the run's status and ▶ Run.
+    /// the run's status and ▶ Run — or, while the prompt is queued, Cancel, which takes it
+    /// off the queue (Penumbra's interaction spec §10.6). The button is measured from its
+    /// word either way, so a caller hit-testing ``PenPostItExpansion/Role/runButton`` finds
+    /// it where it is drawn.
     static func promptExpansion(
         _ node: PenNode, metadata: Metadata?, box: (width: Double, height: Double), drawing: Drawing
     ) -> PenPostItExpansion {
@@ -50,11 +53,12 @@ extension PenPostIt {
         let content = body(of: node, box: box, color: ink.primary, ink: ink, paper: style.promptPaper, drawing: drawing)
         parts += content.parts
 
-        // The run row: ▶ Run at the right, the status at the left.
+        // The run row: ▶ Run, or Cancel while queued, at the right; the status at the left.
         let rowTop = box.height - textInsets.bottom - chrome.runRow
         let runStyle = chrome.label(size: chrome.runSize, weight: style.runWeight)
         let padX = style.runPaddingX * chrome.scale
-        let runLabel = drawing.text(.run)
+        let buttonLabel: Label = metadata?.runState?.value == .queued ? .cancel : .run
+        let runLabel = drawing.text(buttonLabel)
         let labelWidth = chrome.width(of: runLabel, style: runStyle, measure: measure)
         let button = PenRect(x: right - labelWidth - 2 * padX, y: rowTop, width: labelWidth + 2 * padX, height: chrome.runRow)
         parts.append(PenPostItExpansion.Part(
@@ -65,7 +69,7 @@ extension PenPostIt {
         ))
         parts.append(chrome.labelPart(
             .runLabel, runLabel, style: runStyle, at: (button.x + padX, rowTop + style.runPaddingY * chrome.scale),
-            maxWidth: labelWidth, color: style.runButtonInk, label: .run, measure: measure
+            maxWidth: labelWidth, color: style.runButtonInk, label: buttonLabel, measure: measure
         ))
         if let state = metadata?.runState?.value {
             let diameter = style.statusDotDiameter * chrome.scale

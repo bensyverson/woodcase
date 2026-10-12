@@ -38,7 +38,9 @@ struct PenRendererPostItOptionsTests {
 
     private func options() -> PenPostIt.DrawingOptions {
         PenPostIt.DrawingOptions(
-            labels: { $0 == .run ? Self.longRun : $0.english },
+            // The button's word either way: PiP01 is queued, so its button asks for Cancel
+            // (changed for qoGTON).
+            labels: { [.run, .cancel].contains($0) ? Self.longRun : $0.english },
             identityColor: { $0 == "ben" ? Self.chosen : nil }
         )
     }

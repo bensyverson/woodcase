@@ -33,7 +33,8 @@ there when they do not fit.
 The caller supplies two things the look cannot know:
 
 - **The words.** The chrome's labels are typed, ``PenPostIt/Label`` — a prompt's and a
-  context's title, Run, and the status for each ``PenPostIt/RunState`` — and the expansion
+  context's title, Run, Cancel (a queued prompt's button, which takes it off the queue,
+  drawn with no ▶), and the status for each ``PenPostIt/RunState`` — and the expansion
   takes `labels`, a function that spells each one. Woodcase's CG renderer and CLI pass
   ``PenPostIt/Label/english``; an editor passes its localized strings, which are what the
   chrome is measured in. Each chrome text names its label (``PenPostItExpansion/Text/label``).
@@ -66,8 +67,8 @@ if let expansion = PenPostIt.expansion(
 | ``PenPostItExpansion/Role/header`` | prompt, context | text | "▶ PROMPT" or "CONTEXT", tracked, in the secondary ink |
 | ``PenPostItExpansion/Role/modelChip`` | prompt | shape | The model chip, a pill at the top right |
 | ``PenPostItExpansion/Role/modelLabel`` | prompt | text | The prompt's `model` in the chip |
-| ``PenPostItExpansion/Role/runButton`` | prompt | shape | The dark Run button, bottom right |
-| ``PenPostItExpansion/Role/runLabel`` | prompt | text | "▶ Run" on it |
+| ``PenPostItExpansion/Role/runButton`` | prompt | shape | The dark Run button, bottom right, sized to its word |
+| ``PenPostItExpansion/Role/runLabel`` | prompt | text | "▶ Run" on it, or "Cancel" while the prompt is queued |
 | ``PenPostItExpansion/Role/statusDot`` | prompt | shape | A dot in the run state's color (``PenPostIt/Style/statusColor(_:)``) |
 | ``PenPostItExpansion/Role/status`` | prompt | text | "Queued · ben": the run state and `requestedBy`; absent before the first Run |
 | ``PenPostItExpansion/Role/infoMark`` | context | shape | The ⓘ ring, top left |

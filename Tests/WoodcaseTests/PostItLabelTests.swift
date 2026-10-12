@@ -30,6 +30,7 @@ struct PostItLabelTests {
         #expect(PenPostIt.Label.promptTitle.english == "PROMPT")
         #expect(PenPostIt.Label.contextTitle.english == "CONTEXT")
         #expect(PenPostIt.Label.run.english == "Run")
+        #expect(PenPostIt.Label.cancel.english == "Cancel")
         #expect(PenPostIt.Label.status(.queued, requestedBy: "ben").english == "Queued · ben")
         #expect(PenPostIt.Label.status(.running, requestedBy: nil).english == "Running")
         #expect(PenPostIt.Label.status(.done, requestedBy: "claude").english == "Done · claude")
@@ -39,7 +40,8 @@ struct PostItLabelTests {
     func partsCarryTheirLabel() throws {
         let prompt = try expansion(Self.queued)
         #expect(prompt.text(.header)?.label == .promptTitle)
-        #expect(prompt.text(.runLabel)?.label == .run)
+        // Changed for qoGTON: the fixture is queued, and a queued prompt's button is Cancel.
+        #expect(prompt.text(.runLabel)?.label == .cancel)
         #expect(prompt.text(.status)?.label == .status(.queued, requestedBy: "ben"))
         #expect(prompt.text(.modelLabel)?.label == nil, "a model name is data, not a label")
         let context = try expansion(#"{"id": "X1", "type": "context", "content": "Hi"}"#)
@@ -53,13 +55,15 @@ struct PostItLabelTests {
             case .promptTitle: "AUFFORDERUNG"
             case .contextTitle: "KONTEXT"
             case .run: "Ausführen"
+            case .cancel: "Abbrechen"
             case let .status(state, requestedBy): (state == .queued ? "Wartet" : state.rawValue) + (requestedBy.map { " – \($0)" } ?? "")
             }
         }
         let english = try expansion(Self.queued)
         let local = try expansion(Self.queued, labels: german)
         #expect(local.text(.header)?.string == "\u{25B6}\u{FE0E} AUFFORDERUNG")
-        #expect(local.text(.runLabel)?.string == "\u{25B6}\u{FE0E} Ausführen")
+        // Changed for qoGTON: the fixture is queued, so its button reads Cancel, with no ▶.
+        #expect(local.text(.runLabel)?.string == "Abbrechen")
         #expect(local.text(.status)?.string == "Wartet – ben")
         let englishButton = try #require(english.part(.runButton))
         let localButton = try #require(local.part(.runButton))
