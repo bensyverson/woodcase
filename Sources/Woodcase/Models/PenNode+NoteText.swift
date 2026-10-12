@@ -64,13 +64,19 @@ public extension PenNode {
     ///
     /// Derived on every read and never stored: the file keeps only the markdown.
     var noteMarkdown: PenNoteMarkdown? {
+        guard let source = noteSource, let style = noteTextStyle else { return nil }
+        return PenNoteMarkdown(source, fontSize: style.fontSize)
+    }
+
+    /// A note's, prompt's or context's `content` as written — its markdown source — or
+    /// `nil` for another node, or one whose content is absent or an unresolved `$variable`.
+    internal var noteSource: String? {
         let content: PenValue<String>? = switch kind {
         case let .note(data): data.content
         case let .prompt(data): data.content
         case let .context(data): data.content
         default: nil
         }
-        guard let source = content?.literalValue, let style = noteTextStyle else { return nil }
-        return PenNoteMarkdown(source, fontSize: style.fontSize)
+        return content?.literalValue
     }
 }

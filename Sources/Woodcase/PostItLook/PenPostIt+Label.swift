@@ -8,7 +8,7 @@ import Foundation
 public extension PenPostIt {
     /// A word the chrome shows: what it says, not how it is spelled.
     ///
-    /// The expansion (``PenPostIt/expansion(of:width:height:style:measure:labels:identityColor:)``)
+    /// The expansion (``PenPostIt/expansion(of:width:height:style:measure:labels:identityColor:body:)``)
     /// takes a function that turns a label into a string, so an editor passes its localized
     /// strings and the chrome is measured in the words drawn; Woodcase's renderer and CLI
     /// pass ``english``. Each chrome text part names the label it shows

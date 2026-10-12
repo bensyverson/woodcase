@@ -102,6 +102,27 @@ struct PenRendererPostItOptionsTests {
         #expect(try !near(pixel(render(nil), probe.x, probe.y), style.runButtonFill, tolerance: 3))
     }
 
+    @Test("A card listed as raw draws its body as written, and no other card changes")
+    func rawBody() throws {
+        let (_, rects) = try load()
+        let styled = try render(PenPostIt.DrawingOptions())
+        let raw = try render(PenPostIt.DrawingOptions(rawBodies: ["PiN02"]))
+        func differing(in rect: PenRect) -> Int {
+            var count = 0
+            for y in stride(from: rect.y, to: rect.maxY, by: 0.5) {
+                for x in stride(from: rect.x, to: rect.maxX, by: 0.5) {
+                    let lhs = pixel(styled, x, y)
+                    let rhs = pixel(raw, x, y)
+                    if lhs.r != rhs.r || lhs.g != rhs.g || lhs.b != rhs.b || lhs.a != rhs.a { count += 1 }
+                }
+            }
+            return count
+        }
+        #expect(try differing(in: #require(rects["PiN02"])) > 100)
+        #expect(try differing(in: #require(rects["PiN01"])) == 0)
+        #expect(try differing(in: #require(rects["PiP01"])) == 0)
+    }
+
     @Test("The into-context overload takes the options, for notes nested in the document")
     func intoContext() throws {
         let (document, rects) = try load()

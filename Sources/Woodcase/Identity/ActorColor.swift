@@ -29,7 +29,7 @@ import Foundation
 /// It lives in the Woodcase library so every surface draws an identity in one color
 /// (Penumbra's notes design, decision 7, ruled 2026-10-11): the viewer's avatar discs and
 /// edit markers, and a note's identity dot and mention pills
-/// (``PenPostIt/expansion(of:width:height:style:measure:labels:identityColor:)``). An
+/// (``PenPostIt/expansion(of:width:height:style:measure:labels:identityColor:body:)``). An
 /// editor that lets a person choose their own color passes it to the expansion, which
 /// falls back to this hash.
 ///

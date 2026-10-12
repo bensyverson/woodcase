@@ -11,7 +11,7 @@ public extension PenPostIt {
     ///
     /// Penumbra's notes design (`../Penumbra/project/2026-10-11-notes-comments-and-spans.md`,
     /// decision 12) and its mockup set them; ``standard`` is that look. The expansion
-    /// (``PenPostIt/expansion(of:width:height:style:measure:labels:identityColor:)``) reads
+    /// (``PenPostIt/expansion(of:width:height:style:measure:labels:identityColor:body:)``) reads
     /// them, so a renderer never does: it draws the parts it is given. See
     /// <doc:PenPostItLook>.
     ///

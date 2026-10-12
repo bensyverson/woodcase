@@ -25,7 +25,9 @@ extension PenPostIt {
 
     /// A note's, prompt's or context's body: its markdown's display text, runs and indents
     /// in its own style, set in ``textFrame(of:width:height:style:)``, and the marks drawn
-    /// as shapes behind it (``bodyMarks(of:text:frame:mentions:ink:paper:chrome:)``).
+    /// as shapes behind it (``bodyMarks(of:text:frame:mentions:ink:paper:chrome:)``) — or,
+    /// when ``Drawing/bodyText`` is ``BodyText/raw``, the content as written in the same
+    /// frame (``rawBody(of:frame:color:)``).
     ///
     /// Two kinds of run only color the text, so they change no line break and the layout
     /// an editor builds from ``PenTextLayout/init(note:size:color:)`` still lies over the
@@ -44,6 +46,8 @@ extension PenPostIt {
         of node: PenNode, box: (width: Double, height: Double), color: PenHexColor, ink: Ink, paper: PenHexColor,
         drawing: Drawing
     ) -> Body {
+        let frame = textFrame(of: node, width: box.width, height: box.height, style: drawing.style)
+        if drawing.bodyText == .raw { return rawBody(of: node, frame: frame, color: color) }
         guard let markdown = node.noteMarkdown, let textStyle = node.noteTextStyle, !markdown.displayText.isEmpty
         else { return Body() }
         let mentions = markdown.runs.compactMap { run in
@@ -58,7 +62,6 @@ extension PenPostIt {
             string: markdown.displayText, style: textStyle,
             runs: markdown.runs + tickedRuns(of: markdown, ink: ink) + mentionInk, indents: markdown.indents, color: color
         )
-        let frame = textFrame(of: node, width: box.width, height: box.height, style: drawing.style)
         let marks = bodyMarks(
             of: markdown, text: text, frame: frame, mentions: mentions, ink: ink, paper: paper, chrome: drawing.chrome
         )
@@ -66,6 +69,21 @@ extension PenPostIt {
             marks: marks.parts, text: PenPostItExpansion.Part(role: .body, frame: frame, paint: .text(text)),
             mentions: mentions, checkboxes: marks.checkboxes
         )
+    }
+
+    /// A body drawn as written, for a card being edited: the content verbatim in
+    /// ``PenNode/noteTextStyle`` — no runs, no indents, no marks — so an editor's draft,
+    /// set in the same style in the same frame, lies over it line for line.
+    ///
+    /// - Parameters:
+    ///   - node: The node.
+    ///   - frame: The body's frame, the same as a styled body's.
+    ///   - color: The body's ink.
+    /// - Returns: The body; empty when the node has no content to set.
+    private static func rawBody(of node: PenNode, frame: PenRect, color: PenHexColor) -> Body {
+        guard let source = node.noteSource, let textStyle = node.noteTextStyle, !source.isEmpty else { return Body() }
+        let text = PenPostItExpansion.Text(string: source, style: textStyle, color: color)
+        return Body(text: PenPostItExpansion.Part(role: .body, frame: frame, paint: .text(text)))
     }
 
     /// Fill-only runs that draw a ticked item's words in the tertiary ink.

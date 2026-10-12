@@ -8,7 +8,7 @@ import Foundation
 /// A note, prompt or context expanded into the parts every renderer draws: the single
 /// source of the rev 2 look.
 ///
-/// ``PenPostIt/expansion(of:width:height:style:measure:labels:identityColor:)`` makes one from a node and its
+/// ``PenPostIt/expansion(of:width:height:style:measure:labels:identityColor:body:)`` makes one from a node and its
 /// laid-out size. Woodcase's CG renderer draws it, and RapidPro draws the same parts, so
 /// the look is decided once, here, and a renderer only paints: shapes through their node
 /// (``Shape/node(id:frame:)``), which every renderer already draws, and text through

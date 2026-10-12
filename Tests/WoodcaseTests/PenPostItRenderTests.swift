@@ -9,7 +9,7 @@ import Testing
 @testable import Woodcase
 
 /// The CG renderer draws notes, prompts and contexts from their expansion
-/// (``PenPostIt/expansion(of:width:height:style:measure:labels:identityColor:)``) in the rev 2 look, and leaves
+/// (``PenPostIt/expansion(of:width:height:style:measure:labels:identityColor:body:)``) in the rev 2 look, and leaves
 /// comments to Penumbra.
 ///
 /// There is no Pen reference: Pen draws notes its own way and cannot draw rich text

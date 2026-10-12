@@ -7,7 +7,7 @@ import Foundation
 
 extension PenPostIt {
     /// What one expansion is drawn with: the chrome's measures, the text measurer, the
-    /// caller's words for the labels and its colors for identities.
+    /// caller's words for the labels, its colors for identities, and how the body is drawn.
     ///
     /// Not ``Friendly``: it holds the caller's functions, and lives for one expansion.
     struct Drawing {
@@ -19,6 +19,8 @@ extension PenPostIt {
         let labels: (Label) -> String
         /// The caller's color for an identity, or `nil` to use its ``ActorColor``.
         let identityColors: (String) -> PenHexColor?
+        /// Whether the body is styled from its markdown or drawn as written.
+        let bodyText: BodyText
 
         /// The look.
         var style: Style {

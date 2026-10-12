@@ -25,6 +25,9 @@ public extension PenPostIt {
     ///     measured as this spells them, so a localized label is fitted, not the English.
     ///   - identityColor: The color a person chose, by identity, or `nil` to draw them in
     ///     their ``ActorColor``. Their dot and their mention pills take it.
+    ///   - body: How the body is drawn: styled from its markdown, or raw, as written, for
+    ///     a card being edited (``BodyText``). The chrome and the box are the same either
+    ///     way.
     /// - Returns: The expansion, or `nil` for a node that is not a note, prompt or context,
     ///   and for a comment message (`woodcase.type: comment`), which Penumbra draws.
     static func expansion(
@@ -34,14 +37,15 @@ public extension PenPostIt {
         style: Style = .standard,
         measure: @escaping TextMeasurer = PenLayoutEngine.defaultTextMeasurer,
         labels: @escaping (Label) -> String = { $0.english },
-        identityColor: @escaping (String) -> PenHexColor? = { _ in nil }
+        identityColor: @escaping (String) -> PenHexColor? = { _ in nil },
+        body: BodyText = .styled
     ) -> PenPostItExpansion? {
         guard let variant = Variant(node.kind), let text = node.noteTextStyle else { return nil }
         let metadata = Metadata(node)
         if metadata?.type == .valid(.comment) { return nil }
         let drawing = Drawing(
             chrome: Chrome(style: style, fontSize: text.fontSize), measure: measure, labels: labels,
-            identityColors: identityColor
+            identityColors: identityColor, bodyText: body
         )
         let box = (width: width, height: height)
         return switch variant {
@@ -49,6 +53,37 @@ public extension PenPostIt {
         case .prompt: promptExpansion(node, metadata: metadata, box: box, drawing: drawing)
         case .context: contextExpansion(node, box: box, drawing: drawing)
         }
+    }
+
+    /// A note, prompt or context expanded with a caller's drawing options: its words for
+    /// the labels, its identity colors, and whether this node's body is drawn raw
+    /// (``DrawingOptions/bodyText(for:)``).
+    ///
+    /// The one call a renderer makes, so a new option reaches every renderer through the
+    /// value it already passes. See
+    /// ``expansion(of:width:height:style:measure:labels:identityColor:body:)``.
+    ///
+    /// - Parameters:
+    ///   - node: The node.
+    ///   - width: Its laid-out width.
+    ///   - height: Its laid-out height, grown to fit its text.
+    ///   - style: The look.
+    ///   - measure: The text measurer the chrome's labels are measured with; the layout's.
+    ///   - options: The caller's drawing options.
+    /// - Returns: The expansion, or `nil` for a node that is not a note, prompt or context,
+    ///   and for a comment message.
+    static func expansion(
+        of node: PenNode,
+        width: Double,
+        height: Double,
+        style: Style = .standard,
+        measure: @escaping TextMeasurer = PenLayoutEngine.defaultTextMeasurer,
+        options: DrawingOptions
+    ) -> PenPostItExpansion? {
+        expansion(
+            of: node, width: width, height: height, style: style, measure: measure, labels: options.labels,
+            identityColor: options.identityColor, body: options.bodyText(for: node.id)
+        )
     }
 }
 

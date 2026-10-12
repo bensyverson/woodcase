@@ -17,7 +17,7 @@ public extension PenRenderer {
     /// renderer draws every note this way, and an editor can call it to draw one alone.
     ///
     /// - Parameters:
-    ///   - expansion: The expansion (``PenPostIt/expansion(of:width:height:style:measure:labels:identityColor:)``).
+    ///   - expansion: The expansion (``PenPostIt/expansion(of:width:height:style:measure:labels:identityColor:body:)``).
     ///   - context: The context, flipped to a top-left origin and moved to the node.
     static func draw(_ expansion: PenPostItExpansion, in context: CGContext) {
         for (index, part) in expansion.parts.enumerated() {
@@ -47,9 +47,8 @@ extension PenRenderer {
         // Saves the graphics state; restored below.
         guard let box = enter(ref, layoutRects: layoutRects, overrides: overrides, in: context) else { return }
         defer { context.restoreGState() }
-        guard let expansion = PenPostIt.expansion(
-            of: ref.node, width: box.width, height: box.height, labels: options.labels, identityColor: options.identityColor
-        ) else { return }
+        guard let expansion = PenPostIt.expansion(of: ref.node, width: box.width, height: box.height, options: options)
+        else { return }
         let opacity = overrides?.opacity ?? ref.node.common.opacity?.literalValue
         let isTranslucent = opacity.map { $0 < 1 } ?? false
         if let opacity, isTranslucent {

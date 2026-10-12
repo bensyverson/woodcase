@@ -11,7 +11,7 @@ text engine, so `woodcase shot` matches Penumbra and caret editing is the canvas
 Comments are the exception: Penumbra draws them, so a note with `woodcase.type: comment` has
 no expansion and the CG renderer draws nothing for it.
 
-The look is decided once, by ``PenPostIt/expansion(of:width:height:style:measure:labels:identityColor:)``. It takes
+The look is decided once, by ``PenPostIt/expansion(of:width:height:style:measure:labels:identityColor:body:)``. It takes
 the node and its laid-out size — grown to fit its text, <doc:NoteMarkdown> — and returns a
 ``PenPostItExpansion``: typed parts in paint order, each with a frame in the node's own
 coordinates. A renderer only paints them:
@@ -136,6 +136,26 @@ by a fill-only run. A mention that wraps draws a pill per line.
 > Revised 2026-10-11: the first cut drew the padding into the neighboring spaces without
 > laying it out; at 13 points the pill crowded its neighbors and poked past the text column.
 
+### Raw while editing
+
+A card shows its markdown styled at rest and raw while it is edited (Penumbra's notes design,
+decision 6). Given ``PenPostIt/BodyText/raw`` — the expansion's `body:` parameter, or a
+``PenPostIt/DrawingOptions`` whose ``PenPostIt/DrawingOptions/rawBodies`` lists the card —
+the body part is the content exactly as written, in ``PenNode/noteTextStyle``, with no runs,
+no paragraph indents and no marks: `**bold**` keeps its asterisks, `- [x] done` its brackets,
+`# Heading` its hash at body size. Mentions stay plain text, so the expansion lists no
+mentions and no checkboxes. An editor sets its draft in the same style in
+``PenPostIt/textFrame(of:width:height:style:)``, so the draft lies over the drawn body line
+for line, caret included.
+
+Only the body changes. The paper, the labels, the author line, the Run button and the body's
+frame are the same parts either way (`PostItRawBodyTests`), so a card does not move when
+editing begins. The box is the caller's, and the layout grows a card by its *styled* text, so a
+raw body is set in a frame sized for the styled one. Raw text can be shorter — a heading loses
+its larger size and the space after it — leaving room below; or taller, where the written
+markers and link syntax wrap to more lines than the styled text, and then its last lines run
+past the frame's bottom over the author line or the run row, since a text part is not clipped.
+
 ### Sizes
 
 A note lays out at 200 × 200 when unsized (<doc:PenPostItConvention>); a prompt or context at
@@ -147,7 +167,9 @@ needs layout, since it adds or removes the author line; a change to its state do
 
 ### Expanding
 
-- ``PenPostIt/expansion(of:width:height:style:measure:labels:identityColor:)``
+- ``PenPostIt/expansion(of:width:height:style:measure:labels:identityColor:body:)``
+- ``PenPostIt/expansion(of:width:height:style:measure:options:)``
+- ``PenPostIt/BodyText``
 - ``PenPostItExpansion``
 - ``PenPostItExpansion/Part``
 - ``PenPostItExpansion/Role``
