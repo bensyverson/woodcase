@@ -107,5 +107,17 @@ extension HelpTopic {
     ]}
     JSON
       woodcase lint design.pen
+
+    A COMMENT THREAD
+      A comment is a note at the document root, one per message; these verbs
+      stamp the author and the time, so no one writes the keys by hand. --at is
+      a point in the node's own coordinates, from its top-left. --id names the
+      message so the lines after can address it; without it, use the id the
+      answer prints. A reply to any message threads under the first.
+      woodcase comment design.pen Home/Header --at 12,4 "Is 56pt right, @claude?" --id Cm01 --as ana
+      woodcase reply design.pen Cm01 "It matches the HIG. @ana" --as claude
+      woodcase resolve design.pen Cm01 --as ana
+      woodcase comments design.pen --state resolved
+      # resolved  <Header's id> @12,4  ana  …, then claude's reply under it.
     """
 }

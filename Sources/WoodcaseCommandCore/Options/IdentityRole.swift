@@ -75,4 +75,17 @@ enum Identity {
             valueName: "name"
         )
     }
+
+    /// `--as` is who wrote the message, stamped as its `woodcase.author`, and the verb
+    /// refuses without it: a comment from no one has no bubble to draw. The role of
+    /// `comment` and `reply`.
+    enum Author: IdentityRole {
+        static let help = ArgumentHelp(
+            """
+            Who wrote the message: stamped as its woodcase.author, and who the edit is \
+            logged as. Defaults to $\(Identity.environmentVariable); the verb refuses without one.
+            """,
+            valueName: "name"
+        )
+    }
 }

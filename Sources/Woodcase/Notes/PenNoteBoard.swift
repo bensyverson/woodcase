@@ -60,6 +60,7 @@ public struct PenNoteBoard: Friendly {
                     let markdown = PenNoteMarkdown(content)
                     messages.append((PenCommentThread.Message(
                         id: node.id, rev: row.rev, author: string(.author), replyTo: string(.replyTo),
+                        createdAt: string(.createdAt).flatMap { PenComment.date(createdAt: $0) == nil ? nil : $0 },
                         content: content, firstLine: Self.firstLine(of: markdown), mentions: markdown.mentionedNames
                     ), metadata))
                 } else {
@@ -82,7 +83,7 @@ public struct PenNoteBoard: Friendly {
         }
         self.notes = notes
         self.prompts = prompts
-        threads = Self.threads(of: messages)
+        threads = Self.threads(of: messages, resolving: document.resolvesCommentAnchor)
     }
 
     // MARK: - Queries
@@ -110,8 +111,8 @@ public struct PenNoteBoard: Friendly {
             else { return false }
             switch query.effectiveState {
             case .all: return true
-            case .open: return thread.state == PenPostIt.State.open.rawValue
-            case .resolved: return thread.state == PenPostIt.State.resolved.rawValue
+            case .open: return thread.state == .open
+            case .resolved: return thread.state == .resolved
             }
         }
     }
@@ -145,42 +146,5 @@ public struct PenNoteBoard: Friendly {
             .map { $0.replacingOccurrences(of: "\t", with: " ").trimmingCharacters(in: .whitespaces) }
             .first { !$0.isEmpty }
         return line ?? ""
-    }
-
-    /// Groups comment messages into threads by `replyTo`.
-    private static func threads(
-        of messages: [(message: PenCommentThread.Message, metadata: PenMetadata)]
-    ) -> [PenCommentThread] {
-        let firstIDs = Set(messages.filter { $0.message.replyTo == nil }.map(\.message.id))
-        var replies: [String: [PenCommentThread.Message]] = [:]
-        var orphanOrder: [String] = []
-        for entry in messages {
-            guard let target = entry.message.replyTo else { continue }
-            if !firstIDs.contains(target), replies[target] == nil { orphanOrder.append(target) }
-            replies[target, default: []].append(entry.message)
-        }
-        var threads: [PenCommentThread] = []
-        for (message, metadata) in messages where message.replyTo == nil {
-            let written = metadata[woodcase: .anchor]
-            let anchor = written.flatMap(PenCommentThread.Anchor.init)
-            let state: String = if case let .string(text)? = metadata[woodcase: .state] {
-                text
-            } else {
-                PenPostIt.State.open.rawValue
-            }
-            threads.append(PenCommentThread(
-                id: message.id,
-                state: state,
-                anchor: anchor,
-                hasUnreadableAnchor: written != nil && anchor == nil,
-                messages: [message] + (replies[message.id] ?? [])
-            ))
-        }
-        for id in orphanOrder {
-            threads.append(PenCommentThread(
-                id: id, state: nil, anchor: nil, isMissingFirstMessage: true, messages: replies[id] ?? []
-            ))
-        }
-        return threads
     }
 }

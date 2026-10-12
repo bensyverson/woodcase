@@ -21,6 +21,11 @@ public extension PenCommentThread {
         /// On a reply, the first message's id, from `woodcase.replyTo`.
         public var replyTo: String?
 
+        /// When it was written, from `woodcase.createdAt`: ISO 8601 in UTC, as the file
+        /// holds it (``PenComment/date(createdAt:)`` reads it). `nil` when none is
+        /// written, or what is written is not that form.
+        public var createdAt: String?
+
         /// The note's markdown, as its `content` holds it.
         public var content: String
 
@@ -38,6 +43,7 @@ public extension PenCommentThread {
         ///   - rev: The note's revision.
         ///   - author: Who wrote it.
         ///   - replyTo: On a reply, the first message's id.
+        ///   - createdAt: When it was written, in UTC.
         ///   - content: The note's markdown.
         ///   - firstLine: The first line of its words.
         ///   - mentions: The names it mentions.
@@ -46,6 +52,7 @@ public extension PenCommentThread {
             rev: String,
             author: String?,
             replyTo: String?,
+            createdAt: String? = nil,
             content: String,
             firstLine: String,
             mentions: [String]
@@ -54,6 +61,7 @@ public extension PenCommentThread {
             self.rev = rev
             self.author = author
             self.replyTo = replyTo
+            self.createdAt = createdAt
             self.content = content
             self.firstLine = firstLine
             self.mentions = mentions

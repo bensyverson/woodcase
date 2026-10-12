@@ -16,15 +16,18 @@ import Foundation
 ///
 /// ```text
 /// rev 4f2a1b0c9d8e7f60  2 threads  3 messages
-/// state     anchor       author  mentions  text                                id
-/// open      Btn01 @12,4  ana     @claude   Should this be 44pt tall, @claude?  Cm01
-///   reply   -            claude  @ana      Yes, per the HIG. @ana              Cm02
-/// resolved  Card1 @0,0   ben     @claude   @claude rename Card to StatCard     Cm04
+/// state     anchor               author  created               mentions  text                                id
+/// open      Btn01 @12,4          ana     2026-10-11T20:41:07Z  @claude   Should this be 44pt tall, @claude?  Cm01
+///   reply   -                    claude  2026-10-11T20:43:30Z  @ana      Yes, per the HIG. @ana              Cm02
+/// resolved  ⚠ deleted Card1 @0,0  ben     -                     @claude   @claude rename Card to StatCard     Cm04
 /// ```
 ///
 /// In a comment listing the first message's row leads with the thread's state and each
 /// reply's with `  reply`; a reply whose first message is gone leads with `⚠ orphan`
-/// and its text says which message is missing.
+/// and its text says which message is missing. The anchor reads `node @x,y`,
+/// `canvas @x,y` for a page point, `⚠ deleted node @x,y` for a node that is gone (the
+/// anchor as written), or `⚠ unreadable`. A state the file misspells leads as
+/// `⚠ <spelling>`. Times are UTC, as the file holds them.
 public enum PenNoteBoardFormatter {
     // MARK: - Text
 
@@ -46,20 +49,20 @@ public enum PenNoteBoardFormatter {
     }
 
     /// The threads as an aligned listing, one row per message: state (or `reply`),
-    /// anchor, author, mentions, first line, id.
+    /// anchor, author, time written, mentions, first line, id.
     ///
     /// - Parameters:
     ///   - threads: The threads to list.
     ///   - revision: The document's revision.
     /// - Returns: The header line and the listing, with no trailing newline.
     public static func text(threads: [PenCommentThread], revision: String) -> String {
-        var table = [["state", "anchor", "author", "mentions", "text", "id"]]
+        var table = [["state", "anchor", "author", "created", "mentions", "text", "id"]]
         var messages = 0
         for thread in threads {
             for (index, message) in thread.messages.enumerated() {
                 messages += 1
                 let isFirst = index == 0 && !thread.isMissingFirstMessage
-                let lead = isFirst ? (thread.state ?? "-") : thread.isMissingFirstMessage ? "⚠ orphan" : "  reply"
+                let lead = isFirst ? state(of: thread) : thread.isMissingFirstMessage ? "⚠ orphan" : "  reply"
                 var text = TreeFormatter.oneLine(message.firstLine)
                 if thread.isMissingFirstMessage {
                     text = "⚠ no first message \(thread.id): " + text
@@ -68,6 +71,7 @@ public enum PenNoteBoardFormatter {
                     lead,
                     isFirst ? anchor(of: thread) : "-",
                     cell(message.author),
+                    cell(message.createdAt),
                     message.mentions.isEmpty ? "-" : message.mentions.map { "@\($0)" }.joined(separator: ","),
                     text,
                     message.id,
@@ -124,11 +128,26 @@ public enum PenNoteBoardFormatter {
         return TreeFormatter.oneLine(value)
     }
 
-    /// A thread's anchor as `node @x,y`, `⚠ unreadable` for one that does not read, or `-`.
+    /// A thread's state, or its misspelling flagged.
+    private static func state(of thread: PenCommentThread) -> String {
+        if let written = thread.unrecognizedState { return "⚠ \(TreeFormatter.oneLine(written))" }
+        return thread.state?.rawValue ?? "-"
+    }
+
+    /// A thread's anchor by ``PenCommentThread/placement``: `node @x,y`, `canvas @x,y`,
+    /// `⚠ deleted node @x,y`, `⚠ unreadable`, or `-`.
     private static func anchor(of thread: PenCommentThread) -> String {
-        if thread.hasUnreadableAnchor { return "⚠ unreadable" }
-        guard let anchor = thread.anchor, let node = anchor.node else { return "-" }
-        guard let x = anchor.x, let y = anchor.y else { return node }
-        return "\(node) @\(TreeFormatter.number(x)),\(TreeFormatter.number(y))"
+        var point: String?
+        if let x = thread.anchor?.x, let y = thread.anchor?.y {
+            point = "@\(TreeFormatter.number(x)),\(TreeFormatter.number(y))"
+        }
+        let place = [thread.anchor?.node, point].compactMap(\.self).joined(separator: " ")
+        switch thread.placement {
+        case .node: return place
+        case .canvas: return "canvas " + (point ?? "")
+        case .deletedNode: return "⚠ deleted " + place
+        case .unreadable: return "⚠ unreadable"
+        case .unanchored: return "-"
+        }
     }
 }

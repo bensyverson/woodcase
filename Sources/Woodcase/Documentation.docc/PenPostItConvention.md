@@ -52,9 +52,10 @@ under the Woodcase namespace, `metadata.woodcase`, rather than in properties of 
 | `stage` | any string | The part of the work, or the board lane, it sits in |
 | `tint` | `#RRGGBB` | The paper color; absent is Post-it yellow |
 | `copiedFrom` | any string | On a copy, the original author, until the copier first edits it |
-| `anchor` | any JSON | On a comment's first message, the node and point it is about |
+| `anchor` | any JSON | On a comment's first message, the node and point it is about (``PenCommentThread/Anchor``) |
 | `replyTo` | any string | On a comment reply, the id of the thread's first message |
 | `requestedBy` | any string | On a prompt, who pressed Run |
+| `createdAt` | `YYYY-MM-DDTHH:MM:SSZ` | On a comment message, when it was written: ISO 8601 in UTC, to the second (``PenComment/createdAt(_:)``) |
 | `fontFamily`, `fontWeight`, `fontStyle` | any string | The note's text style |
 | `fontSize`, `letterSpacing`, `lineHeight` | any number | The note's text style |
 | `textAlign`, `textAlignVertical` | as on a text node | The note's text alignment |
@@ -87,9 +88,33 @@ spellings (``PenMetadata/WoodcaseKey/shape(on:)``), a comment's to `open` and `r
 ``PenPostIt/Metadata`` reads a prompt's as ``PenPostIt/Metadata/runState``. The card draws the
 state with who requested it.
 
-**Comments** are notes too, one per message: `woodcase.type: comment`, the first message
-carrying `anchor` and `state`, each reply `replyTo` and `author`. The keys are typed
-here; the comment workflow is not.
+**Comments** are notes too, one per message, at the document root: `woodcase.type:
+comment`, every message carrying `author` and `createdAt`, the first message `anchor` and
+`state`, each reply `replyTo`. ``PenComment`` writes them — `woodcase comment`, `reply`
+and `resolve` are its CLI — so no one writes the keys by hand:
+
+- **The anchor** is `{"node": "<id>", "x": n, "y": n}`, a point in the node's own
+  coordinates, in points from its top-left, so the bubble moves and rotates with the
+  node; `node` is an expanded id path (`instance/child`) on something inside a component
+  instance. Without `node`, x and y are page coordinates: a canvas comment
+  (Ben's session 12 ruling).
+- **A reply names the first message**, always: ``PenComment/reply(_:to:author:at:id:in:)``
+  given a reply's id threads under that reply's first message.
+- **`createdAt`** is ISO 8601 in UTC to the second (`2026-10-11T20:41:07Z`), validated
+  when written; an edit to the text never changes it. Showing it in local time is the
+  reader's business.
+- **A thread whose node is gone** — deleted, or an instance child a component edit
+  removed — is never rewritten. It reads as ``PenCommentThread/Placement/deletedNode``,
+  which Penumbra shows only in its Comments tab, as Google Docs keeps a comment whose
+  text was deleted; undoing the delete brings it back with nothing else to do.
+
+```swift
+let anchor = try PenComment.anchor(on: "Card/Button", x: 12, y: 4, in: document)
+let thread = try PenComment.startThread("Too tall?", anchor: anchor, author: "ana", at: .now, in: document)
+try session.submit(.local(LocalEdit(operations: [thread.operation])))  // or recorder.apply(_:)
+let reply = try PenComment.reply("Fixed.", to: thread.messageID, author: "claude", at: .now, in: document)
+let resolve = try PenComment.setState(.resolved, of: thread.threadID, in: document) // nil if already
+```
 
 **A plain note has no state** (Ben's ruling, 2026-10-11, Penumbra's notes design decision 8):
 only comments are open or resolved, since resolving is how a conversation ends. A note's
@@ -105,9 +130,12 @@ treated the same way, minus the notice: left as written, read by nothing.
 ``PenNoteBoard`` reads a document's post-its, comment threads and prompts for listing —
 what `woodcase notes`, `comments` and `prompts` print (<doc:WoodcaseCLI>). A thread
 (``PenCommentThread``) is a first message and every reply naming it in `replyTo`, in
-document order; its anchor reads as `{"node": "<id>", "x": …, "y": …}`
-(``PenCommentThread/Anchor``), and a reply whose first message is gone is a thread of its
-own, flagged, never dropped. ``PenNoteBoard/threads(_:)`` keeps the threads a
+`createdAt` order (a reply with no time stays after the one before it in the file); its
+state is typed (``PenPostIt/State``, a misspelling reading as open and kept in
+``PenCommentThread/unrecognizedState``), its anchor reads as ``PenCommentThread/Anchor``,
+and ``PenCommentThread/placement`` says where it sits: on a node, on the canvas, on a
+deleted node, unreadable, or unanchored. A reply whose first message is gone is a thread
+of its own, flagged, never dropped. ``PenNoteBoard/threads(_:)`` keeps the threads a
 ``PenNoteBoard/CommentQuery`` asks for — asking for mentions keeps open threads unless a
 state is named — and ``PenNoteBoard/identity(_:for:)`` refuses a filter value that is a
 near miss of an identity the file names.
@@ -182,6 +210,10 @@ is not Woodcase's, and is never checked.
 - ``PenNoteBoard``
 - ``PenCommentThread``
 - ``PenNoteBoardFormatter``
+
+### Writing comments
+
+- ``PenComment``
 - <doc:PenMetadataNamespace>
 - <doc:NoteMarkdown>
 - <doc:PenPostItLook>

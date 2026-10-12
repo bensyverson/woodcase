@@ -72,8 +72,8 @@ struct PenNoteBoardTests {
         let threads = try board().threads
         try #require(threads.count == 4)
         #expect(threads[0].anchor == PenCommentThread.Anchor(node: "Btn01", x: 12, y: 4))
-        #expect(threads[0].state == "open")
-        #expect(threads[1].state == "resolved")
+        #expect(threads[0].state == .open)
+        #expect(threads[1].state == .resolved)
         #expect(threads[1].anchor?.node == "Card1")
     }
 

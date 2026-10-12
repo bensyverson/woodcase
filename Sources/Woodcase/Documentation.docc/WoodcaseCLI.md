@@ -78,6 +78,9 @@ return are listed here, so a script knows what it must branch on.
 | `unbundle` | write | Copy a bundle out as a plain .pen folder any .pen tool opens | 0 2 3 4 5 |
 | `embed` | write | Download a bundle's remote images and Google Fonts into it | 0 2 3 4 5 |
 | `add` | write | Insert a .pen subtree under a parent, or at the root | 0 2 3 4 5 |
+| `comment` | write | Start a comment thread on a node, or on the canvas | 0 2 3 4 5 |
+| `reply` | write | Reply to a comment thread, under its first message | 0 2 3 4 5 |
+| `resolve` | write | Resolve a comment thread, or `--reopen` it | 0 2 3 4 5 |
 | `set` | write | Patch properties of one node by path | 0 2 3 4 5 |
 | `replace` | write | Swap a node's subtree for a new one, keeping its place | 0 2 3 4 5 |
 | `cp` | write | Duplicate a subtree with fresh ids | 0 2 3 4 5 |
@@ -401,19 +404,27 @@ claude  #90CAF9  200×200  Old-style post-it  Nte02
 List comment threads, so an agent can find the ones that mention it. A comment is a
 note, one per message (`woodcase.type: comment`), at the document root: the first
 message carries the thread's `anchor` — `{"node": "<id>", "x": …, "y": …}`, the point in
-the node's coordinates — and its `state`, `open` or `resolved` (absent reads as open);
-each reply carries `replyTo`, the first message's id. One row per message: the first
-leads with the thread's state and anchor, each reply with `reply`, then the author, the
-names it `@mentions`, its first line and its id. A reply whose first message is gone
-leads with `⚠ orphan` rather than vanishing.
+the node's own coordinates, or `{"x": …, "y": …}`, a page point on the empty canvas — and
+its `state`, `open` or `resolved` (absent reads as open); each reply carries `replyTo`, the
+first message's id. Every message carries `author` and `createdAt`, the time it was
+written, in UTC. `comment`, `reply` and `resolve` write all of these. One row per
+message: the first leads with the thread's state and anchor, each reply with `reply`,
+then the author, the time (UTC, as the file holds it; `-` when none is written), the
+names it `@mentions`, its first line and its id. Replies are in `createdAt` order, a
+reply with no time staying after the one before it in the file. The anchor reads
+`node @x,y`, `canvas @x,y`, `⚠ deleted node @x,y` when the node is gone — deleted, or an
+instance child a component edit removed; the anchor is never rewritten, so undoing the
+delete brings the thread back — or `⚠ unreadable`. A reply whose first message is gone
+leads with `⚠ orphan` rather than vanishing, and a misspelled state leads as
+`⚠ <spelling>` and counts as open.
 
 ```text
 $ woodcase comments design.pen --mentions claude
 rev 4f2a1b0c9d8e7f60  1 thread  3 messages
-state    anchor       author  mentions  text                                id
-open     Btn01 @12,4  ana     @claude   Should this be 44pt tall, @claude?  Cm01
-  reply  -            claude  @ana      Yes, per the HIG. @ana              Cm02
-  reply  -            ben     -         Agreed.                             Cm03
+state    anchor       author  created               mentions  text                                id
+open     Btn01 @12,4  ana     2026-10-11T20:41:07Z  @claude   Should this be 44pt tall, @claude?  Cm01
+  reply  -            claude  2026-10-11T20:43:30Z  @ana      Yes, per the HIG. @ana              Cm02
+  reply  -            ben     -                     -         Agreed.                             Cm03
 ```
 
 Filters combine. `--mentions` keeps threads in which any message mentions the name
@@ -433,7 +444,56 @@ error who the file does name. A misspelled `--state` is refused with its choices
 | `--mentions` | — | Threads that `@mention` this identity |
 | `--state` | `open` with `--mentions`, else `all` | `open`, `resolved` or `all` |
 | `--author` | — | Threads this identity wrote any message in |
-| `--json` | `false` | `{"revision":…,"threads":[{"id","state","anchor","messages":[…]}]}`, each message with its `rev` and whole `content` |
+| `--json` | `false` | `{"revision":…,"threads":[{"id","state","anchor","placement","messages":[…]}]}`, each message with its `rev`, `createdAt` and whole `content`; `placement` is `node`, `canvas`, `deletedNode`, `unreadable` or `unanchored` |
+
+### `comment`, `reply`, `resolve`
+
+Write comments without writing their keys by hand (Penumbra's notes design rev 2,
+decision 8). Each is one edit through the transaction, logged under `--as` and undoable
+with `woodcase undo`; the library side is ``PenComment``, which Penumbra calls too.
+
+```bash
+woodcase comment design.pen Card/Button --at 12,4 "Too tall, @ana?" --as claude
+woodcase comment design.pen --at 900,40 "Room for a legend here" --as claude
+woodcase reply design.pen Cm01 "Fixed: 44pt now." --as claude
+woodcase resolve design.pen Cm01 --as ana
+woodcase resolve design.pen Cm01 --reopen --as ana
+```
+
+- **`comment <file> [<node>] [--at x,y] <text>`** starts a thread: a note at the document
+  root with `type: comment`, `author`, `createdAt` (now, UTC to the second), `state: open`
+  and `anchor`. `--at` is in the node's own coordinates — points from its top-left — and
+  defaults to `0,0`; the node is any address, stored by id, and a path into a component
+  instance is stored as the expanded id path (`instance/child`). With no node, or
+  `--canvas`, the point is in page coordinates and is required. The note is placed past
+  every root, as `add` places a root that names no position. It answers
+  `thread  <id>`, then the revisions.
+- **`reply <file> <thread> <text>`** adds a message whose `replyTo` is the thread's
+  **first** message, even when `<thread>` is a reply's id. It answers
+  `reply  <id>  thread <first>`.
+- **`resolve <file> <thread> [--reopen]`** sets the first message's `state` and nothing
+  else; a thread already in that state is left alone, the answer says so, and it exits 0.
+  `--rev` guards the first message.
+
+The text is markdown, as the last argument or from `-F <file>` (`-F -` reads standard
+input), never both. `comment` and `reply` require an author — `--as` or
+`$WOODCASE_AS` — since it is stamped on the message; `--id` names the new message instead
+of minting one. A thread that is not a comment message is refused with exit 2 and the
+threads there are; a node that does not resolve, with its near misses.
+
+**Options:**
+
+| Option | Verbs | Description |
+|--------|-------|-------------|
+| `--at x,y` | `comment` | The point: on the node from its top-left, or on the page |
+| `--canvas` | `comment` | Comment on the empty canvas; takes no node |
+| `--id` | `comment`, `reply` | The new message's id |
+| `-F <file>` | `comment`, `reply` | The text from a file; `-` is standard input |
+| `--reopen` | `resolve` | Set the thread open instead of resolved |
+| `--rev` | `resolve` | The first message's revision you last read |
+| `--dry-run` | all three | Rehearse; write nothing |
+| `--as` | all three | The author (required for `comment` and `reply`) |
+| `--json` | all three | `{"action","thread","message","createdAt","unchanged","dryRun","rev","documentRevision"}` |
 
 ### `prompts`
 

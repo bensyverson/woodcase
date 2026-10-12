@@ -27,7 +27,7 @@ package struct WoodcaseCommand: AsyncParsableCommand {
                   notes  comments  prompts
                   never write; --json on every one, and a document read carries a revision
           write   new  add  set  replace  cp  mv  rm  override  apply  js  undo
-                  bundle  unbundle  embed
+                  bundle  unbundle  embed  comment  reply  resolve
                   attributed with --as, appended to the activity log, guarded by --rev
           render  render  themes  generate  migrate
           view    serve  preview
@@ -55,6 +55,7 @@ package struct WoodcaseCommand: AsyncParsableCommand {
             NewCommand.self, BundleCommand.self, UnbundleCommand.self, EmbedCommand.self,
             AddCommand.self, SetCommand.self, ReplaceCommand.self, CopyCommand.self,
             MoveCommand.self, RemoveCommand.self,
+            CommentCommand.self, ReplyCommand.self, ResolveCommand.self,
             OverrideCommand.self, Apply.self, Js.self, Vars.self, Imports.self,
             Render.self, Themes.self, Generate.self, Migrate.self, Activity.self, Icons.self,
             Serve.self, Preview.self, Help.self,

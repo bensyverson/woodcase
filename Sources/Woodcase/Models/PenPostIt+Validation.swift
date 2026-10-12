@@ -110,6 +110,11 @@ public extension PenPostIt {
             return Violation(key: key, value: value, accepted: spellings, suggestion: nil)
         case (.hexColor, _):
             return Violation(key: key, value: value, accepted: key.spellings, suggestion: nil)
+        case let (.utcTimestamp, .string(text)):
+            guard PenComment.date(createdAt: text) == nil else { return nil }
+            return Violation(key: key, value: value, accepted: key.spellings, suggestion: nil)
+        case (.utcTimestamp, _):
+            return Violation(key: key, value: value, accepted: key.spellings, suggestion: nil)
         case (.textSpans, _):
             do {
                 _ = try PenTextSpans(metadataValue: value)

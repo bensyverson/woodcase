@@ -70,6 +70,9 @@ public extension PenMetadata {
         case replyTo
         /// On a prompt, who pressed Run: the identity that queued its work.
         case requestedBy
+        /// On a comment message, when it was written: ISO 8601 in UTC, to the second
+        /// (`2026-10-11T20:41:07Z`). An edit to the text never changes it.
+        case createdAt
 
         // MARK: A note's text style
 
@@ -123,13 +126,16 @@ public extension PenMetadata {
             /// A text node's spans: `{text, runs: [{start, end, …}]}`, as
             /// ``PenTextSpans/init(metadataValue:)`` reads them.
             case textSpans
+            /// A time in UTC, to the second, as ``PenComment/date(createdAt:)`` reads it.
+            case utcTimestamp
         }
 
         /// Which part of Woodcase the key belongs to.
         public var group: Group {
             switch self {
             case .props, .role, .states, .action, .scroll: .codegen
-            case .type, .state, .author, .leaf, .stage, .tint, .copiedFrom, .anchor, .replyTo, .requestedBy: .note
+            case .type, .state, .author, .leaf, .stage, .tint, .copiedFrom, .anchor, .replyTo, .requestedBy, .createdAt:
+                .note
             case .fontFamily, .fontSize, .fontWeight, .fontStyle, .letterSpacing, .lineHeight, .textAlign,
                  .textAlignVertical: .noteTextStyle
             case .spans: .text
@@ -146,7 +152,7 @@ public extension PenMetadata {
             switch self {
             case .props, .role, .states, .action, .scroll: "_\(rawValue)"
             case .type, .state, .author, .leaf, .stage, .tint, .copiedFrom: rawValue
-            case .anchor, .replyTo, .requestedBy, .fontFamily, .fontSize, .fontWeight, .fontStyle, .letterSpacing,
+            case .anchor, .replyTo, .requestedBy, .createdAt, .fontFamily, .fontSize, .fontWeight, .fontStyle, .letterSpacing,
                  .lineHeight, .textAlign, .textAlignVertical, .spans: nil
             }
         }
@@ -164,6 +170,7 @@ public extension PenMetadata {
                 .string
             case .fontSize, .letterSpacing, .lineHeight: .number
             case .spans: .textSpans
+            case .createdAt: .utcTimestamp
             }
         }
 
@@ -185,6 +192,7 @@ public extension PenMetadata {
             case let .oneOf(spellings): spellings
             case .hexColor: [PenPostIt.tintForm]
             case .textSpans: [PenTextSpans.wireForm]
+            case .utcTimestamp: [PenComment.createdAtForm]
             case .any, .string, .number: []
             }
         }
@@ -207,6 +215,7 @@ public extension PenMetadata {
             case .anchor: "On a comment's first message, the node and point it is about."
             case .replyTo: "On a comment reply, the id of the thread's first message."
             case .requestedBy: "On a prompt, who pressed Run."
+            case .createdAt: "On a comment message, when it was written: ISO 8601 UTC, to the second."
             case .fontFamily: "The note's font family."
             case .fontSize: "The note's font size, in points."
             case .fontWeight: "The note's font weight."

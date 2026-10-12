@@ -28,7 +28,7 @@ struct CommentsCommandTests {
         #expect(lines[0].hasPrefix("rev "))
         #expect(lines[0].hasSuffix("4 threads  7 messages"))
         #expect(lines[1].split(separator: " ", omittingEmptySubsequences: true)
-            == ["state", "anchor", "author", "mentions", "text", "id"])
+            == ["state", "anchor", "author", "created", "mentions", "text", "id"])
         #expect(ids(run) == ["Cm01", "Cm02", "Cm03", "Cm04", "Cm05", "Cm06", "Cm07"])
 
         let first = try #require(lines.first { $0.hasSuffix("Cm01") })
@@ -113,12 +113,44 @@ struct CommentsCommandTests {
         let report = try JSONDecoder().decode(PenNoteBoard.CommentsReport.self, from: Data(run.stdout.utf8))
         #expect(report.threads.map(\.id) == ["Cm01"])
         let thread = try #require(report.threads.first)
-        #expect(thread.state == "open")
+        #expect(thread.state == .open)
         #expect(thread.anchor == PenCommentThread.Anchor(node: "Btn01", x: 12, y: 4))
         try #require(thread.messages.map(\.id) == ["Cm01", "Cm02", "Cm03"])
         #expect(thread.messages.allSatisfy { !$0.rev.isEmpty })
         #expect(thread.messages[1].replyTo == "Cm01")
         #expect(!report.revision.isEmpty)
+    }
+
+    @Test("A thread whose node was deleted lists as on a deleted node; undoing the delete restores it")
+    func deletedNode() throws {
+        let fixture = try CommandFixture(fixture: "notes-comments-prompts.pen")
+        let remove = try fixture.run("rm", fixture.file.path, "Btn01", "--as", "ana")
+        #expect(remove.status == 0, "rm refused: \(remove.stderr)")
+
+        let deleted = try fixture.run("comments", fixture.file.path)
+        let row = try #require(deleted.stdoutLines.first { $0.hasSuffix("Cm01") })
+        #expect(row.contains("⚠ deleted Btn01 @12,4"), "row: \(row)")
+        let json = try fixture.run("comments", fixture.file.path, "--json")
+        let report = try JSONDecoder().decode(PenNoteBoard.CommentsReport.self, from: Data(json.stdout.utf8))
+        #expect(report.threads.first?.placement == .deletedNode)
+        #expect(report.threads.first?.anchor == PenCommentThread.Anchor(node: "Btn01", x: 12, y: 4))
+
+        let undo = try fixture.run("undo", fixture.file.path, "--as", "ana")
+        #expect(undo.status == 0, "undo refused: \(undo.stderr)")
+        let restored = try fixture.run("comments", fixture.file.path)
+        let back = try #require(restored.stdoutLines.first { $0.hasSuffix("Cm01") })
+        #expect(back.contains("Btn01 @12,4"), "row: \(back)")
+        #expect(!back.contains("deleted"), "row: \(back)")
+    }
+
+    @Test("A canvas thread's anchor lists as the canvas and its point")
+    func canvasAnchor() throws {
+        let fixture = try CommandFixture(fixture: "notes-comments-prompts.pen")
+        _ = try fixture.run("comment", fixture.file.path, "--at", "900,40", "Legend?", "--id", "CmC", "--as", "ana")
+        let run = try fixture.run("comments", fixture.file.path)
+
+        let row = try #require(run.stdoutLines.first { $0.hasSuffix("CmC") })
+        #expect(row.contains("canvas @900,40"), "row: \(row)")
     }
 
     @Test("A file with no comments is a clean negative")
