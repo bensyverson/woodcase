@@ -26,14 +26,20 @@ public extension EditableDocument {
     /// The stored nodes `operations` would leave, by id, computed without applying them.
     ///
     /// Each node is what ``apply(_:)`` would store: children stripped, as in ``nodes``.
+    /// Each operation is first normalized (``EditOperation/normalized(in:)``) against the
+    /// nodes the earlier ones would have left, as a commit does, so a deep metadata key
+    /// such as `common.metadata.woodcase.fontSize` folds onto the node's metadata instead
+    /// of being dropped, and a whole-struct ``EditOperation/updateCommon(_:)`` that
+    /// normalizes to a property patch previews as one.
     /// Operations apply in order, so two that touch one node fold onto it as a commit
     /// folds them; each is checked against the document as it stands, exactly as
     /// applying it checks it. Nothing changes: not the store, the caches, the dirty
     /// tracking nor the CRDT.
     ///
-    /// Only the operations ``EditPlanner`` plans are property edits:
-    /// ``EditOperation/setProperties(_:)``, ``EditOperation/overrideDescendant(_:)``
-    /// and ``EditOperation/overrideRoot(_:)``.
+    /// Only property edits preview: ``EditOperation/setProperties(_:)``,
+    /// ``EditOperation/overrideDescendant(_:)`` and ``EditOperation/overrideRoot(_:)``
+    /// (what ``EditPlanner`` plans), and an ``EditOperation/updateCommon(_:)`` or
+    /// ``EditOperation/updateKind(_:)`` that normalizes to a `setProperties`.
     ///
     /// - Parameter operations: The operations to preview.
     /// - Returns: Each node the operations write — an override writes its instance's
@@ -42,7 +48,8 @@ public extension EditableDocument {
     ///   ``EditingError`` applying the operation would throw.
     func previewNodes(for operations: [EditOperation]) throws -> [String: PenNode] {
         var preview: [String: PenNode] = [:]
-        for operation in operations {
+        for original in operations {
+            let operation = original.normalized(in: self, nodeAt: { preview[$0] ?? nodes[$0] })
             switch operation {
             case let .setProperties(op):
                 var node = try validateSetProperties(op, onto: preview[op.nodeID]).new
@@ -53,7 +60,7 @@ public extension EditableDocument {
             case let .overrideRoot(op):
                 preview[op.refNodeID] = try overriddenNode(for: op, onto: preview[op.refNodeID])
             default:
-                throw PreviewError.notAPropertyEdit(Self.caseName(of: operation))
+                throw PreviewError.notAPropertyEdit(Self.caseName(of: original))
             }
         }
         return preview

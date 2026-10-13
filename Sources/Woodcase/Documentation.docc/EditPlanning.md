@@ -88,10 +88,12 @@ An editor shows a gesture in progress (a scrubbed value, a dragged gradient stop
 number being typed) on its own canvas before committing it, without sending each step
 to collaborators, the undo stack or the file. It plans each step as above, and hands the
 plan's operations to ``EditableDocument/previewNodes(for:)``. That returns the stored
-nodes a commit would leave, using the commit's own patch and override code, and changes
-nothing. ``EditableDocument/materializeSnapshot(overlaying:isolation:)`` then draws the
-document with those nodes swapped in. A plan's operations are always property edits; a
-structural one throws ``EditableDocument/PreviewError/notAPropertyEdit(_:)``.
+nodes a commit would leave, using the commit's own normalization
+(``EditOperation/normalized(in:)``, so a deep metadata key such as
+`common.metadata.woodcase.fontSize` folds onto the node's metadata as it does on a commit),
+patch and override code, and changes nothing. ``EditableDocument/materializeSnapshot(overlaying:isolation:)`` then draws the
+document with those nodes swapped in. A plan's operations are always property edits, as is a whole-struct
+`updateCommon` or `updateKind` that normalizes to one; any other operation throws ``EditableDocument/PreviewError/notAPropertyEdit(_:)``.
 
 ```swift
 let plan = try EditPlanner.plan(.set(["common.opacity": 0.4]), at: address, in: document)

@@ -44,15 +44,31 @@ public extension EditOperation {
     /// - Parameter document: The document the operation is about to be applied to.
     /// - Returns: The equivalent per-path operation, or `self`.
     func normalized(in document: EditableDocument) -> EditOperation {
+        normalized(in: document, nodeAt: { document.nodes[$0] })
+    }
+
+    /// The operation normalized against the document with some nodes standing in for stored ones.
+    ///
+    /// ``normalized(in:)`` is this with the document's own nodes. A preview
+    /// (``EditableDocument/previewNodes(for:)``) passes the nodes earlier operations of
+    /// the same batch would have left, so each operation normalizes against what a commit
+    /// would have stored by then, and the preview and the commit share this one fold.
+    ///
+    /// - Parameters:
+    ///   - document: The document the operation is about to be applied to; its child
+    ///     lists settle whether an `updateKind` changes declared-ness.
+    ///   - lookup: The stored node an id names at this point, or `nil` for none.
+    /// - Returns: The equivalent per-path operation, or `self`.
+    internal func normalized(in document: EditableDocument, nodeAt lookup: (String) -> PenNode?) -> EditOperation {
         switch self {
         case let .updateCommon(op):
-            guard let node = document.nodes[op.nodeID] else { return self }
+            guard let node = lookup(op.nodeID) else { return self }
             var target = node
             target.common = op.common
             let paths = PropertyDiff.diffCommon(old: node.common, new: op.common)
             return Self.patch(node: node, target: target, paths: paths) ?? self
         case let .updateKind(op):
-            guard let node = document.nodes[op.nodeID] else { return self }
+            guard let node = lookup(op.nodeID) else { return self }
             // A change of declared-ness has no path; it stays whole.
             if let empty = op.emptyChildren, (document.children[op.nodeID] ?? []).isEmpty,
                (document.children[op.nodeID] != nil) != (empty == .declared)
@@ -66,7 +82,7 @@ public extension EditOperation {
             return Self.patch(node: node, target: target, paths: paths) ?? self
         case let .setProperties(op):
             guard op.properties.keys.contains(where: { NodePropertyCodec.deepKey(of: $0) != nil }),
-                  let node = document.nodes[op.nodeID],
+                  let node = lookup(op.nodeID),
                   let folded = try? NodePropertyCodec.folding(op.properties, onto: node)
             else { return self }
             return .setProperties(SetProperties(nodeID: op.nodeID, properties: folded))
