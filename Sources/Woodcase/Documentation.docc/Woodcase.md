@@ -38,6 +38,7 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 - <doc:PenBundles>
 - <doc:WoodcaseBatches>
 - <doc:EditPlanning>
+- <doc:Clipboard>
 - <doc:InspectingNodes>
 - <doc:WoodcaseScripting>
 - <doc:WoodcaseViewer>
@@ -136,6 +137,7 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 - <doc:EditingDocuments>
 - <doc:MergingDocuments>
 - <doc:ComponentLoops>
+- <doc:Clipboard>
 - ``EditableDocument``
 - ``EditOperation``
 - ``EditingError``

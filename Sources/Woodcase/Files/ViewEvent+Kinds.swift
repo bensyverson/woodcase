@@ -19,6 +19,8 @@ public extension ViewEvent {
         case shot
         /// `woodcase render`: the roots drawn.
         case render
+        /// `woodcase clip`: the subtrees a copy took.
+        case clip
     }
 
     /// How much of the document under each node a read covered.

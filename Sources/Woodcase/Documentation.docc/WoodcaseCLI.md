@@ -62,6 +62,7 @@ return are listed here, so a script knows what it must branch on.
 | `tree` | read | The settled node tree, one row per node with its rect | 0 2 3 4 |
 | `find` | read | The rows of that tree a JavaScript predicate keeps | 0 1 2 3 4 |
 | `get` | read | One node as canonical .pen JSON, with its revision | 0 2 3 4 |
+| `clip` | read | What Copy takes: the nodes as a self-contained .pen, with their components and variables | 0 2 3 4 |
 | `lint` | read | What is wrong with the file, from its settled layout | 0 1 2 3 4 |
 | `notes` | read | The post-its: author, tint, settled size and first line | 0 1 2 3 4 |
 | `comments` | read | Comment threads with replies, anchor and state; `--mentions` finds yours | 0 1 2 3 4 |
@@ -356,6 +357,25 @@ woodcase get design.pen Button --instances
 | `--expand` | `false` | Print the node as it renders, children and all |
 | `--instances` | `false` | List every `ref` that draws this component, one row each |
 | `--json` | `false` | `{"node":…,"revision":…}`, or `{"definition":…,"instances":[…]}` |
+
+### `clip`
+
+What an editor's Copy puts on the pasteboard: the nodes asked for, as a .pen that draws
+on its own (``PenClip``; see <doc:Clipboard>). Its first roots are the nodes, in document
+order and at the canvas positions they were drawn at; after them come the component
+definitions they draw — through nested instances and ref chains, copied as stored, an
+imported library's as local definitions — with the variables and theme axes they need.
+A node inside an instance (`Orders/Value`) is copied as drawn and detached. `cp` is the
+verb that duplicates a node *inside* a file; `clip` writes nothing.
+
+```bash
+woodcase clip design.pen Dashboard/Header Orders/Value > clip.pen
+woodcase shot clip.pen
+```
+
+**Options:** `--as` (a reader, for the view log), `--json`, which prints
+`{"contentIDs": [...], "document": {...}}` so the copied roots can be told from the
+carried definitions.
 
 ### `lint`
 

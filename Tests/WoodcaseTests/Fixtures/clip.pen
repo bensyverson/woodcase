@@ -1,0 +1,54 @@
+{
+  "version": "2.17",
+  "themes": { "mode": ["light", "dark"], "density": ["comfy", "tight"] },
+  "variables": {
+    "brand": {
+      "type": "color",
+      "value": [
+        { "value": "#000000", "theme": { "mode": "light" } },
+        { "value": "#FFFFFF", "theme": { "mode": "dark" } }
+      ]
+    },
+    "accent": { "type": "color", "value": "$brand" },
+    "unused": { "type": "color", "value": "#123456" }
+  },
+  "children": [
+    {
+      "id": "Lib", "name": "Library", "type": "frame", "x": 0, "y": 0, "width": 50, "height": 50, "layout": "none",
+      "children": [
+        { "id": "Icon", "name": "Icon", "type": "frame", "reusable": true, "width": 16, "height": 16, "fill": "$accent" },
+        {
+          "id": "Btn", "name": "Button", "type": "frame", "reusable": true, "layout": "horizontal",
+          "children": [
+            { "id": "Lbl", "name": "Label", "type": "text", "content": "Go" },
+            { "id": "IcoRef", "name": "Glyph", "type": "ref", "ref": "Icon" }
+          ]
+        },
+        { "id": "Alias", "name": "Alias", "type": "ref", "ref": "Btn", "reusable": true },
+        {
+          "id": "Outer", "name": "Outer", "type": "frame", "reusable": true,
+          "children": [
+            { "id": "Inner", "name": "Inner", "type": "frame", "reusable": true, "width": 4, "height": 4 },
+            { "id": "InnerI", "name": "Inner instance", "type": "ref", "ref": "Inner" }
+          ]
+        },
+        { "id": "Unrelated", "name": "Unrelated", "type": "frame", "reusable": true, "width": 8, "height": 8 }
+      ]
+    },
+    {
+      "id": "Page", "name": "Page", "type": "frame", "x": 100, "y": 200, "width": 400, "height": 300, "layout": "none",
+      "children": [
+        {
+          "id": "Card", "name": "Card", "type": "frame", "x": 10, "y": 20, "width": 200, "height": 100, "layout": "vertical",
+          "children": [
+            { "id": "BtnI", "name": "Buy", "type": "ref", "ref": "Btn", "descendants": { "Lbl": { "content": "Buy" } } },
+            { "id": "Fill", "name": "Bar", "type": "rectangle", "width": "fill_container", "height": 10, "fill": "#00FF00" }
+          ]
+        },
+        { "id": "Free", "name": "Dot", "type": "rectangle", "x": 5, "y": 6, "width": 10, "height": 10, "fill": "#FF0000" },
+        { "id": "AliasI", "name": "Aliased", "type": "ref", "ref": "Alias", "x": 300, "y": 0 },
+        { "id": "OuterI", "name": "Outer instance", "type": "ref", "ref": "Outer", "x": 300, "y": 100 }
+      ]
+    }
+  ]
+}

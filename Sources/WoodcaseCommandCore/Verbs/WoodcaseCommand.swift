@@ -24,7 +24,7 @@ package struct WoodcaseCommand: AsyncParsableCommand {
         makes one, `woodcase bundle design.pen` converts one.
 
           read    tree  find  get  shot  lint  activity  vars  imports  icons  schema
-                  notes  comments  prompts
+                  notes  comments  prompts  clip
                   never write; --json on every one, and a document read carries a revision
           write   new  add  set  replace  cp  mv  rm  override  apply  js  undo
                   bundle  unbundle  embed  comment  reply  resolve
@@ -50,7 +50,7 @@ package struct WoodcaseCommand: AsyncParsableCommand {
         """,
         version: WoodcaseVersion.line,
         subcommands: [
-            Tree.self, Find.self, Get.self, Shot.self, Lint.self, Schema.self, Undo.self,
+            Tree.self, Find.self, Get.self, ClipCommand.self, Shot.self, Lint.self, Schema.self, Undo.self,
             Notes.self, Comments.self, Prompts.self,
             NewCommand.self, BundleCommand.self, UnbundleCommand.self, EmbedCommand.self,
             AddCommand.self, SetCommand.self, ReplaceCommand.self, CopyCommand.self,
