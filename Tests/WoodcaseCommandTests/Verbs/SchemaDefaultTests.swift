@@ -69,7 +69,7 @@ struct SchemaDefaultTests {
             $0.contains("position*") && $0.hasSuffix("0 to 1, a fraction")
         }
         #expect(position != nil)
-        let radius = text.split(separator: "\n").first { $0.contains("radius ") && $0.hasSuffix("≥ 0, in points") }
+        let radius = text.split(separator: "\n").first { $0.contains("radius ") && $0.hasSuffix("≥ 0, in points — default 0") }
         #expect(radius != nil)
     }
 

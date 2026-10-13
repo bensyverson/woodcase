@@ -171,6 +171,44 @@ struct SchemaCommandTests {
         #expect(radius.contains("[topLeft, topRight, bottomRight, bottomLeft]"))
     }
 
+    @Test("A gradient's center, size and rotation print their defaults, as the top-level ones do")
+    func nestedDefaultsArePrinted() throws {
+        let fixture = try CommandFixture(fixture: "every-node-type.pen")
+        let run = try fixture.run("schema", "frame")
+
+        func line(_ key: String, in shape: String) throws -> String {
+            let lines = run.stdoutLines
+            let start = try #require(lines.firstIndex { $0.hasPrefix("  \(shape) —") })
+            let block = lines[(start + 1)...].prefix { !$0.isEmpty }
+            return try #require(block.first { $0.trimmingCharacters(in: .whitespaces).hasPrefix(key) })
+        }
+        #expect(try line("x", in: "fill position").hasSuffix("default 0.5"))
+        #expect(try line("y", in: "fill position").hasSuffix("default 0.5"))
+        #expect(try line("width", in: "fill size").hasSuffix("default 1"))
+        #expect(try line("height", in: "fill size").hasSuffix("default 1"))
+        let rotation = try line("rotation", in: "fill")
+        #expect(rotation.hasSuffix("default 0"), "\(rotation)")
+        #expect(try line("shadowType", in: "effect").hasSuffix("default \"outer\""))
+        #expect(try line("position", in: "gradient stop").contains("default") == false)
+    }
+
+    @Test("--json carries a nested key's default as the file would write it")
+    func nestedDefaultsAreInJSON() throws {
+        let fixture = try CommandFixture(fixture: "every-node-type.pen")
+        let run = try fixture.run("schema", "frame", "--json")
+        let object = try #require(
+            try JSONSerialization.jsonObject(with: Data(run.stdout.utf8)) as? [String: Any]
+        )
+        let nested = try #require(object["nested"] as? [[String: Any]])
+        let size = try #require(nested.first { $0["name"] as? String == "fill size" })
+        let variant = try #require((size["variants"] as? [[String: Any]])?.first)
+        let width = try #require((variant["fields"] as? [[String: Any]])?.first { $0["key"] as? String == "width" })
+        #expect(width["default"] as? Int == 1)
+        let stop = try #require(nested.first { $0["name"] as? String == "gradient stop" })
+        let stopFields = try #require(((stop["variants"] as? [[String: Any]])?.first)?["fields"] as? [[String: Any]])
+        #expect(stopFields.allSatisfy { $0["default"] == nil })
+    }
+
     // MARK: - Shape of the verb
 
     @Test("`woodcase schema` needs no .pen file")

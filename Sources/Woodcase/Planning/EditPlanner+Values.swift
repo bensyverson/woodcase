@@ -66,7 +66,8 @@ extension EditPlanner {
     /// - Parameters:
     ///   - property: The property path or raw key, for the refusal.
     ///   - location: Where inside the property's value the binding sits
-    ///     (`kind.fills[0].color`), for the message, or `nil` for the property itself.
+    ///     (`kind.fills[0].color` spelled under `property`), for the message and the
+    ///     refusal's ``EditRefusal/nested``, or `nil` for the property itself.
     ///   - variable: The variable name, without `$`.
     ///   - expected: The type the property's binding must have, or `nil` to check only
     ///     that the variable exists.
@@ -75,13 +76,13 @@ extension EditPlanner {
     /// - Throws: ``EditRefusal``.
     static func checkBinding(
         _ property: String,
-        at location: String? = nil,
+        at location: EditRefusal.NestedLocation? = nil,
         to variable: String,
         expecting expected: PenVariableType?,
         address: String,
         in document: EditableDocument
     ) throws {
-        let named = location ?? property
+        let named = location.map { $0.spelled(under: property) } ?? property
         let reference = PenDollarEscape.dollar + variable
         guard let defined = document.variable(named: variable) else {
             guard !document.mayDefineImported(variable) else { return }
@@ -92,7 +93,8 @@ extension EditPlanner {
                 expected: expected.map(phrase(of:)),
                 message: "\(address) \(named) refers to \(reference), and the document defines no "
                     + "variable named \(variable) — define it first with `woodcase vars set <file> "
-                    + "\(variable)=<value>`, or write \(PenDollarEscape.sequence)\(variable) for the literal text"
+                    + "\(variable)=<value>`, or write \(PenDollarEscape.sequence)\(variable) for the literal text",
+                nested: location
             )
         }
         guard let expected, defined.type != expected else { return }
@@ -104,7 +106,8 @@ extension EditPlanner {
             message: "\(address) \(named) takes \(phrase(of: expected)), but \(variable) is a "
                 + "\(defined.type.rawValue) variable — bind a \(expected.rawValue) variable instead; "
                 + "`woodcase vars <file>` lists them"
-                + (expected == .string ? ", or write \(PenDollarEscape.sequence)\(variable) for the literal text" : "")
+                + (expected == .string ? ", or write \(PenDollarEscape.sequence)\(variable) for the literal text" : ""),
+            nested: location
         )
     }
 
@@ -135,7 +138,7 @@ extension EditPlanner {
             let expected = item.field.flatMap { PenValueForm.variableType(of: $0.forms) }
             guard expected != nil || shape.variable != nil else { continue }
             try checkBinding(
-                write.key, at: item.location, to: name, expecting: expected, address: address, in: document
+                write.key, at: item.nestedLocation, to: name, expecting: expected, address: address, in: document
             )
         }
     }

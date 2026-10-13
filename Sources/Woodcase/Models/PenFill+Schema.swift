@@ -42,7 +42,7 @@ public extension PenFill {
                     opacityField,
                     PenNestedShape.Field(key: "center", forms: [.one(positionSchema)]),
                     PenNestedShape.Field(key: "size", forms: [.one(sizeSchema)]),
-                    PenNestedShape.Field(key: "rotation", forms: [.number, .variable(.number)]),
+                    PenNestedShape.Field(key: "rotation", forms: [.number, .variable(.number)], default: .number(0)),
                     PenNestedShape.Field(key: "colors", forms: [.many(stopSchema)]),
                 ]
             ),
@@ -80,7 +80,9 @@ public extension PenFill {
             PenNestedShape.Variant(
                 spelling: "shader",
                 fields: [
-                    enabledField, blendModeField, opacityField,
+                    // The CoreGraphics renderer draws no shader, so nothing pins these keys'
+                    // defaults; they are left unstated rather than guessed.
+                    enabledField.withoutDefault, blendModeField.withoutDefault, opacityField.withoutDefault,
                     PenNestedShape.Field(key: "url", forms: [.text(.plain)], isRequired: true),
                     PenNestedShape.Field(
                         key: "uniforms",
@@ -141,8 +143,8 @@ public extension PenFill {
         summary: "a point in the node's box, as fractions from 0 to 1",
         variants: [
             PenNestedShape.Variant(fields: [
-                PenNestedShape.Field(key: "x", forms: [.number]),
-                PenNestedShape.Field(key: "y", forms: [.number]),
+                PenNestedShape.Field(key: "x", forms: [.number], default: .number(0.5)),
+                PenNestedShape.Field(key: "y", forms: [.number], default: .number(0.5)),
             ]),
         ]
     )
@@ -155,8 +157,8 @@ public extension PenFill {
         summary: "a gradient's reach, as fractions of the node's box",
         variants: [
             PenNestedShape.Variant(fields: [
-                PenNestedShape.Field(key: "width", forms: [.number, .variable(.number)]),
-                PenNestedShape.Field(key: "height", forms: [.number, .variable(.number)]),
+                PenNestedShape.Field(key: "width", forms: [.number, .variable(.number)], default: .number(1)),
+                PenNestedShape.Field(key: "height", forms: [.number, .variable(.number)], default: .number(1)),
             ]),
         ]
     )
@@ -166,19 +168,22 @@ public extension PenFill {
     /// `enabled` — a fill switched off is kept in the file and not painted.
     private static let enabledField = PenNestedShape.Field(
         key: "enabled",
-        forms: [.boolean, .variable(.boolean)]
+        forms: [.boolean, .variable(.boolean)],
+        default: .boolean(true)
     )
 
     /// `blendMode` — how this fill composites onto what is under it.
     private static let blendModeField = PenNestedShape.Field(
         key: "blendMode",
-        forms: [.text(.blendMode)]
+        forms: [.text(.blendMode)],
+        default: .string(PenBlendMode.normal.rawString)
     )
 
     /// `opacity` — the fill's own opacity, on top of the node's.
     private static let opacityField = PenNestedShape.Field(
         key: "opacity",
         forms: [.number, .variable(.number)],
-        constraint: .fraction
+        constraint: .fraction,
+        default: .number(1)
     )
 }

@@ -111,6 +111,8 @@ public struct EditRefusal: Error, Friendly {
     ///   - message: One sentence: what was refused, and what to do instead.
     ///   - errorCode: The ``EditingError/code`` or ``BatchError/code`` the refusal came
     ///     from, when it came from one.
+    ///   - nested: Where inside the property's value the refused value sits, when the
+    ///     refusal is about one.
     public init(
         code: Code,
         address: String,
@@ -118,7 +120,8 @@ public struct EditRefusal: Error, Friendly {
         expected: String? = nil,
         suggestion: String? = nil,
         message: String,
-        errorCode: String? = nil
+        errorCode: String? = nil,
+        nested: NestedLocation? = nil
     ) {
         self.code = code
         self.address = address
@@ -127,6 +130,7 @@ public struct EditRefusal: Error, Friendly {
         self.suggestion = suggestion
         self.message = message
         self.errorCode = errorCode
+        self.nested = nested
     }
 
     /// The family this refusal belongs to.
@@ -153,4 +157,11 @@ public struct EditRefusal: Error, Friendly {
     /// The ``EditingError/code`` or ``BatchError/code`` this refusal came from, or `nil`
     /// for one the planner raised itself.
     public var errorCode: String?
+
+    /// Where inside ``property``'s value the refused value sits — the paint or effect
+    /// layer and the key — or `nil` when the refusal is about the property itself.
+    ///
+    /// The structured twin of the location the ``message`` spells: an inspector places
+    /// the refusal under layer ``NestedLocation/layerIndex`` without parsing a sentence.
+    public var nested: NestedLocation?
 }

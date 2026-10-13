@@ -62,7 +62,12 @@ root's properties as the instance shows them are an override.
 Each refusal carries ``EditRefusal/property`` and ``EditRefusal/expected`` — the range
 or form that would have been accepted — so an inspector can show it beside the field. For
 a value inside a structured one, ``EditRefusal/property`` is still the key written
-(`kind.fills`) and the message names the spot (`kind.fills[0].colors[1].position`). Only
+(`kind.fills`) and the message names the spot (`kind.fills[0].colors[1].position`). The
+same spot rides in ``EditRefusal/nested``, a typed ``EditRefusal/NestedLocation`` — here
+`[.index(0), .key("colors"), .index(1), .key("position")]`, with
+``EditRefusal/NestedLocation/layerIndex`` 0 and ``EditRefusal/NestedLocation/key``
+`"position"` — so an inspector places the refusal under the right layer without reading
+the sentence; it is `nil` for a refusal about the property itself. Only
 nested values the write changes are judged: a whole paint list written to edit one layer
 passes a value another layer already held, even one out of range.
 A value equal to what the node already holds is never refused, so writing back what a

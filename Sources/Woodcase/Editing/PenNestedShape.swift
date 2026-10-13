@@ -113,16 +113,20 @@ public struct PenNestedShape: Friendly {
         ///   - isRequired: Whether the decoder refuses the object without it.
         ///   - constraint: The range, step and unit a number written here must keep to,
         ///     or `nil`.
+        ///   - default: What the key is when an object leaves it unset, or `nil` when it
+        ///     is nothing the renderer fills in.
         public init(
             key: String,
             forms: [PenValueForm],
             isRequired: Bool = false,
-            constraint: PenValueConstraint? = nil
+            constraint: PenValueConstraint? = nil,
+            default: PenPropertyDefault? = nil
         ) {
             self.key = key
             self.forms = forms
             self.isRequired = isRequired
             self.constraint = constraint
+            self.default = `default`
         }
 
         /// The key as the .pen file writes it.
@@ -140,6 +144,21 @@ public struct PenNestedShape: Friendly {
         /// write whose value breaks it — a gradient stop at position 2 — wherever the
         /// object sits in the property's value, and loading never does.
         public let constraint: PenValueConstraint?
+
+        /// What the key is when an object leaves it unset: the value the renderer uses in
+        /// its place, or `nil` when there is none to state.
+        ///
+        /// The nested twin of ``PenSchemaTable/Property/default`` — a gradient's unset
+        /// `center` is `{x: 0.5, y: 0.5}`, so its `x` and `y` each default to 0.5 — and
+        /// held to the renderer the same way, by `PenNestedDefaultEngineTests`. A key with
+        /// no default is either required, or leaving it unset draws something no single
+        /// value stands for (a shader's `uniforms`).
+        public let `default`: PenPropertyDefault?
+
+        /// The same key with no default stated, for a variant whose default nothing pins.
+        public var withoutDefault: Field {
+            Field(key: key, forms: forms, isRequired: isRequired, constraint: constraint)
+        }
 
         /// The value column: the forms as one union.
         public var value: String {

@@ -12,8 +12,21 @@ import Foundation
 extension EditPlanner {
     /// One scalar found inside an object or an array of a written value.
     struct NestedValue {
-        /// Where it sits, from the written key: `kind.fills[0].colors[1].position`.
-        var location: String
+        /// The key the write names, which every location starts from.
+        var property: String
+
+        /// Where it sits under the written key, as steps down into the value.
+        var path: [EditRefusal.NestedLocation.Component]
+
+        /// Where it sits, spelled from the written key: `kind.fills[0].colors[1].position`.
+        var location: String {
+            nestedLocation.spelled(under: property)
+        }
+
+        /// Where it sits, as a refusal carries it.
+        var nestedLocation: EditRefusal.NestedLocation {
+            EditRefusal.NestedLocation(components: path)
+        }
 
         /// The value.
         var value: AnyCodable
@@ -36,7 +49,7 @@ extension EditPlanner {
     /// - Returns: The nested scalars, in key order.
     static func nestedValues(in value: AnyCodable, forms: [PenValueForm], key: String) -> [NestedValue] {
         switch value {
-        case .dictionary, .array: walk(value, forms: forms, field: nil, at: key)
+        case .dictionary, .array: walk(value, forms: forms, field: nil, under: key, path: [])
         default: []
         }
     }
@@ -58,10 +71,10 @@ extension EditPlanner {
         let written = nestedValues(in: write.value, forms: forms, key: write.key)
         guard let current = write.current else { return written }
         let held = Dictionary(
-            nestedValues(in: current, forms: forms, key: write.key).map { ($0.location, $0.value) },
+            nestedValues(in: current, forms: forms, key: write.key).map { ($0.path, $0.value) },
             uniquingKeysWith: { first, _ in first }
         )
-        return written.filter { held[$0.location] != $0.value }
+        return written.filter { held[$0.path] != $0.value }
     }
 
     /// Refuses the first nested number outside its key's constraint.
@@ -86,7 +99,8 @@ extension EditPlanner {
                 property: write.key,
                 expected: constraint.summary,
                 message: "\(address) \(item.location) is \(PenValueConstraint.spell(number)), "
-                    + "but it takes \(constraint.summary)\(remedy)"
+                    + "but it takes \(constraint.summary)\(remedy)",
+                nested: item.nestedLocation
             )
         }
     }
@@ -98,7 +112,8 @@ extension EditPlanner {
         _ value: AnyCodable,
         forms: [PenValueForm],
         field: PenNestedShape.Field?,
-        at location: String
+        under property: String,
+        path: [EditRefusal.NestedLocation.Component]
     ) -> [NestedValue] {
         switch value {
         case let .dictionary(entries):
@@ -106,12 +121,14 @@ extension EditPlanner {
             return entries.keys.sorted().flatMap { key -> [NestedValue] in
                 let item = entries[key] ?? .null
                 let described = fields.first { $0.key == key }
-                return element(item, forms: described?.forms ?? [], field: described, at: "\(location).\(key)")
+                return element(
+                    item, forms: described?.forms ?? [], field: described, under: property, path: path + [.key(key)]
+                )
             }
         case let .array(items):
             let elementForms = elementForms(of: forms)
             return items.enumerated().flatMap { index, item in
-                element(item, forms: elementForms, field: field, at: "\(location)[\(index)]")
+                element(item, forms: elementForms, field: field, under: property, path: path + [.index(index)])
             }
         default:
             return []
@@ -123,11 +140,12 @@ extension EditPlanner {
         _ item: AnyCodable,
         forms: [PenValueForm],
         field: PenNestedShape.Field?,
-        at location: String
+        under property: String,
+        path: [EditRefusal.NestedLocation.Component]
     ) -> [NestedValue] {
         switch item {
-        case .dictionary, .array: walk(item, forms: forms, field: field, at: location)
-        default: [NestedValue(location: location, value: item, field: field)]
+        case .dictionary, .array: walk(item, forms: forms, field: field, under: property, path: path)
+        default: [NestedValue(property: property, path: path, value: item, field: field)]
         }
     }
 

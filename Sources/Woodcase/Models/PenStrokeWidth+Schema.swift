@@ -19,10 +19,10 @@ public extension PenStrokeWidth {
         summary: "one width per edge; an edge left out carries no stroke",
         variants: [
             PenNestedShape.Variant(fields: [
-                PenNestedShape.Field(key: "top", forms: [.number, .variable(.number)]),
-                PenNestedShape.Field(key: "right", forms: [.number, .variable(.number)]),
-                PenNestedShape.Field(key: "bottom", forms: [.number, .variable(.number)]),
-                PenNestedShape.Field(key: "left", forms: [.number, .variable(.number)]),
+                PenNestedShape.Field(key: "top", forms: [.number, .variable(.number)], default: .number(0)),
+                PenNestedShape.Field(key: "right", forms: [.number, .variable(.number)], default: .number(0)),
+                PenNestedShape.Field(key: "bottom", forms: [.number, .variable(.number)], default: .number(0)),
+                PenNestedShape.Field(key: "left", forms: [.number, .variable(.number)], default: .number(0)),
             ]),
         ]
     )

@@ -34,12 +34,26 @@ public extension PenEffect {
                     enabledField,
                     PenNestedShape.Field(
                         key: "shadowType",
-                        forms: PenEffect.PenShadowEffect.ShadowType.allCases.map { .spelling($0.rawValue) }
+                        forms: PenEffect.PenShadowEffect.ShadowType.allCases.map { .spelling($0.rawValue) },
+                        default: .string(PenEffect.PenShadowEffect.ShadowType.outer.rawValue)
                     ),
                     PenNestedShape.Field(key: "offset", forms: [.one(offsetSchema)]),
-                    PenNestedShape.Field(key: "blur", forms: [.number, .variable(.number)], constraint: .length),
-                    PenNestedShape.Field(key: "color", forms: [.text(.color), .variable(.color)]),
-                    PenNestedShape.Field(key: "blendMode", forms: [.text(.blendMode)]),
+                    PenNestedShape.Field(
+                        key: "blur",
+                        forms: [.number, .variable(.number)],
+                        constraint: .length,
+                        default: .number(0)
+                    ),
+                    PenNestedShape.Field(
+                        key: "color",
+                        forms: [.text(.color), .variable(.color)],
+                        default: .string("#00000080")
+                    ),
+                    PenNestedShape.Field(
+                        key: "blendMode",
+                        forms: [.text(.blendMode)],
+                        default: .string(PenBlendMode.normal.rawString)
+                    ),
                 ]
             ),
         ]
@@ -64,13 +78,15 @@ public extension PenEffect {
     /// `enabled` — an effect switched off is kept in the file and not drawn.
     private static let enabledField = PenNestedShape.Field(
         key: "enabled",
-        forms: [.boolean, .variable(.boolean)]
+        forms: [.boolean, .variable(.boolean)],
+        default: .boolean(true)
     )
 
     /// `radius` — how far a blur reaches, in points.
     private static let radiusField = PenNestedShape.Field(
         key: "radius",
         forms: [.number, .variable(.number)],
-        constraint: .length
+        constraint: .length,
+        default: .number(0)
     )
 }

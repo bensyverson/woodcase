@@ -52,6 +52,16 @@ left unset, so the schema cannot name a value the engine does not use. `woodcase
 `default` (the literal) or `defaultFrom` (where a derived one comes from); each nested key's
 constraint rides on ``SchemaNestedReport/Field/constraint`` and ends its line in the text.
 
+A nested key carries a default the same way (``PenNestedShape/Field/default``): a gradient's
+unset `center` is `{x: 0.5, y: 0.5}` and its `size` `{width: 1, height: 1}`, its `rotation`
+is 0, and a paint's `enabled`, `blendMode` and `opacity` are `true`, `"normal"` and 1; a
+shadow's `shadowType` is `"outer"`, and a per-side stroke width left out is 0. The text
+ends the key's line with `— default 0.5`; the JSON carries
+``SchemaNestedReport/Field/default``. `PenNestedDefaultEngineTests` draws each with the key
+unset and with the default written and requires the same pixels, so the table cannot name
+a value the renderer does not use. A shader fill's keys state none: the CoreGraphics
+renderer draws no shader, so nothing pins them.
+
 The typography strings carry a role of their own, so a control is chosen by the form a
 row takes rather than by its path: ``PenValueForm/StringRole/fontFamily`` (a menu of
 ``PenFontRegistry/availableFamilies(cache:)``), ``PenValueForm/StringRole/fontWeight``

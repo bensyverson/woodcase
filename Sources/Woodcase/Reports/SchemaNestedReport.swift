@@ -66,6 +66,12 @@ public struct SchemaNestedReport: Friendly {
             required = field.isRequired
             nested = field.forms.compactMap(\.nestedShape).map(\.name)
             constraint = field.constraint?.summary
+            self.default = field.default?.value
+            if case let .derived(derivation)? = field.default {
+                defaultFrom = derivation.phrase
+            } else {
+                defaultFrom = nil
+            }
         }
 
         /// The key as the .pen file writes it.
@@ -89,5 +95,13 @@ public struct SchemaNestedReport: Friendly {
         /// The range, step and unit a number written here must keep to, in one phrase —
         /// `"0 to 1, a fraction"` — or absent.
         public let constraint: String?
+
+        /// What the key is when an object leaves it unset, as the file would write it —
+        /// `0.5`, `"outer"`, `true` — or absent when it has no literal default.
+        public let `default`: AnyCodable?
+
+        /// Where a default no literal states comes from — "the font's own line height" —
+        /// or absent.
+        public let defaultFrom: String?
     }
 }
