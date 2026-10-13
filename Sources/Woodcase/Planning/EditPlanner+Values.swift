@@ -51,7 +51,7 @@ extension EditPlanner {
             if case .null = write.value { continue }
             if write.value == write.current { continue }
             guard let shape = NodePropertyCodec.shape(of: write.field) else { continue }
-            let nested = nestedValues(in: write.value, forms: shape.forms, key: write.key)
+            let nested = changedNestedValues(write, forms: shape.forms)
             try checkBindings(write, shape: shape, nested: nested, address: address, in: document)
             if let constraint = shape.constraint {
                 try checkConstraint(write, constraint, address: address)

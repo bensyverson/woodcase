@@ -112,4 +112,36 @@ struct EditPlannerNestedValueTests {
         #expect(try refusal(.set(["kind.fills": swapped]), at: "Board/Free") != nil)
         #expect(try refusal(.set(["kind.fills": gradient(["$brand", 1])]), at: "Board/Free") != nil)
     }
+
+    // MARK: - Values the write leaves as they were
+
+    /// The fixture with `Board/Free`'s fills stored without planning, as a file may hold them.
+    private func document(holdingFills fills: AnyCodable) throws -> EditableDocument {
+        let document = try PlannerFixture.document()
+        try document.apply(.setProperties(EditOperation.SetProperties(nodeID: "Fre01", properties: ["kind.fills": fills])))
+        return document
+    }
+
+    @Test("An out-of-range stop the file already holds lets an edit to another stop through")
+    func untouchedOutOfRangeStopPasses() throws {
+        let document = try document(holdingFills: gradient([0, 2]))
+
+        #expect(PlannerFixture.refusal(.set(["kind.fills": gradient([0.5, 2])]), at: "Board/Free", in: document) == nil)
+        let refused = PlannerFixture.refusal(.set(["kind.fills": gradient([0, 3])]), at: "Board/Free", in: document)
+        #expect(refused?.code == .outOfRange)
+        #expect(refused?.message.contains("kind.fills[0].colors[1].position") == true)
+    }
+
+    @Test("A wrong-typed nested variable the file already holds lets an edit to another fill through")
+    func untouchedWrongVariablePasses() throws {
+        let document = try document(holdingFills: [
+            ["type": "color", "color": "$spacing"], ["type": "color", "color": "#000000"],
+        ])
+
+        let other: AnyCodable = [["type": "color", "color": "$spacing"], ["type": "color", "color": "#FFFFFF"]]
+        #expect(PlannerFixture.refusal(.set(["kind.fills": other]), at: "Board/Free", in: document) == nil)
+        let changed: AnyCodable = [["type": "color", "color": "$headline"], ["type": "color", "color": "#000000"]]
+        #expect(PlannerFixture.refusal(.set(["kind.fills": changed]), at: "Board/Free", in: document)?.code
+            == .variableTypeMismatch)
+    }
 }

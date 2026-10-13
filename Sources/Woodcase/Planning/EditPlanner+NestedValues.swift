@@ -41,6 +41,29 @@ extension EditPlanner {
         }
     }
 
+    /// The scalars inside a written value that differ from what the node holds at the
+    /// same location — the only ones a write is judged by.
+    ///
+    /// An inspector writes a whole paint list to change one layer, so a value the file
+    /// already held (an opacity of 1.5 from Pen, a hand edit) comes back unchanged
+    /// beside the edit. Judging it would refuse an edit to fill 0 over a spot the user
+    /// never touched; a nested value left as it was passes, as a whole property written
+    /// back unchanged does.
+    ///
+    /// - Parameters:
+    ///   - write: The property written, with what the node holds there now.
+    ///   - forms: The forms the property accepts.
+    /// - Returns: The nested scalars that are new or changed, in key order.
+    static func changedNestedValues(_ write: ValueWrite, forms: [PenValueForm]) -> [NestedValue] {
+        let written = nestedValues(in: write.value, forms: forms, key: write.key)
+        guard let current = write.current else { return written }
+        let held = Dictionary(
+            nestedValues(in: current, forms: forms, key: write.key).map { ($0.location, $0.value) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        return written.filter { held[$0.location] != $0.value }
+    }
+
     /// Refuses the first nested number outside its key's constraint.
     ///
     /// - Parameters:
