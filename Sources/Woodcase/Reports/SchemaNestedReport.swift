@@ -65,6 +65,7 @@ public struct SchemaNestedReport: Friendly {
             variable = PenValueForm.variableType(of: field.forms)?.rawValue
             required = field.isRequired
             nested = field.forms.compactMap(\.nestedShape).map(\.name)
+            constraint = field.constraint?.summary
         }
 
         /// The key as the .pen file writes it.
@@ -84,5 +85,9 @@ public struct SchemaNestedReport: Friendly {
 
         /// The names of the nested key tables this key references.
         public let nested: [String]
+
+        /// The range, step and unit a number written here must keep to, in one phrase —
+        /// `"0 to 1, a fraction"` — or absent.
+        public let constraint: String?
     }
 }

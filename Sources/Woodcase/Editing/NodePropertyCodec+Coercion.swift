@@ -33,7 +33,9 @@ extension NodePropertyCodec {
     ///
     /// Derived from ``shapes``, so it cannot drift from the shapes a refusal quotes.
     static let stringFields: Set<String> = Set(
-        shapes.filter { $0.value == stringOrVariable }.keys
+        shapes.filter { _, shape in
+            PenValueForm.StringRole.allCases.contains { shape == textOrVariable($0) }
+        }.keys
     )
 
     /// The value to store for a written one, after the number-to-string rule.

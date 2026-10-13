@@ -55,13 +55,17 @@ extension PenTextMeasurer {
                 let font = CTFontCreateWithFontDescriptor(match, 12, nil)
                 guard (CTFontCopyFamilyName(font) as String).lowercased() == family.lowercased() else { return nil }
                 let italic = CTFontGetSymbolicTraits(font).contains(.traitItalic)
-                return RegisteredFace(italic: italic, weights: weights(of: font))
+                return RegisteredFace(italic: italic, weights: drawnWeights(of: font))
             }
         }
     }
 
-    /// The weights a font draws: its `wght` axis's range, or its OS/2 weight class.
-    private static func weights(of font: CTFont) -> ClosedRange<Int> {
+    /// The weights a font draws in a face of its own: its `wght` axis's range, or its
+    /// OS/2 weight class. ``PenFontRegistry/faces(of:cache:)`` lists faces by it too.
+    ///
+    /// - Parameter font: The font.
+    /// - Returns: The range of CSS weights; one weight for a static font.
+    static func drawnWeights(of font: CTFont) -> ClosedRange<Int> {
         let axes = (CTFontCopyVariationAxes(font) as? [[CFString: Any]]) ?? []
         if let axis = axes.first(where: { ($0[kCTFontVariationAxisIdentifierKey] as? Int) == wghtAxisTag }),
            let minimum = (axis[kCTFontVariationAxisMinimumValueKey] as? NSNumber)?.doubleValue,

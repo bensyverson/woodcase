@@ -37,7 +37,7 @@ public extension PenEffect {
                         forms: PenEffect.PenShadowEffect.ShadowType.allCases.map { .spelling($0.rawValue) }
                     ),
                     PenNestedShape.Field(key: "offset", forms: [.one(offsetSchema)]),
-                    PenNestedShape.Field(key: "blur", forms: [.number, .variable(.number)]),
+                    PenNestedShape.Field(key: "blur", forms: [.number, .variable(.number)], constraint: .length),
                     PenNestedShape.Field(key: "color", forms: [.text(.color), .variable(.color)]),
                     PenNestedShape.Field(key: "blendMode", forms: [.text(.blendMode)]),
                 ]
@@ -70,6 +70,7 @@ public extension PenEffect {
     /// `radius` — how far a blur reaches, in points.
     private static let radiusField = PenNestedShape.Field(
         key: "radius",
-        forms: [.number, .variable(.number)]
+        forms: [.number, .variable(.number)],
+        constraint: .length
     )
 }

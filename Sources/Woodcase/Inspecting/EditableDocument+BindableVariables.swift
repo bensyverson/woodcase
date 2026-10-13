@@ -28,6 +28,27 @@ public extension EditableDocument {
     /// - Returns: The variables, sorted by name; empty when the property takes no variable.
     func bindableVariables(for property: String, at target: ResolvedNodeAddress) -> [BindableVariable] {
         guard let type = NodePropertyCodec.bindableVariableType(of: property) else { return [] }
+        return bindableVariables(ofType: type, at: target)
+    }
+
+    /// The variables of one type that may bind at a node — what an inspector offers
+    /// where it knows the type it wants rather than the property: a color picker inside
+    /// a fill, a gradient stop, a shadow.
+    ///
+    /// Each carries its value under the theme the node draws with, as
+    /// ``bindableVariables(for:at:)`` does; that call is this one with the property's type.
+    ///
+    /// ```swift
+    /// document.bindableVariables(ofType: .color, at: address).map(\.name)  // ["brand", "ink"]
+    /// ```
+    ///
+    /// - Parameters:
+    ///   - type: The variable type wanted.
+    ///   - target: The node, as ``resolve(expandedID:)`` or ``resolve(_:tags:)-(String,_)``
+    ///     returned it.
+    /// - Returns: The variables of that type, from the document and its libraries, sorted
+    ///   by name.
+    func bindableVariables(ofType type: PenVariableType, at target: ResolvedNodeAddress) -> [BindableVariable] {
         let own = variables ?? [:]
         let candidates = own.merging(importedVariables) { mine, _ in mine }.filter { $0.value.type == type }
         guard !candidates.isEmpty else { return [] }

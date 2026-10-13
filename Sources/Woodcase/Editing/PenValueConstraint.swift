@@ -170,6 +170,14 @@ public struct PenValueConstraint: Friendly {
         return parts.joined(separator: ", ")
     }
 
+    // MARK: - Shared constraints
+
+    /// A fraction from 0 to 1: an opacity, a ring's inner radius, a gradient stop.
+    static let fraction = PenValueConstraint(unit: .fraction, minimum: .inclusive(0), maximum: .inclusive(1))
+
+    /// A length that is never negative: a size, a radius, a padding, a stroke, a blur.
+    static let length = PenValueConstraint(unit: .points, minimum: .inclusive(0))
+
     // MARK: - Private
 
     /// The range in one phrase, or `nil` when the constraint has no bounds or step.

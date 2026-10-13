@@ -103,7 +103,12 @@ public extension PenFill {
         variants: [
             PenNestedShape.Variant(fields: [
                 PenNestedShape.Field(key: "color", forms: [.text(.color), .variable(.color)], isRequired: true),
-                PenNestedShape.Field(key: "position", forms: [.number, .variable(.number)], isRequired: true),
+                PenNestedShape.Field(
+                    key: "position",
+                    forms: [.number, .variable(.number)],
+                    isRequired: true,
+                    constraint: .fraction
+                ),
             ]),
         ]
     )
@@ -173,6 +178,7 @@ public extension PenFill {
     /// `opacity` — the fill's own opacity, on top of the node's.
     private static let opacityField = PenNestedShape.Field(
         key: "opacity",
-        forms: [.number, .variable(.number)]
+        forms: [.number, .variable(.number)],
+        constraint: .fraction
     )
 }

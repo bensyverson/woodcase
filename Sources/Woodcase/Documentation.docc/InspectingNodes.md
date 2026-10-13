@@ -6,14 +6,15 @@ address an expanded node answers to, what it overrides, and the variables a fiel
 ## Overview
 
 An editor builds its inspector from Woodcase rather than from its own copy of the format,
-and writes every change through ``EditPlanner``. Four queries feed it, each one call:
+and writes every change through ``EditPlanner``. Five queries feed it, each one call:
 
 | Question | Call | Answer |
 |---|---|---|
 | Which fields does this type take, and what shape is each? | ``PenSchema/fields(for:)``, ``PenSchema/field(_:for:)`` | ``PenSchemaTable/Property`` rows |
 | Which address edits this node of the expanded tree? | ``EditableDocument/resolve(expandedID:)`` | ``ResolvedNodeAddress`` |
 | Where do its values come from, and which does this instance override? | ``EditableDocument/inspect(expandedID:)`` | ``NodeInspection`` |
-| Which variables may bind to this field? | ``EditableDocument/bindableVariables(for:at:)`` | ``BindableVariable`` list |
+| Which variables may bind to this field? | ``EditableDocument/bindableVariables(for:at:)``, ``EditableDocument/bindableVariables(ofType:at:)`` | ``BindableVariable`` list |
+| Which fonts can a text be set in? | ``PenFontRegistry/availableFamilies(cache:)``, ``PenFontRegistry/faces(of:cache:)`` | family names, ``PenFontFace`` list |
 
 ```swift
 let inspection = document.inspect(expandedID: "Card1/Btn02/Lbl02")!
@@ -37,6 +38,35 @@ picker offers, the ``PenSchemaTable/Property/constraint`` a number field keeps t
 planner refuses outside it), the ``PenSchemaTable/Property/variable`` type a binding must
 have, and the ``PenSchemaTable/Property/nested`` key tables of a fill, an effect or a
 stroke width. ``PenSchema/field(_:for:)`` finds one row by path or by raw key.
+
+A row also says what the property is when a node leaves it unset:
+``PenSchemaTable/Property/default`` is the value the layout engine and the renderer use in
+its place (``PenPropertyDefault``) — `"horizontal"` for a frame's `layout`, 16 for a
+text's `fontSize` and 13 for a note's, `"fit_content"` for a width — so a control shows the
+value the canvas draws rather than an empty field, and an "add" that writes it changes
+nothing. A text's `lineHeight` and `letterSpacing` have no number: they come from the font
+(``PenPropertyDefault/Derivation``). A property where unset draws nothing (`fills`) has no
+default. `PenSchemaDefaultEngineTests` draws every literal default against the property
+left unset, so the schema cannot name a value the engine does not use. `woodcase schema
+<type>` prints them in a DEFAULTS section, and its JSON (``SchemaPropertyReport``) carries
+`default` (the literal) or `defaultFrom` (where a derived one comes from); each nested key's
+constraint rides on ``SchemaNestedReport/Field/constraint`` and ends its line in the text.
+
+The typography strings carry a role of their own, so a control is chosen by the form a
+row takes rather than by its path: ``PenValueForm/StringRole/fontFamily`` (a menu of
+``PenFontRegistry/availableFamilies(cache:)``), ``PenValueForm/StringRole/fontWeight``
+and ``PenValueForm/StringRole/fontStyle``, whose ``PenValueForm/StringRole/keywords``
+list the words each reads (`"bold"`, `"italic"`).
+
+### Fonts
+
+``PenFontRegistry/availableFamilies(cache:)`` lists every family Woodcase can set a text
+in: what Core Text has, the system's and every family registered in this process, and
+what the Google Fonts cache holds and a read would register from disk. Hidden system
+families are left out and the default family is always in. ``PenFontRegistry/faces(of:cache:)``
+lists a family's faces — a static font's weight class, every hundred a variable font's
+weight axis spans — for a weight menu. Both are cached until
+``PenFontRegistry/generation`` moves.
 
 ### Expanded ids
 
@@ -75,6 +105,16 @@ one with ``EditIntent/resetOverride(_:)`` passing ``NodeInspection/overriddenPat
 the field binds — from the document and from the libraries read with it, each with its
 ``BindableVariable/origin`` — so every one plans as a binding. Each carries its value under
 the theme the node draws with, the value ``EditIntent/unbind(property:)`` would write.
+``EditableDocument/bindableVariables(ofType:at:)`` asks by type instead, for a picker that
+binds inside a structured value — a fill's color, a gradient stop — where no property path
+names the type.
+
+### Mentions
+
+A comment's or a note's reply box finds `@mentions` in its raw text with
+``PenMention/mentions(in:)``, and the name being typed at the caret with
+``PenMention/query(atCaret:in:)`` — both by the rule note markdown parses with
+(<doc:NoteMarkdown>), so the pills drawn while typing agree with the note drawn after.
 
 ## Topics
 
@@ -84,10 +124,17 @@ the theme the node draws with, the value ``EditIntent/unbind(property:)`` would 
 - ``EditableDocument/inspect(expandedID:)``
 - ``EditableDocument/inspect(_:)``
 - ``EditableDocument/bindableVariables(for:at:)``
+- ``EditableDocument/bindableVariables(ofType:at:)``
 - ``PenSchema/fields(for:)``
 - ``PenSchema/field(_:for:)``
+- ``PenFontRegistry/availableFamilies(cache:)``
+- ``PenFontRegistry/faces(of:cache:)``
+- ``PenMention/mentions(in:)``
+- ``PenMention/query(atCaret:in:)``
 
 ### Results
 
 - ``NodeInspection``
 - ``BindableVariable``
+- ``PenPropertyDefault``
+- ``PenMention``

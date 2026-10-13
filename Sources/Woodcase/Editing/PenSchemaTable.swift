@@ -50,10 +50,13 @@ public struct PenSchemaTable: Friendly {
         ///   - path: The codec path `set` and `cp` accept.
         ///   - key: Where the .pen file writes the value.
         ///   - shape: The wire shape the decoders accept.
-        public init(path: String, key: PenKeyForm, shape: PenPropertyShape) {
+        ///   - default: What the engine uses when a node leaves the property unset, or
+        ///     `nil` when it uses nothing.
+        public init(path: String, key: PenKeyForm, shape: PenPropertyShape, default: PenPropertyDefault? = nil) {
             self.path = path
             self.key = key
             self.shape = shape
+            self.default = `default`
         }
 
         /// The codec path `set` and `cp` accept — `kind.fills`.
@@ -64,6 +67,16 @@ public struct PenSchemaTable: Friendly {
 
         /// The wire shape the decoders accept.
         public let shape: PenPropertyShape
+
+        /// What the layout engine and renderer use when a node leaves the property unset
+        /// — `"horizontal"` for a frame's `layout`, 16 for a text's `fontSize`, 13 for a
+        /// note's — or `nil` when an unset property draws nothing in its place (`fills`)
+        /// or the engine never reads it (`name`).
+        ///
+        /// It depends on the node type as well as the property, so a row from
+        /// ``PenSchema/table(for:)`` carries its type's default; the `common.*` rows'
+        /// defaults are the same on every type.
+        public let `default`: PenPropertyDefault?
 
         /// The accepted forms as one union — `color | fill | [color | fill, …]`.
         public var value: String {

@@ -46,6 +46,25 @@ enum SchemaTableFormatter {
         return ([constraintsHeading, ""] + lines).joined(separator: "\n")
     }
 
+    /// The section listing what each property is when a node leaves it unset, or `nil`
+    /// when no row of the table has a default.
+    ///
+    /// A section of its own for the reason constraints have one: only some rows have a
+    /// default, and the value column is already the widest.
+    ///
+    /// - Parameter table: The table whose rows to read.
+    /// - Returns: A heading and one indented `path  default` line per row with one.
+    static func defaults(of table: PenSchemaTable) -> String? {
+        let rows = table.properties.compactMap { row in row.default.map { (row.path, $0.summary) } }
+        guard !rows.isEmpty else { return nil }
+        let width = rows.map(\.0.count).max() ?? 0
+        let lines = rows.map { "  \($0.0.padding(toLength: width, withPad: " ", startingAt: 0))  \($0.1)" }
+        return ([defaultsHeading, ""] + lines).joined(separator: "\n")
+    }
+
+    /// The heading the defaults section is titled with.
+    static let defaultsHeading = "DEFAULTS — what the engine draws when a node leaves the property unset"
+
     /// The heading the constraints section is titled with.
     static let constraintsHeading = "CONSTRAINTS — a write outside these is refused; a file that already "
         + "holds one still opens"
@@ -85,7 +104,10 @@ enum SchemaTableFormatter {
             }
             for field in variant.fields {
                 let key = field.key + (field.isRequired ? "*" : "")
-                lines.append("      \(key.padding(toLength: keyWidth, withPad: " ", startingAt: 0))  \(field.value)")
+                let constraint = field.constraint.map { " — \($0.summary)" } ?? ""
+                lines.append(
+                    "      \(key.padding(toLength: keyWidth, withPad: " ", startingAt: 0))  \(field.value)\(constraint)"
+                )
             }
         }
         return lines.joined(separator: "\n")

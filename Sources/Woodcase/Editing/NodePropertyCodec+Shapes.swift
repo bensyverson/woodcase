@@ -32,7 +32,16 @@ extension NodePropertyCodec {
     /// Internal rather than private because ``NodePropertyCodec/stringFields`` reads
     /// the table for it: a number written to one of these is stored as its string,
     /// and the set of "these" has to be the table's, not a second list.
-    static let stringOrVariable = PenPropertyShape(forms: [.text(.plain), .variable(.string)])
+    static let stringOrVariable = textOrVariable(.plain)
+
+    /// A property whose value is a string in one role, or a `$string` reference.
+    ///
+    /// - Parameter role: What the string means.
+    /// - Returns: The shape.
+    static func textOrVariable(_ role: PenValueForm.StringRole) -> PenPropertyShape {
+        PenPropertyShape(forms: [.text(role), .variable(.string)])
+    }
+
     private static let sizing = PenPropertyShape(
         forms: [.number, .spelling("fit_content"), .spelling("fill_container"), .variable(.number)]
     )
@@ -52,11 +61,11 @@ extension NodePropertyCodec {
     /// A coordinate or an offset: any number of points.
     private static let points = PenValueConstraint(unit: .points)
     /// A size, a radius, a padding or a stroke: never negative.
-    private static let length = PenValueConstraint(unit: .points, minimum: .inclusive(0))
+    private static let length = PenValueConstraint.length
     /// A rotation or an angle: any number of degrees.
     private static let degrees = PenValueConstraint(unit: .degrees)
     /// An opacity or a ring's inner radius.
-    private static let fraction = PenValueConstraint(unit: .fraction, minimum: .inclusive(0), maximum: .inclusive(1))
+    private static let fraction = PenValueConstraint.fraction
     /// An arc's sweep, which the format bounds at one turn either way.
     private static let sweep = PenValueConstraint(unit: .degrees, minimum: .inclusive(-360), maximum: .inclusive(360))
     /// A polygon's sides: whole, and at least a triangle.
@@ -170,10 +179,10 @@ extension NodePropertyCodec {
         // Text
         "content": stringOrVariable,
         "textGrowth": PenPropertyShape.oneOf(PenTextGrowth.self),
-        "fontFamily": stringOrVariable,
+        "fontFamily": textOrVariable(.fontFamily),
         "fontSize": numberOrVariable.constrained(fontSize),
-        "fontWeight": stringOrVariable,
-        "fontStyle": stringOrVariable,
+        "fontWeight": textOrVariable(.fontWeight),
+        "fontStyle": textOrVariable(.fontStyle),
         "letterSpacing": numberOrVariable.constrained(points),
         // The one number in the format that is not points. A reader who assumes the
         // house unit writes 23 for a 15pt face and gets a 345pt line box, silently —

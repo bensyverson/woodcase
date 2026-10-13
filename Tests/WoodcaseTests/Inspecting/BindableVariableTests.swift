@@ -55,6 +55,28 @@ struct BindableVariableTests {
         #expect(try names("kind.fills", at: "Board/Chip/Label", in: document) == ["brand", "ink"])
     }
 
+    // MARK: - By variable type
+
+    @Test("bindableVariables(ofType:at:) lists the color variables for a node")
+    func colorsByType() throws {
+        let document = try PlannerFixture.document()
+        let free = try document.resolve("Board/Free")
+        let colors = document.bindableVariables(ofType: .color, at: free)
+
+        #expect(colors.map(\.name) == ["brand", "ink"])
+        #expect(colors == document.bindableVariables(for: "kind.fills", at: free))
+        #expect(colors.last?.value == "#111111")
+    }
+
+    @Test("Each variable type lists its own variables, wherever the node is")
+    func eachTypeByType() throws {
+        let document = try PlannerFixture.document()
+        let label = try document.resolve("Board/Chip/Label")
+        #expect(document.bindableVariables(ofType: .number, at: label).map(\.name) == ["spacing"])
+        #expect(document.bindableVariables(ofType: .boolean, at: label).map(\.name) == ["visible"])
+        #expect(document.bindableVariables(ofType: .string, at: label).map(\.name) == ["headline"])
+    }
+
     // MARK: - Values
 
     @Test("A themed variable's value is the one under the theme the node draws with")

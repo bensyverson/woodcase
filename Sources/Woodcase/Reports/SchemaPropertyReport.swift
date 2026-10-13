@@ -28,6 +28,12 @@ public struct SchemaPropertyReport: Friendly {
         nested = property.nested.map(\.name)
         example = property.example
         constraint = property.constraint?.summary
+        self.default = property.default?.value
+        if case let .derived(derivation)? = property.default {
+            defaultFrom = derivation.phrase
+        } else {
+            defaultFrom = nil
+        }
     }
 
     /// The codec path `set` and `cp` accept.
@@ -55,4 +61,12 @@ public struct SchemaPropertyReport: Friendly {
     /// The range, step and unit a number written here must keep to, in one phrase —
     /// `"0 to 1, a fraction"` — or absent when any number the forms accept is taken.
     public let constraint: String?
+
+    /// What the engine uses when a node leaves the property unset, as the file would
+    /// write it — `"horizontal"`, `16`, `true` — or absent when it has no literal default.
+    public let `default`: AnyCodable?
+
+    /// Where the value comes from when a node leaves the property unset and no literal
+    /// states it — "the font's own line height" — or absent.
+    public let defaultFrom: String?
 }

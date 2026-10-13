@@ -57,6 +57,12 @@ identity color. Woodcase does not resolve names to colors: identity colors are t
 presence colors. The CG renderer has no pill: the run's weight is what it draws.
 ``PenNoteMarkdown/mentionedNames`` lists who a note mentions.
 
+An editor working on the raw source — a reply box drawing pills as its words are typed —
+reads the same rule with ``PenMention``: ``PenMention/mentions(in:)`` gives each
+mention's name and its UTF-16 range in the source, read back from this parser's own mention
+runs, and ``PenMention/query(atCaret:in:)`` the `@name` being typed at a caret, a lone `@`
+included. Neither is a second copy of the rule, so the two cannot disagree.
+
 A text node's spans can carry a mention too: `mention` is a stored run key
 (``PenTextRun/WireKey/mention``).
 
@@ -136,6 +142,7 @@ use it. A text node has no `.pen` key for it yet. No space follows a list.
 - ``PenNoteMarkdown/ChecklistItem``
 - ``PenTextOffsetMap``
 - ``PenNode/noteMarkdown``
+- ``PenMention``
 
 ### Setting
 

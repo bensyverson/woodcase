@@ -78,6 +78,14 @@ public enum PenValueForm: Friendly {
         case svgPathData
         /// A blend mode name; one the renderer does not know is kept as written.
         case blendMode
+        /// A font family's name, as Core Text and Google Fonts name it — `"Inter"`;
+        /// ``PenFontRegistry/availableFamilies(cache:)`` lists the ones Woodcase can draw.
+        case fontFamily
+        /// A font weight: one of ``keywords`` (`"bold"`) or a CSS weight (`"700"`), read
+        /// by ``PenFontWeight/cssWeight(_:)``.
+        case fontWeight
+        /// A font style: one of ``keywords``, `"normal"` or `"italic"`.
+        case fontStyle
     }
 
     /// A JSON object or array with no fixed key table — the keys are theme axis names,
@@ -206,6 +214,9 @@ public extension PenValueForm.StringRole {
         case .color: "a color string"
         case .svgPathData: "an SVG path data string"
         case .blendMode: "a blend mode string"
+        case .fontFamily: "a font family name"
+        case .fontWeight: "a font weight keyword or number"
+        case .fontStyle: "a font style string"
         }
     }
 
@@ -216,6 +227,20 @@ public extension PenValueForm.StringRole {
         case .color: "color"
         case .svgPathData: "svg-path"
         case .blendMode: "blend-mode"
+        case .fontFamily: "font-family"
+        case .fontWeight: "font-weight"
+        case .fontStyle: "font-style"
+        }
+    }
+
+    /// The words this role reads with a meaning of their own, in the order a menu would
+    /// list them: every weight keyword ``PenFontWeight`` knows, the two font styles;
+    /// empty for a role that names none.
+    var keywords: [String] {
+        switch self {
+        case .fontWeight: PenFontWeight.keywords
+        case .fontStyle: PenFontFace.Style.allCases.map(\.rawValue)
+        case .plain, .color, .svgPathData, .blendMode, .fontFamily: []
         }
     }
 }

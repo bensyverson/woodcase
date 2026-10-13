@@ -111,10 +111,18 @@ public struct PenNestedShape: Friendly {
         ///   - key: The key as the .pen file writes it.
         ///   - forms: The forms its value may take.
         ///   - isRequired: Whether the decoder refuses the object without it.
-        public init(key: String, forms: [PenValueForm], isRequired: Bool = false) {
+        ///   - constraint: The range, step and unit a number written here must keep to,
+        ///     or `nil`.
+        public init(
+            key: String,
+            forms: [PenValueForm],
+            isRequired: Bool = false,
+            constraint: PenValueConstraint? = nil
+        ) {
             self.key = key
             self.forms = forms
             self.isRequired = isRequired
+            self.constraint = constraint
         }
 
         /// The key as the .pen file writes it.
@@ -125,6 +133,13 @@ public struct PenNestedShape: Friendly {
 
         /// Whether the decoder refuses the object without it.
         public let isRequired: Bool
+
+        /// The range, step and unit a number written here must keep to, or `nil`.
+        ///
+        /// The nested twin of ``PenPropertyShape/constraint``: ``EditPlanner`` refuses a
+        /// write whose value breaks it — a gradient stop at position 2 — wherever the
+        /// object sits in the property's value, and loading never does.
+        public let constraint: PenValueConstraint?
 
         /// The value column: the forms as one union.
         public var value: String {

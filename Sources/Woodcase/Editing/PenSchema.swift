@@ -25,7 +25,7 @@ public enum PenSchema {
         PenSchemaTable(
             type: nil,
             summary: "every node of every type takes these",
-            properties: rows(for: NodePropertyCodec.commonPaths, prefix: NodePropertyCodec.commonPrefix)
+            properties: rows(for: NodePropertyCodec.commonPaths, prefix: NodePropertyCodec.commonPrefix, type: nil)
         )
     }
 
@@ -39,7 +39,7 @@ public enum PenSchema {
         PenSchemaTable(
             type: type,
             summary: type.summary,
-            properties: rows(for: PropertyDiff.allKindKeys(type), prefix: NodePropertyCodec.kindPrefix)
+            properties: rows(for: PropertyDiff.allKindKeys(type), prefix: NodePropertyCodec.kindPrefix, type: type)
         )
     }
 
@@ -80,8 +80,13 @@ public enum PenSchema {
     /// - Parameters:
     ///   - paths: The codec paths to describe.
     ///   - prefix: The prefix they share, which the field name follows.
+    ///   - type: The node type the rows describe, for their defaults; `nil` for `common.*`.
     /// - Returns: One row per path, sorted by path.
-    private static func rows(for paths: Set<String>, prefix: String) -> [PenSchemaTable.Property] {
+    private static func rows(
+        for paths: Set<String>,
+        prefix: String,
+        type: PenNode.NodeType?
+    ) -> [PenSchemaTable.Property] {
         paths.sorted().map { path in
             let field = String(path.dropFirst(prefix.count))
             return PenSchemaTable.Property(
@@ -91,7 +96,8 @@ public enum PenSchema {
                     ?? PenPropertyShape(forms: [.open(PenValueForm.OpenShape(
                         phrase: "a valid \(field) value",
                         signature: "any"
-                    ))])
+                    ))]),
+                default: unsetDefault(of: path, on: type)
             )
         }
     }

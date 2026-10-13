@@ -52,15 +52,17 @@ root's properties as the instance shows them are an override.
 
 | Code | When |
 |---|---|
-| ``EditRefusal/Code/outOfRange``, ``EditRefusal/Code/offStep`` | a number outside the property's ``PenValueConstraint`` — an opacity of 7, a negative width, a fractional polygon count, a `lineHeight` written in points |
+| ``EditRefusal/Code/outOfRange``, ``EditRefusal/Code/offStep`` | a number outside the property's ``PenValueConstraint`` — an opacity of 7, a negative width, a fractional polygon count, a `lineHeight` written in points — or outside a nested key's ``PenNestedShape/Field/constraint``: a gradient stop at position 2, a fill's opacity of 1.5, a negative blur radius |
 | ``EditRefusal/Code/undefinedVariable`` | a `$name` the document (and the libraries read with it) does not define; text content alone keeps an undefined `$word` as literal text |
-| ``EditRefusal/Code/variableTypeMismatch`` | a `$name` of a type the property does not take — a color bound to an opacity |
+| ``EditRefusal/Code/variableTypeMismatch`` | a `$name` of a type the property does not take — a color bound to an opacity — or, inside a structured value, of a type its nested key does not take: a number variable as a fill's color |
 | ``EditRefusal/Code/setInsideInstance`` | a set, bind or unbind aimed inside a component instance; ``EditRefusal/suggestion`` is the override to request instead |
 | ``EditRefusal/Code/positionIgnoredByLayout`` | an `x` or `y` on a node its parent's layout places; ``EditRefusal/suggestion`` is the `layoutPosition` write that would honor it |
 | ``EditRefusal/Code/unknownProperty``, ``EditRefusal/Code/invalidForm`` | a key the node's type lacks, a value of a form it does not take |
 
 Each refusal carries ``EditRefusal/property`` and ``EditRefusal/expected`` — the range
-or form that would have been accepted — so an inspector can show it beside the field.
+or form that would have been accepted — so an inspector can show it beside the field. For
+a value inside a structured one, ``EditRefusal/property`` is still the key written
+(`kind.fills`) and the message names the spot (`kind.fills[0].colors[1].position`).
 A value equal to what the node already holds is never refused, so writing back what a
 read returned stays a no-op. `woodcase schema` prints every property's constraint.
 

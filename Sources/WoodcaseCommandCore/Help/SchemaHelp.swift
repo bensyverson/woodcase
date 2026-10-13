@@ -84,6 +84,8 @@ enum SchemaHelp {
 
         \(SchemaTableFormatter.constraints(of: PenSchema.common) ?? "")
 
+        \(SchemaTableFormatter.defaults(of: PenSchema.common) ?? "")
+
         DOCUMENT ROOT — keys beside "children"; a key marked * is required
 
         \(SchemaTableFormatter.nested(PenSchema.rootShapes))
@@ -106,6 +108,9 @@ enum SchemaHelp {
         ]
         if let constraints = SchemaTableFormatter.constraints(of: table) {
             sections.append(constraints)
+        }
+        if let defaults = SchemaTableFormatter.defaults(of: table) {
+            sections.append(defaults)
         }
         if !table.nested.isEmpty {
             sections.append("NESTED SHAPES\n\n" + SchemaTableFormatter.nested(table.nested))
@@ -155,7 +160,10 @@ enum SchemaHelp {
     itself hold a $ escapes it: \\$name stores the literal string $name rather \
     than resolving it, anywhere in the string. \
     \(PenValueForm.StringRole.blendMode.signature) and \
-    \(PenValueForm.StringRole.svgPathData.signature) are strings in a fixed form.
+    \(PenValueForm.StringRole.svgPathData.signature) are strings in a fixed form; \
+    \(PenValueForm.StringRole.fontFamily.signature) is a family name, \
+    \(PenValueForm.StringRole.fontWeight.signature) a CSS weight ("700") or a keyword \
+    (bold), and \(PenValueForm.StringRole.fontStyle.signature) is normal or italic.
     Every length is in points, with one exception: kind.lineHeight is a multiple of \
     fontSize, so 1.4 is 140% leading and 21 is a line box fourteen times too tall.
     A key marked * is required; `null` clears a property.

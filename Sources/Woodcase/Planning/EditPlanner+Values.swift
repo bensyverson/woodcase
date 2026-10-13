@@ -51,10 +51,12 @@ extension EditPlanner {
             if case .null = write.value { continue }
             if write.value == write.current { continue }
             guard let shape = NodePropertyCodec.shape(of: write.field) else { continue }
-            try checkBindings(write, shape: shape, address: address, in: document)
+            let nested = nestedValues(in: write.value, forms: shape.forms, key: write.key)
+            try checkBindings(write, shape: shape, nested: nested, address: address, in: document)
             if let constraint = shape.constraint {
                 try checkConstraint(write, constraint, address: address)
             }
+            try checkNestedConstraints(write, nested, address: address)
         }
     }
 
@@ -63,6 +65,8 @@ extension EditPlanner {
     ///
     /// - Parameters:
     ///   - property: The property path or raw key, for the refusal.
+    ///   - location: Where inside the property's value the binding sits
+    ///     (`kind.fills[0].color`), for the message, or `nil` for the property itself.
     ///   - variable: The variable name, without `$`.
     ///   - expected: The type the property's binding must have, or `nil` to check only
     ///     that the variable exists.
@@ -71,11 +75,13 @@ extension EditPlanner {
     /// - Throws: ``EditRefusal``.
     static func checkBinding(
         _ property: String,
+        at location: String? = nil,
         to variable: String,
         expecting expected: PenVariableType?,
         address: String,
         in document: EditableDocument
     ) throws {
+        let named = location ?? property
         let reference = PenDollarEscape.dollar + variable
         guard let defined = document.variable(named: variable) else {
             guard !document.mayDefineImported(variable) else { return }
@@ -84,7 +90,7 @@ extension EditPlanner {
                 address: address,
                 property: property,
                 expected: expected.map(phrase(of:)),
-                message: "\(address) \(property) refers to \(reference), and the document defines no "
+                message: "\(address) \(named) refers to \(reference), and the document defines no "
                     + "variable named \(variable) — define it first with `woodcase vars set <file> "
                     + "\(variable)=<value>`, or write \(PenDollarEscape.sequence)\(variable) for the literal text"
             )
@@ -95,7 +101,7 @@ extension EditPlanner {
             address: address,
             property: property,
             expected: phrase(of: expected),
-            message: "\(address) \(property) takes \(phrase(of: expected)), but \(variable) is a "
+            message: "\(address) \(named) takes \(phrase(of: expected)), but \(variable) is a "
                 + "\(defined.type.rawValue) variable — bind a \(expected.rawValue) variable instead; "
                 + "`woodcase vars <file>` lists them"
                 + (expected == .string ? ", or write \(PenDollarEscape.sequence)\(variable) for the literal text" : "")
@@ -108,22 +114,29 @@ extension EditPlanner {
     private static func checkBindings(
         _ write: ValueWrite,
         shape: PenPropertyShape,
+        nested: [NestedValue],
         address: String,
         in document: EditableDocument
     ) throws {
-        // A property that takes no variable stores `$word` as the text it is.
-        guard let expected = shape.variable else { return }
         if let name = reference(in: write.value) {
+            // A property that takes no variable stores `$word` as the text it is.
+            guard let expected = shape.variable else { return }
             // Text content alone reads a `$word` the document defines nowhere as the
             // words it is — `$30.00` is a price — so only a name it defines is judged.
             if forgivesUndefined(write.field), document.variable(named: name) == nil { return }
             try checkBinding(write.key, to: name, expecting: expected, address: address, in: document)
             return
         }
-        // References nested inside a structured value — a fill object's color — must
-        // name a variable; their type is the nested key's, which the table does not say.
-        for name in nestedReferences(in: write.value) {
-            try checkBinding(write.key, to: name, expecting: nil, address: address, in: document)
+        // A reference nested inside a structured value — a fill's color, a shadow's —
+        // must name a variable of the type its nested key takes. Where no key table
+        // names a type, it need only exist, and only in a property that takes variables.
+        for item in nested {
+            guard let name = reference(in: item.value) else { continue }
+            let expected = item.field.flatMap { PenValueForm.variableType(of: $0.forms) }
+            guard expected != nil || shape.variable != nil else { continue }
+            try checkBinding(
+                write.key, at: item.location, to: name, expecting: expected, address: address, in: document
+            )
         }
     }
 
@@ -159,19 +172,6 @@ extension EditPlanner {
         else { return nil }
         let name = String(text.dropFirst())
         return name.isEmpty ? nil : name
-    }
-
-    /// Every variable name referenced inside an array or object, at any depth.
-    private static func nestedReferences(in value: AnyCodable) -> [String] {
-        switch value {
-        case let .array(items): items.flatMap { reference(in: $0).map { [$0] } ?? nestedReferences(in: $0) }
-        case let .dictionary(entries):
-            entries.keys.sorted().flatMap { key in
-                let item = entries[key] ?? .null
-                return reference(in: item).map { [$0] } ?? nestedReferences(in: item)
-            }
-        default: []
-        }
     }
 
     /// The numbers a constraint applies to: the value itself, or each slot of a
