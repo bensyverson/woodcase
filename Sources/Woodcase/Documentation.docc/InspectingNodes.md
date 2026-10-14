@@ -55,7 +55,9 @@ constraint rides on ``SchemaNestedReport/Field/constraint`` and ends its line in
 A nested key carries a default the same way (``PenNestedShape/Field/default``): a gradient's
 unset `center` is `{x: 0.5, y: 0.5}` and its `size` `{width: 1, height: 1}`, its `rotation`
 is 0, and a paint's `enabled`, `blendMode` and `opacity` are `true`, `"normal"` and 1; a
-shadow's `shadowType` is `"outer"`, and a per-side stroke width left out is 0. The text
+shadow's `shadowType` is `"outer"` and its unset `offset` is `{x: 0, y: 0}`, and a per-side
+stroke width left out is 0. The offset's `x` and `y` are required *within* an offset
+object, so their defaults are what the renderer draws when the whole `offset` is left out. The text
 ends the key's line with `— default 0.5`; the JSON carries
 ``SchemaNestedReport/Field/default``. `PenNestedDefaultEngineTests` draws each with the key
 unset and with the default written and requires the same pixels, so the table cannot name

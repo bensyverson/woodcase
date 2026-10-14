@@ -326,13 +326,20 @@ overridable property surface:
 ```swift
 if let surface = editable.inspectComponent("comp1") {
     for slot in surface.slots {
-        print("Slot: \(slot.frameName ?? slot.frameID)")
+        print("Slot: \(slot.frameName ?? slot.frameID), suggests \(slot.suggestedComponentIDs)")
     }
     for node in surface.overridableNodes {
         print("\(node.nodeName ?? node.nodeID): \(node.properties)")
     }
 }
 ```
+
+**A slot suggests; it does not restrict.** The Pen format's `slot` list holds the ids of
+reusable components a designer suggested for the hole — Pen offers them as one-click
+inserts — so ``ComponentSlotInfo/suggestedComponentIDs`` is that list as written. Pen
+accepts any node in a slot, and so does Woodcase: no edit is refused for what it puts
+there. A list of node *types* (`["frame", "text"]`) is not the format; Pen finds no
+component by those names and suggests nothing. See `project/2026-10-14-slot-semantics.md`.
 
 ### Incremental Layout
 

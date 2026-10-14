@@ -17,42 +17,19 @@ public extension PenNode {
     /// ``PenTextStyle``'s default for every other key. A metadata value of the wrong JSON
     /// type, or a misspelled alignment, is skipped as if absent. Comments are notes, and
     /// prompts and contexts are drawn as cards in the same family, so all of them read
-    /// the same way.
+    /// the same way. ``noteTextStyleSource(of:)`` says which of the three supplied a key.
     var noteTextStyle: PenTextStyle? {
-        let data: any PenTextStyleProperties
-        switch kind {
-        case let .note(note): data = note
-        case let .prompt(prompt): data = prompt
-        case let .context(context): data = context
-        default: return nil
-        }
-        let metadata = common.metadata ?? PenMetadata(type: nil)
-        func number(_ key: PenMetadata.WoodcaseKey) -> Double? {
-            switch metadata[woodcase: key] {
-            case let .int(value)?: Double(value)
-            case let .double(value)? where value.isFinite: value
-            default: nil
-            }
-        }
-        func string(_ key: PenMetadata.WoodcaseKey) -> String? {
-            switch metadata[woodcase: key] {
-            case let .string(value)?: value
-            case let .int(value)? where key == .fontWeight: String(value)
-            case let .double(value)? where key == .fontWeight: String(value)
-            default: nil
-            }
-        }
-        let own = PenTextStyle(data)
+        guard let reading = noteTextStyleReading else { return nil }
+        let own = PenTextStyle(reading.data)
         return PenTextStyle(
-            fontFamily: string(.fontFamily) ?? own.fontFamily,
-            fontSize: number(.fontSize).flatMap { $0 > 0 ? $0 : nil }
-                ?? data.fontSize?.literalValue.flatMap { $0 > 0 ? $0 : nil } ?? PenPostIt.defaultFontSize,
-            fontWeight: string(.fontWeight).map(PenTextStyle.weight) ?? own.fontWeight,
-            isItalic: string(.fontStyle).map(PenTextStyle.isItalic) ?? own.isItalic,
-            letterSpacing: number(.letterSpacing) ?? own.letterSpacing,
-            lineHeight: number(.lineHeight) ?? own.lineHeight ?? PenPostIt.defaultLineHeight,
-            textAlign: string(.textAlign).flatMap(PenTextAlign.init(rawValue:)) ?? own.textAlign,
-            textAlignVertical: string(.textAlignVertical).flatMap(PenTextAlignVertical.init(rawValue:))
+            fontFamily: reading.string(.fontFamily) ?? own.fontFamily,
+            fontSize: reading.number(.fontSize) ?? reading.ownFontSize ?? PenPostIt.defaultFontSize,
+            fontWeight: reading.string(.fontWeight).map(PenTextStyle.weight) ?? own.fontWeight,
+            isItalic: reading.string(.fontStyle).map(PenTextStyle.isItalic) ?? own.isItalic,
+            letterSpacing: reading.number(.letterSpacing) ?? own.letterSpacing,
+            lineHeight: reading.number(.lineHeight) ?? own.lineHeight ?? PenPostIt.defaultLineHeight,
+            textAlign: reading.string(.textAlign).flatMap(PenTextAlign.init(rawValue:)) ?? own.textAlign,
+            textAlignVertical: reading.string(.textAlignVertical).flatMap(PenTextAlignVertical.init(rawValue:))
                 ?? own.textAlignVertical,
             underline: own.underline,
             strikethrough: own.strikethrough

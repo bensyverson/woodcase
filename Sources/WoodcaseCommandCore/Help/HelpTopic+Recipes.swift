@@ -52,7 +52,9 @@ extension HelpTopic {
       woodcase tree design.pen List
 
     A COMPONENT WITH A HOLE IN IT
-      A frame with a "slot" key is a hole a definition leaves for its instances.
+      A frame with a "slot" key is a hole a definition leaves for its instances;
+      its list names component ids to suggest for it ([] for none), and any node
+      may fill it.
       The instance fills it by overriding that frame's `children` with .pen
       subtrees — refs with their own overrides included — so a component can hold
       whole composites, not only text. Every injected node needs an "id": the
@@ -61,7 +63,7 @@ extension HelpTopic {
     {"id":"Card0","type":"frame","name":"Card","reusable":true,"layout":"vertical",
      "gap":8,"padding":8,"width":200,"height":"fit_content","children":[
        {"id":"CTtl0","type":"text","name":"Card Title","content":"Card","fill":"#111111"},
-       {"id":"CSlt0","type":"frame","name":"Body","slot":["text","frame","ref"],
+       {"id":"CSlt0","type":"frame","name":"Body","slot":[],
         "layout":"vertical","gap":4,"width":"fit_content","height":"fit_content"}]}
     JSON
       woodcase cp design.pen Card List common.name=Filled --as ana

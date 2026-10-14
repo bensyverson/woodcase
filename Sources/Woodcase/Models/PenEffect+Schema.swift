@@ -60,6 +60,10 @@ public extension PenEffect {
     )
 
     /// How far a shadow is displaced from the node.
+    ///
+    /// `x` and `y` are both required in an offset object, so each one's default is what
+    /// the renderer draws when the shadow leaves `offset` out altogether: 0, 0, the
+    /// shadow straight under the node.
     static let offsetSchema = PenNestedShape(
         name: "offset",
         singular: "an offset object",
@@ -67,8 +71,12 @@ public extension PenEffect {
         summary: "how far a shadow is displaced, in points",
         variants: [
             PenNestedShape.Variant(fields: [
-                PenNestedShape.Field(key: "x", forms: [.number, .variable(.number)], isRequired: true),
-                PenNestedShape.Field(key: "y", forms: [.number, .variable(.number)], isRequired: true),
+                PenNestedShape.Field(
+                    key: "x", forms: [.number, .variable(.number)], isRequired: true, default: .number(0)
+                ),
+                PenNestedShape.Field(
+                    key: "y", forms: [.number, .variable(.number)], isRequired: true, default: .number(0)
+                ),
             ]),
         ]
     )

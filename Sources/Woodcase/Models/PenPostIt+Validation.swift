@@ -94,8 +94,10 @@ public extension PenPostIt {
         of key: PenMetadata.WoodcaseKey, shape: PenMetadata.WoodcaseKey.Shape, _ value: AnyCodable
     ) -> Violation? {
         switch (shape, value) {
-        case (.any, _), (.string, .string), (.number, .int), (.number, .double):
+        case (.any, _), (.string, .string):
             return nil
+        case (.number, .int), (.number, .double):
+            return rangeViolation(of: key, value)
         case (.string, _):
             return Violation(key: key, value: value, accepted: [anyString], suggestion: nil)
         case (.number, _):
@@ -123,6 +125,21 @@ public extension PenPostIt {
                 return Violation(key: key, value: value, accepted: key.spellings, suggestion: nil, reason: error.reason)
             }
         }
+    }
+
+    /// Whether a number breaks the key's ``PenMetadata/WoodcaseKey/constraint``: the
+    /// refusal names the range, and the nearest number inside it when there is one.
+    private static func rangeViolation(of key: PenMetadata.WoodcaseKey, _ value: AnyCodable) -> Violation? {
+        let number: Double? = switch value {
+        case let .int(number): Double(number)
+        case let .double(number): number
+        default: nil
+        }
+        guard let number, let constraint = key.constraint, constraint.violation(by: number) != nil else { return nil }
+        return Violation(
+            key: key, value: value, accepted: [constraint.summary],
+            suggestion: constraint.nearestAllowed(to: number).map(PenValueConstraint.spell)
+        )
     }
 
     /// The spelling a misspelling most likely meant, or `nil` when none is close.

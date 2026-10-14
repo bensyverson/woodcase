@@ -65,9 +65,9 @@ struct PenNestedDefaultEngineTests {
     private static let color: AnyCodable = ["type": "color", "color": "#33CC66"]
 
     /// A shadow with every optional key written, so a pin can remove the one under test.
-    private static func shadow() -> AnyCodable {
+    private static func shadow(offset: AnyCodable = ["x": 8, "y": 8]) -> AnyCodable {
         [
-            "type": "shadow", "shadowType": "outer", "offset": ["x": 8, "y": 8], "blur": 6,
+            "type": "shadow", "shadowType": "outer", "offset": offset, "blur": 6,
             "color": "#FF8800", "blendMode": "normal", "enabled": true,
         ]
     }
@@ -88,6 +88,9 @@ struct PenNestedDefaultEngineTests {
         let object: AnyCodable
         /// A value that must draw differently from the default.
         let alternative: AnyCodable
+        /// What "unset" removes, when it is not ``path`` itself: the object holding a key
+        /// the decoder requires, which can be left out only as a whole.
+        var unsetPath: [String]?
 
         var testDescription: String {
             "\(shape) \(spelling ?? "") \(path.joined(separator: "."))"
@@ -143,6 +146,12 @@ struct PenNestedDefaultEngineTests {
             object: shadow(), alternative: "#FF0000"),
         Pin(shape: "effect", spelling: "shadow", path: ["blendMode"], property: "effect", object: shadow(),
             alternative: "multiply"),
+        // A shadow's offset: x and y are required, so "unset" is the offset left out
+        // whole, and the other axis sits at its default so only the one under test moves.
+        Pin(shape: "offset", path: ["offset", "x"], property: "effect", object: shadow(offset: ["x": 8, "y": 0]),
+            alternative: 12, unsetPath: ["offset"]),
+        Pin(shape: "offset", path: ["offset", "y"], property: "effect", object: shadow(offset: ["x": 0, "y": 8]),
+            alternative: 12, unsetPath: ["offset"]),
         // A per-side stroke width: a side left out carries no stroke.
         Pin(shape: "per-side width", path: ["top"], property: "strokeWidth",
             object: ["right": 3, "bottom": 3, "left": 3], alternative: 9),
@@ -160,7 +169,9 @@ struct PenNestedDefaultEngineTests {
         let value = try #require(field.default?.value, "the schema lists no literal default")
         let key = pin.property
 
-        let unset = try Self.draw(Self.document(key, pin.object.removing(pin.path), stroked: key == "strokeWidth"))
+        let unset = try Self.draw(Self.document(
+            key, pin.object.removing(pin.unsetPath ?? pin.path), stroked: key == "strokeWidth"
+        ))
         let asDefault = try Self.draw(Self.document(key, pin.object.setting(pin.path, to: value), stroked: key == "strokeWidth"))
         let other = try Self.draw(Self.document(
             key, pin.object.setting(pin.path, to: pin.alternative), stroked: key == "strokeWidth"
@@ -196,6 +207,15 @@ struct PenNestedDefaultEngineTests {
         #expect(Self.field("fill size", nil, "height")?.default == .number(1))
         #expect(Self.field("fill", "gradient", "rotation")?.default == .number(0))
         #expect(Self.field("fill", "gradient", "opacity")?.default == .number(1))
+    }
+
+    @Test("A shadow left without an offset draws at 0, 0, and the offset's keys say so while staying required")
+    func shadowOffsetDefaults() throws {
+        let x = try #require(Self.field("offset", nil, "x"))
+        let y = try #require(Self.field("offset", nil, "y"))
+        #expect(x.default == .number(0))
+        #expect(y.default == .number(0))
+        #expect(x.isRequired && y.isRequired)
     }
 
     // MARK: - Lookup

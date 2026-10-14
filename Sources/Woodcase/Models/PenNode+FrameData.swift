@@ -68,7 +68,10 @@ public extension PenNode {
         public var padding: PenPadding?
         public var justifyContent: PenJustifyContent?
         public var alignItems: PenAlignItems?
-        /// Accepted node types for this slot frame in a component.
+        /// Marks this frame, inside a component, as a slot an instance fills: the ids of
+        /// the reusable components suggested to fill it, empty for a slot that suggests
+        /// none, or `nil` for a frame that is not a slot. A suggestion, never a
+        /// restriction — Pen accepts any node in a slot. See ``ComponentSlotInfo``.
         public var slot: [String]?
         public var children: [PenNode]?
 

@@ -42,7 +42,7 @@ public struct SchemaPostItReport: Friendly {
             self.key = key.path
             spellings = key.spellings
             takes = switch key.shape {
-            case .number: "any number"
+            case .number: key.constraint.flatMap { $0.limitsValues ? $0.summary : nil } ?? "any number"
             case .any: "any JSON"
             case .textSpans: "an object"
             case .string, .oneOf, .hexColor, .utcTimestamp: "any string"
@@ -56,8 +56,8 @@ public struct SchemaPostItReport: Friendly {
         /// The values it takes; empty for any value of the kind ``takes`` names.
         public let spellings: [String]
 
-        /// What it takes when ``spellings`` is empty: `any string`, `any number` or
-        /// `any JSON`.
+        /// What it takes when ``spellings`` is empty: `any string`, `any number`, `any
+        /// JSON`, or the range a number must keep to (`> 0, in points` for `fontSize`).
         public let takes: String
 
         /// One sentence saying what it holds.

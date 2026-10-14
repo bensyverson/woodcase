@@ -150,9 +150,12 @@ public struct PenNestedShape: Friendly {
         ///
         /// The nested twin of ``PenSchemaTable/Property/default`` — a gradient's unset
         /// `center` is `{x: 0.5, y: 0.5}`, so its `x` and `y` each default to 0.5 — and
-        /// held to the renderer the same way, by `PenNestedDefaultEngineTests`. A key with
-        /// no default is either required, or leaving it unset draws something no single
-        /// value stands for (a shader's `uniforms`).
+        /// held to the renderer the same way, by `PenNestedDefaultEngineTests`. A key the
+        /// object requires can be left out only with the whole object, so its default is
+        /// what the renderer draws then: a shadow with no `offset` sits at `x` 0, `y` 0.
+        /// A key with no default is either required by an object that must be written, or
+        /// leaving it unset draws something no single value stands for (a shader's
+        /// `uniforms`).
         public let `default`: PenPropertyDefault?
 
         /// The same key with no default stated, for a variant whose default nothing pins.

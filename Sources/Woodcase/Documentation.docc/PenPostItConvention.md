@@ -57,7 +57,9 @@ under the Woodcase namespace, `metadata.woodcase`, rather than in properties of 
 | `requestedBy` | any string | On a prompt, who pressed Run |
 | `createdAt` | `YYYY-MM-DDTHH:MM:SSZ` | On a comment message, when it was written: ISO 8601 in UTC, to the second (``PenComment/createdAt(_:)``) |
 | `fontFamily`, `fontWeight`, `fontStyle` | any string | The note's text style |
-| `fontSize`, `letterSpacing`, `lineHeight` | any number | The note's text style |
+| `fontSize` | > 0, in points (as `kind.fontSize`) | The note's type size |
+| `lineHeight` | > 0 and ≤ 10, a multiple of fontSize (as `kind.lineHeight`) | The note's line height |
+| `letterSpacing` | any number, in points | The note's letter spacing |
 | `textAlign`, `textAlignVertical` | as on a text node | The note's text alignment |
 
 ```json
@@ -68,6 +70,23 @@ under the Woodcase namespace, `metadata.woodcase`, rather than in properties of 
 
 `woodcase schema postit` prints the same table from ``PenPostIt/keys``, and
 ``SchemaPostItReport`` is its machine-readable form.
+
+**Text-style numbers keep the text node's ranges.** `fontSize`, `lineHeight` and
+`letterSpacing` carry the ``PenValueConstraint`` of the `kind.` key they stand in for
+(``PenMetadata/WoodcaseKey/constraint``), so ``EditPlanner`` refuses a 0 pt or negative
+type size, or a line height written in points, with ``EditRefusal/Code/outOfRange`` and
+`common.metadata.woodcase.fontSize` as the property — exactly as it refuses
+`kind.fontSize: 0` on a text. An `add` or `replace` subtree is held to the same range
+through ``PenPostIt/violation(in:comparedTo:on:)``. A file already holding one still
+opens, and a write that leaves it unchanged passes.
+
+**Where a note's style came from.** A note draws each text-style key from
+`metadata.woodcase` first, then from its own property (a legacy file, or one Pen has
+not loaded), then from the post-it default (``PenNode/noteTextStyle``). A value the
+drawing skips — a type size of 0, a misspelled alignment, a string where a number
+belongs — does not count. ``PenNode/noteTextStyleSource(of:)`` says which of the three
+supplied the value drawn, so an inspector can show that a legacy note's 18 pt comes
+from `kind.fontSize` and offer to move it into the metadata.
 
 **Old spellings.** A note written before the namespace carries `metadata.type: "postit"` (rewritten to `"woodcase"` when its keys move in)
 and its keys bare beside it (`state`, `author`, `tint`, …). They are still read, the

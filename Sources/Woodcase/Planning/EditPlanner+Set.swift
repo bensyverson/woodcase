@@ -52,6 +52,9 @@ extension EditPlanner {
         // already carries before the edit exists, so what is recorded, replicated and
         // undone is the ordinary whole-object write the format has always had.
         let props = try NodePropertyCodec.folding(properties, onto: node)
+        // Before the convention's own check, so a number out of range is refused as
+        // outOfRange, as the `kind.` key it stands in for would be, not as a bad form.
+        try checkMetadataValues(props, on: node, address: written)
         try NodePropertyCodec.checkAuthored(props, on: node)
         try checkValues(
             props.keys.sorted().compactMap { path in

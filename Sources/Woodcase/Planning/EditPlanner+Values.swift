@@ -144,7 +144,7 @@ extension EditPlanner {
     }
 
     /// Refuses a number outside the property's constraint, at the top level or in a slot.
-    private static func checkConstraint(
+    static func checkConstraint(
         _ write: ValueWrite,
         _ constraint: PenValueConstraint,
         address: String

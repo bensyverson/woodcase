@@ -37,7 +37,10 @@ struct SchemaPostItTests {
         #expect(report.type == PenPostIt.typeValue)
         #expect(report.keys.map(\.key) == PenPostIt.keys.map { "common.metadata.woodcase.\($0.rawValue)" })
         #expect(report.keys.first { $0.key == "common.metadata.woodcase.state" }?.spellings == ["open", "resolved"])
-        #expect(report.keys.first { $0.key == "common.metadata.woodcase.fontSize" }?.takes == "any number")
+        let fontSize = PenMetadata.WoodcaseKey.fontSize.constraint?.summary
+        #expect(fontSize != nil)
+        #expect(report.keys.first { $0.key == "common.metadata.woodcase.fontSize" }?.takes == fontSize)
+        #expect(report.keys.first { $0.key == "common.metadata.woodcase.letterSpacing" }?.takes == "any number")
     }
 
     @Test("The overview points at the convention")

@@ -45,7 +45,7 @@ struct ComponentIntrospectionTests {
         let slotFrame = PenNode(
             id: "content-slot",
             common: PenNodeCommon(name: "Content"),
-            kind: .frame(PenNode.FrameData(slot: ["frame", "text"]))
+            kind: .frame(PenNode.FrameData(slot: ["round-button", "icon-button"]))
         )
         let component = PenNode(
             id: "comp1",
@@ -60,7 +60,7 @@ struct ComponentIntrospectionTests {
         #expect(surface?.slots.count == 1)
         #expect(surface?.slots.first?.frameID == "content-slot")
         #expect(surface?.slots.first?.frameName == "Content")
-        #expect(surface?.slots.first?.acceptedTypes == ["frame", "text"])
+        #expect(surface?.slots.first?.suggestedComponentIDs == ["round-button", "icon-button"])
     }
 
     @Test("Component without slots returns empty slots array")
@@ -127,7 +127,7 @@ struct ComponentIntrospectionTests {
         let surface = ComponentSurface(
             componentID: "comp1",
             componentName: "Button",
-            slots: [ComponentSlotInfo(frameID: "slot1", frameName: "Content", acceptedTypes: ["frame"])],
+            slots: [ComponentSlotInfo(frameID: "slot1", frameName: "Content", suggestedComponentIDs: ["round-button"])],
             overridableNodes: [OverridableNode(
                 nodeID: "label",
                 nodeName: "Label",
