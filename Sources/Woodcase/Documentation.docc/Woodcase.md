@@ -81,6 +81,7 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 ### Rendering
 
 - <doc:PenRendering>
+- <doc:PenSVGExport>
 - <doc:PenTextLayoutForEditors>
 - <doc:PenRichText>
 - <doc:NoteMarkdown>

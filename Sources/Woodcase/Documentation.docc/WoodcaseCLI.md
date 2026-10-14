@@ -94,7 +94,7 @@ return are listed here, so a script knows what it must branch on.
 | `vars set/rm` | write | Add, change or remove a variable or theme axis | 0 2 3 4 5 |
 | `imports set/rm` | write | Add, repoint or drop a library import | 0 2 3 4 5 |
 | `migrate` | write | Rewrite older files in the current format, and old-style metadata under `woodcase`, in place | 0 2 4 |
-| `shot` | render | One node to a PNG, scaled, with the scale printed | 0 2 3 4 |
+| `shot` | render | One node to a PNG, scaled, with the scale printed; `--svg` writes an SVG of the same region | 0 2 3 4 |
 | `render` | render | The whole document to PNG or PDF | 0 1 2 4 |
 | `generate react` | render | React + Tailwind source from the document | 0 2 4 |
 | `generate swiftui` | render | A SwiftPM package of SwiftUI views from the document | 0 2 4 |

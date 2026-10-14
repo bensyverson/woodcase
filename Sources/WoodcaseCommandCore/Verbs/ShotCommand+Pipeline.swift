@@ -73,6 +73,13 @@ extension Shot {
         )
         let imageProvider = PenRenderer.imageProvider(relativeTo: url.deletingLastPathComponent())
 
+        if request.svg {
+            return try await writeSVG(
+                request, of: document, selection: selection, rect: rect, region: region,
+                layoutRects: rects, imageProvider: imageProvider, editing: url, reader: reader, revision: read.revision
+            )
+        }
+
         guard let image = ShotRegionRenderer.image(
             of: document, node: selection.nodeID, region: region,
             layoutRects: rects, scale: scale, imageProvider: imageProvider

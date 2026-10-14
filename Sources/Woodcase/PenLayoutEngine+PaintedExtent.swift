@@ -73,6 +73,25 @@ public extension PenLayoutEngine {
         else { return nil }
         return mapped(localPaintedExtent(of: node, box: placement.box, layoutRects: layoutRects), by: placement)
     }
+
+    /// Everything a selection may paint, in canvas coordinates: the union of each node's
+    /// ``canvasPaintedExtent(of:in:layoutRects:)``. The bounds that hold a multi-root PNG
+    /// or SVG of the selection whole, shadows and overhangs included.
+    ///
+    /// - Parameters:
+    ///   - nodeIDs: The nodes, in the expanded document's spelling.
+    ///   - document: The expanded, resolved document the layout ran on.
+    ///   - layoutRects: The settled rects, parent-relative as the engine writes them.
+    /// - Returns: The union, or `nil` when no id names a node with a settled rect.
+    static func canvasPaintedExtent(
+        of nodeIDs: [String],
+        in document: PenDocument,
+        layoutRects: [String: PenRect]
+    ) -> PenRect? {
+        nodeIDs.reduce(nil) { extent, id in
+            union(extent, canvasPaintedExtent(of: id, in: document, layoutRects: layoutRects))
+        }
+    }
 }
 
 extension PenLayoutEngine {

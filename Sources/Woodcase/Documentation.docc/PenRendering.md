@@ -277,11 +277,20 @@ let titleImage = PenRenderer.render(
 )
 ```
 
+### A selection across parents
+
+To draw several nodes under different parents, each where the canvas draws it — through its
+ancestors' placements and clips, without their paint — use
+``PenRenderer/render(_:layoutRects:rootNodeIDs:bounds:scale:colorSpace:imageProvider:postIt:)``,
+which frames a canvas region rather than one node. ``SVGExporter`` draws the same selection
+as an SVG; see <doc:PenSVGExport>.
+
 ## Topics
 
 ### Public API
 
 - ``PenRenderer``
+- ``SVGExporter``
 - ``NodeOverrides``
 - ``PenIconFontRegistry``
 - ``PenFontRegistry``

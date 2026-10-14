@@ -40,6 +40,9 @@ extension Shot {
         /// The `--extent` value: which of the node's extents the run frames.
         let extent: ShotExtent
 
+        /// Whether `--svg` was given: write an SVG instead of a PNG.
+        let svg: Bool
+
         /// The `--out` path.
         let out: String
     }

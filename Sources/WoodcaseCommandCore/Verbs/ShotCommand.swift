@@ -101,10 +101,11 @@ import Woodcase
 /// frame the printed `rect=` establishes.
 struct Shot: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-        abstract: "Render: one node of a .pen file to a PNG, with an optional ruler and boxes.",
+        abstract: "Render: one node of a .pen file to a PNG or SVG, with an optional ruler and boxes.",
         discussion: """
         A read verb: it takes a shared lock, writes nothing to the .pen file, and \
-        leaves its bytes and modification date alone. It writes one PNG, at --out.
+        leaves its bytes and modification date alone. It writes one PNG (or, with --svg, \
+        one SVG) at --out.
 
         Reach for `woodcase tree` first — structure is cheaper to read than pixels. \
         When you do need the picture, scope it to the smallest node that shows the \
@@ -153,6 +154,13 @@ struct Shot: AsyncParsableCommand {
         repeats. The ring is drawn just *outside* the rect, so the node's own edge \
         pixels are never covered. Only a node inside the rendered node's own subtree \
         can be boxed; anything else is refused rather than drawn nowhere.
+
+        --svg writes the same region as an SVG instead: shapes as paths, text as real \
+        <text>, gradients, strokes, shadows and blurs as SVG, anything SVG cannot draw \
+        embedded as a picture. It is framed exactly as the PNG would be -- rect= is its \
+        viewBox, one unit per layout point, so scale= is 1 -- and --crop and --extent \
+        work as they do for a PNG. --grid, --outline and --scale are pixel-only and \
+        refused with it.
 
         --grid draws a numbered ruler along the top and left edges, ticked every 100 \
         layout points, plus a faint line across the image at each tick. The numbers \
@@ -266,6 +274,16 @@ struct Shot: AsyncParsableCommand {
     )
     var extent: ShotExtent = .layout
 
+    /// Whether to write an SVG instead of a PNG. See ``Woodcase/SVGExporter``.
+    @Flag(
+        name: .long,
+        help: ArgumentHelp(
+            "Write the node as an SVG instead of a PNG: vector, one unit per layout point. "
+                + "Not with --grid, --outline or --scale."
+        )
+    )
+    var svg = false
+
     /// The `--json` flag.
     @OptionGroup var output: OutputOptions
 
@@ -278,13 +296,22 @@ struct Shot: AsyncParsableCommand {
             throw ValidationError("--scale must be a positive number, got \(scale).")
         }
         _ = try crop?.region()
+        if svg {
+            if grid { throw ValidationError("--svg cannot take --grid: the ruler is drawn on pixels. Drop one.") }
+            if !outline.isEmpty {
+                throw ValidationError("--svg cannot take --outline: the boxes are drawn on pixels. Drop one.")
+            }
+            if scale != nil {
+                throw ValidationError("--svg cannot take --scale: an SVG is one unit per layout point at any size. Drop --scale.")
+            }
+        }
     }
 
     func run() async throws {
         let url = try file.existingFile()
         let request = try Request(
             node: node, theme: themePin.theme, maxSize: maxSize, scale: scale,
-            grid: grid, outline: outline, crop: crop?.region(), extent: extent, out: out
+            grid: grid, outline: outline, crop: crop?.region(), extent: extent, svg: svg, out: out
         )
         let result = try await runReportingFailures(editing: url) {
             try await Self.render(request, editing: url, reader: reader.identity)
