@@ -34,9 +34,10 @@ struct ClipCommand: AsyncParsableCommand {
         drawn: overrides applied, detached from its component, under fresh ids derived \
         from the document, so the same copy prints the same bytes every time.
 
-        --json prints {"contentIDs": [...], "document": {...}} instead: the clip with \
-        the ids of the roots that were copied, so a reader can tell them from the \
-        definitions carried along.
+        --json prints {"contentIDs": [...], "document": {...}, "offsets": {...}} \
+        instead: the clip with the ids of the roots that were copied, so a reader can \
+        tell them from the definitions carried along, and where each one copied out of \
+        a parent sat in it — what `woodcase paste --into` a free container keeps.
 
         \(AddressArgument.addressForms)
 

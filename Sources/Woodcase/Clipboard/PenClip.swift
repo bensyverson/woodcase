@@ -45,9 +45,12 @@ public struct PenClip: Friendly {
     ///   - document: The clip as a .pen document: the copied roots, then the carried
     ///     definitions.
     ///   - contentIDs: The ids of the roots that were copied, in document order.
-    public init(document: PenDocument, contentIDs: [String]) {
+    ///   - offsets: Where each copied root sat inside the parent it was copied out of,
+    ///     by id; `nil` when none was copied out of a parent.
+    public init(document: PenDocument, contentIDs: [String], offsets: [String: PenPoint]? = nil) {
         self.document = document
         self.contentIDs = contentIDs
+        self.offsets = offsets
     }
 
     /// The clip as a .pen document: the copied roots, then the carried definitions,
@@ -57,6 +60,17 @@ public struct PenClip: Friendly {
     /// The ids of the roots that were copied, in document order. Every other root of
     /// ``document`` is a component definition carried along for them.
     public var contentIDs: [String]
+
+    /// Where each copied root sat inside the parent it was copied out of: the point its
+    /// `x` and `y` named there — its origin in the parent's coordinates, as drawn, so a
+    /// node a stack placed records where the stack put it. Keyed by the root's id in
+    /// ``document``; a node copied from the canvas has no parent and no entry, and a clip
+    /// with no entry at all has `nil`, which is also what a clip written before offsets
+    /// existed decodes to.
+    ///
+    /// The roots of ``document`` stay at their canvas positions; this is what a paste into
+    /// another free container reads to keep the offset (``PasteTarget/inside(containerID:)``).
+    public var offsets: [String: PenPoint]?
 
     /// Extracts a clip of some nodes of a document.
     ///
@@ -73,8 +87,12 @@ public struct PenClip: Friendly {
         let position = Dictionary(uniqueKeysWithValues: order.enumerated().map { ($1, $0) })
         let selected = try selection(nodeIDs, in: document, position: position)
         let positioned = placed(copies(of: selected, in: document), of: selected, in: document)
-        let definitions = definitions(for: positioned, in: document, position: position)
-        let content = renumbered(positioned, apartFrom: definitions, in: document)
+        let definitions = definitions(for: positioned.nodes, in: document, position: position)
+        let content = renumbered(positioned.nodes, apartFrom: definitions, in: document)
+        var offsets: [String: PenPoint] = [:]
+        for (root, offset) in zip(content, positioned.offsets) {
+            offsets[root.id] = offset
+        }
         let roots = content + definitions
         let needs = needs(of: roots, in: document)
         return PenClip(
@@ -84,7 +102,8 @@ public struct PenClip: Friendly {
                 variables: needs.variables.isEmpty ? nil : needs.variables,
                 children: roots
             ),
-            contentIDs: content.map(\.id)
+            contentIDs: content.map(\.id),
+            offsets: offsets.isEmpty ? nil : offsets
         )
     }
 

@@ -85,6 +85,7 @@ return are listed here, so a script knows what it must branch on.
 | `set` | write | Patch properties of one node by path | 0 2 3 4 5 |
 | `replace` | write | Swap a node's subtree for a new one, keeping its place | 0 2 3 4 5 |
 | `cp` | write | Duplicate a subtree with fresh ids | 0 2 3 4 5 |
+| `paste` | write | Take a clip from `clip --json` into the file, reusing and renaming its components and variables | 0 2 3 4 5 |
 | `mv` | write | Reparent or reorder a node | 0 2 3 4 5 |
 | `rm` | write | Delete a node, refusing to strand instances | 0 2 3 4 5 |
 | `override` | write | Write an override into a component instance | 0 2 3 4 5 |
@@ -374,8 +375,9 @@ woodcase shot clip.pen
 ```
 
 **Options:** `--as` (a reader, for the view log), `--json`, which prints
-`{"contentIDs": [...], "document": {...}}` so the copied roots can be told from the
-carried definitions.
+`{"contentIDs": [...], "document": {...}, "offsets": {...}}` so the copied roots can be
+told from the carried definitions; `offsets` gives each root copied out of a parent its
+`{"x", "y"}` there, which `paste --into` a free container keeps.
 
 ### `lint`
 
@@ -874,6 +876,33 @@ share one batch id, so one `woodcase undo` takes the whole write back.
 ```bash
 woodcase cp design.pen Cards/Row Cards common.name='Card {n}' --times 3
 ```
+
+### `paste`
+
+What an editor's Paste does: take a clip — the JSON `woodcase clip --json` prints, or `-`
+for standard input — into the file (``PenClip/plan(into:at:)``; see <doc:Clipboard#Pasting>).
+Every id is new. A component or variable the file already has with the same name and
+definition is reused; one whose name it holds with a different definition comes along
+renamed (`Button 2`, `$primary-2`), and every use in the paste follows. Components the file
+lacks land as roots past everything on its canvas. A paste that would make components
+contain each other is refused, naming the loop, and nothing is written. The whole paste is
+one transaction, so one `woodcase undo` takes it back.
+
+```bash
+woodcase clip source.pen Buy --json > clip.json
+woodcase paste design.pen clip.json --into Page/Card --as ana
+woodcase clip design.pen Hero --json | woodcase paste other.pen - --at 0,0 --as ana
+```
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--into <container>` | — | After the container's last child: in a stack, in the flow; in a free container, at the canvas position copied from (centered when that misses it) |
+| `--after <node>` | — | Right after the node in its parent: in a stack, in the flow; elsewhere to its right, top-aligned |
+| `--at x,y` | — | On the canvas, as roots, centered on the point |
+| `--in-place` | on | On the canvas, as roots, where the nodes were copied |
+| `--json` | `false` | `{"insertedRootIDs":[…],"reusedComponents":{…},"renamedComponents":[…],"reusedVariables":[…],"renamedVariables":[…],"revision":…}` |
+
+Pass at most one placement. `--dry-run` and `--as` work as for every write verb.
 
 ### `mv`
 

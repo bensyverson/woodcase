@@ -137,6 +137,8 @@ struct CommandFailure: Error, Friendly, CustomStringConvertible {
             )
         case let refusal as EditRefusal:
             CommandFailure(message: refusal.message, exitCode: .usage)
+        case let paste as PasteError:
+            CommandFailure(message: paste.description, exitCode: .usage)
         case is CocoaError, is URLError:
             CommandFailure(message: error.localizedDescription, exitCode: .environment)
         default:

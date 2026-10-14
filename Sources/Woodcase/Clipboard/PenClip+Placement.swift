@@ -17,21 +17,64 @@ extension PenClip {
     ///
     /// The document is laid out only when some copied node was not a root.
     ///
+    /// Each one that was not a root also reports its offset in its parent: the point its
+    /// `x` and `y` named there, as drawn (``PenClip/offsets``).
+    ///
     /// - Parameters:
     ///   - copies: The copied subtrees, one per selected node.
     ///   - selected: The selection, in the same order.
     ///   - document: The source document.
-    /// - Returns: The subtrees, placed.
-    static func placed(_ copies: [PenNode], of selected: [Selected], in document: EditableDocument) -> [PenNode] {
-        guard selected.contains(where: { !$0.isRoot }) else { return copies }
+    /// - Returns: The subtrees, placed, and each one's offset in its parent — `nil` for a
+    ///   root — in the same order.
+    static func placed(
+        _ copies: [PenNode],
+        of selected: [Selected],
+        in document: EditableDocument
+    ) -> (nodes: [PenNode], offsets: [PenPoint?]) {
+        guard selected.contains(where: { !$0.isRoot }) else {
+            return (copies, Array(repeating: nil, count: copies.count))
+        }
         let expanded = PenVariableResolver.resolve(document.expanded(for: .canvas))
         let rects = PenLayoutEngine.layout(expanded)
-        return zip(copies, selected).map { copy, node in
+        let drawn = drawnNodes(selected.filter { !$0.isRoot }.map(\.expandedID), in: expanded)
+        var nodes: [PenNode] = []
+        var offsets: [PenPoint?] = []
+        for (copy, node) in zip(copies, selected) {
             guard !node.isRoot,
                   let placement = PenLayoutEngine.canvasPlacement(of: node.expandedID, in: expanded, layoutRects: rects)
-            else { return copy }
-            return moved(copy, to: placement)
+            else {
+                nodes.append(copy)
+                offsets.append(nil)
+                continue
+            }
+            nodes.append(moved(copy, to: placement))
+            offsets.append(drawn[node.expandedID].flatMap { found in
+                rects[found.id].map { rect in
+                    PenLayoutEngine.placement(of: found, rect: rect, layoutRects: rects)
+                        .transform.apply(to: PenPoint(x: 0, y: 0))
+                }
+            })
         }
+        return (nodes, offsets)
+    }
+
+    /// Some nodes of an expanded document, found by id.
+    ///
+    /// - Parameters:
+    ///   - ids: The expanded ids to find.
+    ///   - expanded: The expanded document.
+    /// - Returns: Each one found, by id.
+    private static func drawnNodes(_ ids: [String], in expanded: PenDocument) -> [String: PenNode] {
+        let wanted = Set(ids)
+        var found: [String: PenNode] = [:]
+        var pending = expanded.children
+        while let node = pending.popLast(), found.count < wanted.count {
+            if wanted.contains(node.id) {
+                found[node.id] = node
+            }
+            pending.append(contentsOf: node.kind.inlineChildren)
+        }
+        return found
     }
 
     /// One subtree, moved to its canvas placement.

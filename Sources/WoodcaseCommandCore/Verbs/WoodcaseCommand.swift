@@ -53,7 +53,7 @@ package struct WoodcaseCommand: AsyncParsableCommand {
             Tree.self, Find.self, Get.self, ClipCommand.self, Shot.self, Lint.self, Schema.self, Undo.self,
             Notes.self, Comments.self, Prompts.self,
             NewCommand.self, BundleCommand.self, UnbundleCommand.self, EmbedCommand.self,
-            AddCommand.self, SetCommand.self, ReplaceCommand.self, CopyCommand.self,
+            AddCommand.self, SetCommand.self, ReplaceCommand.self, CopyCommand.self, PasteCommand.self,
             MoveCommand.self, RemoveCommand.self,
             CommentCommand.self, ReplyCommand.self, ResolveCommand.self,
             OverrideCommand.self, Apply.self, Js.self, Vars.self, Imports.self,
