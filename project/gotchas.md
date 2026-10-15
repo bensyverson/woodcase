@@ -31,3 +31,5 @@ With several agents building (load 90–200) the same suites fail in full runs a
 ## 2026-10-11 — `scripts/mae-check` after a filtered test run checks only that run
 
 **A `swift test --filter …` rerun rewrites `performance/mae-test.csv` with its few rows, so the commit hook's `mae-check` then lists every other id as MISSING and prints "MAE baseline updated".** The tracked baseline did not change on 2026-10-11 (`git status` clean), but the check covered 11–12 rows, not the suite. To gate a commit on MAE, run the full `swift test --quiet` last, after any filtered reruns of load flakes.
+
+`pen interactive --enable-preview --preview-output out.png` sometimes exits without writing the PNG. Two `execute({ input: 'Print(1)' })` calls before `save()` make it write reliably (w-shade, 2026-10-15); the cause is unknown.
