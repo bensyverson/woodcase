@@ -6,7 +6,7 @@
 import CoreGraphics
 
 extension SVGWriter {
-    /// A node's stroke, as ``PenStrokeRenderer/renderStroke(_:path:rect:roundedBox:dash:in:imageProvider:)``
+    /// A node's stroke, as ``PenStrokeRenderer/renderStroke(_:path:rect:roundedBox:dash:miterLimit:in:imageProvider:)``
     /// draws it.
     ///
     /// A uniform stroke stays an SVG stroke, so an editor can still change its width: a
@@ -25,13 +25,16 @@ extension SVGWriter {
     ///   - dash: The node's dash, or `nil` for a solid stroke: `stroke-dasharray` and
     ///     `stroke-dashoffset` on a stroke paint, the dashed outline for a filled one. The
     ///     outline starts where the CG renderer's does, so the dashes land alike.
+    ///   - miterLimit: The node's miter limit (``PenNode/strokeMiterLimit``), written as
+    ///     `stroke-miterlimit` on a mitered stroke paint.
     /// - Returns: The stroke's elements, one per paint.
     func stroke(
         _ strokable: (any PenStrokable)?,
         path: CGPath,
         box: PenRect,
         roundedBox: PenStrokeRenderer.RoundedBox?,
-        dash: PenStrokeDash? = nil
+        dash: PenStrokeDash? = nil,
+        miterLimit: Double = PenNode.defaultMiterLimit
     ) -> [SVGElement] {
         guard let strokable, let fills = strokable.stroke else { return [] }
         let domain = box.cgRect
@@ -46,7 +49,7 @@ extension SVGWriter {
         guard let width = strokable.uniformStrokeWidth.map({ CGFloat($0) }), width > 0 else { return [] }
         let style = PenStrokeRenderer.Style(
             width: width, alignment: alignment, penJoin: strokable.strokeLinejoin, penCap: strokable.strokeLinecap,
-            dash: dash
+            dash: dash, miterLimit: CGFloat(miterLimit)
         )
         if let band = PenStrokeRenderer.zeroAreaBand(width: width, alignment: alignment, box: roundedBox) {
             return paint(fills, through: SVGShape(path: band, rule: .evenOdd), domain: domain)
@@ -63,7 +66,7 @@ extension SVGWriter {
                 element["stroke-linejoin"] = style.penJoin.map(\.rawValue)
                 element["stroke-linecap"] = style.penCap.map(\.rawValue)
                 if style.join == .miter {
-                    element["stroke-miterlimit"] = Double(PenStrokeRenderer.Style.miterLimit).svgNumber
+                    element["stroke-miterlimit"] = Double(style.miterLimit).svgNumber
                 }
                 if let dash = style.dash {
                     element["stroke-dasharray"] = dash.lengths.map(\.svgNumber).joined(separator: " ")
@@ -74,7 +77,7 @@ extension SVGWriter {
             } else {
                 let outline = style.dashed(path).copy(
                     strokingWithWidth: style.outlineWidth, lineCap: style.cap, lineJoin: style.join,
-                    miterLimit: PenStrokeRenderer.Style.miterLimit
+                    miterLimit: style.miterLimit
                 )
                 layers = self.paint(.single(fill), through: SVGShape(path: outline, rule: .winding), domain: domain)
             }
@@ -131,7 +134,7 @@ extension SVGWriter {
         case .outer:
             let outline = path.copy(
                 strokingWithWidth: style.outlineWidth, lineCap: style.cap, lineJoin: style.join,
-                miterLimit: PenStrokeRenderer.Style.miterLimit
+                miterLimit: style.miterLimit
             )
             let reach = style.solidOuterBounds(of: path).union(outline.boundingBox).insetBy(dx: -1, dy: -1)
             let mask = SVGElement("mask", [

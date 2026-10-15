@@ -124,6 +124,20 @@ public extension PenPostIt {
         case (.dashLengths, _):
             guard PenStrokeDash.problem(in: value) != nil else { return nil }
             return Violation(key: key, value: value, accepted: [PenStrokeDash.writtenForm], suggestion: nil)
+        case (.textDecoration, _):
+            do {
+                _ = try PenTextDecoration(metadataValue: value)
+                return nil
+            } catch {
+                return Violation(key: key, value: value, accepted: key.spellings, suggestion: nil, reason: error.reason)
+            }
+        case (.shadowSpreads, _):
+            do {
+                _ = try PenShadowSpread.entries(in: value)
+                return nil
+            } catch {
+                return Violation(key: key, value: value, accepted: key.spellings, suggestion: nil, reason: error.reason)
+            }
         case (.textSpans, _):
             do {
                 _ = try PenTextSpans(metadataValue: value)

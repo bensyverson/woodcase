@@ -125,7 +125,7 @@ final class SVGWriter {
         }
         guard let rect = layoutRects[node.id] else { return nil }
         let placement = PenLayoutEngine.placement(of: node, rect: rect, layoutRects: layoutRects)
-        let effects = Effects(PenRenderer.effects(for: node))
+        let effects = Effects(node)
 
         let children = node.kind.inlineChildren.compactMap { self.node($0) }
         var content = ownContent(node, box: placement.box, effects: effects)

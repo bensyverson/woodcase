@@ -6,11 +6,8 @@
 import CoreGraphics
 
 extension PenStrokeRenderer {
-    /// How a uniform stroke is drawn: width, alignment, join, cap and dash.
+    /// How a uniform stroke is drawn: width, alignment, join, cap, miter limit and dash.
     struct Style: Friendly {
-        /// The miter limit both the solid and the painted path use — CoreGraphics' default.
-        static let miterLimit: CGFloat = 10
-
         /// The stroke's width in points.
         let width: CGFloat
         /// Where the stroke sits relative to the outline.
@@ -21,6 +18,9 @@ extension PenStrokeRenderer {
         let penCap: PenStrokeCap?
         /// The dash, `nil` meaning solid.
         var dash: PenStrokeDash?
+        /// The miter limit both the solid and the painted path use: the node's
+        /// (``PenNode/strokeMiterLimit``), Pen's 4 by default.
+        var miterLimit = CGFloat(PenNode.defaultMiterLimit)
 
         /// The CoreGraphics line join.
         var join: CGLineJoin {

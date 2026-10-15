@@ -14,10 +14,15 @@ import Foundation
 /// keys are gone from the node Pen reports after load and from the file it saves, and
 /// its export draws plain text (`project/2026-09-26-what-pen-drops-from-a-file.md`).
 ///
-/// Woodcase keeps drawing an underline and a strikethrough, so for those two the
-/// finding says the renders disagree; Woodcase draws no text stroke either, so that
-/// one is simply lost. Each case is its own finding, so fixing one leaves the others
-/// standing. `underline: false` and `strikethrough: false` lose nothing and are clean.
+/// An underline and a strikethrough on a text of literal content are protected: Woodcase
+/// keeps them in `metadata.woodcase.textDecoration` too, which Pen keeps, and restores
+/// them on its next read and write (``PenTextDecoration``, leaf kyrTTL). So for those two
+/// the finding is a notice that Pen's own render shows neither while Woodcase's shows
+/// both. One Woodcase cannot protect — content held in a variable, or a protection made
+/// for other words — is still a warning that a save in Pen loses it. Woodcase draws no
+/// text stroke, so that one is simply lost. Each case is its own finding, so fixing one
+/// leaves the others standing. `underline: false` and `strikethrough: false` lose
+/// nothing and are clean.
 extension DocumentLinter {
     /// A text node's stroke, underline and strikethrough, one finding each.
     ///
@@ -45,14 +50,30 @@ extension DocumentLinter {
                     + "text some other way, or remove the keys."
             ))
         }
-        for (key, value) in [("underline", data.underline), ("strikethrough", data.strikethrough)]
-            where value?.literalValue == true
-        {
-            found.append(finding(
-                .textStyleStripped, row,
-                "sets \(key): true, but Pen strips `\(key)` from text when it opens the file and "
-                    + "draws none. Woodcase draws it, so Woodcase's render and Pen's disagree."
-            ))
+        let protection = node.textDecoration.flatMap { decoration in
+            data.content?.literalValue.map { decoration.isStale(for: $0) ? nil : decoration } ?? nil
+        }
+        let key = PenMetadata.WoodcaseKey.textDecoration
+        for (name, value, isProtected) in [
+            ("underline", data.underline, protection?.underline == true),
+            ("strikethrough", data.strikethrough, protection?.strikethrough == true),
+        ] where value?.literalValue == true {
+            if isProtected {
+                found.append(LintFinding(
+                    check: .textStyleStripped, severity: .notice, nodeID: row.id, path: row.address,
+                    message: "sets \(name): true, which Pen strips from text when it opens the file and draws none. "
+                        + "It is protected: Woodcase keeps it in metadata.\(PenMetadata.woodcaseNamespace)."
+                        + "\(key.rawValue), which Pen keeps, and restores it when it next reads the file, so only "
+                        + "Pen's own render goes without it."
+                ))
+            } else {
+                found.append(finding(
+                    .textStyleStripped, row,
+                    "sets \(name): true, but Pen strips `\(name)` from text when it opens the file and "
+                        + "draws none, and it is not protected: Woodcase protects it in metadata only on text "
+                        + "whose content is plain, not a variable. A save in Pen loses it."
+                ))
+            }
         }
         return found
     }

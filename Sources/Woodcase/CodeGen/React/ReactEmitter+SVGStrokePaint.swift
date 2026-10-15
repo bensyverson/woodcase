@@ -26,6 +26,8 @@ extension ReactEmitter {
         var scale = Scale.identity
         /// The node's dash (``PenNode/strokeDash``), or `nil` for a solid stroke.
         var dash: PenStrokeDash?
+        /// The node's miter limit (``PenNode/strokeMiterLimit``).
+        var miterLimit = PenNode.defaultMiterLimit
 
         /// Whether the SVG's viewBox scales its user space onto the node's box, so a stroke
         /// drawn in it would scale too; the renderer strokes the mapped outline at the
@@ -137,7 +139,7 @@ extension ReactEmitter {
                 } else {
                     ""
                 }
-                let strokeAttributes = "stroke=\"\(paint)\" strokeWidth=\"\(cssNumber(drawnWidth))\"\(shape.strokeScaling)\(svgStrokeStyle(stroke, dash: shape.dash))"
+                let strokeAttributes = "stroke=\"\(paint)\" strokeWidth=\"\(cssNumber(drawnWidth))\"\(shape.strokeScaling)\(svgStrokeStyle(stroke, dash: shape.dash, miterLimit: shape.miterLimit))"
                 ctx.lines.append("\(pad)<\(shape.element) \(shape.geometry)\(fill) \(strokeAttributes)\(strokeClip)\(blend) />")
             case let .conic(gradient):
                 // Every conic layer is masked by the same stroked shape: define it once.
@@ -170,14 +172,20 @@ extension ReactEmitter {
 
     /// A stroke's cap and join as SVG attributes, each written only when it is not SVG's
     /// default (butt, miter), which is Pen's default too — e.g. ` strokeLinecap="round"` —
-    /// then its dash and offset, when it has one.
-    static func svgStrokeStyle(_ stroke: any PenStrokable, dash: PenStrokeDash?) -> String {
+    /// then a mitered stroke's limit when it is not SVG's 4, which is Pen's too, then its
+    /// dash and offset, when it has one.
+    static func svgStrokeStyle(
+        _ stroke: any PenStrokable, dash: PenStrokeDash?, miterLimit: Double = PenNode.defaultMiterLimit
+    ) -> String {
         var attributes = ""
         if let cap = stroke.strokeLinecap, cap != .butt {
             attributes += " strokeLinecap=\"\(cap.rawValue)\""
         }
         if let join = stroke.strokeLinejoin, join != .miter {
             attributes += " strokeLinejoin=\"\(join.rawValue)\""
+        }
+        if (stroke.strokeLinejoin ?? .miter) == .miter, miterLimit != PenNode.defaultMiterLimit {
+            attributes += " strokeMiterlimit=\"\(cssNumber(miterLimit))\""
         }
         if let dash {
             attributes += " strokeDasharray=\"\(dash.lengths.map { cssNumber($0) }.joined(separator: " "))\""

@@ -79,7 +79,7 @@ no document, so accepting any of those would be accepting an argument it ignores
 | `codegen-unmapped-override` | warning | An instance overrides a descendant no declared prop reads |
 | `mesh-gradient-dropped` | error | A mesh gradient's `points` or `colors` do not number `columns × rows`, one of the four is missing, the grid is under 2×2, or a point is malformed in a way Pen cannot place: Pen paints nothing |
 | `mesh-gradient-distorted` | warning | A mesh gradient has a color Pen's mesh misreads (4-digit `#RGBA`, a word), a patch that folds over itself, or a malformed point Pen places its own way |
-| `text-style-stripped` | warning | A text node carries a stroke, `underline: true` or `strikethrough: true`, which Pen strips on load and never draws |
+| `text-style-stripped` | warning | A text node carries a stroke, `underline: true` or `strikethrough: true`, which Pen strips on load and never draws; a protected underline or strikethrough is a notice |
 | `shader-not-drawn` | warning | An enabled shader fill, in a node's fills or its stroke, which Pen runs and Woodcase does not draw on any target |
 | `per-side-stroke-on-shape` | warning | An ellipse, polygon, path or line with a stroke paint and a per-side `strokeWidth` whose sides differ from its `top`, or that has no `top`: Pen draws the `top` width alone, all round |
 | `note-unsized` | notice | A `note` with no `width` or `height` of its own, or the `0` Pen saves an unsized note with, which lays out at the 200-pt post-it default on that axis |
@@ -87,6 +87,7 @@ no document, so accepting any of those would be accepting an argument it ignores
 | `note-state` | notice | A plain note — not a comment, not a prompt — carries a `state`, in either spelling. Only comments are open or resolved, so it draws nothing; remove it, or make the note a comment |
 | `spans-stale` | warning | A text whose `metadata.woodcase.spans` were made for other words than its content, so its styling is ignored and it draws plain |
 | `stroke-dash-ignored` | warning | A `metadata.woodcase.strokeDash` every target draws solid: on a per-side `strokeWidth`, or one that is not an array of at most 16 non-negative lengths, not all zero |
+| `shadow-spread-stale` | warning | A `metadata.woodcase.shadowSpread` entry made for a shadow the node no longer has at its place — Pen changed, moved or removed it — so the shadow casts without its spread |
 
 The two sizing checks fire only where the engine has *nothing to fall back on*:
 `fill_container(200)` under a `fit_content` parent, and `fit_content(200)` with no
@@ -428,9 +429,21 @@ warning mesh-gradient-distorted  Hero (Msh01)  has a mesh gradient fill Pen pain
 
 `text-style-stripped` is a warning, one finding per case. Pen strips a text node's
 stroke keys, `underline` and `strikethrough` when it opens the file and draws none of
-them, although all three are in its schema. Woodcase keeps drawing an underline and a
-strikethrough, so for those the finding says the two renders disagree; Woodcase draws
-no text stroke either. `underline: false` loses nothing and is clean.
+them, although all three are in its schema. Woodcase draws no text stroke either, so
+that one is lost. An underline or strikethrough on a text of plain content is
+**protected** (leaf `kyrTTL`): Woodcase also writes it into
+`metadata.woodcase.textDecoration` (``PenTextDecoration``), which Pen keeps, and restores
+the native key from it when it next reads the file — so a save in Pen loses nothing, and
+only Pen's own render goes without it. That finding is a notice. One on a text whose
+content is a variable cannot be protected, and stays a warning that a save in Pen loses
+it. `underline: false` loses nothing and is clean.
+
+> Corrected 2026-10-15 (leaf `kyrTTL`): until then every underline and strikethrough was
+> a warning that a save in Pen loses it.
+
+```text
+notice text-style-stripped  Board/Terms (Txt01)  sets underline: true, which Pen strips from text when it opens the file and draws none. It is protected: Woodcase keeps it in metadata.woodcase.textDecoration, which Pen keeps, and restores it when it next reads the file, so only Pen's own render goes without it.
+```
 
 `shader-not-drawn` is a warning, one finding per enabled shader, fills first and then
 the stroke, placed in its list when there are several (`fill 2 of 3`). The file is
@@ -501,6 +514,17 @@ another tool can still hold one.
 
 ```text
 warning stroke-dash-ignored  Board/Card (Rct01)  has a dash on a per-side strokeWidth, so its stroke draws solid: dashes flow round the whole outline, which per-side bands are not. Write one strokeWidth, or remove common.metadata.woodcase.strokeDash.
+```
+
+`shadow-spread-stale` is a warning, one finding per node holding a
+`metadata.woodcase.shadowSpread` entry made for a shadow other than the one at its place
+(``PenShadowSpread/isStale(for:)``): Pen keeps the entry but cannot see it, so changing,
+moving or removing the shadow there leaves it behind, and a write that changes `effect`
+without restating the spreads does the same. The shadow casts without spread rather than
+spreading the wrong one. A row inside an instance is skipped, as for `spans-stale`.
+
+```text
+warning shadow-spread-stale  Board/Card (Rct01)  has a shadow spread for effect 0 made for a shadow it no longer has there, so it casts without it. Restate `common.metadata.woodcase.shadowSpread` for the shadow as it is now, or remove it with `woodcase set <file> Rct01 common.metadata.woodcase.shadowSpread=null`.
 ```
 
 ## What `generate react` will choke on

@@ -52,8 +52,16 @@ struct PenFileTransactionRewriteTests {
             #expect(outcome.value.writtenVersion == "2.20")
             let written = try Data(contentsOf: url)
             #expect(written == outcome.value.data)
-            #expect(!String(decoding: written, as: UTF8.self).contains("spread"))
-            #expect(diagnostics.diagnostics.count == 2, "\(diagnostics.diagnostics)")
+            // The spread leaves the shadow for metadata.woodcase.shadowSpread (leaf zRp9CO),
+            // where it was deleted with a second diagnostic before.
+            let node = try #require(PenParser.parse(written).children.first)
+            guard case let .rectangle(data) = node.kind, case let .shadow(shadow)? = data.effects?.all.first else {
+                Issue.record("no shadow: \(node)")
+                return
+            }
+            #expect(shadow.extras.isEmpty, "the effect keeps no spread")
+            #expect(node.shadowSpread(forEffect: 0) == 2)
+            #expect(diagnostics.diagnostics.count == 1, "\(diagnostics.diagnostics)")
 
             let recorded = try events(log)
             #expect(recorded.count == 1)

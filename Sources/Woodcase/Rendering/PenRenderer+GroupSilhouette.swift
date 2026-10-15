@@ -42,7 +42,7 @@ extension PenRenderer {
                 }
             } else {
                 PenShadowSilhouette.draw(
-                    ref.node, rect: drawRect, in: context, children: { _ in }, imageProvider: imageProvider
+                    ref.node, rect: drawRect, spread: 0, in: context, children: { _ in }, imageProvider: imageProvider
                 )
             }
         }

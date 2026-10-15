@@ -146,13 +146,22 @@ alike, the way Pen 1.2.14 does when it opens one:
   the first to draw it inside, and converts an older file's inner shadows to outer on
   open so that the file keeps looking the way it always did in Pen. So does Woodcase:
   an inner shadow in a 2.17 file is read, drawn and written as an outer one.
-- **`spread` is deleted.** 2.19 has no such key, Pen refuses a new shadow that carries
-  one, and no Pen ever drew it. ``PenEffect/PenShadowEffect`` no longer models it.
+- **`spread` leaves the shadow.** 2.19 has no such key, Pen refuses a new shadow that
+  carries one, and no Pen ever drew it. ``PenEffect/PenShadowEffect`` no longer models it.
+  Pen deletes it; Woodcase moves it into the node's `metadata.woodcase.shadowSpread`
+  (``PenShadowSpread``): one entry per spread shadow, addressed to the shadow's place among
+  the node's effects and holding the migrated shadow it was made for, so the CG renderer
+  still draws it and a later change to that shadow in Pen leaves it stale and ignored
+  (leaf `zRp9CO`). A spread of 0 goes silently; one naming a variable, or on a `descendants`
+  override bag with no metadata of its own — whose `metadata` would replace the component
+  node's whole metadata — is discarded with a warning.
 
-Pen does both silently; Woodcase reports each as a warning at
+Pen does both silently; Woodcase reports the inner-to-outer conversion as a warning at
 ``PenDiagnostic/Stage/migration`` naming the node. A 2.19 file's inner shadow is an
 inner shadow, and its `spread` — which only a hand edit could put there — is kept as an
 extra like any other key the model does not claim.
+
+> Corrected 2026-10-15 (leaf `zRp9CO`): until then `spread` was deleted with a warning.
 
 ### Image modes before 2.20
 
@@ -240,8 +249,12 @@ nothing at all, and a stroke
 object with no `fill` is dropped entirely — it had no paint, so it drew nothing.
 `dashPattern` left the format with no replacement in it, and moves into the node's
 `metadata.woodcase.strokeDash` (``PenStrokeDash``) unless no target could draw it or it
-sits on per-side widths, when it is discarded with a diagnostic; `miterAngle` is
-discarded with a diagnostic.
+sits on per-side widths, when it is discarded with a diagnostic. `miterAngle` — the
+sharpest corner, in degrees, still mitered — moves into `metadata.woodcase.strokeMiterLimit`
+as the limit it stands for, 1 / sin(angle / 2) to four places (``PenNode/strokeMiterLimit``);
+one naming a variable, or not strictly between 0° and 180°, is discarded with a diagnostic
+(leaf `zRp9CO`; before, every `miterAngle` was). Either is discarded with a diagnostic on a
+`descendants` override bag with no metadata of its own (``PenStrokeMigrationRule``).
 
 ### Rich text
 
@@ -532,7 +545,8 @@ wider, font-*substitution* gap for at least one bundled icon (x8–x9 in
 `PenPaintedExtentProbeTests`; Woodcase draws icon fonts installed on the system, where Pen
 draws its own bundled vector set, and the two libraries' glyphs are not always the same
 shape for the same name). One approximation remains: a sharp corner of a path's stroke
-counts only the band's half width, where Pen counts the miter.
+counts only the band's half width, where Pen counts the miter. A sharp polygon's miters are
+counted at the node's own limit (``PenNode/strokeMiterLimit``, Pen's 4 by default).
 
 ## Text Measurement
 

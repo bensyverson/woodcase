@@ -161,6 +161,11 @@ public enum LintCheck: String, Friendly, CaseIterable {
     /// per-side stroke, or one no target can draw (``PenStrokeDash/problem(in:)``).
     case strokeDashIgnored = "stroke-dash-ignored"
 
+    /// A node whose `metadata.woodcase.shadowSpread` holds an entry made for a shadow the
+    /// node no longer has at that place, so the shadow casts without its spread
+    /// (``PenNode/hasStaleShadowSpread``).
+    case shadowSpreadStale = "shadow-spread-stale"
+
     /// Components that contain each other — a component that renders an instance of
     /// itself, directly or through others (``ComponentLoop``). One finding per loop, at
     /// the top of the report.
@@ -210,7 +215,8 @@ public enum LintCheck: String, Friendly, CaseIterable {
         case .pipeline, .textWithoutFill, .fillContainerInFitParent, .emptyFitContent, .clipped,
              .artboardOverlap, .duplicateName, .textOverflow, .codegenUnmappedOverride, .collapsedText,
              .collapsedAbsoluteFrame, .meshGradientDistorted, .textStyleStripped, .importNotFollowed,
-             .shaderNotDrawn, .perSideStrokeOnShape, .spansStale, .strokeDashIgnored:
+             .shaderNotDrawn, .perSideStrokeOnShape, .spansStale, .strokeDashIgnored,
+             .shadowSpreadStale:
             .warning
         case .brokenRef, .importNotFound, .importUnreadable, .unresolvedVariable, .unknownIcon, .unknownIconLibrary,
              .overrideValueRejected, .overrideTargetNotFound, .overrideKeyUnread,
@@ -288,6 +294,8 @@ public enum LintCheck: String, Friendly, CaseIterable {
             "A text whose styled runs were made for other words than its content, so it draws plain."
         case .strokeDashIgnored:
             "A stroke dash every target draws solid: on per-side widths, or one no target can draw."
+        case .shadowSpreadStale:
+            "A shadow spread made for a shadow the node no longer has there, so it casts without it."
         case .componentLoop:
             "Components that contain each other, directly or through others; that nesting is not drawn."
         }

@@ -92,7 +92,9 @@ public extension PenLayoutEngine {
                 guard polygonIsSharp(node), let vertices = polygonVertices(of: node, box: box) else {
                     return geometry.outset(by: reach)
                 }
-                return PenStrokeReach.closedPolyline(vertices, reach: reach, join: stroke.strokeLinejoin ?? .miter)
+                return PenStrokeReach.closedPolyline(
+                    vertices, reach: reach, join: stroke.strokeLinejoin ?? .miter, miterLimit: node.strokeMiterLimit
+                )
             default:
                 return geometry.outset(by: reach)
             }

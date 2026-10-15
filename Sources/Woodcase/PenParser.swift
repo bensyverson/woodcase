@@ -80,7 +80,7 @@ public enum PenParser {
 
             switch try route(declaredVersion: probe.version, diagnostics: diagnostics) {
             case let .decodeAsIs(relation):
-                var document = try decode(data)
+                var document = try decode(data).protectingTextDecoration()
                 // Upgrading an older minor is what the model's output is; downgrading a
                 // newer one is how a newer Pen's data gets migrated away behind our back.
                 if relation != .newerMinor {
@@ -98,6 +98,7 @@ public enum PenParser {
                     let migrated = try PenLegacyMigrator.migrate(tree(from: data), rules: rules, diagnostics: diagnostics)
                     document = try decode(reencode(migrated))
                 }
+                document = document.protectingTextDecoration()
                 document.version = PenDocument.currentFormatVersion
                 return document
             case let .probeDifferentMajor(version):
@@ -178,12 +179,15 @@ public enum PenParser {
 
     /// Encodes a ``PenDocument`` to JSON data.
     ///
+    /// Every text's underline and strikethrough are written protected from Pen
+    /// (``PenDocument/protectingTextDecoration()``), as every parse reads them.
+    ///
     /// - Parameter document: The document to encode.
     /// - Returns: UTF-8 encoded JSON data.
     public static func encode(_ document: PenDocument) throws -> Data {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys]
-        return try encoder.encode(document)
+        return try encoder.encode(document.protectingTextDecoration())
     }
 
     /// Encodes a ``PenDocument`` to a JSON string.
@@ -212,7 +216,10 @@ public enum PenParser {
     public static func encodeForFile(_ value: some Encodable) throws -> Data {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys, .prettyPrinted, .withoutEscapingSlashes]
-        let pretty = try String(decoding: encoder.encode(value), as: UTF8.self)
+        // A whole document's text decoration is protected from Pen on the way out, as
+        // `encode(_:)` protects it (``PenDocument/protectingTextDecoration()``).
+        let protected: any Encodable = (value as? PenDocument)?.protectingTextDecoration() ?? value
+        let pretty = try String(decoding: encoder.encode(protected), as: UTF8.self)
         return Data((tightenKeySeparators(in: pretty) + "\n").utf8)
     }
 

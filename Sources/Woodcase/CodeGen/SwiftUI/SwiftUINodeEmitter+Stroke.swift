@@ -21,9 +21,11 @@ extension SwiftUINodeEmitter {
     /// width alone, so it arrives uniform; a per-side width on a shape without corners
     /// draws nothing. A dash (``PenNode/strokeDash``) goes in the uniform stroke's
     /// `StrokeStyle` — SwiftUI's own shapes start their outlines where they choose, so its
-    /// dashes need not start where the renderer's do; a per-side band takes none.
+    /// dashes need not start where the renderer's do; a per-side band takes none. A
+    /// `miterLimit` (``writtenMiterLimit(of:)``) goes in the same `StrokeStyle`.
     func strokeView(
-        _ stroke: any PenStrokable, shape: Outline, box: FillBox, dash: PenStrokeDash? = nil, unemitted: inout [String]
+        _ stroke: any PenStrokable, shape: Outline, box: FillBox, dash: PenStrokeDash? = nil, miterLimit: Double? = nil,
+        unemitted: inout [String]
     ) -> SwiftUIViewCode? {
         guard PaintRoute(stroke.stroke) != .none else { return nil }
         let region: Outline
@@ -38,9 +40,14 @@ extension SwiftUINodeEmitter {
             return painted(region, layers: layers, reach: widest * Self.outsideShare(alignment))
         case let .uniform(value):
             guard let width = number(value, unemitted: &unemitted) else { return nil }
-            return uniformStroke(stroke, width: width, shape: shape, box: box, dash: dash, unemitted: &unemitted)
+            return uniformStroke(
+                stroke, width: width, shape: shape, box: box, dash: dash, miterLimit: miterLimit, unemitted: &unemitted
+            )
         case nil:
-            return uniformStroke(stroke, width: SwiftUINumber(1), shape: shape, box: box, dash: dash, unemitted: &unemitted)
+            return uniformStroke(
+                stroke, width: SwiftUINumber(1), shape: shape, box: box, dash: dash, miterLimit: miterLimit,
+                unemitted: &unemitted
+            )
         }
     }
 
@@ -48,7 +55,7 @@ extension SwiftUINodeEmitter {
     /// its widest value.
     private func uniformStroke(
         _ stroke: any PenStrokable, width number: SwiftUINumber, shape: Outline, box: FillBox, dash: PenStrokeDash?,
-        unemitted: inout [String]
+        miterLimit: Double?, unemitted: inout [String]
     ) -> SwiftUIViewCode? {
         guard number.largest > 0 else { return nil }
         let width = number.largest
@@ -62,7 +69,9 @@ extension SwiftUINodeEmitter {
             let region = sideRegion(widths, alignment: alignment, shape: shape, corners: corners)
             return painted(region, layers: layers, reach: width * Self.outsideShare(alignment))
         }
-        let style = strokeStyle(number.code, cap: stroke.strokeLinecap, join: stroke.strokeLinejoin, dash: dash)
+        let style = strokeStyle(
+            number.code, cap: stroke.strokeLinecap, join: stroke.strokeLinejoin, dash: dash, miterLimit: miterLimit
+        )
         if layers.count == 1, let paint = layers[0].style {
             if alignment == .center {
                 return SwiftUIViewCode(head: shape.view).modified(".stroke(\(paint), \(style))")
@@ -74,13 +83,56 @@ extension SwiftUINodeEmitter {
         let name = SwiftUIStrokeAlignment(alignment).rawValue
         let region = "\(shape.view).penStroke(.\(name), \(style))"
         // A miter can reach half the miter limit's widths past the outline's corner.
-        let joinReach = (stroke.strokeLinejoin ?? .miter) == .miter ? Self.miterLimit : 2
+        let joinReach = (stroke.strokeLinejoin ?? .miter) == .miter ? miterLimit ?? Self.miterLimit : 2
         let reach = width * Self.outsideShare(alignment) * joinReach
         return painted(Outline(view: region, argument: region), layers: layers, reach: reach)
     }
 
-    /// SwiftUI's and Core Graphics' default miter limit, which Pen's strokes are drawn with.
+    /// SwiftUI's and Core Graphics' default miter limit. Pen strokes with 4
+    /// (``PenNode/defaultMiterLimit``), which ``writtenMiterLimit(of:)`` writes where it
+    /// can differ.
     private static let miterLimit = 10.0
+
+    /// The miter limit a node's `StrokeStyle` names, or `nil` where SwiftUI's own 10 draws
+    /// the same as the node's limit (``PenNode/strokeMiterLimit``, Pen's 4 by default).
+    ///
+    /// The two draw a corner alike unless its miter (`CGPath.miterRatios`)
+    /// falls between them, so the limit is written only for a shape with such a corner,
+    /// read off its outline at its declared size: a sharp path, star or arc, never a
+    /// rectangle, a plain ellipse or a line, which has no corners. A path, polygon or
+    /// ellipse whose size is only known at layout time is given the limit whenever it
+    /// differs from 10; a box's corners are right angles at any size.
+    ///
+    /// - Parameter node: The stroked node.
+    /// - Returns: The limit to write, or `nil`.
+    static func writtenMiterLimit(of node: PenNode) -> Double? {
+        let limit = node.strokeMiterLimit
+        if case .line = node.kind { return nil }
+        guard limit != miterLimit else { return nil }
+        let sized: (any PenLayoutSized)? = switch node.kind {
+        case let .frame(data): data
+        case let .rectangle(data): data
+        case let .ellipse(data): data
+        case let .polygon(data): data
+        case let .path(data): data
+        default: nil
+        }
+        // A box's corners are right angles at any size; any other outline's depend on it.
+        let isBox = switch node.kind {
+        case .frame, .rectangle: true
+        default: false
+        }
+        let box: PenRect? = if let width = sized?.width?.fixedValue, let height = sized?.height?.fixedValue {
+            PenRect(x: 0, y: 0, width: width, height: height)
+        } else if isBox {
+            PenRect(x: 0, y: 0, width: 100, height: 100)
+        } else {
+            nil
+        }
+        guard let box, let outline = PenShapeBuilder.buildPath(for: node, rect: box) else { return limit }
+        let low = min(limit, miterLimit), high = max(limit, miterLimit)
+        return outline.miterRatios.contains { $0 > low && $0 <= high } ? limit : nil
+    }
 
     /// How much of a stroke's width lies outside the outline.
     private static func outsideShare(_ alignment: PenStrokeAlign) -> Double {
@@ -105,14 +157,20 @@ extension SwiftUINodeEmitter {
 
     /// The width and style arguments: `lineWidth: 2`, or a `StrokeStyle` naming the cap and
     /// join where they are not SwiftUI's defaults, which are Pen's (butt, miter), and the
-    /// dash and its phase when there is one.
-    func strokeStyle(_ width: String, cap: PenStrokeCap?, join: PenStrokeJoin?, dash: PenStrokeDash? = nil) -> String {
+    /// dash and its phase when there is one, and the miter limit on a mitered join when one
+    /// is given.
+    func strokeStyle(
+        _ width: String, cap: PenStrokeCap?, join: PenStrokeJoin?, dash: PenStrokeDash? = nil, miterLimit: Double? = nil
+    ) -> String {
         var parts = ["lineWidth: \(width)"]
         if let cap, cap != .butt {
             parts.append("lineCap: .\(cap.rawValue)")
         }
         if let join, join != .miter {
             parts.append("lineJoin: .\(join.rawValue)")
+        }
+        if let miterLimit, (join ?? .miter) == .miter {
+            parts.append("miterLimit: \(SwiftUILiteral.number(miterLimit))")
         }
         if let dash {
             parts.append("dash: [\(dash.lengths.map(SwiftUILiteral.number).joined(separator: ", "))]")

@@ -45,7 +45,8 @@ extension SwiftUINodeEmitter {
         // box grown by the stroke's reach, as a flat shape is: SwiftUI draws nothing there.
         let outset = FlatOutset(width: width, height: height, stroke: data)
         var stroke = strokeView(
-            data, shape: outset.map { shape.outset($0) } ?? shape, box: box, dash: node.strokeDash, unemitted: &unemitted
+            data, shape: outset.map { shape.outset($0) } ?? shape, box: box, dash: node.strokeDash,
+            miterLimit: Self.writtenMiterLimit(of: node), unemitted: &unemitted
         )
         if let outset {
             stroke = stroke?.modified(outset.padding)

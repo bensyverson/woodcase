@@ -32,9 +32,14 @@ enum PenShadowSilhouette {
 
     /// Draws the silhouette of `node` in ``ink``.
     ///
+    /// A closed shape's silhouette is grown by `spread` (``spread(_:rule:by:)``). A text's,
+    /// an icon's and a group's are drawn, not a path, and are drawn as they are: a spread on
+    /// one of their shadows is not drawn.
+    ///
     /// - Parameters:
     ///   - node: The node.
     ///   - rect: The node's draw rect.
+    ///   - spread: How far to grow a closed shape's silhouette, in points; negative shrinks it.
     ///   - context: The context to draw into.
     ///   - children: Draws a group's silhouette, its descendants' combined outline; called
     ///     for a group only.
@@ -42,15 +47,17 @@ enum PenShadowSilhouette {
     static func draw(
         _ node: PenNode,
         rect: PenRect,
+        spread: CGFloat,
         in context: CGContext,
         children: (CGContext) -> Void,
         imageProvider: PenRenderer.ImageProvider
     ) {
         let ink = PenFills.single(.shorthand("#000000"))
         if let silhouette = path(for: node, rect: rect) {
-            context.addPath(silhouette.path)
+            let grown = Self.spread(silhouette.path, rule: silhouette.rule, by: spread)
+            context.addPath(grown.path)
             context.setFillColor(Self.ink)
-            context.fillPath(using: silhouette.rule)
+            context.fillPath(using: grown.rule)
             return
         }
         switch node.kind {
@@ -65,6 +72,23 @@ enum PenShadowSilhouette {
         default:
             break
         }
+    }
+
+    /// `path` grown by `spread` on every side — or, for a negative spread, shrunk — as a CSS
+    /// `box-shadow` spread grows its box: a sharp corner stays sharp, a rounded one's radius
+    /// grows with it.
+    ///
+    /// - Parameters:
+    ///   - path: The region.
+    ///   - rule: The rule `path` is filled with.
+    ///   - spread: How far to grow it, in points.
+    /// - Returns: The grown region and the rule to fill it with; `path` itself for no spread.
+    static func spread(_ path: CGPath, rule: CGPathFillRule, by spread: CGFloat) -> (path: CGPath, rule: CGPathFillRule) {
+        guard spread != 0, spread.isFinite else { return (path, rule) }
+        let band = path.copy(strokingWithWidth: abs(spread) * 2, lineCap: .butt, lineJoin: .miter, miterLimit: 10)
+        return spread > 0
+            ? (path.union(band, using: rule), .winding)
+            : (path.subtracting(band, using: rule), .winding)
     }
 
     /// Whether the node's shape is an open line, which covers only what its stroke does.
@@ -102,11 +126,12 @@ enum PenShadowSilhouette {
             return band
         }
         let style = PenStrokeRenderer.Style(
-            width: width, alignment: alignment, penJoin: stroke.strokeLinejoin, penCap: stroke.strokeLinecap
+            width: width, alignment: alignment, penJoin: stroke.strokeLinejoin, penCap: stroke.strokeLinecap,
+            miterLimit: CGFloat(node.strokeMiterLimit)
         )
         return shape.copy(
             strokingWithWidth: style.outlineWidth, lineCap: style.cap, lineJoin: style.join,
-            miterLimit: PenStrokeRenderer.Style.miterLimit
+            miterLimit: style.miterLimit
         )
     }
 }

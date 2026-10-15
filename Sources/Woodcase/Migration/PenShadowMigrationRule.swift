@@ -18,8 +18,11 @@ import Foundation
 /// - **`spread` is deleted.** 2.19 has no such key, and Pen refuses a new shadow that
 ///   carries one. No Pen ever drew it.
 ///
-/// Pen does both silently. This rule reports each one as a warning naming the node,
-/// because both change what a Woodcase render of the file shows.
+/// Pen does both silently. This rule reports the first as a warning naming the node,
+/// because it changes what a Woodcase render of the file shows. The second it does not
+/// follow: a spread moves into the node's `metadata.woodcase.shadowSpread`
+/// (``PenShadowSpread``), addressed to its effect's place and made for the migrated shadow,
+/// so Woodcase still draws it and a later change to that shadow in Pen leaves it stale.
 ///
 /// ```json
 /// {"type": "shadow", "shadowType": "inner", "spread": 4, "blur": 8}
@@ -28,6 +31,10 @@ import Foundation
 /// ```json
 /// {"type": "shadow", "shadowType": "outer", "blur": 8}
 /// ```
+/// with `{"effect": 0, "spread": 4, "shadow": {"type": "shadow", "shadowType": "outer", "blur": 8}}`
+/// in the node's shadow spreads. A spread of 0 draws nothing and goes silently; one naming a
+/// variable, or on an instance override with no metadata of its own — whose `metadata`
+/// would replace the component node's whole metadata — is discarded with a warning.
 ///
 /// It runs for every document older than 2.19 — see ``PenLegacyMigrator/rules(upgrading:)``.
 public struct PenShadowMigrationRule: PenMigrationRule {
@@ -53,26 +60,36 @@ public struct PenShadowMigrationRule: PenMigrationRule {
     /// The key a node's effects live under, in the file's spelling.
     private static let effectKey = "effect"
 
-    /// Rewrites the shadows among one node's effects.
+    /// Rewrites the shadows among one node's effects, keeping their spreads in its metadata.
     ///
     /// `effect` may be one object or an array of them; anything else is left alone.
     public func apply(toNode node: inout [String: AnyCodable], id: String?, diagnostics: PenDiagnosticCollector?) {
+        var spreads: [AnyCodable] = []
         switch node[Self.effectKey] {
         case let .dictionary(effect)?:
-            node[Self.effectKey] = .dictionary(migrated(effect, id: id, diagnostics: diagnostics))
+            node[Self.effectKey] = .dictionary(migrated(effect, at: 0, spreads: &spreads, id: id, diagnostics: diagnostics))
         case let .array(effects)?:
-            node[Self.effectKey] = .array(effects.map { value in
+            node[Self.effectKey] = .array(effects.enumerated().map { index, value in
                 guard case let .dictionary(effect) = value else { return value }
-                return .dictionary(migrated(effect, id: id, diagnostics: diagnostics))
+                return .dictionary(migrated(effect, at: index, spreads: &spreads, id: id, diagnostics: diagnostics))
             })
         default:
             break
         }
+        guard !spreads.isEmpty else { return }
+        if !PenMigrationMetadata.keep(.array(spreads), as: .shadowSpread, in: &node) {
+            diagnostics?.warn(
+                "Discarded shadow spread: \(PenMigrationMetadata.barePatchReason)", stage: .migration, nodeID: id
+            )
+        }
     }
 
-    /// One effect object, migrated if it is a shadow.
+    /// One effect object, migrated if it is a shadow, its spread appended to `spreads` as a
+    /// stored ``PenShadowSpread`` entry.
     private func migrated(
         _ effect: [String: AnyCodable],
+        at index: Int,
+        spreads: inout [AnyCodable],
         id: String?,
         diagnostics: PenDiagnosticCollector?
     ) -> [String: AnyCodable] {
@@ -87,13 +104,25 @@ public struct PenShadowMigrationRule: PenMigrationRule {
                 nodeID: id
             )
         }
-        if result.removeValue(forKey: "spread") != nil {
+        switch result.removeValue(forKey: "spread") {
+        case nil, .int(0)?, .double(0)?:
+            break
+        case let .int(number)?:
+            spreads.append(entry(index, .int(number), shadow: result))
+        case let .double(number)? where number.isFinite:
+            spreads.append(entry(index, .double(number), shadow: result))
+        case let other?:
             diagnostics?.warn(
-                "Discarded shadow spread: format 2.19 has no equivalent, and no Pen ever drew it",
+                "Discarded shadow spread: \(PenPostIt.json(other)) is not a number of points",
                 stage: .migration,
                 nodeID: id
             )
         }
         return result
+    }
+
+    /// A stored ``PenShadowSpread`` entry.
+    private func entry(_ index: Int, _ spread: AnyCodable, shadow: [String: AnyCodable]) -> AnyCodable {
+        .dictionary(["effect": .int(index), "spread": spread, "shadow": .dictionary(shadow)])
     }
 }

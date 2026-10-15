@@ -57,22 +57,28 @@ struct DocumentLinterTextStrippedTests {
         #expect(finding.message.contains("Pen"))
     }
 
-    @Test("An underline is a finding, and says Woodcase still draws it")
+    /// Until leaf kyrTTL this was a warning that Woodcase's render and Pen's disagree; the
+    /// underline is now protected in `metadata.woodcase.textDecoration`, so it is a notice.
+    @Test("An underline is a notice that it is protected from Pen")
     func underline() throws {
         let found = try stripped(board(text: #", "underline": true"#))
         #expect(found.count == 1)
         let message = try #require(found.first?.message)
         #expect(message.contains("underline"))
-        #expect(message.contains("Woodcase draws"))
+        #expect(message.contains("protected"))
+        #expect(found.first?.severity == .notice)
     }
 
-    @Test("A strikethrough is a finding, and says Woodcase still draws it")
+    /// Until leaf kyrTTL this was a warning that Woodcase's render and Pen's disagree; the
+    /// strikethrough is now protected in `metadata.woodcase.textDecoration`, so it is a notice.
+    @Test("A strikethrough is a notice that it is protected from Pen")
     func strikethrough() throws {
         let found = try stripped(board(text: #", "strikethrough": true"#))
         #expect(found.count == 1)
         let message = try #require(found.first?.message)
         #expect(message.contains("strikethrough"))
-        #expect(message.contains("Woodcase draws"))
+        #expect(message.contains("protected"))
+        #expect(found.first?.severity == .notice)
     }
 
     @Test("All three on one node are three findings")

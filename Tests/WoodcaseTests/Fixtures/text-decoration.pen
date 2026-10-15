@@ -1,0 +1,59 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "content": "Underlined",
+          "fill": "#000000",
+          "fontSize": 24,
+          "id": "t1",
+          "metadata": {
+            "type": "woodcase",
+            "woodcase": {
+              "textDecoration": {
+                "strikethrough": true,
+                "text": "Underlined",
+                "underline": true
+              }
+            }
+          },
+          "strikethrough": true,
+          "type": "text",
+          "underline": true,
+          "x": 20,
+          "y": 20
+        },
+        {
+          "content": "Edited",
+          "fill": "#000000",
+          "fontSize": 24,
+          "id": "t2",
+          "metadata": {
+            "type": "woodcase",
+            "woodcase": {
+              "textDecoration": {
+                "strikethrough": true,
+                "text": "Edited",
+                "underline": true
+              }
+            }
+          },
+          "strikethrough": true,
+          "type": "text",
+          "underline": true,
+          "x": 20,
+          "y": 80
+        }
+      ],
+      "fill": "#FFFFFF",
+      "height": 140,
+      "id": "board",
+      "layout": "none",
+      "type": "frame",
+      "width": 300,
+      "x": 0,
+      "y": 0
+    }
+  ],
+  "version": "2.20"
+}

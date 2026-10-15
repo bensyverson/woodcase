@@ -1,0 +1,60 @@
+{
+  "version": "2.21",
+  "children": [
+    {
+      "type": "frame",
+      "id": "board",
+      "x": 0,
+      "y": 0,
+      "width": 300,
+      "height": 140,
+      "fill": "#FFFFFF",
+      "layout": "none",
+      "children": [
+        {
+          "type": "text",
+          "id": "t1",
+          "x": 20,
+          "y": 20,
+          "metadata": {
+            "type": "woodcase",
+            "woodcase": {
+              "textDecoration": {
+                "strikethrough": true,
+                "text": "Underlined",
+                "underline": true
+              }
+            }
+          },
+          "fill": "#000000",
+          "content": "Underlined",
+          "fontFamily": "Inter",
+          "fontSize": 24,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "t2",
+          "x": 20,
+          "y": 80,
+          "metadata": {
+            "type": "woodcase",
+            "woodcase": {
+              "textDecoration": {
+                "strikethrough": true,
+                "text": "Edited",
+                "underline": true
+              }
+            }
+          },
+          "fill": "#000000",
+          "content": "Edited in Pen",
+          "fontFamily": "Inter",
+          "fontSize": 24,
+          "fontWeight": "normal"
+        }
+      ]
+    }
+  ],
+  "fileToken": "a81aa332-253a-4e63-81e6-eac82c19378f"
+}

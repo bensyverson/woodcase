@@ -51,9 +51,12 @@ node types it again.
 | code generation | `props`, `role`, `states`, `action`, `scroll` | ``ComponentAnalyzer``, ``PageAnalyzer``, ``EditableDocument/parameters(ofComponent:)``, the `codegen-*` and `clipped` lints |
 | notes | `type`, `state`, `author`, `leaf`, `stage`, `tint`, `copiedFrom`, `anchor`, `replyTo`, `requestedBy`, `createdAt` | ``PenPostIt/Metadata``; see <doc:PenPostItConvention> |
 | a note's text style | `fontFamily`, `fontSize`, `fontWeight`, `fontStyle`, `letterSpacing`, `lineHeight`, `textAlign`, `textAlignVertical` | the note's look; Pen strips a note's own text style on load, so it lives here |
+| a text's protected decoration | `textDecoration` | ``PenTextDecoration`` and ``PenNode/protectingTextDecoration()``: ``PenParser`` keeps a text's native `underline` and `strikethrough` and this key in step on every read and write, so Pen — which strips the native keys — cannot lose them; see <doc:PenRichText>, *Underline and strikethrough survive Pen* |
 | a text's rich text | `spans` | ``PenMetadata/textSpans`` and ``PenNode/appliedRuns``: the layout, the renderer and the `spans-stale` lint; see <doc:PenRichText> |
 | a stroke's dash | `strokeDash`, `strokeDashOffset` | ``PenNode/strokeDash`` (``PenStrokeDash``): every renderer and emitter, the planner and the `stroke-dash-ignored` lint; an inspector reads them as fields through ``PenSchema/woodcaseFields(for:)``; see <doc:PenRendering>, *Dashed strokes* |
 | editor state | `locked` | an editor: a locked node is not selected or hit on the canvas, only in its layer list (Penumbra spec §14, the integrator's ruling of 2026-10-15); an inspector reads it as a field through ``PenSchema/woodcaseFields(for:)``. The format has no lock, and Pen keeps the key and ignores it |
+| a stroke's miter limit | `strokeMiterLimit` | ``PenNode/strokeMiterLimit``: every renderer and emitter, painted extent and the stroke-band hit test; Pen's 4 where absent; see <doc:PenInteroperability>, *Miter Limits and Shadow Spreads Live in Metadata* |
+| a shadow's spread | `shadowSpread` | ``PenShadowSpread`` and ``PenNode/shadowSpread(forEffect:)``: the CG renderer and SVG export, and the `shadow-spread-stale` lint; one entry per spread shadow, addressed by its place among the effects and stale once that shadow changes |
 
 ### One accessor
 

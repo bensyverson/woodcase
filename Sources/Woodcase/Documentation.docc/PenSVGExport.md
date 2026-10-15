@@ -53,19 +53,24 @@ never re-derived from SVG's own primitives.
 | Linear and radial gradient | `userSpaceOnUse` gradient; its `gradientTransform` is the renderer's gradient frame, so the stops land on the box where Pen puts them |
 | Image fill | the pixels, embedded as PNG, placed by mode and crop, clipped to the shape |
 | Stacked fills | one element per fill, bottom to top |
-| Centered stroke | an SVG stroke at its width, join, cap and a miter limit of 10 |
+| Centered stroke | an SVG stroke at its width, join, cap and the node's miter limit (``PenNode/strokeMiterLimit``, Pen's 4 by default) |
 | Inner and outer stroke | an SVG stroke at twice its width, clipped to the shape or masked to its complement |
 | Per-side stroke, zero-area box stroke | the stroke's ring, filled even-odd |
 | Dashed stroke (``PenNode/strokeDash``) | `stroke-dasharray` and `stroke-dashoffset` on the stroke, along the renderer's outline, which starts where SVG starts each shape; a paint filled through the outline fills the dashed one |
 | Frame `clip` | a `clipPath` on its children |
 | Opacity | the node's `<g opacity>` |
 | Blend mode | `mix-blend-mode` on the node's or fill's element |
-| Outer shadow | a filter on the node's silhouette: blur, offset, flood, knocked out under the silhouette |
-| Inner shadow | a filter on the silhouette's complement, kept inside it |
+| Outer shadow | a filter on the node's silhouette: blur, offset, flood, knocked out under the silhouette; a spread (``PenShadowSpread``) dilates or erodes the silhouette first with `feMorphology` |
+| Inner shadow | a filter on the silhouette's complement, kept inside it; a spread dilates the complement first |
 | Layer blur | `feGaussianBlur` on the node's `<g>`, sigma half the radius |
 | Text | real `<text>`, one `<tspan>` per styled run per line |
 | Icon | its glyph's outline, as a `<path>` |
 | Instance | its expanded subtree (expand the document first) |
+
+`feMorphology`'s kernel is a square, so a spread grows a rounded or slanted edge square,
+where the CG renderer grows it along the outline: a corner differs by up to the spread ×
+(√2 − 1). It works on any silhouette, so a text's, an icon's and a group's spread shadows
+— which the CG renderer casts without spread — draw spread in the SVG.
 
 A shadow's offset is written as authored, in the node's own coordinates, so it turns and
 flips with the node and its ancestors, as Pen and the CG renderer cast it. (Before leaf

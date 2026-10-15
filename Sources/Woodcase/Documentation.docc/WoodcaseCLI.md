@@ -1458,15 +1458,15 @@ platform: ios, web
 Rewrite `.pen` files in the current format version, in place.
 
 Each file is parsed through the version gate — which runs ``PenLegacyMigrator`` over any
-document older than 2.20 — turning a pre-2.19 inner shadow into an outer one and dropping
-`spread`, and renaming a pre-2.20 image mode, as Pen does — and written back with sorted keys and two-space indentation,
+document older than 2.20 — turning a pre-2.19 inner shadow into an outer one and moving its
+`spread` into `metadata.woodcase.shadowSpread`, and renaming a pre-2.20 image mode, as Pen does — and written back with sorted keys and two-space indentation,
 under the file's lock. A rewrite adds one `migrate` row to the activity log; the
 document's revision does not change, so `undo` passes over it.
 Directories are searched recursively; a file already at the current version — or at
 a newer 2.x minor, which a newer Pen wrote — is left alone unless `--force` is given,
 and `--force` keeps a newer minor's own version. A file of another major is read-only:
 it counts as a failure, and is left untouched. Every migration diagnostic goes to stderr, prefixed
-with the file's path, so discarded legacy data (a stroke `miterAngle`, a `dashPattern` no target can draw,
+with the file's path, so discarded legacy data (a `miterAngle` naming a variable, a `dashPattern` no target can draw,
 per-run text styling) is visible rather than silent.
 
 Each file's old-style Woodcase metadata — `_props`, `_role`, `_states`, `_action`,

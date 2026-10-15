@@ -26,6 +26,7 @@ enum PenStrokeRenderer {
     ///   - dash: The node's dash (``PenNode/strokeDash``), or `nil` for a solid stroke. It
     ///     follows `path` from its start; a per-side stroke and a zero-area box's band,
     ///     which are not one outline, are drawn solid.
+    ///   - miterLimit: The node's miter limit (``PenNode/strokeMiterLimit``).
     ///   - context: The context to draw into.
     ///   - imageProvider: Resolves an image paint's URL to an image.
     static func renderStroke(
@@ -34,6 +35,7 @@ enum PenStrokeRenderer {
         rect: PenRect,
         roundedBox: RoundedBox? = nil,
         dash: PenStrokeDash? = nil,
+        miterLimit: Double = PenNode.defaultMiterLimit,
         in context: CGContext,
         imageProvider: PenRenderer.ImageProvider = { _ in nil }
     ) {
@@ -59,7 +61,8 @@ enum PenStrokeRenderer {
             alignment: node.strokeAlignment ?? .center,
             penJoin: node.strokeLinejoin,
             penCap: node.strokeLinecap,
-            dash: dash
+            dash: dash,
+            miterLimit: CGFloat(miterLimit)
         )
         if let band = zeroAreaBand(width: width, alignment: style.alignment, box: roundedBox) {
             paint(band, .evenOdd)
@@ -80,6 +83,7 @@ enum PenStrokeRenderer {
         context.setStrokeColor(color)
         context.setLineJoin(style.join)
         context.setLineCap(style.cap)
+        context.setMiterLimit(style.miterLimit)
         if let dash = style.dash {
             context.setLineDash(phase: dash.phase, lengths: dash.lengths.map { CGFloat($0) })
         }
@@ -103,7 +107,7 @@ enum PenStrokeRenderer {
             strokingWithWidth: style.outlineWidth,
             lineCap: style.cap,
             lineJoin: style.join,
-            miterLimit: Style.miterLimit
+            miterLimit: style.miterLimit
         )
         context.saveGState()
         clipToAlignment(

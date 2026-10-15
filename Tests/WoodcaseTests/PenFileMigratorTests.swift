@@ -142,11 +142,13 @@ struct PenFileMigratorTests {
     // MARK: - Diagnostics and errors
 
     /// The legacy dash was the discarded data this pinned; it now moves into
-    /// `metadata.woodcase.strokeDash` (leaf ajB4uc), so a miter angle stands in for it.
+    /// `metadata.woodcase.strokeDash` (leaf ajB4uc), and a numeric miter angle into
+    /// `strokeMiterLimit` (leaf zRp9CO), so a miter angle naming a variable — which no limit
+    /// can be computed from — stands in for it.
     @Test("Discarded legacy data is reported through the collector")
     func discardedDataIsReported() throws {
         let diagnostics = PenDiagnosticCollector()
-        let legacy = Self.legacyJSON.replacingOccurrences(of: #""dashPattern": [4, 2]"#, with: #""miterAngle": 45"#)
+        let legacy = Self.legacyJSON.replacingOccurrences(of: #""dashPattern": [4, 2]"#, with: #""miterAngle": "$miter""#)
         _ = try PenFileMigrator.migrate(Self.data(legacy), diagnostics: diagnostics)
         #expect(diagnostics.diagnostics.contains { $0.message.contains("miterAngle") })
     }

@@ -13,10 +13,6 @@ import Foundation
 /// width for a centered stroke, the whole width for an outer one (Pen strokes an outer
 /// band at twice the width and clips the inside away, so its outline reaches as far).
 enum PenStrokeReach {
-    /// The miter limit Pen strokes with: Skia's default, the longest miter as a multiple
-    /// of the stroke's width before a join falls back to a bevel.
-    static let miterLimit = 4.0
-
     /// The bounds of an open segment's band, with its caps.
     ///
     /// - Parameters:
@@ -50,14 +46,17 @@ enum PenStrokeReach {
     ///
     /// At every corner the band has each edge's offset ends; a round join adds a disc of
     /// the reach about the corner, and a miter join the miter's tip, unless the miter is
-    /// longer than ``miterLimit`` times the width, where it is beveled.
+    /// longer than `miterLimit` times the width, where it is beveled.
     ///
     /// - Parameters:
     ///   - points: The corners, in order; the last joins the first.
     ///   - reach: How far the band extends to each side of an edge.
     ///   - join: How corners are joined.
+    ///   - miterLimit: The longest miter, in widths (``PenNode/strokeMiterLimit``).
     /// - Returns: The bounds, or `nil` for fewer than two distinct corners.
-    static func closedPolyline(_ points: [PenPoint], reach: Double, join: PenStrokeJoin) -> PenRect? {
+    static func closedPolyline(
+        _ points: [PenPoint], reach: Double, join: PenStrokeJoin, miterLimit: Double = PenNode.defaultMiterLimit
+    ) -> PenRect? {
         guard points.count >= 2 else { return nil }
         var ink: [PenPoint] = []
         for (index, corner) in points.enumerated() {

@@ -9,8 +9,9 @@ import Woodcase
 
 /// Covers what reading a file older than 2.19 does to its shadows, the way Pen 1.2.14
 /// does when it opens one: every inner shadow becomes an outer shadow — which is what
-/// every earlier Pen drew — and `spread`, which 2.19 dropped, is deleted. Both are said
-/// out loud, because Pen says nothing.
+/// every earlier Pen drew — and `spread`, which 2.19 dropped, moves into
+/// `metadata.woodcase.shadowSpread` (leaf zRp9CO). The conversion is said out loud, because
+/// Pen says nothing.
 struct PenFormat219MigrationTests {
     // MARK: - Helpers
 
@@ -119,8 +120,11 @@ struct PenFormat219MigrationTests {
 
     // MARK: - Spread
 
-    @Test("A pre-2.19 spread is deleted, with a warning naming the node")
-    func legacySpreadIsDropped() throws {
+    /// A pre-2.19 spread was deleted with a warning until leaf zRp9CO; it now moves into
+    /// `metadata.woodcase.shadowSpread`, addressed to its effect and holding the migrated
+    /// shadow, so the CG renderer draws it and a change in Pen makes it stale.
+    @Test("A pre-2.19 spread moves into metadata.woodcase.shadowSpread, made for the migrated shadow")
+    func legacySpreadIsKept() throws {
         let children = #"""
         [{"id":"R2","type":"rectangle","width":10,"height":10,
           "effect":{"type":"shadow","shadowType":"outer","color":"#000000","blur":4,"spread":6}}]
@@ -129,11 +133,70 @@ struct PenFormat219MigrationTests {
         let doc = try PenParser.parse(document(version: "2.17", children: children), diagnostics: diagnostics)
         let node = try #require(doc.children.first)
         #expect(try shadow(of: node).extras.isEmpty)
+        #expect(node.shadowSpread(forEffect: 0) == 6)
+        let entry = try #require(node.shadowSpreads.first)
+        #expect(try entry.shadow == shadow(of: node))
+        #expect(!diagnostics.diagnostics.contains { $0.message.contains("spread") })
         let written = try PenParser.encodeToString(doc)
-        #expect(!written.contains("spread"))
+        let reread = try PenParser.parse(Data(written.utf8))
+        #expect(try shadow(of: #require(reread.children.first)).extras.isEmpty)
+    }
+
+    @Test("A spread on an inner shadow is made for the outer shadow it migrates to, so it still applies")
+    func spreadFollowsTheInnerToOuterMigration() throws {
+        let children = #"""
+        [{"id":"R3","type":"rectangle","width":10,"height":10,
+          "effect":[{"type":"blur","radius":2},{"type":"shadow","shadowType":"inner","blur":4,"spread":3}]}]
+        """#
+        let doc = try PenParser.parse(document(version: "2.17", children: children))
+        let node = try #require(doc.children.first)
+        #expect(node.shadowSpread(forEffect: 1) == 3)
+        #expect(node.shadowSpreads.map(\.effect) == [1])
+        #expect(node.shadowSpreads.first?.shadow.shadowType == .outer)
+    }
+
+    @Test("A zero spread draws nothing and is dropped silently")
+    func zeroSpreadIsDropped() throws {
+        let children = #"""
+        [{"id":"R4","type":"rectangle","width":10,"height":10,"effect":{"type":"shadow","blur":4,"spread":0}}]
+        """#
+        let diagnostics = PenDiagnosticCollector()
+        let doc = try PenParser.parse(document(version: "2.17", children: children), diagnostics: diagnostics)
+        #expect(try #require(doc.children.first).common.metadata == nil)
+        #expect(!diagnostics.diagnostics.contains { $0.message.contains("spread") })
+    }
+
+    @Test("A spread naming a variable is discarded with a warning naming the node")
+    func variableSpreadIsDiscarded() throws {
+        let children = #"""
+        [{"id":"R5","type":"rectangle","width":10,"height":10,"effect":{"type":"shadow","blur":4,"spread":"$s"}}]
+        """#
+        let diagnostics = PenDiagnosticCollector()
+        let doc = try PenParser.parse(document(version: "2.17", children: children), diagnostics: diagnostics)
+        #expect(try #require(doc.children.first).common.metadata == nil)
         let warning = try #require(diagnostics.diagnostics.first { $0.message.contains("spread") })
-        #expect(warning.nodeID == "R2")
-        #expect(warning.severity == .warning)
+        #expect(warning.nodeID == "R5")
+    }
+
+    @Test("Spreads join the node's own metadata, keeping its type and keys")
+    func spreadJoinsExistingMetadata() throws {
+        let children = #"""
+        [{"id":"R6","type":"rectangle","width":10,"height":10,"metadata":{"type":"card","owner":"ben"},
+          "effect":{"type":"shadow","blur":4,"spread":2}}]
+        """#
+        let node = try #require(PenParser.parse(document(version: "2.17", children: children)).children.first)
+        #expect(node.common.metadata?.type == "card")
+        #expect(node.common.metadata?.extensions["owner"] == .string("ben"))
+        #expect(node.shadowSpread(forEffect: 0) == 2)
+    }
+
+    @Test("In an instance override with no metadata of its own, a spread is discarded with a warning")
+    func spreadInBareOverrideIsDiscarded() {
+        let diagnostics = PenDiagnosticCollector()
+        var bag: [String: AnyCodable] = ["effect": .dictionary(["type": "shadow", "blur": 4, "spread": 2])]
+        PenShadowMigrationRule().apply(toNode: &bag, id: "inst/child", diagnostics: diagnostics)
+        #expect(bag["metadata"] == nil)
+        #expect(diagnostics.diagnostics.contains { $0.message.contains("spread") && $0.nodeID == "inst/child" })
     }
 
     @Test("Migration is idempotent: re-reading the written file changes nothing more")

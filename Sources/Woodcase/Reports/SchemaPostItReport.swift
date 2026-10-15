@@ -47,6 +47,8 @@ public struct SchemaPostItReport: Friendly {
             case .textSpans: "an object"
             case .dashLengths: "an array of numbers"
             case .boolean: "true or false"
+            case .shadowSpreads: "an array of objects"
+            case .textDecoration: "an object"
             case .string, .oneOf, .hexColor, .utcTimestamp: "any string"
             }
             summary = key.summary

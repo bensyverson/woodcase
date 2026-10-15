@@ -14,10 +14,12 @@ public extension PenMetadata.WoodcaseKey {
     /// than copied: `fontSize` above 0 in points, `lineHeight` a multiple of the font size
     /// above 0 and at most 10, `letterSpacing` any number of points. ``EditPlanner``
     /// refuses a write outside it with ``EditRefusal/Code/outOfRange``, as it does on a
-    /// text.
+    /// text. A stroke's miter limit is a factor of at least 1: a shorter miter than the
+    /// stroke's own width is no miter at all.
     var constraint: PenValueConstraint? {
         switch self {
         case .fontSize, .lineHeight, .letterSpacing: NodePropertyCodec.shape(of: rawValue)?.constraint
+        case .strokeMiterLimit: PenNode.miterLimitConstraint
         default: nil
         }
     }

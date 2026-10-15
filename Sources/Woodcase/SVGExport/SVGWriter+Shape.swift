@@ -67,7 +67,8 @@ extension SVGWriter {
         elements += innerShadows(effects.innerShadows, silhouette: shape.element(fill: "#000000"), region: outline.boundingBoxOfPath)
         elements += self.stroke(
             stroke.drawn(on: node), path: outline, box: box,
-            roundedBox: PenStrokeRenderer.roundedBox(for: node, rect: box), dash: node.strokeDash
+            roundedBox: PenStrokeRenderer.roundedBox(for: node, rect: box), dash: node.strokeDash,
+            miterLimit: node.strokeMiterLimit
         )
         return elements
     }
@@ -78,7 +79,7 @@ extension SVGWriter {
         let stroke = data.drawn(on: node)
         return self.stroke(
             stroke, path: path, box: PenRenderer.lineBand(box, strokeWidth: stroke.uniformStrokeWidth ?? 1),
-            roundedBox: nil, dash: node.strokeDash
+            roundedBox: nil, dash: node.strokeDash, miterLimit: node.strokeMiterLimit
         )
     }
 

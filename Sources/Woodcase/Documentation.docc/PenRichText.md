@@ -51,6 +51,27 @@ Stale spans start as no runs at all (``PenFlatTextRuns/init(spans:content:)``): 
 
 A run's keys are one list, ``PenTextRun/StyleKey``: overlaying (``PenTextRun/overlaid(by:)``), clearing (``PenTextRun/clear(_:)``), comparing (``PenTextRun/hasSameKeys(as:)``) and flattening all walk it, so a key added to ``PenTextRun`` reaches all of them, and a test fails until the new property has its case.
 
+### Underline and strikethrough survive Pen
+
+Pen strips a text node's own `underline` and `strikethrough` when it opens a file, and
+keeps its metadata (`project/2026-09-26-what-pen-drops-from-a-file.md`). So whenever a
+text of plain content carries either natively, Woodcase also writes them into
+`metadata.woodcase.textDecoration` (``PenTextDecoration``), with the content they were
+made for. ``PenParser`` keeps the two in step on every read and write
+(``PenDocument/protectingTextDecoration()``): a native key a file no longer writes is
+restored from protection made for the node's content, a key it does write wins, and the
+protection is then rewritten from the native keys. So a file saved in Pen reads
+underlined and struck through, draws so on every target, and is written with the native
+keys back. Words edited in Pen leave the protection stale, as they leave spans stale; it
+restores nothing and the next write drops it. A text whose content is a variable has no
+literal to protect against and is not protected. Probed with headless Pen (pen CLI
+0.3.11, 2026-10-15) on `text-decoration.pen`, Woodcase's own write, and its save
+`text-decoration.pen-saved.pen` (`PenTextDecorationTests`, leaf `kyrTTL`).
+
+It is its own key rather than a whole-text run in `spans`: spans are the author's
+styling, written whole by an editor, so a run kept in step with the native keys could
+not be told from one the author made.
+
 ### Storage
 
 `metadata.woodcase.spans` holds ``PenTextSpans/metadataValue``, read back by ``PenTextSpans/init(metadataValue:)``:

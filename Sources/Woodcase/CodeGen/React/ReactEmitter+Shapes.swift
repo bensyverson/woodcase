@@ -123,7 +123,7 @@ extension ReactEmitter {
                 SVGStrokedShape(
                     element: "path", geometry: "d=\"\(d)\"", fill: svgFillAttributes(data.fills, fillRule: fillRule),
                     fillRule: fillRule, domain: .init(x: 0, y: 0, width: w, height: h), nodeID: node.id,
-                    dash: node.strokeDash
+                    dash: node.strokeDash, miterLimit: node.strokeMiterLimit
                 ),
                 fills: data.fills, stroke: data, innerShadows: NodeEffects(data.effects).innerShadows,
                 indent: indent + 2, ctx: ctx

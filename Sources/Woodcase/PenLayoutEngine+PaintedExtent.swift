@@ -16,7 +16,8 @@ public extension PenLayoutEngine {
     /// does not clip and for a group, every enabled child's painted extent carried through
     /// the child's placement. A group paints only its children. Then the effects: each
     /// enabled outer shadow adds a copy of that extent moved by its offset and grown by
-    /// 1.5 × its blur (Pen does not count a shadow's spread), and each enabled layer blur
+    /// 1.5 × its blur and by its spread (``PenNode/shadowSpread(forEffect:)``, which Pen
+    /// neither keeps in the format nor draws, but Woodcase draws), and each enabled layer blur
     /// grows the whole by 1.5 × its radius; a background blur and an inner shadow add
     /// nothing. A note's or prompt's paper casts its look's shadows
     /// (``PenPostIt/Style/shadows``) as if they were its effects. Last, the extent goes through the node's own placement
@@ -153,14 +154,16 @@ extension PenLayoutEngine {
 
     /// `extent` grown by a node's effects, as Pen grows it: every enabled outer shadow adds
     /// a copy of the extent before any shadow, moved by its offset and grown by 1.5 × its
-    /// blur, and every enabled layer blur then grows the whole by 1.5 × its radius.
+    /// blur and by any positive spread Woodcase draws for it, and every enabled layer blur
+    /// then grows the whole by 1.5 × its radius.
     private static func withEffects(_ extent: PenRect, of node: PenNode) -> PenRect {
         guard let effects = PenRenderer.effects(for: node)?.all ?? PenPostIt.paperEffects(of: node) else { return extent }
         var grown = extent
-        for case let .shadow(shadow) in effects
-            where shadow.enabled?.literalValue != false && (shadow.shadowType ?? .outer) == .outer
-        {
-            let reach = 1.5 * max(0, shadow.blur?.literalValue ?? 0)
+        for (index, effect) in effects.enumerated() {
+            guard case let .shadow(shadow) = effect, shadow.enabled?.literalValue != false,
+                  (shadow.shadowType ?? .outer) == .outer
+            else { continue }
+            let reach = 1.5 * max(0, shadow.blur?.literalValue ?? 0) + max(0, node.shadowSpread(forEffect: index) ?? 0)
             let moved = PenRect(
                 x: extent.x + (shadow.offset?.x.literalValue ?? 0),
                 y: extent.y + (shadow.offset?.y.literalValue ?? 0),

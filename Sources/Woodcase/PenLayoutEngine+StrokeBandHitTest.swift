@@ -64,11 +64,12 @@ public extension PenLayoutEngine {
         let alignment = stroke.strokeAlignment ?? .center
         let style = PenStrokeRenderer.Style(
             width: CGFloat(width), alignment: alignment,
-            penJoin: stroke.strokeLinejoin, penCap: stroke.strokeLinecap
+            penJoin: stroke.strokeLinejoin, penCap: stroke.strokeLinecap,
+            miterLimit: CGFloat(node.strokeMiterLimit)
         )
         let outline = path.copy(
             strokingWithWidth: style.outlineWidth, lineCap: style.cap, lineJoin: style.join,
-            miterLimit: PenStrokeRenderer.Style.miterLimit
+            miterLimit: style.miterLimit
         )
         guard outline.contains(cgPoint, using: .winding) else { return false }
         switch alignment {
@@ -95,7 +96,7 @@ public extension PenLayoutEngine {
         }
         let outline = segment.copy(
             strokingWithWidth: CGFloat(width), lineCap: cap, lineJoin: .miter,
-            miterLimit: PenStrokeRenderer.Style.miterLimit
+            miterLimit: CGFloat(PenNode.defaultMiterLimit)
         )
         return outline.contains(point)
     }

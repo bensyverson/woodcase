@@ -98,6 +98,9 @@ public extension PenMetadata {
         /// A text node's styled runs and the content they were made for
         /// (``PenTextSpans``, read and written as ``PenMetadata/textSpans``).
         case spans
+        /// A text node's underline and strikethrough, kept where Pen cannot strip them, and
+        /// the content they were made for (``PenTextDecoration``).
+        case textDecoration
 
         // MARK: A stroke's dash
 
@@ -106,6 +109,16 @@ public extension PenMetadata {
         case strokeDash
         /// How far into its dash pattern a stroke starts, in points.
         case strokeDashOffset
+        /// The longest a mitered join may reach, as a multiple of the stroke's width, before
+        /// it is beveled. The format has had no miter control since 2.17.
+        case strokeMiterLimit
+
+        // MARK: A shadow's spread
+
+        /// How far each shadow is grown (or, negative, shrunk) before it is cast, addressed
+        /// to its effect by place and holding the shadow it was made for
+        /// (``PenShadowSpread``). Format 2.19 dropped `spread`.
+        case shadowSpread
 
         // MARK: Editor state
 
@@ -121,12 +134,14 @@ public extension PenMetadata {
             case note
             /// A note's text style, which Pen strips from the node itself.
             case noteTextStyle
-            /// A text node's rich text, which Pen's format cannot hold.
+            /// A text node's rich text and protected decoration, which Pen strips or cannot hold.
             case text
-            /// A shape's stroke dash, which Pen's format cannot hold.
+            /// A shape's stroke dash and miter limit, which Pen's format cannot hold.
             case stroke
             /// How an editor treats the node — a lock — which Pen's format cannot hold.
             case editor
+            /// A node's shadow spreads, which Pen's format cannot hold.
+            case effect
         }
 
         /// What an authored value of a key must be.
@@ -151,6 +166,12 @@ public extension PenMetadata {
             case dashLengths
             /// `true` or `false`.
             case boolean
+            /// A text's protected decoration: `{text, underline, strikethrough}`, as
+            /// ``PenTextDecoration/init(metadataValue:)`` reads it.
+            case textDecoration
+            /// A node's shadow spreads: `[{effect, spread, shadow}]`, as
+            /// ``PenShadowSpread/entries(in:)`` reads them.
+            case shadowSpreads
         }
 
         /// Which part of Woodcase the key belongs to.
@@ -161,8 +182,9 @@ public extension PenMetadata {
                 .note
             case .fontFamily, .fontSize, .fontWeight, .fontStyle, .letterSpacing, .lineHeight, .textAlign,
                  .textAlignVertical: .noteTextStyle
-            case .spans: .text
-            case .strokeDash, .strokeDashOffset: .stroke
+            case .spans, .textDecoration: .text
+            case .strokeDash, .strokeDashOffset, .strokeMiterLimit: .stroke
+            case .shadowSpread: .effect
             case .locked: .editor
             }
         }
@@ -178,7 +200,8 @@ public extension PenMetadata {
             case .props, .role, .states, .action, .scroll: "_\(rawValue)"
             case .type, .state, .author, .leaf, .stage, .tint, .copiedFrom: rawValue
             case .anchor, .replyTo, .requestedBy, .createdAt, .fontFamily, .fontSize, .fontWeight, .fontStyle, .letterSpacing,
-                 .lineHeight, .textAlign, .textAlignVertical, .spans, .strokeDash, .strokeDashOffset, .locked: nil
+                 .lineHeight, .textAlign, .textAlignVertical, .spans, .textDecoration, .strokeDash, .strokeDashOffset,
+                 .strokeMiterLimit, .shadowSpread, .locked: nil
             }
         }
 
@@ -193,9 +216,11 @@ public extension PenMetadata {
             case .tint: .hexColor
             case .author, .leaf, .stage, .copiedFrom, .replyTo, .requestedBy, .fontFamily, .fontWeight, .fontStyle:
                 .string
-            case .fontSize, .letterSpacing, .lineHeight, .strokeDashOffset: .number
+            case .fontSize, .letterSpacing, .lineHeight, .strokeDashOffset, .strokeMiterLimit: .number
             case .spans: .textSpans
+            case .textDecoration: .textDecoration
             case .strokeDash: .dashLengths
+            case .shadowSpread: .shadowSpreads
             case .createdAt: .utcTimestamp
             case .locked: .boolean
             }
@@ -221,6 +246,8 @@ public extension PenMetadata {
             case .textSpans: [PenTextSpans.wireForm]
             case .utcTimestamp: [PenComment.createdAtForm]
             case .boolean: ["true", "false"]
+            case .shadowSpreads: [PenShadowSpread.wireForm]
+            case .textDecoration: [PenTextDecoration.wireForm]
             case .any, .string, .number, .dashLengths: []
             }
         }
@@ -253,9 +280,12 @@ public extension PenMetadata {
             case .textAlign: "The horizontal alignment of the note's lines."
             case .textAlignVertical: "The vertical alignment of the note's text."
             case .spans: "A text node's styled runs, and the content they were made for."
+            case .textDecoration: "A text's underline and strikethrough, kept from Pen, and the content they were made for."
             case .strokeDash: "The stroke's alternating dash and gap lengths, in points; absent or empty is solid."
             case .strokeDashOffset: "How far into its dash pattern the stroke starts, in points."
             case .locked: "Whether an editor keeps the node from being selected on the canvas; absent is unlocked."
+            case .strokeMiterLimit: "The longest a mitered join reaches, in stroke widths, before it is beveled; absent is Pen's 4."
+            case .shadowSpread: "How far each shadow is grown before it is cast, per effect, and the shadow it was made for."
             }
         }
 

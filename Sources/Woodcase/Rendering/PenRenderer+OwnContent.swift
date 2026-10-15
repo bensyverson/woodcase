@@ -5,10 +5,10 @@ extension PenRenderer {
     struct OwnContent: Friendly {
         /// The node's draw rect: zero-origin, in the node's own space.
         let drawRect: PenRect
-        /// The node's enabled outer shadows, in array order.
-        let outerShadows: [PenEffect.PenShadowEffect]
-        /// The node's enabled inner shadows, in array order.
-        let innerShadows: [PenEffect.PenShadowEffect]
+        /// The node's enabled outer shadows, in array order, with their spreads.
+        let outerShadows: [PenCastShadow]
+        /// The node's enabled inner shadows, in array order, with their spreads.
+        let innerShadows: [PenCastShadow]
         /// An animation override of the node's fills.
         let overrideFills: PenFills?
     }
@@ -32,10 +32,11 @@ extension PenRenderer {
     ) {
         let rect = own.drawRect
         if !own.outerShadows.isEmpty {
-            let bounds = rect.cgRect.insetBy(dx: -outerStrokeReach(of: node), dy: -outerStrokeReach(of: node))
-            PenEffectRenderer.renderOuterShadows(own.outerShadows, bounds: bounds, in: context) { target in
+            let reach = outerStrokeReach(of: node) + max(0, own.outerShadows.map(\.spread).max() ?? 0)
+            let bounds = rect.cgRect.insetBy(dx: -reach, dy: -reach)
+            PenEffectRenderer.renderOuterShadows(own.outerShadows, bounds: bounds, in: context) { target, spread in
                 PenShadowSilhouette.draw(
-                    node, rect: rect, in: target, children: groupSilhouette, imageProvider: imageProvider
+                    node, rect: rect, spread: spread, in: target, children: groupSilhouette, imageProvider: imageProvider
                 )
             }
         }
@@ -67,20 +68,24 @@ extension PenRenderer {
             let stroke = data.drawn(on: node)
             PenStrokeRenderer.renderStroke(
                 stroke, path: path, rect: lineBand(rect, strokeWidth: stroke.uniformStrokeWidth ?? 1),
-                dash: node.strokeDash, in: context, imageProvider: imageProvider
+                dash: node.strokeDash, miterLimit: node.strokeMiterLimit, in: context, imageProvider: imageProvider
             )
         case let .text(data):
             PenTextRenderer.renderText(
                 node: node, rect: rect, fills: own.overrideFills ?? data.fills,
                 in: context, imageProvider: imageProvider
             )
-            renderGlyphInnerShadows(own.innerShadows, node: node, rect: rect, imageProvider: imageProvider, in: context)
+            renderGlyphInnerShadows(
+                own.innerShadows.map(\.shadow), node: node, rect: rect, imageProvider: imageProvider, in: context
+            )
         case let .icon(data):
             PenIconFontRenderer.render(
                 data: data, rect: rect, fills: own.overrideFills ?? data.fills,
                 in: context, imageProvider: imageProvider
             )
-            renderGlyphInnerShadows(own.innerShadows, node: node, rect: rect, imageProvider: imageProvider, in: context)
+            renderGlyphInnerShadows(
+                own.innerShadows.map(\.shadow), node: node, rect: rect, imageProvider: imageProvider, in: context
+            )
         case let .browser(data):
             PenBrowserPlaceholder.render(data, node: node, rect: rect, in: context)
             renderInnerShadows(own.innerShadows, node: node, rect: rect, in: context)
@@ -105,23 +110,25 @@ extension PenRenderer {
             clip: path, fillRule: PenShapeBuilder.fillRule(for: node), domain: own.drawRect.cgRect,
             in: context, imageProvider: imageProvider
         )
-        for shadow in own.innerShadows {
-            PenEffectRenderer.renderInnerShadow(shadow, path: path, fillRule: PenShapeBuilder.fillRule(for: node), in: context)
+        for cast in own.innerShadows {
+            PenEffectRenderer.renderInnerShadow(
+                cast.shadow, path: path, fillRule: PenShapeBuilder.fillRule(for: node), spread: cast.spread, in: context
+            )
         }
         PenStrokeRenderer.renderStroke(
             stroke.drawn(on: node), path: path, rect: own.drawRect,
             roundedBox: PenStrokeRenderer.roundedBox(for: node, rect: own.drawRect),
-            dash: node.strokeDash, in: context, imageProvider: imageProvider
+            dash: node.strokeDash, miterLimit: node.strokeMiterLimit, in: context, imageProvider: imageProvider
         )
     }
 
     /// Inner shadows for a node that is not one of the stroked shapes but still has a path.
     private static func renderInnerShadows(
-        _ shadows: [PenEffect.PenShadowEffect], node: PenNode, rect: PenRect, in context: CGContext
+        _ shadows: [PenCastShadow], node: PenNode, rect: PenRect, in context: CGContext
     ) {
         guard !shadows.isEmpty, let path = PenShapeBuilder.buildPath(for: node, rect: rect) else { return }
-        for shadow in shadows {
-            PenEffectRenderer.renderInnerShadow(shadow, path: path, in: context)
+        for cast in shadows {
+            PenEffectRenderer.renderInnerShadow(cast.shadow, path: path, spread: cast.spread, in: context)
         }
     }
 
@@ -136,7 +143,9 @@ extension PenRenderer {
     ) {
         for shadow in shadows {
             PenEffectRenderer.renderInnerShadow(shadow, bounds: rect.cgRect, in: context) { target in
-                PenShadowSilhouette.draw(node, rect: rect, in: target, children: { _ in }, imageProvider: imageProvider)
+                PenShadowSilhouette.draw(
+                    node, rect: rect, spread: 0, in: target, children: { _ in }, imageProvider: imageProvider
+                )
             }
         }
     }

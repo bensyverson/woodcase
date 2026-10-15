@@ -32,21 +32,28 @@ enum PenEffectRenderer {
     ///    from under the node.
     ///
     /// - Parameters:
-    ///   - shadows: The node's outer shadows; disabled ones draw nothing.
-    ///   - bounds: A rectangle containing the silhouette, in the context's current space.
+    /// A shadow's spread grows the silhouette it is cast by (step 1) but not the one erased
+    /// (step 2), so a spread shadow never shows under the node either.
+    ///
+    /// - Parameters:
+    ///   - shadows: The node's outer shadows and their spreads; disabled ones draw nothing.
+    ///   - bounds: A rectangle containing the silhouette, grown by any spread, in the
+    ///     context's current space.
     ///   - context: The context to draw into.
-    ///   - silhouette: Draws the node's silhouette in opaque ink into the context it is given.
+    ///   - silhouette: Draws the node's silhouette in opaque ink into the context it is
+    ///     given, grown by the spread it is given.
     static func renderOuterShadows(
-        _ shadows: [PenEffect.PenShadowEffect],
+        _ shadows: [PenCastShadow],
         bounds: CGRect,
         in context: CGContext,
-        silhouette: (CGContext) -> Void
+        silhouette: (CGContext, CGFloat) -> Void
     ) {
-        let enabled = shadows.filter { $0.enabled?.literalValue != false }
+        let enabled = shadows.filter { $0.shadow.enabled?.literalValue != false }
         guard !enabled.isEmpty else { return }
         let scale = deviceScale(of: context)
         let clipBox = context.boundingBoxOfClipPath
-        for shadow in enabled {
+        for entry in enabled {
+            let shadow = entry.shadow
             let blur = CGFloat(shadow.blur?.literalValue ?? 0)
             // Far enough right that the silhouette, and none of its own pixels, is drawn
             // inside the clip.
@@ -67,12 +74,12 @@ enum PenEffectRenderer {
                 color: color(of: shadow)
             )
             context.translateBy(x: shift, y: 0)
-            silhouette(context)
+            silhouette(context, entry.spread)
             context.restoreGState()
 
             context.setBlendMode(.destinationOut)
             context.beginTransparencyLayer(auxiliaryInfo: nil)
-            silhouette(context)
+            silhouette(context, 0)
             context.endTransparencyLayer()
 
             context.endTransparencyLayer()
@@ -90,11 +97,13 @@ enum PenEffectRenderer {
     /// before its stroke and children; the caller keeps that order.
     ///
     /// The clip takes the shape's own fill rule: a donut's hole is outside it, and casts
-    /// the shadow into the ring (`render-inner-shadow-shapes`, `donut`).
+    /// the shadow into the ring (`render-inner-shadow-shapes`, `donut`). A `spread` shrinks
+    /// the cut-out shape, so the shadow reaches further in — CSS's inset spread.
     static func renderInnerShadow(
         _ shadow: PenEffect.PenShadowEffect,
         path: CGPath,
         fillRule: CGPathFillRule = .winding,
+        spread: CGFloat = 0,
         in context: CGContext
     ) {
         guard shadow.enabled?.literalValue != false else { return }
@@ -115,7 +124,7 @@ enum PenEffectRenderer {
 
         let invertedPath = CGMutablePath()
         invertedPath.addRect(outerRect)
-        invertedPath.addPath(path)
+        invertedPath.addPath(PenShadowSilhouette.spread(path, rule: fillRule, by: -spread).path)
         context.addPath(invertedPath)
         context.setFillColor(PenShadowSilhouette.ink)
         context.fillPath(using: .evenOdd)

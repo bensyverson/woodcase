@@ -282,20 +282,7 @@ public enum PenRenderer {
 
         // Collect effects
         let nodeEffects = effects(for: ref.node)
-        let outerShadows = nodeEffects?.all.compactMap { effect -> PenEffect.PenShadowEffect? in
-            guard case let .shadow(shadow) = effect,
-                  shadow.shadowType != .inner,
-                  shadow.enabled?.literalValue != false
-            else { return nil }
-            return shadow
-        } ?? []
-        let innerShadows = nodeEffects?.all.compactMap { effect -> PenEffect.PenShadowEffect? in
-            guard case let .shadow(shadow) = effect,
-                  shadow.shadowType == .inner,
-                  shadow.enabled?.literalValue != false
-            else { return nil }
-            return shadow
-        } ?? []
+        let (outerShadows, innerShadows) = PenCastShadow.casts(of: ref.node)
         let blurEffect = nodeEffects?.all.compactMap { effect -> PenEffect.PenBlurEffect? in
             guard case let .blur(blur) = effect,
                   blur.enabled?.literalValue != false
@@ -344,10 +331,10 @@ public enum PenRenderer {
 
         // Blur path: render entire subtree into offscreen context
         if let blur = blurEffect {
-            let shadowReach: CGFloat = outerShadows.map { shadow -> CGFloat in
-                let x: Double = abs(shadow.offset?.x.literalValue ?? 0)
-                let y: Double = abs(shadow.offset?.y.literalValue ?? 0)
-                return CGFloat(max(x, y) + (shadow.blur?.literalValue ?? 0))
+            let shadowReach: CGFloat = outerShadows.map { cast -> CGFloat in
+                let x: Double = abs(cast.shadow.offset?.x.literalValue ?? 0)
+                let y: Double = abs(cast.shadow.offset?.y.literalValue ?? 0)
+                return CGFloat(max(x, y) + (cast.shadow.blur?.literalValue ?? 0)) + max(cast.spread, 0)
             }.max() ?? 0
             PenEffectRenderer.renderBlur(blur, rect: drawRect, overflow: shadowReach, in: context) { offscreenCtx in
                 renderOwnContent(
@@ -359,7 +346,7 @@ public enum PenRenderer {
                     overrides: overrides, imageProvider: imageProvider, postIt: postIt
                 )
                 if case .group = ref.node.kind {
-                    renderGroupInnerShadows(innerShadows, bounds: drawRect.cgRect, in: offscreenCtx, silhouette: castGroupSilhouette)
+                    renderGroupInnerShadows(innerShadows.map(\.shadow), bounds: drawRect.cgRect, in: offscreenCtx, silhouette: castGroupSilhouette)
                 }
             }
             // Cleanup: end transparency layer + restore GState
@@ -401,7 +388,7 @@ public enum PenRenderer {
             case .group:
                 // A group's inner shadow falls over its children, so it runs after them.
                 if !innerShadows.isEmpty {
-                    stack.append(.groupInnerShadows(ref, innerShadows, drawRect))
+                    stack.append(.groupInnerShadows(ref, innerShadows.map(\.shadow), drawRect))
                 }
                 for child in children.reversed() {
                     stack.append(.renderNode(NodeRef(child)))
