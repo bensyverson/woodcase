@@ -102,9 +102,11 @@ extension PenLayoutEngine {
 
             // Empty text node: use one line height as the intrinsic height
             // so it still occupies vertical space in layout (matching Pen's behavior).
+            // Only a width the text decides is zero: a fixed or filling one is kept, as
+            // Pen keeps it.
             if text.isEmpty, needsHeightFromText {
                 let oneLineHeight = textMeasurer(textInput.request.measuring(" ", maxWidth: nil, runs: []))
-                return (0, oneLineHeight.height)
+                return (needsWidthFromText ? 0 : resolvedWidth, oneLineHeight.height)
             }
         }
 

@@ -378,6 +378,47 @@ struct PenTextLayoutTests {
         #expect(rect.height == 16)
     }
 
+    @Test("An empty fixed-width text keeps its width, one line tall (Pen draws it so)")
+    func emptyFixedWidthTextKeepsWidth() throws {
+        let doc = PenDocument(version: "0.0.1", children: [
+            PenNode(
+                id: "text1",
+                common: PenNodeCommon(),
+                kind: .text(PenNode.TextData(width: .fixed(160), content: .literal(""), textGrowth: .fixedWidth))
+            ),
+        ])
+        let rects = PenLayoutEngine.layout(doc, textMeasurer: Self.stubMeasurer)
+        let rect = try #require(rects["text1"])
+        #expect(rect.width == 160)
+        #expect(rect.height == 16)
+    }
+
+    @Test("An empty fixed-width text takes its width in a row")
+    func emptyFixedWidthTextInRow() {
+        // Pen (`pen interactive` preview, 2026-10-15): the row is 160 + 10 + 40 wide.
+        let doc = PenDocument(version: "0.0.1", children: [
+            PenNode(
+                id: "row",
+                common: PenNodeCommon(),
+                kind: .frame(PenNode.FrameData(layout: .horizontal, gap: .literal(10), children: [
+                    PenNode(
+                        id: "empty",
+                        common: PenNodeCommon(),
+                        kind: .text(PenNode.TextData(width: .fixed(160), content: .literal(""), textGrowth: .fixedWidth))
+                    ),
+                    PenNode(
+                        id: "box",
+                        common: PenNodeCommon(),
+                        kind: .rectangle(PenNode.RectangleData(width: .fixed(40), height: .fixed(40)))
+                    ),
+                ]))
+            ),
+        ])
+        let rects = PenLayoutEngine.layout(doc, textMeasurer: Self.stubMeasurer)
+        #expect(rects["box"]?.x == 170)
+        #expect(rects["row"]?.width == 210)
+    }
+
     @Test("Text with fill_container width inside fixed frame uses parent width for wrapping")
     func fillContainerWidthUsesParentForWrapping() throws {
         // "Hello World Test!!" = 18 chars → natural width = 144
