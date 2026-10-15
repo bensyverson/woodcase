@@ -96,6 +96,18 @@ public struct EditRefusal: Error, Friendly {
         /// A dash on a stroke of per-side widths, whose bands dashes cannot flow around.
         case dashOnPerSideStroke
 
+        // MARK: Structure
+
+        /// A group, frame selection or ungroup named nothing to act on.
+        case noNodes
+
+        /// A group, frame selection or ungroup reached into a component instance, whose
+        /// nodes are its component's: aimed at a node inside one, or at a slot's content.
+        case insideInstance
+
+        /// An ungroup was aimed at a node that is neither a group nor a frame.
+        case notAGroup
+
         // MARK: Everything else
 
         /// The document refused the edit for a reason no other code names; ``errorCode``

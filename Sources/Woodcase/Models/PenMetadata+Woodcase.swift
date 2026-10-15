@@ -150,7 +150,7 @@ public extension PenMetadata {
         switch key.group {
         case .codegen:
             return extensions[spelling]
-        case .text, .stroke:
+        case .text, .stroke, .editor:
             return nil
         case .note, .noteTextStyle:
             guard readsBareNoteKeys else { return nil }

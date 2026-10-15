@@ -87,6 +87,8 @@ return are listed here, so a script knows what it must branch on.
 | `cp` | write | Duplicate a subtree with fresh ids | 0 2 3 4 5 |
 | `paste` | write | Take a clip from `clip --json` into the file, reusing and renaming its components and variables | 0 2 3 4 5 |
 | `mv` | write | Reparent or reorder a node | 0 2 3 4 5 |
+| `group` | write | Wrap nodes in a new group, or a free frame with `--frame`, keeping them where they are drawn | 0 2 3 4 5 |
+| `ungroup` | write | Take a group or frame apart, keeping its children where they are drawn | 0 2 3 4 5 |
 | `rm` | write | Delete a node, refusing to strand instances | 0 2 3 4 5 |
 | `override` | write | Write an override into a component instance | 0 2 3 4 5 |
 | `apply` | write | A JSONL batch of the above, in one transaction | 0 1 2 3 4 5 |
@@ -915,6 +917,43 @@ woodcase mv design.pen Card/Badge Card/Header --at 0 --as ana
 ```
 
 **Options:** `--at`, `--rev`, `--as`, `--json`.
+
+
+### `group`
+
+What an editor's Group (⌘G) and Frame Selection (⌥⌘G) do
+(``EditPlanner/planGroup(nodeIDs:kind:in:layout:)``; see <doc:EditPlanning>). The wrapper
+goes into the parent of the front-most node — the last in document order — at its index,
+and nodes from other parents move in. Nothing moves on the canvas: each node's `x`/`y`, and
+its turn and flips under a turned or flipped parent, are rewritten to keep it where it is
+drawn. In a stack the wrapper takes the front-most node's place in the flow. A node inside
+another node named stays where it is; a node inside a component instance, or a wrap that
+would put a component inside itself, is refused. One transaction, so one `woodcase undo`
+takes it back.
+
+```bash
+woodcase group design.pen Card/Title Card/Subtitle --as ana
+woodcase group design.pen Hero Footer --frame --as ana
+```
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--frame` | `false` | Wrap in a frame with `layout: none`, no fill and no clip, sized to the nodes |
+| `--json` | `false` | `{"id":…,"path":…,"revision":…}` |
+
+### `ungroup`
+
+What an editor's Ungroup (⇧⌘G) does (``EditPlanner/planUngroup(groupID:in:layout:)``): the
+group's or frame's children go to its parent at its index, in their order, with its
+position, turn and flips folded into each, and it is removed. In a stack the children join
+the flow there. A node inside a component instance, a node that is neither a group nor a
+frame, and a component with instances are refused.
+
+```bash
+woodcase ungroup design.pen Card/Header --as ana
+```
+
+`--json` prints `{"ids":[…],"revision":…}`.
 
 ### `rm`
 

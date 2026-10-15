@@ -16,14 +16,18 @@ import Foundation
 public extension PenSchema {
     /// The `metadata.woodcase` keys a node of one type takes as fields of its own.
     ///
-    /// Every type whose stroke the renderer dashes takes ``PenMetadata/WoodcaseKey/strokeDash``
-    /// and ``PenMetadata/WoodcaseKey/strokeDashOffset``.
+    /// Every type takes ``PenMetadata/WoodcaseKey/locked``; every type whose stroke the
+    /// renderer dashes also takes ``PenMetadata/WoodcaseKey/strokeDash`` and
+    /// ``PenMetadata/WoodcaseKey/strokeDashOffset``.
     ///
     /// - Parameter type: The node type.
     /// - Returns: The rows, sorted by path.
     static func woodcaseFields(for type: PenNode.NodeType) -> [PenSchemaTable.Property] {
-        guard dashedTypes.contains(type) else { return [] }
-        return [strokeDashRow, strokeDashOffsetRow]
+        var rows = [lockedRow]
+        if dashedTypes.contains(type) {
+            rows += [strokeDashRow, strokeDashOffsetRow]
+        }
+        return rows.sorted { $0.path < $1.path }
     }
 
     // MARK: - Private
@@ -51,6 +55,14 @@ public extension PenSchema {
         key: .key(metadataKey(.strokeDashOffset)),
         shape: PenPropertyShape(forms: [.number], example: "2", constraint: PenValueConstraint(unit: .points)),
         default: .number(0)
+    )
+
+    /// The lock an editor keeps: unset is unlocked.
+    private static let lockedRow = PenSchemaTable.Property(
+        path: PenMetadata.WoodcaseKey.locked.path,
+        key: .key(metadataKey(.locked)),
+        shape: PenPropertyShape(forms: [.boolean], example: "true"),
+        default: .boolean(false)
     )
 
     /// Where the file writes a Woodcase key: `metadata.woodcase.strokeDash`.

@@ -46,6 +46,7 @@ public struct SchemaPostItReport: Friendly {
             case .any: "any JSON"
             case .textSpans: "an object"
             case .dashLengths: "an array of numbers"
+            case .boolean: "true or false"
             case .string, .oneOf, .hexColor, .utcTimestamp: "any string"
             }
             summary = key.summary

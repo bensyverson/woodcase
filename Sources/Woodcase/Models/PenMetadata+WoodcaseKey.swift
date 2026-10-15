@@ -107,6 +107,12 @@ public extension PenMetadata {
         /// How far into its dash pattern a stroke starts, in points.
         case strokeDashOffset
 
+        // MARK: Editor state
+
+        /// Whether the node is locked: an editor will not select or hit it on the canvas,
+        /// only in its layer list. The format has no lock; Pen keeps the key and ignores it.
+        case locked
+
         /// Which part of Woodcase a key belongs to.
         public enum Group: String, Friendly, CaseIterable {
             /// Read by code generation and its lints.
@@ -119,6 +125,8 @@ public extension PenMetadata {
             case text
             /// A shape's stroke dash, which Pen's format cannot hold.
             case stroke
+            /// How an editor treats the node — a lock — which Pen's format cannot hold.
+            case editor
         }
 
         /// What an authored value of a key must be.
@@ -141,6 +149,8 @@ public extension PenMetadata {
             /// A stroke's dash lengths: an array of numbers, as
             /// ``PenStrokeDash/problem(in:)`` holds them.
             case dashLengths
+            /// `true` or `false`.
+            case boolean
         }
 
         /// Which part of Woodcase the key belongs to.
@@ -153,6 +163,7 @@ public extension PenMetadata {
                  .textAlignVertical: .noteTextStyle
             case .spans: .text
             case .strokeDash, .strokeDashOffset: .stroke
+            case .locked: .editor
             }
         }
 
@@ -167,7 +178,7 @@ public extension PenMetadata {
             case .props, .role, .states, .action, .scroll: "_\(rawValue)"
             case .type, .state, .author, .leaf, .stage, .tint, .copiedFrom: rawValue
             case .anchor, .replyTo, .requestedBy, .createdAt, .fontFamily, .fontSize, .fontWeight, .fontStyle, .letterSpacing,
-                 .lineHeight, .textAlign, .textAlignVertical, .spans, .strokeDash, .strokeDashOffset: nil
+                 .lineHeight, .textAlign, .textAlignVertical, .spans, .strokeDash, .strokeDashOffset, .locked: nil
             }
         }
 
@@ -186,6 +197,7 @@ public extension PenMetadata {
             case .spans: .textSpans
             case .strokeDash: .dashLengths
             case .createdAt: .utcTimestamp
+            case .locked: .boolean
             }
         }
 
@@ -208,6 +220,7 @@ public extension PenMetadata {
             case .hexColor: [PenPostIt.tintForm]
             case .textSpans: [PenTextSpans.wireForm]
             case .utcTimestamp: [PenComment.createdAtForm]
+            case .boolean: ["true", "false"]
             case .any, .string, .number, .dashLengths: []
             }
         }
@@ -242,6 +255,7 @@ public extension PenMetadata {
             case .spans: "A text node's styled runs, and the content they were made for."
             case .strokeDash: "The stroke's alternating dash and gap lengths, in points; absent or empty is solid."
             case .strokeDashOffset: "How far into its dash pattern the stroke starts, in points."
+            case .locked: "Whether an editor keeps the node from being selected on the canvas; absent is unlocked."
             }
         }
 

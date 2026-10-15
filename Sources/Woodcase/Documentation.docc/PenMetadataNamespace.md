@@ -43,7 +43,7 @@ node types it again.
 
 ### The keys
 
-``PenMetadata/WoodcaseKey`` lists every key, in five groups
+``PenMetadata/WoodcaseKey`` lists every key, in six groups
 (``PenMetadata/WoodcaseKey/Group``):
 
 | Group | Keys | Read by |
@@ -53,6 +53,7 @@ node types it again.
 | a note's text style | `fontFamily`, `fontSize`, `fontWeight`, `fontStyle`, `letterSpacing`, `lineHeight`, `textAlign`, `textAlignVertical` | the note's look; Pen strips a note's own text style on load, so it lives here |
 | a text's rich text | `spans` | ``PenMetadata/textSpans`` and ``PenNode/appliedRuns``: the layout, the renderer and the `spans-stale` lint; see <doc:PenRichText> |
 | a stroke's dash | `strokeDash`, `strokeDashOffset` | ``PenNode/strokeDash`` (``PenStrokeDash``): every renderer and emitter, the planner and the `stroke-dash-ignored` lint; an inspector reads them as fields through ``PenSchema/woodcaseFields(for:)``; see <doc:PenRendering>, *Dashed strokes* |
+| editor state | `locked` | an editor: a locked node is not selected or hit on the canvas, only in its layer list (Penumbra spec §14, the integrator's ruling of 2026-10-15); an inspector reads it as a field through ``PenSchema/woodcaseFields(for:)``. The format has no lock, and Pen keeps the key and ignores it |
 
 ### One accessor
 

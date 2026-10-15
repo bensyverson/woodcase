@@ -74,6 +74,7 @@ struct PenStrokeDashTests {
         #expect(offset.constraint?.unit == .points)
         #expect(offset.key.written == "metadata.woodcase.strokeDashOffset")
         #expect(PenSchema.woodcaseFields(for: type).map(\.path) == [
+            PenMetadata.WoodcaseKey.locked.path,
             PenMetadata.WoodcaseKey.strokeDash.path, PenMetadata.WoodcaseKey.strokeDashOffset.path,
         ])
     }
@@ -81,7 +82,7 @@ struct PenStrokeDashTests {
     @Test("A node with no stroke of its own takes no dash field", arguments: [PenNode.NodeType.text, .note, .group, .icon])
     func noSchemaFieldWithoutStroke(type: PenNode.NodeType) {
         #expect(PenSchema.field(PenMetadata.WoodcaseKey.strokeDash.path, for: type) == nil)
-        #expect(PenSchema.woodcaseFields(for: type).isEmpty)
+        #expect(PenSchema.woodcaseFields(for: type).map(\.path) == [PenMetadata.WoodcaseKey.locked.path])
     }
 
     @Test("The schema's defaults draw as unset: an empty dash and a 0 offset are solid")

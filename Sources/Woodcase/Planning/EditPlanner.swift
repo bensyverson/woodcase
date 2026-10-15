@@ -42,6 +42,10 @@ import Foundation
 /// ### Planning
 /// - ``plan(_:at:in:)-(_,NodeAddress,_)``
 /// - ``plan(_:at:in:)-(_,ResolvedNodeAddress,_)``
+///
+/// ### Restructuring
+/// - ``planGroup(nodeIDs:kind:in:layout:)``
+/// - ``planUngroup(groupID:in:layout:)``
 public enum EditPlanner {
     /// Plans an intent against the node an address names.
     ///

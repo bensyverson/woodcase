@@ -88,6 +88,63 @@ A value that is legal on its own but wrong beside another — `fill_container` i
 `fit_content` parent, a per-side stroke on a shape — is not refused. `woodcase lint`
 reports it, and a write rehearsed with `--dry-run` lists the findings it would introduce.
 
+### Group, Frame Selection and Ungroup
+
+Three structural commands keep their geometry here, so an editor, the CLI and an agent
+wrap and unwrap nodes the same way (Penumbra's interaction spec §14, the integrator's
+ruling of 2026-10-15, which follows Figma). Each returns plain operations to submit as one
+edit, and each reads the canvas from a ``PenLayoutState`` of the document as it stands:
+
+```swift
+let plan = try EditPlanner.planGroup(nodeIDs: ["a", "b"], kind: .group, in: document, layout: layout)
+try session.submit(.local(LocalEdit(operations: plan.operations)))   // then select plan.wrapperID
+
+let operations = try EditPlanner.planUngroup(groupID: plan.wrapperID, in: document, layout: layout)
+```
+
+- ``EditPlanner/planGroup(nodeIDs:kind:in:layout:)`` wraps the top-most members (a member
+  inside another is dropped, not refused) in a group or a free frame (``WrapKind``). The
+  wrapper goes into the parent of the front-most member — the last in document order — at
+  that member's index; members from other parents move in, in document order. In a stack
+  the wrapper takes that member's place in the flow, and the members become its free
+  children where they were drawn.
+- ``EditPlanner/planUngroup(groupID:in:layout:)`` moves a group's or a frame's children to
+  its parent at its index, in their order, and removes it. In a stack they join the flow.
+
+**Nothing moves on the canvas.** A node placed by its own `x`/`y` is drawn by
+`translate(x, y) · turn · flip` about its anchor in its parent's own coordinates, so each
+moved node's new local map is its new parent's canvas map inverted, after its old canvas
+map; that map is read back as an anchor, a turn and flips. Pen has no scale, so the
+reading always exists. A turn or flip changes only when the new parent's chain turns or
+flips differently from the old one; flips follow the chain's parity (a child of a
+`flipY` group keeps `flipY` when ungrouped, with the group's turn added to its own). A
+`fill_container` size is frozen at the size it was drawn at, because it means something
+else in another parent.
+
+**The wrapper is unturned in its parent.** It spans the union of its members' canvas
+quads, measured in its parent's own coordinates: a group's box is that union, and a frame
+is placed and sized to it with `layout: none`, no fill and no clip, so wrapping draws
+nothing new. Under a turned parent the union is the parent's axis-aligned box of the turned
+members — turning the wrapper to fit one member would turn the others with it.
+
+Two limits, both the flow's rather than the planner's: grouping in a stack keeps every
+member where it was only when the members sit together in the flow, since the wrapper
+takes one slot; and an ungroup into a stack places the children by the flow, which keeps
+them where they were only when they sat as the flow would put them. A hidden child of a
+stack has no place of its own, so it keeps what it stored.
+
+| Code | When |
+|---|---|
+| ``EditRefusal/Code/noNodes`` | the list is empty |
+| ``EditRefusal/Code/insideInstance`` | a member, or the group, is inside a component instance or a slot's content |
+| ``EditRefusal/Code/notAGroup`` | an ungroup aimed at a node that is neither a group nor a frame |
+| ``EditRefusal/Code/addressNotFound`` | an id names no node |
+| ``EditRefusal/Code/documentRefused`` | a member moving in would make a component contain itself (error code `wouldCloseComponentLoop`), or the frame ungrouped is a component with instances |
+
+Lock has no planner of its own: it is a write of `metadata.woodcase.locked`
+(``PenMetadata/WoodcaseKey/locked``), planned as any other set; see
+<doc:PenMetadataNamespace>.
+
 ### Previewing a plan
 
 An editor shows a gesture in progress (a scrubbed value, a dragged gradient stop, a
@@ -114,6 +171,10 @@ let drawn = await document.materializeSnapshot(overlaying: preview)
 - ``EditPlanner``
 - ``EditIntent``
 - ``EditPlan``
+- ``EditPlanner/planGroup(nodeIDs:kind:in:layout:)``
+- ``EditPlanner/planUngroup(groupID:in:layout:)``
+- ``WrapKind``
+- ``WrapPlan``
 
 ### Previewing
 
