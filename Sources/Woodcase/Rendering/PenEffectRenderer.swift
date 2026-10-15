@@ -52,7 +52,7 @@ enum PenEffectRenderer {
             // inside the clip.
             let shift = abs(clipBox.maxX - bounds.minX) + clipBox.width + bounds.width + 4 * blur + 64
             let travel = CGSize(width: shift, height: 0).applying(context.ctm)
-            let cast = offset(of: shadow, scale: scale)
+            let cast = offset(of: shadow, in: context)
 
             context.saveGState()
             if let blendMode = shadow.blendMode {
@@ -100,7 +100,7 @@ enum PenEffectRenderer {
         guard shadow.enabled?.literalValue != false else { return }
 
         let blur = CGFloat(shadow.blur?.literalValue ?? 0)
-        let pointOffset = offset(of: shadow, scale: 1)
+        let pointOffset = pointOffset(of: shadow)
         let margin = blur + max(abs(pointOffset.width), abs(pointOffset.height)) + 100
         let outerRect = path.boundingBox.insetBy(dx: -margin, dy: -margin)
         let scale = deviceScale(of: context)
@@ -111,7 +111,7 @@ enum PenEffectRenderer {
         }
         context.addPath(path)
         context.clip(using: fillRule)
-        context.setShadow(offset: offset(of: shadow, scale: scale), blur: blur * scale, color: color(of: shadow))
+        context.setShadow(offset: offset(of: shadow, in: context), blur: blur * scale, color: color(of: shadow))
 
         let invertedPath = CGMutablePath()
         invertedPath.addRect(outerRect)
@@ -145,7 +145,7 @@ enum PenEffectRenderer {
         guard shadow.enabled?.literalValue != false else { return }
 
         let blur = CGFloat(shadow.blur?.literalValue ?? 0)
-        let pointOffset = offset(of: shadow, scale: 1)
+        let pointOffset = pointOffset(of: shadow)
         let margin = 2 * blur + max(abs(pointOffset.width), abs(pointOffset.height)) + 100
         let outerRect = bounds.insetBy(dx: -margin, dy: -margin)
         let scale = deviceScale(of: context)
@@ -157,7 +157,7 @@ enum PenEffectRenderer {
         context.beginTransparencyLayer(auxiliaryInfo: nil)
 
         context.saveGState()
-        context.setShadow(offset: offset(of: shadow, scale: scale), blur: blur * scale, color: color(of: shadow))
+        context.setShadow(offset: offset(of: shadow, in: context), blur: blur * scale, color: color(of: shadow))
         context.beginTransparencyLayer(auxiliaryInfo: nil)
         context.setFillColor(PenShadowSilhouette.ink)
         context.fill(outerRect)
@@ -182,13 +182,20 @@ enum PenEffectRenderer {
         shadow.color?.literalValue.flatMap { PenColorParser.parse($0) } ?? defaultShadowColor
     }
 
-    /// The shadow's offset in CoreGraphics' shadow space: device pixels, y up.
+    /// The shadow's offset in the node's own space, in points, y down.
+    private static func pointOffset(of shadow: PenEffect.PenShadowEffect) -> CGSize {
+        CGSize(width: shadow.offset?.x.literalValue ?? 0, height: shadow.offset?.y.literalValue ?? 0)
+    }
+
+    /// The shadow's offset in CoreGraphics' shadow space — the context's base space, device
+    /// pixels with y up in a bitmap — carried there through the CTM.
     ///
-    /// A shadow offset does not follow the CTM, so the point offset is scaled to pixels and
-    /// its y negated for the renderer's y-down space.
-    private static func offset(of shadow: PenEffect.PenShadowEffect, scale: CGFloat) -> CGSize {
-        let x = CGFloat(shadow.offset?.x.literalValue ?? 0)
-        let y = CGFloat(shadow.offset?.y.literalValue ?? 0)
-        return CGSize(width: x * scale, height: -y * scale)
+    /// CoreGraphics casts a shadow in base space, untouched by the CTM, but Pen turns and
+    /// flips a node's shadows with it (a `0, 24` shadow on a node turned 90° falls on its
+    /// right edge), its ancestors' turns included. So the offset goes through the CTM's
+    /// linear part — its turn, flips and scale, and the renderer's own y-down flip — not
+    /// just its scale.
+    private static func offset(of shadow: PenEffect.PenShadowEffect, in context: CGContext) -> CGSize {
+        pointOffset(of: shadow).applying(context.ctm)
     }
 }

@@ -66,9 +66,10 @@ never re-derived from SVG's own primitives.
 | Icon | its glyph's outline, as a `<path>` |
 | Instance | its expanded subtree (expand the document first) |
 
-A shadow's offset is carried into the node's own coordinates through the inverse of its
-placement, so a turned card's shadow still falls down and right on the screen, as Pen and
-the CG renderer cast it.
+A shadow's offset is written as authored, in the node's own coordinates, so it turns and
+flips with the node and its ancestors, as Pen and the CG renderer cast it. (Before leaf
+`u7pRBs` it was carried back through the inverse of the placement to stay on the screen's
+axes; that matched the CG renderer's old screen-fixed shadows, and was wrong for Pen.)
 
 ### Text
 

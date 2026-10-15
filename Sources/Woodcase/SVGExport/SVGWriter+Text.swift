@@ -21,7 +21,6 @@ extension SVGWriter {
     func text(
         _ node: PenNode,
         box: PenRect,
-        canvas: PenLayoutEngine.PlaneTransform,
         effects: Effects
     ) -> [SVGElement] {
         guard case let .text(data) = node.kind else { return [] }
@@ -37,7 +36,7 @@ extension SVGWriter {
         let region = (layout.inkBounds ?? .null).union(box.cgRect)
         let ink = shape.element(fill: "#000000")
 
-        var elements = outerShadows(effects.outerShadows, silhouette: ink, region: region, canvas: canvas)
+        var elements = outerShadows(effects.outerShadows, silhouette: ink, region: region)
         switch paint {
         case .nothing:
             elements.append(shape.element(fill: "none"))
@@ -46,7 +45,7 @@ extension SVGWriter {
         case .glyphOutlines:
             elements += self.paint(fills, through: shape, domain: box.cgRect)
         }
-        elements += innerShadows(effects.innerShadows, silhouette: ink, region: region, canvas: canvas)
+        elements += innerShadows(effects.innerShadows, silhouette: ink, region: region)
         return elements
     }
 

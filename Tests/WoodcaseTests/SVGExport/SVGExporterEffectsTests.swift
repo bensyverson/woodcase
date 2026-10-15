@@ -35,8 +35,8 @@
             #expect(users.count == 1, "the silhouette casts it")
         }
 
-        @Test("A shadow's offset stays on the screen's axes under a turned node, as Pen casts it")
-        func shadowOffsetIgnoresRotation() throws {
+        @Test("A shadow's offset turns with its node, as Pen casts it")
+        func shadowOffsetTurnsWithNode() throws {
             let xml = try rect(
                 effect: #"{"type": "shadow", "shadowType": "outer", "blur": 0, "offset": {"x": 10, "y": 0}}"#,
                 extra: #""rotation": 90, "#
@@ -44,10 +44,10 @@
             let offset = try #require(Fixture.elements("feOffset", in: xml).first)
             let dx = try #require(Fixture.attribute("dx", of: offset).flatMap(Double.init))
             let dy = try #require(Fixture.attribute("dy", of: offset).flatMap(Double.init))
-            // Pen turns counter-clockwise: the node's own x axis points up the screen, so a
-            // screen-right offset is along its own −y or +y, never its own x.
-            #expect(abs(dx) < 0.001)
-            #expect(abs(abs(dy) - 10) < 0.001)
+            // The filter works in the node's own coordinates, which carry its turn: the
+            // offset is written as authored and turns with the node on screen.
+            #expect(abs(dx - 10) < 0.001)
+            #expect(abs(dy) < 0.001)
         }
 
         @Test("An inner shadow is a filter on the shape, kept inside it")

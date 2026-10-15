@@ -91,7 +91,7 @@ final class SVGWriter {
     /// - Parameter root: The root and what it is seen through.
     /// - Returns: The root's element, or `nil` when it draws nothing.
     func root(_ root: PenCanvasRoot) -> SVGElement? {
-        guard var element = node(root.node, canvas: root.parentTransform) else { return nil }
+        guard var element = node(root.node) else { return nil }
         if root.parentTransform != .identity {
             element = SVGElement("g", ["transform": root.parentTransform.svgMatrix], children: [element])
         }
@@ -109,12 +109,9 @@ final class SVGWriter {
     /// placed, then its own content, then its children — inside its clip when it is a frame
     /// that clips — under its opacity, blend mode and layer blur.
     ///
-    /// - Parameters:
-    ///   - node: The node.
-    ///   - canvas: The map from the node's parent's coordinates to the canvas, which a
-    ///     shadow's offset is measured against.
+    /// - Parameter node: The node.
     /// - Returns: The node's element, or `nil` when it draws nothing at all.
-    func node(_ node: PenNode, canvas: PenLayoutEngine.PlaneTransform) -> SVGElement? {
+    func node(_ node: PenNode) -> SVGElement? {
         guard PenRenderer.isEnabled(node, overrides: nil) else { return nil }
         switch node.kind {
         case .note, .prompt, .context, .browser:
@@ -128,11 +125,10 @@ final class SVGWriter {
         }
         guard let rect = layoutRects[node.id] else { return nil }
         let placement = PenLayoutEngine.placement(of: node, rect: rect, layoutRects: layoutRects)
-        let own = canvas.concatenating(placement.transform)
         let effects = Effects(PenRenderer.effects(for: node))
 
-        let children = node.kind.inlineChildren.compactMap { self.node($0, canvas: own) }
-        var content = ownContent(node, box: placement.box, canvas: own, effects: effects)
+        let children = node.kind.inlineChildren.compactMap { self.node($0) }
+        var content = ownContent(node, box: placement.box, effects: effects)
         if !children.isEmpty {
             if case let .frame(data) = node.kind, data.clip?.literalValue == true,
                let outline = PenShapeBuilder.buildPath(for: node, rect: placement.box)
@@ -144,7 +140,7 @@ final class SVGWriter {
             }
         }
         if case .group = node.kind {
-            content += groupInnerShadows(effects.innerShadows, box: placement.box, canvas: own, of: node.kind.inlineChildren)
+            content += groupInnerShadows(effects.innerShadows, box: placement.box, of: node.kind.inlineChildren)
         }
 
         var group = SVGElement("g", ["transform": placement.transform == .identity ? nil : placement.transform.svgMatrix])

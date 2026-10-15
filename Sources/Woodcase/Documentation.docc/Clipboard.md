@@ -7,15 +7,16 @@ taking a clip into a document, reusing what the document already has.
 ## Overview
 
 An editor's Copy hands ``PenClip/extract(nodeIDs:from:)`` the ids it has selected and
-puts the clip's ``PenClip/document`` on the pasteboard; `woodcase clip` prints the same
-document. Paste is the other half: ``PenClip/plan(into:at:)`` takes a clip and a target
+puts the whole clip on the pasteboard as JSON — not only its ``PenClip/document`` — so a
+paste can tell the copied roots (``PenClip/contentIDs``) from the definitions carried for
+them, and keep each root's ``PenClip/offsets``; `woodcase clip` prints the clip's document. Paste is the other half: ``PenClip/plan(into:at:)`` takes a clip and a target
 document and returns the operations that bring it in (<doc:Clipboard#Pasting>); `woodcase paste`
 applies them to a file. The rules below are Penumbra's interaction spec §16 and its
 session 18 ruling.
 
 ```swift
 let clip = try PenClip.extract(nodeIDs: selection, from: document)
-pasteboard.setData(try PenParser.encodeForFile(clip.document), forType: penType)
+pasteboard.setData(try JSONEncoder().encode(clip), forType: clipType)
 ```
 
 ### What a clip holds

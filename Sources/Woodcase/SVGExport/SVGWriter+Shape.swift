@@ -12,37 +12,35 @@ extension SVGWriter {
     /// - Parameters:
     ///   - node: The node.
     ///   - box: Its draw rect, in its own coordinates.
-    ///   - canvas: The map from its own coordinates to the canvas.
     ///   - effects: Its enabled effects.
     /// - Returns: The elements, bottom to top.
     func ownContent(
         _ node: PenNode,
         box: PenRect,
-        canvas: PenLayoutEngine.PlaneTransform,
         effects: Effects
     ) -> [SVGElement] {
         switch node.kind {
         case let .frame(data):
-            shape(node, fills: data.fills, stroke: data, box: box, canvas: canvas, effects: effects)
+            shape(node, fills: data.fills, stroke: data, box: box, effects: effects)
         case let .rectangle(data):
-            shape(node, fills: data.fills, stroke: data, box: box, canvas: canvas, effects: effects)
+            shape(node, fills: data.fills, stroke: data, box: box, effects: effects)
         case let .ellipse(data):
-            shape(node, fills: data.fills, stroke: data, box: box, canvas: canvas, effects: effects)
+            shape(node, fills: data.fills, stroke: data, box: box, effects: effects)
         case let .polygon(data):
-            shape(node, fills: data.fills, stroke: data, box: box, canvas: canvas, effects: effects)
+            shape(node, fills: data.fills, stroke: data, box: box, effects: effects)
         case let .path(data):
-            shape(node, fills: data.fills, stroke: data, box: box, canvas: canvas, effects: effects)
+            shape(node, fills: data.fills, stroke: data, box: box, effects: effects)
         case let .line(data):
             line(node, data: data, box: box)
         case .text:
-            text(node, box: box, canvas: canvas, effects: effects)
+            text(node, box: box, effects: effects)
         case let .icon(data):
-            icon(node, data: data, box: box, canvas: canvas, effects: effects)
+            icon(node, data: data, box: box, effects: effects)
         case .group:
             // A group paints nothing but its children; they cast its shadows.
             outerShadows(
                 effects.outerShadows, silhouette: groupSilhouette(of: node.kind.inlineChildren),
-                region: groupRegion(node, box: box), canvas: canvas
+                region: groupRegion(node, box: box)
             )
         default:
             []
@@ -55,7 +53,6 @@ extension SVGWriter {
         fills: PenFills?,
         stroke: any PenStrokable,
         box: PenRect,
-        canvas: PenLayoutEngine.PlaneTransform,
         effects: Effects
     ) -> [SVGElement] {
         guard let outline = PenShapeBuilder.buildPath(for: node, rect: box) else { return [] }
@@ -63,11 +60,11 @@ extension SVGWriter {
         var elements: [SVGElement] = []
         if !effects.outerShadows.isEmpty, let silhouette = PenShadowSilhouette.path(for: node, rect: box) {
             let ink = SVGShape(path: silhouette.path, rule: silhouette.rule).element(fill: "#000000")
-            elements += outerShadows(effects.outerShadows, silhouette: ink, region: silhouette.path.boundingBoxOfPath, canvas: canvas)
+            elements += outerShadows(effects.outerShadows, silhouette: ink, region: silhouette.path.boundingBoxOfPath)
         }
         let shape = SVGShape(path: outline, rule: rule)
         elements += paint(fills, through: shape, domain: box.cgRect)
-        elements += innerShadows(effects.innerShadows, silhouette: shape.element(fill: "#000000"), region: outline.boundingBoxOfPath, canvas: canvas)
+        elements += innerShadows(effects.innerShadows, silhouette: shape.element(fill: "#000000"), region: outline.boundingBoxOfPath)
         elements += self.stroke(
             stroke.drawn(on: node), path: outline, box: box,
             roundedBox: PenStrokeRenderer.roundedBox(for: node, rect: box)
@@ -88,7 +85,6 @@ extension SVGWriter {
         _: PenNode,
         data: PenNode.IconData,
         box: PenRect,
-        canvas: PenLayoutEngine.PlaneTransform,
         effects: Effects
     ) -> [SVGElement] {
         let size = CGSize(width: box.width, height: box.height)
@@ -99,9 +95,9 @@ extension SVGWriter {
         guard !outline.isEmpty else { return [] }
         let shape = SVGShape(path: outline, rule: .winding)
         let ink = shape.element(fill: "#000000")
-        return outerShadows(effects.outerShadows, silhouette: ink, region: outline.boundingBoxOfPath, canvas: canvas)
+        return outerShadows(effects.outerShadows, silhouette: ink, region: outline.boundingBoxOfPath)
             + paint(data.fills, through: shape, domain: box.cgRect)
-            + innerShadows(effects.innerShadows, silhouette: ink, region: outline.boundingBoxOfPath, canvas: canvas)
+            + innerShadows(effects.innerShadows, silhouette: ink, region: outline.boundingBoxOfPath)
     }
 
     /// What a group may paint, in its own coordinates: the region its shadows' filters
