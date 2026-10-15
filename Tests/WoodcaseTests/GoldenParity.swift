@@ -7,7 +7,7 @@
 
 import Foundation
 import Testing
-import Woodcase
+@testable import Woodcase
 
 /// Compares a 2.9 fixture with Pen.app 1.2.7's own 2.17 re-save of it.
 ///
@@ -38,6 +38,8 @@ import Woodcase
 ///   has no field for either, so they are kept as ``PenNode/extras`` and written back.
 /// - Pen flattens a `ref` whose target is not `reusable` into a full copy of the
 ///   target carrying the ref's id.
+/// - Pen 1.2.7 discarded a legacy stroke `dashPattern`; Woodcase keeps it as
+///   `metadata.woodcase.strokeDash` (leaf ajB4uc), so that key is dropped before comparing.
 ///
 /// Anything else that differs is a migration bug.
 enum GoldenParity {
@@ -264,6 +266,10 @@ enum GoldenParity {
         }
 
         var result = node
+        if var metadata = node.common.metadata, metadata[woodcase: .strokeDash] != nil {
+            metadata[woodcase: .strokeDash] = nil
+            result.common.metadata = metadata.typedForWriting()
+        }
         result.common.x = node.common.x ?? .literal(0)
         result.common.y = node.common.y ?? .literal(0)
 

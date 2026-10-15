@@ -58,9 +58,10 @@ extension ReactEmitter {
         }
 
         let hasChildren = !(data.children ?? []).isEmpty
-        let overlay = strokeOverlay(
-            data, shape: .box(data.cornerRadius), beneathChildren: hasChildren,
-            box: FillBox(width: data.width, height: data.height), ctx: ctx
+        let strokeBox = FillBox(width: data.width, height: data.height)
+        let dashedOverlay = dashedStrokeOverlay(node, stroke: data, box: strokeBox, beneathChildren: hasChildren, ctx: ctx)
+        let overlay = dashedOverlay ?? strokeOverlay(
+            data, shape: .box(data.cornerRadius), beneathChildren: hasChildren, box: strokeBox, ctx: ctx
         )
         let shadowLayers = layersShadows(node)
             ? shadowLayerStyles(data.effects, borderRadius: data.cornerRadius.flatMap(emitCornerRadius), stroke: data) : nil
@@ -135,7 +136,7 @@ extension ReactEmitter {
 
         // Stroke + Effects (merged to combine boxShadow values)
         styles.append(contentsOf: emitStrokeAndEffects(
-            stroke: data, effects: data.effects,
+            stroke: data, strokeDrawnByOverlay: dashedOverlay != nil, effects: data.effects,
             showsBackdrop: data.fills?.hasVisiblePaint == true, layered: shadowLayers != nil
         ))
         let layersOverFill = liftingInsetShadows(&styles, over: fill.layers, beneathChildren: hasChildren)

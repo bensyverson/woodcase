@@ -68,6 +68,7 @@ extension ReactEmitter {
         box: FillBox,
         cornerRadius: PenCornerRadius?,
         stroke: (any PenStrokable)?,
+        strokeDrawnByOverlay: Bool = false,
         effects: PenEffects?,
         showsBackdrop: Bool? = nil,
         layered: Bool = false,
@@ -86,7 +87,7 @@ extension ReactEmitter {
         }
 
         styles.append(contentsOf: emitStrokeAndEffects(
-            stroke: stroke, effects: effects,
+            stroke: stroke, strokeDrawnByOverlay: strokeDrawnByOverlay, effects: effects,
             showsBackdrop: showsBackdrop ?? (fills?.hasVisiblePaint == true), layered: layered
         ))
 

@@ -33,8 +33,11 @@ import Foundation
 /// - **A stroke with no `fill` is dropped entirely** — width, join and all. Such a stroke has
 ///   no paint and draws nothing, and that editor discards it rather than carrying a widow width.
 ///
-/// `dashPattern` and `miterAngle` left the format with no replacement; each is discarded with
-/// a diagnostic naming the node it came from.
+/// `dashPattern` left the format with no replacement in it, and moves into the node's
+/// `metadata.woodcase.strokeDash` (``PenStrokeDash``), which every Woodcase target draws and
+/// Pen keeps — unless the stroke goes (no `fill`), or the dash is one no target draws (a
+/// negative length, all zeros) or sits on per-side widths, when it is discarded with a
+/// diagnostic naming the node. `miterAngle` is discarded the same way.
 public struct PenStrokeMigrationRule: PenMigrationRule {
     /// Creates the rule.
     public init() {}
@@ -49,12 +52,14 @@ public struct PenStrokeMigrationRule: PenMigrationRule {
     public func apply(toNode node: inout [String: AnyCodable], id: String?, diagnostics: PenDiagnosticCollector?) {
         guard case let .dictionary(stroke)? = node["stroke"] else { return }
 
-        report(discarded: "dashPattern", from: stroke, id: id, to: diagnostics)
         report(discarded: "miterAngle", from: stroke, id: id, to: diagnostics)
 
         guard let paint = stroke["fill"] else {
             node["stroke"] = nil
             return
+        }
+        if let dash = stroke["dashPattern"] {
+            keep(dash, perSide: isPerSide(stroke["thickness"]), in: &node, id: id, diagnostics: diagnostics)
         }
 
         node["stroke"] = paint
@@ -85,6 +90,41 @@ public struct PenStrokeMigrationRule: PenMigrationRule {
     /// Drops a value that equals the .pen default, the way the format's own editor does on save.
     private func nonDefault(_ value: AnyCodable?, default defaultValue: String) -> AnyCodable? {
         value == .string(defaultValue) ? nil : value
+    }
+
+    // MARK: - Dash
+
+    /// Moves a legacy dash into `metadata.woodcase.strokeDash`, beside whatever metadata the
+    /// node already has, or reports it discarded when no target could draw it.
+    private func keep(
+        _ dash: AnyCodable,
+        perSide: Bool,
+        in node: inout [String: AnyCodable],
+        id: String?,
+        diagnostics: PenDiagnosticCollector?
+    ) {
+        if let problem = PenStrokeDash.problem(in: dash) {
+            diagnostics?.warn("Discarded stroke dashPattern: it \(problem.reason)", stage: .migration, nodeID: id)
+            return
+        }
+        if perSide {
+            diagnostics?.warn(
+                "Discarded stroke dashPattern: a dash cannot flow round per-side stroke widths",
+                stage: .migration, nodeID: id
+            )
+            return
+        }
+        guard PenStrokeDash.lengths(in: dash)?.isEmpty == false else { return }
+        let existing: [String: AnyCodable] = if case let .dictionary(object)? = node["metadata"] { object } else { [:] }
+        var metadata = PenMetadata(object: existing)
+        metadata[woodcase: .strokeDash] = dash
+        node["metadata"] = .dictionary(metadata.object)
+    }
+
+    /// Whether a legacy `thickness` writes a width per side.
+    private func isPerSide(_ thickness: AnyCodable?) -> Bool {
+        if case .dictionary? = thickness { return true }
+        return false
     }
 
     // MARK: - Diagnostics

@@ -149,7 +149,7 @@ extension SwiftUINodeEmitter {
         let outset = drawn.flatMap { FlatOutset(width: width, height: height, stroke: $0) }
         if let drawn {
             let stroked = outset.map { shape.outset($0) } ?? shape
-            if var strokeView = strokeView(drawn, shape: stroked, box: box, unemitted: &unemitted) {
+            if var strokeView = strokeView(drawn, shape: stroked, box: box, dash: node.strokeDash, unemitted: &unemitted) {
                 if let outset {
                     strokeView = strokeView.modified(outset.padding)
                 }

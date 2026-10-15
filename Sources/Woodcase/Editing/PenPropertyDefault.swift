@@ -28,6 +28,9 @@ public enum PenPropertyDefault: Friendly {
     /// A boolean.
     case boolean(Bool)
 
+    /// A list of numbers, such as a solid stroke's empty dash.
+    case numbers([Double])
+
     /// A string as the file writes it: one of the property's spellings, a family name,
     /// a weight.
     case string(String)
@@ -58,6 +61,7 @@ public enum PenPropertyDefault: Friendly {
     public var summary: String {
         switch self {
         case let .number(number): PenValueConstraint.spell(number)
+        case let .numbers(numbers): "[\(numbers.map(PenValueConstraint.spell).joined(separator: ", "))]"
         case let .boolean(flag): String(flag)
         case let .string(text): "\"\(text)\""
         case let .derived(derivation): derivation.phrase
@@ -68,6 +72,7 @@ public enum PenPropertyDefault: Friendly {
     public var value: AnyCodable? {
         switch self {
         case let .number(number): number.rounded() == number && abs(number) < 1e15 ? .int(Int(number)) : .double(number)
+        case let .numbers(numbers): .array(numbers.map { PenPropertyDefault.number($0).value ?? .double($0) })
         case let .boolean(flag): .bool(flag)
         case let .string(text): .string(text)
         case .derived: nil

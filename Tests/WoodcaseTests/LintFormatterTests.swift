@@ -96,6 +96,7 @@ struct LintFormatterTests {
             "pipeline",
             "shader-not-drawn",
             "spans-stale",
+            "stroke-dash-ignored",
             "text-overflow",
             "text-style-stripped",
             "text-without-fill",

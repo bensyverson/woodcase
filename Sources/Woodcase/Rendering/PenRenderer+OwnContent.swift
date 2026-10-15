@@ -67,7 +67,7 @@ extension PenRenderer {
             let stroke = data.drawn(on: node)
             PenStrokeRenderer.renderStroke(
                 stroke, path: path, rect: lineBand(rect, strokeWidth: stroke.uniformStrokeWidth ?? 1),
-                in: context, imageProvider: imageProvider
+                dash: node.strokeDash, in: context, imageProvider: imageProvider
             )
         case let .text(data):
             PenTextRenderer.renderText(
@@ -111,7 +111,7 @@ extension PenRenderer {
         PenStrokeRenderer.renderStroke(
             stroke.drawn(on: node), path: path, rect: own.drawRect,
             roundedBox: PenStrokeRenderer.roundedBox(for: node, rect: own.drawRect),
-            in: context, imageProvider: imageProvider
+            dash: node.strokeDash, in: context, imageProvider: imageProvider
         )
     }
 

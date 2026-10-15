@@ -23,6 +23,9 @@ enum PenStrokeRenderer {
     ///     ``roundedBox(for:rect:)``); a per-side stroke is laid out on it. Any other shape
     ///     is handed its stroke as ``PenStrokable/drawn(on:)`` gives it, uniform; a per-side
     ///     width without a box draws nothing.
+    ///   - dash: The node's dash (``PenNode/strokeDash``), or `nil` for a solid stroke. It
+    ///     follows `path` from its start; a per-side stroke and a zero-area box's band,
+    ///     which are not one outline, are drawn solid.
     ///   - context: The context to draw into.
     ///   - imageProvider: Resolves an image paint's URL to an image.
     static func renderStroke(
@@ -30,6 +33,7 @@ enum PenStrokeRenderer {
         path: CGPath,
         rect: PenRect,
         roundedBox: RoundedBox? = nil,
+        dash: PenStrokeDash? = nil,
         in context: CGContext,
         imageProvider: PenRenderer.ImageProvider = { _ in nil }
     ) {
@@ -54,7 +58,8 @@ enum PenStrokeRenderer {
             width: width,
             alignment: node.strokeAlignment ?? .center,
             penJoin: node.strokeLinejoin,
-            penCap: node.strokeLinecap
+            penCap: node.strokeLinecap,
+            dash: dash
         )
         if let band = zeroAreaBand(width: width, alignment: style.alignment, box: roundedBox) {
             paint(band, .evenOdd)
@@ -75,6 +80,9 @@ enum PenStrokeRenderer {
         context.setStrokeColor(color)
         context.setLineJoin(style.join)
         context.setLineCap(style.cap)
+        if let dash = style.dash {
+            context.setLineDash(phase: dash.phase, lengths: dash.lengths.map { CGFloat($0) })
+        }
         clipToAlignment(style, path: path, outerBounds: style.solidOuterBounds(of: path), in: context)
         context.setLineWidth(style.outlineWidth)
         context.addPath(path)
@@ -82,15 +90,16 @@ enum PenStrokeRenderer {
         context.restoreGState()
     }
 
-    /// Any other paint fills the stroke's outline — the stroked path, doubled in width and
-    /// cut to the shape or its complement for inner and outer strokes.
+    /// Any other paint fills the stroke's outline — the stroked path, dashed first when the
+    /// stroke is, doubled in width and cut to the shape or its complement for inner and
+    /// outer strokes.
     private static func renderPainted(
         paint: (CGPath, CGPathFillRule) -> Void,
         path: CGPath,
         style: Style,
         in context: CGContext
     ) {
-        let outline = path.copy(
+        let outline = style.dashed(path).copy(
             strokingWithWidth: style.outlineWidth,
             lineCap: style.cap,
             lineJoin: style.join,

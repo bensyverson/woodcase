@@ -246,9 +246,11 @@ one line each, with what would revive it.
 - **A parameter language beyond `_props`.** The format carries nothing for it; `_props` in
   `common.metadata` is the declaration and now serves the editing verbs too. Un-park if Pen
   adds component properties to the format.
-- **Format asks: dashed strokes, rich text runs, document-level style defaults.** `dashPattern`
-  was deliberately dropped in the 2.17 migration; the dotted-rule pain was a symptom of the
-  font bug. Un-park only if Pen re-adds them.
+- **Format asks: document-level style defaults.** Un-park if Pen adds a document-level slot,
+  or if one can live in `metadata.woodcase` (Penumbra's
+  `project/2026-10-14-feature-enhancements-plan.md`, P12). Dashed strokes left this list on
+  2026-10-15: they live in `metadata.woodcase.strokeDash`, which Pen keeps (leaf `ajB4uc`);
+  rich text runs left it as `metadata.woodcase.spans`.
 - **Exempting an instance from `duplicate-name` when named as its definition.** Moot under the
   sibling scope.
 - **A `shot` default-scale change for tall boards.** `pixels=` is printed on every run and

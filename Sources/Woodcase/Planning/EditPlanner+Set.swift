@@ -55,6 +55,7 @@ extension EditPlanner {
         // Before the convention's own check, so a number out of range is refused as
         // outOfRange, as the `kind.` key it stands in for would be, not as a bad form.
         try checkMetadataValues(props, on: node, address: written)
+        try checkStrokeDash(props, on: node, address: written)
         try NodePropertyCodec.checkAuthored(props, on: node)
         try checkValues(
             props.keys.sorted().compactMap { path in

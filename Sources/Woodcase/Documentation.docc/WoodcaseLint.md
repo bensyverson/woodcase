@@ -86,6 +86,7 @@ no document, so accepting any of those would be accepting an argument it ignores
 | `metadata-old-style` | notice | A node keeps Woodcase metadata under its spelling from before `metadata.woodcase` (`_props`, a post-it's bare `state`); still read, and `woodcase migrate` moves it in |
 | `note-state` | notice | A plain note — not a comment, not a prompt — carries a `state`, in either spelling. Only comments are open or resolved, so it draws nothing; remove it, or make the note a comment |
 | `spans-stale` | warning | A text whose `metadata.woodcase.spans` were made for other words than its content, so its styling is ignored and it draws plain |
+| `stroke-dash-ignored` | warning | A `metadata.woodcase.strokeDash` every target draws solid: on a per-side `strokeWidth`, or one that is not an array of at most 16 non-negative lengths, not all zero |
 
 The two sizing checks fire only where the engine has *nothing to fall back on*:
 `fill_container(200)` under a `fit_content` parent, and `fit_content(200)` with no
@@ -489,6 +490,17 @@ design). A `set` that makes a text's spans stale prints this same line on standa
 
 ```text
 warning spans-stale  Board/Stale (Stl01)  has 1 styled run made for "Make this bold", not its content, so it draws plain. Restate `common.metadata.woodcase.spans` for the new words, or remove it with `woodcase set <file> Stl01 common.metadata.woodcase.spans=null`.
+```
+
+`stroke-dash-ignored` is a warning, one finding per node with a stroke paint whose
+`metadata.woodcase.strokeDash` no target draws (``PenNode/strokeDash``): on a per-side
+`strokeWidth`, since dashes flow round one outline and per-side bands are not one, or a
+dash that is not at most 16 non-negative lengths, not all zero. The stroke draws solid
+on every target. An edit refuses both (<doc:EditPlanning>); a file written by hand or by
+another tool can still hold one.
+
+```text
+warning stroke-dash-ignored  Board/Card (Rct01)  has a dash on a per-side strokeWidth, so its stroke draws solid: dashes flow round the whole outline, which per-side bands are not. Write one strokeWidth, or remove common.metadata.woodcase.strokeDash.
 ```
 
 ## What `generate react` will choke on

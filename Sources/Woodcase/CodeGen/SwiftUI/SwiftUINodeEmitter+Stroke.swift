@@ -19,9 +19,11 @@ extension SwiftUINodeEmitter {
     /// filled or clipped to like a node's outline. A sideless shape is handed its stroke as
     /// ``PenStrokable/drawn(on:)`` gives it: Pen strokes a per-side width there at the top
     /// width alone, so it arrives uniform; a per-side width on a shape without corners
-    /// draws nothing.
+    /// draws nothing. A dash (``PenNode/strokeDash``) goes in the uniform stroke's
+    /// `StrokeStyle` — SwiftUI's own shapes start their outlines where they choose, so its
+    /// dashes need not start where the renderer's do; a per-side band takes none.
     func strokeView(
-        _ stroke: any PenStrokable, shape: Outline, box: FillBox, unemitted: inout [String]
+        _ stroke: any PenStrokable, shape: Outline, box: FillBox, dash: PenStrokeDash? = nil, unemitted: inout [String]
     ) -> SwiftUIViewCode? {
         guard PaintRoute(stroke.stroke) != .none else { return nil }
         let region: Outline
@@ -36,16 +38,17 @@ extension SwiftUINodeEmitter {
             return painted(region, layers: layers, reach: widest * Self.outsideShare(alignment))
         case let .uniform(value):
             guard let width = number(value, unemitted: &unemitted) else { return nil }
-            return uniformStroke(stroke, width: width, shape: shape, box: box, unemitted: &unemitted)
+            return uniformStroke(stroke, width: width, shape: shape, box: box, dash: dash, unemitted: &unemitted)
         case nil:
-            return uniformStroke(stroke, width: SwiftUINumber(1), shape: shape, box: box, unemitted: &unemitted)
+            return uniformStroke(stroke, width: SwiftUINumber(1), shape: shape, box: box, dash: dash, unemitted: &unemitted)
         }
     }
 
     /// A stroke of one width all round; a width read through the theme reaches as far as
     /// its widest value.
     private func uniformStroke(
-        _ stroke: any PenStrokable, width number: SwiftUINumber, shape: Outline, box: FillBox, unemitted: inout [String]
+        _ stroke: any PenStrokable, width number: SwiftUINumber, shape: Outline, box: FillBox, dash: PenStrokeDash?,
+        unemitted: inout [String]
     ) -> SwiftUIViewCode? {
         guard number.largest > 0 else { return nil }
         let width = number.largest
@@ -59,7 +62,7 @@ extension SwiftUINodeEmitter {
             let region = sideRegion(widths, alignment: alignment, shape: shape, corners: corners)
             return painted(region, layers: layers, reach: width * Self.outsideShare(alignment))
         }
-        let style = strokeStyle(number.code, cap: stroke.strokeLinecap, join: stroke.strokeLinejoin)
+        let style = strokeStyle(number.code, cap: stroke.strokeLinecap, join: stroke.strokeLinejoin, dash: dash)
         if layers.count == 1, let paint = layers[0].style {
             if alignment == .center {
                 return SwiftUIViewCode(head: shape.view).modified(".stroke(\(paint), \(style))")
@@ -101,14 +104,21 @@ extension SwiftUINodeEmitter {
     }
 
     /// The width and style arguments: `lineWidth: 2`, or a `StrokeStyle` naming the cap and
-    /// join where they are not SwiftUI's defaults, which are Pen's (butt, miter).
-    func strokeStyle(_ width: String, cap: PenStrokeCap?, join: PenStrokeJoin?) -> String {
+    /// join where they are not SwiftUI's defaults, which are Pen's (butt, miter), and the
+    /// dash and its phase when there is one.
+    func strokeStyle(_ width: String, cap: PenStrokeCap?, join: PenStrokeJoin?, dash: PenStrokeDash? = nil) -> String {
         var parts = ["lineWidth: \(width)"]
         if let cap, cap != .butt {
             parts.append("lineCap: .\(cap.rawValue)")
         }
         if let join, join != .miter {
             parts.append("lineJoin: .\(join.rawValue)")
+        }
+        if let dash {
+            parts.append("dash: [\(dash.lengths.map(SwiftUILiteral.number).joined(separator: ", "))]")
+            if dash.phase != 0 {
+                parts.append("dashPhase: \(SwiftUILiteral.number(dash.phase))")
+            }
         }
         return parts.count == 1 ? parts[0] : "style: StrokeStyle(\(parts.joined(separator: ", ")))"
     }

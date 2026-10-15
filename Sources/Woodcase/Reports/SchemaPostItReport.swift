@@ -45,6 +45,7 @@ public struct SchemaPostItReport: Friendly {
             case .number: key.constraint.flatMap { $0.limitsValues ? $0.summary : nil } ?? "any number"
             case .any: "any JSON"
             case .textSpans: "an object"
+            case .dashLengths: "an array of numbers"
             case .string, .oneOf, .hexColor, .utcTimestamp: "any string"
             }
             summary = key.summary

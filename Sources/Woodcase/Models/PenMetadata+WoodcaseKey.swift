@@ -99,6 +99,14 @@ public extension PenMetadata {
         /// (``PenTextSpans``, read and written as ``PenMetadata/textSpans``).
         case spans
 
+        // MARK: A stroke's dash
+
+        /// The alternating dash and gap lengths a stroke is drawn with, in points
+        /// (``PenStrokeDash``). The format has had no dash since 2.17.
+        case strokeDash
+        /// How far into its dash pattern a stroke starts, in points.
+        case strokeDashOffset
+
         /// Which part of Woodcase a key belongs to.
         public enum Group: String, Friendly, CaseIterable {
             /// Read by code generation and its lints.
@@ -109,6 +117,8 @@ public extension PenMetadata {
             case noteTextStyle
             /// A text node's rich text, which Pen's format cannot hold.
             case text
+            /// A shape's stroke dash, which Pen's format cannot hold.
+            case stroke
         }
 
         /// What an authored value of a key must be.
@@ -128,6 +138,9 @@ public extension PenMetadata {
             case textSpans
             /// A time in UTC, to the second, as ``PenComment/date(createdAt:)`` reads it.
             case utcTimestamp
+            /// A stroke's dash lengths: an array of numbers, as
+            /// ``PenStrokeDash/problem(in:)`` holds them.
+            case dashLengths
         }
 
         /// Which part of Woodcase the key belongs to.
@@ -139,6 +152,7 @@ public extension PenMetadata {
             case .fontFamily, .fontSize, .fontWeight, .fontStyle, .letterSpacing, .lineHeight, .textAlign,
                  .textAlignVertical: .noteTextStyle
             case .spans: .text
+            case .strokeDash, .strokeDashOffset: .stroke
             }
         }
 
@@ -153,7 +167,7 @@ public extension PenMetadata {
             case .props, .role, .states, .action, .scroll: "_\(rawValue)"
             case .type, .state, .author, .leaf, .stage, .tint, .copiedFrom: rawValue
             case .anchor, .replyTo, .requestedBy, .createdAt, .fontFamily, .fontSize, .fontWeight, .fontStyle, .letterSpacing,
-                 .lineHeight, .textAlign, .textAlignVertical, .spans: nil
+                 .lineHeight, .textAlign, .textAlignVertical, .spans, .strokeDash, .strokeDashOffset: nil
             }
         }
 
@@ -168,8 +182,9 @@ public extension PenMetadata {
             case .tint: .hexColor
             case .author, .leaf, .stage, .copiedFrom, .replyTo, .requestedBy, .fontFamily, .fontWeight, .fontStyle:
                 .string
-            case .fontSize, .letterSpacing, .lineHeight: .number
+            case .fontSize, .letterSpacing, .lineHeight, .strokeDashOffset: .number
             case .spans: .textSpans
+            case .strokeDash: .dashLengths
             case .createdAt: .utcTimestamp
             }
         }
@@ -193,7 +208,7 @@ public extension PenMetadata {
             case .hexColor: [PenPostIt.tintForm]
             case .textSpans: [PenTextSpans.wireForm]
             case .utcTimestamp: [PenComment.createdAtForm]
-            case .any, .string, .number: []
+            case .any, .string, .number, .dashLengths: []
             }
         }
 
@@ -225,6 +240,8 @@ public extension PenMetadata {
             case .textAlign: "The horizontal alignment of the note's lines."
             case .textAlignVertical: "The vertical alignment of the note's text."
             case .spans: "A text node's styled runs, and the content they were made for."
+            case .strokeDash: "The stroke's alternating dash and gap lengths, in points; absent or empty is solid."
+            case .strokeDashOffset: "How far into its dash pattern the stroke starts, in points."
             }
         }
 

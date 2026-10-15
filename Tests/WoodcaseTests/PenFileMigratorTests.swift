@@ -141,11 +141,20 @@ struct PenFileMigratorTests {
 
     // MARK: - Diagnostics and errors
 
+    /// The legacy dash was the discarded data this pinned; it now moves into
+    /// `metadata.woodcase.strokeDash` (leaf ajB4uc), so a miter angle stands in for it.
     @Test("Discarded legacy data is reported through the collector")
     func discardedDataIsReported() throws {
         let diagnostics = PenDiagnosticCollector()
-        _ = try PenFileMigrator.migrate(Self.data(Self.legacyJSON), diagnostics: diagnostics)
-        #expect(diagnostics.diagnostics.contains { $0.message.contains("dashPattern") })
+        let legacy = Self.legacyJSON.replacingOccurrences(of: #""dashPattern": [4, 2]"#, with: #""miterAngle": 45"#)
+        _ = try PenFileMigrator.migrate(Self.data(legacy), diagnostics: diagnostics)
+        #expect(diagnostics.diagnostics.contains { $0.message.contains("miterAngle") })
+    }
+
+    @Test("A legacy dash is kept, in metadata.woodcase.strokeDash")
+    func legacyDashIsKept() throws {
+        let outcome = try PenFileMigrator.migrate(Self.data(Self.legacyJSON))
+        #expect(Self.text(outcome.data).contains("strokeDash"), "\(Self.text(outcome.data))")
     }
 
     @Test("Invalid JSON throws a parser error")

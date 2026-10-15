@@ -7,7 +7,7 @@
 
 import Foundation
 import Testing
-import Woodcase
+@testable import Woodcase
 
 /// Covers the 2.10 → 2.17 rewrite of the nested `stroke` object into flat keys.
 struct PenStrokeMigrationRuleTests {
@@ -122,22 +122,52 @@ struct PenStrokeMigrationRuleTests {
 
     // MARK: - Discarded properties
 
-    @Test("dashPattern is discarded with a diagnostic naming the node")
-    func dashPatternIsDiscarded() {
+    /// A 2.10 dash used to be discarded here, as 2.17 has no dash; it now moves into
+    /// `metadata.woodcase.strokeDash`, which every Woodcase target draws (leaf ajB4uc).
+    @Test("dashPattern moves into metadata.woodcase.strokeDash, beside the node's own metadata, with no diagnostic")
+    func dashPatternMovesIntoMetadata() {
+        let diagnostics = PenDiagnosticCollector()
+        var node = rectangle(id: "dashed-stroke", stroke: [
+            "fill": .string("#FF0000"),
+            "dashPattern": .array([.int(5), .int(3)]),
+        ])
+        node["metadata"] = .dictionary(["type": .string("card"), "owner": .string("ben")])
+        let migrated = migrated(node, diagnostics: diagnostics)
+        #expect(migrated["dashPattern"] == nil)
+        #expect(migrated["stroke"] == .string("#FF0000"))
+        guard case let .dictionary(metadata)? = migrated["metadata"] else {
+            Issue.record("no metadata: \(migrated)")
+            return
+        }
+        #expect(metadata["type"] == .string("card"))
+        #expect(metadata["owner"] == .string("ben"))
+        #expect(metadata["woodcase"] == .dictionary(["strokeDash": .array([.int(5), .int(3)])]))
+        #expect(!diagnostics.diagnostics.contains { $0.message.contains("dashPattern") })
+    }
+
+    @Test("A dash on a stroke with no fill goes with the stroke")
+    func dashWithoutPaintIsDropped() {
+        let node = migrated(rectangle(stroke: ["thickness": .int(2), "dashPattern": .array([.int(5), .int(3)])]))
+        #expect(node["stroke"] == nil)
+        #expect(node["metadata"] == nil)
+    }
+
+    @Test("A dash no target can draw, or on per-side widths, is discarded with a diagnostic naming the node",
+          arguments: [
+              ("thickness", AnyCodable.int(2), AnyCodable.array([.int(-5), .int(3)])),
+              ("thickness", AnyCodable.int(2), AnyCodable.array([.int(0), .int(0)])),
+              ("thickness", AnyCodable.dictionary(["top": .int(2)]), AnyCodable.array([.int(5), .int(3)])),
+          ])
+    func undrawableDashIsDiscarded(widthKey: String, width: AnyCodable, dash: AnyCodable) {
         let diagnostics = PenDiagnosticCollector()
         let node = migrated(
-            rectangle(id: "dashed-stroke", stroke: [
-                "fill": .string("#FF0000"),
-                "dashPattern": .array([.int(5), .int(3)]),
-            ]),
+            rectangle(id: "odd", stroke: ["fill": .string("#FF0000"), widthKey: width, "dashPattern": dash]),
             diagnostics: diagnostics
         )
-        #expect(node["dashPattern"] == nil)
-        #expect(node["stroke"] == .string("#FF0000"))
-
+        #expect(node["metadata"] == nil)
         let reported = diagnostics.diagnostics.filter { $0.message.contains("dashPattern") }
         #expect(reported.count == 1)
-        #expect(reported.first?.nodeID == "dashed-stroke")
+        #expect(reported.first?.nodeID == "odd")
         #expect(reported.first?.stage == .migration)
     }
 
@@ -210,6 +240,7 @@ struct PenStrokeMigrationRuleTests {
         #expect(data.strokeWidth == .uniform(.literal(2)))
         #expect(data.strokeLinecap == .square)
         #expect(data.strokeAlignment == .outer)
-        #expect(diagnostics.diagnostics.contains { $0.message.contains("dashPattern") && $0.nodeID == "r" })
+        #expect(document.children.first?.strokeDash == PenStrokeDash(lengths: [5, 3], phase: 0))
+        #expect(!diagnostics.diagnostics.contains { $0.message.contains("dashPattern") })
     }
 }

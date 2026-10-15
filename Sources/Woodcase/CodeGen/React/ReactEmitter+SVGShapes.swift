@@ -65,7 +65,7 @@ extension ReactEmitter {
         emitSVGShape(
             SVGStrokedShape(
                 element: "polygon", geometry: "points=\"\(pointsStr)\"", fill: svgFillAttributes(data.fills),
-                fillRule: nil, domain: .init(x: 0, y: 0, width: w, height: h), nodeID: node.id
+                fillRule: nil, domain: .init(x: 0, y: 0, width: w, height: h), nodeID: node.id, dash: node.strokeDash
             ),
             fills: data.fills, stroke: data, innerShadows: NodeEffects(data.effects).innerShadows, indent: indent + 2, ctx: ctx
         )
@@ -136,7 +136,7 @@ extension ReactEmitter {
         emitSVGShape(
             SVGStrokedShape(
                 element: "path", geometry: "d=\"\(geometry)\"", fill: svgFillAttributes(data.fills, fillRule: fillRule),
-                fillRule: fillRule, domain: domain, nodeID: node.id, scale: scale
+                fillRule: fillRule, domain: domain, nodeID: node.id, scale: scale, dash: node.strokeDash
             ),
             fills: data.fills, stroke: data, innerShadows: NodeEffects(data.effects).innerShadows, indent: indent + 2, ctx: ctx
         )
@@ -251,12 +251,13 @@ extension ReactEmitter {
                 emitPaintedSVGShape(
                     SVGStrokedShape(
                         element: "line", geometry: geometry, fill: nil, fillRule: nil,
-                        domain: lineBand(width: w, height: nodeHeight, strokeWidth: strokeWidth), nodeID: node.id
+                        domain: lineBand(width: w, height: nodeHeight, strokeWidth: strokeWidth), nodeID: node.id,
+                        dash: node.strokeDash
                     ),
                     fills: paintedStroke, stroke: data, indent: indent + 2, ctx: ctx
                 )
             } else if strokeRoute != .none {
-                let strokeAttributes = "stroke=\"\(strokeColor)\" strokeWidth=\"\(cssNumber(strokeWidth))\"\(svgStrokeStyle(data))"
+                let strokeAttributes = "stroke=\"\(strokeColor)\" strokeWidth=\"\(cssNumber(strokeWidth))\"\(svgStrokeStyle(data, dash: node.strokeDash))"
                 ctx.lines.append("\(pad)  <line \(geometry) \(strokeAttributes) />")
             }
             ctx.lines.append("\(pad)</svg>")

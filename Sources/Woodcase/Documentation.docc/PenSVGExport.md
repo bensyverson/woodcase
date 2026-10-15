@@ -56,6 +56,7 @@ never re-derived from SVG's own primitives.
 | Centered stroke | an SVG stroke at its width, join, cap and a miter limit of 10 |
 | Inner and outer stroke | an SVG stroke at twice its width, clipped to the shape or masked to its complement |
 | Per-side stroke, zero-area box stroke | the stroke's ring, filled even-odd |
+| Dashed stroke (``PenNode/strokeDash``) | `stroke-dasharray` and `stroke-dashoffset` on the stroke, along the renderer's outline, which starts where SVG starts each shape; a paint filled through the outline fills the dashed one |
 | Frame `clip` | a `clipPath` on its children |
 | Opacity | the node's `<g opacity>` |
 | Blend mode | `mix-blend-mode` on the node's or fill's element |

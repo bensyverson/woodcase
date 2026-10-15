@@ -157,6 +157,10 @@ public enum LintCheck: String, Friendly, CaseIterable {
     /// so its styling is ignored and it draws plain (``PenNode/hasStaleTextSpans``).
     case spansStale = "spans-stale"
 
+    /// A node whose `metadata.woodcase.strokeDash` every target draws solid: a dash on a
+    /// per-side stroke, or one no target can draw (``PenStrokeDash/problem(in:)``).
+    case strokeDashIgnored = "stroke-dash-ignored"
+
     /// Components that contain each other — a component that renders an instance of
     /// itself, directly or through others (``ComponentLoop``). One finding per loop, at
     /// the top of the report.
@@ -206,7 +210,7 @@ public enum LintCheck: String, Friendly, CaseIterable {
         case .pipeline, .textWithoutFill, .fillContainerInFitParent, .emptyFitContent, .clipped,
              .artboardOverlap, .duplicateName, .textOverflow, .codegenUnmappedOverride, .collapsedText,
              .collapsedAbsoluteFrame, .meshGradientDistorted, .textStyleStripped, .importNotFollowed,
-             .shaderNotDrawn, .perSideStrokeOnShape, .spansStale:
+             .shaderNotDrawn, .perSideStrokeOnShape, .spansStale, .strokeDashIgnored:
             .warning
         case .brokenRef, .importNotFound, .importUnreadable, .unresolvedVariable, .unknownIcon, .unknownIconLibrary,
              .overrideValueRejected, .overrideTargetNotFound, .overrideKeyUnread,
@@ -282,6 +286,8 @@ public enum LintCheck: String, Friendly, CaseIterable {
             "A plain note that carries a state, which only a comment has; it is not drawn."
         case .spansStale:
             "A text whose styled runs were made for other words than its content, so it draws plain."
+        case .strokeDashIgnored:
+            "A stroke dash every target draws solid: on per-side widths, or one no target can draw."
         case .componentLoop:
             "Components that contain each other, directly or through others; that nesting is not drawn."
         }

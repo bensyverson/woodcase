@@ -36,7 +36,23 @@ struct PenPathCGPathTests {
         let penRect = PenRect(x: 0, y: 0, width: 100, height: 50)
         #expect(PenShapeOutline(elements: [.rect(penRect)]).cgPath == CGPath(rect: rect, transform: nil))
         #expect(PenShapeOutline(elements: [.ellipse(in: penRect)]).cgPath == CGPath(ellipseIn: rect, transform: nil))
-        #expect(PenShapeOutline(elements: [.roundedRect(penRect, cornerRadius: 10)]).cgPath
-            == CGPath(roundedRect: rect, cornerWidth: 10, cornerHeight: 10, transform: nil))
+    }
+
+    /// `addRoundedRect` starts at the right edge's middle; a dashed stroke's pattern starts
+    /// where SVG starts the shape, so the outline traces the same corners from (x + r, y)
+    /// instead (leaf ajB4uc) — the same shape, drawn from another start.
+    @Test("A rounded rectangle is traced from (x + r, y), clockwise on screen, with tangent arcs")
+    func roundedRectanglePrimitive() {
+        let penRect = PenRect(x: 0, y: 0, width: 100, height: 50)
+        let traced = CGMutablePath()
+        traced.move(to: CGPoint(x: 10, y: 0))
+        traced.addLine(to: CGPoint(x: 90, y: 0))
+        traced.addArc(tangent1End: CGPoint(x: 100, y: 0), tangent2End: CGPoint(x: 100, y: 50), radius: 10)
+        traced.addArc(tangent1End: CGPoint(x: 100, y: 50), tangent2End: CGPoint(x: 0, y: 50), radius: 10)
+        traced.addArc(tangent1End: CGPoint(x: 0, y: 50), tangent2End: CGPoint(x: 0, y: 0), radius: 10)
+        traced.addArc(tangent1End: CGPoint(x: 0, y: 0), tangent2End: CGPoint(x: 100, y: 0), radius: 10)
+        traced.closeSubpath()
+        let outline = PenShapeOutline(elements: [.roundedRect(penRect, cornerRadius: 10)]).cgPath
+        #expect(outline == traced)
     }
 }

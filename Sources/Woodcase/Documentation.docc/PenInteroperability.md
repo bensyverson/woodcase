@@ -77,9 +77,11 @@ The format's own editor migrates a file on load according to the version it decl
 
 Woodcase models and writes 2.20, the format version 1.2.15 of the editor writes, and migrates an older file the way the editor does: every pre-2.19 inner shadow becomes an outer one — which is what every earlier editor drew — and `spread`, which 2.19 removed, is deleted, each with a diagnostic naming the node; and a pre-2.20 image paint's `fill`/`fit` mode becomes `cover`/`contain`, and a missing one an explicit `stretch`. The editor does all of it silently. See <doc:PenEngine>, *Shadows before 2.19* and *Image modes before 2.20*.
 
-## Dash Patterns Are Gone
+## Dashed Strokes Live in Metadata
 
-.pen 2.10 allowed a `dashPattern` (and a `miterAngle`) inside the nested stroke object. Neither survives in 2.17 — the format's own editor (version 1.2.7) strips a dash pattern silently on save — so Woodcase's model has no equivalent and its renderer never dashes a stroke. Migrating a legacy document discards both properties and emits a ``PenDiagnostic`` at the ``PenDiagnostic/Stage/migration`` stage naming the node each came from.
+.pen 2.10 allowed a `dashPattern` (and a `miterAngle`) inside the nested stroke object. Neither survives in 2.17 — the format's own editor (version 1.2.7) strips a dash pattern silently on save. Woodcase keeps a dash in the node's `metadata.woodcase` instead (Ben's ruling, 2026-10-14): `strokeDash`, the dash and gap lengths, and `strokeDashOffset`, the phase (``PenStrokeDash``). The editor keeps both keys on save — probed with its headless CLI (pen 0.3.11, 2026-10-15) on a frame, rectangle, ellipse, path, line and polygon, each edited before saving — and draws the stroke solid; every Woodcase target dashes it (<doc:PenRendering>, *Dashed strokes*). Migrating a legacy document moves a `dashPattern` into `strokeDash`; one no target can draw, or on per-side widths, is discarded with a ``PenDiagnostic`` at the ``PenDiagnostic/Stage/migration`` stage naming the node, and so is every `miterAngle`.
+
+> Corrected 2026-10-15 (leaf `ajB4uc`): this section was titled *Dash Patterns Are Gone* and said Woodcase's model had no dash and its renderer never dashed a stroke; that held from the 2.17 port until dashes moved into metadata.
 
 ## Kept Divergences
 

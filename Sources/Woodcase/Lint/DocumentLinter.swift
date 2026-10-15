@@ -251,6 +251,7 @@ public enum DocumentLinter {
         found += meshGradientFindings(row, node: node)
         found += shaderFindings(row, node: node)
         found += perSideStrokeOnShape(row, node: node)
+        found += strokeDashIgnored(row, node: node)
         found += noteUnsized(row, node: node)
         found += metadataOldStyle(row, in: context)
         found += noteState(row, in: context)

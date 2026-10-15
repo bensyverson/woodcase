@@ -40,7 +40,7 @@ extension SwiftUINodeEmitter {
 
     /// The silhouette of a node drawn as `shape` in `box`, stroked by `stroke`.
     ///
-    /// The band is the region the stroke covers, laid out as ``strokeView(_:shape:box:unemitted:)``
+    /// The band is the region the stroke covers, laid out as ``strokeView(_:shape:box:dash:unemitted:)``
     /// lays it out — per side, from the box on a 0×0 box, or the outline's own stroke — and
     /// only where it can reach outside the shape: an inside stroke adds nothing. A line casts
     /// nothing from its stroke, which is what Pen draws (`render-stroke-shadows.pen`, boards

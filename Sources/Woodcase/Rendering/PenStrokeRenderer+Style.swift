@@ -6,7 +6,7 @@
 import CoreGraphics
 
 extension PenStrokeRenderer {
-    /// How a uniform stroke is drawn: width, alignment, join and cap.
+    /// How a uniform stroke is drawn: width, alignment, join, cap and dash.
     struct Style: Friendly {
         /// The miter limit both the solid and the painted path use — CoreGraphics' default.
         static let miterLimit: CGFloat = 10
@@ -19,6 +19,8 @@ extension PenStrokeRenderer {
         let penJoin: PenStrokeJoin?
         /// The line cap, `nil` meaning butt.
         let penCap: PenStrokeCap?
+        /// The dash, `nil` meaning solid.
+        var dash: PenStrokeDash?
 
         /// The CoreGraphics line join.
         var join: CGLineJoin {
@@ -42,6 +44,12 @@ extension PenStrokeRenderer {
         /// it for inner and outer, whose other half the alignment clip removes.
         var outlineWidth: CGFloat {
             alignment == .center ? width : width * 2
+        }
+
+        /// `path` cut into its dashes from its start, or `path` itself for a solid stroke.
+        func dashed(_ path: CGPath) -> CGPath {
+            guard let dash else { return path }
+            return path.copy(dashingWithPhase: dash.phase, lengths: dash.lengths.map { CGFloat($0) })
         }
 
         /// The rectangle an outer solid stroke's complement clip spans: the path's box

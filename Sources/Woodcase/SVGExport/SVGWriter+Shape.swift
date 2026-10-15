@@ -67,7 +67,7 @@ extension SVGWriter {
         elements += innerShadows(effects.innerShadows, silhouette: shape.element(fill: "#000000"), region: outline.boundingBoxOfPath)
         elements += self.stroke(
             stroke.drawn(on: node), path: outline, box: box,
-            roundedBox: PenStrokeRenderer.roundedBox(for: node, rect: box)
+            roundedBox: PenStrokeRenderer.roundedBox(for: node, rect: box), dash: node.strokeDash
         )
         return elements
     }
@@ -76,7 +76,10 @@ extension SVGWriter {
     private func line(_ node: PenNode, data: PenNode.LineData, box: PenRect) -> [SVGElement] {
         guard let path = PenShapeBuilder.buildPath(for: node, rect: box) else { return [] }
         let stroke = data.drawn(on: node)
-        return self.stroke(stroke, path: path, box: PenRenderer.lineBand(box, strokeWidth: stroke.uniformStrokeWidth ?? 1), roundedBox: nil)
+        return self.stroke(
+            stroke, path: path, box: PenRenderer.lineBand(box, strokeWidth: stroke.uniformStrokeWidth ?? 1),
+            roundedBox: nil, dash: node.strokeDash
+        )
     }
 
     /// An icon: its glyph's outline, painted and shadowed like a shape, so it draws without

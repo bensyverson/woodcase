@@ -63,7 +63,7 @@ extension ReactEmitter {
         if case let .uniform(width) = stroke.strokeWidth, let width = width.literalValue {
             attrs += " strokeWidth=\"\(cssNumber(width))\""
         }
-        if strokeColor != nil { attrs += shape.strokeScaling + svgStrokeStyle(stroke) }
+        if strokeColor != nil { attrs += shape.strokeScaling + svgStrokeStyle(stroke, dash: shape.dash) }
         ctx.lines.append("\(String(repeating: " ", count: indent))<\(shape.element) \(attrs) />")
     }
 

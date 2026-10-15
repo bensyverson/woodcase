@@ -6,7 +6,7 @@
 extension ReactEmitter {
     /// How React writes a node's inner shadows, which decides what it warns about them.
     enum InnerShadowRoute: Friendly {
-        /// `inset` entries of the box's `box-shadow` (``emitStrokeAndEffects(stroke:effects:showsBackdrop:layered:)``):
+        /// `inset` entries of the box's `box-shadow` (``emitStrokeAndEffects(stroke:strokeDrawnByOverlay:effects:showsBackdrop:layered:)``):
         /// drawn, but without a blend mode, since CSS blends an element and not one shadow.
         case insetBoxShadow
         /// An SVG filter over the node's silhouette (``svgInnerShadowFilter(_:id:region:scale:composite:)``),
@@ -24,7 +24,7 @@ extension ReactEmitter {
         case .rectangle, .frame, .browser:
             .insetBoxShadow
         case let .ellipse(data):
-            drawsAsBox(data) ? .insetBoxShadow : .svgFilter
+            drawsAsBox(data, of: node) ? .insetBoxShadow : .svgFilter
         case .polygon, .path, .icon:
             .svgFilter
         case .text:
@@ -37,9 +37,10 @@ extension ReactEmitter {
     }
 
     /// Whether an ellipse is written as a CSS box with `border-radius: 50%` — no inner
-    /// radius and a full sweep — rather than as an SVG path
-    /// (``emitEllipse(_:data:indent:ctx:isRoot:parentLayout:)``).
-    static func drawsAsBox(_ data: PenNode.EllipseData) -> Bool {
+    /// radius, a full sweep and an undashed stroke, which CSS cannot dash exactly — rather
+    /// than as an SVG path (``emitEllipse(_:data:indent:ctx:isRoot:parentLayout:)``).
+    static func drawsAsBox(_ data: PenNode.EllipseData, of node: PenNode) -> Bool {
         (data.innerRadius?.literalValue ?? 0) <= 0 && abs(data.sweepAngle?.literalValue ?? 360) >= 360
+            && node.strokeDash == nil
     }
 }

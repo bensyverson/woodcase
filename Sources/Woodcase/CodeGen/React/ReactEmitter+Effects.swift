@@ -19,6 +19,9 @@ extension ReactEmitter {
     ///
     /// - Parameters:
     ///   - stroke: The node's stroke, if it has one.
+    ///   - strokeDrawnByOverlay: Whether an overlay draws the stroke — a dashed one
+    ///     (``dashedStrokeOverlay(_:stroke:box:beneathChildren:ctx:)``) — so the list holds
+    ///     none of it; its reach still spreads the outer shadows.
     ///   - effects: The node's effects, if it has any.
     ///   - showsBackdrop: Whether the node has a visible fill: Pen draws no background
     ///     blur through a node without one (``PenFills/hasVisiblePaint``).
@@ -27,11 +30,12 @@ extension ReactEmitter {
     /// - Returns: The declarations.
     static func emitStrokeAndEffects(
         stroke: (any PenStrokable)?,
+        strokeDrawnByOverlay: Bool = false,
         effects: PenEffects?,
         showsBackdrop: Bool,
         layered: Bool = false
     ) -> [(String, String)] {
-        let strokeStyles = stroke.map { emitStroke($0) } ?? []
+        let strokeStyles = strokeDrawnByOverlay ? [] : stroke.map { emitStroke($0) } ?? []
         let drawn = NodeEffects(effects)
 
         var shadows: [String] = []
@@ -216,7 +220,7 @@ extension ReactEmitter {
         case .rectangle:
             true
         case let .ellipse(data):
-            drawsAsBox(data)
+            drawsAsBox(data, of: node)
         case let .frame(data):
             data.clip?.literalValue != true
         default:

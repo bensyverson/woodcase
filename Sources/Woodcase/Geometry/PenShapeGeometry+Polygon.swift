@@ -4,8 +4,9 @@ extension PenShapeGeometry {
     /// A regular polygon's outline, inscribed in the box with its first vertex at the top.
     ///
     /// With a positive corner radius each vertex is rounded by a tangent arc toward the
-    /// midpoint of the edge after it; the outline starts along the first edge, where the
-    /// first vertex's rounding would end.
+    /// midpoint of the edge after it; the outline starts on the first edge, exactly where
+    /// the first vertex's rounding ends — the outline closes onto its start, and a dashed
+    /// stroke's pattern starts there.
     ///
     /// - Returns: `nil` for fewer than three sides.
     static func polygon(in rect: PenRect, sides: Int, cornerRadius: Double?) -> PenShapeOutline? {
@@ -36,11 +37,7 @@ extension PenShapeGeometry {
             let next = vertex(i + 1)
             let after = vertex(i + 2)
             if i == 0 {
-                let ratio = min(radius / distance(current, next), 0.5)
-                elements.append(.command(.move(to: PenPoint(
-                    x: current.x + (next.x - current.x) * ratio,
-                    y: current.y + (next.y - current.y) * ratio
-                ))))
+                elements.append(.command(.move(to: roundingEnd(at: current, from: vertex(sides - 1), toward: next, radius: radius))))
             }
             elements.append(.tangentArc(
                 tangent1End: next,
@@ -73,7 +70,17 @@ extension PenShapeGeometry {
         return PenPoint(x: cx + rx * cos(angle), y: cy + ry * sin(angle))
     }
 
-    private static func distance(_ a: PenPoint, _ b: PenPoint) -> Double {
-        sqrt((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y))
+    /// Where a tangent arc of `radius` rounding `vertex` meets the edge toward `next`: the
+    /// arc's tangent point, `radius / tan(θ / 2)` along that edge for the corner's angle θ.
+    private static func roundingEnd(at vertex: PenPoint, from previous: PenPoint, toward next: PenPoint, radius: Double) -> PenPoint {
+        let toNext = (x: next.x - vertex.x, y: next.y - vertex.y)
+        let toPrevious = (x: previous.x - vertex.x, y: previous.y - vertex.y)
+        let lengthNext = (toNext.x * toNext.x + toNext.y * toNext.y).squareRoot()
+        let lengthPrevious = (toPrevious.x * toPrevious.x + toPrevious.y * toPrevious.y).squareRoot()
+        guard lengthNext > 0, lengthPrevious > 0 else { return vertex }
+        let cosine = (toNext.x * toPrevious.x + toNext.y * toPrevious.y) / (lengthNext * lengthPrevious)
+        let angle = acos(max(-1, min(1, cosine)))
+        let along = radius / tan(angle / 2)
+        return PenPoint(x: vertex.x + toNext.x / lengthNext * along, y: vertex.y + toNext.y / lengthNext * along)
     }
 }

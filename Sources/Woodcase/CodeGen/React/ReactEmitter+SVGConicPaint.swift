@@ -67,7 +67,7 @@ extension ReactEmitter {
         _ shape: SVGStrokedShape, stroke: any PenStrokable, width: Double, overhang: Double, defs: inout [String]
     ) -> String {
         let outline = "<\(shape.element) \(shape.geometry) fill=\"none\" stroke=\"white\" strokeWidth=\"\(cssNumber(width))\""
-            + "\(shape.strokeScaling)\(svgStrokeStyle(stroke)) />"
+            + "\(shape.strokeScaling)\(svgStrokeStyle(stroke, dash: shape.dash)) />"
         let id = paintID("wc-stroke", shape.nodeID, outline)
         if !defs.contains(where: { $0.hasPrefix("<mask id=\"\(id)\"") }) {
             defs.append("<mask id=\"\(id)\" maskUnits=\"userSpaceOnUse\" \(svgRect(shape.domain, grownBy: overhang))>")

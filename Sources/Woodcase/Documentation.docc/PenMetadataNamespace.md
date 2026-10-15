@@ -43,7 +43,7 @@ node types it again.
 
 ### The keys
 
-``PenMetadata/WoodcaseKey`` lists every key, in four groups
+``PenMetadata/WoodcaseKey`` lists every key, in five groups
 (``PenMetadata/WoodcaseKey/Group``):
 
 | Group | Keys | Read by |
@@ -52,6 +52,7 @@ node types it again.
 | notes | `type`, `state`, `author`, `leaf`, `stage`, `tint`, `copiedFrom`, `anchor`, `replyTo`, `requestedBy`, `createdAt` | ``PenPostIt/Metadata``; see <doc:PenPostItConvention> |
 | a note's text style | `fontFamily`, `fontSize`, `fontWeight`, `fontStyle`, `letterSpacing`, `lineHeight`, `textAlign`, `textAlignVertical` | the note's look; Pen strips a note's own text style on load, so it lives here |
 | a text's rich text | `spans` | ``PenMetadata/textSpans`` and ``PenNode/appliedRuns``: the layout, the renderer and the `spans-stale` lint; see <doc:PenRichText> |
+| a stroke's dash | `strokeDash`, `strokeDashOffset` | ``PenNode/strokeDash`` (``PenStrokeDash``): every renderer and emitter, the planner and the `stroke-dash-ignored` lint; an inspector reads them as fields through ``PenSchema/woodcaseFields(for:)``; see <doc:PenRendering>, *Dashed strokes* |
 
 ### One accessor
 

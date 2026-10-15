@@ -117,6 +117,9 @@ public extension PenPostIt {
             return Violation(key: key, value: value, accepted: key.spellings, suggestion: nil)
         case (.utcTimestamp, _):
             return Violation(key: key, value: value, accepted: key.spellings, suggestion: nil)
+        case (.dashLengths, _):
+            guard PenStrokeDash.problem(in: value) != nil else { return nil }
+            return Violation(key: key, value: value, accepted: [PenStrokeDash.writtenForm], suggestion: nil)
         case (.textSpans, _):
             do {
                 _ = try PenTextSpans(metadataValue: value)

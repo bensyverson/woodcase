@@ -1427,8 +1427,8 @@ Directories are searched recursively; a file already at the current version — 
 a newer 2.x minor, which a newer Pen wrote — is left alone unless `--force` is given,
 and `--force` keeps a newer minor's own version. A file of another major is read-only:
 it counts as a failure, and is left untouched. Every migration diagnostic goes to stderr, prefixed
-with the file's path, so discarded legacy data (a stroke `dashPattern`, per-run text
-styling) is visible rather than silent.
+with the file's path, so discarded legacy data (a stroke `miterAngle`, a `dashPattern` no target can draw,
+per-run text styling) is visible rather than silent.
 
 Each file's old-style Woodcase metadata — `_props`, `_role`, `_states`, `_action`,
 `_scroll`, and a post-it's bare keys beside `metadata.type: "postit"` — then moves under

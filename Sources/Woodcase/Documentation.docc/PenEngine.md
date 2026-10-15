@@ -238,7 +238,9 @@ Two behaviors copy version 1.2.7 of the format's own editor, whose own re-saves
 are the oracle for the migration: a value equal to the default is written as
 nothing at all, and a stroke
 object with no `fill` is dropped entirely — it had no paint, so it drew nothing.
-`dashPattern` and `miterAngle` left the format with no replacement and are
+`dashPattern` left the format with no replacement in it, and moves into the node's
+`metadata.woodcase.strokeDash` (``PenStrokeDash``) unless no target could draw it or it
+sits on per-side widths, when it is discarded with a diagnostic; `miterAngle` is
 discarded with a diagnostic.
 
 ### Rich text

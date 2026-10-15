@@ -93,6 +93,9 @@ public struct EditRefusal: Error, Friendly {
         /// ignored.
         case positionIgnoredByLayout
 
+        /// A dash on a stroke of per-side widths, whose bands dashes cannot flow around.
+        case dashOnPerSideStroke
+
         // MARK: Everything else
 
         /// The document refused the edit for a reason no other code names; ``errorCode``

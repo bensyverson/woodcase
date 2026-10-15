@@ -24,6 +24,8 @@ extension ReactEmitter {
         /// Points per user unit on each axis: how the SVG's viewBox scales its user space
         /// onto the node's box.
         var scale = Scale.identity
+        /// The node's dash (``PenNode/strokeDash``), or `nil` for a solid stroke.
+        var dash: PenStrokeDash?
 
         /// Whether the SVG's viewBox scales its user space onto the node's box, so a stroke
         /// drawn in it would scale too; the renderer strokes the mapped outline at the
@@ -135,7 +137,7 @@ extension ReactEmitter {
                 } else {
                     ""
                 }
-                let strokeAttributes = "stroke=\"\(paint)\" strokeWidth=\"\(cssNumber(drawnWidth))\"\(shape.strokeScaling)\(svgStrokeStyle(stroke))"
+                let strokeAttributes = "stroke=\"\(paint)\" strokeWidth=\"\(cssNumber(drawnWidth))\"\(shape.strokeScaling)\(svgStrokeStyle(stroke, dash: shape.dash))"
                 ctx.lines.append("\(pad)<\(shape.element) \(shape.geometry)\(fill) \(strokeAttributes)\(strokeClip)\(blend) />")
             case let .conic(gradient):
                 // Every conic layer is masked by the same stroked shape: define it once.
@@ -167,14 +169,21 @@ extension ReactEmitter {
     }
 
     /// A stroke's cap and join as SVG attributes, each written only when it is not SVG's
-    /// default (butt, miter), which is Pen's default too — e.g. ` strokeLinecap="round"`.
-    static func svgStrokeStyle(_ stroke: any PenStrokable) -> String {
+    /// default (butt, miter), which is Pen's default too — e.g. ` strokeLinecap="round"` —
+    /// then its dash and offset, when it has one.
+    static func svgStrokeStyle(_ stroke: any PenStrokable, dash: PenStrokeDash?) -> String {
         var attributes = ""
         if let cap = stroke.strokeLinecap, cap != .butt {
             attributes += " strokeLinecap=\"\(cap.rawValue)\""
         }
         if let join = stroke.strokeLinejoin, join != .miter {
             attributes += " strokeLinejoin=\"\(join.rawValue)\""
+        }
+        if let dash {
+            attributes += " strokeDasharray=\"\(dash.lengths.map { cssNumber($0) }.joined(separator: " "))\""
+            if dash.phase != 0 {
+                attributes += " strokeDashoffset=\"\(cssNumber(dash.phase))\""
+            }
         }
         return attributes
     }

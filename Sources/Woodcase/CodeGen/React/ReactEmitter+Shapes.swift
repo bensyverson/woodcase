@@ -31,11 +31,13 @@ extension ReactEmitter {
         let shadowLayers = shadowLayerStyles(data.effects, borderRadius: data.cornerRadius.flatMap(emitCornerRadius), stroke: data)
         let box = FillBox(width: data.width, height: data.height)
         let fills = PaintSplit(data.fills)
+        let dashedOverlay = dashedStrokeOverlay(node, stroke: data, box: box, beneathChildren: false, ctx: ctx)
         styles.append(contentsOf: emitVisualStyles(
             fills: fills.backgroundFills,
             box: box,
             cornerRadius: data.cornerRadius,
             stroke: data,
+            strokeDrawnByOverlay: dashedOverlay != nil,
             effects: data.effects,
             showsBackdrop: data.fills?.hasVisiblePaint == true,
             layered: shadowLayers != nil,
@@ -44,7 +46,8 @@ extension ReactEmitter {
         let layersOverFill = liftingInsetShadows(
             &styles, over: fillLayers(fills.layered, box: box, beneathChildren: false, ctx: ctx), beneathChildren: false
         )
-        let overlay = strokeOverlay(data, shape: .box(data.cornerRadius), beneathChildren: false, box: box, ctx: ctx)
+        let overlay = dashedOverlay
+            ?? strokeOverlay(data, shape: .box(data.cornerRadius), beneathChildren: false, box: box, ctx: ctx)
         if overlay != nil || shadowLayers != nil || !layersOverFill.isEmpty {
             styles.append(("position", "\"relative\""))
         }
@@ -85,7 +88,7 @@ extension ReactEmitter {
         let pad = String(repeating: " ", count: indent)
         let w = data.width?.fixedValue ?? 0
         let h = data.height?.fixedValue ?? 0
-        if !drawsAsBox(data) {
+        if !drawsAsBox(data, of: node) {
             // SVG ellipse for donut/arc
             let overflow = svgStrokeOverflows(data) ? " overflow=\"visible\"" : ""
 
@@ -119,7 +122,8 @@ extension ReactEmitter {
             emitSVGShape(
                 SVGStrokedShape(
                     element: "path", geometry: "d=\"\(d)\"", fill: svgFillAttributes(data.fills, fillRule: fillRule),
-                    fillRule: fillRule, domain: .init(x: 0, y: 0, width: w, height: h), nodeID: node.id
+                    fillRule: fillRule, domain: .init(x: 0, y: 0, width: w, height: h), nodeID: node.id,
+                    dash: node.strokeDash
                 ),
                 fills: data.fills, stroke: data, innerShadows: NodeEffects(data.effects).innerShadows,
                 indent: indent + 2, ctx: ctx

@@ -293,7 +293,7 @@ private struct EllipseArcShape: Shape {
 private struct HexagonShape: Shape {
     func path(in rect: CGRect) -> Path {
         var path = Path()
-        path.move(to: CGPoint(x: 27.464102, y: 2))
+        path.move(to: CGPoint(x: 26, y: 1.154701))
         path.addArc(tangent1End: CGPoint(x: 44.78461, y: 12), tangent2End: CGPoint(x: 44.78461, y: 24), radius: 4)
         path.addArc(tangent1End: CGPoint(x: 44.78461, y: 36), tangent2End: CGPoint(x: 34.392305, y: 42), radius: 4)
         path.addArc(tangent1End: CGPoint(x: 24, y: 48), tangent2End: CGPoint(x: 13.607695, y: 42), radius: 4)
