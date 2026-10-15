@@ -18,8 +18,9 @@ import Foundation
 /// keeps them in `metadata.woodcase.textDecoration` too, which Pen keeps, and restores
 /// them on its next read and write (``PenTextDecoration``, leaf kyrTTL). So for those two
 /// the finding is a notice that Pen's own render shows neither while Woodcase's shows
-/// both. One Woodcase cannot protect — content held in a variable, or a protection made
-/// for other words — is still a warning that a save in Pen loses it. Woodcase draws no
+/// both. A protection made for older words counts: it restores and is made again for the
+/// new ones. One Woodcase cannot protect — content held in a variable — is still a warning
+/// that a save in Pen loses it. Woodcase draws no
 /// text stroke, so that one is simply lost. Each case is its own finding, so fixing one
 /// leaves the others standing. `underline: false` and `strikethrough: false` lose
 /// nothing and are clean.
@@ -50,9 +51,9 @@ extension DocumentLinter {
                     + "text some other way, or remove the keys."
             ))
         }
-        let protection = node.textDecoration.flatMap { decoration in
-            data.content?.literalValue.map { decoration.isStale(for: $0) ? nil : decoration } ?? nil
-        }
+        // Protection for older words still protects: it is made again for these on the
+        // next read or write. Content in a variable has none to make.
+        let protection = data.content?.literalValue == nil ? nil : node.textDecoration
         let key = PenMetadata.WoodcaseKey.textDecoration
         for (name, value, isProtected) in [
             ("underline", data.underline, protection?.underline == true),

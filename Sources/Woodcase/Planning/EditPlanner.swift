@@ -25,6 +25,9 @@ import Foundation
 ///   outside a property's ``PenValueConstraint``, a `$name` naming no variable or one of
 ///   the wrong type, and an `x`/`y` on a node its parent's layout places are refused
 ///   with a stable ``EditRefusal/Code``.
+/// - **what else the edit must write to keep what is drawn.** A change of a text's
+///   `textGrowth` writes each dimension that stops following the words as the size it was
+///   drawn at, and drops the number of each that starts following them again.
 ///
 /// Planning never mutates. The refusals are a **write** rule: a file that breaks them
 /// still opens, and an ``EditOperation`` applied without planning — a three-way merge,
@@ -44,6 +47,7 @@ import Foundation
 /// - ``plan(_:at:in:)-(_,ResolvedNodeAddress,_)``
 ///
 /// ### Restructuring
+/// - ``planMove(nodeID:into:at:in:layout:)``
 /// - ``planGroup(nodeIDs:kind:in:layout:)``
 /// - ``planUngroup(groupID:in:layout:)``
 public enum EditPlanner {
@@ -137,7 +141,7 @@ public enum EditPlanner {
         written: String,
         in document: EditableDocument
     ) throws -> EditPlan {
-        let plan = switch intent {
+        let plan = switch keepingTextSize(intent, at: target, in: document) {
         case let .set(properties):
             try planSet(properties, at: target, written: written, in: document)
         case let .override(properties, unset):

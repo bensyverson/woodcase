@@ -147,4 +147,12 @@ struct PenTextSpansMetadataTests {
         #expect(!Self.node(content: .literal("Make this bold"), spans: spans).hasStaleTextSpans)
         #expect(!Self.node(content: .literal("Make this bold"), spans: nil).hasStaleTextSpans)
     }
+
+    @Test("A whole-text run survives new words: the node applies it stretched and reports nothing stale")
+    func nodeWholeRunSurvives() {
+        let spans = PenTextSpans(text: "Make this bold", runs: [PenTextRun(start: 0, end: 14, underline: true)])
+        let edited = Self.node(content: .literal("Edited in Pen"), spans: spans)
+        #expect(edited.appliedRuns == [PenTextRun(start: 0, end: 13, underline: true)])
+        #expect(!edited.hasStaleTextSpans)
+    }
 }

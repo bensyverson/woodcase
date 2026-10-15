@@ -48,6 +48,17 @@ instance wrote into its own slot written into that slot's fill. Aimed at an inst
 a set writes the `ref` node's own properties (`common.x`, `common.enabled`); the component
 root's properties as the instance shows them are an override.
 
+**A text's sizing mode keeps the size it is drawn at.** `textGrowth` says which of a
+text's `fit_content` dimensions follow its words: `auto` both, `fixed-width` the height,
+`fixed-width-height` neither. A set or override of it also writes each dimension that stops
+following the words as the number it was drawn at — auto to `fixed-width` writes the
+width; to `fixed-width-height`, the width and the height — and drops the number of each
+that starts following them again (a set removes it, an override writes `fit_content`, to
+outweigh the component's). A dimension written in the same edit, or one that fills its
+container, is left alone. Without this a text set from auto to fixed width turned 0 wide
+(the integrator's ruling of 2026-10-15, Penumbra spec §4.4, leaf `Q2hXKO`). The planner
+lays the document out for it, and only for a write that changes `textGrowth`.
+
 ### What is refused
 
 | Code | When |
@@ -118,8 +129,10 @@ map; that map is read back as an anchor, a turn and flips. Pen has no scale, so 
 reading always exists. A turn or flip changes only when the new parent's chain turns or
 flips differently from the old one; flips follow the chain's parity (a child of a
 `flipY` group keeps `flipY` when ungrouped, with the group's turn added to its own). A
-`fill_container` size is frozen at the size it was drawn at, because it means something
-else in another parent.
+`fill_container` size is frozen at the size it was drawn at when the new parent does not
+lay the node out — a group or free frame, or a stack holding it absolutely — because a fill
+there has nothing to fill; children ungrouped into a stack's flow keep their fill, which
+the stack lays out (see Moving a node below).
 
 **The wrapper is unturned in its parent.** It spans the union of its members' canvas
 quads, measured in its parent's own coordinates: a group's box is that union, and a frame
@@ -144,6 +157,29 @@ stack has no place of its own, so it keeps what it stored.
 Lock has no planner of its own: it is a write of `metadata.woodcase.locked`
 (``PenMetadata/WoodcaseKey/locked``), planned as any other set; see
 <doc:PenMetadataNamespace>.
+
+### Moving a node
+
+``EditPlanner/planMove(nodeID:into:at:in:layout:)`` plans a move to another parent: the
+`moveNode`, then — when the new parent does not lay the node out — each `fill_container`
+width or height written as the number it was drawn at; a `fit_content` one stays (Ben's
+ruling of 2026-10-15, Penumbra spec §4.4, leaf `skbh2k`, as Figma does). A stack lays a
+child out on both axes — a share of the main axis, the cross axis stretched — so the check
+is per parent, not per axis: a frame with a layout lays out a child it holds in flow; a
+free frame, a group, the canvas, and a stack's absolutely positioned child get no room
+on either axis, and a fill there settles at its fallback or content, often zero. The CLI's
+`mv` and a batch's `mv` line plan the same sizes. A caller that drops the node at a point
+writes its `x`/`y` after these edits. A move is refused inside an instance, for an id naming
+nothing, and with ``EditRefusal/Code/documentRefused`` when it would make a component
+contain itself.
+
+```swift
+var operations = try EditPlanner.planMove(nodeID: "row1", into: "board", in: document, layout: layout)
+operations.append(.setProperties(EditOperation.SetProperties(nodeID: "row1", properties: ["common.x": 40, "common.y": 20])))
+```
+
+A paste needs no rule of its own: a clip already freezes a fill size at the size it was
+drawn at when it copies a node out of its parent (``PenClip``).
 
 ### Previewing a plan
 
@@ -171,6 +207,7 @@ let drawn = await document.materializeSnapshot(overlaying: preview)
 - ``EditPlanner``
 - ``EditIntent``
 - ``EditPlan``
+- ``EditPlanner/planMove(nodeID:into:at:in:layout:)``
 - ``EditPlanner/planGroup(nodeIDs:kind:in:layout:)``
 - ``EditPlanner/planUngroup(groupID:in:layout:)``
 - ``WrapKind``

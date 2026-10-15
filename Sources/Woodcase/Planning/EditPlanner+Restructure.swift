@@ -5,8 +5,8 @@
 
 import Foundation
 
-/// What Group, Frame Selection and Ungroup share: finding the stored nodes they act on,
-/// and rewriting a node's placement so it is drawn where it was after it changes parent.
+/// What Group, Frame Selection, Ungroup and a move share: finding the stored nodes they act
+/// on, and rewriting a node's placement so it is drawn where it was after it changes parent.
 ///
 /// A node placed by its own `x`/`y` is drawn by `translate(x, y) · turn · flip` about its
 /// anchor, in its parent's own coordinates (``PenLayoutEngine/placement(of:rect:layoutRects:)``).
@@ -208,17 +208,7 @@ extension EditPlanner {
             writes[common + "layoutPosition"] = position.map { .string($0.rawValue) } ?? .null
         }
 
-        // A fill size means something else in another parent: keep the size it was drawn at.
-        let expanded = document.expandedID(of: .node(id: id))
-        if let size = layout.rects[expanded]?.drawnSize {
-            for (field, value) in [("width", size.width), ("height", size.height)] {
-                let path = NodePropertyCodec.kindPrefix + field
-                guard case let .string(sizing)? = try? NodePropertyCodec.value(at: path, of: node),
-                      sizing.hasPrefix("fill_container")
-                else { continue }
-                writes[path] = number(value)
-            }
-        }
+        writes.merge(keptSizeWrites(of: id, laidOut: placing == .inFlow, in: document, layout: layout)) { _, kept in kept }
         return writes
     }
 

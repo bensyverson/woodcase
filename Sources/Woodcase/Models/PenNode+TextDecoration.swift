@@ -19,12 +19,14 @@ public extension PenNode {
     ///
     /// For a text whose content is a literal:
     ///
-    /// 1. **Restore.** A native key the node does not write is restored from protection
-    ///    made for its content — the key Pen stripped when it opened the file. A key the
-    ///    node does write wins, whatever the protection says.
+    /// 1. **Restore.** A native key the node does not write is restored from its
+    ///    protection — the key Pen stripped when it opened the file — even when the
+    ///    protection was made for other words: both keys cover the whole text, so they
+    ///    follow it into words Pen edited (Ben's ruling of 2026-10-15, leaf 0LwfSn). A key
+    ///    the node does write wins, whatever the protection says.
     /// 2. **Protect.** The protection is then rewritten from the native keys: made for the
     ///    content and holding each one that is literally `true`, or removed when neither
-    ///    is. A stale protection — made for words Pen has since edited — so goes.
+    ///    is.
     ///
     /// A text whose content is a variable is left alone: there is no literal to make the
     /// protection for, and so nothing to tell a stale one by.
@@ -32,9 +34,9 @@ public extension PenNode {
     /// - Returns: The node, protected.
     func protectingTextDecoration() -> PenNode {
         guard case var .text(data) = kind, let content = data.content?.literalValue else { return self }
-        let fresh = textDecoration.flatMap { $0.isStale(for: content) ? nil : $0 }
-        if data.underline == nil, fresh?.underline == true { data.underline = .literal(true) }
-        if data.strikethrough == nil, fresh?.strikethrough == true { data.strikethrough = .literal(true) }
+        let stored = textDecoration
+        if data.underline == nil, stored?.underline == true { data.underline = .literal(true) }
+        if data.strikethrough == nil, stored?.strikethrough == true { data.strikethrough = .literal(true) }
 
         let underline = data.underline?.literalValue == true
         let strikethrough = data.strikethrough?.literalValue == true

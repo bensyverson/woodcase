@@ -21,10 +21,12 @@ import Foundation
 /// ```
 ///
 /// Woodcase keeps the two in step on every read and write (``PenDocument/protectingTextDecoration()``):
-/// a native key restores from protection still made for the node's content, and the
-/// protection is rewritten from the native keys. When Pen edits the words, which it can do
-/// but cannot see this key, the protection is stale (``isStale(for:)``) and dropped, as a
-/// text's spans are (<doc:PenRichText>).
+/// a native key restores from the protection, and the protection is rewritten from the
+/// native keys. When Pen edits the words, which it can do but cannot see this key, the
+/// protection is stale (``isStale(for:)``) but still restores: both keys cover the whole
+/// text, and a whole-text style follows the text into new words, as a whole-text run of a
+/// text's spans does (<doc:PenRichText>, Ben's ruling of 2026-10-15). It is then made again
+/// for the new words.
 ///
 /// It is a key of its own, not a whole-text run in `metadata.woodcase.spans`: spans are the
 /// author's styling, written whole by a rich-text editor, so a run Woodcase kept in step
@@ -53,8 +55,10 @@ public struct PenTextDecoration: Friendly {
         self.strikethrough = strikethrough
     }
 
-    /// Whether the protection was made for other content than `content`, so it restores
-    /// nothing. Compared as UTF-16 code units, as ``PenTextSpans/isStale(for:)`` compares.
+    /// Whether the protection was made for other content than `content`: the words were
+    /// edited where the protection could not follow them. It still restores, and is made
+    /// again for `content` on the next read or write. Compared as UTF-16 code units, as
+    /// ``PenTextSpans/isStale(for:)`` compares.
     ///
     /// - Parameter content: The node's content as it is now.
     /// - Returns: `true` when `content` differs from ``text``.

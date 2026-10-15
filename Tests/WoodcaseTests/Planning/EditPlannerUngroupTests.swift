@@ -112,6 +112,18 @@ struct EditPlannerUngroupTests {
         #expect(g2.common.x == nil && g2.common.y == nil)
     }
 
+    @Test("A fill child joining a stack's flow keeps its fill, which the stack lays out")
+    func fillJoinsAStack() throws {
+        let json = Self.stacked.replacingOccurrences(
+            of: #""id": "G2", "x": 0, "y": 10, "width": 80"#, with: #""id": "G2", "x": 0, "y": 10, "width": "fill_container""#
+        )
+        let document = try WrapFixture.document(json)
+        let operations = try EditPlanner.planUngroup(groupID: "Pair", in: document, layout: WrapFixture.layout(of: document))
+        try WrapFixture.apply(operations, to: document)
+        let g2 = try #require(document.node(id: "G2"))
+        #expect(try NodePropertyCodec.value(at: "kind.width", of: g2) == .string("fill_container"))
+    }
+
     // MARK: - Refusals
 
     @Test("A node that is neither a group nor a frame is refused with notAGroup")

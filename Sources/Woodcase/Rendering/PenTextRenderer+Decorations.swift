@@ -15,7 +15,10 @@ public extension PenTextRenderer {
     /// Draws strikethrough lines for runs marked with the custom strikethrough attribute.
     ///
     /// Iterates the lines and their runs, finding runs with the `strikethroughKey`
-    /// attribute set, and draws a horizontal line a little above the baseline of each.
+    /// attribute set, and fills a bar a little above the baseline of each: as thick as the
+    /// run's font draws its underline, with its edges on whole device pixels, as Core Text
+    /// places an underline's — so the two decorations of one text weigh the same, as they
+    /// do in Core Text and browsers.
     ///
     /// - Parameters:
     ///   - lines: Each line with its origin in Core Text's y-up space.
@@ -30,9 +33,7 @@ public extension PenTextRenderer {
 
                 guard attrs[strikethroughKey] != nil else { continue }
 
-                // Get the font for this run to determine the line position
                 guard let font = attrs[kCTFontAttributeName] as! CTFont? else { continue }
-                let ascent = CTFontGetAscent(font)
 
                 // Get the color for this run
                 let color = attrs[kCTForegroundColorAttributeName] as! CGColor?
@@ -44,16 +45,13 @@ public extension PenTextRenderer {
                     line, runRange.location + runRange.length, nil
                 )
 
-                // Strikethrough at roughly 1/3 of ascent above baseline
-                let strikeY = lineOrigin.y + ascent * strikethroughAscentFraction
-                let lineWidth = strikethroughThickness
-
+                let bar = strikethroughBar(
+                    x: lineOrigin.x + min(startOffset, endOffset), width: abs(endOffset - startOffset),
+                    baseline: lineOrigin.y, font: font
+                )
                 context.saveGState()
-                context.setStrokeColor(color)
-                context.setLineWidth(lineWidth)
-                context.move(to: CGPoint(x: lineOrigin.x + startOffset, y: strikeY))
-                context.addLine(to: CGPoint(x: lineOrigin.x + endOffset, y: strikeY))
-                context.strokePath()
+                context.setFillColor(color)
+                context.fill(snappedToPixels(bar, in: context))
                 context.restoreGState()
             }
         }
@@ -101,11 +99,7 @@ public extension PenTextRenderer {
             bars.append(CGRect(x: span.x, y: center - thickness / 2, width: span.width, height: thickness))
         }
         if attributes[strikethroughKey] != nil {
-            let center = origin.y + CTFontGetAscent(font) * strikethroughAscentFraction
-            bars.append(CGRect(
-                x: span.x, y: center - strikethroughThickness / 2,
-                width: span.width, height: strikethroughThickness
-            ))
+            bars.append(strikethroughBar(x: span.x, width: span.width, baseline: origin.y, font: font))
         }
         return bars
     }
@@ -113,6 +107,29 @@ public extension PenTextRenderer {
     /// How far up the ascent the strikethrough sits, as a fraction of it.
     static let strikethroughAscentFraction: CGFloat = 0.35
 
-    /// The strikethrough's thickness in points.
-    static let strikethroughThickness: CGFloat = 1.0
+    /// The strikethrough bar of a run, before snapping: centered
+    /// ``strikethroughAscentFraction`` of the font's ascent above the baseline, as thick as
+    /// the font's underline.
+    ///
+    /// - Parameters:
+    ///   - x: The run's left edge.
+    ///   - width: The run's width.
+    ///   - baseline: The line's baseline, in Core Text's y-up space.
+    ///   - font: The run's font.
+    /// - Returns: The bar, in the same space.
+    static func strikethroughBar(x: CGFloat, width: CGFloat, baseline: CGFloat, font: CTFont) -> CGRect {
+        let thickness = CTFontGetUnderlineThickness(font)
+        let center = baseline + CTFontGetAscent(font) * strikethroughAscentFraction
+        return CGRect(x: x, y: center - thickness / 2, width: width, height: thickness)
+    }
+
+    /// A bar with its top and bottom moved to whole device pixels, at least one pixel apart,
+    /// so it draws solid rather than as two half-covered rows.
+    private static func snappedToPixels(_ bar: CGRect, in context: CGContext) -> CGRect {
+        let device = context.convertToDeviceSpace(bar)
+        let height = max(1, device.height.rounded())
+        let top = (device.midY - height / 2).rounded()
+        let snapped = CGRect(x: device.minX, y: top, width: device.width, height: height)
+        return context.convertToUserSpace(snapped)
+    }
 }

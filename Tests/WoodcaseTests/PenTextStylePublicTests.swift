@@ -129,10 +129,30 @@ struct PenTextStylePublicTests {
         #expect(measured == direct)
     }
 
-    @Test("The strikethrough sits 0.35 of the ascent up, 1 pt thick")
+    @Test("The strikethrough sits 0.35 of the ascent up")
     func strikethroughConstants() {
         #expect(PenTextRenderer.strikethroughAscentFraction == 0.35)
-        #expect(PenTextRenderer.strikethroughThickness == 1)
+    }
+
+    @Test("The strikethrough is as thick as the font's underline, snapped to whole pixels", arguments: [20.0, 40.0])
+    func strikethroughMatchesUnderline(fontSize: Double) throws {
+        let style = PenTextStyle(fontFamily: "Inter", fontSize: fontSize, strikethrough: true)
+        let styled = style.attributedString("Hello", for: .drawing(color: Self.red))
+        let line = CTLineCreateWithAttributedString(styled.string)
+        let width = 200, height = 80
+        let space = try #require(CGColorSpace(name: CGColorSpace.sRGB))
+        let context = try #require(CGContext(
+            data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: width * 4,
+            space: space, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ))
+        // A fractional baseline: the bar must still land on whole pixel rows.
+        PenTextRenderer.drawStrikethrough(lines: [(line, CGPoint(x: 0, y: 10.3))], in: context)
+        let pixels = try #require(context.data).bindMemory(to: UInt8.self, capacity: width * height * 4)
+        let column = 20
+        let alphas = (0 ..< height).map { pixels[($0 * width + column) * 4 + 3] }.filter { $0 != 0 }
+        let thickness = CTFontGetUnderlineThickness(styled.font)
+        #expect(alphas.allSatisfy { $0 == 255 }, "\(alphas)")
+        #expect(alphas.count == max(1, Int(thickness.rounded())), "\(alphas) for \(thickness)")
     }
 
     @Test("drawStrikethrough strokes a struck line and leaves an unstruck one alone")

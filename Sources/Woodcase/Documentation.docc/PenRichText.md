@@ -4,7 +4,7 @@ Styled runs over a text node's content: a bold word, an italic phrase, a colored
 
 ## Overview
 
-The `.pen` format has had no rich text since 2.17: a text node's `content` is one string, or a `$variable`, in one style. Woodcase goes ahead of the format. A text node keeps its plain string in `content` — the words Pen shows — and its styling beside it as ``PenTextSpans``: the runs, and the text they were made for. Pen deletes a 2.10-style run array written into `content` (the node loses its words), so runs are never written there. They live **only** in the node's `metadata.woodcase.spans` (Ben's ruling, 2026-10-11): one source of truth, which the per-entry metadata merge already resolves, key by key (<doc:PenMetadataNamespace>). Pen keeps metadata it does not understand, so a file edited in Pen keeps its styling — and when Pen changes the words, the styling goes stale rather than wrong (see Stale styling below).
+The `.pen` format has had no rich text since 2.17: a text node's `content` is one string, or a `$variable`, in one style. Woodcase goes ahead of the format. A text node keeps its plain string in `content` — the words Pen shows — and its styling beside it as ``PenTextSpans``: the runs, and the text they were made for. Pen deletes a 2.10-style run array written into `content` (the node loses its words), so runs are never written there. They live **only** in the node's `metadata.woodcase.spans` (Ben's ruling, 2026-10-11): one source of truth, which the per-entry metadata merge already resolves, key by key (<doc:PenMetadataNamespace>). Pen keeps metadata it does not understand, so a file edited in Pen keeps its styling — and when Pen changes the words, styling over part of the text goes stale rather than wrong, while styling over all of it follows the new words (see Stale styling below).
 
 There is no Pen reference to match: Pen cannot draw runs. Parity is between Woodcase's CG renderer and RapidPro, which draws the same runs through the same ``PenTextLayout``.
 
@@ -29,9 +29,9 @@ let layout = PenTextLayout(node, box: box)   // sets "bold" in the 700 face
 
 ### Stale styling
 
-``PenTextSpans/text`` is the content the runs were made for. ``PenTextSpans/appliedRuns(to:)`` returns the runs only while the content still equals it, code unit for code unit — two strings equal only by Unicode equivalence have different offsets — and an empty list otherwise. ``PenNode/appliedRuns`` asks that of the node's literal content, read from its metadata, and every consumer reads it: measurement, ink, the renderer, ``PenTextLayout/init(_:box:color:)``, the overflow lint. ``PenNode/hasStaleTextSpans`` says when they are stale, which the `spans-stale` lint, `tree` (`⚠ stale runs`) and a `set` that changes the words report (<doc:WoodcaseLint>, <doc:WoodcaseEditor>). Stale runs are kept, not moved: re-anchoring them by diffing the old text against the new can come later.
+``PenTextSpans/text`` is the content the runs were made for. ``PenTextSpans/appliedRuns(to:)`` returns the runs while the content still equals it, code unit for code unit — two strings equal only by Unicode equivalence have different offsets. Once it differs, a run over part of the text is dropped, since where it belongs in new words cannot be known; a run that covered the whole text is stretched over the whole of the new content (Ben's ruling of 2026-10-15, leaf `0LwfSn`), except a mention, which names the words it was made for, and nothing is stretched over empty content. ``PenTextSpans/ignoredRuns(for:)`` lists what is dropped. ``PenNode/appliedRuns`` asks that of the node's literal content, read from its metadata, and every consumer reads it: measurement, ink, the renderer, ``PenTextLayout/init(_:box:color:)``, the overflow lint. ``PenNode/hasStaleTextSpans`` says when some run is dropped that way, which the `spans-stale` lint, `tree` (`⚠ stale runs`) and a `set` that changes the words report (<doc:WoodcaseLint>, <doc:WoodcaseEditor>). Stale runs are kept, not moved: re-anchoring them by diffing the old text against the new can come later.
 
-An instance that overrides a component text's content draws it plain, by the same rule: the spans were made for the component's words. So a node whose words were changed by a tool that does not know about runs draws plain everywhere at once. Anything that changes `content` must restate the spans for the new text, or they go stale.
+An instance that overrides a component text's content keeps only the component's whole-text runs, by the same rule: the spans were made for the component's words. So a node whose words were changed by a tool that does not know about runs loses its partial styling everywhere at once. Anything that changes `content` must restate the spans for the new text, or they go stale.
 
 ### Editing runs
 
@@ -47,7 +47,7 @@ let spans = runs.spans(for: draft)   // nil once no run is left: remove the span
 
 ``PenFlatTextRuns/replace(_:insertedLength:keys:)`` follows an insert, a delete or a replacement: runs before it stay, runs after it shift, a run it cuts keeps its parts outside it, and the inserted text takes the keys given. Un-bolding a range *clears* its weight (``PenFlatTextRuns/clear(_:over:)``) so the node's own weight shows there, rather than writing a regular weight over it. ``PenFlatTextRuns/stretches(in:)`` and ``PenFlatTextRuns/keys(at:)`` read the keys back for an inspector or a Format menu.
 
-Stale spans start as no runs at all (``PenFlatTextRuns/init(spans:content:)``): they draw plain, so nothing visible is lost, and the spans written back are fresh for the current content and replace them — which is what a Format command on stale text does.
+Stale spans start as the runs they still apply — their whole-text runs, stretched (``PenFlatTextRuns/init(spans:content:)``): that is what draws, so nothing visible is lost, and the spans written back are fresh for the current content and replace them — which is what a Format command on stale text does.
 
 A run's keys are one list, ``PenTextRun/StyleKey``: overlaying (``PenTextRun/overlaid(by:)``), clearing (``PenTextRun/clear(_:)``), comparing (``PenTextRun/hasSameKeys(as:)``) and flattening all walk it, so a key added to ``PenTextRun`` reaches all of them, and a test fails until the new property has its case.
 
@@ -59,11 +59,12 @@ text of plain content carries either natively, Woodcase also writes them into
 `metadata.woodcase.textDecoration` (``PenTextDecoration``), with the content they were
 made for. ``PenParser`` keeps the two in step on every read and write
 (``PenDocument/protectingTextDecoration()``): a native key a file no longer writes is
-restored from protection made for the node's content, a key it does write wins, and the
-protection is then rewritten from the native keys. So a file saved in Pen reads
+restored from the protection, a key it does write wins, and the protection is then
+rewritten from the native keys. So a file saved in Pen reads
 underlined and struck through, draws so on every target, and is written with the native
-keys back. Words edited in Pen leave the protection stale, as they leave spans stale; it
-restores nothing and the next write drops it. A text whose content is a variable has no
+keys back. Both keys cover the whole text, so words edited in Pen keep them, as they keep
+a whole-text run of a text's spans: the stale protection still restores, and is made
+again for the new words (Ben's ruling of 2026-10-15, leaf `0LwfSn`). A text whose content is a variable has no
 literal to protect against and is not protected. Probed with headless Pen (pen CLI
 0.3.11, 2026-10-15) on `text-decoration.pen`, Woodcase's own write, and its save
 `text-decoration.pen-saved.pen` (`PenTextDecorationTests`, leaf `kyrTTL`).

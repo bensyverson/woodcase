@@ -34,6 +34,24 @@ struct PenTextRunModelTests {
         #expect(spans.isStale(for: "Bold text, edited in Pen"))
     }
 
+    @Test("A run over the whole text is stretched over new words; a run over part of it is dropped")
+    func wholeRunSurvivesNewWords() {
+        let whole = PenTextRun(start: 0, end: 9, underline: true)
+        let part = PenTextRun(start: 0, end: 4, fontWeight: 700)
+        let spans = PenTextSpans(text: "Bold text", runs: [whole, part])
+        #expect(spans.appliedRuns(to: "Edited in Pen") == [PenTextRun(start: 0, end: 13, underline: true)])
+        #expect(spans.ignoredRuns(for: "Edited in Pen") == [part])
+        #expect(spans.ignoredRuns(for: "Bold text").isEmpty)
+    }
+
+    @Test("A whole-text run is not stretched over empty words, nor is a whole-text mention")
+    func wholeRunExceptions() {
+        let spans = PenTextSpans(text: "@claude", runs: [PenTextRun(start: 0, end: 7, mention: "claude")])
+        #expect(spans.appliedRuns(to: "@someone").isEmpty)
+        let underlined = PenTextSpans(text: "Words", runs: [PenTextRun(start: 0, end: 5, underline: true)])
+        #expect(underlined.appliedRuns(to: "").isEmpty)
+    }
+
     @Test("Content equal only by Unicode equivalence is stale: its UTF-16 offsets differ")
     func staleAcrossNormalization() {
         // "é" decomposed (e + combining acute, 2 units) against precomposed (1 unit).

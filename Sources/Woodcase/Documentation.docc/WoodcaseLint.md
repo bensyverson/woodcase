@@ -85,7 +85,7 @@ no document, so accepting any of those would be accepting an argument it ignores
 | `note-unsized` | notice | A `note` with no `width` or `height` of its own, or the `0` Pen saves an unsized note with, which lays out at the 200-pt post-it default on that axis |
 | `metadata-old-style` | notice | A node keeps Woodcase metadata under its spelling from before `metadata.woodcase` (`_props`, a post-it's bare `state`); still read, and `woodcase migrate` moves it in |
 | `note-state` | notice | A plain note — not a comment, not a prompt — carries a `state`, in either spelling. Only comments are open or resolved, so it draws nothing; remove it, or make the note a comment |
-| `spans-stale` | warning | A text whose `metadata.woodcase.spans` were made for other words than its content, so its styling is ignored and it draws plain |
+| `spans-stale` | warning | A text whose `metadata.woodcase.spans` were made for other words than its content, so its runs over part of the text are ignored |
 | `stroke-dash-ignored` | warning | A `metadata.woodcase.strokeDash` every target draws solid: on a per-side `strokeWidth`, or one that is not an array of at most 16 non-negative lengths, not all zero |
 | `shadow-spread-stale` | warning | A `metadata.woodcase.shadowSpread` entry made for a shadow the node no longer has at its place — Pen changed, moved or removed it — so the shadow casts without its spread |
 
@@ -495,8 +495,9 @@ notice metadata-old-style  Button (Btn01)  keeps Woodcase metadata under its old
 `spans-stale` is a warning, one finding per text node whose spans
 (`metadata.woodcase.spans`, <doc:PenRichText>) record other words than its content — Pen,
 which keeps metadata but has no rich text, changed the words, or a `set` changed
-`kind.content` without restating the spans. The runs are ignored, so the text draws
-plain rather than styling the wrong characters: a warning, on the reading
+`kind.content` without restating the spans. The runs over part of the text are ignored
+rather than styling the wrong characters, and a run over the whole text is stretched over
+the new words, so spans whose every run covered the whole text raise no finding: a warning, on the reading
 `text-style-stripped` has, because the node draws, only not as its styling says. A row
 inside an instance is skipped (an instance that overrides the content draws it plain by
 design). A `set` that makes a text's spans stale prints this same line on standard error.

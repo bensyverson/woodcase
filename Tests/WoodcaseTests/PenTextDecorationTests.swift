@@ -8,9 +8,10 @@ import Testing
 /// Pen strips `underline` and `strikethrough` from a text node when it opens a file, and
 /// keeps metadata. So whenever a text carries either natively, Woodcase writes them into
 /// `metadata.woodcase.textDecoration` too, with the content they were made for; reading a
-/// file whose native keys are gone but whose protection still matches the content restores
-/// them, so Woodcase draws them and writes them back. Text edited in Pen leaves the
-/// protection stale, and it is dropped.
+/// file whose native keys are gone but whose protection is still there restores
+/// them, so Woodcase draws them and writes them back. Both keys cover the whole text, so
+/// text edited in Pen keeps them too: the protection is made again for the new words (Ben's
+/// ruling of 2026-10-15, leaf 0LwfSn).
 ///
 /// `text-decoration.pen` is Woodcase's own write (`woodcase migrate --force`) of two texts
 /// with a native underline and strikethrough; `text-decoration.pen-saved.pen` is headless
@@ -82,13 +83,13 @@ struct PenTextDecorationTests {
         #expect(written.contains(#""strikethrough":true"#), "\(written)")
     }
 
-    @Test("Protection made for other words — the text was edited in Pen — restores nothing and is dropped")
-    func staleProtectionIsDropped() throws {
+    @Test("Protection made for other words — the text was edited in Pen — still restores, made again for the new words")
+    func staleProtectionIsStretched() throws {
         let doc = try document(text("", metadata: Self.protection.replacingOccurrences(of: #""text": "Struck""#, with: #""text": "Older""#)))
         let node = try #require(doc.children.first)
-        #expect(try data(node).underline == nil)
-        #expect(try data(node).strikethrough == nil)
-        #expect(node.common.metadata == nil)
+        #expect(try data(node).underline == .literal(true))
+        #expect(try data(node).strikethrough == .literal(true))
+        #expect(node.textDecoration == PenTextDecoration(text: "Struck", underline: true, strikethrough: true))
     }
 
     @Test("A native key the file still writes wins over the protection")
@@ -117,7 +118,7 @@ struct PenTextDecorationTests {
 
     // MARK: - Pen's own save
 
-    @Test("Pen's save of a protected file reads underlined and struck through; the text Pen edited reads plain")
+    @Test("Pen's save of a protected file reads underlined and struck through, the text Pen edited too")
     func pensSave() throws {
         let doc = try PenParser.parse(contentsOf: Self.fixtures.appendingPathComponent("text-decoration.pen-saved.pen"))
         let board = try #require(doc.children.first)
@@ -126,8 +127,9 @@ struct PenTextDecorationTests {
         #expect(kept.underline == .literal(true))
         #expect(kept.strikethrough == .literal(true))
         let edited = try #require(children.first { $0.id == "t2" })
-        #expect(try data(edited).underline == nil)
-        #expect(edited.common.metadata == nil)
+        #expect(try data(edited).underline == .literal(true))
+        #expect(try data(edited).strikethrough == .literal(true))
+        #expect(edited.textDecoration?.text == "Edited in Pen")
     }
 
     @Test("Woodcase draws the underline and strikethrough of a text Pen stripped them from")
@@ -152,6 +154,18 @@ struct PenTextDecorationTests {
         #expect(found.count == 2)
         #expect(found.allSatisfy { $0.severity == .notice }, "\(found)")
         #expect(found.allSatisfy { $0.message.contains("metadata.woodcase.textDecoration") }, "\(found)")
+    }
+
+    @Test("text-style-stripped counts an underline protected for older words as protected")
+    @MainActor
+    func lintStaleProtectionStillProtects() throws {
+        let editable = try EditableDocument(from: document(text(#", "underline": true"#)))
+        try editable.apply(.setProperties(EditOperation.SetProperties(
+            nodeID: "t", properties: ["kind.content": .string("New words")]
+        )))
+        let found = try DocumentLinter.findings(in: editable).filter { $0.check == .textStyleStripped }
+        #expect(found.count == 1)
+        #expect(found.first?.severity == .notice, "\(found)")
     }
 
     @Test("text-style-stripped still warns about an underline it cannot protect")

@@ -909,7 +909,9 @@ Pass at most one placement. `--dry-run` and `--as` work as for every write verb.
 ### `mv`
 
 Move a node to another parent, or to another position under the same one. The node
-keeps everything it had; only where it sits changes. A move into a node's own subtree,
+keeps everything it had but one: moved into a parent that does not lay it out (a free
+frame, a group, the document root), a `fill_container` width or height becomes the size
+it was drawn at, since there is nothing there to fill (<doc:EditPlanning>). A move into a node's own subtree,
 or into a component instance, is refused with the reason.
 
 ```bash

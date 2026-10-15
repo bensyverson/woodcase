@@ -13,8 +13,10 @@ struct MoveCommand: AsyncParsableCommand {
         commandName: "mv",
         abstract: "Write: move a node to another parent, or to another position.",
         discussion: """
-        An act verb. The node keeps everything it had; only where it sits changes. \
-        Naming the parent it is already in reorders it there, and `document` makes \
+        An act verb. The node keeps everything it had; only where it sits changes — \
+        except that moved into a parent that does not lay it out (a free frame, a \
+        group, the document root), a fill_container width or height becomes the size \
+        it was drawn at. Naming the parent it is already in reorders it there, and `document` makes \
         it a root.
 
         A node cannot move inside itself, and it cannot move into a component \

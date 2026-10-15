@@ -52,6 +52,10 @@ extension BatchApplier {
         )
     }
 
+    /// An `mv` line: the move, and — where the new parent does not lay the node out — its
+    /// fill sizes kept at the size they were drawn at, as
+    /// ``EditPlanner/planMove(nodeID:into:at:in:layout:)`` plans them. The document is laid
+    /// out only for a node with a fill size.
     private static func planMove(
         _ op: BatchOperation.MoveOp,
         in document: EditableDocument,
@@ -59,8 +63,11 @@ extension BatchApplier {
     ) throws -> BatchPlan {
         let id = try nodeID(op.target, in: document, tags: tags)
         let parentID = try op.parent.map { try containerID($0, in: document, tags: tags) }
+        let kept = EditPlanner.keptSizes(movingNode: id, into: parentID, in: document) {
+            PenLayoutState(document: PenVariableResolver.resolve(document.expandedDocument().0))
+        }
         return BatchPlan(
-            operations: [.moveNode(EditOperation.MoveNode(nodeID: id, newParentID: parentID, index: op.at))],
+            operations: [.moveNode(EditOperation.MoveNode(nodeID: id, newParentID: parentID, index: op.at))] + kept,
             expecting: expecting(op.rev, on: id),
             actedOnID: id
         )
