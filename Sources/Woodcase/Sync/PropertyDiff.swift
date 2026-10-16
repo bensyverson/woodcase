@@ -352,6 +352,20 @@ public enum PropertyDiff {
     /// - Parameter type: The node type to list.
     /// - Returns: Every `kind.*` path the codec reads and writes on that type.
     public static func allKindKeys(_ type: PenNode.NodeType) -> Set<String> {
+        kindKeysByType[type] ?? buildKindKeys(type)
+    }
+
+    /// Every type's `kind.*` paths, spelled out once: the codec validates a path against
+    /// them on every read and write.
+    private static let kindKeysByType: [PenNode.NodeType: Set<String>] = Dictionary(
+        uniqueKeysWithValues: PenNode.NodeType.allCases.map { ($0, buildKindKeys($0)) }
+    )
+
+    /// Spells out the property paths a node of this type accepts.
+    ///
+    /// - Parameter type: The node type to list.
+    /// - Returns: Every `kind.*` path the codec reads and writes on that type.
+    static func buildKindKeys(_ type: PenNode.NodeType) -> Set<String> {
         switch type {
         case .frame:
             Set(["kind.width", "kind.height", "kind.cornerRadius", "kind.clip",

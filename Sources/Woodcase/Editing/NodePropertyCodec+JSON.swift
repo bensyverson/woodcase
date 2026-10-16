@@ -8,9 +8,9 @@ import Foundation
 /// The JSON layer under ``NodePropertyCodec``.
 ///
 /// A node's shared properties and each kind's payload are already `Codable` in
-/// the .pen file's shape, so the codec addresses a single property by encoding
+/// the .pen file's shape, so the codec writes a single property by encoding
 /// the whole payload to a JSON dictionary, replacing one key, and decoding it
-/// back. That makes the wire shape of every path correct by construction —
+/// back, and reads one by encoding only that key (``singleValue(forKey:in:)``). That makes the wire shape of every path correct by construction —
 /// there is no second, hand-written description of what a property looks like
 /// on disk — and turns a bad value into a real `DecodingError` that the codec
 /// reports as ``EditingError/propertyTypeMismatch(nodeID:key:expected:actual:)``.
@@ -66,7 +66,8 @@ extension NodePropertyCodec {
 
     /// Encodes a `Codable` payload to the flat JSON dictionary the .pen file holds.
     static func dictionary(from value: some Encodable) throws -> [String: AnyCodable] {
-        try JSONDecoder().decode([String: AnyCodable].self, from: JSONEncoder().encode(value))
+        ReadCostCounter.record(.payloadEncode)
+        return try JSONDecoder().decode([String: AnyCodable].self, from: JSONEncoder().encode(value))
     }
 
     /// Decodes a flat JSON dictionary back into a typed payload.
@@ -101,6 +102,52 @@ extension NodePropertyCodec {
         case let .connection(data): try dictionary(from: data)
         case let .ref(data): try dictionary(from: data)
         case let .unknown(_, properties): properties
+        }
+    }
+
+    /// One key of a `Codable` payload, encoded on its own.
+    ///
+    /// Equal to `dictionary(from: payload)[key] ?? .null`, without encoding the
+    /// payload's other keys — ``SingleKeyEncoder`` walks the payload's own
+    /// `encode(to:)` and keeps only `key`. A payload that encodes itself in a way that
+    /// encoder does not follow is encoded whole instead.
+    ///
+    /// - Parameters:
+    ///   - key: The JSON key, as ``jsonKey(for:)`` spells it.
+    ///   - payload: The payload to read.
+    /// - Returns: The key's JSON value, or ``AnyCodable/null`` when the payload does not
+    ///   write it.
+    static func singleValue(forKey key: String, in payload: some Encodable) throws -> AnyCodable {
+        if let value = try SingleKeyEncoder.value(forKey: key, in: payload) { return value }
+        return try dictionary(from: payload)[key] ?? .null
+    }
+
+    /// One key of a kind's payload, encoded on its own — ``kindDictionary(_:)``'s
+    /// entry for `key`, without the rest of the dictionary.
+    ///
+    /// - Parameters:
+    ///   - key: The JSON key.
+    ///   - kind: The kind to read.
+    /// - Returns: The key's JSON value, or ``AnyCodable/null`` when it is unset.
+    static func kindPayloadValue(forKey key: String, in kind: PenNode.Kind) throws -> AnyCodable {
+        switch kind {
+        case let .frame(data): try singleValue(forKey: key, in: data)
+        case let .text(data): try singleValue(forKey: key, in: data)
+        case let .rectangle(data): try singleValue(forKey: key, in: data)
+        case let .ellipse(data): try singleValue(forKey: key, in: data)
+        case let .path(data): try singleValue(forKey: key, in: data)
+        case let .group(data): try singleValue(forKey: key, in: data)
+        case let .line(data): try singleValue(forKey: key, in: data)
+        case let .polygon(data): try singleValue(forKey: key, in: data)
+        case let .note(data): try singleValue(forKey: key, in: data)
+        case let .prompt(data): try singleValue(forKey: key, in: data)
+        case let .context(data): try singleValue(forKey: key, in: data)
+        case let .icon(data): try singleValue(forKey: key, in: data)
+        case let .script(data): try singleValue(forKey: key, in: data)
+        case let .browser(data): try singleValue(forKey: key, in: data)
+        case let .connection(data): try singleValue(forKey: key, in: data)
+        case let .ref(data): try singleValue(forKey: key, in: data)
+        case let .unknown(_, properties): properties[key] ?? .null
         }
     }
 

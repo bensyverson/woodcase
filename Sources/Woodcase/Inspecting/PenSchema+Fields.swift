@@ -21,10 +21,12 @@ public extension PenSchema {
     /// - Parameter type: The node type.
     /// - Returns: The rows, sorted by path.
     static func fields(for type: PenNode.NodeType) -> [PenSchemaTable.Property] {
-        (common.properties + table(for: type).properties).sorted { $0.path < $1.path }
+        fieldIndexes[type]?.fields ?? FieldIndex(type: type).fields
     }
 
     /// One property of a node type.
+    ///
+    /// A lookup in a table built once per type, so it costs a dictionary read.
     ///
     /// - Parameters:
     ///   - property: A property path (`kind.fills`), a raw key (`fill`), or the path of a
@@ -32,15 +34,41 @@ public extension PenSchema {
     ///   - type: The node type.
     /// - Returns: The row, or `nil` when nodes of `type` do not take the property.
     static func field(_ property: String, for type: PenNode.NodeType) -> PenSchemaTable.Property? {
-        if let row = woodcaseFields(for: type).first(where: { $0.path == property }) { return row }
+        let index = fieldIndexes[type] ?? FieldIndex(type: type)
+        if let row = index.woodcase[property] { return row }
         let path = NodePropertyCodec.fieldName(of: property) != nil
             ? property
             : NodePropertyCodec.path(forRawKey: property)
         guard let path else { return nil }
-        if NodePropertyCodec.commonPaths.contains(path) {
-            return common.properties.first { $0.path == path }
-        }
-        guard PropertyDiff.allKindKeys(type).contains(path) else { return nil }
-        return table(for: type).properties.first { $0.path == path }
+        return index.byPath[path]
     }
+}
+
+extension PenSchema {
+    /// One type's rows, sorted and keyed by path, built once.
+    struct FieldIndex: Friendly {
+        /// The `common.*` rows and the type's own `kind.*` rows, sorted by path.
+        let fields: [PenSchemaTable.Property]
+        /// The same rows by path.
+        let byPath: [String: PenSchemaTable.Property]
+        /// The type's `metadata.woodcase` rows by path, which win over the others.
+        let woodcase: [String: PenSchemaTable.Property]
+
+        /// Indexes one type's rows.
+        ///
+        /// - Parameter type: The node type.
+        init(type: PenNode.NodeType) {
+            fields = (PenSchema.common.properties + PenSchema.table(for: type).properties).sorted { $0.path < $1.path }
+            byPath = Dictionary(fields.map { ($0.path, $0) }, uniquingKeysWith: { first, _ in first })
+            woodcase = Dictionary(
+                PenSchema.woodcaseFields(for: type).map { ($0.path, $0) },
+                uniquingKeysWith: { first, _ in first }
+            )
+        }
+    }
+
+    /// Every type's index, built once.
+    static let fieldIndexes: [PenNode.NodeType: FieldIndex] = Dictionary(
+        uniqueKeysWithValues: PenNode.NodeType.allCases.map { ($0, FieldIndex(type: $0)) }
+    )
 }

@@ -21,7 +21,17 @@ import Foundation
 /// ```
 public enum PenSchema {
     /// The properties every node of every type takes.
+    ///
+    /// Built once, on first use, and shared: the table is immutable.
     public static var common: PenSchemaTable {
+        commonTable
+    }
+
+    /// The `common.*` table, built once.
+    private static let commonTable: PenSchemaTable = buildCommonTable()
+
+    /// Builds the `common.*` table from the codec's vocabulary.
+    static func buildCommonTable() -> PenSchemaTable {
         PenSchemaTable(
             type: nil,
             summary: "every node of every type takes these",
@@ -35,7 +45,21 @@ public enum PenSchema {
     /// - Returns: Its `kind.*` rows, sorted by path. The `common.*` rows are not
     ///   repeated: they are the same thirteen on all sixteen types, and burying the
     ///   eight to twenty-three rows that differ under them is what the reader came for.
+    ///   Each type's table is built once, on first use of any, and shared.
     public static func table(for type: PenNode.NodeType) -> PenSchemaTable {
+        kindTables[type] ?? buildTable(for: type)
+    }
+
+    /// Every type's `kind.*` table, built once.
+    private static let kindTables: [PenNode.NodeType: PenSchemaTable] = Dictionary(
+        uniqueKeysWithValues: PenNode.NodeType.allCases.map { ($0, buildTable(for: $0)) }
+    )
+
+    /// Builds one type's `kind.*` table from the codec's vocabulary.
+    ///
+    /// - Parameter type: The node type to describe.
+    /// - Returns: Its rows, sorted by path.
+    static func buildTable(for type: PenNode.NodeType) -> PenSchemaTable {
         PenSchemaTable(
             type: type,
             summary: type.summary,
@@ -87,7 +111,8 @@ public enum PenSchema {
         prefix: String,
         type: PenNode.NodeType?
     ) -> [PenSchemaTable.Property] {
-        paths.sorted().map { path in
+        ReadCostCounter.record(.schemaTable(type))
+        return paths.sorted().map { path in
             let field = String(path.dropFirst(prefix.count))
             return PenSchemaTable.Property(
                 path: path,

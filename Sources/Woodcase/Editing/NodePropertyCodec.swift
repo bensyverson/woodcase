@@ -108,7 +108,7 @@ public enum NodePropertyCodec {
     ) throws -> AnyCodable {
         guard commonPaths.contains(path) else { throw unknownProperty(path, nodeID, nodeType) }
         let field = String(path.dropFirst(commonPrefix.count))
-        return try dictionary(from: common)[jsonKey(for: field)] ?? .null
+        return try singleValue(forKey: jsonKey(for: field), in: common)
     }
 
     /// Reads the value at a `kind.*` path.
@@ -133,7 +133,7 @@ public enum NodePropertyCodec {
             default: return data.rootOverrides.map { .dictionary($0) } ?? .null
             }
         default:
-            return try kindDictionary(kind)[jsonKey(for: field)] ?? .null
+            return try kindPayloadValue(forKey: jsonKey(for: field), in: kind)
         }
     }
 

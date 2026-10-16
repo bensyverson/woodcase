@@ -101,7 +101,10 @@ a malformed tint, is refused with
 <doc:PenMetadataNamespace> and <doc:PenPostItConvention>.
 
 ``NodePropertyCodec/paths(for:)`` lists what a given node accepts, and
-``NodePropertyCodec/value(at:of:)`` reads one back. `"kind.type"` is deliberately not a
+``NodePropertyCodec/value(at:of:)`` reads one back. A read costs its one path: it runs
+the payload's own `encode(to:)` but encodes only the key it wants, so reading a board's
+`kind.width` does not encode its children, and a caller that reads many paths need not
+hold anything between reads. `"kind.type"` is deliberately not a
 path — changing a node's type is ``EditOperation/updateKind(_:)``'s job, or
 ``EditOperation/replaceSubtree(_:)``'s when its contents change with it.
 
@@ -175,7 +178,8 @@ padding `[horizontal, vertical]` when the decoder reads it as `[vertical, horizo
 `common.*` one — which is what `woodcase schema` prints and what
 <doc:WoodcaseCLI> documents. It reads `PropertyDiff.allKindKeys` for the paths and
 ``NodePropertyCodec/shape(of:)`` for the shapes, so the table and the refusal are the
-same list by construction; a test walks every ``PenNode/NodeType`` and asserts it.
+same list by construction; a test walks every ``PenNode/NodeType`` and asserts it. Each
+table is built once and shared, so ``PenSchema/field(_:for:)`` is a dictionary lookup.
 
 The inverse of a patch is a patch: ``EditableDocument/prepareInverse(of:)`` returns a
 `setProperties` carrying the prior value of exactly the same keys, so undo restores a
