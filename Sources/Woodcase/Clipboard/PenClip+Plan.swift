@@ -78,28 +78,40 @@ public extension PenClip {
             RootOverlap.roots(in: EditableDocument(from: self.document)).map { ($0.id, $0.rect) },
             uniquingKeysWith: { first, _ in first }
         )
-        let placedContent = site.positioned(
-            Array(settled.dropFirst(added.count)),
+        let copies = PasteSite.Copies(
             rects: contentIDs.map { clipRects[$0] },
-            offsets: contentIDs.map { offsets?[$0] },
+            origins: contentIDs.map { origins?[$0] },
+            sourceDocumentID: sourceDocumentID
+        )
+        let placed = Self.sized(
+            site.placed(Array(settled.dropFirst(added.count)), copies: copies, in: document),
+            origins: copies.origins,
+            drawn: { drawnSizes() },
             in: document
         )
+        let placedContent = placed.map(\.node)
         try Self.refuseComponentLoops(
-            content: placedContent, definitions: newDefinitions, parentID: site.parentID, among: theirs, in: document
+            content: placedContent, definitions: newDefinitions, parentIDs: placed.map(\.parentID),
+            among: theirs, in: document
         )
+        let onCanvas = zip(placed, content).filter { $0.0.parentID == nil }
         let placedDefinitions = Self.pastTheCanvas(
             newDefinitions,
             widths: added.map { clipRects[$0.id]?.width ?? 0 },
             occupied: RootOverlap.roots(in: document).map(\.rect)
-                + (site.parentID == nil ? Self.rects(of: placedContent, sized: content, from: clipRects) : [])
+                + Self.rects(of: onCanvas.map(\.0.node), sized: onCanvas.map(\.1), from: clipRects)
         )
+
+        /// Each copied root's size as the clip draws it.
+        func drawnSizes() -> [PenSize?] {
+            let laidOut = PenLayoutEngine.layout(PenVariableResolver.resolve(self.document))
+            return contentIDs.map { laidOut[$0]?.drawnSize }
+        }
 
         var operations = themeOperations(in: document) + variables.operations
         operations += placedDefinitions.map { .insertNode(EditOperation.InsertNode(node: $0)) }
-        operations += placedContent.enumerated().map { offset, node in
-            .insertNode(EditOperation.InsertNode(
-                node: node, parentID: site.parentID, index: site.index.map { $0 + offset }
-            ))
+        operations += placed.map { root in
+            .insertNode(EditOperation.InsertNode(node: root.node, parentID: root.parentID, index: root.index))
         }
         return PastePlan(
             operations: operations,

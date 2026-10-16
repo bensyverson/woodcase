@@ -25,8 +25,9 @@ struct PasteCommand: AsyncParsableCommand {
 
         Where the copies go — pass at most one:
           --into <container>  after its last child: in a stack they join the flow; in a \
-        free container they keep the canvas position they were copied from, in its \
-        coordinates, or are centered in it when that would miss it
+        free container each keeps the offset it had in the parent it was copied out of \
+        (its canvas position, in the container's coordinates, when it was a root), or \
+        they are centered in it when that would miss it
           --after <node>      right after the node in its parent: in a stack, in the \
         flow; elsewhere to its right, top-aligned
           --at x,y            on the canvas, as roots, centered on the point
@@ -186,7 +187,7 @@ struct PasteCommand: AsyncParsableCommand {
         switch placement {
         case let .into(address): try .inside(containerID: stored(address, in: document))
         case let .after(address): try .after(siblingID: stored(address, in: document))
-        case let .at(point): .canvas(center: point)
+        case let .at(point): .centered(on: point, in: nil)
         case .inPlace: .inPlace
         }
     }

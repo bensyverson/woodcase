@@ -377,9 +377,10 @@ woodcase shot clip.pen
 ```
 
 **Options:** `--as` (a reader, for the view log), `--json`, which prints
-`{"contentIDs": [...], "document": {...}, "offsets": {...}}` so the copied roots can be
-told from the carried definitions; `offsets` gives each root copied out of a parent its
-`{"x", "y"}` there, which `paste --into` a free container keeps.
+`{"contentIDs": [...], "document": {...}, "origins": {...}}` so the copied roots can be
+told from the carried definitions; `origins` gives each root where it came from
+(``PenClip/Origin``): its `parentID` and `offset` there, which `paste --into` a free
+container keeps, and its `boardID` and `boardOffset` from that board's corner.
 
 ### `lint`
 

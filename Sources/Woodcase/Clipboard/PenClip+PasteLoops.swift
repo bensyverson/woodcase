@@ -12,8 +12,8 @@ extension PenClip {
     /// with every component the paste brings — the definitions and any component among
     /// the copies — under their new ids. A loop closes in one of two ways:
     ///
-    /// - **Into a component**: the parent the copies land in is a component, or inside
-    ///   one, and something the copies render reaches back to it. An edge between two
+    /// - **Into a component**: a parent copies land in is a component, or inside one, and
+    ///   something the copies landing there render reaches back to it. An edge between two
     ///   members of a loop the target already holds closes nothing new, as the loop guard
     ///   on ``EditableDocument`` reads it.
     /// - **Among what the paste brings**: a component it brings reaches back to itself, as
@@ -25,14 +25,14 @@ extension PenClip {
     /// - Parameters:
     ///   - content: The copied roots, rewritten, with their new ids.
     ///   - definitions: The definitions the paste inserts, rewritten, with their new ids.
-    ///   - parentID: Where the copies land, or `nil` for the canvas.
+    ///   - parentIDs: Where each copy lands, in the same order; `nil` for the canvas.
     ///   - theirs: The target's components, own and imported, by id.
     ///   - document: The target document.
     /// - Throws: ``PasteError/wouldCloseComponentLoop(_:)``.
     static func refuseComponentLoops(
         content: [PenNode],
         definitions: [PenNode],
-        parentID: String?,
+        parentIDs: [String?],
         among theirs: [String: PenNode],
         in document: EditableDocument
     ) throws {
@@ -56,9 +56,17 @@ extension PenClip {
         }
         let name: (String) -> String = { registry[$0]?.common.name ?? $0 }
 
-        if let parentID {
+        var landing: [String: [PenNode]] = [:]
+        var parents: [String] = []
+        for (node, parentID) in zip(content, parentIDs) {
+            guard let parentID else { continue }
+            if landing[parentID] == nil { parents.append(parentID) }
+            landing[parentID, default: []].append(node)
+        }
+        for parentID in parents {
             var seen: Set<String> = []
-            let rendered = content.flatMap(ComponentLoopIndex.renderedInSubtree(of:)).filter { seen.insert($0).inserted }
+            let rendered = (landing[parentID] ?? []).flatMap(ComponentLoopIndex.renderedInSubtree(of:))
+                .filter { seen.insert($0).inserted }
             let groups = document.componentLoopIndex.groupOf
             let sites = ([parentID] + document.componentAncestors(of: parentID)).filter { document.componentRegistry[$0] != nil }
             for site in sites {

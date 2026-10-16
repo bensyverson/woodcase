@@ -40,7 +40,7 @@ struct PenClipPasteNamingTests {
         let first = try clip.plan(into: target, at: .inPlace)
         try PasteFixture.apply(first, to: target)
 
-        let second = try clip.plan(into: target, at: .canvas(center: PenPoint(x: 900, y: 900)))
+        let second = try clip.plan(into: target, at: .centered(on: PenPoint(x: 900, y: 900), in: nil))
         try PasteFixture.apply(second, to: target)
 
         #expect(second.operations.count == 1)

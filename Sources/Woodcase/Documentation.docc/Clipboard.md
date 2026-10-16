@@ -6,16 +6,16 @@ taking a clip into a document, reusing what the document already has.
 
 ## Overview
 
-An editor's Copy hands ``PenClip/extract(nodeIDs:from:)`` the ids it has selected and
+An editor's Copy hands ``PenClip/extract(nodeIDs:from:documentID:)`` the ids it has selected and
 puts the whole clip on the pasteboard as JSON — not only its ``PenClip/document`` — so a
 paste can tell the copied roots (``PenClip/contentIDs``) from the definitions carried for
-them, and keep each root's ``PenClip/offsets``; `woodcase clip` prints the clip's document. Paste is the other half: ``PenClip/plan(into:at:)`` takes a clip and a target
+them, and keep each root's ``PenClip/origins``; `woodcase clip` prints the clip's document. Paste is the other half: ``PenClip/plan(into:at:)`` takes a clip and a target
 document and returns the operations that bring it in (<doc:Clipboard#Pasting>); `woodcase paste`
 applies them to a file. The rules below are Penumbra's interaction spec §16 and its
 session 18 ruling.
 
 ```swift
-let clip = try PenClip.extract(nodeIDs: selection, from: document)
+let clip = try PenClip.extract(nodeIDs: selection, from: document, documentID: windowDocumentID)
 pasteboard.setData(try JSONEncoder().encode(clip), forType: clipType)
 ```
 
@@ -29,16 +29,43 @@ and `themes` hold exactly what those roots need, and it has no `imports`.
 |---|---|
 | A stored node | Its subtree as stored, ids unchanged — unless it was copied out of a component the clip also carries, which would hold it twice; then it takes derived ids of its own |
 | A node under another copied node | Nothing more: it travels inside the outer one |
-| A node that was not a root | A root at the canvas position it was drawn at; a `fill_container` width or height becomes the size it was drawn; `layoutPosition` is dropped. Its offset in its parent — the point its `x` and `y` named there, as drawn, so a stack child records where the stack put it — goes in ``PenClip/offsets`` |
+| A node that was not a root | A root at the canvas position it was drawn at; a `fill_container` width or height becomes the size it was drawn, its original kept in the root's ``PenClip/Origin`` for a paste into a stack; `layoutPosition` is dropped. Its offset in its parent — the point its `x` and `y` named there, as drawn, so a stack child records where the stack put it — goes in its ``PenClip/Origin`` |
 | An instance (a `ref`, or its expanded root id) | The `ref`, still linked, with its component carried |
 | A node inside an instance | Its drawing — overrides applied, nested instances expanded — detached, under ids derived as a detach derives them (``SubtreeIDPlan/detaching(_:refID:replica:avoiding:)``) |
 | A component from an imported library | A local definition under its prefixed id (`K:Chip1`), with the library variables it uses (`$K:accent`) |
 
-The ids ``PenClip/extract(nodeIDs:from:)`` takes are the expanded document's — the ones
+The ids ``PenClip/extract(nodeIDs:from:documentID:)`` takes are the expanded document's — the ones
 a canvas selects and hit-tests (``EditableDocument/expandedID(of:)``) — and a stored
 node's own id is accepted as well. A position is the canvas point a root's `x` and `y`
 name, its own origin: a node keeps its own turn, but a turn it inherited from an
 ancestor is not carried.
+
+### Where each copy came from
+
+Each copied root has a ``PenClip/Origin`` in ``PenClip/origins``, which a Paste in Place
+reads:
+
+| Field | A node copied out of a parent | A root copied from the top level |
+|---|---|---|
+| ``PenClip/Origin/parentID`` | The parent's stored id; for a node drawn inside an instance, the expanded id of the node it was drawn under, which no paste can write into | `nil` |
+| ``PenClip/Origin/offset`` | Its offset in that parent | `nil` |
+| ``PenClip/Origin/boardID`` | Its board: the stored root above it | `nil` |
+| ``PenClip/Origin/boardOffset`` | Its offset from the board's top-left corner, in the board's coordinates | Its canvas position: the offset from the canvas origin |
+| ``PenClip/Origin/nodeID`` | The id it had in the source | The same |
+| ``PenClip/Origin/index`` | Its place among the parent's children (`nil` when drawn inside an instance) | Its place among the roots |
+| ``PenClip/Origin/width``, ``PenClip/Origin/height`` | The `fill_container` sizing it had, which the clip writes at its drawn size; `nil` otherwise | `nil`: a root keeps its own sizing in the clip |
+
+Every offset is the point the root's `x` and `y` named, as drawn — its own origin, so a
+node a stack placed records where the stack put it.
+
+**The document is named by the editor.** A .pen file stores no identity of its own: its
+`fileToken` is a per-save token another editor writes and rewrites, not a name, and
+Woodcase never generates one. So ``PenClip/extract(nodeIDs:from:documentID:)`` takes
+whatever id the copying editor gives its document — any string that stays the same
+while it is open, such as one made when the window opens — and records it as
+``PenClip/sourceDocumentID``. The editor names its document again when it pastes
+(``PasteTarget/whereCopied(documentID:)``); equal ids mean the copy is home, where its
+parent ids still mean what they meant. A clip given no id is never taken to be home.
 
 ### Components
 
@@ -94,10 +121,19 @@ the copies; the rest of the plan says what was reused and what was renamed.
 
 | ``PasteTarget`` | The copies land |
 |---|---|
-| ``PasteTarget/inside(containerID:)`` | After the container's last child. In a stack they join the flow and lose `x` and `y`; in a free container (a `layout: none` frame or a group) each keeps the offset it had in the parent it was copied out of (``PenClip/offsets``) — or, when that would miss the container's box, they are centered in it |
+| ``PasteTarget/inside(containerID:)`` | After the container's last child. In a stack they join the flow and lose `x` and `y`; in a free container (a `layout: none` frame or a group) each keeps the offset it had in the parent it was copied out of (``PenClip/Origin/offset``) — or, when that would miss the container's box, they are centered in it |
 | ``PasteTarget/after(siblingID:)`` | Right after the node in its parent. In a stack, in the flow; elsewhere to its right, top-aligned, ``PenClip/besideGap`` away (``RootOverlap/margin`` when the node is a root) |
-| ``PasteTarget/canvas(center:)`` | As roots, the clip's bounds centered on the point |
+| ``PasteTarget/at(topLeft:in:)`` | The copies' bounds with their top-left corner on the canvas point: into the container, after its last child, or as roots for `nil`. Exact — never moved to fit |
+| ``PasteTarget/centered(on:in:)`` | The copies' bounds centered on the canvas point, into the container or as roots. Exact |
+| ``PasteTarget/atInnerTopLeft(of:)`` | Into the container, the bounds' top-left corner at its inner top-left (its box moved in by its padding). Exact |
+| ``PasteTarget/atBoardOffset(in:)`` | Into the container, each copy at its ``PenClip/Origin/boardOffset`` — its offset from its own board's corner, from the canvas origin for a top-level copy. Exact, even wholly outside the container's box, so a board that clips shows what falls inside it |
+| ``PasteTarget/whereCopied(documentID:)`` | Each copy on its own, back where it came from (<doc:Clipboard#Back-where-it-came-from>) |
 | ``PasteTarget/inPlace`` | As roots, at the coordinates they were copied from |
+
+Every target that names a container refuses one the document does not store or one that
+cannot hold children, and in a stack puts the copies in its flow. The copies keep their
+arrangement in every case but ``PasteTarget/atBoardOffset(in:)`` and
+``PasteTarget/whereCopied(documentID:)``, which place each by its own origin.
 
 Definitions the target lacks are never put inside a container: they land as roots in a row
 past everything on the canvas, ``RootOverlap/margin`` apart — the rule a copied root is
@@ -105,9 +141,42 @@ placed by.
 
 Pasted into the free container it was copied out of, a copy lands on its original; pasted
 into another, at the same offset there. A copy with no offset — a root copied from the
-canvas, or a clip written before ``PenClip/offsets`` existed — keeps its canvas position
+canvas, or a clip without ``PenClip/origins`` — keeps its canvas position
 instead, written in the container's coordinates, and so does every copy of a paste when
 any one lacks an offset, so the copies keep their arrangement.
+
+### Back where it came from
+
+``PasteTarget/whereCopied(documentID:)`` places each copied root on its own, so copies
+from different parents each go back to theirs (spec §16, the integrator's session 24
+ruling):
+
+1. **Copied from the top level**: a root again, at its canvas position. The canvas is in
+   every document.
+2. **Its parent is here**: when the paste's document id equals the clip's
+   ``PenClip/sourceDocumentID`` and the parent is still a frame or group, back into it
+   at its offset there — in a stack, in the flow — and at its place: right after its
+   source node while that is still there, as Duplicate puts it, else at the index it
+   had, clamped to the children there now. Copies from one parent keep their order. A
+   copy from the top level keeps its place among the roots the same way when home.
+3. **Otherwise** — another document, a parent deleted since, a node drawn inside an
+   instance, a clip without origins — at its canvas position, inside the board under its
+   center (``EditableDocument/board(at:)``: the top-most top-level frame there), or as a
+   root when no board is there.
+
+Which target a gesture means — the selection's board, the board under the pointer, or
+back where it came from — is the editor's choice; ``EditableDocument/board(at:)`` gives it
+the board under a point by the same rule.
+
+### Sizes
+
+Wherever the copies land, each is sized for its new parent (Penumbra spec §4, Ben's
+ruling of 2026-10-15), the rule a move follows
+(``EditPlanner/planMove(nodeID:into:at:in:layout:)``): where the parent lays the copy
+out — a stack — a dimension that filled its container where it was copied
+(``PenClip/Origin/width``, ``PenClip/Origin/height``) fills again; where it does not —
+a free frame, a group, the canvas — a dimension still written `fill_container` becomes
+the number it was drawn at. `fit_content` works anywhere and stays.
 
 ### Ids, names and definitions
 
@@ -162,9 +231,11 @@ guard on every insert would refuse the same operations one by one.
 ### Copying
 
 - ``PenClip``
+- ``PenClip/Origin``
 
 ### Pasting
 
 - ``PasteTarget``
 - ``PastePlan``
+- ``EditableDocument/board(at:)``
 - ``PasteError``

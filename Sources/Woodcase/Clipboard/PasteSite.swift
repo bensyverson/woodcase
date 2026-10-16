@@ -13,21 +13,54 @@ struct PasteSite: Friendly {
         /// As they were copied: canvas coordinates, unchanged.
         case asCopied
 
-        /// Centered on a canvas point.
-        case centered(on: PenPoint)
-
         /// In a stack's flow: no coordinates.
         case flow
 
-        /// In a free container, at their canvas position in its coordinates — or
-        /// centered in it when that misses it.
+        /// In a free container, at their offsets in the parents they were copied out of,
+        /// or their canvas position in its coordinates — or centered in it when that
+        /// misses it.
         case container(id: String)
 
         /// To the right of a node, top-aligned with it, a gap away.
         case beside(id: String, gap: Double)
+
+        /// Their bounds placed by a corner, exactly, in a free container or on the
+        /// canvas (`nil`).
+        case corner(Corner, containerID: String?)
+
+        /// In a free container, each at its offset from its own board's corner.
+        case boardOffset(containerID: String)
+
+        /// Each back where it came from, on its own.
+        case whereCopied(documentID: String?)
     }
 
-    /// The parent the copies are inserted into, or `nil` for the canvas.
+    /// What places the copies' bounds, all of them together.
+    enum Corner: Friendly {
+        /// Their top-left corner on this canvas point.
+        case topLeft(PenPoint)
+
+        /// Their center on this canvas point.
+        case center(PenPoint)
+
+        /// Their top-left corner at the container's inner top-left.
+        case innerTopLeft
+    }
+
+    /// One copied root, positioned, with where it is inserted.
+    struct Placed: Friendly {
+        /// The root, positioned.
+        var node: PenNode
+
+        /// The parent it is inserted into, or `nil` for the canvas.
+        var parentID: String?
+
+        /// Its index among the parent's children (or the roots), or `nil` to append.
+        var index: Int?
+    }
+
+    /// The parent every copy is inserted into, or `nil` for the canvas — and for
+    /// ``Arrangement/whereCopied(documentID:)``, which picks one per copy.
     var parentID: String?
 
     /// The index of the first copy among the parent's children (or the roots), or `nil`
@@ -49,18 +82,18 @@ struct PasteSite: Friendly {
         switch target {
         case .inPlace:
             self.init(parentID: nil, index: nil, arrangement: .asCopied)
-        case let .canvas(center):
-            self.init(parentID: nil, index: nil, arrangement: .centered(on: center))
+        case let .whereCopied(documentID):
+            self.init(parentID: nil, index: nil, arrangement: .whereCopied(documentID: documentID))
         case let .inside(id):
-            guard let container = document.nodes[id] else { throw PasteError.targetNotFound(id: id) }
-            switch container.kind {
-            case .frame:
-                self.init(parentID: id, index: nil, arrangement: Self.isStack(container) ? .flow : .container(id: id))
-            case .group:
-                self.init(parentID: id, index: nil, arrangement: .container(id: id))
-            default:
-                throw PasteError.notAContainer(id: id)
-            }
+            try self.init(into: id, free: .container(id: id), in: document)
+        case let .atBoardOffset(id):
+            try self.init(into: id, free: .boardOffset(containerID: id), in: document)
+        case let .atInnerTopLeft(id):
+            try self.init(into: id, free: .corner(.innerTopLeft, containerID: id), in: document)
+        case let .at(point, id):
+            try self.init(by: .topLeft(point), in: id, of: document)
+        case let .centered(point, id):
+            try self.init(by: .center(point), in: id, of: document)
         case let .after(id):
             guard document.nodes[id] != nil else { throw PasteError.targetNotFound(id: id) }
             guard let parentID = document.parents[id] else {
@@ -84,139 +117,37 @@ struct PasteSite: Friendly {
         self.arrangement = arrangement
     }
 
+    /// A site placed by a corner: in a container, or on the canvas when there is none.
+    private init(by corner: Corner, in containerID: String?, of document: EditableDocument) throws {
+        guard let containerID else {
+            self.init(parentID: nil, index: nil, arrangement: .corner(corner, containerID: nil))
+            return
+        }
+        try self.init(into: containerID, free: .corner(corner, containerID: containerID), in: document)
+    }
+
+    /// A site after a container's last child: in its flow when it is a stack, else
+    /// arranged as `free` says.
+    ///
+    /// - Throws: ``PasteError/targetNotFound(id:)``, ``PasteError/notAContainer(id:)``.
+    private init(into id: String, free: Arrangement, in document: EditableDocument) throws {
+        guard let container = document.nodes[id] else { throw PasteError.targetNotFound(id: id) }
+        guard Self.isContainer(container) else { throw PasteError.notAContainer(id: id) }
+        self.init(parentID: id, index: nil, arrangement: Self.isStack(container) ? .flow : free)
+    }
+
+    /// Whether a node can hold pasted children: a frame or a group.
+    static func isContainer(_ node: PenNode) -> Bool {
+        switch node.kind {
+        case .frame, .group: true
+        default: false
+        }
+    }
+
     /// Whether a node lays its children out itself: a frame whose layout is not `none`
     /// (a frame that says nothing is horizontal).
     static func isStack(_ node: PenNode) -> Bool {
         guard case let .frame(data) = node.kind else { return false }
         return (data.layout ?? .horizontal) != .none
-    }
-
-    // MARK: - Positioning
-
-    /// The copied roots, positioned for this site.
-    ///
-    /// - Parameters:
-    ///   - roots: The copied roots, carrying the canvas coordinates they were copied at.
-    ///   - rects: Each root's rect on the canvas, as the clip lays them out, in the same
-    ///     order.
-    ///   - offsets: Each root's offset in the parent it was copied out of
-    ///     (``PenClip/offsets``), in the same order; `nil` for a root that has none.
-    ///   - document: The target document.
-    /// - Returns: The roots, positioned.
-    func positioned(
-        _ roots: [PenNode],
-        rects: [PenRect?],
-        offsets: [PenPoint?],
-        in document: EditableDocument
-    ) -> [PenNode] {
-        let bounds = PenClip.union(rects.compactMap(\.self))
-        switch arrangement {
-        case .asCopied:
-            return roots
-        case .flow:
-            return roots.map { root in
-                var placed = root
-                placed.common.x = nil
-                placed.common.y = nil
-                return placed
-            }
-        case let .centered(center):
-            guard let bounds else { return roots }
-            return Self.shifted(roots, by: PenPoint(
-                x: center.x - (bounds.x + bounds.width / 2), y: center.y - (bounds.y + bounds.height / 2)
-            ))
-        case let .container(id):
-            return inContainer(roots, bounds: bounds, rects: rects, offsets: offsets, container: id, in: document)
-        case let .beside(id, gap):
-            guard let bounds, let sibling = Self.rect(of: id, in: document) else { return roots }
-            return Self.shifted(roots, by: PenPoint(
-                x: sibling.x + sibling.width + gap - bounds.x, y: sibling.y - bounds.y
-            ))
-        }
-    }
-
-    /// The roots in a free container, or, when their bounds would miss its box there,
-    /// centered in it.
-    ///
-    /// When every root knows its offset in the parent it was copied out of, each takes
-    /// that offset in the container — the same place in a new parent, and the original
-    /// place in the parent it came from. Otherwise (a root copied from the canvas, a clip
-    /// written before offsets) their canvas origins are carried into the container's
-    /// coordinates.
-    private func inContainer(
-        _ roots: [PenNode],
-        bounds: PenRect?,
-        rects: [PenRect?],
-        offsets: [PenPoint?],
-        container id: String,
-        in document: EditableDocument
-    ) -> [PenNode] {
-        let (expanded, layoutRects) = Self.layout(of: document)
-        guard let placement = PenLayoutEngine.canvasPlacement(
-            of: document.expandedID(of: .node(id: id)), in: expanded, layoutRects: layoutRects
-        ), let inverse = placement.transform.inverted()
-        else { return roots }
-        let local: PenRect?
-        let carried: [PenNode]
-        let known = offsets.compactMap(\.self)
-        if !roots.isEmpty, known.count == roots.count {
-            carried = zip(roots, known).map { root, offset in
-                var placed = root
-                placed.common.x = .literal(offset.x)
-                placed.common.y = .literal(offset.y)
-                return placed
-            }
-            local = PenClip.union(zip(zip(roots, known), rects).compactMap { pair, rect in
-                guard let rect else { return nil }
-                let (root, offset) = pair
-                return PenRect(
-                    x: rect.x + offset.x - (root.common.x?.literalValue ?? 0),
-                    y: rect.y + offset.y - (root.common.y?.literalValue ?? 0),
-                    width: rect.width, height: rect.height
-                )
-            })
-        } else {
-            carried = roots.map { root in
-                var placed = root
-                let origin = inverse.apply(to: PenPoint(x: root.common.x?.literalValue ?? 0, y: root.common.y?.literalValue ?? 0))
-                placed.common.x = .literal(origin.x)
-                placed.common.y = .literal(origin.y)
-                return placed
-            }
-            local = bounds.map(inverse.bounds(of:))
-        }
-        guard let local else { return carried }
-        let box = placement.box
-        let misses = local.x >= box.x + box.width || local.x + local.width <= box.x
-            || local.y >= box.y + box.height || local.y + local.height <= box.y
-        guard misses else { return carried }
-        return Self.shifted(carried, by: PenPoint(
-            x: box.x + box.width / 2 - (local.x + local.width / 2),
-            y: box.y + box.height / 2 - (local.y + local.height / 2)
-        ))
-    }
-
-    /// A node's rect in its parent's coordinates — the canvas's for a root.
-    private static func rect(of id: String, in document: EditableDocument) -> PenRect? {
-        if document.parents[id] == nil {
-            return RootOverlap.roots(in: document).first { $0.id == id }?.rect
-        }
-        return layout(of: document).rects[document.expandedID(of: .node(id: id))]
-    }
-
-    /// The document laid out as the canvas draws it.
-    private static func layout(of document: EditableDocument) -> (document: PenDocument, rects: [String: PenRect]) {
-        let expanded = PenVariableResolver.resolve(document.expanded(for: .canvas))
-        return (expanded, PenLayoutEngine.layout(expanded))
-    }
-
-    /// Roots moved by an offset.
-    static func shifted(_ roots: [PenNode], by offset: PenPoint) -> [PenNode] {
-        roots.map { root in
-            var moved = root
-            moved.common.x = .literal((root.common.x?.literalValue ?? 0) + offset.x)
-            moved.common.y = .literal((root.common.y?.literalValue ?? 0) + offset.y)
-            return moved
-        }
     }
 }

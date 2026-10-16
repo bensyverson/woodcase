@@ -56,15 +56,16 @@ struct ClipCommandTests {
         #expect(clip.document.children.map(\.id) == ["BtnI", "Icon", "Btn"])
     }
 
-    @Test("--json carries where each copied node sat in its parent")
-    func jsonCarriesOffsets() throws {
+    @Test("--json carries where each copied node came from")
+    func jsonCarriesOrigins() throws {
         let fixture = try CommandFixture(fixture: "clip.pen")
 
         let run = try fixture.run("clip", fixture.file.path, "Page/Dot", "--json")
 
         #expect(run.status == 0)
         let clip = try JSONDecoder().decode(PenClip.self, from: Data(run.stdout.utf8))
-        #expect(clip.offsets == ["Free": PenPoint(x: 5, y: 6)])
+        #expect(clip.origins?["Free"]?.parentID == "Page")
+        #expect(clip.origins?["Free"]?.offset == PenPoint(x: 5, y: 6))
     }
 
     @Test("Copying twice prints the same bytes")

@@ -7,7 +7,7 @@ import Foundation
 
 /// A self-contained copy of some of a document's nodes: what a copy puts on a pasteboard.
 ///
-/// ``extract(nodeIDs:from:)`` takes the nodes an editor has selected and builds a .pen
+/// ``extract(nodeIDs:from:documentID:)`` takes the nodes an editor has selected and builds a .pen
 /// that needs nothing else to draw:
 ///
 /// - **The copied subtrees**, in document order, each placed at the canvas position it
@@ -45,12 +45,19 @@ public struct PenClip: Friendly {
     ///   - document: The clip as a .pen document: the copied roots, then the carried
     ///     definitions.
     ///   - contentIDs: The ids of the roots that were copied, in document order.
-    ///   - offsets: Where each copied root sat inside the parent it was copied out of,
-    ///     by id; `nil` when none was copied out of a parent.
-    public init(document: PenDocument, contentIDs: [String], offsets: [String: PenPoint]? = nil) {
+    ///   - origins: Where each copied root came from, by id; `nil` when nothing says.
+    ///   - sourceDocumentID: The id of the document it was copied out of, as the copy
+    ///     named it; `nil` when it named none.
+    public init(
+        document: PenDocument,
+        contentIDs: [String],
+        origins: [String: Origin]? = nil,
+        sourceDocumentID: String? = nil
+    ) {
         self.document = document
         self.contentIDs = contentIDs
-        self.offsets = offsets
+        self.origins = origins
+        self.sourceDocumentID = sourceDocumentID
     }
 
     /// The clip as a .pen document: the copied roots, then the carried definitions,
@@ -61,16 +68,26 @@ public struct PenClip: Friendly {
     /// ``document`` is a component definition carried along for them.
     public var contentIDs: [String]
 
-    /// Where each copied root sat inside the parent it was copied out of: the point its
-    /// `x` and `y` named there — its origin in the parent's coordinates, as drawn, so a
-    /// node a stack placed records where the stack put it. Keyed by the root's id in
-    /// ``document``; a node copied from the canvas has no parent and no entry, and a clip
-    /// with no entry at all has `nil`, which is also what a clip written before offsets
-    /// existed decodes to.
+    /// Where each copied root came from — its parent, its board and its offset in each —
+    /// keyed by the root's id in ``document``. A clip that says nothing has `nil`: one a
+    /// consumer built by hand (pasted plain text), or one written before origins existed.
     ///
-    /// The roots of ``document`` stay at their canvas positions; this is what a paste into
-    /// another free container reads to keep the offset (``PasteTarget/inside(containerID:)``).
-    public var offsets: [String: PenPoint]?
+    /// The roots of ``document`` stay at their canvas positions; this is what a paste reads
+    /// to keep an offset (``PasteTarget/inside(containerID:)``,
+    /// ``PasteTarget/atBoardOffset(in:)``) or to put a copy back
+    /// (``PasteTarget/whereCopied(documentID:)``).
+    public var origins: [String: Origin]?
+
+    /// The id of the document the clip was copied out of, as ``extract(nodeIDs:from:documentID:)``
+    /// was given it, or `nil` when it was given none.
+    ///
+    /// A .pen file stores no identity of its own — its `fileToken` is a per-save token
+    /// another editor writes, not a name — so the editor that copies names its document,
+    /// with any string that stays the same while the document is open, and names it
+    /// again when it pastes (``PasteTarget/whereCopied(documentID:)``): equal ids mean the
+    /// copy is back in the document it came from, where its ``Origin/parentID`` still
+    /// means what it meant.
+    public var sourceDocumentID: String?
 
     /// Extracts a clip of some nodes of a document.
     ///
@@ -80,18 +97,24 @@ public struct PenClip: Friendly {
     ///     inside an instance and `Chip1/Btn01` the instance itself. A stored node's own
     ///     id, a `ref`'s included, is accepted too. Order and repeats do not matter.
     ///   - document: The document they are in, read with the libraries it imports.
+    ///   - documentID: What the copying editor calls that document, recorded as
+    ///     ``sourceDocumentID``; `nil` to record none.
     /// - Returns: The clip.
     /// - Throws: ``EditingError/nodeNotFound(id:)`` for an id that names no node.
-    public static func extract(nodeIDs: [String], from document: EditableDocument) throws -> PenClip {
+    public static func extract(
+        nodeIDs: [String],
+        from document: EditableDocument,
+        documentID: String? = nil
+    ) throws -> PenClip {
         let order = document.nodeIDsInDocumentOrder()
         let position = Dictionary(uniqueKeysWithValues: order.enumerated().map { ($1, $0) })
         let selected = try selection(nodeIDs, in: document, position: position)
         let positioned = placed(copies(of: selected, in: document), of: selected, in: document)
         let definitions = definitions(for: positioned.nodes, in: document, position: position)
         let content = renumbered(positioned.nodes, apartFrom: definitions, in: document)
-        var offsets: [String: PenPoint] = [:]
-        for (root, offset) in zip(content, positioned.offsets) {
-            offsets[root.id] = offset
+        var origins: [String: Origin] = [:]
+        for (root, origin) in zip(content, positioned.origins) {
+            origins[root.id] = origin
         }
         let roots = content + definitions
         let needs = needs(of: roots, in: document)
@@ -103,7 +126,8 @@ public struct PenClip: Friendly {
                 children: roots
             ),
             contentIDs: content.map(\.id),
-            offsets: offsets.isEmpty ? nil : offsets
+            origins: origins.isEmpty ? nil : origins,
+            sourceDocumentID: documentID
         )
     }
 

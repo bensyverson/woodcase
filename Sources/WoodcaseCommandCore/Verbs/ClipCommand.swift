@@ -10,7 +10,7 @@ import Woodcase
 /// Prints what a copy of some nodes would put on a pasteboard: a self-contained .pen.
 ///
 /// The verb is an adapter: it resolves each address to the id the expanded document
-/// gives it and hands them to ``Woodcase/PenClip/extract(nodeIDs:from:)``, which decides
+/// gives it and hands them to ``Woodcase/PenClip/extract(nodeIDs:from:documentID:)``, which decides
 /// everything about what the clip carries.
 struct ClipCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
@@ -34,10 +34,11 @@ struct ClipCommand: AsyncParsableCommand {
         drawn: overrides applied, detached from its component, under fresh ids derived \
         from the document, so the same copy prints the same bytes every time.
 
-        --json prints {"contentIDs": [...], "document": {...}, "offsets": {...}} \
+        --json prints {"contentIDs": [...], "document": {...}, "origins": {...}} \
         instead: the clip with the ids of the roots that were copied, so a reader can \
-        tell them from the definitions carried along, and where each one copied out of \
-        a parent sat in it — what `woodcase paste --into` a free container keeps.
+        tell them from the definitions carried along, and where each one came from — \
+        its parent and offset there, its board and offset from the board's corner — \
+        the offset `woodcase paste --into` a free container keeps.
 
         \(AddressArgument.addressForms)
 

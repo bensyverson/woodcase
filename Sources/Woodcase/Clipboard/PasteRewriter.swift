@@ -17,7 +17,7 @@ import Foundation
 ///   segment the map does not hold is left as written — it names a node outside the
 ///   paste.
 /// - **Variables**: every string leaf that is `$name` — the rule
-///   ``EditableDocument/variableReferences()`` and ``PenClip/extract(nodeIDs:from:)`` read
+///   ``EditableDocument/variableReferences()`` and ``PenClip/extract(nodeIDs:from:documentID:)`` read
 ///   by — wherever it sits.
 /// - **Component names**: a node the paste renames gets its new `name`.
 ///

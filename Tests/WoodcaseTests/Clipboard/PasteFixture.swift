@@ -45,6 +45,13 @@ enum PasteFixture {
         }
     }
 
+    /// The insert operations of a plan's copied roots, in clip order — without the
+    /// definitions it brings.
+    static func contentInserts(_ plan: PastePlan) -> [EditOperation.InsertNode] {
+        let content = Set(plan.insertedRootIDs)
+        return inserts(plan).filter { content.contains($0.node.id) }
+    }
+
     /// The variables a plan adds, by name.
     static func addedVariables(_ plan: PastePlan) -> [String: PenVariable] {
         var added: [String: PenVariable] = [:]

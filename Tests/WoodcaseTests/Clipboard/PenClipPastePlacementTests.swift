@@ -33,7 +33,7 @@ struct PenClipPastePlacementTests {
     func canvasCenter() throws {
         let (clip, source) = try freeClip()
 
-        let plan = try clip.plan(into: source, at: .canvas(center: PenPoint(x: 0, y: 0)))
+        let plan = try clip.plan(into: source, at: .centered(on: PenPoint(x: 0, y: 0), in: nil))
 
         let insert = try #require(PasteFixture.inserts(plan).first)
         #expect(insert.parentID == nil)

@@ -33,6 +33,13 @@ extension PenClip {
         /// Whether the node is a root of the source document, already at its canvas
         /// position.
         var isRoot: Bool
+
+        /// The parent it sits in: a stored node's id, or for a drawn node the expanded id
+        /// of the node it is drawn under; `nil` for a root.
+        var parentID: String?
+
+        /// The stored root above it, or `nil` for a root.
+        var boardID: String?
     }
 
     /// Finds every node to copy, drops each one another copied node holds, and orders
@@ -78,14 +85,17 @@ extension PenClip {
         let resolved: ResolvedNodeAddress? = document.nodes[id] != nil ? .node(id: id) : document.resolve(expandedID: id)
         switch resolved {
         case let .node(storedID)?:
+            let ancestors = storedAncestors(of: storedID, in: document)
             return try Selected(
                 key: storedID,
                 subtree: document.materializeSubtree(rootID: storedID),
                 instanceID: nil,
-                ancestors: Set(storedAncestors(of: storedID, in: document)),
+                ancestors: Set(ancestors),
                 order: [position[storedID] ?? Int.max],
                 expandedID: document.expandedID(of: .node(id: storedID)),
-                isRoot: document.parents[storedID] == nil
+                isRoot: document.parents[storedID] == nil,
+                parentID: ancestors.first,
+                boardID: ancestors.last
             )
         case let .instanceDescendant(refID, _)?:
             return try drawn(id, inInstance: refID, of: document, position: position)
@@ -124,7 +134,9 @@ extension PenClip {
                     ancestors: Set(outside + above),
                     order: [position[refID] ?? Int.max, index],
                     expandedID: expandedID,
-                    isRoot: false
+                    isRoot: false,
+                    parentID: above.last ?? refID,
+                    boardID: outside.last
                 )
             }
             pending.append(contentsOf: node.kind.inlineChildren.reversed().map { ($0, above + [node.id]) })
