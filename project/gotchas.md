@@ -35,3 +35,7 @@ With several agents building (load 90–200) the same suites fail in full runs a
 `pen interactive --enable-preview --preview-output out.png` sometimes exits without writing the PNG. Two `execute({ input: 'Print(1)' })` calls before `save()` make it write reliably (w-shade, 2026-10-15); the cause is unknown.
 
 The pre-commit hook's `scripts/mae-check` prints "MISSING: `svg-render-…` was in the baseline … but not in this test run" whenever the WebView SVG tests time out under load, then "MAE baseline updated". That is harmless: the update merges, keeping every row the run didn't produce (checked 2026-10-15, all 21 svg-render rows kept). Only a rise in a row the run did produce is a regression.
+
+## 2026-10-17 — `swift test -c release` compiles the whole test target with optimization
+
+**Release figures from a test (`swift test -c release --filter …`) cost a whole-module `-O` compile of every test file, about 800 of them — a single compile step that ran over 15 minutes under load** (issue a1p6vh). For release stack or timing figures, prefer `swift build -c release --product woodcase` and run the CLI on a deep file (how `project/2026-09-26-debug-stack-depth.md` measured in September), or say in the brief that a release test run is expected to be slow. Never make a second checkout for "before" figures: each `.build` is ~4 GB, and a doubled one filled the disk twice that afternoon.
