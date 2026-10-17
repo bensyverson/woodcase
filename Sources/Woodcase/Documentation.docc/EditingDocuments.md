@@ -104,8 +104,14 @@ a malformed tint, is refused with
 ``NodePropertyCodec/value(at:of:)`` reads one back. A read costs its one path: it runs
 the payload's own `encode(to:)` but encodes only the key it wants, so reading a board's
 `kind.width` does not encode its children, and a caller that reads many paths need not
-hold anything between reads. `"kind.type"` is deliberately not a
-path — changing a node's type is ``EditOperation/updateKind(_:)``'s job, or
+hold anything between reads. A write costs its one path too:
+``NodePropertyCodec/setting(_:at:on:)`` decodes only the new value and carries the
+payload's other keys over as they are (through the same capture-and-overlay
+`PenNodeOverlay` applies overrides with), so writing a board's width neither encodes nor
+decodes its children. A payload the overlay cannot follow is written the old way, whole.
+That matters wherever a node holds its subtree inline — a clip, a parsed tree; the nodes
+an ``EditableDocument`` stores keep their children apart already. `"kind.type"` is
+deliberately not a path — changing a node's type is ``EditOperation/updateKind(_:)``'s job, or
 ``EditOperation/replaceSubtree(_:)``'s when its contents change with it.
 
 ### Replacing a subtree

@@ -11,6 +11,10 @@ import Foundation
 /// patching several paths can fold them onto a scratch value and commit only
 /// once every key and value has been accepted — which is how
 /// ``EditOperation/setProperties(_:)`` stays atomic.
+///
+/// A write costs its one path: the payload's other keys, a container's `children` among
+/// them, are carried over as they are rather than encoded and decoded again — see
+/// ``patchingPayload(_:field:value:)``.
 extension NodePropertyCodec {
     /// Returns a copy of `node` with one property set to `value`.
     ///
@@ -68,9 +72,8 @@ extension NodePropertyCodec {
     ) throws -> PenNodeCommon {
         guard commonPaths.contains(path) else { throw unknownProperty(path, nodeID, nodeType) }
         let field = String(path.dropFirst(commonPrefix.count))
-        let patched = try patching(dictionary(from: common), field: field, value: value)
         do {
-            return try decode(PenNodeCommon.self, from: patched)
+            return try patchingPayload(common, field: field, value: value)
         } catch {
             throw mismatch(path, field, value, nodeID, error)
         }
@@ -114,7 +117,7 @@ extension NodePropertyCodec {
                     data.descendants = nil
                 } else {
                     do {
-                        data.descendants = try decode([String: PenDescendantOverride].self, fromValue: value)
+                        data.descendants = try descendantOverrides(from: value)
                     } catch {
                         throw mismatch(path, field, value, nodeID, error)
                     }
@@ -129,12 +132,35 @@ extension NodePropertyCodec {
             return .ref(data)
 
         default:
-            let patched = try patching(kindDictionary(kind), field: field, value: value)
             do {
-                return try makeKind(like: kind, from: patched)
+                return try patchingKind(kind, field: field, value: value)
             } catch {
                 throw mismatch(path, field, value, nodeID, error)
             }
         }
+    }
+
+    /// Decodes a `descendants` map one entry at a time, in key order.
+    ///
+    /// `JSONDecoder` decodes a dictionary's entries in hash order, so a map with several
+    /// bad entries was refused naming whichever it met first — a different one from run to
+    /// run. Decoding entry by entry in sorted order names the first bad id every time; a
+    /// value that is not an object is decoded whole, for the refusal that gives.
+    ///
+    /// - Parameter value: The `kind.descendants` value written.
+    /// - Returns: The decoded overrides.
+    /// - Throws: The `DecodingError` of the first bad entry, by key.
+    private static func descendantOverrides(from value: AnyCodable) throws -> [String: PenDescendantOverride] {
+        guard case let .dictionary(entries) = value else {
+            return try decode([String: PenDescendantOverride].self, fromValue: value)
+        }
+        var overrides: [String: PenDescendantOverride] = [:]
+        for (id, entry) in entries.sorted(by: { $0.key < $1.key }) {
+            try overrides.merge(
+                decode([String: PenDescendantOverride].self, fromValue: .dictionary([id: entry])),
+                uniquingKeysWith: { $1 }
+            )
+        }
+        return overrides
     }
 }

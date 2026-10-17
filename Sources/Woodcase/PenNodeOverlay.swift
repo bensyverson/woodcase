@@ -28,6 +28,10 @@ import Foundation
 /// ``PenNodePatcher`` then takes the JSON round trip, so the overlay is never *wrong*,
 /// only occasionally not faster. `PenNodePatcherEquivalenceTests` expands every fixture
 /// with the overlay alone and requires the round trip's documents.
+///
+/// Nothing here is particular to a whole node: ``NodePropertyCodec`` writes one key of a
+/// `common` or `kind` payload the same way (``NodePropertyCodec/overlaying(_:key:value:)``),
+/// and `PropertyWriteOracleTests` holds that to the round trip on every fixture node.
 struct PenNodeOverlay: Decoder {
     /// The overlay could not answer a read without encoding the node.
     struct Unsupported: Error {}
