@@ -18,9 +18,9 @@
     /// expansion reaches on a painted stack (``StackHighWater``) and hold it to a budget
     /// well inside a task's, leaving the rest to whoever called it.
     ///
-    /// Every deep tree is built and freed on a thread of its own: freeing one recurses as
-    /// deep as the tree — about 800 bytes a level in a debug build — and a test thread
-    /// is itself a task's. Only the expansion is measured.
+    /// Every deep tree is built and freed on a thread of its own, so only the expansion is
+    /// measured. (Freeing one used to recurse as deep as the tree, about 800 bytes a level
+    /// in a debug build; since issue `a1p6vh` it takes the tree apart from a work list.)
     struct PenRefExpanderStackTests {
         /// The most of a task's stack an expansion may use, freeing its result included.
         private static let budget = StackHighWater.taskStackSize / 4

@@ -4,6 +4,11 @@
 > either. A debug `woodcase tree` now lists a frame tree 200 deep (255, the most JSON
 > nesting lets a file hold) and 64 nested instances, exit 0 — and so does release, which
 > overflowed exactly where debug did. See [the rest of the pipeline](#the-rest-of-the-pipeline-leaf-7y53c0).
+>
+> **Updated 2026-10-17 (leaf `a1p6vh`):** comparing, hashing, encoding, freeing and
+> inserting a tree no longer recurse either. Penumbra's Debug app had crashed comparing an
+> eight-level mockup: synthesized `==` took 563 KB of stack on it. See
+> [the node's own walks](#the-nodes-own-walks-leaf-a1p6vh-2026-10-17).
 
 Author: Claude (Opus), leaf `PJwhm2`. Found by `ILYyZi`: `woodcase tree` (debug) on an
 instance of `Scr03 → Mid01 → Scr01 → Ins0A → InsB` exited 138 with no output — "Thread
@@ -147,6 +152,10 @@ What is left is not a walk of ours:
   debug: 154,560 bytes to free the 200-deep parsed tree. It is the deepest point of
   expanding (which frees the materialized tree), settling and the whole read, so those
   tests get half a task's stack; the walks get a quarter.
+
+  > **Fixed 2026-10-17 (leaf `a1p6vh`):** a container's kind now lives in a class whose
+  > `deinit` takes the subtree apart from a work list; freeing a 5,000-deep chain uses
+  > under 6 KB. "No hook to stop it" was true of the struct, not of the tree.
 - **Foundation's JSON scanner** — 118,192 of the parse's 121,600 bytes: a
   `JSONDecoder` decode of `{version}` alone from the same bytes, measured the same way.
 - **JSON nesting** — Foundation refuses input nested past 512 arrays and objects, so a
@@ -166,6 +175,12 @@ Outside the read path, recursion remains and was not audited: `EditableDocument.
 (3,632 bytes a level, the edit path's insert), synthesized `Equatable` on nodes (release
 `FrameData.__derived_struct_equals` is 4,560), encoding a deep subtree (the write path and
 the patcher's JSON round trips), and CodeGen's own tree walks.
+
+> **Updated 2026-10-17 (leaf `a1p6vh`):** all but CodeGen are fixed, and the list missed
+> two more on the insert path — `validateNoDuplicateIDs` and `collectInsertedIDs`. The
+> per-level costs above understated equality: synthesized `==` is five frames a level,
+> about 68 KB in debug and 8 KB in release. See
+> [the node's own walks](#the-nodes-own-walks-leaf-a1p6vh-2026-10-17).
 
 ### `woodcase tree`, end to end
 
@@ -191,3 +206,109 @@ reserves 7,776 bytes and `specialized PenNode.FrameData.init(from:)` 5,280
 so the generic-helper split of leaf `PJwhm2` does not survive optimization. The flat decode
 takes both off the per-level path.
 
+
+## The node's own walks (leaf `a1p6vh`, 2026-10-17)
+
+Author: Claude (Opus), leaf `a1p6vh`. Found by Ben: unchecking a drop shadow on a
+top-level frame of the settings mockup (Penumbra `project/mockups/2026-10-17-settings`,
+eight levels deep, now `Tests/WoodcaseTests/Fixtures/settings-mockup.pen`) crashed the
+Debug app — "Thread stack size exceeded" in synthesized `PenNode ==`, called from
+Penumbra's `IncrementalExpansion.changedRoots`. Synthesized `==` was five frames a level;
+on that mockup alone it reached **563,368 bytes** of stack in debug, past a task's 512 KiB.
+
+### What changed
+
+- **`==` and `hash(into:)`** (`PenNode+Equatable.swift`) compare and hash each node
+  shallow, then its children, from a work list of sibling arrays. A childless kind goes
+  to its synthesized `==`; a container's payload has `children` taken out of a copy and
+  the copy goes to the payload's synthesized `==`/`hash`, so no payload field is named
+  and none can be forgotten. `PenNode`'s own four properties are named; a layout test in
+  `PenNodeEqualityTests` fails if a fifth appears. Two shortcuts with `Array`'s own
+  semantics: two containers sharing storage, or two childless kinds sharing an
+  `indirect` box, are equal without reading further.
+- **Freeing** (`PenNode+KindStorage.swift`): a node whose kind holds children keeps it in
+  a `SubtreeOwner` class, whose `deinit` moves each uniquely held child's children onto a
+  work list before the child is released. A childless node keeps its kind inline.
+- **Encoding** (`PenNode+TreeEncoding.swift`): each node is encoded shallow and its
+  `children` array is filled from a work list through `superEncoder()`, mirroring
+  `decodedTree(from:)`. The wire format is unchanged (`PenNodeTreeEncodingTests`).
+- **Inserting**: `flattenAndInsert`, `collectInsertedIDs` and `validateNoDuplicateIDs`
+  use work lists; insert now shares `flattenSubtree(_:parentID:)` with `init(from:)`.
+- `PenNodePatcher` also lifts a node's children when the patch replaces them, so the
+  overlay never reads, and the round trip never encodes, a subtree it is about to drop.
+
+### Measured: stack
+
+`StackHighWater` bytes, `swift test --filter PenNodeTreeCostProbe` with
+`WOODCASE_TREE_COST_PROBE=1` (debug), and the same with
+`-c release -Xswiftc -enable-testing` (release). "Before" is `main` at `74ed6066`, run
+before this leaf's source changes (debug 13:16, release 13:45); "after" this leaf.
+*chain* is a 255-frame chain, *mockup-shaped* the mockup's first board nested 245 times
+(253 deep, ~10,800 nodes, unique ids) — both `DeepDocuments+InMemory.swift`.
+`PenNodeDeepTreeStackTests` holds each to a quarter of a task's stack (encoding: half).
+
+| Walk | Debug before → after | Release before → after |
+|---|---|---|
+| `==`, settings mockup (8 deep) | 563,368 → 85,128 | 68,384 → 16,496 |
+| `==`, chain / mockup-shaped | 17,554,624 / 17,431,128 → 70,928 / 85,128 | 2,122,928 / 2,106,784 → 14,848 / 16,496 |
+| hash, chain / mockup-shaped | 8,519,080 / 8,457,152 → 35,096 / 39,984 | 1,110,096 / 1,102,336 → 7,536 / 8,912 |
+| encode to JSON, chain / mockup-shaped | 2,934,672 / 2,912,792 → 234,560 / 232,784 | 1,851,600 / 1,842,800 → 234,224 / 232,448 |
+| free, chain 255 | 196,384 → 5,840 | 151,160 → 2,368 |
+| free, chain 5,000 (`freeingFarDeeperThanAFile`) | 3,840,496 → passes (< 131,072) | 2,960,208 → passes |
+| insert, chain | 1,076,416 → 42,480 | 707,432 → 10,336 |
+
+What is left is Foundation's: an encode's ~230 KB at 255 levels is `JSONEncoder` turning
+its value tree into text, recursively, about 460 bytes per level of JSON nesting (two per
+tree level), the same in debug and release. An encode of the same nesting through nested
+containers alone, with no `PenNode` in it, used more (317,088 bytes at 255, debug; a
+throwaway test, not kept).
+
+### Measured: time
+
+Medians of 9 runs, milliseconds, same probe. Times on this shared machine move with load,
+so each row says when. **Release, fair A/B** — `main` and this leaf built side by side
+and run interleaved twice (15:12–15:13, load ~6), with an earlier cut of this leaf
+(payload shells compared field by field, no kind-box shortcut; the shipped version was
+faster in debug and, in an earlier interleaved run, equal in release within noise):
+
+| Walk | Release before | Release after |
+|---|---|---|
+| `==` settings mockup | 0.129 / 0.142 | 0.177 / 0.165 |
+| `==` woodcase-app | 0.317 / 0.325 | 0.385 / 0.375 |
+| `==` synthetic 5,000 nodes | 2.14 / 2.13 | 2.83 / 2.81 |
+| `==` chain 255 | 0.089 / 0.088 | 0.108 / 0.105 |
+| hash synthetic 5,000 | 1.82 / 1.81 | 2.08 / 2.05 |
+| encode synthetic 5,000 | 40.0 / 39.8 | 39.9 / 39.3 |
+| free synthetic 5,000 | 0.459 / 0.450 | 0.716 / 0.716 |
+| insert mockup-shaped | 39.5 / 40.6 | 24.8 / 23.5 |
+
+So on two trees that share **no** storage — separately parsed — the work-list `==` is
+about a quarter slower than the synthesized one, and freeing about half again as long
+(0.26 ms more per 5,000 nodes). That is not the case Penumbra pays for: it compares two
+materializations of one flat store, which share every childless node's `indirect` box,
+and there the kind-box shortcut skips the payloads. In the final release run (16:49, load
+~12, so every figure is inflated): settings mockup materialized twice 0.169 ms against
+0.329 ms parsed twice; woodcase-app 0.165 against 0.608. `main` was not measured on the
+materialized pair; it has no such shortcut, so it pays the parsed-twice cost.
+
+Debug, the final build (16:26–16:27, load 30–70), against `main` measured at 14:29–14:30
+(load ~6): settings mockup `==` 0.93–1.01 (materialized 0.67–0.75) against 0.63; synthetic
+16.2–17.2 against 11.8; chain 0.45 against 0.29. Comparing payload fields by name instead
+was 70% slower in debug (chain 0.89) and no faster in release, so it was dropped.
+
+### CodeGen still recurses
+
+Not changed here; measured with a throwaway `StackHighWater` test emitting a page of a
+frame chain *n* deep (`ReactEmitter.emit` / `SwiftUIEmitter.emit`, `PageAnalyzer`):
+
+| Depth | React debug | SwiftUI debug | React release | SwiftUI release |
+|---|---|---|---|---|
+| 25 | 1,126,440 | 843,968 | 167,536 | 269,424 |
+| 50 | 2,246,040 | 1,664,472 | 325,936 | 536,080 |
+| 200 | 8,963,640 | 6,539,296 | 1,276,336 | 2,083,824 |
+
+About 45 KB a level for React and 33 KB for SwiftUI in debug (6.4 and 10.4 KB in
+release): a debug emit overflows a task's 512 KiB about 11 (React) or 15 (SwiftUI) levels
+deep, a release one about 80 or 50. Each emitter builds a node's code from its children's,
+with per-node context (indentation, parent layout, slots, instance scope), across some
+190 files; making them iterative is a refactor of its own, not this leaf's.

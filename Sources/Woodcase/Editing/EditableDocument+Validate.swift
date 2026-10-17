@@ -102,21 +102,12 @@ extension EditableDocument {
     /// - Throws: ``EditingError/duplicateNodeID(id:)``.
     func validateNoDuplicateIDs(in node: PenNode) throws {
         var seen = Set<String>()
-        try validateNoDuplicateIDs(in: node, seen: &seen)
-    }
-
-    /// Refuses a duplicate id, remembering the ids already met in this subtree.
-    ///
-    /// - Parameters:
-    ///   - node: The node to check, then its inline children.
-    ///   - seen: The ids met so far in this subtree.
-    /// - Throws: ``EditingError/duplicateNodeID(id:)``.
-    private func validateNoDuplicateIDs(in node: PenNode, seen: inout Set<String>) throws {
-        guard nodes[node.id] == nil, seen.insert(node.id).inserted else {
-            throw EditingError.duplicateNodeID(id: node.id)
-        }
-        for child in node.kind.inlineChildren {
-            try validateNoDuplicateIDs(in: child, seen: &seen)
+        var pending = [node]
+        while let next = pending.popLast() {
+            guard nodes[next.id] == nil, seen.insert(next.id).inserted else {
+                throw EditingError.duplicateNodeID(id: next.id)
+            }
+            pending.append(contentsOf: next.kind.inlineChildren.reversed())
         }
     }
 

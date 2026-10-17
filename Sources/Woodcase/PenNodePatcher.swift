@@ -156,27 +156,33 @@ public enum PenNodePatcher {
 
     // MARK: - Private
 
-    /// Runs a merge with the node's children lifted off and put back after, unless the
-    /// patch names `children` itself or the node has none to lift.
+    /// Runs a merge with the node's children lifted off and put back after — or, when the
+    /// patch names `children` itself, lifted off and dropped, since the patch's win.
+    ///
+    /// Either way the merge never sees the node's own subtree, so neither route encodes
+    /// it, and the overlay — which reads a node only as far as its top-level values —
+    /// can answer a patch that replaces a slot's children.
     ///
     /// - Parameters:
     ///   - node: The node to patch.
     ///   - patchProperties: The patch, read only for `children`.
     ///   - merge: The merge to run on the childless node.
-    /// - Returns: The merged node, its children restored.
+    /// - Returns: The merged node, its own children restored unless the patch replaced them.
     /// - Throws: Whatever `merge` throws.
     private static func withoutChildren(
         of node: PenNode,
         unlessNamedBy patchProperties: [String: AnyCodable],
         _ merge: (PenNode) throws -> PenNode
     ) throws -> PenNode {
-        guard patchProperties[childrenKey] == nil, let children = detachedChildren(of: node.kind) else {
+        guard let children = detachedChildren(of: node.kind) else {
             return try merge(node)
         }
         var childless = node
         childless.kind = replacingChildren(nil, in: node.kind)
         var merged = try merge(childless)
-        merged.kind = replacingChildren(children, in: merged.kind)
+        if patchProperties[childrenKey] == nil {
+            merged.kind = replacingChildren(children, in: merged.kind)
+        }
         return merged
     }
 

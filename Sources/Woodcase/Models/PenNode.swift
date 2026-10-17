@@ -19,8 +19,10 @@ import Foundation
 /// and the appropriate `*Data` struct, both reading from the same decoder.
 ///
 /// - Important: Walk a tree of nodes from a work list, never by recursion: a Swift task's
-///   512 KiB stack overflows on a deep document (SIGBUS, exit 138, no output). Freeing,
-///   comparing, encoding and some emitters still recurse — issue `a1p6vh`;
+///   512 KiB stack overflows on a deep document (SIGBUS, exit 138, no output). The node's
+///   own walks do: decoding (`decodedTree(from:)`), encoding, `==`, hashing and freeing
+///   (a container's kind lives in a `SubtreeOwner`, which takes its subtree apart from a
+///   work list). CodeGen's emitters still recurse, one call per level;
 ///   `project/2026-09-26-debug-stack-depth.md` has the measurements.
 public struct PenNode: Friendly, Identifiable {
     /// Creates a node.
@@ -38,7 +40,7 @@ public struct PenNode: Friendly, Identifiable {
     ) {
         self.id = id
         self.common = common
-        self.kind = kind
+        storage = KindStorage(kind)
         self.extras = extras
     }
 
@@ -49,7 +51,17 @@ public struct PenNode: Friendly, Identifiable {
     public var common: PenNodeCommon
 
     /// The type-specific data.
-    public var kind: Kind
+    public var kind: Kind {
+        get { storage.kind }
+        set { storage = KindStorage(newValue) }
+    }
+
+    /// Where ``kind`` lives: inline, or — when it holds children — in a ``SubtreeOwner``
+    /// that frees them without recursing.
+    ///
+    /// A stored property added to the node must also join ``==(_:_:)``,
+    /// ``hash(into:)`` and ``customMirror``; `PenNodeEqualityTests` checks the layout.
+    var storage: KindStorage
 
     /// Keys the file wrote on this node that its type does not model, kept verbatim.
     ///
@@ -144,26 +156,20 @@ public extension PenNode {
         self = try Self.decodedTree(from: decoder)
     }
 
-    /// Encodes the node as one flat object, extras included.
+    /// Encodes the node as one flat object, extras included, its children nested.
     ///
     /// - Parameter encoder: The encoder to write to.
     /// - Throws: Whatever the encoder throws.
+    ///
+    /// The subtree is encoded from a work list rather than by each node encoding its
+    /// children, so the encode's stack use does not grow with the tree's depth — see
+    /// `encodeTree(to:)`.
     func encode(to encoder: Encoder) throws {
-        try extras.encode(into: encoder)
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(id, forKey: .id)
-
-        guard let payload = kind.encodablePayload else {
-            try encodeUnknown(into: encoder, container: &container)
-            return
-        }
-        try container.encode(kind.typeName, forKey: .type)
-        try common.encode(to: encoder)
-        try payload.encode(to: encoder)
+        try encodeTree(to: encoder)
     }
 
     /// Encodes a node of a type this build does not model, key by key as it was read.
-    private func encodeUnknown(
+    internal func encodeUnknown(
         into encoder: Encoder,
         container: inout KeyedEncodingContainer<CodingKeys>
     ) throws {
@@ -224,6 +230,20 @@ public extension PenNode.Kind {
                 codingPath: encoder.codingPath,
                 debugDescription: "PenNode.Kind should not be encoded directly; use PenNode's encode(to:)"
             )
+        )
+    }
+}
+
+// MARK: - Reflection
+
+extension PenNode: CustomReflectable {
+    /// The node as its four properties, ``kind`` among them, rather than as the storage
+    /// that holds the kind — what `print`, `dump` and a failed test's message show.
+    public var customMirror: Mirror {
+        Mirror(
+            self,
+            children: ["id": id, "common": common, "kind": kind, "extras": extras],
+            displayStyle: .struct
         )
     }
 }

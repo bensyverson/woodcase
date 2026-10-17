@@ -29,9 +29,8 @@
     /// values directly, with no JSON in between — but a genuinely deep single node value is
     /// still expensive to let go of: `EditableDocument.init(from:)`'s own `document`
     /// parameter holds the *original*, unflattened tree until `init` returns, and freeing it
-    /// then recurses one call per level exactly the way ``PenRefExpanderStackTests``
-    /// documents (`project/2026-09-26-debug-stack-depth.md`'s "still recurses" list). That
-    /// is a separate, already-known, out-of-scope cost — not `collectInjected`'s — so
+    /// then recursed one call per level (`project/2026-09-26-debug-stack-depth.md`; no
+    /// longer, since issue `a1p6vh`). That was a separate cost — not `collectInjected`'s — so
     /// ``DeepSlotDocumentHolder`` builds and frees the document on ``StackHighWater``'s own
     /// generously-stacked thread, the same way ``PenRefExpanderStackTests/Holder`` does, and
     /// only the walk itself is measured against the budget.
@@ -140,7 +139,7 @@
     ///
     /// `EditableDocument.init(from:)`'s own `document` parameter keeps the *original*,
     /// unflattened tree alive until `init` returns, and that parameter's deinit — like any
-    /// PenNode tree's — still recurses one call per level
+    /// PenNode tree's — recursed one call per level until issue `a1p6vh`
     /// (`project/2026-09-26-debug-stack-depth.md`). Building the document here, on
     /// ``StackHighWater``'s generously-stacked thread, absorbs that cost outside of
     /// whatever a test measures; ``release()`` does the same for freeing it.

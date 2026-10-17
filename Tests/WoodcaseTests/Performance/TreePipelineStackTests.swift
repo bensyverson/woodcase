@@ -18,13 +18,13 @@
     /// painted stack (``StackHighWater``) at the depths the verb must survive, and hold
     /// each walk to a quarter of a task's stack; the whole read gets half.
     ///
-    /// Freeing a tree is the one step that still recurses: the compiler writes a value's
-    /// destruction, one call per level — about 770 bytes a level in a debug build — and
-    /// there is no hook to stop it. Expanding an editable document frees the tree it
-    /// materialized, settling frees the expanded tree, and the whole read frees
-    /// everything; at these depths that free, not any walk, is each one's deepest point,
-    /// so those three get half a task's stack. JSON nesting bounds the depth: Foundation refuses input nested past
-    /// 512 arrays and objects, so no file parses to a frame tree deeper than 255.
+    /// Expanding an editable document frees the tree it materialized, settling frees the
+    /// expanded tree, and the whole read frees everything, so those three get half a
+    /// task's stack. Freeing used to recurse one call per level — about 770 bytes a level
+    /// in a debug build — and was their deepest point; it no longer does
+    /// (``PenNode/SubtreeOwner``, issue `a1p6vh`), but the budgets were left as they were.
+    /// JSON nesting bounds the depth: Foundation refuses input nested past 512 arrays and
+    /// objects, so no file parses to a frame tree deeper than 255.
     ///
     /// Inputs are built and outputs freed on threads of their own, so only the stage
     /// under test is measured and the test thread never holds a deep tree.

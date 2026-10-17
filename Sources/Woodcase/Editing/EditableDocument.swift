@@ -303,25 +303,38 @@ public final class EditableDocument {
     // MARK: - Private
 
     /// Adds a forest to the flat store, every node stripped of its inline children.
+    private func flatten(_ roots: [PenNode]) {
+        for root in roots {
+            rootOrder.append(root.id)
+            flattenSubtree(root, parentID: nil)
+        }
+    }
+
+    /// Writes a subtree into the flat store, every node stripped of its inline children,
+    /// keeping the difference between a container that declares no children and one that
+    /// declares an empty list — see ``PenNode/Kind/declaredChildIDs``. That is what lets
+    /// an `add` and an undo of a delete round-trip the file's bytes rather than an
+    /// equivalent tree. The root's place in its parent's list, or in ``rootOrder``, is the
+    /// caller's to record.
     ///
     /// Pre-order from a work list rather than by recursion: a debug build reserved
     /// 3.7 KB a level here, and a deep tree overflowed a Swift task's stack
     /// (`project/2026-09-26-debug-stack-depth.md`).
-    private func flatten(_ roots: [PenNode]) {
-        var pending: [(node: PenNode, parentID: String?)] = roots.reversed().map { ($0, nil) }
+    ///
+    /// - Parameters:
+    ///   - root: The subtree to write.
+    ///   - parentID: The node the root sits under, or `nil` for a top-level node.
+    func flattenSubtree(_ root: PenNode, parentID: String?) {
+        var pending: [(node: PenNode, parentID: String?)] = [(root, parentID)]
         while let (node, parentID) = pending.popLast() {
             nodes[node.id] = PenNode(
                 id: node.id, common: node.common, kind: node.kind.withEmptyChildren(), extras: node.extras
             )
-
             if let parentID {
                 parents[node.id] = parentID
-            } else {
-                rootOrder.append(node.id)
             }
-
-            // Record children in the structure map. Store an entry even for empty arrays
-            // to distinguish `children: []` from `children: nil` during materialization.
+            // Store an entry even for an empty array, to tell `children: []` from
+            // `children: nil` when materializing.
             if let declared = node.kind.declaredChildIDs {
                 children[node.id] = declared
             }

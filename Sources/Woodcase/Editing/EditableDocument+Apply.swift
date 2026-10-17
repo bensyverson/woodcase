@@ -96,7 +96,7 @@ extension EditableDocument {
     private func insertValidated(_ op: EditOperation.InsertNode) {
         if let parentID = op.parentID {
             var childList = children[parentID] ?? []
-            flattenAndInsert(op.node, parentID: parentID)
+            flattenSubtree(op.node, parentID: parentID)
             if let index = op.index {
                 childList.insert(op.node.id, at: index)
             } else {
@@ -104,7 +104,7 @@ extension EditableDocument {
             }
             children[parentID] = childList
         } else {
-            flattenAndInsert(op.node, parentID: nil)
+            flattenSubtree(op.node, parentID: nil)
             if let index = op.index {
                 rootOrder.insert(op.node.id, at: index)
             } else {
@@ -156,40 +156,16 @@ extension EditableDocument {
 
     // MARK: - Helpers
 
-    /// Writes a subtree into the flat store, keeping the difference between a container
-    /// that declares no children and one that declares an empty list — see
-    /// ``PenNode/Kind/declaredChildIDs``. That is what lets an `add` and an undo of a
-    /// delete round-trip the file's bytes rather than an equivalent tree.
-    ///
-    /// - Parameters:
-    ///   - node: The subtree to write.
-    ///   - parentID: The parent to record for its root, or `nil` for a root node.
-    private func flattenAndInsert(_ node: PenNode, parentID: String?) {
-        let strippedNode = PenNode(
-            id: node.id, common: node.common, kind: node.kind.withEmptyChildren(), extras: node.extras
-        )
-        nodes[node.id] = strippedNode
-
-        if let parentID {
-            parents[node.id] = parentID
-        }
-
-        if let declared = node.kind.declaredChildIDs {
-            children[node.id] = declared
-        }
-        for child in node.kind.inlineChildren {
-            flattenAndInsert(child, parentID: node.id)
-        }
-    }
-
     /// Every id an insert of this subtree would add, root first.
     ///
     /// - Parameter node: The subtree about to be, or just, inserted.
     /// - Returns: The subtree's ids in tree order.
     func collectInsertedIDs(in node: PenNode) -> [String] {
-        var result = [node.id]
-        for child in node.kind.inlineChildren {
-            result.append(contentsOf: collectInsertedIDs(in: child))
+        var result: [String] = []
+        var pending = [node]
+        while let next = pending.popLast() {
+            result.append(next.id)
+            pending.append(contentsOf: next.kind.inlineChildren.reversed())
         }
         return result
     }
