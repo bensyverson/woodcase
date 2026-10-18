@@ -120,14 +120,7 @@ public enum ReactEmitter {
         let registry = Dictionary(
             uniqueKeysWithValues: components.map { ($0.id, $0) }
         )
-
-        // Build variant-to-state lookup for tabBar ref resolution
-        var variantToState: [String: (componentName: String, stateName: String)] = [:]
-        for component in components where component.role == .tabBar {
-            for (stateName, variantID) in component.variantIDs {
-                variantToState[variantID] = (componentName: component.name, stateName: stateName)
-            }
-        }
+        let variantToState = variantStates(components)
 
         var files: [GeneratedFile] = []
         var meshProperties: [String: ThemedCustomProperty] = [:]
@@ -136,32 +129,23 @@ public enum ReactEmitter {
         // Component files
         for component in components {
             let ctx = EmitContext()
-            let content = emitComponent(
-                component, theme: theme, registry: registry,
-                variantToState: variantToState,
-                options: options, diagnostics: diagnostics, context: ctx
-            )
+            files.append(componentFile(
+                component, registry: registry, variantToState: variantToState,
+                theme: theme, options: options, diagnostics: diagnostics, context: ctx
+            ))
             meshProperties.merge(ctx.meshProperties) { first, _ in first }
             usesImageCrop = usesImageCrop || ctx.usesImageCrop
-            files.append(GeneratedFile(
-                path: "components/\(component.name).tsx",
-                content: content
-            ))
         }
 
         // Page files
         for page in pages {
             let ctx = EmitContext()
-            let content = emitPage(
+            files.append(pageFile(
                 page, registry: registry, variantToState: variantToState,
                 theme: theme, options: options, diagnostics: diagnostics, context: ctx
-            )
+            ))
             meshProperties.merge(ctx.meshProperties) { first, _ in first }
             usesImageCrop = usesImageCrop || ctx.usesImageCrop
-            files.append(GeneratedFile(
-                path: "pages/\(page.name).tsx",
-                content: content
-            ))
         }
 
         // Utility files

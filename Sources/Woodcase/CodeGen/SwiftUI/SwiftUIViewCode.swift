@@ -81,37 +81,74 @@ struct SwiftUIViewCode: Friendly {
     }
 
     /// The source lines for this view, indented by `indent` levels of four spaces.
-    func lines(indent: Int) -> [String] {
+    ///
+    /// Laid out from a work list rather than by recursion, so a view nested as deep as
+    /// any design costs no stack (issue `g5SACU`). Each level is freed as it is laid out,
+    /// its nested views held by the work list, so a tree handed over whole
+    /// (``lines(of:indent:)`` with `consume`) is not freed by recursion either.
+    consuming func lines(indent: Int) -> [String] {
+        Self.lines(of: consume self, indent: indent)
+    }
+
+    /// `view`'s source lines, indented by `indent` levels of four spaces
+    /// (``lines(indent:)``), taking the view over: a caller that is done with a tree
+    /// passes it with `consume`, and the tree is freed level by level as it is laid out.
+    static func lines(of view: consuming SwiftUIViewCode, indent: Int) -> [String] {
+        var lines: [String] = []
+        var pending: [Piece] = [.view(consume view, indent: indent)]
+        while let piece = pending.popLast() {
+            switch piece {
+            case let .line(line):
+                lines.append(line)
+            case let .view(view, indent):
+                pending.append(contentsOf: view.pieces(indent: indent).reversed())
+            }
+        }
+        return lines
+    }
+
+    /// A part of a view's layout: a line written as it is, or a nested view to lay out.
+    private enum Piece {
+        /// A finished line.
+        case line(String)
+
+        /// A view, laid out at `indent`.
+        case view(SwiftUIViewCode, indent: Int)
+    }
+
+    /// This view's own lines, in order, with each nested view — in its body, a trailing
+    /// closure or a modifier's closure — standing in for its lines.
+    private func pieces(indent: Int) -> [Piece] {
         let pad = Self.pad(indent)
-        var lines: [String] = comments.map { "\(pad)// \($0)" }
+        var pieces: [Piece] = comments.map { .line("\(pad)// \($0)") }
         if let body {
             let open = parameters.map { " { \($0) in" } ?? " {"
             if body.isEmpty, trailingClosures.isEmpty {
-                lines.append("\(pad)\(head)\(open)\(parameters == nil ? "" : " ")}")
+                pieces.append(.line("\(pad)\(head)\(open)\(parameters == nil ? "" : " ")}"))
             } else {
-                lines.append("\(pad)\(head)\(open)")
-                lines.append(contentsOf: body.flatMap { $0.lines(indent: indent + 1) })
+                pieces.append(.line("\(pad)\(head)\(open)"))
+                pieces += body.map { .view($0, indent: indent + 1) }
                 for closure in trailingClosures {
-                    lines.append("\(pad)} \(closure.label): {")
-                    lines.append(contentsOf: closure.body.flatMap { $0.lines(indent: indent + 1) })
+                    pieces.append(.line("\(pad)} \(closure.label): {"))
+                    pieces += closure.body.map { .view($0, indent: indent + 1) }
                 }
-                lines.append("\(pad)}")
+                pieces.append(.line("\(pad)}"))
             }
         } else {
-            lines.append("\(pad)\(head)")
+            pieces.append(.line("\(pad)\(head)"))
         }
         let modifierIndent = body == nil ? indent + 1 : indent
         let modifierPad = Self.pad(modifierIndent)
         for modifier in modifiers {
             if let content = modifier.content {
-                lines.append("\(modifierPad)\(modifier.call) {")
-                lines.append(contentsOf: content.flatMap { $0.lines(indent: modifierIndent + 1) })
-                lines.append("\(modifierPad)}")
+                pieces.append(.line("\(modifierPad)\(modifier.call) {"))
+                pieces += content.map { .view($0, indent: modifierIndent + 1) }
+                pieces.append(.line("\(modifierPad)}"))
             } else {
-                lines.append("\(modifierPad)\(modifier.call)")
+                pieces.append(.line("\(modifierPad)\(modifier.call)"))
             }
         }
-        return lines
+        return pieces
     }
 
     private static func pad(_ indent: Int) -> String {

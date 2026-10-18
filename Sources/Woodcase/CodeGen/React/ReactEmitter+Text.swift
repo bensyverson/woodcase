@@ -98,7 +98,7 @@ extension ReactEmitter {
         let hrefAttr = if let href = data.href { " href=\"\(href)\"" } else { "" }
 
         // Empty text: reserve space matching font metrics
-        let textContent = extractTextContent(data) ?? ""
+        let textContent = extractTextContent(data, theme: ctx.theme) ?? ""
         if textContent.trimmingCharacters(in: .whitespaces).isEmpty {
             let fontSize = data.fontSize?.literalValue ?? PenTextMeasurer.defaultFontSize
             let pitch: Double? = if let lineHeight = data.lineHeight {
@@ -141,9 +141,19 @@ extension ReactEmitter {
 
     // MARK: - Text Content
 
-    /// The literal text of a text node, or nil when the content is absent or an
-    /// unresolved variable reference.
-    static func extractTextContent(_ data: PenNode.TextData) -> String? {
-        data.content?.literalValue
+    /// The literal text of a text node, or nil when the content is absent or reads a
+    /// variable of `theme`.
+    ///
+    /// A `$name` no variable of the document has is the literal it almost certainly was
+    /// (`$9`, a price), as the resolver and the SwiftUI emitter read it.
+    static func extractTextContent(_ data: PenNode.TextData, theme: ThemeManifest) -> String? {
+        switch data.content {
+        case let .literal(text)?:
+            text
+        case let .variable(name)? where !theme.variables.contains { $0.name == name }:
+            "$" + name
+        case .variable?, nil:
+            nil
+        }
     }
 }

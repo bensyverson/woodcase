@@ -33,6 +33,22 @@ let pages = PageAnalyzer.analyze(doc)
 let theme = ThemeAnalyzer.analyze(doc)
 ```
 
+### Code for a selection
+
+``CodeGeneration`` writes the code for some of a document's nodes rather than a whole package — what an editor's Copy As or a Code tab shows — one ``DefinitionCode`` per definition, keyed by the definition's node id and in the order asked:
+
+- A **component** (any reusable node, at the root or nested) is the file `generate` writes for it, path and text: the whole emit and the selection share one per-definition function in each emitter (`ReactEmitter+Definitions.swift`, `SwiftUIEmitter+Definitions.swift`), and `CodeGenerationParityTests` holds every fixture's components and pages to it.
+- Any other **root**, of any kind — a board, a frame, a text, a shape, an icon, a group, an instance — is a **view** drawn from it as a page is. It is named by the page rule above, whatever its kind (`PageAnalyzer.pages(drawnFrom:componentNames:)`, which ``PageAnalyzer/analyze(_:)`` also names its frames through), against the document's components and the other views in the order asked: a frame named `Toggle:off` is `ToggleOff`, and a root whose name holds no letter or digit is named from its id. SwiftUI's header names the root's kind (`from the "Body" text`, an instance for a `ref`).
+- A layer inside another is neither, and throws ``CodeGenerationError/notADefinition(id:)``: copy it into a ``PenClip`` first, which makes it a root and carries every component and variable it needs.
+
+Components a definition uses are referenced by name, not included. A caller that wants a self-contained copy asks for them as well: a clip's roots other than its ``PenClip/contentIDs`` are exactly the components the copy needs. Every emitter option is its default, and no support file (theme, `cn`, `PenSupport`) comes with the result.
+
+```swift
+let clip = try PenClip.extract(nodeIDs: selection, from: document)
+let code = try CodeGeneration.code(for: clip, language: .react)
+let source = code.map(\.file.content).joined(separator: "\n")
+```
+
 ### Prop Mapping
 
 When a ref node overrides descendant properties, ``PropMapper`` bridges between ref override keys (node IDs) and component prop names. It reads override values from ``PenDescendantOverride`` and returns them typed, as ``PropMapper/Value`` — a string, a color (a literal or a variable), a boolean or an image URL — so each emitter formats them in its own syntax: React writes `"Custom Title"`, `"var(--primary)"` or `{false}`.
@@ -74,6 +90,8 @@ SwiftUI writes each as one modifier that is the identity while its state does no
 ### Emission
 
 Emitters produce target-specific output files from analysis results. Pass ``ReactEmitter/Options`` to control behavior such as strict mode, and an optional ``PenDiagnosticCollector`` to capture warnings about inlined components.
+
+**No walk recurses with the tree's depth.** Penumbra emits on a Swift task, whose thread has 512 KiB of stack, and the emitters used to call themselves once per level of the tree: a debug emit overflowed about 11 (React) or 15 (SwiftUI) levels deep, a release one about 80 or 50 (issue `g5SACU`). React writes its markup in document order into the file's context, so a container hands back the steps left after its opening lines — each child, and the closing lines and context restores between and after them (`ReactEmitStep`) — and `ReactEmitter.emitNode` drains them from a work list. A SwiftUI view is built from its children's, so a node's emitter returns a `SwiftUIPendingView`: its view, or requests for its children's views and a continuation that finishes from them; `SwiftUINodeEmitter.view(for:in:)` draws the requests depth first, in the order the recursion did, so every side effect — theme reads marked and rolled back, shapes declared, warnings — comes in the same order. The analyzers' walks, `NodeDiffer`, the asset walks and `SwiftUIViewCode`'s layout on the page use work lists too (`PenNode.inDocumentOrder(_:)`), and a page's or component's body, handed to its layout with `consume`, is freed level by level; a control's faces and a slot's default content are still freed by Swift's own recursion, about 270 bytes a level in debug. The output was shown byte-identical across every fixture under `Tests/` (`CodeGenCorpusProbe`), and `CodeGenStackTests` holds deep trees to a quarter of a task's stack; see `project/2026-09-26-debug-stack-depth.md`.
 
 - ``ReactEmitter`` generates a complete file set:
   - `components/*.tsx` — React + Tailwind component files with typed props and CSS variable references
@@ -172,6 +190,8 @@ Not covered: a painted stroke on a `browser` node (an `<iframe>` cannot hold the
 **Fills on SVG shapes.** A path, polygon, arc or donut whose fills are one plain color takes its topmost enabled solid as its `fill` attribute, skipping a disabled one — the rule text and icons follow; any other fill is drawn in layers, as *Paints on SVG fills* above says.
 
 > **Corrected 2026-09-28 (leaf `Mu4JsL`):** this paragraph said a gradient, image or mesh fill on these shapes was not drawn; the paint servers of leaves `bLU8nV` and `Qfm8i8` had drawn them since, and the paragraph had not moved with them.
+
+**Text copy.** A text's copy is its literal, or the prop that carries it. A `$name` no variable of the document has is that literal (`$9`, a price), as the resolver and SwiftUI read it; before issue `7aBGl9` React wrote it as `&nbsp;`. A text bound to a string variable the document has is still `&nbsp;` in React — how React reads a string variable is undecided (the rest of `7aBGl9`).
 
 **Text layout.** A text's lines are set as Pen sets them (``ReactEmitter``'s `textLayoutStyles`; leaves `Gmh2sB`, `3Xbv46`, `RgeMUN`):
 
@@ -540,6 +560,11 @@ Measured 2026-09-27 (`swift test --filter SwiftUIScreenRenderTests`, Xcode 27.0,
 
 ### Emission
 
+- ``CodeGeneration``
+- ``CodeLanguage``
+- ``DefinitionCode``
+- ``DefinitionCode/Role``
+- ``CodeGenerationError``
 - ``ReactEmitter``
 - ``ReactEmitter/Options``
 - ``SwiftUIEmitter``

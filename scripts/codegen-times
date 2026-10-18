@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+"""Median wall time of `woodcase generate react` and `generate swiftui`, for several
+builds of woodcase run interleaved, so load on a shared machine hits each build alike.
+
+    scripts/codegen-times --runs 9 --fixture Tests/WoodcaseTests/Fixtures/woodcase-app.pen \
+        --fixture Tests/WoodcaseTests/Fixtures/banking.pen \
+        before=/path/to/woodcase after=.build/release/woodcase
+
+Prints `uptime` first and last: a figure means something only beside the load it was
+taken under. Each run writes into a fresh temporary directory, deleted afterwards.
+"""
+
+import argparse
+import os
+import shutil
+import statistics
+import subprocess
+import tempfile
+import time
+
+
+def run_once(binary, verb, fixture):
+    out = tempfile.mkdtemp(prefix="codegen-times-")
+    try:
+        command = [binary, "generate", verb, fixture, "--output", out, "--force"]
+        start = time.perf_counter()
+        subprocess.run(command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        return (time.perf_counter() - start) * 1000
+    finally:
+        shutil.rmtree(out, ignore_errors=True)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--runs", type=int, default=9)
+    parser.add_argument("builds", nargs="+", help="label=path to a woodcase binary")
+    parser.add_argument("--fixture", dest="fixtures", action="append", required=True, help="a .pen file; repeat")
+    args = parser.parse_args()
+    builds = [build.split("=", 1) for build in args.builds]
+    print("uptime:", subprocess.run(["uptime"], capture_output=True, text=True).stdout.strip())
+    times = {}
+    for fixture in args.fixtures:
+        for verb in ("react", "swiftui"):
+            for _ in range(args.runs):
+                for label, binary in builds:
+                    times.setdefault((fixture, verb, label), []).append(run_once(binary, verb, fixture))
+    for (fixture, verb, label), samples in times.items():
+        print(f"{os.path.basename(fixture)}\t{verb}\t{label}\tmedian {statistics.median(samples):.1f} ms\t"
+              f"min {min(samples):.1f}\tmax {max(samples):.1f}")
+    print("uptime:", subprocess.run(["uptime"], capture_output=True, text=True).stdout.strip())
+
+
+if __name__ == "__main__":
+    main()

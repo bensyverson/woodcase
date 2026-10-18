@@ -21,27 +21,37 @@ extension SwiftUINodeEmitter {
     /// applies is applied — paths into nested instances, slot content, alias chains — and
     /// the instances inside it are calls or copies in turn. `nil` when the copy's root is
     /// switched off.
-    func instance(_ node: PenNode, data: PenNode.RefData, in container: Container) -> SwiftUIViewCode? {
-        let label = node.common.name ?? node.id
+    func instance(_ node: PenNode, data: PenNode.RefData, in container: Container) -> SwiftUIPendingView<SwiftUIViewCode?> {
         let variant = scope.variants[data.ref]
         let component = scope.components[variant?.componentID ?? data.ref]
         let name = component?.typeName ?? scope.reusable[data.ref]?.common.name ?? data.ref
-        var refusal = Refusal.undeclared(name)
-        if let component, !scope.chain.contains(data.ref), !scope.chain.contains(component.definition.id) {
-            let mark = themeReads.count
-            switch call(node, to: component, pinned: variant?.state, data: data, in: container) {
-            case let .success(call):
-                return themed(placed(call, node, in: container), node, since: mark)
-            case let .failure(why):
-                refusal = why
-            }
-            // The copy drawn instead reads the theme again.
-            themeReads.rollBack(to: mark)
+        guard let component, !scope.chain.contains(data.ref), !scope.chain.contains(component.definition.id) else {
+            return inlined(node, data: data, name: name, refusal: .undeclared(name), in: container)
         }
+        let mark = themeReads.count
+        return call(node, to: component, pinned: variant?.state, data: data, in: container).flatMap { result in
+            switch result {
+            case let .success(call):
+                return .done(themed(placed(call, node, in: container), node, since: mark))
+            case let .failure(why):
+                // The copy drawn instead reads the theme again.
+                themeReads.rollBack(to: mark)
+                return inlined(node, data: data, name: name, refusal: why, in: container)
+            }
+        }
+    }
+
+    /// The instance drawn as the component inlined, its overrides applied, under a comment
+    /// naming it, with a warning saying why (`refusal`); a placeholder when the component
+    /// is missing or places itself.
+    private func inlined(
+        _ node: PenNode, data: PenNode.RefData, name: String, refusal: Refusal, in container: Container
+    ) -> SwiftUIPendingView<SwiftUIViewCode?> {
+        let label = node.common.name ?? node.id
         guard let prepared = PenRefExpander.prepareInstance(
             refNode: node, refData: data, registry: scope.reusable, visited: scope.chain, cache: .init(loops: scope.loops)
         ) else {
-            return missing(node, data: data, in: container)
+            return .done(missing(node, data: data, in: container))
         }
         diagnostics?.warn(
             "SwiftUI inlined the instance \"\(label)\" of \(name): \(refusal)",
@@ -49,9 +59,11 @@ extension SwiftUINodeEmitter {
         )
         var emitter = self
         emitter.scope = scope.inlining(chain: prepared.chainVisited)
-        guard var view = emitter.view(for: prepared.node, in: container) else { return nil }
-        view.comments.insert("woodcase: inlined from \(name)", at: 0)
-        return view
+        return .awaiting([emitter.request(for: prepared.node, in: container)]) { views in
+            guard var view = views.first ?? nil else { return .done(nil) }
+            view.comments.insert("woodcase: inlined from \(name)", at: 0)
+            return .done(view)
+        }
     }
 
     /// Why an instance is a copy rather than a call.
@@ -84,10 +96,10 @@ extension SwiftUINodeEmitter {
     private func call(
         _ node: PenNode, to component: SwiftUIComponent, pinned: StateDefinition?, data: PenNode.RefData,
         in container: Container
-    ) -> Result<SwiftUIViewCode, Refusal> {
+    ) -> SwiftUIPendingView<Result<SwiftUIViewCode, Refusal>> {
         let rotation = node.common.rotation?.literalValue ?? 0
         guard rotation == 0, node.common.flipX?.literalValue != true, node.common.flipY?.literalValue != true else {
-            return .failure(.placement)
+            return .done(.failure(.placement))
         }
         // A variant's overrides name its own tree, which no prop of the component reads.
         var measured = component.bindable
@@ -97,42 +109,46 @@ extension SwiftUINodeEmitter {
         }
         let slots = pinned == nil ? Set(component.slots.map(\.frame.id)) : []
         let overrides = InstanceOverrides(of: data, against: measured, slots: slots)
-        guard overrides.unmapped.isEmpty else { return .failure(.unmapped(overrides.unmapped)) }
+        guard overrides.unmapped.isEmpty else { return .done(.failure(.unmapped(overrides.unmapped))) }
         if let slot = component.slots.first(where: { !$0.holds(overrides.slotFills[$0.frame.id] ?? []) }) {
-            return .failure(.unmapped([slot.frame.id]))
+            return .done(.failure(.unmapped([slot.frame.id])))
         }
         let root = measured.sourceNode
         guard let width = callSize(root, resized: overrides.rootWidth, axis: .width, in: container) else {
-            return .failure(.size(.width))
+            return .done(.failure(.size(.width)))
         }
         guard let height = callSize(root, resized: overrides.rootHeight, axis: .height, in: container) else {
-            return .failure(.size(.height))
+            return .done(.failure(.size(.height)))
         }
         var arguments: [String] = []
         for argument in overrides.arguments {
             guard let prop = component.props.first(where: { $0.definition.name == argument.name }),
                   let value = self.argument(argument.value, to: prop)
             else {
-                return .failure(.unmapped([argument.name]))
+                return .done(.failure(.unmapped([argument.name])))
             }
             arguments.append("\(prop.name): \(value)")
         }
-        var view: SwiftUIViewCode
+        let view: SwiftUIPendingView<SwiftUIViewCode>
         if let pinned {
             guard let control = SwiftUIControl(component.definition),
                   let lines = SwiftUIEmitter.pinnedCall(pinned, control: control, type: component.typeName)
             else {
-                return .failure(.state(pinned.name))
+                return .done(.failure(.state(pinned.name)))
             }
-            view = SwiftUIViewCode(head: lines[0])
-            view.modifiers += lines.dropFirst().map { SwiftUIViewCode.Modifier(String($0.drop { $0 == " " })) }
+            var pinnedCall = SwiftUIViewCode(head: lines[0])
+            pinnedCall.modifiers += lines.dropFirst().map { SwiftUIViewCode.Modifier(String($0.drop { $0 == " " })) }
+            view = .done(pinnedCall)
         } else if !overrides.slotFills.isEmpty {
             view = slotCall(component, arguments: arguments, fills: overrides.slotFills)
         } else {
-            view = SwiftUIViewCode(head: "\(component.typeName)(\(arguments.joined(separator: ", ")))")
+            view = .done(SwiftUIViewCode(head: "\(component.typeName)(\(arguments.joined(separator: ", ")))"))
         }
-        view.modifiers += frameModifiers(width: width, height: height, alignment: .center)
-        return .success(view)
+        return view.map { call in
+            var framed = call
+            framed.modifiers += frameModifiers(width: width, height: height, alignment: .center)
+            return .success(framed)
+        }
     }
 
     /// The size a call frames the component's `root` to on `axis`, where the instance sits

@@ -23,19 +23,27 @@ public enum NodeDiffer {
     public static func diff(base: PenNode, variant: PenNode) -> DiffResult {
         var deltas: [StateDelta] = []
         var isStructural = false
-        diffNode(base: base, variant: variant, path: ".", deltas: &deltas, isStructural: &isStructural)
+        // Each node's changes, then its matched children's, in order: a work list rather
+        // than recursion, so a deep tree costs no stack (issue `g5SACU`).
+        var pending: [(base: PenNode, variant: PenNode, path: String)] = [(base, variant, ".")]
+        while let pair = pending.popLast() {
+            let matched = diffNode(base: pair.base, variant: pair.variant, path: pair.path, deltas: &deltas, isStructural: &isStructural)
+            pending.append(contentsOf: matched.reversed())
+        }
         return DiffResult(deltas: deltas, isStructural: isStructural)
     }
 
-    // MARK: - Recursive Diff
+    // MARK: - Diff
 
+    /// Records the changes at one pair of nodes and returns their matched children, with
+    /// each one's path, for the caller to diff next.
     private static func diffNode(
         base: PenNode,
         variant: PenNode,
         path: String,
         deltas: inout [StateDelta],
         isStructural: inout Bool
-    ) {
+    ) -> [(base: PenNode, variant: PenNode, path: String)] {
         // Compare visual properties at this node
         let changes = compareProperties(base: base, variant: variant)
         if !changes.isEmpty {
@@ -77,6 +85,7 @@ public enum NodeDiffer {
         let baseLookup = Dictionary(baseByName, uniquingKeysWith: { first, _ in first })
         let variantLookup = Dictionary(variantByName, uniquingKeysWith: { first, _ in first })
 
+        var matched: [(base: PenNode, variant: PenNode, path: String)] = []
         for name in baseNames where variantLookup[name] != nil {
             let baseChild = baseLookup[name]!
             let variantChild = variantLookup[name]!
@@ -90,14 +99,9 @@ public enum NodeDiffer {
             }
 
             let childPath = path == "." ? name : "\(path)/\(name)"
-            diffNode(
-                base: baseChild,
-                variant: variantChild,
-                path: childPath,
-                deltas: &deltas,
-                isStructural: &isStructural
-            )
+            matched.append((baseChild, variantChild, childPath))
         }
+        return matched
     }
 
     // MARK: - Property Comparison

@@ -20,14 +20,17 @@ extension ReactEmitter {
         return urls
     }
 
-    /// Recursively walks a node tree and collects image fill URLs.
+    /// Walks a node tree and collects image fill URLs.
     public static func collectImageURLs(from node: PenNode) -> Set<String> {
         var urls: Set<String> = []
-        collectImageURLs(from: node, into: &urls)
+        for descendant in PenNode.inDocumentOrder([node]) {
+            collectImageURLs(of: descendant, into: &urls)
+        }
         return urls
     }
 
-    private static func collectImageURLs(from node: PenNode, into urls: inout Set<String>) {
+    /// Collects the image fill URLs of one node, not its children.
+    private static func collectImageURLs(of node: PenNode, into urls: inout Set<String>) {
         // Extract fills from any node kind that has them
         let fills: PenFills? = switch node.kind {
         case let .frame(data):
@@ -51,20 +54,6 @@ extension ReactEmitter {
                     urls.insert(url)
                 }
             }
-        }
-
-        // Recurse into children
-        switch node.kind {
-        case let .frame(data):
-            for child in data.children ?? [] {
-                collectImageURLs(from: child, into: &urls)
-            }
-        case let .group(data):
-            for child in data.children ?? [] {
-                collectImageURLs(from: child, into: &urls)
-            }
-        default:
-            break
         }
     }
 }

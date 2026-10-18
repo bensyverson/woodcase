@@ -45,7 +45,7 @@ extension SwiftUIEmitter {
         lines += declarations(component.props, slots: component.slots)
         lines.append("")
         let slots = slotLines(component, parameters: component.props.map(\.parameter), emitter: emitter, scope: scope)
-        lines += bodyLines(body, emitter: emitter, specimens: specimens(of: component), trailer: slots)
+        lines += bodyLines(consume body, emitter: emitter, specimens: specimens(of: component), trailer: slots)
         return lines.joined(separator: "\n") + "\n"
     }
 

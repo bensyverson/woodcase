@@ -32,11 +32,11 @@ public enum PageAnalyzer {
             return states.values.compactMap { if case let .string(id) = $0 { id } else { nil } }
         })
 
-        let found = document.children.compactMap { node -> PageDefinition? in
+        let frames = document.children.filter { node in
             guard case .frame = node.kind,
                   node.common.reusable != true,
                   !variantIDs.contains(node.id)
-            else { return nil }
+            else { return false }
 
             // Exclude state variant siblings (e.g. "Toggle:off" when "Toggle" is reusable)
             if let nodeName = node.common.name,
@@ -44,15 +44,34 @@ public enum PageAnalyzer {
             {
                 let prefix = String(nodeName[nodeName.startIndex ..< colonIndex])
                 if reusableNames.contains(prefix) {
-                    return nil
+                    return false
                 }
             }
+            return true
+        }
+        return pages(drawnFrom: frames, componentNames: Set(ComponentAnalyzer.analyze(document).map(\.name)))
+            .sorted { $0.name < $1.name }
+    }
 
-            let name = CodeGenName.typeName(node.common.name ?? node.id, droppingPrefixes: CodeGenName.pagePrefixes)
+    /// A page drawn from each of `roots`, whatever its kind, named by the rule
+    /// ``analyze(_:)`` names a page and told apart from `componentNames`, the reserved
+    /// names and each other in the order given.
+    ///
+    /// A root whose name holds no letter or digit is named from its id instead.
+    ///
+    /// - Parameters:
+    ///   - roots: The nodes to draw pages from, in the order their names are claimed.
+    ///   - componentNames: The names of the document's components (``ComponentAnalyzer``).
+    /// - Returns: One page per root, in the order given.
+    static func pages(drawnFrom roots: [PenNode], componentNames: Set<String>) -> [PageDefinition] {
+        let found = roots.map { node in
+            var name = CodeGenName.typeName(node.common.name ?? node.id, droppingPrefixes: CodeGenName.pagePrefixes)
+            if name.isEmpty {
+                name = CodeGenName.typeName(node.id, droppingPrefixes: [])
+            }
             return PageDefinition(id: node.id, name: name, sourceNode: node)
         }
-        return disambiguated(found, componentNames: Set(ComponentAnalyzer.analyze(document).map(\.name)))
-            .sorted { $0.name < $1.name }
+        return disambiguated(found, componentNames: componentNames)
     }
 
     /// Collect the IDs of all components referenced by ref nodes within a page's tree.
@@ -65,19 +84,8 @@ public enum PageAnalyzer {
     // MARK: - Private
 
     private static func collectRefIDs(from node: PenNode, into ids: inout Set<String>) {
-        switch node.kind {
-        case let .ref(data):
+        for case let .ref(data) in PenNode.inDocumentOrder([node]).map(\.kind) {
             ids.insert(data.ref)
-        case let .frame(data):
-            for child in data.children ?? [] {
-                collectRefIDs(from: child, into: &ids)
-            }
-        case let .group(data):
-            for child in data.children ?? [] {
-                collectRefIDs(from: child, into: &ids)
-            }
-        default:
-            break
         }
     }
 

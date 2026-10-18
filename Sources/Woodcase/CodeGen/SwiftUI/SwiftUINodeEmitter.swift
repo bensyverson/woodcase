@@ -42,27 +42,28 @@ struct SwiftUINodeEmitter {
     /// theme it reads variables through.
     var scope = SwiftUIComponentScope()
 
-    /// The view for `node`, or `nil` when the node is switched off (`enabled: false`); a
-    /// context node's view is set in its theme (``themed(_:_:since:)``).
-    func view(for node: PenNode, in container: Container) -> SwiftUIViewCode? {
-        guard node.common.enabled?.literalValue != false else { return nil }
+    /// The view for `node` — or `nil` when the node is switched off (`enabled: false`) —
+    /// once the views it is drawn from are known: a container's children, an instance's
+    /// slot content or inlined copy. ``view(for:in:)`` draws those it waits on.
+    func pendingView(for node: PenNode, in container: Container) -> SwiftUIPendingView<SwiftUIViewCode?> {
+        guard node.common.enabled?.literalValue != false else { return .done(nil) }
         if case let .ref(data) = node.kind {
             // An instance sets its own theme: on the call, or on the copy's root.
             return instance(node, data: data, in: container)
         }
         let mark = themeReads.count
-        let view: SwiftUIViewCode = switch node.kind {
+        let view: SwiftUIPendingView<SwiftUIViewCode> = switch node.kind {
         case let .frame(data): frame(node, data: data, in: container)
-        case let .rectangle(data): rectangle(node, data: data, in: container)
-        case let .ellipse(data): ellipse(node, data: data, in: container)
-        case let .text(data) where scope.textField == node.id: textField(node, data: data, in: container)
-        case let .text(data): text(node, data: data, in: container)
-        case .path, .polygon, .line: geometry(node, in: container)
-        case let .icon(data): icon(node, data: data, in: container)
+        case let .rectangle(data): .done(rectangle(node, data: data, in: container))
+        case let .ellipse(data): .done(ellipse(node, data: data, in: container))
+        case let .text(data) where scope.textField == node.id: .done(textField(node, data: data, in: container))
+        case let .text(data): .done(text(node, data: data, in: container))
+        case .path, .polygon, .line: .done(geometry(node, in: container))
+        case let .icon(data): .done(icon(node, data: data, in: container))
         case let .group(data): group(node, data: data, in: container)
-        default: placeholder(node, in: container)
+        default: .done(placeholder(node, in: container))
         }
-        return themed(placed(view, node, in: container), node, since: mark)
+        return view.map { view -> SwiftUIViewCode? in themed(placed(view, node, in: container), node, since: mark) }
     }
 
     /// `view`, drawn for `node`, with what every kind shares: its effects, its turn and

@@ -13,31 +13,24 @@ extension SwiftUIEmitter {
     /// Only the kinds this emitter paints are read, and only enabled nodes and fills; a
     /// remote or absolute URL is left out, as the views do not reference it.
     static func imageAssetURLs(in node: PenNode) -> Set<String> {
-        guard node.common.enabled?.literalValue != false else { return [] }
-        var paints: [PenFills?] = []
-        var children: [PenNode] = []
-        switch node.kind {
-        case let .frame(data):
-            paints = [data.fills, data.stroke]
-            children = data.children ?? []
-        case let .group(data): children = data.children ?? []
-        case let .rectangle(data): paints = [data.fills, data.stroke]
-        case let .ellipse(data): paints = [data.fills, data.stroke]
-        case let .text(data): paints = [data.fills]
-        case let .path(data): paints = [data.fills, data.stroke]
-        case let .polygon(data): paints = [data.fills, data.stroke]
-        case let .line(data): paints = [data.stroke]
-        case let .icon(data): paints = [data.fills]
-        default: break
-        }
         var urls: Set<String> = []
-        for fill in paints.flatMap({ $0?.all ?? [] }) where fill.isEnabled {
-            if case let .image(image) = fill, let url = image.url, SwiftUINodeEmitter.resourceName(url) != nil {
-                urls.insert(url)
+        for node in PenNode.enabledInDocumentOrder([node]) {
+            let paints: [PenFills?] = switch node.kind {
+            case let .frame(data): [data.fills, data.stroke]
+            case let .rectangle(data): [data.fills, data.stroke]
+            case let .ellipse(data): [data.fills, data.stroke]
+            case let .text(data): [data.fills]
+            case let .path(data): [data.fills, data.stroke]
+            case let .polygon(data): [data.fills, data.stroke]
+            case let .line(data): [data.stroke]
+            case let .icon(data): [data.fills]
+            default: []
             }
-        }
-        for child in children {
-            urls.formUnion(imageAssetURLs(in: child))
+            for fill in paints.flatMap({ $0?.all ?? [] }) where fill.isEnabled {
+                if case let .image(image) = fill, let url = image.url, SwiftUINodeEmitter.resourceName(url) != nil {
+                    urls.insert(url)
+                }
+            }
         }
         return urls
     }

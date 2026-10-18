@@ -9,6 +9,11 @@
 > inserting a tree no longer recurse either. Penumbra's Debug app had crashed comparing an
 > eight-level mockup: synthesized `==` took 563 KB of stack on it. See
 > [the node's own walks](#the-nodes-own-walks-leaf-a1p6vh-2026-10-17).
+>
+> **Updated 2026-10-17 (leaf `g5SACU`):** code generation no longer recurses with the
+> tree's depth: a release `woodcase generate` of a 255-deep frame tree or 32 nested
+> instances exits 0 (138 before), with output byte-identical across every test fixture.
+> See [code generation](#code-generation-leaf-g5sacu-2026-10-17).
 
 Author: Claude (Opus), leaf `PJwhm2`. Found by `ILYyZi`: `woodcase tree` (debug) on an
 instance of `Scr03 → Mid01 → Scr01 → Ins0A → InsB` exited 138 with no output — "Thread
@@ -312,3 +317,91 @@ release): a debug emit overflows a task's 512 KiB about 11 (React) or 15 (SwiftU
 deep, a release one about 80 or 50. Each emitter builds a node's code from its children's,
 with per-node context (indentation, parent layout, slots, instance scope), across some
 190 files; making them iterative is a refactor of its own, not this leaf's.
+
+> **Updated 2026-10-17 (leaf `g5SACU`):** done; see [code generation](#code-generation-leaf-g5sacu-2026-10-17).
+> "Each emitter builds a node's code from its children's" was true of SwiftUI only:
+> React writes its markup into a shared context in document order, and only some 20 of
+> the 190 files walk the tree.
+
+
+## Code generation (leaf `g5SACU`, 2026-10-17)
+
+Author: Claude (Opus), leaf `g5SACU`, after leaf `0oCvb9` added `CodeGeneration` (code for
+a selection), which Penumbra's Copy As runs on a Swift task.
+
+### What changed
+
+- **React** writes its markup in document order into the file's `EmitContext`, so a
+  container now writes its opening lines and hands back the rest as `ReactEmitStep`s —
+  each child, and the closing lines and context restores (child placement, node path,
+  turned-fill sizes) between and after them. `ReactEmitter.emitNode` drains them from a
+  work list.
+- **SwiftUI** builds a view from its children's, so a node's emitter returns a
+  `SwiftUIPendingView`: its view, or requests for its children's views (`SwiftUIViewRequest`,
+  which carries the emitter — an inlined instance draws with its component's scope) and a
+  continuation. `SwiftUINodeEmitter.view(for:in:)` draws the requests from a work list,
+  depth first and in order, so the side effects — theme reads marked and rolled back,
+  shapes declared, warnings — come in the order the recursion made them. Frames, groups,
+  group silhouettes, instance calls and slot calls, and inlined copies are continuations.
+- **The other walks**: ComponentAnalyzer's component, node and descendant walks,
+  `PageAnalyzer.collectRefIDs`, `ThemeAnalyzer`'s context nodes, the image, icon and font
+  walks (`PenNode.inDocumentOrder(_:)` / `enabledInDocumentOrder(_:)`), `NodeDiffer`,
+  the silhouette's inking and `SwiftUIViewCode`'s layout on the page all use work lists.
+  A page's or component's body, handed to `SwiftUIViewCode.lines(of:indent:)` with
+  `consume`, is freed level by level as it is laid out.
+
+### Measured: stack
+
+`StackHighWater` bytes, debug, each test alone:
+`swift test --filter "CodeGenStackTests/<test>"`. "Before" is this leaf's red run, on
+leaf `0oCvb9`'s code (20:16, the tests in parallel, so each pair was matched to its test
+by size: emit and code agree within a few KB, and each is the old ~45 KB or ~33 KB a
+level times the depth); "after" is 21:10, load ~40. Each row: whole emit / `CodeGeneration`.
+
+| Tree | React before | React after | SwiftUI before | SwiftUI after |
+|---|---|---|---|---|
+| frame chain, 255 deep | 11,425,168 / 11,425,152 | 80,560 / 71,008 | 8,337,368 / 8,329,440 | 77,240 / 69,312 |
+| mockup-shaped, 128 deep | 5,738,536 / 5,738,520 | 82,488 / 77,840 | 4,199,184 / 4,198,032 | 76,840 / 70,992 |
+| `layout: none` frames, 200 deep | 9,006,832 / 9,006,816 | 80,560 / 70,672 | 6,573,216 / 6,572,064 | 77,240 / 69,311 |
+| groups with shadows, 200 deep | 5,297,016 / 5,328,488 | 80,560 / 70,672 | 8,034,688 / 8,033,536 | 77,240 / 72,368 |
+| 40 turned instances, inlined | 5,170,016 / 5,170,000 | 116,168 / 109,176 | 3,969,440 / 3,996,544 | 119,560 / 118,408 |
+| nested slot instances, 16 deep | 3,003,792 / 3,003,776 | 116,168 / 108,336 | 2,512,840 / 2,511,688 | 117,568 / 143,424 |
+| nested slot instances, 32 deep | — | 107,264 / 108,336 | — | 117,568 / 143,400 |
+
+`CodeGenStackTests` holds each to a quarter of a task's stack (131,072), and the nested
+instances to half and to no growth from 16 to 32 deep: the ~100 KB there is the fixed
+cost of preparing one instance (*What changed*, above). A 200-deep state
+variant analyzed (`NodeDiffer`) and a 1,000-deep view laid out and freed also pass; the
+view used 273,752 bytes before it was consumed as it was laid out (about 270 bytes a
+level, Swift freeing nested arrays), which is what a control's faces and a slot's
+default content, not handed over, still cost.
+
+Release, end to end: `scripts/deep-pen frames 255` and `scripts/deep-pen instances 32`
+through `woodcase generate react` and `generate swiftui` (`swift build -c release
+--product woodcase`), exit 138 for all four on leaf `0oCvb9`'s binary and 0 after.
+
+### Byte-identical output
+
+`WOODCASE_CODEGEN_DUMP=<dir> swift test --filter CodeGenCorpusProbe` dumps, for each of
+the 247 `.pen` files under `Tests/`, the whole React and SwiftUI emit, each run's
+diagnostics, and `CodeGeneration`'s code for every component and root. Run on leaf
+`0oCvb9`'s code (20:14) and after this leaf (20:50): 12,021 files, `diff -r` empty. The
+release CLI's `generate react` and `generate swiftui` output for `woodcase-app.pen` and
+`banking.pen` is identical too (299 files).
+
+React's text layout reads the line pitch of fonts this machine has registered, so an
+emit can change when another suite registers the test fonts mid-run; the probe runs
+alone, and `CodeGenerationParityTests` registers them first.
+
+### Measured: time (provisional)
+
+`scripts/codegen-times --runs 9`, medians of interleaved runs of leaf `0oCvb9`'s release
+binary and this leaf's, 20:58, load ~10 (provisional: a shared machine):
+
+| File | React before / after | SwiftUI before / after |
+|---|---|---|
+| `woodcase-app.pen` | 121.6 / 123.6 ms | 124.8 / 126.6 ms |
+| `banking.pen` | 151.8 / 152.3 ms | 192.4 / 194.6 ms |
+
+End to end, including parsing and writing, the work lists cost 0.5–2 ms, about 1%.
+

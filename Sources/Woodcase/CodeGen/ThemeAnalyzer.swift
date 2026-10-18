@@ -53,21 +53,6 @@ public enum ThemeAnalyzer {
     }
 
     private static func collectContextNodes(from nodes: [PenNode], into result: inout [String]) {
-        for node in nodes {
-            if node.common.theme != nil {
-                result.append(node.id)
-            }
-            for child in children(of: node) {
-                collectContextNodes(from: [child], into: &result)
-            }
-        }
-    }
-
-    private static func children(of node: PenNode) -> [PenNode] {
-        switch node.kind {
-        case let .frame(data): data.children ?? []
-        case let .group(data): data.children ?? []
-        default: []
-        }
+        result += PenNode.inDocumentOrder(nodes).filter { $0.common.theme != nil }.map(\.id)
     }
 }

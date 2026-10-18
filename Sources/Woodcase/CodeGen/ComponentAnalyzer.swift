@@ -179,33 +179,29 @@ public enum ComponentAnalyzer {
         }
     }
 
-    /// Recursively flatten all nodes in the tree for ID-based lookup.
+    /// Every node in the trees, in document order, for ID-based lookup.
     private static func flattenNodes(_ nodes: [PenNode]) -> [PenNode] {
-        var result: [PenNode] = []
-        for node in nodes {
-            result.append(node)
-            result.append(contentsOf: flattenNodes(children(of: node)))
-        }
-        return result
+        PenNode.inDocumentOrder(nodes)
     }
 
     // MARK: - Component Collection
 
+    /// Every reusable node in the trees, in document order, each with the siblings it
+    /// sits among; walked from a work list, so a deep tree costs no stack.
     private static func collectComponents(
         from nodes: [PenNode],
         into results: inout [ComponentDefinition],
         siblingScope: inout [String: [PenNode]]
     ) {
-        for node in nodes {
+        var pending: [(node: PenNode, siblings: [PenNode])] = nodes.reversed().map { ($0, nodes) }
+        while let (node, siblings) = pending.popLast() {
             if node.common.reusable == true {
                 let definition = buildDefinition(for: node)
                 results.append(definition)
-                siblingScope[definition.id] = nodes
+                siblingScope[definition.id] = siblings
             }
             let nodeChildren = children(of: node)
-            if !nodeChildren.isEmpty {
-                collectComponents(from: nodeChildren, into: &results, siblingScope: &siblingScope)
-            }
+            pending.append(contentsOf: nodeChildren.reversed().map { ($0, nodeChildren) })
         }
     }
 
@@ -325,9 +321,8 @@ public enum ComponentAnalyzer {
         actions: inout [ActionDefinition],
         bindings: inout [BindingDefinition]
     ) {
-        for child in children(of: node) {
-            extractInteractiveMetadata(from: child, actions: &actions, bindings: &bindings)
-            walkDescendants(of: child, actions: &actions, bindings: &bindings)
+        for descendant in PenNode.inDocumentOrder(children(of: node)) {
+            extractInteractiveMetadata(from: descendant, actions: &actions, bindings: &bindings)
         }
     }
 

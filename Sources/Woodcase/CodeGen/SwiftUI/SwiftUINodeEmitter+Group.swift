@@ -24,32 +24,38 @@ extension SwiftUINodeEmitter {
     ///   - node: The group.
     ///   - data: Its payload.
     ///   - container: What it sits in.
-    func group(_ node: PenNode, data: PenNode.GroupData, in container: Container) -> SwiftUIViewCode {
+    func group(_ node: PenNode, data: PenNode.GroupData, in container: Container) -> SwiftUIPendingView<SwiftUIViewCode> {
         let children = data.children ?? []
         let flow = Self.isFlow(container) ? GroupFlow(rotation: node.common.rotation?.literalValue ?? 0) : nil
-        var view = groupStack(children, flow: flow)
-        var effects = effects(data.effects)
-        if !effects.outer.isEmpty || !effects.inner.isEmpty, let silhouette = groupSilhouette(children, flow: flow) {
-            let style = Effects.Shadow.styles
-            var arguments: [String] = []
-            if !effects.outer.isEmpty { arguments.append("outer: \(style(effects.outer))") }
-            if !effects.inner.isEmpty { arguments.append("inner: \(style(effects.inner))") }
-            view.modifiers.append(SwiftUIViewCode.Modifier(
-                ".penGroupShadows(\(arguments.joined(separator: ", ")))", content: [silhouette]
-            ))
+        return groupStack(children, flow: flow).flatMap { stacked in
+            var effects = effects(data.effects)
+            let casts = !effects.outer.isEmpty || !effects.inner.isEmpty
+            let silhouette: SwiftUIPendingView<SwiftUIViewCode?> = casts ? groupSilhouette(children, flow: flow) : .done(nil)
+            return silhouette.map { silhouette in
+                var view = stacked
+                if let silhouette {
+                    let style = Effects.Shadow.styles
+                    var arguments: [String] = []
+                    if !effects.outer.isEmpty { arguments.append("outer: \(style(effects.outer))") }
+                    if !effects.inner.isEmpty { arguments.append("inner: \(style(effects.inner))") }
+                    view.modifiers.append(SwiftUIViewCode.Modifier(
+                        ".penGroupShadows(\(arguments.joined(separator: ", ")))", content: [silhouette]
+                    ))
+                }
+                if !effects.backgroundBlurs.isEmpty {
+                    effects.unemitted.append("background blur on groups")
+                }
+                for radius in effects.blurs {
+                    view = view.modified(".blur(radius: \(radius.code))")
+                }
+                let opacity = node.common.opacity?.literalValue ?? 1
+                if opacity < 1 || (data.blendMode ?? .normal) != .normal {
+                    view = view.modified(".compositingGroup()")
+                }
+                warnUnemitted(node, effects.unemitted)
+                return view
+            }
         }
-        if !effects.backgroundBlurs.isEmpty {
-            effects.unemitted.append("background blur on groups")
-        }
-        for radius in effects.blurs {
-            view = view.modified(".blur(radius: \(radius.code))")
-        }
-        let opacity = node.common.opacity?.literalValue ?? 1
-        if opacity < 1 || (data.blendMode ?? .normal) != .normal {
-            view = view.modified(".compositingGroup()")
-        }
-        warnUnemitted(node, effects.unemitted)
-        return view
     }
 
     /// How a group in a stack is laid out: by `PenGroupFlow`, sized to its children's union.
@@ -74,22 +80,27 @@ extension SwiftUINodeEmitter {
     /// - Parameters:
     ///   - children: The group's children.
     ///   - flow: How the group sits in a stack, or `nil` when it is placed by its `x`/`y`.
-    func groupStack(_ children: [PenNode], flow: GroupFlow? = nil) -> SwiftUIViewCode {
-        var offsets: [String] = []
-        let views = children.compactMap { child -> SwiftUIViewCode? in
+    func groupStack(_ children: [PenNode], flow: GroupFlow? = nil) -> SwiftUIPendingView<SwiftUIViewCode> {
+        let requests = children.map { child in
             var anchored = child
             anchored.common.x = nil
             anchored.common.y = nil
-            guard let view = view(for: anchored, in: .absolute) else { return nil }
-            let x = Self.rounded(child.common.x?.literalValue ?? 0)
-            let y = Self.rounded(child.common.y?.literalValue ?? 0)
-            guard flow != nil else { return placed(view, x: x, y: y) }
-            offsets.append("CGPoint(x: \(SwiftUILiteral.number(x)), y: \(SwiftUILiteral.number(y)))")
-            return view
+            return request(for: anchored, in: .absolute)
         }
-        guard let flow else { return SwiftUIViewCode(head: "ZStack(alignment: .topLeading)", body: views) }
-        let turn = flow.rotation == 0 ? "" : ", rotation: \(SwiftUILiteral.number(flow.rotation))"
-        return SwiftUIViewCode(head: "PenGroupFlow(offsets: [\(offsets.joined(separator: ", "))]\(turn))", body: views)
+        return views(requests).map { drawn in
+            var offsets: [String] = []
+            let views = zip(children, drawn).compactMap { child, view -> SwiftUIViewCode? in
+                guard let view else { return nil }
+                let x = Self.rounded(child.common.x?.literalValue ?? 0)
+                let y = Self.rounded(child.common.y?.literalValue ?? 0)
+                guard flow != nil else { return placed(view, x: x, y: y) }
+                offsets.append("CGPoint(x: \(SwiftUILiteral.number(x)), y: \(SwiftUILiteral.number(y)))")
+                return view
+            }
+            guard let flow else { return SwiftUIViewCode(head: "ZStack(alignment: .topLeading)", body: views) }
+            let turn = flow.rotation == 0 ? "" : ", rotation: \(SwiftUILiteral.number(flow.rotation))"
+            return SwiftUIViewCode(head: "PenGroupFlow(offsets: [\(offsets.joined(separator: ", "))]\(turn))", body: views)
+        }
     }
 
     /// An offset rounded to a millionth of a point, which drops the float noise Pen leaves in

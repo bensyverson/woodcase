@@ -12,14 +12,14 @@ extension ReactEmitter {
         indent: Int,
         ctx: EmitContext,
         isRoot _: Bool
-    ) {
+    ) -> [ReactEmitStep] {
         let pad = String(repeating: " ", count: indent)
 
         // TabBar variant ref resolution: redirect to base component with selected prop
         if let mapping = ctx.variantToState[data.ref] {
             ctx.componentRefs.insert(mapping.componentName)
             ctx.lines.append("\(pad)<\(mapping.componentName) selected=\"\(mapping.stateName)\" />")
-            return
+            return []
         }
 
         let component = ctx.componentRegistry[data.ref]
@@ -37,7 +37,7 @@ extension ReactEmitter {
         }
 
         if hasUnmappedOverrides, let component {
-            emitInlinedRef(
+            return emitInlinedRef(
                 node, data: data, component: component,
                 componentName: componentName, indent: indent, ctx: ctx
             )
@@ -50,6 +50,7 @@ extension ReactEmitter {
                 node, data: data, componentName: componentName,
                 component: component, indent: indent, ctx: ctx
             )
+            return []
         }
     }
 
@@ -119,7 +120,8 @@ extension ReactEmitter {
         }
     }
 
-    /// Inline a component by cloning its source node, applying overrides, and emitting the tree.
+    /// Inline a component by cloning its source node and applying overrides; returns the
+    /// steps that emit the tree and then report the inlining.
     private static func emitInlinedRef(
         _ node: PenNode,
         data: PenNode.RefData,
@@ -127,7 +129,7 @@ extension ReactEmitter {
         componentName: String,
         indent: Int,
         ctx: EmitContext
-    ) {
+    ) -> [ReactEmitStep] {
         let pad = String(repeating: " ", count: indent)
 
         // Clone the component's source node
@@ -156,19 +158,21 @@ extension ReactEmitter {
             bindings: []
         )
 
-        // Emit the patched node tree
-        emitNode(patched, component: dummyComp, indent: indent, ctx: ctx, isRoot: false)
-
-        // Emit diagnostic
+        // Emit the patched node tree, then the diagnostic
         let severity: PenDiagnostic.Severity = ctx.options.strict ? .error : .warning
         let unmappedIDs = unmappedOverrideIDs(data.descendants, in: component)
         let message = "Inlined component '\(componentName)' due to unmapped descendant overrides: \(unmappedIDs.sorted().joined(separator: ", "))"
-        ctx.diagnostics?.add(PenDiagnostic(
-            severity: severity,
-            stage: .codeGen,
-            message: message,
-            nodeID: node.id
-        ))
+        return [
+            .node(patched, component: dummyComp, indent: indent, isRoot: false, parentLayout: nil),
+            .then {
+                ctx.diagnostics?.add(PenDiagnostic(
+                    severity: severity,
+                    stage: .codeGen,
+                    message: message,
+                    nodeID: node.id
+                ))
+            },
+        ]
     }
 
     /// Returns the set of override node IDs that have no corresponding prop in the component.

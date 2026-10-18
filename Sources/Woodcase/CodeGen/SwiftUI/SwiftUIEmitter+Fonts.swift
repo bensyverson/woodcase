@@ -10,23 +10,17 @@ extension SwiftUIEmitter {
     /// `woodcase generate swiftui` bundles into `Sources/<Module>/Resources/`, so the
     /// package draws its text in its own faces.
     static func fontFaces(in node: PenNode, theme: SwiftUITheme?) -> Set<PenFontFace> {
-        guard node.common.enabled?.literalValue != false else { return [] }
-        switch node.kind {
-        case let .text(data):
+        var faces: Set<PenFontFace> = []
+        for case let .text(data) in PenNode.enabledInDocumentOrder([node]).map(\.kind) {
             let families: [String] = switch data.fontFamily {
             case let .literal(family)?: [family]
             case let .variable(name)?: theme?.tokens[name]?.cases.compactMap(\.string) ?? []
             case nil: []
             }
-            return Set(families.map {
+            faces.formUnion(families.map {
                 PenFontFace(family: $0, fontWeight: data.fontWeight?.literalValue, fontStyle: data.fontStyle?.literalValue)
             })
-        case let .frame(data):
-            return (data.children ?? []).reduce(into: Set<PenFontFace>()) { $0.formUnion(fontFaces(in: $1, theme: theme)) }
-        case let .group(data):
-            return (data.children ?? []).reduce(into: Set<PenFontFace>()) { $0.formUnion(fontFaces(in: $1, theme: theme)) }
-        default:
-            return []
         }
+        return faces
     }
 }

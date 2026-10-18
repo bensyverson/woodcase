@@ -18,15 +18,69 @@ extension SwiftUINodeEmitter {
     ///   - children: The group's children.
     ///   - flow: How the group sits in a stack, or `nil` when it is placed by its `x`/`y`
     ///     (``groupStack(_:flow:)``).
-    func groupSilhouette(_ children: [PenNode], flow: GroupFlow? = nil) -> SwiftUIViewCode? {
+    func groupSilhouette(_ children: [PenNode], flow: GroupFlow? = nil) -> SwiftUIPendingView<SwiftUIViewCode?> {
         let inked = children.compactMap(Self.inked)
-        guard !inked.isEmpty else { return nil }
-        return groupStack(inked, flow: flow)
+        guard !inked.isEmpty else { return .done(nil) }
+        return groupStack(inked, flow: flow).map { Optional($0) }
     }
 
     /// `node` as it stands in a group's silhouette, or `nil` for a node that covers nothing
     /// there: a line, and any kind the emitter does not draw.
+    ///
+    /// A group is inked with its children, nested groups included, rebuilt bottom-up from
+    /// a work list rather than by recursion, so nesting costs no stack (issue `g5SACU`).
     static func inked(_ node: PenNode) -> PenNode? {
+        guard case let .group(data) = node.kind else { return inkedOwnPaint(node) }
+        var open = [InkingGroup(group: node, children: data.children)]
+        while var top = open.popLast() {
+            if let children = top.children, top.next < children.count {
+                let child = children[top.next]
+                top.next += 1
+                open.append(top)
+                if case let .group(childData) = child.kind {
+                    open.append(InkingGroup(group: child, children: childData.children))
+                } else if let inked = inkedOwnPaint(child) {
+                    open[open.count - 1].inked.append(inked)
+                }
+                continue
+            }
+            let finished = inkedGroup(top.group, children: top.children.map { _ in top.inked })
+            guard !open.isEmpty else { return finished }
+            open[open.count - 1].inked.append(finished)
+        }
+        return nil
+    }
+
+    /// A group being inked: its children, how many are done, and the inked ones so far.
+    private struct InkingGroup {
+        /// The group.
+        var group: PenNode
+
+        /// Its children, or `nil` when it has none.
+        var children: [PenNode]?
+
+        /// The index of the next child to ink.
+        var next = 0
+
+        /// The children inked so far, those covering nothing left out.
+        var inked: [PenNode] = []
+    }
+
+    /// `group` in a silhouette, its children replaced by `children`, already inked.
+    private static func inkedGroup(_ group: PenNode, children: [PenNode]?) -> PenNode {
+        var node = group
+        node.common.opacity = nil
+        if case var .group(data) = node.kind {
+            data.children = children
+            data.effects = nil
+            data.blendMode = nil
+            node.kind = .group(data)
+        }
+        return node
+    }
+
+    /// `node`, not a group, as it stands in a silhouette, or `nil` when it covers nothing.
+    private static func inkedOwnPaint(_ node: PenNode) -> PenNode? {
         var node = node
         node.common.opacity = nil
         switch node.kind {
@@ -72,11 +126,6 @@ extension SwiftUINodeEmitter {
             data.effects = nil
             data.blendMode = nil
             node.kind = .icon(data)
-        case var .group(data):
-            data.children = data.children?.compactMap(inked)
-            data.effects = nil
-            data.blendMode = nil
-            node.kind = .group(data)
         default:
             return nil
         }

@@ -1,0 +1,34 @@
+{
+  "version": "2.17",
+  "variables": {
+    "headline": { "type": "string", "value": "Hello" }
+  },
+  "children": [
+    {
+      "id": "card", "name": "Card", "type": "frame", "layout": "none",
+      "x": 0, "y": 0, "width": 400, "height": 320, "fill": "#FFFFFF",
+      "children": [
+        { "id": "body", "name": "Body", "type": "text", "content": "Body copy", "fill": "#000000", "x": 20, "y": 120, "fontSize": 14 },
+        { "id": "title", "name": "Title", "type": "text", "content": "$headline", "fill": "#000000", "x": 20, "y": 20, "fontSize": 24 },
+        {
+          "id": "row", "name": "Row", "type": "frame", "layout": "none",
+          "x": 20, "y": 200, "width": 360, "height": 40,
+          "children": [
+            { "id": "price", "name": "Price", "type": "text", "content": "$9", "fill": "#000000", "x": 200, "y": 0, "fontSize": 14 },
+            { "id": "priceLabel", "name": "Price Label", "type": "text", "content": "Price", "fill": "#000000", "x": 0, "y": 2, "fontSize": 18 }
+          ]
+        },
+        { "id": "secret", "name": "Secret", "type": "text", "content": "Secret", "enabled": false, "fill": "#000000", "x": 20, "y": 60, "fontSize": 14 },
+        { "id": "swatch", "name": "Swatch", "type": "rectangle", "x": 300, "y": 20, "width": 40, "height": 40, "fill": "#4F46E5" },
+        { "id": "cta", "name": "Buy Button", "type": "ref", "ref": "button", "x": 20, "y": 260 }
+      ]
+    },
+    {
+      "id": "button", "name": "Button", "type": "frame", "reusable": true, "layout": "none",
+      "x": 0, "y": 500, "width": 160, "height": 40, "fill": "#4F46E5",
+      "children": [
+        { "id": "label", "name": "Label", "type": "text", "content": "Buy", "fill": "#FFFFFF", "x": 40, "y": 10, "fontSize": 14 }
+      ]
+    }
+  ]
+}

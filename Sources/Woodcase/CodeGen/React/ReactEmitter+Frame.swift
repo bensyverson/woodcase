@@ -14,7 +14,7 @@ extension ReactEmitter {
         ctx: EmitContext,
         isRoot: Bool,
         parentLayout: PenLayoutDirection? = nil
-    ) {
+    ) -> [ReactEmitStep] {
         let pad = String(repeating: " ", count: indent)
 
         // Build className
@@ -248,44 +248,69 @@ extension ReactEmitter {
             emitLayer(overlay, indent: indent + 2, ctx: ctx)
         }
 
-        // Children
+        // Children, then the closing tag (root uses its semantic tag; non-root always div)
         let savedPlacement = ctx.childPlacement
         ctx.childPlacement = isNoneLayout ? .free : .flow
-        defer { ctx.childPlacement = savedPlacement }
+        let closingTag = isRoot ? tag : "div"
         let turnedFillSizes = TurnedFillSizes(container: data)
-        for child in data.children ?? [] {
-            ctx.turnedFillSizes = turnedFillSizes
-            // Track node path for state var substitution
-            let savedPath = ctx.currentNodePath
-            if let childName = child.common.name {
-                ctx.currentNodePath = savedPath == "." ? childName : "\(savedPath)/\(childName)"
-            }
+        var steps = childSteps(
+            data.children ?? [], component: component, indent: indent, ctx: ctx,
+            wrapped: isNoneLayout, parentLayout: data.layout
+        ) { ctx.turnedFillSizes = turnedFillSizes }
+        steps.append(.then {
+            ctx.lines.append("\(pad)</\(closingTag)>")
+            ctx.childPlacement = savedPlacement
+        })
+        return steps
+    }
 
-            if isNoneLayout {
-                // layout: none → children are free-positioned (absolute)
-                let childPad = String(repeating: " ", count: indent + 2)
+    /// The steps that emit `children` of a container at `indent`, each with its node path
+    /// set while it is emitted (for state var substitution) and `prepare` run first;
+    /// `wrapped` places each in an absolutely positioned `div` at its `x`/`y`, as a free
+    /// layout's children are.
+    private static func childSteps(
+        _ children: [PenNode],
+        component: ComponentDefinition,
+        indent: Int,
+        ctx: EmitContext,
+        wrapped: Bool,
+        parentLayout: PenLayoutDirection?,
+        prepare: @escaping () -> Void = {}
+    ) -> [ReactEmitStep] {
+        let parentPath = ctx.currentNodePath
+        let childPad = String(repeating: " ", count: indent + 2)
+        var steps: [ReactEmitStep] = []
+        for child in children {
+            let childPath: String? = child.common.name.map { parentPath == "." ? $0 : "\(parentPath)/\($0)" }
+            var opening: [String] = []
+            var closing: [String] = []
+            if wrapped {
                 var posStyles = [("position", "\"absolute\"")]
                 if let x = child.common.x { posStyles.append(("left", emitPenValue(x))) }
                 if let y = child.common.y { posStyles.append(("top", emitPenValue(y))) }
-                ctx.lines.append("\(childPad)<div")
-                ctx.lines.append("\(childPad)  style={{")
+                opening.append("\(childPad)<div")
+                opening.append("\(childPad)  style={{")
                 for (key, value) in posStyles {
-                    ctx.lines.append("\(childPad)    \(key): \(value),")
+                    opening.append("\(childPad)    \(key): \(value),")
                 }
-                ctx.lines.append("\(childPad)  }}")
-                ctx.lines.append("\(childPad)>")
-                emitNode(child, component: component, indent: indent + 4, ctx: ctx, isRoot: false, parentLayout: data.layout)
-                ctx.lines.append("\(childPad)</div>")
-            } else {
-                emitNode(child, component: component, indent: indent + 2, ctx: ctx, isRoot: false, parentLayout: data.layout)
+                opening.append("\(childPad)  }}")
+                opening.append("\(childPad)>")
+                closing.append("\(childPad)</div>")
             }
-
-            ctx.currentNodePath = savedPath
+            steps.append(.then {
+                prepare()
+                if let childPath { ctx.currentNodePath = childPath }
+                ctx.lines.append(contentsOf: opening)
+            })
+            steps.append(.node(
+                child, component: component, indent: indent + (wrapped ? 4 : 2), isRoot: false, parentLayout: parentLayout
+            ))
+            steps.append(.then {
+                ctx.lines.append(contentsOf: closing)
+                ctx.currentNodePath = parentPath
+            })
         }
-
-        // Root uses semantic tag; non-root always uses div
-        let closingTag = isRoot ? tag : "div"
-        ctx.lines.append("\(pad)</\(closingTag)>")
+        return steps
     }
 
     // MARK: - Group
@@ -307,7 +332,7 @@ extension ReactEmitter {
         indent: Int,
         ctx: EmitContext,
         isRoot _: Bool
-    ) {
+    ) -> [ReactEmitStep] {
         let pad = String(repeating: " ", count: indent)
         let classString = "relative"
 
@@ -343,34 +368,16 @@ extension ReactEmitter {
             ctx.lines.append("\(pad)>")
         }
 
+        // Children are always free-positioned (absolute), like a frame with layout: none.
         let savedPlacement = ctx.childPlacement
         ctx.childPlacement = .free
-        defer { ctx.childPlacement = savedPlacement }
-        for child in data.children ?? [] {
-            // Track node path for state var substitution
-            let savedPath = ctx.currentNodePath
-            if let childName = child.common.name {
-                ctx.currentNodePath = savedPath == "." ? childName : "\(savedPath)/\(childName)"
-            }
-
-            // Children are always free-positioned (absolute), like a frame with layout: none.
-            let childPad = String(repeating: " ", count: indent + 2)
-            var posStyles = [("position", "\"absolute\"")]
-            if let x = child.common.x { posStyles.append(("left", emitPenValue(x))) }
-            if let y = child.common.y { posStyles.append(("top", emitPenValue(y))) }
-            ctx.lines.append("\(childPad)<div")
-            ctx.lines.append("\(childPad)  style={{")
-            for (key, value) in posStyles {
-                ctx.lines.append("\(childPad)    \(key): \(value),")
-            }
-            ctx.lines.append("\(childPad)  }}")
-            ctx.lines.append("\(childPad)>")
-            emitNode(child, component: component, indent: indent + 4, ctx: ctx, isRoot: false)
-            ctx.lines.append("\(childPad)</div>")
-
-            ctx.currentNodePath = savedPath
-        }
-
-        ctx.lines.append("\(pad)</div>")
+        var steps = childSteps(
+            data.children ?? [], component: component, indent: indent, ctx: ctx, wrapped: true, parentLayout: nil
+        )
+        steps.append(.then {
+            ctx.lines.append("\(pad)</div>")
+            ctx.childPlacement = savedPlacement
+        })
+        return steps
     }
 }

@@ -85,18 +85,12 @@ public enum SwiftUIEmitter {
         var files: [GeneratedFile] = [manifest(options: options), resourcesPlaceholder(module: options.moduleName)]
         for definition in components {
             guard let component = scope.components[definition.id] else { continue }
-            files.append(GeneratedFile(
-                path: "\(root)/Components/\(component.typeName).swift",
-                content: emitComponent(component, scope: scope, diagnostics: diagnostics)
-            ))
+            files.append(componentFile(component, root: root, scope: scope, diagnostics: diagnostics))
         }
         let taken = Set(typeNames.values)
         let pageTypes = pages.map { (page: $0, type: typeName(for: $0, taken: taken)) }
         for (page, type) in pageTypes {
-            files.append(GeneratedFile(
-                path: "\(root)/Pages/\(type).swift",
-                content: emitPage(page, named: type, scope: scope, diagnostics: diagnostics)
-            ))
+            files.append(pageFile(page, named: type, root: root, scope: scope, diagnostics: diagnostics))
         }
         if let theme {
             files.append(GeneratedFile(path: "\(root)/Theme/PenTheme.swift", content: theme.themeSource))
@@ -111,7 +105,8 @@ public enum SwiftUIEmitter {
     }
 
     /// The source of one page: a public view struct named `type` whose body is the page's
-    /// root frame.
+    /// root node, of any kind; the header names the node and its kind (`the "Body" text`,
+    /// a `ref` being an instance).
     static func emitPage(
         _ page: PageDefinition, named type: String, scope: SwiftUIComponentScope, diagnostics: PenDiagnosticCollector?
     ) -> String {
@@ -119,14 +114,15 @@ public enum SwiftUIEmitter {
         emitter.scope = scope
         let body = emitter.view(for: page.sourceNode, in: .root)
             ?? SwiftUIViewCode(head: "EmptyView()")
-        let frameName = page.sourceNode.common.name ?? page.sourceNode.id
-        var lines = header(type, source: "the \(SwiftUILiteral.string(frameName)) frame")
+        let rootName = page.sourceNode.common.name ?? page.sourceNode.id
+        let kind = if case .ref = page.sourceNode.kind { "instance" } else { page.sourceNode.kind.typeName }
+        var lines = header(type, source: "the \(SwiftUILiteral.string(rootName)) \(kind)")
         lines += [
             "public struct \(type): View {",
             "    public init() {}",
             "",
         ]
-        lines += bodyLines(body, emitter: emitter, specimens: [Specimen(name: nil, call: ["\(type)()"])])
+        lines += bodyLines(consume body, emitter: emitter, specimens: [Specimen(name: nil, call: ["\(type)()"])])
         return lines.joined(separator: "\n") + "\n"
     }
 
@@ -148,13 +144,13 @@ public enum SwiftUIEmitter {
     /// body reads it outside every `PenThemeReader` — then `trailer`, the shapes its
     /// emitter declared, and a preview of each of `specimens`, one per theme variant
     /// (``previewLines(_:theme:)``).
-    static func bodyLines(_ body: SwiftUIViewCode, emitter: SwiftUINodeEmitter, specimens: [Specimen], trailer: [String] = []) -> [String] {
+    static func bodyLines(_ body: consuming SwiftUIViewCode, emitter: SwiftUINodeEmitter, specimens: [Specimen], trailer: [String] = []) -> [String] {
         var lines: [String] = []
         if emitter.themeReads.count > 0 {
             lines += ["    @Environment(\\.penTheme) private var theme", ""]
         }
         lines.append("    public var body: some View {")
-        lines.append(contentsOf: body.lines(indent: 2))
+        lines.append(contentsOf: SwiftUIViewCode.lines(of: consume body, indent: 2))
         lines.append(contentsOf: [
             "    }",
             "}",

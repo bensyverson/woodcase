@@ -12,9 +12,9 @@ extension SwiftUINodeEmitter {
     /// absolutely positioned child of a stack rides in an `.overlay`, placed by its
     /// `x`/`y` in the frame's box. A component's slot frame stacks its slot's content
     /// (``SwiftUISlot``) instead of its children.
-    func frame(_ node: PenNode, data: PenNode.FrameData, in container: Container) -> SwiftUIViewCode {
-        var unemitted: [String] = []
-        let shape = outline(data.cornerRadius, unemitted: &unemitted)
+    func frame(_ node: PenNode, data: PenNode.FrameData, in container: Container) -> SwiftUIPendingView<SwiftUIViewCode> {
+        var outlineUnemitted: [String] = []
+        let shape = outline(data.cornerRadius, unemitted: &outlineUnemitted)
         let layout = data.layout ?? .horizontal
         let children = data.children ?? []
         let inFlow = layout == .none ? children : children.filter { $0.common.layoutPosition != .absolute }
@@ -25,66 +25,69 @@ extension SwiftUINodeEmitter {
         }
         // A slot's stack draws the content a caller passes in place of the frame's children.
         let slot = scope.slots[node.id]
-        let flowViews = slot.map { [SwiftUIViewCode(head: $0.name)] } ?? turnedFillsSized(inFlow, of: data)
-            .compactMap { view(for: $0, in: childContainer) }
-        let overlaid = layout == .none || slot != nil ? [] : children
-            .filter { $0.common.layoutPosition == .absolute }
-            .compactMap { view(for: $0, in: .absolute) }
-        // A frame with nothing in it is drawn as a shape: its outline, painted and stroked.
-        if flowViews.isEmpty, overlaid.isEmpty {
-            return filledShape(node, shape: shape, fills: data.fills, stroke: data, effects: data.effects, in: container, unemitted: unemitted)
-        }
-        // A `layout: none` frame's children do not size it: Pen settles its `fit_content`
-        // at the fallback, 0 by default, and they overhang it (see `PenEngine.md`).
-        let sizedByContent = layout != .none
-        let width = dimension(declaredSizing(node, axis: .width), in: container, empty: !sizedByContent)
-        let height = dimension(declaredSizing(node, axis: .height), in: container, empty: !sizedByContent)
-        let box = fillBox(width: width, height: height)
-        let layers = paintLayers(data.fills, box: box, of: node.id, unemitted: &unemitted)
-        // A frame under a point on an axis — a sizeless `layout: none` one — is stroked in a
-        // box grown by the stroke's reach, as a flat shape is: SwiftUI draws nothing there.
-        let outset = FlatOutset(width: width, height: height, stroke: data)
-        var stroke = strokeView(
-            data, shape: outset.map { shape.outset($0) } ?? shape, box: box, dash: node.strokeDash,
-            miterLimit: Self.writtenMiterLimit(of: node), unemitted: &unemitted
-        )
-        if let outset {
-            stroke = stroke?.modified(outset.padding)
-        }
+        let flowNodes = slot == nil ? turnedFillsSized(inFlow, of: data) : []
+        let overlaidNodes = layout == .none || slot != nil ? [] : children.filter { $0.common.layoutPosition == .absolute }
+        let requests = flowNodes.map { request(for: $0, in: childContainer) } + overlaidNodes.map { request(for: $0, in: .absolute) }
+        return views(requests).map { (views: [SwiftUIViewCode?]) -> SwiftUIViewCode in
+            let flowViews = slot.map { [SwiftUIViewCode(head: $0.name)] } ?? views.prefix(flowNodes.count).compactMap(\.self)
+            let overlaid = views.dropFirst(flowNodes.count).compactMap(\.self)
+            var unemitted = outlineUnemitted
+            // A frame with nothing in it is drawn as a shape: its outline, painted and stroked.
+            if flowViews.isEmpty, overlaid.isEmpty {
+                return filledShape(node, shape: shape, fills: data.fills, stroke: data, effects: data.effects, in: container, unemitted: unemitted)
+            }
+            // A `layout: none` frame's children do not size it: Pen settles its `fit_content`
+            // at the fallback, 0 by default, and they overhang it (see `PenEngine.md`).
+            let sizedByContent = layout != .none
+            let width = dimension(declaredSizing(node, axis: .width), in: container, empty: !sizedByContent)
+            let height = dimension(declaredSizing(node, axis: .height), in: container, empty: !sizedByContent)
+            let box = fillBox(width: width, height: height)
+            let layers = paintLayers(data.fills, box: box, of: node.id, unemitted: &unemitted)
+            // A frame under a point on an axis — a sizeless `layout: none` one — is stroked in a
+            // box grown by the stroke's reach, as a flat shape is: SwiftUI draws nothing there.
+            let outset = FlatOutset(width: width, height: height, stroke: data)
+            var stroke = strokeView(
+                data, shape: outset.map { shape.outset($0) } ?? shape, box: box, dash: node.strokeDash,
+                miterLimit: Self.writtenMiterLimit(of: node), unemitted: &unemitted
+            )
+            if let outset {
+                stroke = stroke?.modified(outset.padding)
+            }
 
-        let justify = data.justifyContent ?? .start
-        let align = data.alignItems ?? .start
-        let gap = spacing(data.gap, unemitted: &unemitted)
-        var view = stack(layout, children: flowViews, justify: justify, align: align, gap: gap)
-        view.modifiers += padding(data.padding, unemitted: &unemitted)
-        let main = layout == .vertical ? height : width
-        if main == .fit, justify == .spaceBetween || justify == .spaceAround {
-            // Spacers would stretch a content-sized stack to whatever its parent offers.
-            let axis = layout == .vertical ? "horizontal: false, vertical: true" : "horizontal: true, vertical: false"
-            view = view.modified(".fixedSize(\(axis))")
+            let justify = data.justifyContent ?? .start
+            let align = data.alignItems ?? .start
+            let gap = spacing(data.gap, unemitted: &unemitted)
+            var view = stack(layout, children: flowViews, justify: justify, align: align, gap: gap)
+            view.modifiers += padding(data.padding, unemitted: &unemitted)
+            let main = layout == .vertical ? height : width
+            if main == .fit, justify == .spaceBetween || justify == .spaceAround {
+                // Spacers would stretch a content-sized stack to whatever its parent offers.
+                let axis = layout == .vertical ? "horizontal: false, vertical: true" : "horizontal: true, vertical: false"
+                view = view.modified(".fixedSize(\(axis))")
+            }
+            view.modifiers += frameModifiers(
+                width: width, height: height,
+                alignment: frameAlignment(layout, justify: justify, align: align)
+            )
+            if !overlaid.isEmpty {
+                view.modifiers.append(.init(".overlay(alignment: .topLeading)", content: overlaid))
+            }
+            // The clip is the children's alone: Pen draws the frame's own paint before it.
+            if data.clip?.literalValue == true {
+                view = clip(view, to: shape)
+            }
+            // Pen's order under the children: fills, inner shadows, stroke. A later
+            // background draws under an earlier one.
+            if let stroke {
+                view.modifiers.append(SwiftUIViewCode.Modifier(".background", content: [stroke]))
+            }
+            view = view.modified(innerShadows(data.effects, in: shape, underContent: true))
+            view.modifiers += backgrounds(layers, in: shape)
+            warnUnemitted(node, unemitted)
+            // Cast by its box and its stroke band, not its children.
+            let silhouette = silhouette(of: node, shape: shape, stroke: data, box: box, outset: outset)
+            return withEffects(view, of: node, effects: data.effects, fills: data.fills, silhouette: silhouette)
         }
-        view.modifiers += frameModifiers(
-            width: width, height: height,
-            alignment: frameAlignment(layout, justify: justify, align: align)
-        )
-        if !overlaid.isEmpty {
-            view.modifiers.append(.init(".overlay(alignment: .topLeading)", content: overlaid))
-        }
-        // The clip is the children's alone: Pen draws the frame's own paint before it.
-        if data.clip?.literalValue == true {
-            view = clip(view, to: shape)
-        }
-        // Pen's order under the children: fills, inner shadows, stroke. A later
-        // background draws under an earlier one.
-        if let stroke {
-            view.modifiers.append(SwiftUIViewCode.Modifier(".background", content: [stroke]))
-        }
-        view = view.modified(innerShadows(data.effects, in: shape, underContent: true))
-        view.modifiers += backgrounds(layers, in: shape)
-        warnUnemitted(node, unemitted)
-        // Cast by its box and its stroke band, not its children.
-        let silhouette = silhouette(of: node, shape: shape, stroke: data, box: box, outset: outset)
-        return withEffects(view, of: node, effects: data.effects, fills: data.fills, silhouette: silhouette)
     }
 
     /// The stack for `layout`, its children interleaved with `Spacer`s for the two
