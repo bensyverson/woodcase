@@ -17,7 +17,8 @@ import Foundation
 public extension PenSchema {
     /// The `metadata.woodcase` keys a node of one type takes as fields of its own.
     ///
-    /// Every type takes ``PenMetadata/WoodcaseKey/locked``. Every type whose stroke the
+    /// Every type takes ``PenMetadata/WoodcaseKey/locked``; a text also takes
+    /// ``PenMetadata/WoodcaseKey/defaultTextStyle``. Every type whose stroke the
     /// renderer dashes also takes ``PenMetadata/WoodcaseKey/strokeDash`` and
     /// ``PenMetadata/WoodcaseKey/strokeDashOffset``; every one of those but a line, which
     /// has no corners, ``PenMetadata/WoodcaseKey/strokeMiterLimit``; and every type that
@@ -27,6 +28,7 @@ public extension PenSchema {
     /// - Returns: The rows, sorted by path.
     static func woodcaseFields(for type: PenNode.NodeType) -> [PenSchemaTable.Property] {
         var rows = [lockedRow]
+        if type == .text { rows.append(defaultTextStyleRow) }
         if shadowedTypes.contains(type) { rows.append(shadowSpreadRow) }
         if dashedTypes.contains(type) { rows += [strokeDashRow, strokeDashOffsetRow] }
         if dashedTypes.contains(type), type != .line { rows.append(strokeMiterLimitRow) }
@@ -112,6 +114,19 @@ public extension PenSchema {
         path: PenMetadata.WoodcaseKey.locked.path,
         key: .key(metadataKey(.locked)),
         shape: PenPropertyShape(forms: [.boolean], example: "true"),
+        default: .boolean(false)
+    )
+
+    /// The mark that makes a text the document's default text style: unset is not the
+    /// default.
+    private static let defaultTextStyleRow = PenSchemaTable.Property(
+        path: PenMetadata.WoodcaseKey.defaultTextStyle.path,
+        key: .key(metadataKey(.defaultTextStyle)),
+        shape: PenPropertyShape(
+            forms: [.boolean],
+            detail: "the first marked text in document order is the default an editor styles new text like",
+            example: "true"
+        ),
         default: .boolean(false)
     )
 

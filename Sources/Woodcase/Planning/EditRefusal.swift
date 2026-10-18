@@ -108,6 +108,9 @@ public struct EditRefusal: Error, Friendly {
         /// An ungroup was aimed at a node that is neither a group nor a frame.
         case notAGroup
 
+        /// Use as Default Text Style was aimed at a node that is not a text.
+        case notAText
+
         // MARK: Everything else
 
         /// The document refused the edit for a reason no other code names; ``errorCode``

@@ -158,6 +158,37 @@ Lock has no planner of its own: it is a write of `metadata.woodcase.locked`
 (``PenMetadata/WoodcaseKey/locked``), planned as any other set; see
 <doc:PenMetadataNamespace>.
 
+### The default text style
+
+A document's default text style is a text marked with `metadata.woodcase.defaultTextStyle:
+true` (``PenMetadata/WoodcaseKey/defaultTextStyle``), and the default is that text's live
+style: restyle it and the default follows (Penumbra spec §6.3, Ben's ruling of 2026-10-18).
+The format has no document-level metadata, and Pen keeps a node's.
+
+```swift
+let operations = try EditPlanner.planMarkDefaultTextStyle(nodeID: id, in: document)
+try session.submit(.local(LocalEdit(operations: operations)))   // one undo step
+
+document.defaultTextStyleNodeID()        // the first marked text in document order
+document.firstFontFamilyVariableName()   // e.g. "body": bind a new text's family to "$body"
+```
+
+- ``EditPlanner/planMarkDefaultTextStyle(nodeID:in:)`` marks one text and takes the mark
+  off every other text that holds it, as plain property writes for one edit; each write
+  folds the one key onto the node's metadata, so the rest is kept. Marking the only marked
+  text plans nothing. It is refused for a node that is not a text
+  (``EditRefusal/Code/notAText``), inside a component instance
+  (``EditRefusal/Code/insideInstance``), and for an id naming nothing
+  (``EditRefusal/Code/addressNotFound``).
+- ``EditPlanner/planUnmarkDefaultTextStyle(in:)`` takes every mark off — what choosing the
+  command on the current default does — so a second mark cannot quietly take over.
+- ``EditableDocument/defaultTextStyleNodeID()`` is the first marked text in document order
+  (``EditableDocument/nodeIDsInDocumentOrder()``), so two marks after a merge or a paste
+  resolve the same way on every peer.
+- ``EditableDocument/firstFontFamilyVariableName()`` is the first string variable, by name,
+  that some text binds as its `fontFamily` — the fallback when no text is marked. It is
+  never guessed from a variable's name or value.
+
 ### Moving a node
 
 ``EditPlanner/planMove(nodeID:into:at:in:layout:)`` plans a move to another parent: the
@@ -210,6 +241,10 @@ let drawn = await document.materializeSnapshot(overlaying: preview)
 - ``EditPlanner/planMove(nodeID:into:at:in:layout:)``
 - ``EditPlanner/planGroup(nodeIDs:kind:in:layout:)``
 - ``EditPlanner/planUngroup(groupID:in:layout:)``
+- ``EditPlanner/planMarkDefaultTextStyle(nodeID:in:)``
+- ``EditPlanner/planUnmarkDefaultTextStyle(in:)``
+- ``EditableDocument/defaultTextStyleNodeID()``
+- ``EditableDocument/firstFontFamilyVariableName()``
 - ``WrapKind``
 - ``WrapPlan``
 

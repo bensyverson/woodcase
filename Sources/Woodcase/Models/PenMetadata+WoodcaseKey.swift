@@ -125,6 +125,11 @@ public extension PenMetadata {
         /// Whether the node is locked: an editor will not select or hit it on the canvas,
         /// only in its layer list. The format has no lock; Pen keeps the key and ignores it.
         case locked
+        /// Whether the text is the document's default text style: an editor styles a new text
+        /// like the first marked text in document order, live (Penumbra spec §6.3, Ben's ruling
+        /// of 2026-10-18). The format has no document-level metadata; Pen keeps the key and
+        /// ignores it. Only a text's mark counts.
+        case defaultTextStyle
 
         /// Which part of Woodcase a key belongs to.
         public enum Group: String, Friendly, CaseIterable {
@@ -138,7 +143,8 @@ public extension PenMetadata {
             case text
             /// A shape's stroke dash and miter limit, which Pen's format cannot hold.
             case stroke
-            /// How an editor treats the node — a lock — which Pen's format cannot hold.
+            /// How an editor treats the node — a lock, the default text style — which Pen's format
+            /// cannot hold.
             case editor
             /// A node's shadow spreads, which Pen's format cannot hold.
             case effect
@@ -185,7 +191,7 @@ public extension PenMetadata {
             case .spans, .textDecoration: .text
             case .strokeDash, .strokeDashOffset, .strokeMiterLimit: .stroke
             case .shadowSpread: .effect
-            case .locked: .editor
+            case .locked, .defaultTextStyle: .editor
             }
         }
 
@@ -201,7 +207,7 @@ public extension PenMetadata {
             case .type, .state, .author, .leaf, .stage, .tint, .copiedFrom: rawValue
             case .anchor, .replyTo, .requestedBy, .createdAt, .fontFamily, .fontSize, .fontWeight, .fontStyle, .letterSpacing,
                  .lineHeight, .textAlign, .textAlignVertical, .spans, .textDecoration, .strokeDash, .strokeDashOffset,
-                 .strokeMiterLimit, .shadowSpread, .locked: nil
+                 .strokeMiterLimit, .shadowSpread, .locked, .defaultTextStyle: nil
             }
         }
 
@@ -222,7 +228,7 @@ public extension PenMetadata {
             case .strokeDash: .dashLengths
             case .shadowSpread: .shadowSpreads
             case .createdAt: .utcTimestamp
-            case .locked: .boolean
+            case .locked, .defaultTextStyle: .boolean
             }
         }
 
@@ -284,6 +290,7 @@ public extension PenMetadata {
             case .strokeDash: "The stroke's alternating dash and gap lengths, in points; absent or empty is solid."
             case .strokeDashOffset: "How far into its dash pattern the stroke starts, in points."
             case .locked: "Whether an editor keeps the node from being selected on the canvas; absent is unlocked."
+            case .defaultTextStyle: "Whether a text is the document's default text style; the first marked text wins."
             case .strokeMiterLimit: "The longest a mitered join reaches, in stroke widths, before it is beveled; absent is Pen's 4."
             case .shadowSpread: "How far each shadow is grown before it is cast, per effect, and the shadow it was made for."
             }
