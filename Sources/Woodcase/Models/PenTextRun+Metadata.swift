@@ -29,6 +29,8 @@ public extension PenTextRun {
         case strikethrough
         /// The name the run mentions: a non-empty string.
         case mention
+        /// The URL the run links to: a non-empty string a URL parses from.
+        case link
     }
 
     /// The format's `fontStyle` for an italic run.
@@ -48,6 +50,7 @@ public extension PenTextRun {
         object[WireKey.underline.rawValue] = underline.map(AnyCodable.bool)
         object[WireKey.strikethrough.rawValue] = strikethrough.map(AnyCodable.bool)
         object[WireKey.mention.rawValue] = mention.map(AnyCodable.string)
+        object[WireKey.link.rawValue] = link.map(AnyCodable.string)
         return .dictionary(object)
     }
 
@@ -111,6 +114,11 @@ public extension PenTextRun {
         case nil: break
         case let .string(name)? where !name.isEmpty: mention = name
         default: throw refuse("has a mention that is not a name")
+        }
+        switch object[WireKey.link.rawValue] {
+        case nil: break
+        case let .string(url)? where !url.isEmpty && URL(string: url) != nil: link = url
+        default: throw refuse("has a link that is not a URL")
         }
         for key in [WireKey.underline, .strikethrough] {
             switch object[key.rawValue] {

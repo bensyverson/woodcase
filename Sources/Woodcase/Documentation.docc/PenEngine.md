@@ -568,7 +568,7 @@ let size = PenTextMeasurer.measure(
 
 ### Font resolution and registration
 
-Resolving a family to a `CTFont` is expensive — `CTFontCopyVariationAxes` reads the font's `fvar` table — so ``PenTextMeasurer`` memoizes the result process-wide, keyed by family, size, weight and style. A family that Core Text does not know falls back to SF Pro, and that fallback is memoized too.
+Resolving a family to a `CTFont` is expensive — `CTFontCopyVariationAxes` reads the font's `fvar` table — so ``PenTextMeasurer`` memoizes the result process-wide, keyed by family, size, weight and style. A family that Core Text does not know falls back to SF Pro, and that fallback is memoized too. SF Pro is a family only where Apple's developer font is installed; elsewhere — a stock Mac, an iPhone — Core Text would answer it with Helvetica, so where the family is missing SF Pro draws as the system font (the hidden `.SF NS`, reached as the UI font), the same design on every Mac.
 
 A weight is read as a CSS weight (100–900) by ``PenFontWeight``, which needs no Core Text: the SwiftUI emitter reads a `fontWeight` the same way when it writes one into generated code.
 

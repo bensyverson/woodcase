@@ -22,7 +22,8 @@ public extension EditPlanner {
     /// (``EditRefusal/Code/notAGroup``), inside a component instance
     /// (``EditRefusal/Code/insideInstance``), for an id naming nothing
     /// (``EditRefusal/Code/addressNotFound``), and for a component that has instances
-    /// (``EditRefusal/Code/documentRefused``).
+    /// (``EditRefusal/Code/componentHasInstances``, whose ``EditRefusal/detail`` names
+    /// them).
     ///
     /// - Parameters:
     ///   - groupID: The group or frame: a stored id, or the expanded id an editor holds.

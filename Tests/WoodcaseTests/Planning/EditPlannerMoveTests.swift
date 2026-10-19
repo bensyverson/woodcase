@@ -102,7 +102,7 @@ struct EditPlannerMoveTests {
         #expect(try value("kind.width", of: spare) == .int(120))
     }
 
-    @Test("A move that would make a component contain itself is refused with documentRefused")
+    @Test("A move that would make a component contain itself is refused with wouldCloseComponentLoop")
     func componentLoop() throws {
         let document = try WrapFixture.document(Self.json)
         do {
@@ -111,7 +111,7 @@ struct EditPlannerMoveTests {
             )
             Issue.record("the move was planned")
         } catch {
-            #expect(error.code == .documentRefused)
+            #expect(error.code == .wouldCloseComponentLoop)
         }
     }
 

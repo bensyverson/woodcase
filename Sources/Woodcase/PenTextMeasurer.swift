@@ -133,7 +133,9 @@ public enum PenTextMeasurer {
     ///
     /// If the requested font family is not available on the system, falls back
     /// to ``defaultFontFamily`` ("SF Pro") to ensure weight and style traits
-    /// are applied correctly. A fallback is only correct for as long as the
+    /// are applied correctly; where "SF Pro" itself is not installed — Apple's
+    /// developer font, absent from a stock Mac — it draws as the system font, which
+    /// is the same design. A fallback is only correct for as long as the
     /// requested family stays absent, so the cached answer is tied to
     /// ``PenFontRegistry/generation`` and is discarded when fonts are
     /// registered.
@@ -192,21 +194,25 @@ public enum PenTextMeasurer {
     ///     static family the cut CSS font matching picks (``PenFaceMatching``).
     ///   - style: `"italic"` selects the italic trait; anything else does not.
     ///   - cache: The cache whose weight-axis answers to reuse.
+    ///   - isFamilyAvailable: Whether Core Text has a family: ``fontFamilyAvailable(_:)``,
+    ///     or a test's own answer.
     /// - Returns: The resolved font, and the registration generation it was resolved
     ///   under — read *inside* the gate, as close to the Core Text call as it can be,
     ///   so a registration that landed while this thread was queued counts as having
     ///   happened before the resolution it actually did affect.
-    private static func resolveFontUncached(
+    static func resolveFontUncached(
         family: String,
         size: Double,
         weight: String,
         style: String,
-        cache: FontResolutionCache
+        cache: FontResolutionCache,
+        isFamilyAvailable: (String) -> Bool = fontFamilyAvailable
     ) -> (font: CTFont, generation: Int) {
         FontRegistryGate.withAccess {
             let generation = PenFontRegistry.generation
             let font = resolveFontThroughTheRegistry(
-                family: family, size: size, weight: weight, style: style, cache: cache
+                family: family, size: size, weight: weight, style: style, cache: cache,
+                isFamilyAvailable: isFamilyAvailable
             )
             return (font, generation)
         }
@@ -220,24 +226,24 @@ public enum PenTextMeasurer {
     ///   - weight: A CSS-style weight.
     ///   - style: `"italic"` selects the italic trait.
     ///   - cache: The cache whose weight-axis answers to reuse.
+    ///   - isFamilyAvailable: Whether Core Text has a family.
     /// - Returns: The resolved font.
     private static func resolveFontThroughTheRegistry(
         family: String,
         size: Double,
         weight: String,
         style: String,
-        cache: FontResolutionCache
+        cache: FontResolutionCache,
+        isFamilyAvailable: (String) -> Bool
     ) -> CTFont {
         let isItalic = style.lowercased() == "italic"
-        let resolvedFamily = fontFamilyAvailable(family) ? family : defaultFontFamily
+        let source = familySource(for: family, isAvailable: isFamilyAvailable)
 
         // Create a base font to inspect for variable font axes
         // Pen's faces at their default optical size; Woodcase's own fallback as Apple designs it.
-        let opticalSizing: [CFString: Any] = resolvedFamily == defaultFontFamily
-            ? [:] : [kCTFontOpticalSizeAttribute: opticalSizingOff]
-        let baseFontDescAttrs = opticalSizing.merging([kCTFontFamilyNameAttribute: resolvedFamily]) { $1 }
-        let baseDescriptor = CTFontDescriptorCreateWithAttributes(baseFontDescAttrs as CFDictionary)
-        let baseFont = CTFontCreateWithFontDescriptor(baseDescriptor, size, nil)
+        let opticalSizing: [CFString: Any] = source == .family(family) && family != defaultFontFamily
+            ? [kCTFontOpticalSizeAttribute: opticalSizingOff] : [:]
+        let baseFont = baseFont(of: source, size: size, attributes: opticalSizing)
 
         // Check if this is a variable font with a wght axis
         let font: CTFont
@@ -247,7 +253,7 @@ public enum PenTextMeasurer {
             let varAttrs = opticalSizing.merging([kCTFontVariationAttribute: variations]) { $1 }
             let varDescriptor = CTFontDescriptorCreateWithAttributes(varAttrs as CFDictionary)
             font = CTFontCreateCopyWithAttributes(baseFont, size, nil, varDescriptor)
-        } else if let face = PenFaceMatching.descriptor(
+        } else if case let .family(resolvedFamily) = source, let face = PenFaceMatching.descriptor(
             family: resolvedFamily, weight: mapWeightToAxisValue(weight), italic: isItalic
         ) {
             let descriptor = CTFontDescriptorCreateCopyWithAttributes(face, opticalSizing as CFDictionary)

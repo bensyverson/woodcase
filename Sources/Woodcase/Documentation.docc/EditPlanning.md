@@ -79,7 +79,11 @@ same spot rides in ``EditRefusal/nested``, a typed ``EditRefusal/NestedLocation`
 `[.index(0), .key("colors"), .index(1), .key("position")]`, with
 ``EditRefusal/NestedLocation/layerIndex`` 0 and ``EditRefusal/NestedLocation/key``
 `"position"` — so an inspector places the refusal under the right layer without reading
-the sentence; it is `nil` for a refusal about the property itself. Only
+the sentence; it is `nil` for a refusal about the property itself. What a refusal names
+beyond its address and property rides in ``EditRefusal/detail``, an
+``EditRefusal/Detail``: the loop a move would close, the component and instances a removal
+would orphan, the node and parent of a cycle, or the candidates an address could mean — so
+an editor names them in its own words without parsing the sentence or replaying the edit. Only
 nested values the write changes are judged: a whole paint list written to edit one layer
 passes a value another layer already held, even one out of range.
 A value equal to what the node already holds is never refused, so writing back what a
@@ -152,11 +156,12 @@ stack has no place of its own, so it keeps what it stored.
 | ``EditRefusal/Code/insideInstance`` | a member, or the group, is inside a component instance or a slot's content |
 | ``EditRefusal/Code/notAGroup`` | an ungroup aimed at a node that is neither a group nor a frame |
 | ``EditRefusal/Code/addressNotFound`` | an id names no node |
-| ``EditRefusal/Code/documentRefused`` | a member moving in would make a component contain itself (error code `wouldCloseComponentLoop`), or the frame ungrouped is a component with instances |
+| ``EditRefusal/Code/wouldCloseComponentLoop`` | a member moving in would make a component contain itself; ``EditRefusal/detail`` is the loop (``EditRefusal/Detail/componentLoop(_:)``), named, in render order from the component written into |
+| ``EditRefusal/Code/componentHasInstances`` | the frame ungrouped is a component with instances; ``EditRefusal/detail`` names the component and its instances |
 
 Lock has no planner of its own: it is a write of `metadata.woodcase.locked`
-(``PenMetadata/WoodcaseKey/locked``), planned as any other set; see
-<doc:PenMetadataNamespace>.
+(``PenMetadata/WoodcaseKey/locked``), planned as any other set, and ``PenNode/isLocked``
+reads it back; see <doc:PenMetadataNamespace>.
 
 ### The default text style
 
@@ -201,8 +206,9 @@ free frame, a group, the canvas, and a stack's absolutely positioned child get n
 on either axis, and a fill there settles at its fallback or content, often zero. The CLI's
 `mv` and a batch's `mv` line plan the same sizes. A caller that drops the node at a point
 writes its `x`/`y` after these edits. A move is refused inside an instance, for an id naming
-nothing, and with ``EditRefusal/Code/documentRefused`` when it would make a component
-contain itself.
+nothing, with ``EditRefusal/Code/wouldCreateCycle`` when the parent is the node or inside it,
+and with ``EditRefusal/Code/wouldCloseComponentLoop`` when it would make a component
+contain itself; either way ``EditRefusal/detail`` names what it found.
 
 ```swift
 var operations = try EditPlanner.planMove(nodeID: "row1", into: "board", in: document, layout: layout)

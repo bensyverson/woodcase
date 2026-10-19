@@ -174,7 +174,7 @@ struct EditPlannerGroupTests {
     func componentLoop() throws {
         let document = try WrapFixture.document()
         let refusal = try #require(WrapFixture.groupRefusal(["Chip", "Slot"], in: document))
-        #expect(refusal.code == .documentRefused)
+        #expect(refusal.code == .wouldCloseComponentLoop)
         #expect(refusal.errorCode == "wouldCloseComponentLoop")
     }
 }

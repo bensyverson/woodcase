@@ -111,6 +111,29 @@ public struct EditRefusal: Error, Friendly {
         /// Use as Default Text Style was aimed at a node that is not a text.
         case notAText
 
+        /// A move would put a node inside itself: the parent named is the node or one of
+        /// its descendants. ``EditRefusal/detail`` names both
+        /// (``Detail/wouldCreateCycle(nodeID:targetParentID:)``).
+        case wouldCreateCycle
+
+        // MARK: Components
+
+        /// The edit would make components contain each other — a component that renders
+        /// an instance of itself, directly or through others (<doc:ComponentLoops>).
+        /// ``EditRefusal/detail`` is the loop (``Detail/componentLoop(_:)``).
+        case wouldCloseComponentLoop
+
+        /// The edit would remove a component its instances point at — a delete, or an
+        /// ungroup of a component frame — turning them into plain frames.
+        /// ``EditRefusal/detail`` names the component and its instances
+        /// (``Detail/componentHasInstances(componentID:instanceIDs:)``).
+        case componentHasInstances
+
+        /// The edit would replace a component with a node of a different type while
+        /// instances point at it. ``EditRefusal/detail`` names them
+        /// (``Detail/componentTypeChange(componentID:from:to:instanceIDs:)``).
+        case componentTypeChange
+
         // MARK: Everything else
 
         /// The document refused the edit for a reason no other code names; ``errorCode``
@@ -131,6 +154,7 @@ public struct EditRefusal: Error, Friendly {
     ///     from, when it came from one.
     ///   - nested: Where inside the property's value the refused value sits, when the
     ///     refusal is about one.
+    ///   - detail: What the refusal names, as values, when it names something.
     public init(
         code: Code,
         address: String,
@@ -139,7 +163,8 @@ public struct EditRefusal: Error, Friendly {
         suggestion: String? = nil,
         message: String,
         errorCode: String? = nil,
-        nested: NestedLocation? = nil
+        nested: NestedLocation? = nil,
+        detail: Detail? = nil
     ) {
         self.code = code
         self.address = address
@@ -149,6 +174,7 @@ public struct EditRefusal: Error, Friendly {
         self.message = message
         self.errorCode = errorCode
         self.nested = nested
+        self.detail = detail
     }
 
     /// The family this refusal belongs to.
@@ -182,4 +208,9 @@ public struct EditRefusal: Error, Friendly {
     /// The structured twin of the location the ``message`` spells: an inspector places
     /// the refusal under layer ``NestedLocation/layerIndex`` without parsing a sentence.
     public var nested: NestedLocation?
+
+    /// What the refusal names, as values — the loop a move would close, the component
+    /// whose instances a removal would orphan, the nodes an address could mean — or `nil`
+    /// when it names nothing beyond ``address`` and ``property``.
+    public var detail: Detail?
 }

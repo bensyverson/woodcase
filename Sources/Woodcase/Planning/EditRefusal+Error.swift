@@ -28,7 +28,7 @@ extension EditRefusal {
             let (code, property, expected) = Self.classify(editing)
             self.init(
                 code: code, address: address, property: property, expected: expected,
-                message: message, errorCode: editing.code
+                message: message, errorCode: editing.code, detail: Self.detail(of: editing, in: document)
             )
         } else if let batch = error as? BatchError {
             self.init(
@@ -56,13 +56,48 @@ extension EditRefusal {
             (.invalidForm, key, accepted.joined(separator: " | "))
         case .textSpansRejected: (.invalidForm, NodePropertyCodec.metadataPath, nil)
         case let .rootOverrideKeyReserved(_, key, _): (.reservedOverrideKey, key, nil)
+        case .wouldCreateCycle: (.wouldCreateCycle, nil, nil)
+        case .wouldCloseComponentLoop: (.wouldCloseComponentLoop, nil, nil)
+        case .componentHasInstances: (.componentHasInstances, nil, nil)
+        case .componentTypeChange: (.componentTypeChange, nil, nil)
         case .duplicateNodeID, .invalidNodeID, .parentNotFound, .cannotHaveChildren, .invalidIndex,
-             .wouldCreateCycle, .variableNotFound, .variableAlreadyExists, .importNotFound,
+             .variableNotFound, .variableAlreadyExists, .importNotFound,
              .importAlreadyExists, .themeAxisNotFound, .themeAxisAlreadyExists, .notARefNode,
-             .unknownDocumentProperty, .documentPropertyTypeMismatch, .componentHasInstances,
-             .componentTypeChange, .overrideOnOwnSlotContent, .revisionConflict,
-             .wouldCloseComponentLoop:
+             .unknownDocumentProperty, .documentPropertyTypeMismatch,
+             .overrideOnOwnSlotContent, .revisionConflict:
             (.documentRefused, nil, nil)
+        }
+    }
+
+    /// What an ``EditingError`` names, as a ``Detail``; `nil` for one that names nothing
+    /// beyond the address and property.
+    ///
+    /// A loop's path comes closed (`["Card", "Badge", "Card"]`); the detail drops the
+    /// repeated first component and names each by its `name`, or its id when it has none.
+    private static func detail(of error: EditingError, in document: EditableDocument) -> Detail? {
+        switch error {
+        case let .wouldCloseComponentLoop(path):
+            let cycle = path.count > 1 && path.first == path.last ? path.dropLast() : path[...]
+            return .componentLoop(ComponentLoop(members: cycle.map { id in
+                ComponentLoop.Member(id: id, name: document.node(id: id)?.common.name ?? id)
+            }))
+        case let .componentHasInstances(componentID, instanceIDs):
+            return .componentHasInstances(componentID: componentID, instanceIDs: instanceIDs)
+        case let .componentTypeChange(componentID, from, to, instanceIDs):
+            return .componentTypeChange(componentID: componentID, from: from, to: to, instanceIDs: instanceIDs)
+        case let .wouldCreateCycle(nodeID, targetParentID):
+            return .wouldCreateCycle(nodeID: nodeID, targetParentID: targetParentID)
+        case let .ambiguousAddress(_, candidates), let .addressNotFound(_, candidates),
+             let .overrideTargetNotFound(_, _, candidates):
+            return candidates.isEmpty ? nil : .candidates(candidates)
+        case .nodeNotFound, .duplicateNodeID, .invalidNodeID, .parentNotFound, .cannotHaveChildren,
+             .invalidIndex, .variableNotFound, .variableAlreadyExists, .importNotFound,
+             .importAlreadyExists, .themeAxisNotFound, .themeAxisAlreadyExists, .notARefNode,
+             .unknownProperty, .propertyTypeMismatch, .unknownDocumentProperty,
+             .documentPropertyTypeMismatch, .postItMetadataRejected, .textSpansRejected,
+             .overrideOnOwnSlotContent, .overrideValueRejected, .rootOverrideKeyReserved,
+             .rootOverrideValueRejected, .revisionConflict:
+            return nil
         }
     }
 

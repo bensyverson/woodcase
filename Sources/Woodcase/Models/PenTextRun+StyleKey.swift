@@ -30,6 +30,8 @@ public extension PenTextRun {
         case strikethrough
         /// ``PenTextRun/mention``.
         case mention
+        /// ``PenTextRun/link``.
+        case link
         /// ``PenTextRun/inlinePadding``.
         case inlinePadding
 
@@ -45,6 +47,7 @@ public extension PenTextRun {
             case .underline: .underline
             case .strikethrough: .strikethrough
             case .mention: .mention
+            case .link: .link
             case .inlinePadding: nil
             }
         }
@@ -60,6 +63,7 @@ public extension PenTextRun {
             case .underline: Field(\.underline)
             case .strikethrough: Field(\.strikethrough)
             case .mention: Field(\.mention)
+            case .link: Field(\.link)
             case .inlinePadding: Field(\.inlinePadding)
             }
         }

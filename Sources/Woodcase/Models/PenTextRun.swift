@@ -69,6 +69,16 @@ public struct PenTextRun: Friendly {
     /// reaches the renderer on ``PenTextSegment/mention``.
     public var mention: String?
 
+    /// The URL the run links to, as written — `https://example.com` — or `nil` for a run
+    /// that is not a link.
+    ///
+    /// It is not a style: a linked run is drawn as its other keys say, so a renderer adds
+    /// no color or underline of its own — the app a link was pasted from gives it its
+    /// color and underline as ``fill`` and ``underline``, which travel separately. It never
+    /// changes a size, so it is left out of a measurement's cache key
+    /// (``PenTextMeasureRequest/ignoringColor``).
+    public var link: String?
+
     /// Horizontal padding on each side of the run, in points, or `nil` for none: CSS's
     /// `padding-inline` on an inline element.
     ///
@@ -93,6 +103,7 @@ public struct PenTextRun: Friendly {
     ///   - underline: Whether the run is underlined.
     ///   - strikethrough: Whether the run is struck through.
     ///   - mention: The name the run mentions, or `nil`.
+    ///   - link: The URL the run links to, or `nil`.
     ///   - inlinePadding: The horizontal padding on each side, in points.
     public init(
         start: Int,
@@ -105,6 +116,7 @@ public struct PenTextRun: Friendly {
         underline: Bool? = nil,
         strikethrough: Bool? = nil,
         mention: String? = nil,
+        link: String? = nil,
         inlinePadding: Double? = nil
     ) {
         self.start = start
@@ -117,6 +129,7 @@ public struct PenTextRun: Friendly {
         self.underline = underline
         self.strikethrough = strikethrough
         self.mention = mention
+        self.link = link
         self.inlinePadding = inlinePadding
     }
 

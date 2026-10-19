@@ -23,9 +23,10 @@ public extension EditPlanner {
     /// `x`/`y` itself, after these edits.
     ///
     /// Refused inside a component instance (``EditRefusal/Code/insideInstance``), for an
-    /// id naming nothing (``EditRefusal/Code/addressNotFound``), and for a move the
-    /// document refuses — one that would make a component contain itself
-    /// (``EditRefusal/Code/documentRefused``).
+    /// id naming nothing (``EditRefusal/Code/addressNotFound``), for a parent that is the
+    /// node or inside it (``EditRefusal/Code/wouldCreateCycle``), and for a move that would
+    /// make a component contain itself (``EditRefusal/Code/wouldCloseComponentLoop``, whose
+    /// ``EditRefusal/detail`` is the loop).
     ///
     /// - Parameters:
     ///   - nodeID: The node: a stored id, or the expanded id an editor holds (an

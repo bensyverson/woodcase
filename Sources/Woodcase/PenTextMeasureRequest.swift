@@ -103,7 +103,7 @@ public struct PenTextMeasureRequest: Friendly {
     }
 
     /// This request with everything that cannot change a size taken out: each run's
-    /// ``PenTextRun/fill`` and ``PenTextRun/mention``, and any run left setting nothing. Two requests that differ only
+    /// ``PenTextRun/fill``, ``PenTextRun/mention`` and ``PenTextRun/link``, and any run left setting nothing. Two requests that differ only
     /// in color answer the same size, so a cache keyed on this measures a recolored text once.
     public var ignoringColor: PenTextMeasureRequest {
         var request = self
@@ -111,6 +111,7 @@ public struct PenTextMeasureRequest: Friendly {
             var sized = run
             sized.fill = nil
             sized.mention = nil
+            sized.link = nil
             return sized == PenTextRun(start: run.start, end: run.end) ? nil : sized
         }
         return request

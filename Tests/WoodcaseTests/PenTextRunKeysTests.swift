@@ -23,6 +23,7 @@ struct PenTextRunKeysTests {
         underline: true,
         strikethrough: false,
         mention: "claude",
+        link: "https://example.com/docs",
         inlinePadding: 4
     )
 

@@ -29,8 +29,8 @@ public extension EditPlanner {
     /// Refused inside a component instance (``EditRefusal/Code/insideInstance``), for an
     /// empty list (``EditRefusal/Code/noNodes``), for an id naming nothing
     /// (``EditRefusal/Code/addressNotFound``), and when a member moving in would make a
-    /// component contain itself (``EditRefusal/Code/documentRefused``, with the error code
-    /// `wouldCloseComponentLoop`).
+    /// component contain itself (``EditRefusal/Code/wouldCloseComponentLoop``, whose
+    /// ``EditRefusal/detail`` is the loop).
     ///
     /// - Parameters:
     ///   - nodeIDs: The members: stored ids, or the expanded ids an editor holds (an
