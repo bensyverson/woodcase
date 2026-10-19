@@ -53,6 +53,10 @@ struct Activity: AsyncParsableCommand {
         An empty or not-yet-created log prints nothing and exits 0 — that is not a \
         failure. A log directory that exists but is not a readable directory is: it \
         names the environment, not the feed, so it exits 5.
+
+        Taking turns with someone? `woodcase changes design.pen --as <you>` is the \
+        agent's feed: only OTHERS' edits since your last look, with old and new \
+        values, resumable, and --wait for the next one.
         """
     )
 

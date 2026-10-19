@@ -172,6 +172,8 @@ detail. Broken across lines here for reading; on disk it is one line:
   operation per row today; an `undo` row's `forward` is the inverse it replayed. Omitted
   when empty: `external`, `migrate` and `new` rows apply nothing, and a line written
   before the field existed (2026-10-04) decodes with an empty `forward`.
+  ``ActivityChangeSummary`` is that pairing done once: forward and inverse read as one
+  `old → new` per changed key — see *The change feed* below.
 - **`revision`** — the document's ``EditableDocument/documentRevision`` *after* this
   operation. Per operation, not per transaction, so `undo` can check one event against
   the file's current revision and refuse rather than guess.
@@ -484,12 +486,61 @@ app holding a grant on one bare `.pen` — the follower polls the file instead. 
 ``PresenceTracker`` folds the follower's events into who changed and who viewed which
 nodes last.
 
+## The change feed
+
+The log answers "what happened"; an agent taking turns with a person needs "what did
+*others* do since I last looked, and what are the values now". ``ChangeFeed`` is that
+question, and `woodcase changes` is its command line:
+
+```text
+$ woodcase changes design.pen --as claude
+16:31:04  ben  set      Home/Hero/Title  kind.content: "Welcome" → "Welcome back"
+16:31:09  ben  add      Note  added note "Warmer, please" in the document
+cursor 1a2b3c-40960
+```
+
+- **Rows are read as changes.** ``ActivityChangeSummary`` pairs each row's `forward`
+  (new values) with its `inverse` (old values) and keeps only what differs: a whole-struct
+  `updateCommon` that renamed a node yields the one `common.name` change, not every
+  common property. Properties are keyed in the path vocabulary `woodcase set` takes, so a
+  line reads back as the write that would repeat it. Inserts, deletes, moves, overrides,
+  variables, imports and theme axes each have their one-line form
+  (``ActivityChangeSummary/Change/line``); a row with nothing to pair — an `external`
+  row, a line from before `forward` existed — still gets a line.
+- **Others only.** The identity's own rows are left out (``ChangeFeed/Writers/others``);
+  `--mine` (``ChangeFeed/Writers/everyone``) puts them back.
+- **Resumable.** Each identity's last look at each file is an ``ActivityCursor`` kept in
+  `cursors/<identity>.json` beside this log (``ActivityCursorStore``), saved under a lock
+  so two processes never drop each other's entry. Each run reads after it and saves the
+  new end; `--peek` reads without saving; `--since <cursor>` starts elsewhere
+  (`0-0` is the whole history). A first look — no cursor yet — starts at the log's end
+  and says so, rather than opening with the whole history.
+- **Exact about outside writes.** The feed reads the document under its shared lock. A
+  woodcase write holds the exclusive lock from its file write to its log append, so the
+  revision, the ``LogLineage`` and the rows the feed reads always agree: a file the log
+  cannot explain is reported as ``ChangeFeed/Report/unlogged`` ("changed outside woodcase
+  since rev … — re-read it"), never a write caught between its two halves.
+- **Waiting is bounded.** ``ChangeFeed/wait(from:timeout:pollInterval:)`` (`--wait N`)
+  returns on the first row by someone else or the first unlogged change, polling the
+  log's tail and the file's `stat` and parsing only when one of them moved. With
+  nothing by the deadline the command exits 3 — the house code for "no answer in time"
+  — with the cursor still printed and saved.
+
+`woodcase activity --as <name>` keeps its meaning — a *filter* on whose rows to show —
+and stays the plain log. `changes` is the agent-facing verb.
+
 ## Topics
 
 ### Following
 
 - ``PenFileFollower``
 - ``PresenceTracker``
+
+### The change feed
+
+- ``ChangeFeed``
+- ``ActivityChangeSummary``
+- ``ActivityCursorStore``
 
 ### Views
 

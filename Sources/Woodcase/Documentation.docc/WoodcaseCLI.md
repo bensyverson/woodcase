@@ -71,6 +71,7 @@ return are listed here, so a script knows what it must branch on.
 | `imports` | read | The component libraries the document imports | 0 2 3 4 |
 | `themes` | read | The theme axes and their options | 0 4 |
 | `activity` | read | The log of edits, newest last; `--follow` tails it | 0 2 5 |
+| `changes` | read | What others changed since your last look, old → new; `--wait` for the next | 0 2 3 4 5 |
 | `icons` | read | The icon names an icon library defines, or matching a query | 0 1 2 |
 | `schema` | read | Every property a node type takes, and each value's shape | 0 2 |
 | `help` | read | The primer: `woodcase help design` teaches the loop | 0 2 |
@@ -574,6 +575,43 @@ would otherwise leave it running forever, polling a log and holding a lock-shape
 grudge against whichever process next opens the same file. A follower that was
 *already* orphaned when it started — `nohup woodcase activity --follow &`, a launch
 agent — has no parent's death to notice and keeps running.
+
+### `changes`
+
+What everyone *else* changed in one file since you last ran it: one row per change —
+time, writer, verb, then the node path and the key with its old and new value, the `set`
+that would repeat it — and the cursor last. The agent's half of taking turns: edit, let
+a person react in an editor, then ask this. See <doc:WoodcaseActivityLog> ▸ The change feed.
+
+```bash
+woodcase changes design.pen --as claude
+# 16:31:04  ben  set      Home/Hero/Title  kind.content: "Welcome" → "Welcome back"
+# 16:31:09  ben  add      Note  added note "Warmer, please" in the document
+# cursor 1a2b3c-40960
+woodcase changes design.pen --as claude --wait 300
+```
+
+**Options:**
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--as` | `$WOODCASE_AS` | Who you are; required. The feed resumes from your last look and leaves out your rows |
+| `--since` | your last look | Start from a cursor token a `cursor` line printed; `0-0` is the whole history |
+| `--peek` | `false` | Read without moving your cursor |
+| `--mine` | `false` | Include your own rows |
+| `--wait` | — | Block up to N seconds for someone else's edit; none by then exits 3 |
+| `--json` | `false` | `{file, identity, revision, since, cursor, origin, restarted, unlogged, changes}` |
+
+Your last look is kept per identity and file in `.woodcase/cursors/<identity>.json`
+beside the activity log, and every run but a `--peek` moves it to the end, so nothing is
+listed twice. The first run lists nothing and says so — the feed starts then. A file
+changed outside woodcase prints `note  … changed outside woodcase since rev … — re-read
+it`, because the log has no record of what changed; that also ends a `--wait`. A
+`--wait` that times out still prints and saves the cursor, then exits 3. In `--json`,
+each of `changes` is one row — `time`, `identity`, `op`, `batch`, `revision` — with its
+`changes`: `{kind, node, path, key, old, new}`, plus `parent` and `index` for an insert,
+delete or move and `descendant` for an override; `old` or `new` absent means nothing
+was there.
 
 ### `icons`
 

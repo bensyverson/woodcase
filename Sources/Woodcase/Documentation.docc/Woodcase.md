@@ -199,6 +199,9 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 - ``ActivityReader``
 - ``ActivityCursor``
 - ``ActivityRecorder``
+- ``ChangeFeed``
+- ``ActivityChangeSummary``
+- ``ActivityCursorStore``
 - ``ViewEvent``
 - ``ViewLog``
 - ``ViewReader``

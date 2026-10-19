@@ -23,8 +23,8 @@ package struct WoodcaseCommand: AsyncParsableCommand {
         fonts and activity log, so they travel together: `woodcase new design.umbra` \
         makes one, `woodcase bundle design.pen` converts one.
 
-          read    tree  find  get  shot  lint  activity  vars  imports  icons  schema
-                  notes  comments  prompts  clip
+          read    tree  find  get  shot  lint  activity  changes  vars  imports  schema
+                  icons  notes  comments  prompts  clip
                   never write; --json on every one, and a document read carries a revision
           write   new  add  set  replace  cp  paste  mv  group  ungroup  scale  rm  override
                   apply  js  undo  bundle  unbundle  embed  comment  reply  resolve
@@ -57,7 +57,7 @@ package struct WoodcaseCommand: AsyncParsableCommand {
             MoveCommand.self, GroupCommand.self, UngroupCommand.self, ScaleCommand.self, RemoveCommand.self,
             CommentCommand.self, ReplyCommand.self, ResolveCommand.self,
             OverrideCommand.self, Apply.self, Js.self, Vars.self, Imports.self,
-            Render.self, Themes.self, Generate.self, Migrate.self, Activity.self, Icons.self,
+            Render.self, Themes.self, Generate.self, Migrate.self, Activity.self, ChangesCommand.self, Icons.self,
             Serve.self, Preview.self, Help.self,
         ]
     )

@@ -121,5 +121,26 @@ extension HelpTopic {
       woodcase resolve design.pen Cm01 --as ana
       woodcase comments design.pen --state resolved
       # resolved  <Header's id> @12,4  ana  …, then claude's reply under it.
+
+    TAKING TURNS: EDIT, REACT, RESUME
+      An agent edits; a person reacts in an editor — a copy edit, a post-it, a move
+      — and the editor writes as them; on its next turn the agent asks `changes`
+      what others did since its last look, with the new values. The first look
+      starts the feed; every look moves your cursor to the end, so nothing is
+      listed twice.
+      woodcase changes design.pen --as claude
+      woodcase set design.pen Home/Header/Title 'kind.content=Welcome' --as claude
+      woodcase set design.pen Home/Header/Title 'kind.content=Welcome back' --as ben
+      woodcase comment design.pen Home/Header --at 8,8 "Warmer, please" --as ben
+      woodcase changes design.pen --as claude
+      # 16:31:04  ben  set  Home/Header/Title  kind.content: "Welcome" → "Welcome back"
+      # 16:31:05  ben  add  <comment>  added note "Warmer, please" in the document
+      # cursor 1a2b3c-40960 — your own set is not listed; --mine adds it.
+      Respond, then wait for the reply instead of polling. --wait returns on the
+      first edit by someone else — here at once, because ben has already moved —
+      or exits 3 at the deadline; --peek reads without moving the cursor.
+      woodcase set design.pen Home/Header/Title 'kind.content=Welcome back!' --as claude
+      woodcase set design.pen Home/Header common.name=Top --as ben
+      woodcase changes design.pen --as claude --wait 300
     """
 }

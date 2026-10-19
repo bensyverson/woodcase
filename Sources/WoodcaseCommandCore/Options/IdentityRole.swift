@@ -23,7 +23,7 @@ protocol IdentityRole {
     static var help: ArgumentHelp { get }
 }
 
-/// The four roles `--as` plays, and the environment variable they all default from.
+/// The roles `--as` plays, and the environment variable they all default from.
 ///
 /// A namespace, not a value: each role is a case-less enum used only as a type
 /// argument to ``IdentityOptions``.
@@ -71,6 +71,19 @@ enum Identity {
             """
             Who you are: whose edits to reverse, and who the undo is recorded as. \
             Defaults to $\(Identity.environmentVariable); undo refuses without one.
+            """,
+            valueName: "name"
+        )
+    }
+
+    /// `--as` is who is looking: whose last look the feed resumes from, and whose own
+    /// edits it leaves out. The verb refuses without one, because a feed for nobody
+    /// has no "since my last look". The role of `changes`.
+    enum Looker: IdentityRole {
+        static let help = ArgumentHelp(
+            """
+            Who you are: the feed resumes from your last look and leaves out your own \
+            edits. Defaults to $\(Identity.environmentVariable); changes refuses without one.
             """,
             valueName: "name"
         )

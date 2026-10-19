@@ -90,8 +90,10 @@ woodcase shot design.pen Dashboard --out dash.png --max 800
 Every read has a `--json` form carrying a revision, every write is attributed and
 recorded in an activity log that `woodcase undo` can replay, and the exit code says
 what kind of thing went wrong. The log stays with your project — `.woodcase/` beside
-your `.git`, added to `.gitignore` the first time it is written. See [Editing from the
-Command Line](Sources/Woodcase/Documentation.docc/WoodcaseEditor.md).
+your `.git`, added to `.gitignore` the first time it is written. Taking turns with a
+person or another agent? `woodcase changes design.pen --as claude` lists what *others*
+changed since your last look, old value → new, and `--wait` blocks for the next edit. See
+[Editing from the Command Line](Sources/Woodcase/Documentation.docc/WoodcaseEditor.md).
 
 ### When the answer is a loop
 

@@ -1045,6 +1045,33 @@ is no inverse to replay. See the history with `woodcase activity --file banking.
 The lesson the note is teaching is the one the primer opens with: edit .pen files
 through `woodcase`, so the lock, the log and undo all keep working.
 
+### Taking turns: what changed since your last look
+
+When a person works on the same file — reacting in an editor that writes as them — the
+question at the start of each turn is not "what is in the file" but "what did *they*
+do". `woodcase changes` answers it: others' edits since your last look, one row per
+change with the old and new value, and a cursor it keeps for you.
+
+```text
+$ woodcase changes banking.pen --as claude
+note  first look at banking.pen as claude: the feed starts here, at the end of the log. …
+cursor 1a2b3c-38211
+
+$ woodcase set banking.pen banking-home/header/title 'kind.content=Welcome' --as claude
+$ woodcase changes banking.pen --as claude --wait 600
+16:31:04  ben  set      banking-home/header/title  kind.content: "Welcome" → "Welcome back"
+16:31:09  ben  add      Note  added note "Warmer, please" in the document
+cursor 1a2b3c-40960
+```
+
+Your own edits are left out (`--mine` puts them back), each run moves the cursor so the
+next lists only what is new (`--peek` does not), and `--wait` blocks until someone else
+edits instead of polling — exit 3 at the deadline. A key in a row is the path `set`
+takes, so answering a change is one write. A note that the file changed outside woodcase
+means the log has no record of what changed: re-read it with `tree` before you act.
+`woodcase help recipes` ▸ TAKING TURNS runs the whole loop; the feed itself is
+<doc:WoodcaseActivityLog> ▸ The change feed.
+
 ## Overrides
 
 A node inside a component instance stores nothing of its own. Writing to it creates an
