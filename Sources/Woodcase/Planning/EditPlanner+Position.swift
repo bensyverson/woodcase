@@ -93,7 +93,7 @@ extension EditPlanner {
     private static let positionField = "layoutPosition"
 
     /// Whether a node places its children itself.
-    private static func lays(outChildrenOf parent: PenNode) -> Bool {
+    static func lays(outChildrenOf parent: PenNode) -> Bool {
         guard case let .frame(data) = parent.kind else { return false }
         return (data.layout ?? .horizontal) != .none
     }

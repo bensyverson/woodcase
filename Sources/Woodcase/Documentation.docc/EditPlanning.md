@@ -218,6 +218,45 @@ operations.append(.setProperties(EditOperation.SetProperties(nodeID: "row1", pro
 A paste needs no rule of its own: a clip already freezes a fill size at the size it was
 drawn at when it copies a node out of its parent (``PenClip``).
 
+### Scaling
+
+Scale multiplies a selection by one factor about an anchor point, proportionally only, so
+no font is ever stretched (Penumbra spec §5, Ben's rulings of 2026-10-14 and 2026-10-18;
+the design and its two-way doors are in `project/2026-10-19-proportional-scale.md`). A live
+gesture captures the selection once and plans each step from that capture, so factors never
+compound; a one-off scale plans in one call.
+
+```swift
+let capture = try ScaleCapture(nodeIDs: selection, in: document, layout: layout)   // at the press
+let step = try capture.plan(factor: 1.4, around: pivot, in: document)              // every frame
+let drawn = try document.previewNodes(for: step.operations)
+try session.submit(.local(LocalEdit(operations: step.operations)))                 // on release
+
+let plan = try EditPlanner.planScale(nodeIDs: selection, by: 0.5, anchor: .center, in: document, layout: layout)
+plan.unscaled   // [BoundValue(nodeID: "Card", property: "kind.gap", variable: "space")]
+```
+
+- **What scales**, on the node and every descendant: a member's position about the anchor
+  and a descendant's in its parent; fixed widths and heights, and the fallback in
+  `fit_content(n)`; `fontSize` (as drawn, so an unset one is written as 16 × the factor),
+  `letterSpacing` and each rich-text run's size; `strokeWidth`, uniform or per side, and
+  the dash and its offset; `cornerRadius`, `gap`, `padding`; a shadow's offset, blur and
+  spread (the spread's shadow snapshot too, so it stays fresh), a layer blur's and a
+  background blur's radius. A note, prompt or context scales its box and its type size.
+- **What does not**: sizing modes (an `auto` text keeps fitting its words, a
+  `fill_container` keeps filling), `lineHeight` (a multiple of the size here), path
+  geometry (drawn into the box), rotation, flips, opacity and fills. A value bound to a
+  variable stays bound and is listed in ``ScalePlan/unscaled``.
+- **Where it moves things**: a member placed by its own `x`/`y` lands where the scale about
+  the canvas anchor sends it, under a turned or flipped parent too; a member a stack places
+  grows in its slot. ``ScaleAnchor`` names the nine points of ``ScaleCapture/bounds``, the
+  members' canvas union. Lengths keep two decimals.
+- **Where it writes**: a node with storage of its own takes one `setProperties`; inside an
+  instance every write is an override on the instance, planned by ``EditPlanner``, and the
+  component is unchanged. An instance root's `x`/`y` are its own and the rest are root
+  overrides. A factor of 1 plans nothing; one that is not positive and finite is
+  ``EditRefusal/Code/outOfRange``.
+
 ### Previewing a plan
 
 An editor shows a gesture in progress (a scrubbed value, a dragged gradient stop, a
@@ -247,12 +286,19 @@ let drawn = await document.materializeSnapshot(overlaying: preview)
 - ``EditPlanner/planMove(nodeID:into:at:in:layout:)``
 - ``EditPlanner/planGroup(nodeIDs:kind:in:layout:)``
 - ``EditPlanner/planUngroup(groupID:in:layout:)``
+- ``EditPlanner/planScale(nodeIDs:by:anchor:in:layout:)``
 - ``EditPlanner/planMarkDefaultTextStyle(nodeID:in:)``
 - ``EditPlanner/planUnmarkDefaultTextStyle(in:)``
 - ``EditableDocument/defaultTextStyleNodeID()``
 - ``EditableDocument/firstFontFamilyVariableName()``
 - ``WrapKind``
 - ``WrapPlan``
+
+### Scaling
+
+- ``ScaleCapture``
+- ``ScalePlan``
+- ``ScaleAnchor``
 
 ### Previewing
 

@@ -89,6 +89,7 @@ return are listed here, so a script knows what it must branch on.
 | `mv` | write | Reparent or reorder a node | 0 2 3 4 5 |
 | `group` | write | Wrap nodes in a new group, or a free frame with `--frame`, keeping them where they are drawn | 0 2 3 4 5 |
 | `ungroup` | write | Take a group or frame apart, keeping its children where they are drawn | 0 2 3 4 5 |
+| `scale` | write | Scale nodes proportionally by one factor: sizes, type, strokes, radii, effects, spacing | 0 2 3 4 5 |
 | `rm` | write | Delete a node, refusing to strand instances | 0 2 3 4 5 |
 | `override` | write | Write an override into a component instance | 0 2 3 4 5 |
 | `apply` | write | A JSONL batch of the above, in one transaction | 0 1 2 3 4 5 |
@@ -957,6 +958,26 @@ woodcase ungroup design.pen Card/Header --as ana
 ```
 
 `--json` prints `{"ids":[…],"revision":…}`.
+
+### `scale`
+
+What an editor's Scale does (``EditPlanner/planScale(nodeIDs:by:anchor:in:layout:)``; see
+<doc:EditPlanning>): every length of the nodes and their children grows by one factor —
+position about the anchor, width and height, font size and letter spacing, stroke widths and
+dashes, corner radii, shadows and blurs, gap and padding. Sizing modes stay; a value bound to
+a variable stays bound and is reported as unscaled. Inside a component instance every write
+is an override on the instance. One transaction, so one `woodcase undo` takes it back.
+
+```bash
+woodcase scale design.pen Card --by 150% --as ana
+woodcase scale design.pen Hero/Logo Hero/Title --by 0.5 --anchor center --as ana
+```
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--by` | — | The factor: a positive number (`2`, `0.5`) or a percentage (`200%`, `50%`) |
+| `--anchor` | `top-left` | The point of the nodes' union that stays still: `top-left`, `top`, `top-right`, `left`, `center`, `right`, `bottom-left`, `bottom`, `bottom-right` |
+| `--json` | `false` | `{"operations":…,"unscaled":[…],"revision":…}` |
 
 ### `rm`
 
