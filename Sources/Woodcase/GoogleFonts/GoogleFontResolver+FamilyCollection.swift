@@ -18,7 +18,9 @@ public extension GoogleFontResolver {
     }
 
     /// Collects every face a document's text nodes set: each literal family at the weight
-    /// and style the node gives it (400 upright when it gives none).
+    /// and style the node gives it (400 upright when it gives none), and the face of each
+    /// rich-text run the node draws (``PenNode/appliedRuns``), a key the run leaves unset
+    /// taken from the node.
     ///
     /// A family, weight or style still written as a `$variable` has no value here; pass
     /// the document after variable resolution.
@@ -33,11 +35,17 @@ public extension GoogleFontResolver {
         while let node = pending.popLast() {
             switch node.kind {
             case let .text(data):
-                if let family = data.fontFamily?.literalValue {
+                let family = data.fontFamily?.literalValue
+                let face = family.map {
+                    PenFontFace(family: $0, fontWeight: data.fontWeight?.literalValue, fontStyle: data.fontStyle?.literalValue)
+                }
+                if let face { faces.insert(face) }
+                for run in node.appliedRuns {
+                    guard let runFamily = run.fontFamily ?? family else { continue }
                     faces.insert(PenFontFace(
-                        family: family,
-                        fontWeight: data.fontWeight?.literalValue,
-                        fontStyle: data.fontStyle?.literalValue
+                        family: runFamily,
+                        weight: run.fontWeight.map { Int($0.rounded()) } ?? face?.weight ?? 400,
+                        style: run.isItalic.map { $0 ? .italic : .normal } ?? face?.style ?? .normal
                     ))
                 }
             case let .frame(data):

@@ -48,4 +48,25 @@ struct PenFontFaceTests {
         ])
         #expect(GoogleFontResolver.collectFontFamilies(from: document) == ["Lora", "Spectral"])
     }
+
+    @Test("A rich-text run's face counts, inheriting from its node what it does not set")
+    func collectsRunFaces() throws {
+        let document = try PenParser.parse("""
+        {
+          "version": "2.17",
+          "children": [
+            {"type": "text", "id": "a", "content": "Make this bold", "fontFamily": "Lora", "fontWeight": "300",
+             "metadata": {"type": "woodcase", "woodcase": {"spans": {"text": "Make this bold", "runs": [
+               {"start": 0, "end": 4, "fontFamily": "Spectral", "fontStyle": "italic"},
+               {"start": 10, "end": 14, "fontWeight": "700"}
+             ]}}}}
+          ]
+        }
+        """)
+        #expect(GoogleFontResolver.collectFontFaces(from: document) == [
+            PenFontFace(family: "Lora", weight: 300, style: .normal),
+            PenFontFace(family: "Spectral", weight: 300, style: .italic),
+            PenFontFace(family: "Lora", weight: 700, style: .normal),
+        ])
+    }
 }

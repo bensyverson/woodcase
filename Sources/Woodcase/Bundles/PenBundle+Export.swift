@@ -27,6 +27,29 @@ public extension PenBundle {
     ///   read or the folder written.
     @discardableResult
     static func export(_ bundle: URL, to folder: URL, identity: String?) async throws -> Report {
+        try await export(bundle, to: folder, identity: identity) { $0 }
+    }
+}
+
+extension PenBundle {
+    /// ``export(_:to:identity:)`` with the document passed through `prepare` before its
+    /// files are gathered — how ``export(_:to:identity:fontPlan:bundling:)`` adds the
+    /// fonts it bundles.
+    ///
+    /// - Parameters:
+    ///   - bundle: The bundle to export.
+    ///   - folder: Where to write.
+    ///   - identity: The writer's name for the new file's `new` row, or `nil`.
+    ///   - prepare: The bundle's document to the document to write, its references
+    ///     still relative to the bundle.
+    /// - Returns: The report.
+    /// - Throws: As ``export(_:to:identity:)`` does.
+    static func export(
+        _ bundle: URL,
+        to folder: URL,
+        identity: String?,
+        prepare: (PenDocument) -> PenDocument
+    ) async throws -> Report {
         let location = PenLocation(bundle)
         guard location.kind == .bundle else { throw PenBundleError.notABundle(bundle) }
         let destination = folder.appendingPathComponent(location.name).appendingPathExtension("pen")
@@ -34,7 +57,7 @@ public extension PenBundle {
             throw PenBundleError.destinationExists(destination)
         }
 
-        let document = try await PenFileTransaction.read(at: location.document) { $0.materialize() }.value
+        let document = try await prepare(PenFileTransaction.read(at: location.document) { $0.materialize() }.value)
         do {
             try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         } catch {

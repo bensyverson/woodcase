@@ -100,6 +100,40 @@ document takes every row, whatever path it was written under
   on its own. The rewrite is one logged change (`replace` rows and a `set` row for
   `fonts`), so `woodcase undo` takes it back.
 
+## Fonts in a Pen Folder
+
+``PenBundle/export(_:to:identity:)`` carries the fonts the document already declares. An
+app's Export ▸ Pen Folder can carry more: the fonts installed on this Mac that the
+document draws, which Pen would otherwise silently replace. Which ones is the
+designer's call, since the license is theirs to read, so Woodcase plans and the app asks:
+
+1. ``PenBundle/exportFontPlan(_:fonts:)`` (or ``PenFolderFontPlan/make(for:relativeTo:fonts:)``
+   for a document in memory) lists every family the document's text draws — instances
+   expanded, rich-text runs included, every theme combination resolved — as a
+   ``PenFolderFontPlan/Family`` with its ``PenFolderFontPlan/Source``: declared, the
+   system's, Google Fonts', installed, or missing. A system font is recognized by where
+   its file is (`/System/`, which holds `/System/Library/Fonts` and the downloadable
+   fonts in `AssetsV2`, or `/Library/Apple/`), never by `fsType`: SF Pro, New York and
+   Helvetica read 0 (installable), yet Apple's license forbids passing them on.
+2. Each row says whether it ``PenFolderFontPlan/Family/startsChecked`` and why not, as a
+   typed ``PenFolderFontPlan/Reason`` the app words: system fonts and Google Fonts (which
+   Pen downloads by name) are unchecked and disabled; every other row with a file starts
+   checked, and one whose ``PenFontEmbedding`` is restricted (2), preview-and-print (4) or
+   unreadable is flagged rather than left out (Ben, 2026-10-15). Each
+   ``PenFolderFontPlan/FontFile`` carries the font's own license from its name table
+   (ID 13 and 14), when it has one, for the designer to consult.
+3. ``PenBundle/export(_:to:identity:fontPlan:bundling:)`` takes the families left checked.
+   Each installed one is declared file by file in the root `fonts` array under the
+   font's **real family name** — Woodcase draws a declared file only under that name,
+   though Pen accepts any — with its style and weight (`[min, max]` for a variable
+   file); an unchecked declared one is left out. Then every local declared font is
+   copied into `fonts/` and its url rewritten relative to the exported `.pen`
+   (`./fonts/Brand-Bold.ttf`), as images are — Pen copies no font file and keeps a
+   relative url as written, so anything else breaks there.
+
+The research and both rulings are in Penumbra's
+`project/2026-10-15-bundling-fonts-in-pen-folders.md`.
+
 ## Adding a file
 
 ``PenBundle/importAsset(_:as:into:)`` copies one file into the bundle's `images/` or
@@ -137,3 +171,8 @@ not in the bundle.
 - ``PenBundle/AssetKind``
 - ``PenBundle/ConvertedFrom``
 - ``PenBundleError``
+
+### Fonts in a Pen Folder
+
+- ``PenFolderFontPlan``
+- ``PenFontEmbedding``

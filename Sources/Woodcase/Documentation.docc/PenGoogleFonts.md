@@ -10,7 +10,8 @@ The unit of resolution is the **face** — family, weight and style, a ``PenFont
 not the family. A static family ships one file per face (`IBMPlexMono-BoldItalic.ttf`);
 a variable one covers every weight in one file per style (`Lora[wght].ttf` and
 `Lora-Italic[wght].ttf`). ``GoogleFontResolver/collectFontFaces(from:)`` collects every
-face a document's text sets, and for each the resolution chain is:
+face a document's text sets, its rich-text runs' faces included, and for each the
+resolution chain is:
 
 0. **The document's declared fonts** — the files its root `fonts` array names (see
    *Declared fonts* below) are registered first, so a family the document ships never
