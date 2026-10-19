@@ -196,7 +196,7 @@ document.firstFontFamilyVariableName()   // e.g. "body": bind a new text's famil
 
 ### Moving a node
 
-``EditPlanner/planMove(nodeID:into:at:in:layout:)`` plans a move to another parent: the
+``EditPlanner/planMove(nodeID:into:at:keepingDrawnPlace:in:layout:)`` plans a move to another parent: the
 `moveNode`, then — when the new parent does not lay the node out — each `fill_container`
 width or height written as the number it was drawn at; a `fit_content` one stays (Ben's
 ruling of 2026-10-15, Penumbra spec §4.4, leaf `skbh2k`, as Figma does). A stack lays a
@@ -213,6 +213,22 @@ contain itself; either way ``EditRefusal/detail`` names what it found.
 ```swift
 var operations = try EditPlanner.planMove(nodeID: "row1", into: "board", in: document, layout: layout)
 operations.append(.setProperties(EditOperation.SetProperties(nodeID: "row1", properties: ["common.x": 40, "common.y": 20])))
+```
+
+A drop that should land where the pointer carried the node — Penumbra's free reparent —
+passes `keepingDrawnPlace:` the canvas offset instead of writing `x`/`y` itself. Where the
+new parent places the node by position (a free frame, a group, the canvas, or a stack
+holding it `absolute`), the planner then rewrites its `x`/`y`, rotation and flips together
+with the same placement Group and Ungroup use, so its quad on the canvas is the one it was
+drawn as, moved by the offset. A turn is not carried as "old turn plus the difference of the
+parents' turns": a flipped parent reverses the sense of its child's turn, so moving into
+one toggles the node's flip and mirrors its turn. A child a stack takes into its flow is
+placed by the stack, and the offset changes nothing (issue `qIds8z`, leaf `XOP0ZQ`).
+
+```swift
+let operations = try EditPlanner.planMove(
+    nodeID: "chip", into: "turnedBoard", keepingDrawnPlace: PenPoint(x: 120, y: -40), in: document, layout: layout
+)
 ```
 
 A paste needs no rule of its own: a clip already freezes a fill size at the size it was
@@ -279,6 +295,26 @@ instance's layout places throws ``EditRefusal``, which an editor shows rather th
 let operations = try EditPlanner.routeWrites(["common.x": 40, "kind.width": 240], at: .node(id: "Chip"), in: document)
 ```
 
+### Routing an inspector's intent
+
+An inspector changes a value, binds a variable or unbinds one, where the node it shows is
+stored however it is. ``EditPlanner/plan(_:routedAt:in:)`` plans an ``EditIntent`` by the
+same rule ``EditPlanner/routeWrites(_:at:in:)`` follows (one internal decision, so the two
+and ``NodeInspection/storage(of:)`` cannot drift): a set is split between the node's own
+storage and the instance's overrides, a bind of an overridden property becomes an override
+of `$name` — still refused for a missing variable or one of the wrong type — and an unbind
+becomes an override of the value the variable the instance shows resolves to, under the
+node's theme. Content an instance wrote into its slot is written into the slot's fill, where
+a plain set is refused. An inspector that asked for the override by showing the instance
+uses this; a CLI or script that did not ask keeps ``EditPlanner/plan(_:at:in:)-(_,ResolvedNodeAddress,_)``,
+which refuses a set inside an instance (leaf `OYvGo2`, Penumbra issue `S5Q58m`).
+
+```swift
+// Chip is an instance: x is the ref's own, the fill a root override.
+let plan = try EditPlanner.plan(.set(["common.x": 80, "kind.fills": "#E5484D"]), routedAt: .node(id: "Chip"), in: document)
+let detach = try EditPlanner.plan(.unbind(property: "kind.fills"), routedAt: inspection.address, in: document)
+```
+
 ### Previewing a plan
 
 An editor shows a gesture in progress (a scrubbed value, a dragged gradient stop, a
@@ -305,7 +341,8 @@ let drawn = await document.materializeSnapshot(overlaying: preview)
 - ``EditPlanner``
 - ``EditIntent``
 - ``EditPlan``
-- ``EditPlanner/planMove(nodeID:into:at:in:layout:)``
+- ``EditPlanner/plan(_:routedAt:in:)``
+- ``EditPlanner/planMove(nodeID:into:at:keepingDrawnPlace:in:layout:)``
 - ``EditPlanner/planGroup(nodeIDs:kind:in:layout:)``
 - ``EditPlanner/planUngroup(groupID:in:layout:)``
 - ``EditPlanner/planScale(nodeIDs:by:anchor:in:layout:)``

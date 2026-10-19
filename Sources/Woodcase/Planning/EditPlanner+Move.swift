@@ -19,8 +19,24 @@ public extension EditPlanner {
     /// `fit_content` one stays, since it works anywhere, and a move into a stack writes
     /// nothing but the move. Figma does the same when a layer leaves an auto-layout frame.
     ///
-    /// Only the size is planned: a caller that drops the node at a point writes its
-    /// `x`/`y` itself, after these edits.
+    /// Given `offset`, a node its new parent places by position — a free frame, a group,
+    /// the canvas, or a stack holding it `absolute` — also keeps its **drawn place**,
+    /// carried by `offset` on the canvas: its `x`/`y`, rotation and flips are rewritten
+    /// together, so its quad on the canvas is the one it was drawn as, moved. A parent
+    /// turned or flipped differently from the old one changes the node's own turn and
+    /// flips — a flipped parent reverses the sense of its child's turn, so the turn is not
+    /// the old one plus the difference of the parents' — and a rotation bound to a
+    /// variable is written as the number it must be. A node a stack takes into its flow
+    /// is placed by the stack, so there the offset changes nothing. Without `offset` only
+    /// the size is planned, and a caller that drops the node at a point writes its `x`/`y`
+    /// itself, after these edits.
+    ///
+    /// ```swift
+    /// // A free reparent drop: the node lands where the pointer carried it, turned as it was drawn.
+    /// let operations = try EditPlanner.planMove(
+    ///     nodeID: "Chip", into: "Board", keepingDrawnPlace: PenPoint(x: 120, y: -40), in: document, layout: layout
+    /// )
+    /// ```
     ///
     /// Refused inside a component instance (``EditRefusal/Code/insideInstance``), for an
     /// id naming nothing (``EditRefusal/Code/addressNotFound``), for a parent that is the
@@ -33,14 +49,18 @@ public extension EditPlanner {
     ///     instance's root resolves to its `ref`).
     ///   - parentID: The new parent's stored id, or `nil` for the canvas.
     ///   - index: Where among the new parent's children it goes; `nil` puts it last, on top.
+    ///   - offset: How far the node is carried on the canvas, to keep its drawn place
+    ///     there; `nil` plans only the move and the size it keeps.
     ///   - document: The document, as it stands.
-    ///   - layout: The layout of `document` as it stands, which the drawn size is read from.
-    /// - Returns: The edits, to submit as one: the move, then any size it keeps.
+    ///   - layout: The layout of `document` as it stands, which the drawn size and place
+    ///     are read from.
+    /// - Returns: The edits, to submit as one: the move, then any size and place it keeps.
     /// - Throws: ``EditRefusal`` naming why nothing should be written.
     static func planMove(
         nodeID: String,
         into parentID: String?,
         at index: Int? = nil,
+        keepingDrawnPlace offset: PenPoint? = nil,
         in document: EditableDocument,
         layout: PenLayoutState
     ) throws(EditRefusal) -> [EditOperation] {
@@ -51,11 +71,32 @@ public extension EditPlanner {
         } catch {
             throw EditRefusal(error, address: nodeID, in: document)
         }
-        return [move] + keptSizes(movingNode: id, into: parentID, in: document) { layout }
+        guard let offset, let placing = placingByPosition(id, in: parentID, of: document) else {
+            return [move] + keptSizes(movingNode: id, into: parentID, in: document) { layout }
+        }
+        let writes = placementWrites(
+            of: id, from: document.parentID(of: id),
+            newParentMap: canvasMap(of: parentID, in: document, layout: layout) ?? .identity,
+            newParentFlips: flipParity(of: parentID, in: document),
+            placing: placing, movedBy: offset, in: document, layout: layout
+        )
+        return writes.isEmpty ? [move] : [move, .setProperties(EditOperation.SetProperties(nodeID: id, properties: writes))]
     }
 }
 
 extension EditPlanner {
+    /// How a parent places a node by its own `x`/`y`, or `nil` when it takes the node into
+    /// its flow.
+    ///
+    /// - Parameters:
+    ///   - id: The node, stored.
+    ///   - parentID: Its new parent, or `nil` for the canvas.
+    ///   - document: The document, as it stands.
+    static func placingByPosition(_ id: String, in parentID: String?, of document: EditableDocument) -> Placing? {
+        guard laysOut(parentID, in: document) else { return .free }
+        return document.node(id: id)?.common.layoutPosition == .absolute ? .absolute : nil
+    }
+
     /// The edit that keeps a moved node's fill sizes at the size it was drawn at, when its
     /// new parent does not lay it out; empty otherwise.
     ///

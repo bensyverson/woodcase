@@ -46,9 +46,10 @@ import Foundation
 /// - ``plan(_:at:in:)-(_,NodeAddress,_)``
 /// - ``plan(_:at:in:)-(_,ResolvedNodeAddress,_)``
 /// - ``routeWrites(_:at:in:)``
+/// - ``plan(_:routedAt:in:)``
 ///
 /// ### Restructuring
-/// - ``planMove(nodeID:into:at:in:layout:)``
+/// - ``planMove(nodeID:into:at:keepingDrawnPlace:in:layout:)``
 /// - ``planGroup(nodeIDs:kind:in:layout:)``
 /// - ``planUngroup(groupID:in:layout:)``
 public enum EditPlanner {

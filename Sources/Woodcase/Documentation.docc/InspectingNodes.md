@@ -106,10 +106,18 @@ path a field row carries (`nil` for a key that is no property, such as a slot's
 to that component. ``NodeInspection/sourceNode`` is the node as stored before this
 instance's overrides, and its id is the definition to navigate to.
 
+``NodeInspection/storage(of:)`` says where a write of one property is stored: the node's
+own storage (the `ref` node's, for an instance root's `common.` properties) or the
+instance's overrides. An inspector reads a field where it would write it — the override
+when the instance stores one, else ``NodeInspection/sourceNode``'s value — and marks it
+overridden only when that storage is an override.
+
 A set aimed inside an instance is refused (``EditRefusal/Code/setInsideInstance``), so an
-inspector writes a field of a ``NodeInspection/Source/componentNode(definitionID:)`` or
-an instance root's component properties with ``EditIntent/override(_:unset:)``, and resets
-one with ``EditIntent/resetOverride(_:)`` passing ``NodeInspection/overriddenPaths``.
+inspector plans its changes with ``EditPlanner/plan(_:routedAt:in:)``, which writes each
+property where ``NodeInspection/storage(of:)`` says — an override for a
+``NodeInspection/Source/componentNode(definitionID:)`` or an instance root's component
+properties, binds and unbinds included — and resets one with
+``EditIntent/resetOverride(_:)`` passing ``NodeInspection/overriddenPaths``.
 
 ### Bindable variables
 

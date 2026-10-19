@@ -143,6 +143,8 @@ extension EditPlanner {
     ///   - newParentMap: The canvas map of its new parent's own coordinates.
     ///   - newParentFlips: The flip parity of its new parent's chain.
     ///   - placing: How the new parent places it.
+    ///   - offset: How far it is carried on the canvas as it moves; `.zero` keeps it
+    ///     exactly where it is drawn.
     ///   - document: The document, as it stands.
     ///   - layout: The layout of the document as it stands.
     /// - Returns: The property writes: empty when nothing changes, and when the layout
@@ -153,16 +155,18 @@ extension EditPlanner {
         newParentMap: Transform,
         newParentFlips: (x: Bool, y: Bool),
         placing: Placing,
+        movedBy offset: PenPoint = .zero,
         in document: EditableDocument,
         layout: PenLayoutState
     ) -> [String: AnyCodable] {
         guard let node = document.node(id: id),
-              let canvas = canvasMap(of: id, in: document, layout: layout),
+              let drawn = canvasMap(of: id, in: document, layout: layout),
               let inverse = newParentMap.inverted(),
               let oldParentMap = canvasMap(of: oldParent, in: document, layout: layout)
         else { return [:] }
         var writes: [String: AnyCodable] = [:]
         let common = NodePropertyCodec.commonPrefix
+        let canvas = Transform.translation(x: offset.x, y: offset.y).concatenating(drawn)
         let local = inverse.concatenating(canvas)
 
         // The turn and flips change only when the new parent is turned or flipped

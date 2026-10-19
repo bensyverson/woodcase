@@ -80,7 +80,7 @@ extension EditableDocument {
 
     /// The theme a node draws under, or the first option of each axis when the
     /// document cannot place it.
-    private func theme(of target: ResolvedNodeAddress) -> [String: String] {
+    func theme(of target: ResolvedNodeAddress) -> [String: String] {
         let placed: EditPlanner.PlacedNode? = switch target {
         case let .node(id): EditPlanner.PlacedNode(node: id, in: self)
         case let .instanceDescendant(refID, key): EditPlanner.PlacedNode(descendant: key, ofInstance: refID, in: self)

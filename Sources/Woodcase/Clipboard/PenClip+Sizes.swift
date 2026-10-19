@@ -45,7 +45,7 @@ extension PenClip {
     /// (``Origin/width``, ``Origin/height``) fills again; where the parent does not — a
     /// free frame, a group, the canvas — a dimension the clip still writes as
     /// `fill_container` becomes the number it was drawn at, as a move there would
-    /// (``EditPlanner/planMove(nodeID:into:at:in:layout:)``). A `fit_content` dimension
+    /// (``EditPlanner/planMove(nodeID:into:at:keepingDrawnPlace:in:layout:)``). A `fit_content` dimension
     /// works anywhere, so it stays.
     ///
     /// - Parameters:

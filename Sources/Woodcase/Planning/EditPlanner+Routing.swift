@@ -27,7 +27,9 @@ public extension EditPlanner {
     /// enough to run every display refresh. A deep `common.metadata.<key>` path is still
     /// folded onto the metadata the node carries (``EditOperation/normalized(in:)``), so the
     /// edit applies as it stands. A value that wants checking is a ``EditIntent/set(_:)``
-    /// planned with ``plan(_:at:in:)-(_,ResolvedNodeAddress,_)``.
+    /// planned with ``plan(_:at:in:)-(_,ResolvedNodeAddress,_)``, and an inspector's intent —
+    /// a value to check, a bind, an unbind — with ``plan(_:routedAt:in:)``, which stores each
+    /// property where this does.
     ///
     /// Every override is planned, so paths become the raw keys the instance stores and the
     /// planner's refusals hold — an `x` on a node its instance's layout places is refused.
@@ -47,17 +49,10 @@ public extension EditPlanner {
         _ properties: [String: AnyCodable], at target: ResolvedNodeAddress, in document: EditableDocument
     ) throws(EditRefusal) -> [EditOperation] {
         guard !properties.isEmpty else { return [] }
-        guard case let .node(id) = target else {
-            return try plan(.override(properties), at: target, in: document).operations
-        }
-        guard case .ref? = document.node(id: id)?.kind else {
-            return [ownWrite(properties, on: id, in: document)]
-        }
-        let own = properties.filter { $0.key.hasPrefix(NodePropertyCodec.commonPrefix) }
-        let overridden = properties.filter { !$0.key.hasPrefix(NodePropertyCodec.commonPrefix) }
+        let (own, overridden) = Holder(target, in: document).split(properties)
         var operations: [EditOperation] = []
         if !own.isEmpty {
-            operations.append(ownWrite(own, on: id, in: document))
+            operations.append(ownWrite(own, on: target.targetID, in: document))
         }
         if !overridden.isEmpty {
             operations += try plan(.override(overridden), at: target, in: document).operations

@@ -56,18 +56,40 @@ extension EditPlanner {
         case let .node(id): PlacedNode(node: id, in: document)
         case let .instanceDescendant(refID, key): PlacedNode(descendant: key, ofInstance: refID, in: document)
         }
-        let bound = placed.flatMap { try? NodePropertyCodec.value(at: property, of: $0.node) }
+        let value = try unboundValue(of: property, on: placed?.node, at: target, written: written, in: document)
+        return try planSet([property: value], at: target, written: written, in: document)
+    }
+
+    /// The value an unbind writes: what the variable a property is bound to resolves to,
+    /// under the theme the node draws with.
+    ///
+    /// - Parameters:
+    ///   - property: The property path to unbind.
+    ///   - node: The node holding the binding, as it is drawn.
+    ///   - target: The node's address, which places it under its theme.
+    ///   - written: The address as written.
+    ///   - document: The document.
+    /// - Returns: The variable's value.
+    /// - Throws: ``EditRefusal`` with ``EditRefusal/Code/notBound`` when the property
+    ///   holds no binding, or one to a variable that resolves to nothing.
+    static func unboundValue(
+        of property: String,
+        on node: PenNode?,
+        at target: ResolvedNodeAddress,
+        written: String,
+        in document: EditableDocument
+    ) throws -> AnyCodable {
+        let bound = node.flatMap { try? NodePropertyCodec.value(at: property, of: $0) }
         guard case let .string(text)? = bound, text.hasPrefix(PenDollarEscape.dollar),
               !text.hasPrefix(PenDollarEscape.sequence)
         else {
             throw notBound(property, address: written)
         }
         let name = String(text.dropFirst())
-        let table = document.resolvedVariables(under: placed?.theme(axes: document.themes) ?? [:])
-        guard let value = table[name] else {
+        guard let value = document.resolvedVariables(under: document.theme(of: target))[name] else {
             throw notBound(property, address: written)
         }
-        return try planSet([property: value], at: target, written: written, in: document)
+        return value
     }
 
     /// The refusal for an unbind of a property that holds no usable binding.
