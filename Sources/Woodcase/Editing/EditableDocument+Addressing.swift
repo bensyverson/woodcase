@@ -112,9 +112,9 @@ public extension EditableDocument {
 
 // MARK: - Walking
 
-private extension EditableDocument {
+extension EditableDocument {
     /// The id-first result for a bare segment, or `nil` if no node has that id.
-    func directIDMatch(for segment: String) -> ResolvedNodeAddress? {
+    private func directIDMatch(for segment: String) -> ResolvedNodeAddress? {
         let id = NodeAddress.forcedID(in: segment) ?? segment
         return nodes[id] == nil ? nil : .node(id: id)
     }
@@ -123,7 +123,7 @@ private extension EditableDocument {
     ///
     /// The first segment may name any node in the document, so the walk starts from
     /// every node that answers to it.
-    func resolveWalk(segments: [String], first: String, written: String) throws -> ResolvedNodeAddress {
+    private func resolveWalk(segments: [String], first: String, written: String) throws -> ResolvedNodeAddress {
         let seeds = preferringIDMatches(
             nodes.keys
                 .filter { matches(nodeID: $0, segment: first) }
@@ -151,7 +151,7 @@ private extension EditableDocument {
     /// - Returns: The resolved target.
     /// - Throws: ``EditingError/ambiguousAddress(address:candidates:)`` or
     ///   ``EditingError/addressNotFound(address:nearMisses:)``.
-    func resolveWalk(
+    private func resolveWalk(
         from seeds: [AddressCursor],
         through path: [String],
         written: String,
@@ -201,7 +201,7 @@ private extension EditableDocument {
     }
 
     /// Whether a node answers to a segment, by id (forced or not) or by name.
-    func matches(nodeID: String, segment: String) -> Bool {
+    private func matches(nodeID: String, segment: String) -> Bool {
         if let forced = NodeAddress.forcedID(in: segment) { return nodeID == forced }
         if nodeID == segment { return true }
         return componentNode(nodeID)?.common.name == segment
@@ -270,7 +270,7 @@ private extension EditableDocument {
     /// the substitution ``PenRefExpander`` makes — and an injected container carries
     /// its own children inline, there being no store to hold them. A `ref` has no
     /// children of its own at all: ``steps(from:)`` handles the step into one.
-    func childCursors(of cursor: AddressCursor) -> [AddressCursor] {
+    private func childCursors(of cursor: AddressCursor) -> [AddressCursor] {
         let node = cursor.injected ?? componentNode(cursor.nodeID)
         if case .ref = node?.kind { return [] }
         if let injected = injectedChildren(of: cursor.nodeID, insideInstances: cursor.refChain) {
@@ -298,7 +298,7 @@ private extension EditableDocument {
     ///
     /// - Parameter cursor: The subtree root, which is not itself included.
     /// - Returns: The cursors beneath it.
-    func deepCursors(below cursor: AddressCursor) -> [AddressCursor] {
+    private func deepCursors(below cursor: AddressCursor) -> [AddressCursor] {
         var result: [AddressCursor] = []
         var seen: Set<String> = [cursor.nodeID]
         var frontier = childCursors(of: cursor)
@@ -325,7 +325,7 @@ private extension EditableDocument {
     /// - Returns: One candidate per node of the instance whose own name is `segment`,
     ///   or `nil` when the step entered no instance, or the instance holds no such
     ///   name — in which case the ordinary near-miss list is the better answer.
-    func instanceNearMisses(from cursors: [AddressCursor], segment: String) -> [NodeAddressCandidate]? {
+    private func instanceNearMisses(from cursors: [AddressCursor], segment: String) -> [NodeAddressCandidate]? {
         var instances: [String] = []
         for cursor in cursors {
             guard case .ref = componentNode(cursor.nodeID)?.kind else { continue }
@@ -350,7 +350,7 @@ private extension EditableDocument {
     }
 
     /// Nodes anywhere in the document whose name equals the address's last segment.
-    func nearMisses(forLastSegment segment: String) -> [NodeAddressCandidate] {
+    private func nearMisses(forLastSegment segment: String) -> [NodeAddressCandidate] {
         nodes
             .filter { $0.value.common.name == segment }
             .map { NodeAddressCandidate(id: $0.key, path: namePath(of: $0.key)) }
@@ -360,7 +360,7 @@ private extension EditableDocument {
 
 // MARK: - Cursor
 
-private extension EditableDocument {
+extension EditableDocument {
     /// One partial match during a walk: where it is, and which instances it is inside.
     ///
     /// `refChain` is empty while the walk is in the document's own tree. Its first

@@ -15,8 +15,9 @@ public extension EditableDocument {
     /// read back as *this* node — it is missing or empty, contains a `/`, or begins
     /// with `#` or `@`. Those segments fall back to the id marker
     /// ``NodeAddress/marker(forID:)`` (`"#Unn01"`), which the resolver accepts as that
-    /// exact node. The path therefore always resolves to the node it describes, though
-    /// a shorter address may of course be ambiguous.
+    /// exact node. A name a sibling shares is still printed as the name, so two siblings
+    /// named `Title` both read `Board/Title`, which resolves to neither; the form that
+    /// always resolves back is ``address(of:)``.
     ///
     /// - Parameter nodeID: The node to describe.
     /// - Returns: The node's full name path. For an id that is not in the document,

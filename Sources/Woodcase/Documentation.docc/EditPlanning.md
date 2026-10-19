@@ -251,11 +251,33 @@ plan.unscaled   // [BoundValue(nodeID: "Card", property: "kind.gap", variable: "
   the canvas anchor sends it, under a turned or flipped parent too; a member a stack places
   grows in its slot. ``ScaleAnchor`` names the nine points of ``ScaleCapture/bounds``, the
   members' canvas union. Lengths keep two decimals.
-- **Where it writes**: a node with storage of its own takes one `setProperties`; inside an
-  instance every write is an override on the instance, planned by ``EditPlanner``, and the
-  component is unchanged. An instance root's `x`/`y` are its own and the rest are root
-  overrides. A factor of 1 plans nothing; one that is not positive and finite is
+- **Where it writes**: as ``EditPlanner/routeWrites(_:at:in:)`` routes every gesture's
+  values (below): a node with storage of its own takes one `setProperties`; inside an
+  instance every write is an override on the instance, and the component is unchanged. An
+  instance root's `x`/`y` are its own and the rest are root overrides. A factor of 1 plans nothing; one that is not positive and finite is
   ``EditRefusal/Code/outOfRange``.
+
+### Routing a gesture's writes
+
+A canvas gesture — a move, a resize, a turn, a scale — computes the values it wants a node
+drawn with, not where the format keeps them. ``EditPlanner/routeWrites(_:at:in:)`` makes
+that decision once, for every editor and for ``ScaleCapture``:
+
+| Target | Where the values go |
+|---|---|
+| a node with storage of its own | one `setProperties` on the node |
+| an instance root (a `ref` node) | its `common.` properties on the `ref`; the rest as root overrides |
+| a node inside an instance, a nested instance's root among them | an override on the outermost instance |
+
+Own writes are not planned — the values are ones the node already draws, moved, sized or
+turned, and a live gesture runs this every display refresh — though a deep metadata key is
+still folded. Every override is planned, so its refusals hold: an `x` on a node its
+instance's layout places throws ``EditRefusal``, which an editor shows rather than drops.
+
+```swift
+// Chip is an instance: x is the ref's own, width a root override.
+let operations = try EditPlanner.routeWrites(["common.x": 40, "kind.width": 240], at: .node(id: "Chip"), in: document)
+```
 
 ### Previewing a plan
 

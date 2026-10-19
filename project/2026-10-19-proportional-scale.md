@@ -77,6 +77,11 @@ Things the brief did not spell out:
    are the `ref` node's own; everything else is a root override. Nodes inside an instance
    are overrides on the outermost instance. The component never changes.
 
+   > **Updated 2026-10-19 (leaf GTIAPf):** that routing is now one public function,
+   > `EditPlanner.routeWrites(_:at:in:)`, which `ScaleCapture` calls; its private
+   > `ScaleCapture.writes` is gone, and Penumbra's `TransformWrites` is to route through it
+   > too rather than keep its own copy.
+
 ## CLI
 
 `woodcase scale <file> <nodes…> --by <factor|percent> [--anchor top-left|…|bottom-right]`,

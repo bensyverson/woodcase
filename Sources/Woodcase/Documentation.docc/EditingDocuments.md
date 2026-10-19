@@ -591,7 +591,16 @@ try editable.resolve("Header/Title")           // the same node — any node may
 try editable.resolve("@hero", tags: tags)      // a tag a batch created earlier
 
 editable.namePath(of: "Ttl01")                 // "Dashboard/Header/Title"
+editable.address(of: .node(id: "r1"))          // "Dashboard/Board/#r1" — a sibling is also named Title
 ```
+
+A name path reads best but need not be unique: two siblings named `Title` both print
+`Board/Title`, which `resolve` (and `woodcase get`) refuses as matching two nodes.
+``EditableDocument/address(of:)`` is the form to hand someone else — an editor's "copy
+path", a message to an agent. It is the same name path with the id marker on each
+segment a name alone would not pick out (a sibling shares the name, or has it as its
+id), and on the first segment when the path would also match from another node of that
+name. It always resolves back to the node it names, inside instances too.
 
 A segment matches a node by **id** or by **name** (`common.name`); `#ALu8G` matches by
 id only. Segments are consecutive parent→child steps, but the first may be any node in

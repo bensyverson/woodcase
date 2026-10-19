@@ -45,6 +45,7 @@ import Foundation
 /// ### Planning
 /// - ``plan(_:at:in:)-(_,NodeAddress,_)``
 /// - ``plan(_:at:in:)-(_,ResolvedNodeAddress,_)``
+/// - ``routeWrites(_:at:in:)``
 ///
 /// ### Restructuring
 /// - ``planMove(nodeID:into:at:in:layout:)``

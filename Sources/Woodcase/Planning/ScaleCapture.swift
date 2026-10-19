@@ -138,7 +138,7 @@ public struct ScaleCapture: Friendly {
         var unscaled: [ScalePlan.BoundValue] = []
         for entry in entries {
             let properties = entry.scaledProperties(by: &scaler, around: anchor, unscaled: &unscaled)
-            operations += try Self.writes(properties, for: entry, in: document)
+            operations += try EditPlanner.routeWrites(properties, at: entry.address, in: document)
         }
         return ScalePlan(operations: operations, unscaled: unscaled)
     }
