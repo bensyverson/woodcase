@@ -1,0 +1,30 @@
+{
+  "case": "G1",
+  "title": "G1 — Transforms, hierarchy, masks and constraints",
+  "exercises": "non-identity transforms, negative determinants, parentIndex trees, frameMaskDisabled, MaskType, ConstraintType, SECTION",
+  "record": "the rotation angles and flip directions",
+  "environment": "www.figma.com",
+  "editorType": "design",
+  "dataType": "scene",
+  "figKiwiVersion": 101,
+  "captured": "2026-10-19",
+  "selection": "the frame `G1 geometry` and the section `G1f section` beside it (a section cannot sit inside a frame)",
+  "counts": "2 root(s), 27 node(s), 0 instance sublayer(s)",
+  "nodeTypes": "ELLIPSE 1, FRAME 6, GROUP 5, RECTANGLE 14, SECTION 1",
+  "notes": [
+    "G1a rotated: frame rotation 15°; children G1a child 30 (30°) and G1a child -45 (−45°), relative to the frame.",
+    "G1b flip horizontal: group mirrored left-right (relativeTransform a = −1); G1b flip vertical: mirrored top-bottom (d = −1).",
+    "G1c: frame > G1c outer group > G1c inner group > G1c leaf. G1d: clip content on, G1d overflow extends 80 px past the right edge.",
+    "G1e: G1e mask shape (ellipse, isMask, ALPHA) masks G1e masked image inside group G1e mask.",
+    "G1g constraints (horizontal, vertical): left top MIN/MIN, right top MAX/MIN, center CENTER/CENTER, left and right STRETCH/MAX, scale SCALE/SCALE.",
+    "G1f section is a top-level section beside G1 geometry: a section cannot be a frame child. The SVG export covers G1 geometry only."
+  ],
+  "schemaSHA256": "1d7aaeaa152f400b731b6064fa5bf9c2d9ad5c128111e039c6f8155680492eaf",
+  "messageBytes": 4509,
+  "fileKeyRedactions": 1,
+  "files": {
+    "message.kiwi": "8c8369d00ca50321106a844ab2fb222014cdcb309d167de29262cc15d67f1c21",
+    "reference.svg": "8478371605f04ef4d821fc88d7c4b7df9062c4d228bbacf8ff4a0441c6dea7da"
+  },
+  "provenance": "Authored for the Penumbra Figma interchange tests by scripts/figma-fixtures in a scratch Figma file; synthetic content only. Built by Penumbra scripts/figma-curate."
+}

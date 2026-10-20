@@ -1,0 +1,31 @@
+{
+  "case": "T1",
+  "title": "T1 — Text breadth",
+  "exercises": "textData.characters, textData.lines, styleId, derivedTextData baselines and glyphs, textAutoResize, line height units, directionality, glyph blob reuse, list styles",
+  "record": "exact strings, font family/style per node, and the fixed box size",
+  "environment": "www.figma.com",
+  "editorType": "design",
+  "dataType": "scene",
+  "figKiwiVersion": 101,
+  "captured": "2026-10-19",
+  "selection": "the frame `T1 text`",
+  "counts": "1 root(s), 12 node(s), 0 instance sublayer(s)",
+  "nodeTypes": "FRAME 1, TEXT 11",
+  "notes": [
+    "emoji: Apple Color Emoji is not available; used Noto Color Emoji Regular.",
+    "T1a: auto width (WIDTH_AND_HEIGHT), line height AUTO. T1b: auto height, width 240, line height 32 px.",
+    "T1c: fixed box 200 × 48, textAutoResize NONE, textTruncation ENDING, line height 120 %.",
+    "T1d: \"Mixed\" Regular 24 #1B1B1F; \"style\" (characters 6–11) Bold Italic 32 #D9480F.",
+    "T1e: the same three lines, one node UNORDERED (bullets) and one ORDERED (numbers).",
+    "T1f fonts: cjk PingFang SC Regular; emoji Noto Color Emoji Regular; arabic Geeza Pro Regular."
+  ],
+  "schemaSHA256": "1d7aaeaa152f400b731b6064fa5bf9c2d9ad5c128111e039c6f8155680492eaf",
+  "messageBytes": 24268,
+  "fileKeyRedactions": 1,
+  "files": {
+    "message.kiwi": "26d6baf1963e98c3ca953768b680a84308ce670758726f770030cd04f15b0e95",
+    "reference-2x.png": "7e0092a335d8950867b77ea38dd95f7728a23a6d6de0fb092c7de5f61f422429",
+    "reference.svg": "8304b72c1e021e6f34412556397130c19cc9808b004d463718e7e5c088544822"
+  },
+  "provenance": "Authored for the Penumbra Figma interchange tests by scripts/figma-fixtures in a scratch Figma file; synthetic content only. Built by Penumbra scripts/figma-curate."
+}

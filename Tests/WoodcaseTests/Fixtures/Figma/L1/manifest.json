@@ -1,0 +1,30 @@
+{
+  "case": "L1",
+  "title": "L1 — Auto layout and grids",
+  "exercises": "layout mode, padding, spacing, alignment, wrap, sizing modes, absolute children, LayoutGrid",
+  "record": "the exact padding, gap, sizes and alignment values",
+  "environment": "www.figma.com",
+  "editorType": "design",
+  "dataType": "scene",
+  "figKiwiVersion": 101,
+  "captured": "2026-10-19",
+  "selection": "the frame `L1 layout`",
+  "counts": "1 root(s), 25 node(s), 0 instance sublayer(s)",
+  "nodeTypes": "FRAME 8, RECTANGLE 17",
+  "notes": [
+    "L1a row: HORIZONTAL, padding 16, gap 12, primary and counter alignment CENTER, fixed 320 × 96; items 40 × 40, 40 × 64, 40 × 24.",
+    "L1b column: VERTICAL, padding 16, gap 8, width fixed 200, height hug; L1b fill child fills the width.",
+    "L1c wrap: HORIZONTAL wrap, width fixed 200, padding 8, gap 8, row gap 8, six 48 × 48 items.",
+    "L1d absolute: HORIZONTAL, padding 16, gap 12, hug both; L1d absolute child ABSOLUTE at (100, 8).",
+    "L1e minmax: fixed 320 × 96, padding 16; L1e bounded child fills both axes with min/max width 80/160, height 40/56.",
+    "L1f grids: 4 columns (stretch, gutter 16, margin 16) and 3 rows (stretch, gutter 8, margin 8). L1g hug: hug both axes, padding 12, gap 8."
+  ],
+  "schemaSHA256": "1d7aaeaa152f400b731b6064fa5bf9c2d9ad5c128111e039c6f8155680492eaf",
+  "messageBytes": 4578,
+  "fileKeyRedactions": 1,
+  "files": {
+    "message.kiwi": "8eba6e8a71f188599edb82b4dbab0aa7b7325bb7d7687f884f29db729ce3f57c",
+    "reference.svg": "635c5711688719ee82c21229a44e2ae11f21d5e6213129e5f1d83fe1548d3e40"
+  },
+  "provenance": "Authored for the Penumbra Figma interchange tests by scripts/figma-fixtures in a scratch Figma file; synthetic content only. Built by Penumbra scripts/figma-curate."
+}

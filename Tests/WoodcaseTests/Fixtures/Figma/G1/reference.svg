@@ -1,0 +1,47 @@
+<svg width="920" height="480" viewBox="0 0 920 480" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g clip-path="url(#clip0_1_390)">
+<rect width="920" height="480" fill="white"/>
+<g clip-path="url(#clip1_1_390)">
+<rect width="160" height="100" transform="translate(60 40) rotate(-15)" fill="#E7F5FF"/>
+<rect x="84.4949" y="54.1422" width="40" height="20" transform="rotate(-45 84.4949 54.1422)" fill="#364FC7"/>
+<rect x="159.874" y="65.0026" width="40" height="20" transform="rotate(30 159.874 65.0026)" fill="#D9480F"/>
+</g>
+<rect width="80" height="20" transform="matrix(-1 0 0 1 380 40)" fill="#2F9E44"/>
+<rect width="20" height="60" transform="matrix(-1 0 0 1 380 60)" fill="#2F9E44"/>
+<rect width="80" height="20" transform="matrix(1 0 0 -1 420 120)" fill="#2F9E44"/>
+<rect width="20" height="60" transform="matrix(1 0 0 -1 420 100)" fill="#2F9E44"/>
+<rect width="160" height="120" transform="translate(560 40)" fill="#F1F3F5"/>
+<rect x="600" y="70" width="80" height="60" fill="#364FC7"/>
+<g clip-path="url(#clip2_1_390)">
+<rect width="100" height="100" transform="translate(60 240)" fill="#F1F3F5"/>
+<rect x="80" y="270" width="160" height="40" fill="#D9480F"/>
+</g>
+<mask id="mask0_1_390" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="240" y="240" width="80" height="80">
+<circle cx="280" cy="280" r="40" fill="black"/>
+</mask>
+<g mask="url(#mask0_1_390)">
+<rect x="220" y="220" width="120" height="120" fill="url(#pattern0_1_390)"/>
+</g>
+<rect width="300" height="200" transform="translate(420 240)" fill="#F8F9FA"/>
+<rect x="436" y="256" width="40" height="34" fill="#364FC7"/>
+<rect x="664" y="256" width="40" height="34" fill="#364FC7"/>
+<rect x="550" y="320" width="40" height="34" fill="#364FC7"/>
+<rect x="436" y="390" width="268" height="34" fill="#364FC7"/>
+<rect x="436" y="320" width="40" height="34" fill="#364FC7"/>
+</g>
+<defs>
+<pattern id="pattern0_1_390" patternContentUnits="objectBoundingBox" width="1" height="1">
+<use xlink:href="#image0_1_390" transform="scale(0.03125)"/>
+</pattern>
+<clipPath id="clip0_1_390">
+<rect width="920" height="480" fill="white"/>
+</clipPath>
+<clipPath id="clip1_1_390">
+<rect width="160" height="100" fill="white" transform="translate(60 40) rotate(-15)"/>
+</clipPath>
+<clipPath id="clip2_1_390">
+<rect width="100" height="100" fill="white" transform="translate(60 240)"/>
+</clipPath>
+<image id="image0_1_390" width="32" height="32" preserveAspectRatio="none" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAAoElEQVR42rXNwQ2AIBBEUYqwEs8UYSXWZCWerYQiPGlMJAR0mV1mJ/86eWF6lpYIFrekKkzvvID7ozIsgMowArhhB0BjCECMUaBrEADZ4ACCQQP+DCbwaZCB1uADleEClIYXYDbCecx42Vj2FUwHGAw1cH9UhgVQGUYAN+wAaAwBiDEKdA0CIBscQDBowJ/BBD4NMtAafKAyXIDS8AKycQGY8i/p/KKzMAAAAABJRU5ErkJggg=="/>
+</defs>
+</svg>

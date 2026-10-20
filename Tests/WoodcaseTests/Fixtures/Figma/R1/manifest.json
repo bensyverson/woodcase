@@ -1,0 +1,32 @@
+{
+  "case": "R1",
+  "title": "R1 — Variables and modes",
+  "exercises": "variableDataValues, variableSetModes, variableResolvedType, variableScopes, aliases, mode resolution, stopsVar / colorVar",
+  "record": "each variable's name, type, collection, mode values and what it is bound to",
+  "environment": "www.figma.com",
+  "editorType": "design",
+  "dataType": "scene",
+  "figKiwiVersion": 101,
+  "captured": "2026-10-19",
+  "selection": "the frame `R1 bound` (every bound layer is inside it)",
+  "counts": "1 root(s), 8 node(s), 0 instance sublayer(s)",
+  "nodeTypes": "FRAME 2, RECTANGLE 5, TEXT 1",
+  "notes": [
+    "R1 text bound: characters bound to R1 label.",
+    "Collection R1 basics, modes Light and Dark:",
+    "R1 color (COLOR): Light #364FC7, Dark #91A7FF → R1 fill bound fill and R1 dark fill bound (frame R1 dark mode pins Dark).",
+    "R1 radius (FLOAT): Light 8, Dark 24 → R1 radius bound, all four corner radii.",
+    "R1 label (STRING): Light \"Light label\", Dark \"Dark label\" → R1 text bound characters.",
+    "R1 visible (BOOLEAN): Light true, Dark false → R1 visibility bound visible.",
+    "Collection R1 aliases, mode Value: R1 alias color (COLOR) = alias of R1 color → R1 alias bound fill."
+  ],
+  "schemaSHA256": "1d7aaeaa152f400b731b6064fa5bf9c2d9ad5c128111e039c6f8155680492eaf",
+  "messageBytes": 8681,
+  "fileKeyRedactions": 1,
+  "files": {
+    "message.kiwi": "b73f09be1a4fdcb496f650761fb24966c7c1308eb62363c77100bea570c33289",
+    "reference-2x.png": "beb9d89cca9532f5696168375b1db49e060f47fb8f340b04a3e595f031292a5d",
+    "reference.svg": "87cd2a6f333d8223aabae38558c88e40bf4ec02d6edbfc6044e56b142476a5ba"
+  },
+  "provenance": "Authored for the Penumbra Figma interchange tests by scripts/figma-fixtures in a scratch Figma file; synthetic content only. Built by Penumbra scripts/figma-curate."
+}
