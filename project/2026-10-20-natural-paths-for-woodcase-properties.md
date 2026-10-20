@@ -22,13 +22,20 @@ A key is **Woodcase-owned** when it stands in for a property Pen's format lacks:
 | `spread` on a shadow in `kind.effect` | `metadata.woodcase.shadowSpread`, one entry per spread shadow, by its place among the effects | every type that takes effects |
 | `common.locked` | `metadata.woodcase.locked` | every type |
 | `kind.defaultTextStyle` | `metadata.woodcase.defaultTextStyle` | text |
+| `kind.spans` | `metadata.woodcase.spans` | text |
 
 `common.locked` sits under `common` because every type takes it. The rest sit under `kind`, beside their Pen siblings (`kind.strokeWidth`, then `kind.strokeDash`). Shadow spread has no path of its own because paths don't address array elements: a `spread` field on a shadow object, which is where CSS, Figma and Sketch put it, is the natural spelling.
 
 1. **Every reader and writer uses the natural path.** That covers `woodcase set` and `get`, batches, `tree --props`, `woodcase schema` and `woodcase help`, the `doc` API in `woodcase js`, `PenSchema.field(_:for:)` and the inspector's rows. `get` and `tree` print the natural path, and only the raw `.pen` JSON shows the metadata.
 2. **One mapping, in one place.** Each Woodcase-owned `PenMetadata.WoodcaseKey` names its natural path beside its storage path. The codec converts between them, so no consumer spells a storage path.
 3. **Writing a raw storage path is refused, with an error that teaches.** For example: `common.metadata.woodcase.strokeDash is stored for you; write kind.strokeDash`. One way in, so two spellings can't drift apart. Reading the raw metadata (`common.metadata`) still shows what's stored.
-4. **Out of scope: Woodcase's own vocabulary.** The code-generation keys (`props`, `role`, `states`, `action`, `scroll`), note keys, a note's text style, rich-text `spans` and a text's protected `textDecoration` are not stand-ins for a missing Pen property. They stay `common.metadata.woodcase.*`. If agents trip on `spans` often, revisit that separately.
+4. **Woodcase concepts with no Pen counterpart get a namespace of their own.** See *Widened the same day* below.
+
+> **Widened the same day (Ben, 2026-10-20):** this rule first left the code-generation keys, the note keys and rich-text `spans` at their raw `common.metadata.woodcase.*` paths, as "Woodcase's own vocabulary". That was wrong for `spans`: Pen's format has had no rich text since 2.17 (DocC `PenRichText.md`), so spans stand in for a missing property. They are now in the table above as `kind.spans`, beside `kind.content`. And "own vocabulary" only meant there was no Pen name to match, not that agents should type a storage path. So the rule is now that **every key Woodcase stores in metadata has a natural path**:
+>
+> - **Code generation:** `codegen.props`, `codegen.role`, `codegen.states`, `codegen.action`, `codegen.scroll`. Only Woodcase reads these, so rule 3 applies: writing the raw path is refused with a pointer to the natural one. The namespace keeps them clear of any future Pen field.
+> - **Notes:** `note.*` for the note keys and a note's text style, as **aliases only**. Other tools read notes by their raw keys: the note convention (DocC `PenPostItConvention.md`) is meant to be legible without Woodcase, for example to an agent working in Pen through Pen's MCP. So the raw keys stay the published format, and writing them is still accepted. Both spellings write the same storage key, so they can't drift. Woodcase's own tools print the `note.*` spelling. This is its own leaf so it can be dropped without touching the rest (Ben was open on it; integrator's recommendation).
+> - **Unchanged:** a text's protected `textDecoration`. Underline and strikethrough are native Pen properties (`kind.underline`, `kind.strikethrough`); Woodcase only mirrors them in metadata because Pen strips the native keys, and it keeps the two in step on every write. The natural path already exists.
 5. **The typed accessors don't change** (`PenNode.strokeDash`, `.strokeMiterLimit`, `.isLocked`, `shadowSpread(forEffect:)`). Renderers, emitters, lints and the planner already read through them.
 
 ## Tasks
