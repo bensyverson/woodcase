@@ -5237,3 +5237,5 @@
 {"v":1,"rep":"22DryP","seq":5237,"ts":1792531521133,"actor":"claude","type":"unblocked","task":"YPi92I","data":{"blocked_id":"YPi92I","blocker_id":"9Sw8C0","reason":"blocker_done"}}
 {"v":1,"rep":"22DryP","seq":5238,"ts":1792531521134,"actor":"claude","type":"unblocked","task":"oNeklc","data":{"blocked_id":"oNeklc","blocker_id":"9Sw8C0","reason":"blocker_done"}}
 {"v":1,"rep":"22DryP","seq":5239,"ts":1792531521135,"actor":"claude","type":"unblocked","task":"tRzkPS","data":{"blocked_id":"tRzkPS","blocker_id":"9Sw8C0","reason":"blocker_done"}}
+{"v":1,"rep":"22DryP","seq":5240,"ts":1792535618564,"actor":"w-blend","type":"claimed","task":"Knr8GN","data":{"duration":"2h","expires_at":1792542818}}
+{"v":1,"rep":"22DryP","seq":5241,"ts":1792535631401,"actor":"w-keys","type":"claimed","task":"oNeklc","data":{"duration":"2h","expires_at":1792542831}}
