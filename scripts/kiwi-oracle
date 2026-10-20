@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# kiwi-oracle — decode Kiwi fixtures with Evan Wallace's reference implementation
+# (kiwi-schema on npm, MIT), the independent oracle the Kiwi tests' expected values come
+# from. Prints the schema's definition counts and every case's root type, node and blob
+# counts, total blob bytes, isCut, and whether the decode consumed every byte.
+#
+# Usage:
+#   scripts/kiwi-oracle [<fixture dir>]   (default: Tests/WoodcaseTests/Fixtures/Figma)
+#
+# Installs kiwi-schema@0.5.0 into local/kiwi-oracle/ on first use (gitignored). Needs node
+# and npm; the first run needs the network, so the sandbox disabled.
+set -euo pipefail
+
+root="$(cd "$(dirname "$0")/.." && pwd)"
+fixtures="${1:-$root/Tests/WoodcaseTests/Fixtures/Figma}"
+cache="$root/local/kiwi-oracle"
+version="0.5.0"
+
+if [[ ! -f "$cache/node_modules/kiwi-schema/package.json" ]] ||
+    ! grep -q "\"version\": \"$version\"" "$cache/node_modules/kiwi-schema/package.json"; then
+    mkdir -p "$cache"
+    npm install --silent --prefix "$cache" "kiwi-schema@$version" >&2
+fi
+
+node - "$cache" "$fixtures" <<'JS'
+const path = require('path');
+const fs = require('fs');
+const [cache, fixtures] = process.argv.slice(2);
+const kiwi = require(path.join(cache, 'node_modules/kiwi-schema'));
+const schema = kiwi.decodeBinarySchema(new Uint8Array(fs.readFileSync(path.join(fixtures, 'schema.kiwi'))));
+const kinds = {};
+let fields = 0;
+for (const d of schema.definitions) {
+  kinds[d.kind] = (kinds[d.kind] || 0) + 1;
+  fields += d.fields.length;
+}
+console.log(`schema: ${schema.definitions.length} definitions ${JSON.stringify(kinds)}, ${fields} fields`);
+console.log(`first ${schema.definitions[0].name}, last ${schema.definitions[schema.definitions.length - 1].name}`);
+const compiled = kiwi.compileSchema(schema);
+console.log('case\tbytes\ttype\tnodes\tblobs\tblobBytes\tisCut\tconsumedAll');
+for (const name of fs.readdirSync(fixtures).sort()) {
+  const file = path.join(fixtures, name, 'message.kiwi');
+  if (!fs.existsSync(file)) continue;
+  const bytes = new Uint8Array(fs.readFileSync(file));
+  const buffer = new kiwi.ByteBuffer(bytes);
+  const message = compiled.decodeMessage(buffer);
+  const blobs = message.blobs || [];
+  const blobBytes = blobs.reduce((sum, blob) => sum + blob.bytes.length, 0);
+  console.log([name, bytes.length, message.type, (message.nodeChanges || []).length, blobs.length,
+    blobBytes, message.isCut, buffer._index === bytes.length].join('\t'));
+}
+JS

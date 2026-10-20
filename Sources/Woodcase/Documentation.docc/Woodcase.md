@@ -126,6 +126,18 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 - ``ZstdDecoder``
 - ``ZstdDecodeError``
 
+### Kiwi Decoding
+
+- <doc:KiwiDecoding>
+- ``KiwiSchema``
+- ``KiwiDefinition``
+- ``KiwiField``
+- ``KiwiFieldType``
+- ``KiwiRecord``
+- ``KiwiValue``
+- ``KiwiByteReader``
+- ``KiwiDecodingError``
+
 ### Networking
 
 - ``RemoteDataFetching``
