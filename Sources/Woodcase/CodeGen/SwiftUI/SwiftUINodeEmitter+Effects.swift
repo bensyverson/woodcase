@@ -119,15 +119,9 @@ extension SwiftUINodeEmitter {
     /// on a node that is a placeholder, is left out.
     func blended(_ view: SwiftUIViewCode, _ node: PenNode) -> SwiftUIViewCode {
         let mode: PenBlendMode? = switch node.kind {
-        case let .frame(data): data.blendMode
-        case let .rectangle(data): data.blendMode
-        case let .ellipse(data): shapeDrawn(node) ? data.blendMode : nil
-        case let .text(data): data.blendMode
-        case let .path(data): shapeDrawn(node) ? data.blendMode : nil
-        case let .polygon(data): shapeDrawn(node) ? data.blendMode : nil
-        case let .line(data): shapeDrawn(node) ? data.blendMode : nil
-        case let .icon(data): iconOutline(data) != nil ? data.blendMode : nil
-        case let .group(data): data.blendMode
+        case .frame, .rectangle, .text, .group: node.blendMode
+        case .ellipse, .path, .polygon, .line: shapeDrawn(node) ? node.blendMode : nil
+        case let .icon(data): iconOutline(data) != nil ? node.blendMode : nil
         default: nil
         }
         guard let mode, mode != .normal else { return view }

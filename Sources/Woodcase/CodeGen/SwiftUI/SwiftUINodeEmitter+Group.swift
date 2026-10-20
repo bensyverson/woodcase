@@ -49,7 +49,7 @@ extension SwiftUINodeEmitter {
                     view = view.modified(".blur(radius: \(radius.code))")
                 }
                 let opacity = node.common.opacity?.literalValue ?? 1
-                if opacity < 1 || (data.blendMode ?? .normal) != .normal {
+                if opacity < 1 || (node.blendMode ?? .normal) != .normal {
                     view = view.modified(".compositingGroup()")
                 }
                 warnUnemitted(node, effects.unemitted)

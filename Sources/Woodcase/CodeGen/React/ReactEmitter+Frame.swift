@@ -150,7 +150,7 @@ extension ReactEmitter {
         ))
 
         // Common: transforms, opacity, enabled, blendMode
-        styles.append(contentsOf: emitCommonStyles(node.common, blendMode: data.blendMode, pivot: ctx.transformPivot(for: node.common)))
+        styles.append(contentsOf: emitCommonStyles(node.common, blendMode: node.blendMode, pivot: ctx.transformPivot(for: node.common)))
         styles.append(contentsOf: turnedSlotStyles(node, width: data.width, height: data.height, isRoot: isRoot, ctx: ctx))
 
         // Isolation: create stacking context when children use fill-level blend modes
@@ -350,7 +350,7 @@ extension ReactEmitter {
         }
 
         // Common: transforms, opacity, enabled, blendMode
-        styles.append(contentsOf: emitCommonStyles(node.common, blendMode: data.blendMode, pivot: .anchor))
+        styles.append(contentsOf: emitCommonStyles(node.common, blendMode: node.blendMode, pivot: .anchor))
 
         // The group's shadows and blur over its content, an approximation of Pen's silhouette
         styles.append(contentsOf: filterEffectStyles(data.effects))

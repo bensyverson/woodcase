@@ -56,11 +56,14 @@ extension PenNode {
     private static func shallow(from decoder: Decoder) throws -> (node: PenNode, children: Decoder?) {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let id = try container.decode(String.self, forKey: .id)
-        let common = try PenNodeCommon(from: decoder)
+        var common = try PenNodeCommon(from: decoder)
         let typeString = try container.decode(String.self, forKey: .type)
 
         guard let nodeType = NodeType(rawValue: typeString) else {
             return try (unknown(typeString, id: id, common: common, from: decoder), nil)
+        }
+        if blendedTypes.contains(nodeType) {
+            common = try migratingTopLevelBlendMode(common, from: decoder)
         }
         let payloadDecoder = ChildDeferringDecoder(decoder)
         let kind = try Kind.decoding(nodeType, from: payloadDecoder)

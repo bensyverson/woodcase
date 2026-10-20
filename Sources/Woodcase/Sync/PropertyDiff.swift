@@ -131,7 +131,6 @@ public enum PropertyDiff {
         if old.fills != new.fills { changed.insert("kind.fills") }
         diffStroke(old: old, new: new, into: &changed)
         if old.effects != new.effects { changed.insert("kind.effects") }
-        if old.blendMode != new.blendMode { changed.insert("kind.blendMode") }
         if old.layout != new.layout { changed.insert("kind.layout") }
         if old.gap != new.gap { changed.insert("kind.gap") }
         if old.padding != new.padding { changed.insert("kind.padding") }
@@ -151,7 +150,6 @@ public enum PropertyDiff {
         if old.fills != new.fills { changed.insert("kind.fills") }
         diffStroke(old: old, new: new, into: &changed)
         if old.effects != new.effects { changed.insert("kind.effects") }
-        if old.blendMode != new.blendMode { changed.insert("kind.blendMode") }
         return changed
     }
 
@@ -163,7 +161,6 @@ public enum PropertyDiff {
         if old.fills != new.fills { changed.insert("kind.fills") }
         diffStroke(old: old, new: new, into: &changed)
         if old.effects != new.effects { changed.insert("kind.effects") }
-        if old.blendMode != new.blendMode { changed.insert("kind.blendMode") }
         return changed
     }
 
@@ -177,7 +174,6 @@ public enum PropertyDiff {
         if old.fills != new.fills { changed.insert("kind.fills") }
         diffStroke(old: old, new: new, into: &changed)
         if old.effects != new.effects { changed.insert("kind.effects") }
-        if old.blendMode != new.blendMode { changed.insert("kind.blendMode") }
         return changed
     }
 
@@ -191,14 +187,12 @@ public enum PropertyDiff {
         if old.fills != new.fills { changed.insert("kind.fills") }
         diffStroke(old: old, new: new, into: &changed)
         if old.effects != new.effects { changed.insert("kind.effects") }
-        if old.blendMode != new.blendMode { changed.insert("kind.blendMode") }
         return changed
     }
 
     private static func diffGroup(old: PenNode.GroupData, new: PenNode.GroupData) -> Set<String> {
         var changed = Set<String>()
         if old.effects != new.effects { changed.insert("kind.effects") }
-        if old.blendMode != new.blendMode { changed.insert("kind.blendMode") }
         return changed
     }
 
@@ -208,7 +202,6 @@ public enum PropertyDiff {
         if old.height != new.height { changed.insert("kind.height") }
         diffStroke(old: old, new: new, into: &changed)
         if old.effects != new.effects { changed.insert("kind.effects") }
-        if old.blendMode != new.blendMode { changed.insert("kind.blendMode") }
         return changed
     }
 
@@ -221,7 +214,6 @@ public enum PropertyDiff {
         if old.fills != new.fills { changed.insert("kind.fills") }
         diffStroke(old: old, new: new, into: &changed)
         if old.effects != new.effects { changed.insert("kind.effects") }
-        if old.blendMode != new.blendMode { changed.insert("kind.blendMode") }
         return changed
     }
 
@@ -289,7 +281,6 @@ public enum PropertyDiff {
         if old.height != new.height { changed.insert("kind.height") }
         if old.fills != new.fills { changed.insert("kind.fills") }
         if old.effects != new.effects { changed.insert("kind.effects") }
-        if old.blendMode != new.blendMode { changed.insert("kind.blendMode") }
         return changed
     }
 

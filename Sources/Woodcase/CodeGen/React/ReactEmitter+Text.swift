@@ -21,7 +21,7 @@ extension ReactEmitter {
         var styles: [(String, String)] = []
 
         // Fill: a color, or paint clipped to the glyphs
-        styles.append(contentsOf: textPaintStyles(data, nodeBlendMode: data.blendMode, ctx: ctx))
+        styles.append(contentsOf: textPaintStyles(data, nodeBlendMode: node.blendMode, ctx: ctx))
 
         // Font
         if let fontFamily = data.fontFamily {
@@ -77,7 +77,7 @@ extension ReactEmitter {
         ))
 
         // Common: transforms, opacity, enabled, blendMode
-        styles.append(contentsOf: emitCommonStyles(node.common, blendMode: data.blendMode, pivot: ctx.transformPivot(for: node.common)))
+        styles.append(contentsOf: emitCommonStyles(node.common, blendMode: node.blendMode, pivot: ctx.transformPivot(for: node.common)))
         styles.append(contentsOf: turnedSlotStyles(node, width: data.width, height: data.height, isRoot: isRoot, ctx: ctx))
 
         // Shadows cast by the glyphs, and layer blur

@@ -21,7 +21,6 @@ public extension PenNode {
             strokeLinejoin: PenStrokeJoin? = nil,
             strokeAlignment: PenStrokeAlign? = nil,
             effects: PenEffects? = nil,
-            blendMode: PenBlendMode? = nil,
             layout: PenLayoutDirection? = nil,
             gap: PenValue<Double>? = nil,
             padding: PenPadding? = nil,
@@ -41,7 +40,6 @@ public extension PenNode {
             self.strokeLinejoin = strokeLinejoin
             self.strokeAlignment = strokeAlignment
             self.effects = effects
-            self.blendMode = blendMode
             self.layout = layout
             self.gap = gap
             self.padding = padding
@@ -62,7 +60,6 @@ public extension PenNode {
         public var strokeLinejoin: PenStrokeJoin?
         public var strokeAlignment: PenStrokeAlign?
         public var effects: PenEffects?
-        public var blendMode: PenBlendMode?
         public var layout: PenLayoutDirection?
         public var gap: PenValue<Double>?
         public var padding: PenPadding?
@@ -80,7 +77,7 @@ public extension PenNode {
             case fills = "fill"
             case stroke, strokeWidth, strokeLinecap, strokeLinejoin, strokeAlignment
             case effects = "effect"
-            case blendMode, layout, gap, padding
+            case layout, gap, padding
             case justifyContent, alignItems, slot, children
         }
     }

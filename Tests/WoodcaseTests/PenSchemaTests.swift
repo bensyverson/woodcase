@@ -33,6 +33,11 @@ struct PenSchemaTests {
     func everyRowCarriesItsWireKey(type: PenNode.NodeType) {
         for property in PenSchema.table(for: type).properties where property.key != .inlined {
             let field = String(property.path.dropFirst("kind.".count))
+            // A natural path names where the file stores it, in metadata (leaf TesTbK).
+            if let key = PenMetadata.WoodcaseKey(naturalPath: property.path) {
+                #expect(property.key.written == "metadata.woodcase.\(key.rawValue)")
+                continue
+            }
             #expect(property.key.written == NodePropertyCodec.jsonKey(for: field))
         }
     }

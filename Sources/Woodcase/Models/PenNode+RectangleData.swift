@@ -19,8 +19,7 @@ public extension PenNode {
             strokeLinecap: PenStrokeCap? = nil,
             strokeLinejoin: PenStrokeJoin? = nil,
             strokeAlignment: PenStrokeAlign? = nil,
-            effects: PenEffects? = nil,
-            blendMode: PenBlendMode? = nil
+            effects: PenEffects? = nil
         ) {
             self.width = width
             self.height = height
@@ -32,7 +31,6 @@ public extension PenNode {
             self.strokeLinejoin = strokeLinejoin
             self.strokeAlignment = strokeAlignment
             self.effects = effects
-            self.blendMode = blendMode
         }
 
         public var width: PenSizing?
@@ -45,13 +43,12 @@ public extension PenNode {
         public var strokeLinejoin: PenStrokeJoin?
         public var strokeAlignment: PenStrokeAlign?
         public var effects: PenEffects?
-        public var blendMode: PenBlendMode?
 
         public enum CodingKeys: String, CodingKey {
             case width, height, cornerRadius
             case fills = "fill"
             case stroke, strokeWidth, strokeLinecap, strokeLinejoin, strokeAlignment
-            case effects = "effect", blendMode
+            case effects = "effect"
         }
     }
 }

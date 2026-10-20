@@ -172,11 +172,14 @@ struct ChangeCategoryTests {
         #expect(ChangeCategory.categorize(oldKind: old, newKind: new) == .renderOnly)
     }
 
+    /// A node's blend mode lives in its metadata (leaf TesTbK), so its change is a common one.
     @Test("BlendMode change is render-only")
     func blendModeChangeIsRenderOnly() {
-        let old = PenNode.Kind.frame(PenNode.FrameData(blendMode: .normal))
-        let new = PenNode.Kind.frame(PenNode.FrameData(blendMode: .multiply))
-        #expect(ChangeCategory.categorize(oldKind: old, newKind: new) == .renderOnly)
+        var old = PenNode(id: "f", common: PenNodeCommon(), kind: .frame(PenNode.FrameData()))
+        old.blendMode = .normal
+        var new = old
+        new.blendMode = .multiply
+        #expect(ChangeCategory.categorize(oldCommon: old.common, newCommon: new.common) == .renderOnly)
     }
 
     @Test("Layout direction change is layout-affecting")
@@ -231,9 +234,10 @@ struct ChangeCategoryTests {
 
     @Test("Group blendMode change is render-only")
     func groupBlendModeChangeIsRenderOnly() {
-        let old = PenNode.Kind.group(PenNode.GroupData(blendMode: .normal))
-        let new = PenNode.Kind.group(PenNode.GroupData(blendMode: .multiply))
-        #expect(ChangeCategory.categorize(oldKind: old, newKind: new) == .renderOnly)
+        let old = PenNode(id: "g", common: PenNodeCommon(), kind: .group(PenNode.GroupData()))
+        var new = old
+        new.blendMode = .multiply
+        #expect(ChangeCategory.categorize(oldCommon: old.common, newCommon: new.common) == .renderOnly)
     }
 
     @Test("Group effects change is render-only")

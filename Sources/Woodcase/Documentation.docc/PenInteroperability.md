@@ -90,6 +90,12 @@ Two more values the format dropped come back the same way (leaf `zRp9CO`, wave E
 
 Both draw in the CG renderer (<doc:PenRendering>); <doc:PenCodeGen> and <doc:PenSVGExport> say which other targets follow.
 
+## A Node's Blend Mode Lives in Metadata
+
+The format gives a blend mode only to paints and shadows (schema 2.17 and 2.20), and the editor drops a node's own top-level `blendMode` when it opens a file: all seven in RapidPro's `group-blend.pen` were gone from the file its headless CLI saved. Woodcase stores a node's blend mode in `metadata.woodcase.blendMode` instead (Ben's ruling, 2026-10-20; leaf TesTbK), which the editor keeps: a rectangle's, a group's beside another Woodcase key, and a text's all survived `pen interactive`'s load and save (pen CLI, 2026-10-20). Callers still read and write it at `kind.blendMode` (``PenNode/blendMode``); a file that writes the old top-level key is read into metadata, and a write never emits it. A paint's and a shadow's `blendMode` stay where the format puts them.
+
+An instance override still writes the raw `blendMode` key into the instance's overrides, which Woodcase reads into the patched node's metadata: a `metadata` override would replace the component node's whole metadata, and a `ref` node's own metadata does not reach its root.
+
 ## Underline and Strikethrough Survive the Editor
 
 The editor strips a text node's `underline` and `strikethrough` when it opens a file and draws neither, though both are in its schema; it keeps metadata. Woodcase writes both into `metadata.woodcase.textDecoration` too and restores them from it on its next read (``PenTextDecoration``; <doc:PenRichText>, *Underline and strikethrough survive Pen*), so a save in the editor loses neither. Its headless CLI (pen 0.3.11, 2026-10-15) saves the file as version 2.21, which Woodcase reads as a newer minor and writes back unchanged.

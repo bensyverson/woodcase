@@ -65,17 +65,22 @@ public extension NodePropertyCodec {
     /// Last, a metadata write — deep or whole — stores the Woodcase keys it changes
     /// under `metadata.woodcase` only (``storingWoodcaseKeysInNamespace(_:replacing:)``).
     ///
+    /// A natural path — `kind.blendMode` — is first aimed at the deep key it is stored
+    /// under (``storingNaturalPaths(_:on:)``), so it folds like one.
+    ///
     /// - Returns: The same properties with every deep key folded into one whole-object
     ///   value, ready for ``setting(_:at:on:)``.
     /// - Throws: ``EditingError/unknownProperty(nodeID:key:nodeType:)`` if a deep-keyed
-    ///   property is somehow not a property of this node.
+    ///   property is somehow not a property of this node, or
+    ///   ``EditingError/propertyTypeMismatch(nodeID:key:expected:actual:)`` for a natural
+    ///   path's value of the wrong form.
     static func folding(
         _ properties: [String: AnyCodable],
         onto node: PenNode
     ) throws -> [String: AnyCodable] {
         var folded: [String: AnyCodable] = [:]
         var deep: [String: [(keyPath: [String], value: AnyCodable)]] = [:]
-        for (key, value) in properties {
+        for (key, value) in try storingNaturalPaths(properties, on: node) {
             if let (property, keyPath) = deepKey(of: key) {
                 deep[property, default: []].append((keyPath, value))
             } else {

@@ -47,7 +47,7 @@ extension ReactEmitter {
             hasFixedHeight: data.height?.fixedValue != nil,
             parentLayout: parentLayout
         ))
-        svgStyles.append(contentsOf: emitCommonStyles(node.common, blendMode: data.blendMode, pivot: ctx.transformPivot(for: node.common)))
+        svgStyles.append(contentsOf: emitCommonStyles(node.common, blendMode: node.blendMode, pivot: ctx.transformPivot(for: node.common)))
         svgStyles.append(contentsOf: turnedSlotStyles(node, width: data.width, height: data.height, isRoot: isRoot, ctx: ctx))
         svgStyles.append(contentsOf: filterEffectStyles(data.effects))
 
@@ -111,7 +111,7 @@ extension ReactEmitter {
             hasFixedHeight: data.height?.fixedValue != nil,
             parentLayout: parentLayout
         ))
-        svgStyles.append(contentsOf: emitCommonStyles(node.common, blendMode: data.blendMode, pivot: ctx.transformPivot(for: node.common)))
+        svgStyles.append(contentsOf: emitCommonStyles(node.common, blendMode: node.blendMode, pivot: ctx.transformPivot(for: node.common)))
         svgStyles.append(contentsOf: turnedSlotStyles(node, width: data.width, height: data.height, isRoot: isRoot, ctx: ctx))
         svgStyles.append(contentsOf: filterEffectStyles(data.effects))
 
@@ -214,7 +214,7 @@ extension ReactEmitter {
                 hasFixedHeight: data.height?.fixedValue != nil,
                 parentLayout: parentLayout
             ))
-            styles.append(contentsOf: emitCommonStyles(node.common, blendMode: data.blendMode, pivot: ctx.transformPivot(for: node.common)))
+            styles.append(contentsOf: emitCommonStyles(node.common, blendMode: node.blendMode, pivot: ctx.transformPivot(for: node.common)))
             styles.append(contentsOf: filterEffectStyles(data.effects))
 
             ctx.lines.append("\(pad)<div")
@@ -238,7 +238,7 @@ extension ReactEmitter {
                 hasFixedHeight: data.height?.fixedValue != nil,
                 parentLayout: parentLayout
             ))
-            svgStyles.append(contentsOf: emitCommonStyles(node.common, blendMode: data.blendMode, pivot: ctx.transformPivot(for: node.common)))
+            svgStyles.append(contentsOf: emitCommonStyles(node.common, blendMode: node.blendMode, pivot: ctx.transformPivot(for: node.common)))
             svgStyles.append(contentsOf: filterEffectStyles(data.effects))
 
             ctx.lines.append("\(pad)<svg \(svgAttrs)")

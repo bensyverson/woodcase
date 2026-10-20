@@ -69,7 +69,8 @@ public enum NodePropertyCodec {
     /// - Parameters:
     ///   - path: A path from ``paths(for:)``, or a deep key inside one of
     ///     ``deepKeyedPaths`` such as `common.metadata.woodcase.author`, which reads the
-    ///     way ``deepValue(in:at:of:)`` describes.
+    ///     way ``deepValue(in:at:of:)`` describes. A natural path such as `kind.blendMode`
+    ///     reads the metadata key it is stored under (``naturalKey(of:on:)``).
     ///   - node: The node to read from.
     /// - Returns: The property's JSON value, or ``AnyCodable/null`` if it is unset.
     /// - Throws: ``EditingError/unknownProperty(nodeID:key:nodeType:)`` if the path
@@ -77,6 +78,9 @@ public enum NodePropertyCodec {
     public static func value(at path: String, of node: PenNode) throws -> AnyCodable {
         if let (property, keyPath) = deepKey(of: path) {
             return try deepValue(in: property, at: keyPath, of: node)
+        }
+        if let key = naturalKey(of: path, on: node.kind) {
+            return naturalValue(of: key, on: node)
         }
         if path.hasPrefix("common.") {
             return try commonValue(at: path, of: node.common, nodeID: node.id, nodeType: node.kind.typeName)
@@ -119,8 +123,10 @@ public enum NodePropertyCodec {
     ///   - nodeID: The owning node's ID, for error reporting.
     /// - Returns: The property's JSON value, or ``AnyCodable/null`` if it is unset.
     /// - Throws: ``EditingError/unknownProperty(nodeID:key:nodeType:)`` for a path
-    ///   that is not a property of this kind.
+    ///   that is not a property of this kind, a natural path among them: what it names is
+    ///   stored in the node's metadata, which the kind does not hold (``naturalKey(of:on:)``).
     static func kindValue(at path: String, of kind: PenNode.Kind, nodeID: String) throws -> AnyCodable {
+        if naturalKey(of: path, on: kind) != nil { throw unknownProperty(path, nodeID, kind.typeName) }
         let field = try kindField(of: path, in: kind, nodeID: nodeID)
 
         switch kind {

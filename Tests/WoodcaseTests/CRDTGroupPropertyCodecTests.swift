@@ -21,26 +21,26 @@ struct CRDTGroupPropertyCodecTests {
 
     // MARK: - Remaining properties round-trip
 
-    @Test("Group blendMode applies through the property codec")
+    /// A group's blend mode is stored in its metadata (leaf TesTbK): a remote write of
+    /// `kind.blendMode` applies to the node, and the group's kind no longer holds it.
+    @Test("Group blendMode applies to the node, in its metadata")
     func groupBlendModeApplies() {
-        let crdt = makeCRDT()
-        let kind = crdt.applyKindProperty(
-            property: "kind.blendMode", value: .string("multiply"), to: .group(PenNode.GroupData())
+        let group = PenNode(id: "g1", common: PenNodeCommon(), kind: .group(PenNode.GroupData()))
+        let document = EditableDocument(from: PenDocument(children: [group]))
+        let crdt = CRDTDocument(peerID: peer, document: document)
+        let node = crdt.applyPropertyToNode(
+            nodeID: "g1", property: "kind.blendMode", value: .string("multiply"), document: document
         )
-        guard case let .group(data) = kind else {
-            Issue.record("Expected group kind")
-            return
-        }
-        #expect(data.blendMode == .multiply)
+        #expect(node.blendMode == .multiply)
+        #expect(node.common.metadata?[woodcase: .blendMode] == .string("multiply"))
     }
 
-    @Test("Group blendMode reads back through the property codec")
-    func groupBlendModeReadsBack() {
+    @Test("Group blendMode is not a property of the group's kind")
+    func groupBlendModeIsNotAKindProperty() {
         let crdt = makeCRDT()
-        let value = crdt.extractKindValue(
-            property: "kind.blendMode", from: .group(PenNode.GroupData(blendMode: .multiply))
-        )
-        #expect(value == .string("multiply"))
+        let kind = crdt.applyKindProperty(property: "kind.blendMode", value: .string("multiply"), to: .group(PenNode.GroupData()))
+        #expect(kind == .group(PenNode.GroupData()))
+        #expect(crdt.extractKindValue(property: "kind.blendMode", from: .group(PenNode.GroupData())) == .null)
     }
 
     // MARK: - Removed properties are no-ops
@@ -48,7 +48,7 @@ struct CRDTGroupPropertyCodecTests {
     @Test("A legacy layout key is ignored when applied to a group")
     func legacyLayoutKeyIsIgnored() {
         let crdt = makeCRDT()
-        let original = PenNode.GroupData(blendMode: .multiply)
+        let original = PenNode.GroupData(effects: .single(.blur(PenEffect.PenBlurEffect(radius: .literal(4)))))
         let kind = crdt.applyKindProperty(property: "kind.layout", value: .string("vertical"), to: .group(original))
         guard case let .group(data) = kind else {
             Issue.record("Expected group kind")

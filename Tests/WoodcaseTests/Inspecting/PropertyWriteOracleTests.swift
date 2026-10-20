@@ -38,6 +38,12 @@ struct PropertyWriteOracleTests {
             if NodePropertyCodec.isExtrasPath(path) {
                 return try NodePropertyCodec.settingExtra(value, at: path, on: node)
             }
+            // A natural path writes the metadata it is stored under, held to this same
+            // oracle as a write of `common.metadata` (leaf TesTbK).
+            if NodePropertyCodec.naturalKey(of: path, on: node.kind) != nil {
+                let folded = try NodePropertyCodec.folding([path: value], onto: node)
+                return try setting(folded[NodePropertyCodec.metadataPath] ?? .null, at: NodePropertyCodec.metadataPath, on: node)
+            }
             let written = NodePropertyCodec.coercing(value, at: path, on: node.kind)
             var patched = node
             if path.hasPrefix(NodePropertyCodec.commonPrefix) {

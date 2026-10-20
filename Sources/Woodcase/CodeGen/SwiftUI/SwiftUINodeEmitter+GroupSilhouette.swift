@@ -70,10 +70,10 @@ extension SwiftUINodeEmitter {
     private static func inkedGroup(_ group: PenNode, children: [PenNode]?) -> PenNode {
         var node = group
         node.common.opacity = nil
+        node.blendMode = nil
         if case var .group(data) = node.kind {
             data.children = children
             data.effects = nil
-            data.blendMode = nil
             node.kind = .group(data)
         }
         return node
@@ -83,48 +83,42 @@ extension SwiftUINodeEmitter {
     private static func inkedOwnPaint(_ node: PenNode) -> PenNode? {
         var node = node
         node.common.opacity = nil
+        node.blendMode = nil
         switch node.kind {
         case var .frame(data):
             data.fills = ink
             data.stroke = data.stroke.map { _ in ink }
             data.effects = nil
-            data.blendMode = nil
             data.children = boxOnly(data.children, of: node)
             node.kind = .frame(data)
         case var .rectangle(data):
             data.fills = ink
             data.stroke = data.stroke.map { _ in ink }
             data.effects = nil
-            data.blendMode = nil
             node.kind = .rectangle(data)
         case var .ellipse(data):
             data.fills = ink
             data.stroke = data.stroke.map { _ in ink }
             data.effects = nil
-            data.blendMode = nil
             node.kind = .ellipse(data)
         case var .polygon(data):
             data.fills = ink
             data.stroke = data.stroke.map { _ in ink }
             data.effects = nil
-            data.blendMode = nil
             node.kind = .polygon(data)
         case var .path(data):
             data.fills = ink
             data.stroke = data.stroke.map { _ in ink }
             data.effects = nil
-            data.blendMode = nil
             node.kind = .path(data)
         case var .text(data):
             data.fills = ink
             data.stroke = data.stroke.map { _ in ink }
             data.effects = nil
-            data.blendMode = nil
             node.kind = .text(data)
         case var .icon(data):
             data.fills = ink
             data.effects = nil
-            data.blendMode = nil
             node.kind = .icon(data)
         default:
             return nil

@@ -25,10 +25,12 @@ struct PenRendererBlendTests {
     private static func rect(
         _ id: String, _ fill: PenFill, blendMode: PenBlendMode? = nil, opacity: Double? = nil
     ) -> PenNode {
-        PenNode(
+        var node = PenNode(
             id: id, common: PenNodeCommon(opacity: opacity.map { .literal($0) }),
-            kind: .rectangle(PenNode.RectangleData(fills: .single(fill), blendMode: blendMode))
+            kind: .rectangle(PenNode.RectangleData(fills: .single(fill)))
         )
+        node.blendMode = blendMode
+        return node
     }
 
     /// A color fill blended by `mode`.
@@ -188,10 +190,11 @@ struct PenRendererBlendTests {
     /// result multiplies the backdrop — (51, 204, 102)·(230, 153, 77)/255 → (46, 122, 31).
     /// Blending each child on its own multiplies green over blue over the backdrop.
     @Test func `A blended frame blends its contents as a group`() throws {
-        let frame = PenNode(id: "grp", common: PenNodeCommon(), kind: .frame(PenNode.FrameData(
-            blendMode: .multiply, layout: PenLayoutDirection.none,
+        var frame = PenNode(id: "grp", common: PenNodeCommon(), kind: .frame(PenNode.FrameData(
+            layout: PenLayoutDirection.none,
             children: [Self.rect("blue", Self.fill("#3366FF")), Self.rect("green", Self.fill("#33CC66"))]
         )))
+        frame.blendMode = .multiply
         try Self.expectColor(Self.render([Self.rect("bd", Self.fill("#E6994D")), frame]), "#2E7A1F")
     }
 

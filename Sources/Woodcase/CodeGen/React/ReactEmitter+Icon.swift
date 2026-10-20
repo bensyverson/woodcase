@@ -63,7 +63,7 @@ extension ReactEmitter {
             hasFixedHeight: data.height?.fixedValue != nil,
             parentLayout: parentLayout
         ))
-        iconStyles.append(contentsOf: emitCommonStyles(node.common, blendMode: data.blendMode, pivot: ctx.transformPivot(for: node.common)))
+        iconStyles.append(contentsOf: emitCommonStyles(node.common, blendMode: node.blendMode, pivot: ctx.transformPivot(for: node.common)))
         iconStyles.append(contentsOf: turnedSlotStyles(node, width: data.width, height: data.height, isRoot: isRoot, ctx: ctx))
         let innerShadows = iconInnerShadowFilters(
             NodeEffects(data.effects).innerShadows, size: data.width?.fixedValue, nodeID: node.id

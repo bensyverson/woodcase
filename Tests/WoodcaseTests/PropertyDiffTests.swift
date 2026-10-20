@@ -94,12 +94,14 @@ struct PropertyDiffTests {
         #expect(diff.contains("kind.layout"))
     }
 
-    @Test("Group has no layout properties to diff — only blendMode")
-    func diffKindGroupBlendModeOnly() {
-        let old = PenNode.Kind.group(PenNode.GroupData(blendMode: .normal))
-        let new = PenNode.Kind.group(PenNode.GroupData(blendMode: .multiply))
+    /// A group's blend mode is stored in its metadata (leaf TesTbK), so it diffs as
+    /// `common.metadata`, and only the group's effects are left to diff on its kind.
+    @Test("Group has no layout properties to diff — only effects")
+    func diffKindGroupEffectsOnly() {
+        let old = PenNode.Kind.group(PenNode.GroupData())
+        let new = PenNode.Kind.group(PenNode.GroupData(effects: .single(.blur(PenEffect.PenBlurEffect(radius: .literal(4))))))
         let diff = PropertyDiff.diffKind(old: old, new: new)
-        #expect(diff == Set(["kind.blendMode"]))
+        #expect(diff == Set(["kind.effects"]))
     }
 
     @Test("allKindKeys for group is only effects and blendMode")

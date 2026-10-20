@@ -253,9 +253,16 @@ extension CRDTDocument {
         if op.properties.keys.contains(where: NodePropertyCodec.isExtrasPath), patched.extras != node.extras {
             ops.append(contentsOf: processLocalSetExtras(nodeID: op.nodeID, extras: patched.extras))
         }
+        // Metadata replicates per entry, and a natural path (`kind.blendMode`) is one of its
+        // entries, so either kind of write emits the entries the patch changed, once.
+        let writesMetadata = op.properties.keys.contains {
+            $0 == NodePropertyCodec.metadataPath || NodePropertyCodec.naturalKey(of: $0, on: node.kind) != nil
+        }
+        if writesMetadata {
+            ops += processLocalMetadata(nodeID: op.nodeID, from: node.common.metadata, to: patched.common.metadata)
+        }
         for (path, value) in op.properties where !NodePropertyCodec.isExtrasPath(path) {
-            if path == NodePropertyCodec.metadataPath {
-                ops += processLocalMetadata(nodeID: op.nodeID, from: node.common.metadata, to: patched.common.metadata)
+            if path == NodePropertyCodec.metadataPath || NodePropertyCodec.naturalKey(of: path, on: node.kind) != nil {
                 continue
             }
             let normalized = (try? NodePropertyCodec.value(at: path, of: patched)) ?? value

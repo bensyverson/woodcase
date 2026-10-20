@@ -223,13 +223,16 @@ struct PenSchemaDefaultEngineTests {
 
 private extension AnyCodable {
     /// The document with one key of the node `id` set, or removed for `nil`.
+    ///
+    /// A dotted key — `metadata.woodcase.blendMode`, where the file stores a natural path —
+    /// is set inside the objects it names.
     func setting(_ key: String, to value: AnyCodable?, on id: String) -> AnyCodable {
         switch self {
-        case var .dictionary(entries):
+        case let .dictionary(entries):
             if entries["id"] == .string(id) {
-                if let value { entries[key] = value } else { entries.removeValue(forKey: key) }
-                return .dictionary(entries)
+                return setting(keyPath: key.split(separator: ".").map(String.init), to: value)
             }
+            var entries = entries
             if let children = entries["children"] {
                 entries["children"] = children.setting(key, to: value, on: id)
             }
@@ -239,5 +242,17 @@ private extension AnyCodable {
         default:
             return self
         }
+    }
+
+    /// This object with the value at `keyPath` set, or removed for `nil`.
+    private func setting(keyPath: [String], to value: AnyCodable?) -> AnyCodable {
+        guard let head = keyPath.first else { return value ?? .null }
+        var entries: [String: AnyCodable] = if case let .dictionary(existing) = self { existing } else { [:] }
+        if keyPath.count == 1 {
+            if let value { entries[head] = value } else { entries.removeValue(forKey: head) }
+        } else {
+            entries[head] = (entries[head] ?? .dictionary([:])).setting(keyPath: Array(keyPath.dropFirst()), to: value)
+        }
+        return .dictionary(entries)
     }
 }

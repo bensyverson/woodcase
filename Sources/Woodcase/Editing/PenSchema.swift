@@ -116,7 +116,7 @@ public enum PenSchema {
             let field = String(path.dropFirst(prefix.count))
             return PenSchemaTable.Property(
                 path: path,
-                key: inlinedFields.contains(field) ? .inlined : .key(NodePropertyCodec.jsonKey(for: field)),
+                key: inlinedFields.contains(field) ? .inlined : storageKey(of: path, field: field),
                 shape: NodePropertyCodec.shape(of: field)
                     ?? PenPropertyShape(forms: [.open(PenValueForm.OpenShape(
                         phrase: "a valid \(field) value",
@@ -125,5 +125,15 @@ public enum PenSchema {
                 default: unsetDefault(of: path, on: type)
             )
         }
+    }
+
+    /// Where the file writes a path's value: its own key, or, for a natural path
+    /// (``PenMetadata/WoodcaseKey/naturalPath``), the `metadata.woodcase` key it is stored
+    /// under — `kind.blendMode` is written as `metadata.woodcase.blendMode`.
+    private static func storageKey(of path: String, field: String) -> PenKeyForm {
+        guard let key = PenMetadata.WoodcaseKey(naturalPath: path) else {
+            return .key(NodePropertyCodec.jsonKey(for: field))
+        }
+        return .key("metadata.\(PenMetadata.woodcaseNamespace).\(key.rawValue)")
     }
 }

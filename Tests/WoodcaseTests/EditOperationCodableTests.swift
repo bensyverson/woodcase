@@ -173,7 +173,6 @@ struct EditOperationCodableTests {
     @Test("Round-trip updateKind with group")
     func updateKindGroup() throws {
         let kind = PenNode.Kind.group(PenNode.GroupData(
-            blendMode: .multiply,
             children: [
                 PenNode(id: "c1", common: PenNodeCommon(), kind: .rectangle(PenNode.RectangleData())),
             ]
@@ -183,7 +182,6 @@ struct EditOperationCodableTests {
 
         if case let .updateKind(params) = decoded {
             if case let .group(data) = params.kind {
-                #expect(data.blendMode == .multiply)
                 #expect(data.children?.count == 1)
             } else {
                 Issue.record("Expected group kind")

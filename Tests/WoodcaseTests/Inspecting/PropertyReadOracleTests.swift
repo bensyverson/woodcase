@@ -68,6 +68,12 @@ struct PropertyReadOracleTests {
             if let (property, keyPath) = NodePropertyCodec.deepKey(of: path) {
                 return try NodePropertyCodec.deepValue(in: property, at: keyPath, of: node)
             }
+            // A natural path reads the metadata key it is stored under (leaf TesTbK).
+            if let key = NodePropertyCodec.naturalKey(of: path, on: node.kind),
+               let (property, keyPath) = NodePropertyCodec.deepKey(of: key.path)
+            {
+                return try NodePropertyCodec.deepValue(in: property, at: keyPath, of: node)
+            }
             if path.hasPrefix("common.") {
                 guard NodePropertyCodec.commonPaths.contains(path) else {
                     throw NodePropertyCodec.unknownProperty(path, node.id, node.kind.typeName)

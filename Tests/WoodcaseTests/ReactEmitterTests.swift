@@ -695,9 +695,8 @@ struct ReactEmitterTests {
         let doc = PenDocument(version: "2.9", children: [
             PenNode(
                 id: "c1",
-                common: PenNodeCommon(name: "Component/Card", reusable: true, metadata: ["type": "component"]),
+                common: PenNodeCommon(name: "Component/Card", reusable: true, metadata: ["type": "component", "woodcase": ["blendMode": "multiply"]]),
                 kind: .frame(PenNode.FrameData(
-                    blendMode: .multiply,
                     layout: .vertical,
                     children: [
                         PenNode(
@@ -2408,8 +2407,8 @@ struct ReactEmitterTests {
                     children: [
                         PenNode(
                             id: "g1",
-                            common: PenNodeCommon(),
-                            kind: .group(PenNode.GroupData(blendMode: .multiply))
+                            common: PenNodeCommon(metadata: ["type": "woodcase", "woodcase": ["blendMode": "multiply"]]),
+                            kind: .group(PenNode.GroupData())
                         ),
                     ]
                 ))

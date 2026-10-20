@@ -57,6 +57,7 @@ node types it again.
 | editor state | `locked`, `defaultTextStyle` | an editor: a locked node (``PenNode/isLocked``: the key is the boolean `true`) is not selected or hit on the canvas, only in its layer list (Penumbra spec §14, the integrator's ruling of 2026-10-15); an inspector reads it as a field through ``PenSchema/woodcaseFields(for:)``. The format has no lock, and Pen keeps the key and ignores it. `defaultTextStyle: true` marks a text as the document's default text style, since the format has no document-level metadata (Penumbra spec §6.3, Ben's ruling of 2026-10-18): ``EditableDocument/defaultTextStyleNodeID()`` finds the first marked text in document order and ``EditPlanner/planMarkDefaultTextStyle(nodeID:in:)`` moves the mark; only a text's mark counts, and only a text takes it as a field. A write of either is held to `true` or `false` on any node, as every key's form is held whatever the node |
 | a stroke's miter limit | `strokeMiterLimit` | ``PenNode/strokeMiterLimit``: every renderer and emitter, painted extent and the stroke-band hit test; Pen's 4 where absent; see <doc:PenInteroperability>, *Miter Limits and Shadow Spreads Live in Metadata* |
 | a shadow's spread | `shadowSpread` | ``PenShadowSpread`` and ``PenNode/shadowSpread(forEffect:)``: the CG renderer and SVG export, and the `shadow-spread-stale` lint; one entry per spread shadow, addressed by its place among the effects and stale once that shadow changes |
+| a node's blend mode | `blendMode` | ``PenNode/blendMode``: every renderer and emitter (the CG renderer, SVG export, React and SwiftUI), as one isolated group; written and read at its natural path `kind.blendMode` (``PenMetadata/WoodcaseKey/naturalPath``, ``NodePropertyCodec/naturalKey(of:on:)``), which folds into this key. A file, an `add` or an override that writes a node's `blendMode` top-level is read into this key; a write never emits it there. Pen keeps the key (pen CLI, 2026-10-20) |
 
 ### One accessor
 
@@ -186,6 +187,16 @@ throughout:
 - ``NodePropertyCodec/storingWoodcaseKeysInNamespace(in:current:)``
 - ``EditableDocument/oldStyleWoodcaseKeyMigration()``
 - ``PenFileTransaction/moveOldStyleWoodcaseKeys(at:identity:log:timeout:effect:isolation:)``
+
+### Natural paths
+
+- ``PenMetadata/WoodcaseKey/naturalPath``
+- ``PenMetadata/WoodcaseKey/init(naturalPath:)``
+- ``NodePropertyCodec/naturalKey(of:on:)``
+- ``NodePropertyCodec/writesNaturalPath(_:on:)``
+- ``NodePropertyCodec/storingNaturalPaths(_:on:)``
+- ``PenNode/blendMode``
+- ``PenNode/blendedTypes``
 
 ### Merging
 

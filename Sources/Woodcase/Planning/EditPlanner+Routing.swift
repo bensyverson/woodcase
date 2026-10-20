@@ -62,13 +62,15 @@ public extension EditPlanner {
 }
 
 private extension EditPlanner {
-    /// A `setProperties` on a node's own storage, its deep metadata keys folded onto the
-    /// metadata the node carries, as the planner folds them.
+    /// A `setProperties` on a node's own storage, its deep metadata keys and natural paths
+    /// (`kind.blendMode`) folded onto the metadata the node carries, as the planner folds them.
     static func ownWrite(
         _ properties: [String: AnyCodable], on id: String, in document: EditableDocument
     ) -> EditOperation {
         let write = EditOperation.setProperties(EditOperation.SetProperties(nodeID: id, properties: properties))
-        return properties.keys.contains { $0.hasPrefix(metadataPrefix) } ? write.normalized(in: document) : write
+        let folds = properties.keys.contains { $0.hasPrefix(metadataPrefix) }
+            || document.node(id: id).map { NodePropertyCodec.writesNaturalPath(properties, on: $0.kind) } == true
+        return folds ? write.normalized(in: document) : write
     }
 
     /// The prefix of a deep metadata key.

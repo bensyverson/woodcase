@@ -120,6 +120,14 @@ public extension PenMetadata {
         /// (``PenShadowSpread``). Format 2.19 dropped `spread`.
         case shadowSpread
 
+        // MARK: A node's blend mode
+
+        /// How the node, drawn as one isolated group, composites onto what lies beneath it
+        /// (``PenNode/blendMode``), written and read at the natural path `kind.blendMode`.
+        /// Pen's format puts a blend mode only on paints and shadows, and Pen drops a node's
+        /// top-level `blendMode` on load.
+        case blendMode
+
         // MARK: Editor state
 
         /// Whether the node is locked: an editor will not select or hit it on the canvas,
@@ -148,6 +156,9 @@ public extension PenMetadata {
             case editor
             /// A node's shadow spreads, which Pen's format cannot hold.
             case effect
+            /// How a node as a whole composites onto what lies beneath it, which Pen's format
+            /// cannot hold.
+            case compositing
         }
 
         /// What an authored value of a key must be.
@@ -191,6 +202,7 @@ public extension PenMetadata {
             case .spans, .textDecoration: .text
             case .strokeDash, .strokeDashOffset, .strokeMiterLimit: .stroke
             case .shadowSpread: .effect
+            case .blendMode: .compositing
             case .locked, .defaultTextStyle: .editor
             }
         }
@@ -207,7 +219,7 @@ public extension PenMetadata {
             case .type, .state, .author, .leaf, .stage, .tint, .copiedFrom: rawValue
             case .anchor, .replyTo, .requestedBy, .createdAt, .fontFamily, .fontSize, .fontWeight, .fontStyle, .letterSpacing,
                  .lineHeight, .textAlign, .textAlignVertical, .spans, .textDecoration, .strokeDash, .strokeDashOffset,
-                 .strokeMiterLimit, .shadowSpread, .locked, .defaultTextStyle: nil
+                 .strokeMiterLimit, .shadowSpread, .blendMode, .locked, .defaultTextStyle: nil
             }
         }
 
@@ -220,7 +232,9 @@ public extension PenMetadata {
             case .textAlign: .oneOf(PenTextAlign.allCases.map(\.rawValue))
             case .textAlignVertical: .oneOf(PenTextAlignVertical.allCases.map(\.rawValue))
             case .tint: .hexColor
-            case .author, .leaf, .stage, .copiedFrom, .replyTo, .requestedBy, .fontFamily, .fontWeight, .fontStyle:
+            // Any string, as `kind.blendMode` takes: a mode Woodcase does not know is kept.
+            case .author, .leaf, .stage, .copiedFrom, .replyTo, .requestedBy, .fontFamily, .fontWeight, .fontStyle,
+                 .blendMode:
                 .string
             case .fontSize, .letterSpacing, .lineHeight, .strokeDashOffset, .strokeMiterLimit: .number
             case .spans: .textSpans
@@ -293,6 +307,7 @@ public extension PenMetadata {
             case .defaultTextStyle: "Whether a text is the document's default text style; the first marked text wins."
             case .strokeMiterLimit: "The longest a mitered join reaches, in stroke widths, before it is beveled; absent is Pen's 4."
             case .shadowSpread: "How far each shadow is grown before it is cast, per effect, and the shadow it was made for."
+            case .blendMode: "How the node as a whole blends with what lies beneath it; absent is normal. Write kind.blendMode."
             }
         }
 

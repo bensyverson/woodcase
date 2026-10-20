@@ -22,20 +22,17 @@ public extension PenNode {
     struct GroupData: Friendly {
         public init(
             effects: PenEffects? = nil,
-            blendMode: PenBlendMode? = nil,
             children: [PenNode]? = nil
         ) {
             self.effects = effects
-            self.blendMode = blendMode
             self.children = children
         }
 
         public var effects: PenEffects?
-        public var blendMode: PenBlendMode?
         public var children: [PenNode]?
 
         public enum CodingKeys: String, CodingKey {
-            case effects = "effect", blendMode, children
+            case effects = "effect", children
         }
     }
 }

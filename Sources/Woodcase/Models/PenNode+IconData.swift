@@ -21,8 +21,7 @@ public extension PenNode {
             width: PenSizing? = nil,
             height: PenSizing? = nil,
             fills: PenFills? = nil,
-            effects: PenEffects? = nil,
-            blendMode: PenBlendMode? = nil
+            effects: PenEffects? = nil
         ) {
             self.icon = icon
             self.library = library
@@ -31,7 +30,6 @@ public extension PenNode {
             self.height = height
             self.fills = fills
             self.effects = effects
-            self.blendMode = blendMode
         }
 
         /// The icon name within `library` (e.g. `"bell"`, `"vpn_lock"`).
@@ -43,14 +41,12 @@ public extension PenNode {
         public var height: PenSizing?
         public var fills: PenFills?
         public var effects: PenEffects?
-        public var blendMode: PenBlendMode?
 
         public enum CodingKeys: String, CodingKey {
             case icon, library, weight
             case width, height
             case fills = "fill"
             case effects = "effect"
-            case blendMode
         }
     }
 }

@@ -23,6 +23,9 @@ public extension EditOperation {
     /// ``EditableDocument/granularInverse(of:)``), so it merges with other authors'
     /// writes to sibling entries.
     ///
+    /// A natural path — `kind.blendMode` — is folded the same way, into the metadata key it
+    /// is stored under (``NodePropertyCodec/storingNaturalPaths(_:on:)``).
+    ///
     /// Left as they are:
     /// - An ``updateKind(_:)`` that changes the node's type: there is no path for
     ///   "become a text node", so it stays whole (its key is
@@ -81,8 +84,9 @@ public extension EditOperation {
             guard !paths.contains(Self.kindTypePath) else { return self }
             return Self.patch(node: node, target: target, paths: paths) ?? self
         case let .setProperties(op):
-            guard op.properties.keys.contains(where: { NodePropertyCodec.deepKey(of: $0) != nil }),
-                  let node = lookup(op.nodeID),
+            guard let node = lookup(op.nodeID),
+                  op.properties.keys.contains(where: { NodePropertyCodec.deepKey(of: $0) != nil })
+                  || NodePropertyCodec.writesNaturalPath(op.properties, on: node.kind),
                   let folded = try? NodePropertyCodec.folding(op.properties, onto: node)
             else { return self }
             return .setProperties(SetProperties(nodeID: op.nodeID, properties: folded))

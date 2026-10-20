@@ -23,7 +23,9 @@ extension NodePropertyCodec {
     ///
     /// This is the single funnel every verb's property write goes through, so it is
     /// where a number written to a text property becomes the string it spells — see
-    /// ``coercing(_:at:on:)``. Nothing else about the value changes.
+    /// ``coercing(_:at:on:)``. Nothing else about the value changes. A natural path such as
+    /// `kind.blendMode` writes the metadata key it is stored under, the rest of the
+    /// node's metadata kept (<doc:PenMetadataNamespace>).
     ///
     /// - Parameters:
     ///   - value: The new JSON value, in the .pen file's own shape.
@@ -37,6 +39,9 @@ extension NodePropertyCodec {
     public static func setting(_ value: AnyCodable, at path: String, on node: PenNode) throws -> PenNode {
         if isExtrasPath(path) {
             return try settingExtra(value, at: path, on: node)
+        }
+        if naturalKey(of: path, on: node.kind) != nil {
+            return try settingNaturalPath(value, at: path, on: node)
         }
         let written = coercing(value, at: path, on: node.kind)
         var patched = node
@@ -87,7 +92,8 @@ extension NodePropertyCodec {
     ///   - kind: The kind-specific data to patch.
     ///   - nodeID: The owning node's ID, for error reporting.
     /// - Returns: The patched kind.
-    /// - Throws: ``EditingError/unknownProperty(nodeID:key:nodeType:)`` or
+    /// - Throws: ``EditingError/unknownProperty(nodeID:key:nodeType:)`` — for a natural path
+    ///   too, whose value the node's metadata holds, not its kind (``naturalKey(of:on:)``) — or
     ///   ``EditingError/propertyTypeMismatch(nodeID:key:expected:actual:)``.
     static func setting(
         _ value: AnyCodable,
@@ -95,6 +101,7 @@ extension NodePropertyCodec {
         on kind: PenNode.Kind,
         nodeID: String
     ) throws -> PenNode.Kind {
+        if naturalKey(of: path, on: kind) != nil { throw unknownProperty(path, nodeID, kind.typeName) }
         let field = try kindField(of: path, in: kind, nodeID: nodeID)
 
         switch kind {

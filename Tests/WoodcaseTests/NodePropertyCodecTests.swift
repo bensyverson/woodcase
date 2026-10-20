@@ -289,7 +289,7 @@ struct NodePropertyCodecTests {
             .rectangle(PenNode.RectangleData(width: .fixed(10))),
             .ellipse(PenNode.EllipseData(width: .fixed(10))),
             .path(PenNode.PathData(geometry: "M0 0 L1 1")),
-            .group(PenNode.GroupData(blendMode: .multiply)),
+            .group(PenNode.GroupData()),
             .line(PenNode.LineData(width: .fixed(10))),
             .polygon(PenNode.PolygonData(width: .fixed(10))),
             .ref(PenNode.RefData(ref: "Button")),
