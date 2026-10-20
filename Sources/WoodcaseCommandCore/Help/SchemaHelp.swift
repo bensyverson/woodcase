@@ -166,6 +166,8 @@ enum SchemaHelp {
     (bold), and \(PenValueForm.StringRole.fontStyle.signature) is normal or italic.
     Every length is in points, with one exception: kind.lineHeight is a multiple of \
     fontSize, so 1.4 is 140% leading and 21 is a line box fourteen times too tall.
-    A key marked * is required; `null` clears a property.
+    A key marked * is required; `null` clears a property. A .pen key under \
+    metadata.woodcase is a property Pen's format lacks, which Woodcase stores there: \
+    write its path, never that key.
     """
 }

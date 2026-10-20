@@ -25,7 +25,10 @@ struct Get: AsyncParsableCommand {
         structural read.
 
         --json wraps the same answer as one object instead: the node under "node", \
-        beside "revision" — and "props" when the node publishes parameters. That is \
+        beside "revision" — "props" when the node publishes parameters, and "properties" \
+        when it sets a Woodcase-owned value (kind.strokeDash, common.locked, …), by the \
+        path `set` writes; the JSON keeps those in metadata.woodcase, and the outline \
+        lists them in a "woodcase-owned" block above it. That is \
         the NodeReport doc.get returns in `woodcase js`.
 
         --expand prints the node as it renders instead, children and all: a component \
@@ -123,7 +126,8 @@ struct Get: AsyncParsableCommand {
         let header = "\(found.address)  \(found.path)  rev \(found.revision)"
         let json = try CanonicalJSON.text(found.node)
         let props = ParameterListFormatter.text(found.parameters)
-        return [header, props, json].compactMap(\.self).joined(separator: "\n")
+        let natural = NaturalPathListFormatter.text(found.report.properties)
+        return [header, props, natural, json].compactMap(\.self).joined(separator: "\n")
     }
 
     /// The bytes `--instances` prints: the definition's header line and one row per

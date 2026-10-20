@@ -255,6 +255,7 @@ public enum DocumentLinter {
         found += shadowSpreadStale(row, node: node)
         found += noteUnsized(row, node: node)
         found += metadataOldStyle(row, in: context)
+        found += penDropsOverride(row, in: context)
         found += noteState(row, in: context)
         found += codegenPropPathFindings(row, node: node, in: context)
         found += codegenUnmappedOverrideFindings(row, node: node, in: context)

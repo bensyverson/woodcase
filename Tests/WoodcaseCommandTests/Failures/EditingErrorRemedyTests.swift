@@ -135,6 +135,7 @@ struct EditingErrorRemedyTests {
             nodeID: "Ttl01", key: "common.metadata.tint", value: "\"yellow\"", accepted: ["#RRGGBB"], suggestion: nil
         ),
         .textSpansRejected(nodeID: "Ttl01", reason: "run 1 has an unknown key \"bold\""),
+        .storedAtNaturalPath(nodeID: "Ttl01", path: "common.metadata.woodcase.locked", naturalPath: "common.locked"),
         .ambiguousAddress(address: "Title", candidates: [
             NodeAddressCandidate(id: "Ttl01", path: "Canvas/Title"),
             NodeAddressCandidate(id: "Ttl02", path: "Board/Title"),
@@ -223,6 +224,7 @@ struct EditingErrorRemedyTests {
         case let .documentPropertyTypeMismatch(key, _, _): key
         case let .postItMetadataRejected(_, key, _, _, _): key
         case .textSpansRejected: "Canvas/Title"
+        case let .storedAtNaturalPath(_, _, naturalPath): naturalPath
         case let .ambiguousAddress(address, _): address
         case let .addressNotFound(address, _): address
         case .componentHasInstances: "Component"

@@ -136,6 +136,10 @@ public struct EditRefusal: Error, Friendly {
 
         // MARK: Everything else
 
+        /// The write names a Woodcase-owned key at its storage path; ``suggestion`` writes
+        /// it at its natural path instead (``EditingError/storedAtNaturalPath(nodeID:path:naturalPath:)``).
+        case storedAtNaturalPath
+
         /// The document refused the edit for a reason no other code names; ``errorCode``
         /// says which.
         case documentRefused

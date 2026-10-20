@@ -11,7 +11,7 @@ import Testing
 /// spec §14, the integrator's ruling of 2026-10-15). Pen keeps the key and ignores it.
 @MainActor
 struct EditPlannerLockTests {
-    private static let locked = PenMetadata.WoodcaseKey.locked.path
+    private static let locked = PenMetadata.WoodcaseKey.locked.propertyPath
 
     @Test("A boolean is stored in the namespace; anything else is the wrong form")
     func onlyABoolean() throws {

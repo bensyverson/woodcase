@@ -49,8 +49,8 @@ enum DefaultTextStyleFixture {
     }
     """
 
-    /// The key's deep path, `common.metadata.woodcase.defaultTextStyle`.
-    static let path = PenMetadata.WoodcaseKey.defaultTextStyle.path
+    /// The key's natural path, `kind.defaultTextStyle` (stored at `common.metadata.woodcase.defaultTextStyle`).
+    static let path = PenMetadata.WoodcaseKey.defaultTextStyle.propertyPath
 
     /// A fresh copy of the fixture.
     static func document() throws -> EditableDocument {
@@ -61,6 +61,18 @@ enum DefaultTextStyleFixture {
     static func write(_ value: AnyCodable, on ids: [String], in document: EditableDocument) throws {
         for id in ids {
             let plan = try EditPlanner.plan(.set([path: value]), at: PlannerFixture.address("#\(id)"), in: document)
+            try apply(plan.operations, to: document)
+        }
+    }
+
+    /// Marks nodes the way a file can, by their whole metadata object, on types the
+    /// planner refuses `kind.defaultTextStyle` on.
+    static func writeMetadataMark(on ids: [String], in document: EditableDocument) throws {
+        let metadata: AnyCodable = ["type": "woodcase", "woodcase": ["defaultTextStyle": true]]
+        for id in ids {
+            let plan = try EditPlanner.plan(
+                .set([NodePropertyCodec.metadataPath: metadata]), at: PlannerFixture.address("#\(id)"), in: document
+            )
             try apply(plan.operations, to: document)
         }
     }

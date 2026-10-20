@@ -68,6 +68,7 @@ lays the document out for it, and only for a write that changes `textGrowth`.
 | ``EditRefusal/Code/variableTypeMismatch`` | a `$name` of a type the property does not take — a color bound to an opacity — or, inside a structured value, of a type its nested key does not take: a number variable as a fill's color |
 | ``EditRefusal/Code/setInsideInstance`` | a set, bind or unbind aimed inside a component instance; ``EditRefusal/suggestion`` is the override to request instead |
 | ``EditRefusal/Code/positionIgnoredByLayout`` | an `x` or `y` on a node its parent's layout places; ``EditRefusal/suggestion`` is the `layoutPosition` write that would honor it |
+| ``EditRefusal/Code/storedAtNaturalPath`` | a write names a Woodcase-owned key at its storage path, such as `common.metadata.woodcase.strokeDash`; ``EditRefusal/suggestion`` names its natural path, `kind.strokeDash` (<doc:PenMetadataNamespace>, *Natural paths*) |
 | ``EditRefusal/Code/dashOnPerSideStroke`` | a `metadata.woodcase.strokeDash` on a stroke of per-side widths, or per-side widths on a dashed stroke: dashes flow round one outline, which per-side bands are not; ``EditRefusal/suggestion`` removes the dash. A dash itself is held to ``PenStrokeDash``: more than 16 lengths, a negative one or all zeros is ``EditRefusal/Code/outOfRange``, anything but an array of numbers ``EditRefusal/Code/invalidForm`` |
 | ``EditRefusal/Code/unknownProperty``, ``EditRefusal/Code/invalidForm`` | a key the node's type lacks, a value of a form it does not take |
 
@@ -159,8 +160,8 @@ stack has no place of its own, so it keeps what it stored.
 | ``EditRefusal/Code/wouldCloseComponentLoop`` | a member moving in would make a component contain itself; ``EditRefusal/detail`` is the loop (``EditRefusal/Detail/componentLoop(_:)``), named, in render order from the component written into |
 | ``EditRefusal/Code/componentHasInstances`` | the frame ungrouped is a component with instances; ``EditRefusal/detail`` names the component and its instances |
 
-Lock has no planner of its own: it is a write of `metadata.woodcase.locked`
-(``PenMetadata/WoodcaseKey/locked``), planned as any other set, and ``PenNode/isLocked``
+Lock has no planner of its own: it is a set of `common.locked`, stored in
+`metadata.woodcase.locked` (``PenMetadata/WoodcaseKey/locked``), planned as any other set, and ``PenNode/isLocked``
 reads it back; see <doc:PenMetadataNamespace>.
 
 ### The default text style

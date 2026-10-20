@@ -90,6 +90,17 @@ public extension EditOperation {
                   let folded = try? NodePropertyCodec.folding(op.properties, onto: node)
             else { return self }
             return .setProperties(SetProperties(nodeID: op.nodeID, properties: folded))
+        case let .overrideDescendant(op):
+            // An override of a Woodcase-owned key joins the entry's own metadata (rule 6).
+            guard case let .ref(data)? = lookup(op.refNodeID)?.kind else { return self }
+            let entry = data.descendants?[op.descendantID]?.properties ?? [:]
+            let (properties, unset) = NodePropertyCodec.foldingNaturalOverrideKeys(
+                op.properties, unset: op.unset, onto: entry
+            )
+            guard properties != op.properties || unset != op.unset else { return self }
+            return .overrideDescendant(OverrideDescendant(
+                refNodeID: op.refNodeID, descendantID: op.descendantID, properties: properties, unset: unset
+            ))
         default:
             return self
         }

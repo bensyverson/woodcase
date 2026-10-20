@@ -50,7 +50,8 @@ struct DefaultTextStyleQueryTests {
     @Test("A mark on a node that is not a text, or a false mark, is no default")
     func ignoredMarks() throws {
         let document = try DefaultTextStyleFixture.document()
-        try DefaultTextStyleFixture.write(true, on: ["Page", "Shape"], in: document)
+        // `kind.defaultTextStyle` is a text's alone, so a mark elsewhere is one a file carries.
+        try DefaultTextStyleFixture.writeMetadataMark(on: ["Page", "Shape"], in: document)
         try DefaultTextStyleFixture.write(false, on: ["Title"], in: document)
         #expect(document.defaultTextStyleNodeID() == nil)
         try DefaultTextStyleFixture.write(true, on: ["Body"], in: document)

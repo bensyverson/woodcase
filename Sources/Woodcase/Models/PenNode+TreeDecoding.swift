@@ -62,11 +62,13 @@ extension PenNode {
         guard let nodeType = NodeType(rawValue: typeString) else {
             return try (unknown(typeString, id: id, common: common, from: decoder), nil)
         }
-        if blendedTypes.contains(nodeType) {
-            common = try migratingTopLevelBlendMode(common, from: decoder)
-        }
+        common = try migratingTopLevelNaturalKeys(common, of: nodeType, from: decoder)
         let payloadDecoder = ChildDeferringDecoder(decoder)
-        let kind = try Kind.decoding(nodeType, from: payloadDecoder)
+        var kind = try Kind.decoding(nodeType, from: payloadDecoder)
+        if case let .ref(data) = kind {
+            let moved = movingRootNaturalKeys(common, data)
+            (common, kind) = (moved.common, .ref(moved.data))
+        }
         let extras = try Self.extras(of: nodeType, from: decoder)
         return (PenNode(id: id, common: common, kind: kind, extras: extras), payloadDecoder.children)
     }

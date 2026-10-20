@@ -1,0 +1,45 @@
+{
+  "version": "2.20",
+  "children": [
+    {
+      "type": "frame", "id": "Brd01", "name": "Board", "x": 0, "y": 0, "width": 600, "height": 400, "layout": "none",
+      "children": [
+        {
+          "type": "rectangle", "id": "Crd01", "name": "Card", "x": 10, "y": 10, "width": 100, "height": 60,
+          "fill": "#FFFFFF", "stroke": "#000000", "strokeWidth": 2,
+          "metadata": { "type": "woodcase", "woodcase": {
+            "strokeDash": [8, 4], "strokeDashOffset": 2, "strokeMiterLimit": 10, "locked": true, "blendMode": "multiply"
+          } }
+        },
+        {
+          "type": "text", "id": "Lbl01", "name": "Label", "x": 10, "y": 100, "content": "Hi there", "fill": "#000000",
+          "metadata": { "type": "woodcase", "woodcase": {
+            "defaultTextStyle": true,
+            "spans": { "text": "Hi there", "runs": [{ "start": 0, "end": 2, "fontWeight": "700" }] }
+          } }
+        },
+        {
+          "type": "line", "id": "Lin01", "name": "Rule", "x": 10, "y": 150, "width": 100, "height": 0,
+          "stroke": "#000000", "strokeWidth": 1
+        },
+        {
+          "type": "rectangle", "id": "Pln01", "name": "Plain", "x": 200, "y": 10, "width": 40, "height": 40,
+          "fill": "#CCCCCC", "stroke": "#000000", "strokeWidth": 1
+        },
+        {
+          "type": "frame", "id": "Bdg01", "name": "Badge", "reusable": true, "x": 300, "y": 10,
+          "width": 80, "height": 40, "layout": "none", "stroke": "#000000", "strokeWidth": 1,
+          "metadata": { "type": "component", "woodcase": { "role": "badge", "strokeDash": [2, 2] } },
+          "children": [
+            {
+              "type": "rectangle", "id": "Box01", "name": "Box", "x": 4, "y": 4, "width": 20, "height": 20,
+              "fill": "#00FF00", "stroke": "#000000", "strokeWidth": 1,
+              "metadata": { "type": "woodcase", "note": "keep me", "woodcase": { "strokeDash": [1, 1], "strokeMiterLimit": 6 } }
+            }
+          ]
+        },
+        { "type": "ref", "id": "Ins01", "name": "Inst", "ref": "Bdg01", "x": 300, "y": 100 }
+      ]
+    }
+  ]
+}

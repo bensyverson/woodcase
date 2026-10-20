@@ -5,9 +5,11 @@ spellings from before it are still read, and both merges resolve it key by key.
 
 ## Overview
 
-Pen keeps every `metadata` key on every node, nested values included (on notes,
+Pen keeps every `metadata` key on every node it draws, nested values included (on notes,
 prompts, contexts and text, probed with the headless engine 0.3.11, format 2.21 —
-`project/2026-10-11-what-pen-keeps-on-a-note.md`). Woodcase stores what it owns there
+`project/2026-10-11-what-pen-keeps-on-a-note.md`). It does **not** keep the `metadata`
+of a `ref` node, nor `metadata` inside a `descendants` override (pen CLI 0.3.11,
+2026-10-20, leaf 9Sw8C0): see *Natural paths* below. Woodcase stores what it owns there
 under one object, so the keys say whose they are and cannot collide with anyone else's
 metadata:
 
@@ -57,7 +59,71 @@ node types it again.
 | editor state | `locked`, `defaultTextStyle` | an editor: a locked node (``PenNode/isLocked``: the key is the boolean `true`) is not selected or hit on the canvas, only in its layer list (Penumbra spec §14, the integrator's ruling of 2026-10-15); an inspector reads it as a field through ``PenSchema/woodcaseFields(for:)``. The format has no lock, and Pen keeps the key and ignores it. `defaultTextStyle: true` marks a text as the document's default text style, since the format has no document-level metadata (Penumbra spec §6.3, Ben's ruling of 2026-10-18): ``EditableDocument/defaultTextStyleNodeID()`` finds the first marked text in document order and ``EditPlanner/planMarkDefaultTextStyle(nodeID:in:)`` moves the mark; only a text's mark counts, and only a text takes it as a field. A write of either is held to `true` or `false` on any node, as every key's form is held whatever the node |
 | a stroke's miter limit | `strokeMiterLimit` | ``PenNode/strokeMiterLimit``: every renderer and emitter, painted extent and the stroke-band hit test; Pen's 4 where absent; see <doc:PenInteroperability>, *Miter Limits and Shadow Spreads Live in Metadata* |
 | a shadow's spread | `shadowSpread` | ``PenShadowSpread`` and ``PenNode/shadowSpread(forEffect:)``: the CG renderer and SVG export, and the `shadow-spread-stale` lint; one entry per spread shadow, addressed by its place among the effects and stale once that shadow changes |
-| a node's blend mode | `blendMode` | ``PenNode/blendMode``: every renderer and emitter (the CG renderer, SVG export, React and SwiftUI), as one isolated group; written and read at its natural path `kind.blendMode` (``PenMetadata/WoodcaseKey/naturalPath``, ``NodePropertyCodec/naturalKey(of:on:)``), which folds into this key. A file, an `add` or an override that writes a node's `blendMode` top-level is read into this key; a write never emits it there. Pen keeps the key (pen CLI, 2026-10-20) |
+| a node's blend mode | `blendMode` | ``PenNode/blendMode``: every renderer and emitter (the CG renderer, SVG export, React and SwiftUI), as one isolated group. A write never emits a top-level `blendMode`. Pen keeps the key (pen CLI, 2026-10-20) |
+
+Every key of the last five groups but `shadowSpread` and `textDecoration` is read and
+written at a natural path — `kind.strokeDash`, `common.locked`, `kind.spans` — not at
+its storage path; see *Natural paths* below.
+
+### Natural paths
+
+**A key that stands in for a property Pen's format lacks is read and written at a natural
+path, and Woodcase decides where it is stored** (Ben's ruling, 2026-10-20;
+`project/2026-10-20-natural-paths-for-woodcase-properties.md`). One table,
+``PenMetadata/WoodcaseKey/naturalPath`` with ``PenMetadata/WoodcaseKey/naturalPathTypes``,
+names each:
+
+| Natural path | Stored at | Node types |
+|---|---|---|
+| `kind.blendMode` | `metadata.woodcase.blendMode` | the drawn shapes, text, icons, frames and groups (``PenNode/blendedTypes``) |
+| `kind.strokeDash`, `kind.strokeDashOffset` | `metadata.woodcase.strokeDash`, `.strokeDashOffset` | frame, rectangle, ellipse, polygon, path, line |
+| `kind.strokeMiterLimit` | `metadata.woodcase.strokeMiterLimit` | as above, but not line |
+| `common.locked` | `metadata.woodcase.locked` | every type (``NodePropertyCodec/naturalCommonPaths``) |
+| `kind.defaultTextStyle`, `kind.spans` | `metadata.woodcase.defaultTextStyle`, `.spans` | text |
+
+The codec converts at the door (``NodePropertyCodec/storingNaturalPaths(_:on:)``): a
+write of `kind.strokeDash` is planned, applied, replicated and undone as the ordinary
+metadata write it stands for, and a read of it reads the stored key. `woodcase set`,
+batches, `tree --props`, `find`, `woodcase schema` (the rows name the stored key under
+`.pen key`), ``PenSchema/field(_:for:)`` and the `doc` API all speak the natural path;
+`get` prints the values a node sets under a `woodcase-owned` block, and in `--json` as
+``NodeReport/properties``, beside the node JSON that keeps them in metadata. The typed
+accessors — ``PenNode/strokeDash``, ``PenNode/strokeMiterLimit``, ``PenNode/isLocked``,
+``PenNode/blendMode`` — are unchanged, and every renderer reads through them.
+
+**The storage path is refused as a way in.** An authored write — a `set`, a batch, the
+`doc` API, an inspector's planned intent, an override — that names
+`common.metadata.woodcase.strokeDash`, or a deep key below it, is refused with
+``EditingError/storedAtNaturalPath(nodeID:path:naturalPath:)``
+("common.metadata.woodcase.strokeDash is stored for you; write kind.strokeDash"), so two
+spellings of one write cannot drift. The whole `common.metadata` object is still written
+as given, and reading `common.metadata` (or a deep key into it) still shows what is
+stored. A raw ``EditOperation`` — an undo, a CRDT entry, a session edit — is not an
+authored write and lands as written. Keys with no natural path yet — the code-generation
+keys, the note keys and a shadow's spread — are written at their storage paths as before.
+
+**An instance override of a Woodcase-owned key is stored in the override's own
+`metadata.woodcase`** (rule 6; Ben's ruling, 2026-10-20). `override Inst/Box
+kind.strokeDash=[4,2]` — or `strokeDash=[4,2]` — writes
+`descendants.Box.metadata.woodcase.strokeDash`, laid over what the entry already keeps
+there (``NodePropertyCodec/foldingNaturalOverrideKeys(_:unset:onto:)``, the one fold the
+planner, ``EditOperation/normalized(in:)``, the document's apply, the CRDT and decoding all
+use). On expansion the override's metadata is laid over the component node's **per
+entry**, `woodcase` key by key (``PenMetadata/overlaying(_:onto:)``): the component's notes
+and other Woodcase keys still reach the instance, later edits to them still flow through,
+and a `null` clears one key on that instance alone. The instance root takes the `ref`
+node's own `metadata.woodcase` laid over the component root's
+(``PenMetadata/instanceRoot(of:under:)``), so an override of the root, and an instance's
+lock (`set Inst common.locked=true`), are written on the ref node. A raw key a file from
+before the rule wrote (`descendants.Box.blendMode`, or a ref's root override `blendMode`) is
+read into that metadata on load. A file or an `add` that writes a natural field top-level on
+a node is read into the node's own metadata the same way.
+
+**Pen drops these overrides**, and Ben accepts it: a `metadata` object in a `descendants`
+override, and the metadata of a `ref` node, are both gone after Pen's load and save (pen CLI
+0.3.11, 2026-10-20, leaf 9Sw8C0), as was the raw key before. Transfers run from Pen to
+Penumbra, not round trips, and Pen ignores Woodcase's metadata anyway. The
+`pen-drops-override` notice (<doc:WoodcaseLint>) names what a save through Pen would lose.
 
 ### One accessor
 
@@ -77,7 +143,11 @@ metadata[woodcase: .leaf] = nil                  // both spellings removed
 (``EditingError/textSpansRejected(nodeID:reason:)``). Code reads it as typed spans through
 ``PenMetadata/textSpans``, which goes through the same subscript.
 
-**Adding a key** is one case of ``PenMetadata/WoodcaseKey``: its
+**Adding a key** is one case of ``PenMetadata/WoodcaseKey``, and, for a key that stands
+in for a property the format lacks, its row in the natural-path table
+(``PenMetadata/WoodcaseKey/naturalPath``, ``PenMetadata/WoodcaseKey/naturalPathTypes``)
+and its field row (``PenSchema/woodcaseFields(for:)``) — `NaturalPathTableTests` fails on
+a field row with no natural path. Then its
 ``PenMetadata/WoodcaseKey/group``, its ``PenMetadata/WoodcaseKey/shape`` (what an
 authored value is held to), a ``PenMetadata/WoodcaseKey/summary``, and an
 ``PenMetadata/WoodcaseKey/oldSpelling`` only if files from before the namespace carry it
@@ -151,9 +221,9 @@ percent-escaped in an entry path (`%2E`, `%25`).
 
 ### Writing one entry from an app
 
-A ``DocumentSession`` edit takes the same deep keys as `woodcase set`: an
-``EditOperation/setProperties(_:)`` of `common.metadata.woodcase.spans` (or `null`, to
-remove it) is folded onto the node's metadata by ``NodePropertyCodec/folding(_:onto:)``
+A ``DocumentSession`` edit takes the same paths as `woodcase set`: an
+``EditOperation/setProperties(_:)`` of `kind.spans` (or `null`, to remove it) — or of a
+deep key such as `common.metadata.woodcase.tint` — is folded onto the node's metadata by ``NodePropertyCodec/folding(_:onto:)``
 when it is normalized (``EditOperation/normalized(in:)``), the one fold the batch planner
 also runs, so it follows every rule above. A metadata write is then entry by entry
 throughout:
@@ -191,8 +261,17 @@ throughout:
 ### Natural paths
 
 - ``PenMetadata/WoodcaseKey/naturalPath``
+- ``PenMetadata/WoodcaseKey/naturalPathTypes``
+- ``PenMetadata/WoodcaseKey/propertyPath``
 - ``PenMetadata/WoodcaseKey/init(naturalPath:)``
+- ``PenMetadata/WoodcaseKey/init(storagePath:)``
+- ``NodePropertyCodec/naturalCommonPaths``
 - ``NodePropertyCodec/naturalKey(of:on:)``
+- ``NodePropertyCodec/naturalValues(of:)``
+- ``NodePropertyCodec/checkNoStoragePaths(_:nodeID:)``
+- ``NodePropertyCodec/foldingNaturalOverrideKeys(_:unset:onto:)``
+- ``PenMetadata/overlaying(_:onto:)``
+- ``PenMetadata/instanceRoot(of:under:)``
 - ``NodePropertyCodec/writesNaturalPath(_:on:)``
 - ``NodePropertyCodec/storingNaturalPaths(_:on:)``
 - ``PenNode/blendMode``

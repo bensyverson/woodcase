@@ -35,6 +35,13 @@ struct PenSchemaDefaultEngineTests {
         "fill": "#3366FF", "stroke": "#FF0000", "strokeWidth": 8,
     ])
 
+    /// The rectangle with a dash, so the dash's offset has something to move.
+    private static let dashedRectangle = document([
+        "type": "rectangle", "id": "t", "x": 20, "y": 20, "width": 100, "height": 60,
+        "fill": "#3366FF", "stroke": "#FF0000", "strokeWidth": 8,
+        "metadata": ["type": "woodcase", "woodcase": ["strokeDash": [20, 10]]],
+    ])
+
     /// A fixed frame holding a short child and one that overflows it.
     private static let frame = document([
         "type": "frame", "id": "t", "x": 20, "y": 20, "width": 160, "height": 120, "fill": "#FFFFFF",
@@ -123,6 +130,10 @@ struct PenSchemaDefaultEngineTests {
         Pin(type: .rectangle, path: "kind.strokeAlignment", fixture: rectangle, alternative: "inner"),
         Pin(type: .rectangle, path: "kind.strokeLinejoin", fixture: rectangle, alternative: "round"),
         Pin(type: .rectangle, path: "kind.blendMode", fixture: rectangle, alternative: "multiply"),
+        Pin(type: .rectangle, path: "kind.strokeDash", fixture: rectangle, alternative: [8, 4]),
+        Pin(type: .rectangle, path: "kind.strokeDashOffset", fixture: dashedRectangle, alternative: 5),
+        // A right angle's miter reaches √2 stroke widths: Pen's 4 keeps it, 1 bevels it.
+        Pin(type: .rectangle, path: "kind.strokeMiterLimit", fixture: rectangle, alternative: 1),
         Pin(type: .line, path: "kind.strokeLinecap", fixture: line, alternative: "round"),
         Pin(type: .ellipse, path: "kind.innerRadius", fixture: ellipse, alternative: 0.5),
         Pin(type: .ellipse, path: "kind.startAngle", fixture: ellipse, alternative: 90),
@@ -162,6 +173,10 @@ struct PenSchemaDefaultEngineTests {
         #expect(unset != other, "the fixture does not exercise \(pin.path)")
     }
 
+    /// Editor state the schema lists with a default but the engine never draws: a lock and
+    /// the default-text-style mark (natural paths since leaf 9Sw8C0, so now in the tables).
+    private static let undrawn: Set<String> = ["common.locked", "kind.defaultTextStyle"]
+
     @Test("Every literal default the schema lists is pinned to the engine")
     func everyLiteralDefaultIsPinned() {
         let pinned = Set(Self.pins.compactMap { pin in
@@ -169,7 +184,7 @@ struct PenSchemaDefaultEngineTests {
         })
         #expect(pinned.count == Self.pins.count, "a pin names a property with no literal default")
         for type in PenNode.NodeType.allCases {
-            for property in PenSchema.fields(for: type) {
+            for property in PenSchema.fields(for: type) where !Self.undrawn.contains(property.path) {
                 guard let listed = property.default, listed.value != nil else { continue }
                 #expect(
                     pinned.contains(Listed(path: property.path, default: listed)),

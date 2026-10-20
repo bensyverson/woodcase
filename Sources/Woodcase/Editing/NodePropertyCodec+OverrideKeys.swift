@@ -37,7 +37,7 @@ extension NodePropertyCodec {
     /// - Returns: Every key ``PenNodePatcher`` could merge onto it and have survive the
     ///   round trip back into a ``PenNode``.
     static func rawKeys(acceptedBy node: PenNode) -> Set<String> {
-        let paths = PropertyDiff.allKindKeys(node.kind).union(commonPaths)
+        let paths = PropertyDiff.allKindKeys(node.kind).union(commonPaths).union(naturalCommonPaths)
         return Set(paths.map { rawKey(for: $0) })
             .union(PenNodePatcher.structuralKeys(of: node))
     }

@@ -44,7 +44,9 @@ public extension EditableDocument {
                 of: target,
                 source: .instance(componentID: componentID),
                 node: componentID.flatMap(componentNode),
-                overrides: refData.rootOverrides ?? [:]
+                overrides: (refData.rootOverrides ?? [:]).merging(
+                    Self.naturalOverrides(in: node.common.metadata.map { .dictionary($0.object) }, kindOnly: true)
+                ) { stored, _ in stored }
             )
         case let .instanceDescendant(refID, key):
             guard case let .ref(refData)? = node(id: refID)?.kind,
@@ -57,12 +59,37 @@ public extension EditableDocument {
                 of: target,
                 source: .componentNode(definitionID: shown.id),
                 node: shown,
-                overrides: refData.descendants?[key]?.properties ?? [:]
+                overrides: Self.expandingNaturalOverrides(refData.descendants?[key]?.properties ?? [:])
             )
         }
     }
 
     // MARK: - Private
+
+    /// An override entry with each Woodcase-owned key its metadata stores listed as an
+    /// override of its own, under the raw key `override` and an inspector name it by
+    /// (`strokeDash`, at `kind.strokeDash`); the entry's `metadata` is listed too.
+    private static func expandingNaturalOverrides(_ entry: [String: AnyCodable]) -> [String: AnyCodable] {
+        entry.merging(naturalOverrides(in: entry[NodePropertyCodec.rawKey(for: NodePropertyCodec.metadataPath)])) { stored, _ in
+            stored
+        }
+    }
+
+    /// The Woodcase-owned keys a metadata value stores, by the raw field of their natural
+    /// path; only the `kind.*` ones when `kindOnly`, for a ref, whose `common.locked` is its own.
+    private static func naturalOverrides(in metadata: AnyCodable?, kindOnly: Bool = false) -> [String: AnyCodable] {
+        guard case let .dictionary(object)? = metadata,
+              case let .dictionary(keys)? = object[PenMetadata.woodcaseNamespace]
+        else { return [:] }
+        var found: [String: AnyCodable] = [:]
+        for (raw, value) in keys {
+            guard let key = PenMetadata.WoodcaseKey(rawValue: raw), let path = key.naturalPath,
+                  let field = key.naturalField, !kindOnly || path.hasPrefix(NodePropertyCodec.kindPrefix)
+            else { continue }
+            found[field] = value
+        }
+        return found
+    }
 
     /// Assembles an inspection, turning stored overrides into sorted rows.
     private func inspection(

@@ -28,6 +28,7 @@ extension EditRefusal {
             let (code, property, expected) = Self.classify(editing)
             self.init(
                 code: code, address: address, property: property, expected: expected,
+                suggestion: Self.suggestion(for: editing),
                 message: message, errorCode: editing.code, detail: Self.detail(of: editing, in: document)
             )
         } else if let batch = error as? BatchError {
@@ -66,6 +67,7 @@ extension EditRefusal {
              .unknownDocumentProperty, .documentPropertyTypeMismatch,
              .overrideOnOwnSlotContent, .revisionConflict:
             (.documentRefused, nil, nil)
+        case let .storedAtNaturalPath(_, path, _): (.storedAtNaturalPath, path, nil)
         }
     }
 
@@ -96,9 +98,15 @@ extension EditRefusal {
              .unknownProperty, .propertyTypeMismatch, .unknownDocumentProperty,
              .documentPropertyTypeMismatch, .postItMetadataRejected, .textSpansRejected,
              .overrideOnOwnSlotContent, .overrideValueRejected, .rootOverrideKeyReserved,
-             .rootOverrideValueRejected, .revisionConflict:
+             .rootOverrideValueRejected, .revisionConflict, .storedAtNaturalPath:
             return nil
         }
+    }
+
+    /// The write to make instead of a storage path: the natural path, its value to fill in.
+    private static func suggestion(for error: EditingError) -> String? {
+        guard case let .storedAtNaturalPath(_, _, naturalPath) = error else { return nil }
+        return "\(naturalPath)=…"
     }
 
     /// The write that would have been accepted instead: for a set inside an instance,

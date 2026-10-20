@@ -84,6 +84,7 @@ no document, so accepting any of those would be accepting an argument it ignores
 | `per-side-stroke-on-shape` | warning | An ellipse, polygon, path or line with a stroke paint and a per-side `strokeWidth` whose sides differ from its `top`, or that has no `top`: Pen draws the `top` width alone, all round |
 | `note-unsized` | notice | A `note` with no `width` or `height` of its own, or the `0` Pen saves an unsized note with, which lays out at the 200-pt post-it default on that axis |
 | `metadata-old-style` | notice | A node keeps Woodcase metadata under its spelling from before `metadata.woodcase` (`_props`, a post-it's bare `state`); still read, and `woodcase migrate` moves it in |
+| `pen-drops-override` | notice | An instance overrides a Woodcase-owned key — a dash, a miter limit, a blend, its own lock — which Woodcase keeps in metadata and Pen drops when it saves the file; it draws as written here, and nothing needs fixing |
 | `note-state` | notice | A plain note — not a comment, not a prompt — carries a `state`, in either spelling. Only comments are open or resolved, so it draws nothing; remove it, or make the note a comment |
 | `spans-stale` | warning | A text whose `metadata.woodcase.spans` were made for other words than its content, so its runs over part of the text are ignored |
 | `stroke-dash-ignored` | warning | A `metadata.woodcase.strokeDash` every target draws solid: on a per-side `strokeWidth`, or one that is not an array of at most 16 non-negative lengths, not all zero |
@@ -492,6 +493,19 @@ legacy `kind` is not named: it is no longer Woodcase's key.
 notice metadata-old-style  Button (Btn01)  keeps Woodcase metadata under its old spelling (`_props`, `_role`), which is still read. Run `woodcase migrate <file>` to move it under `metadata.woodcase`.
 ```
 
+`pen-drops-override` is a notice, one finding per instance, naming each Woodcase-owned
+key it overrides by its natural path: the ones on its own `ref` node (an instance's lock,
+a dash on its root) bare, and a descendant's after the descendant's name. They are stored
+in metadata — a `descendants` override's own `metadata.woodcase`, and the `ref` node's —
+and Pen drops both when it saves the file (pen CLI 0.3.11, 2026-10-20;
+<doc:PenMetadataNamespace>, *Natural paths*). Ben accepts the loss, since transfers run
+from Pen to Penumbra, so the notice only says what a save through Pen would lose. A row
+inside another instance is skipped.
+
+```text
+notice pen-drops-override  Board/Inst (Ins01)  overrides common.locked, Box kind.strokeDash, which Woodcase keeps in metadata and Pen drops when it saves the file. It draws as written here; nothing to fix.
+```
+
 `spans-stale` is a warning, one finding per text node whose spans
 (`metadata.woodcase.spans`, <doc:PenRichText>) record other words than its content — Pen,
 which keeps metadata but has no rich text, changed the words, or a `set` changed
@@ -503,7 +517,7 @@ inside an instance is skipped (an instance that overrides the content draws it p
 design). A `set` that makes a text's spans stale prints this same line on standard error.
 
 ```text
-warning spans-stale  Board/Stale (Stl01)  has 1 styled run made for "Make this bold", not its content, so it draws plain. Restate `common.metadata.woodcase.spans` for the new words, or remove it with `woodcase set <file> Stl01 common.metadata.woodcase.spans=null`.
+warning spans-stale  Board/Stale (Stl01)  has 1 styled run made for "Make this bold", not its content, so it draws plain. Restate `kind.spans` for the new words, or remove it with `woodcase set <file> Stl01 kind.spans=null`.
 ```
 
 `stroke-dash-ignored` is a warning, one finding per node with a stroke paint whose
@@ -514,7 +528,7 @@ on every target. An edit refuses both (<doc:EditPlanning>); a file written by ha
 another tool can still hold one.
 
 ```text
-warning stroke-dash-ignored  Board/Card (Rct01)  has a dash on a per-side strokeWidth, so its stroke draws solid: dashes flow round the whole outline, which per-side bands are not. Write one strokeWidth, or remove common.metadata.woodcase.strokeDash.
+warning stroke-dash-ignored  Board/Card (Rct01)  has a dash on a per-side strokeWidth, so its stroke draws solid: dashes flow round the whole outline, which per-side bands are not. Write one strokeWidth, or remove kind.strokeDash.
 ```
 
 `shadow-spread-stale` is a warning, one finding per node holding a

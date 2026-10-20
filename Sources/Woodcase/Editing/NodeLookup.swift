@@ -72,7 +72,11 @@ public enum NodeLookup {
         /// The parameter list is dropped when it is empty, so a consumer branches on
         /// presence rather than on an empty array.
         public var report: NodeReport {
-            NodeReport(revision: revision, node: node, props: parameters.isEmpty ? nil : parameters)
+            let natural = NodePropertyCodec.naturalValues(of: node)
+            return NodeReport(
+                revision: revision, node: node, props: parameters.isEmpty ? nil : parameters,
+                properties: natural.isEmpty ? nil : natural
+            )
         }
     }
 

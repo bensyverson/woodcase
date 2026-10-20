@@ -60,7 +60,7 @@ public extension NodePropertyCodec {
         }
         throw EditingError.postItMetadataRejected(
             nodeID: nodeID,
-            key: violation.key.path,
+            key: violation.key.propertyPath,
             value: PenPostIt.json(violation.value),
             accepted: violation.accepted,
             suggestion: violation.suggestion

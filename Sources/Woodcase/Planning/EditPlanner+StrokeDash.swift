@@ -32,8 +32,8 @@ extension EditPlanner {
         case .null?: PenMetadata(object: [:])
         default: nil
         }
-        let dashPath = PenMetadata.WoodcaseKey.strokeDash.path
-        let offsetPath = PenMetadata.WoodcaseKey.strokeDashOffset.path
+        let dashPath = PenMetadata.WoodcaseKey.strokeDash.propertyPath
+        let offsetPath = PenMetadata.WoodcaseKey.strokeDashOffset.propertyPath
 
         if let offset = changed(.strokeDashOffset, in: written, from: current) {
             switch offset {

@@ -25,7 +25,7 @@ extension NodePropertyCodec {
     static func path(forRawKey key: String) -> String? {
         let field = fieldName(forRawKey: key)
         let common = commonPrefix + field
-        if commonPaths.contains(common) { return common }
+        if commonPaths.contains(common) || naturalCommonPaths.contains(common) { return common }
         let kind = kindPrefix + field
         return allKindPaths.contains(kind) ? kind : nil
     }

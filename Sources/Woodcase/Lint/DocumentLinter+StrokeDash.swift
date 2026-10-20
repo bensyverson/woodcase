@@ -23,7 +23,7 @@ extension DocumentLinter {
         guard let value = node.common.metadata?[woodcase: .strokeDash], value != .null,
               PenLayoutEngine.strokable(node)?.stroke != nil
         else { return [] }
-        let key = PenMetadata.WoodcaseKey.strokeDash.path
+        let key = PenMetadata.WoodcaseKey.strokeDash.propertyPath
         if let problem = PenStrokeDash.problem(in: value) {
             return [finding(
                 .strokeDashIgnored, row,

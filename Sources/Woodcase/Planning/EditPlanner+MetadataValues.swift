@@ -34,7 +34,7 @@ extension EditPlanner {
                   value != current?[woodcase: key]
             else { continue }
             try checkConstraint(
-                ValueWrite(key: key.path, field: key.rawValue, value: value, current: current?[woodcase: key]),
+                ValueWrite(key: key.propertyPath, field: key.rawValue, value: value, current: current?[woodcase: key]),
                 constraint,
                 address: address
             )

@@ -35,7 +35,11 @@ public enum PenSchema {
         PenSchemaTable(
             type: nil,
             summary: "every node of every type takes these",
-            properties: rows(for: NodePropertyCodec.commonPaths, prefix: NodePropertyCodec.commonPrefix, type: nil)
+            properties: rows(
+                for: NodePropertyCodec.commonPaths.union(NodePropertyCodec.naturalCommonPaths),
+                prefix: NodePropertyCodec.commonPrefix,
+                type: nil
+            )
         )
     }
 
@@ -113,6 +117,10 @@ public enum PenSchema {
     ) -> [PenSchemaTable.Property] {
         CostCounter.record(.schemaTable(type))
         return paths.sorted().map { path in
+            // A natural path's row is the one its key keeps (`kind.strokeDash`'s dash shape).
+            if let key = PenMetadata.WoodcaseKey(naturalPath: path), let row = woodcaseRow(for: key) {
+                return row
+            }
             let field = String(path.dropFirst(prefix.count))
             return PenSchemaTable.Property(
                 path: path,

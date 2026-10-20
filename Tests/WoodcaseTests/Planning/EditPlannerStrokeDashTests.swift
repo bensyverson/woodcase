@@ -34,8 +34,8 @@ struct EditPlannerStrokeDashTests {
     }
     """
 
-    private static let dash = PenMetadata.WoodcaseKey.strokeDash.path
-    private static let offset = PenMetadata.WoodcaseKey.strokeDashOffset.path
+    private static let dash = PenMetadata.WoodcaseKey.strokeDash.propertyPath
+    private static let offset = PenMetadata.WoodcaseKey.strokeDashOffset.propertyPath
 
     private func refusal(_ properties: [String: AnyCodable], at raw: String) throws -> EditRefusal? {
         try PlannerFixture.refusal(.set(properties), at: raw, in: EditableDocument(from: PenParser.parse(Self.board)))

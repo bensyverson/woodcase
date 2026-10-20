@@ -26,7 +26,11 @@ struct PenSchemaTests {
 
     @Test("The common table names every common path the codec accepts")
     func commonTableCoversEveryCommonPath() {
-        #expect(Set(PenSchema.common.properties.map(\.path)) == NodePropertyCodec.commonPaths)
+        // The format's own common paths, and `common.locked`, which Woodcase stores in metadata.
+        #expect(
+            Set(PenSchema.common.properties.map(\.path))
+                == NodePropertyCodec.commonPaths.union(NodePropertyCodec.naturalCommonPaths)
+        )
     }
 
     @Test("Every row carries the raw .pen key beside the codec path", arguments: PenNode.NodeType.allCases)

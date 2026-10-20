@@ -23,7 +23,9 @@ extension PenNode {
     static let claimedKeys: [NodeType: Set<String>] = Dictionary(uniqueKeysWithValues: NodeType.allCases.map { type in
         let kindKeys = PropertyDiff.allKindKeys(type).map(NodePropertyCodec.rawKey(for:))
         let containerKeys: Set<String> = type == .frame || type == .group ? ["children"] : []
-        return (type, sharedKeys.union(kindKeys).union(containerKeys))
+        // A top-level `locked` is read into metadata (``migratingTopLevelNaturalKeys(_:of:from:)``).
+        let naturalCommonKeys = NodePropertyCodec.naturalCommonPaths.map(NodePropertyCodec.rawKey(for:))
+        return (type, sharedKeys.union(kindKeys).union(containerKeys).union(naturalCommonKeys))
     })
 
     /// Reads the keys of the node object at `decoder` that a node of `type` does not claim.

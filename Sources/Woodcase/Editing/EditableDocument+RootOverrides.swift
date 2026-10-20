@@ -49,8 +49,11 @@ extension EditableDocument {
             op.properties, into: refData.rootOverrides ?? [:], removing: op.unset
         )
         refData.rootOverrides = overrides.isEmpty ? nil : overrides
-
-        node.kind = .ref(refData)
+        // A raw operation naming a Woodcase-owned key stores it on the ref's own metadata,
+        // as a planned one does (rule 6).
+        let moved = PenNode.movingRootNaturalKeys(node.common, refData)
+        node.common = moved.common
+        node.kind = .ref(moved.data)
         return node
     }
 

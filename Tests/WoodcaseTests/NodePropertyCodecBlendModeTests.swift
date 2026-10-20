@@ -9,8 +9,8 @@ import Testing
 
 /// `kind.blendMode` is a natural path: every caller reads and writes it as before, and
 /// Woodcase stores it in `metadata.woodcase.blendMode` (leaf TesTbK). It is the first
-/// row of the natural-path table 9Sw8C0 generalizes
-/// (`project/2026-10-20-natural-paths-for-woodcase-properties.md`).
+/// row of the natural-path table 9Sw8C0 generalized; `NaturalPathTableTests` holds the whole
+/// table (`project/2026-10-20-natural-paths-for-woodcase-properties.md`).
 @MainActor
 struct NodePropertyCodecBlendModeTests {
     private static let json = """
@@ -39,11 +39,6 @@ struct NodePropertyCodecBlendModeTests {
         #expect(PenMetadata.WoodcaseKey(naturalPath: "kind.blendMode") == .blendMode)
         #expect(PenMetadata.WoodcaseKey(naturalPath: "kind.fills") == nil)
         #expect(PenMetadata.WoodcaseKey.blendMode.group == .compositing)
-    }
-
-    @Test("Only the blend key has a natural path yet")
-    func onlyBlendHasOne() {
-        #expect(PenMetadata.WoodcaseKey.allCases.filter { $0.naturalPath != nil } == [.blendMode])
     }
 
     // MARK: - Reading

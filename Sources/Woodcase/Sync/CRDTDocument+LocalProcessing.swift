@@ -292,8 +292,9 @@ extension CRDTDocument {
         // Merge the override into the ref's descendants, then drop what it unsets
         var descendants = refData.descendants ?? [:]
         var existing = descendants[op.descendantID]?.properties ?? [:]
-        existing.merge(op.properties) { _, new in new }
-        for key in op.unset {
+        let write = NodePropertyCodec.foldingNaturalOverrideKeys(op.properties, unset: op.unset, onto: existing)
+        existing.merge(write.properties) { _, new in new }
+        for key in write.unset {
             existing.removeValue(forKey: key)
         }
         descendants[op.descendantID] = existing.isEmpty ? nil : PenDescendantOverride(properties: existing)

@@ -207,7 +207,7 @@ extension HelpTopic {
       interface CreatedNode { id: string; name?: string; children: CreatedNode[] }
       interface Divergence { kind: string; severity: 'divergence' | 'note'; target: string;
         requested: string; applied: string; note: string }
-      interface NodeReport { revision: string; node: PenNode; props?: object[] }
+      interface NodeReport { revision: string; node: PenNode; props?: object[]; properties?: Props }
       interface LintFinding { check: string; severity: string; message: string;
         nodeID?: string; path?: string }
       interface Schema { type?: string; summary?: string; properties?: object; [key: string]: any }

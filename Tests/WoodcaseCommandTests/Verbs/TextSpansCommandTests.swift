@@ -25,7 +25,7 @@ struct TextSpansCommandTests {
     func setWritesSpans() throws {
         let fixture = try CommandFixture(fixture: "text-spans.pen")
         let run = try fixture.run(
-            "set", fixture.file.path, "Board/Plain", "common.metadata.woodcase.spans=\(Self.bold)", "--as", "ana"
+            "set", fixture.file.path, "Board/Plain", "kind.spans=\(Self.bold)", "--as", "ana"
         )
         #expect(run.status == 0, "\(run.stderr)")
         #expect(run.stderr.isEmpty)
@@ -39,7 +39,7 @@ struct TextSpansCommandTests {
         let fixture = try CommandFixture(fixture: "text-spans.pen")
         let malformed = #"{"text":"Nothing styled","runs":[{"start":0,"end":4,"bold":true}]}"#
         let run = try fixture.run(
-            "set", fixture.file.path, "Board/Plain", "common.metadata.woodcase.spans=\(malformed)"
+            "set", fixture.file.path, "Board/Plain", "kind.spans=\(malformed)"
         )
         #expect(run.status != 0)
         #expect(run.stderr.contains("unknown key \"bold\""), "\(run.stderr)")
@@ -62,7 +62,7 @@ struct TextSpansCommandTests {
         let fixture = try CommandFixture(fixture: "text-spans.pen")
         let together = try fixture.run(
             "set", fixture.file.path, "Board/Plain", "kind.content=All styled",
-            #"common.metadata.woodcase.spans={"text":"All styled","runs":[{"start":0,"end":3,"fontStyle":"italic"}]}"#
+            #"kind.spans={"text":"All styled","runs":[{"start":0,"end":3,"fontStyle":"italic"}]}"#
         )
         #expect(together.status == 0, "\(together.stderr)")
         #expect(together.stderr.isEmpty, "\(together.stderr)")

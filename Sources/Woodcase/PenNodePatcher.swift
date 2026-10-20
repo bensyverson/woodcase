@@ -124,8 +124,15 @@ public enum PenNodePatcher {
     /// - Throws: The `DecodingError` the merged JSON object raised.
     public static func patched(
         _ node: PenNode,
-        with patchProperties: [String: AnyCodable]
+        with patch: [String: AnyCodable]
     ) throws -> PenNode {
+        // An override's metadata is laid over the node's per entry, `woodcase` key by key
+        // (rule 6), so the component's other keys still reach the instance.
+        var patchProperties = patch
+        let metadataKey = NodePropertyCodec.rawKey(for: NodePropertyCodec.metadataPath)
+        if patch[PenDescendantOverride.typeKey] == nil, let metadata = patch[metadataKey] {
+            patchProperties[metadataKey] = PenMetadata.overlaying(metadata, onto: node.common.metadata)
+        }
         // A patch that renames the node's `type` reads every value it keeps as another
         // type's, which only the round trip can do.
         guard patchProperties[PenDescendantOverride.typeKey] == nil else {

@@ -90,7 +90,7 @@ struct PenStrokeMiterLimitTests {
     @Test("Every stroked shape with corners publishes the limit as a field, a factor of at least 1, default 4",
           arguments: [PenNode.NodeType.frame, .rectangle, .ellipse, .polygon, .path])
     func schemaField(type: PenNode.NodeType) throws {
-        let row = try #require(PenSchema.field(PenMetadata.WoodcaseKey.strokeMiterLimit.path, for: type))
+        let row = try #require(PenSchema.field(PenMetadata.WoodcaseKey.strokeMiterLimit.propertyPath, for: type))
         #expect(row.default == .number(4))
         #expect(row.constraint == PenValueConstraint(unit: .factor, minimum: .inclusive(1)))
         #expect(row.key.written == "metadata.woodcase.strokeMiterLimit")
@@ -99,7 +99,7 @@ struct PenStrokeMiterLimitTests {
     @Test("A line, which has no corners, and a node with no stroke take no limit field",
           arguments: [PenNode.NodeType.line, .text, .group, .icon, .note])
     func noSchemaField(type: PenNode.NodeType) {
-        #expect(PenSchema.field(PenMetadata.WoodcaseKey.strokeMiterLimit.path, for: type) == nil)
+        #expect(PenSchema.field(PenMetadata.WoodcaseKey.strokeMiterLimit.propertyPath, for: type) == nil)
     }
 
     @Test("A write below 1 is refused as out of range; 1 and above plan")
@@ -108,7 +108,7 @@ struct PenStrokeMiterLimitTests {
         let document = try EditableDocument(
             from: PenParser.parse(#"{"version": "2.19", "children": ["# + triangle() + "]}")
         )
-        let path = PenMetadata.WoodcaseKey.strokeMiterLimit.path
+        let path = PenMetadata.WoodcaseKey.strokeMiterLimit.propertyPath
         let refusal = try #require(try PlannerFixture.refusal(.set([path: 0.5]), at: "t", in: document))
         #expect(refusal.code == .outOfRange)
         #expect(try PlannerFixture.refusal(.set([path: 1]), at: "t", in: document) == nil)

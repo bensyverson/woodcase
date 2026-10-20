@@ -55,7 +55,7 @@ extension DocumentLinter {
         let outcome = node.appliedRuns.isEmpty
             ? "so it draws plain"
             : "so they are ignored; only the runs over the whole text still apply"
-        let key = PenMetadata.WoodcaseKey.spans.path
+        let key = PenMetadata.WoodcaseKey.spans.propertyPath
         return "has \(runs) made for \"\(spans.text)\", not its content, \(outcome). Restate "
             + "`\(key)` for the new words, or remove it with `woodcase set <file> \(id) \(key)=null`."
     }

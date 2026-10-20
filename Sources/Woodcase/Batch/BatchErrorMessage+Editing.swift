@@ -217,6 +217,18 @@ extension BatchErrorMessage {
         case let .textSpansRejected(nodeID, reason):
             return textSpansRejected(on: nodeID, reason: reason, in: document, dialect: dialect)
 
+        case let .storedAtNaturalPath(nodeID, path, naturalPath):
+            // The statement is the design doc's own wording (rule 3), so an agent that has
+            // read either recognizes the other.
+            let address = document.namePath(of: nodeID)
+            return sentence(
+                "\(path) is stored for you; write \(naturalPath) on \(name(nodeID, in: document))",
+                batch: "write `\(naturalPath)` in `props`; `common.metadata` still reads what is stored",
+                command: "run `woodcase set \(file) \(address) \(naturalPath)=…`; "
+                    + "`common.metadata` still reads what is stored",
+                in: dialect
+            )
+
         case let .unknownDocumentProperty(key):
             return unknownDocumentProperty(key, in: dialect)
 

@@ -65,28 +65,28 @@ struct PenStrokeDashTests {
     @Test("Every stroked shape publishes both keys as schema fields an inspector reads",
           arguments: [PenNode.NodeType.frame, .rectangle, .ellipse, .polygon, .path, .line])
     func schemaFields(type: PenNode.NodeType) throws {
-        let dash = try #require(PenSchema.field(PenMetadata.WoodcaseKey.strokeDash.path, for: type))
+        let dash = try #require(PenSchema.field(PenMetadata.WoodcaseKey.strokeDash.propertyPath, for: type))
         #expect(dash.default == .numbers([]))
         #expect(dash.constraint == .length)
         #expect(dash.value == "[number, …]")
-        let offset = try #require(PenSchema.field(PenMetadata.WoodcaseKey.strokeDashOffset.path, for: type))
+        let offset = try #require(PenSchema.field(PenMetadata.WoodcaseKey.strokeDashOffset.propertyPath, for: type))
         #expect(offset.default == .number(0))
         #expect(offset.constraint?.unit == .points)
         #expect(offset.key.written == "metadata.woodcase.strokeDashOffset")
         // Beside locked, the miter limit (not on a line) and the shadow spread (leaf zRp9CO).
         let paths = PenSchema.woodcaseFields(for: type).map(\.path)
-        #expect(paths.contains(PenMetadata.WoodcaseKey.locked.path))
-        #expect(paths.contains(PenMetadata.WoodcaseKey.strokeDash.path))
-        #expect(paths.contains(PenMetadata.WoodcaseKey.strokeDashOffset.path))
+        #expect(paths.contains(PenMetadata.WoodcaseKey.locked.propertyPath))
+        #expect(paths.contains(PenMetadata.WoodcaseKey.strokeDash.propertyPath))
+        #expect(paths.contains(PenMetadata.WoodcaseKey.strokeDashOffset.propertyPath))
         #expect(paths == paths.sorted())
     }
 
     @Test("A node with no stroke of its own takes no dash field", arguments: [PenNode.NodeType.text, .note, .group, .icon])
     func noSchemaFieldWithoutStroke(type: PenNode.NodeType) {
-        #expect(PenSchema.field(PenMetadata.WoodcaseKey.strokeDash.path, for: type) == nil)
+        #expect(PenSchema.field(PenMetadata.WoodcaseKey.strokeDash.propertyPath, for: type) == nil)
         // A text, a group and an icon take the shadow spread (leaf zRp9CO), but no stroke key.
         #expect(!PenSchema.woodcaseFields(for: type).contains { $0.path.contains(".stroke") })
-        #expect(PenSchema.woodcaseFields(for: type).map(\.path).contains(PenMetadata.WoodcaseKey.locked.path))
+        #expect(PenSchema.woodcaseFields(for: type).map(\.path).contains(PenMetadata.WoodcaseKey.locked.propertyPath))
     }
 
     @Test("The schema's defaults draw as unset: an empty dash and a 0 offset are solid")

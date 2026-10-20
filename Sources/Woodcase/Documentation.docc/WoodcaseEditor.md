@@ -307,6 +307,27 @@ kind.contnet is not a property of a text — banking-home/header/hdrG/hdrL (DhDs
 [exit 2]
 ```
 
+**Some properties are Woodcase's, and the file keeps them in metadata.** Pen's format has
+no dash, miter limit, lock, rich text or node blend mode, so Woodcase stores those in
+`metadata.woodcase`, which Pen keeps. You still write them where you would guess:
+`kind.strokeDash`, `kind.strokeDashOffset`, `kind.strokeMiterLimit`, `kind.blendMode`,
+`kind.spans`, `kind.defaultTextStyle` and `common.locked`. `tree --props` reads them at
+those paths, `get` lists the ones a node sets in a `woodcase-owned` block above the JSON,
+and `woodcase schema` names where each is stored. The storage path is not a second way in:
+
+```text
+$ woodcase set design.pen Card common.metadata.woodcase.strokeDash=[4,2]
+common.metadata.woodcase.strokeDash is stored for you; write kind.strokeDash on Board/Card (Crd01) — run `woodcase set design.pen Board/Card kind.strokeDash=…`; `common.metadata` still reads what is stored
+[exit 2]
+$ woodcase set design.pen Card kind.strokeDash=[4,2]
+```
+
+An instance overrides them the same way, `override design.pen Page/Card/Box kind.strokeDash=[2,2]`
+(or `strokeDash=[2,2]`), and Woodcase stores the override in its own metadata, laid over the
+component's key by key; an instance's own lock is `set design.pen Page/Card common.locked=true`.
+Pen drops those overrides when it saves the file, and `lint --severity notice` says so
+(`pen-drops-override`). <doc:PenMetadataNamespace> has the table.
+
 > Important: two paths do not match the JSON key beside them in the file. A .pen file
 > writes `"fill"` and `"effect"`; the paths are **`kind.fills`** and
 > **`kind.effects`**, because the path vocabulary names the model's fields, not the
@@ -1216,12 +1237,12 @@ the same inference, so the list is what the generated component's props will be.
 ## Styling words in a text
 
 A text node's `content` is one plain string — Pen has no rich text. To make a word bold,
-italic, colored, larger or underlined, write **spans** beside it, under
-`common.metadata.woodcase.spans`: the text the runs are made for, and the runs, each
+italic, colored, larger or underlined, write **spans** beside it, at `kind.spans` (the
+file keeps them in `metadata.woodcase.spans`): the text the runs are made for, and the runs, each
 covering `start` up to `end` in UTF-16 units of that text (an emoji like 👍🏽 counts 4).
 
 ```text
-$ woodcase set design.pen Hero/Title 'common.metadata.woodcase.spans={"text":"Make this bold","runs":[{"start":10,"end":14,"fontWeight":"700","fill":"#E5484D"}]}'
+$ woodcase set design.pen Hero/Title 'kind.spans={"text":"Make this bold","runs":[{"start":10,"end":14,"fontWeight":"700","fill":"#E5484D"}]}'
 ```
 
 A run may set `fontFamily`, `fontSize`, `fontWeight` (`"700"`, or a keyword such as
@@ -1240,8 +1261,8 @@ went after an edit would style the wrong characters. Restate both in one write, 
 the spans:
 
 ```text
-$ woodcase set design.pen Hero/Title kind.content='Make this BOLD' 'common.metadata.woodcase.spans={"text":"Make this BOLD","runs":[{"start":10,"end":14,"fontWeight":"700"}]}'
-$ woodcase set design.pen Hero/Title common.metadata.woodcase.spans=null
+$ woodcase set design.pen Hero/Title kind.content='Make this BOLD' 'kind.spans={"text":"Make this BOLD","runs":[{"start":10,"end":14,"fontWeight":"700"}]}'
+$ woodcase set design.pen Hero/Title kind.spans=null
 ```
 
 See <doc:PenRichText> for how runs set, measure and draw.

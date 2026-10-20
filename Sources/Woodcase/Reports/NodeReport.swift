@@ -23,10 +23,14 @@ public struct NodeReport: Friendly {
     ///   - revision: The revision the node was read at.
     ///   - node: The node, as `.pen` JSON.
     ///   - props: The parameters the node publishes, or `nil` when it publishes none.
-    public init(revision: String, node: PenNode, props: [ComponentParameter]? = nil) {
+    ///   - properties: The Woodcase-owned values at their natural paths, or `nil` for none.
+    public init(
+        revision: String, node: PenNode, props: [ComponentParameter]? = nil, properties: [String: AnyCodable]? = nil
+    ) {
         self.revision = revision
         self.node = node
         self.props = props
+        self.properties = properties
     }
 
     /// The revision the node was read at.
@@ -39,4 +43,9 @@ public struct NodeReport: Friendly {
     /// descendant and property each one writes — omitted entirely for a node that
     /// publishes none, so a consumer branches on presence rather than on an empty list.
     public let props: [ComponentParameter]?
+
+    /// The Woodcase-owned values the node sets, at their natural paths — `kind.strokeDash`,
+    /// `common.locked` — which the node JSON keeps in `metadata.woodcase`; omitted for a
+    /// node that sets none (``NodePropertyCodec/naturalValues(of:)``).
+    public let properties: [String: AnyCodable]?
 }

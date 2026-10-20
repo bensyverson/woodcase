@@ -53,13 +53,23 @@ public enum NodePropertyCodec {
         "common.theme", "common.context", "common.layoutPosition", "common.metadata",
     ]
 
+    /// The `common.*` natural paths of the keys Woodcase stores in `metadata.woodcase`:
+    /// `common.locked` (``PenMetadata/WoodcaseKey/naturalPath``).
+    ///
+    /// Kept apart from ``commonPaths``, which are the format's own keys — the ones a node
+    /// object claims and ``PropertyDiff/diffCommon(old:new:)`` emits. A write to one of
+    /// these is a metadata change, and diffs as one.
+    public static let naturalCommonPaths: Set<String> = Set(
+        PenMetadata.WoodcaseKey.allCases.compactMap(\.naturalPath).filter { $0.hasPrefix(commonPrefix) }
+    )
+
     /// Every property path that can be read from or written to this node, sorted.
     ///
     /// - Parameter node: The node whose vocabulary to list.
     /// - Returns: The `common.*` paths followed by the `kind.*` paths of the
     ///   node's own kind, in one sorted array.
     public static func paths(for node: PenNode) -> [String] {
-        commonPaths.union(PropertyDiff.allKindKeys(node.kind)).sorted()
+        commonPaths.union(naturalCommonPaths).union(PropertyDiff.allKindKeys(node.kind)).sorted()
     }
 
     // MARK: - Reading

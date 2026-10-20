@@ -56,7 +56,9 @@ public extension PenDescendantOverride {
 public extension PenDescendantOverride {
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        properties = try container.decode([String: AnyCodable].self)
+        // A Woodcase-owned key a file from before rule 6 wrote raw (`blendMode`) is read
+        // into the override's own `metadata.woodcase`, where it is now stored.
+        properties = try NodePropertyCodec.foldingNaturalOverrideKeys(container.decode([String: AnyCodable].self)).properties
     }
 
     func encode(to encoder: Encoder) throws {

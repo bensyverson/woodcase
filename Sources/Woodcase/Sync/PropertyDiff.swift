@@ -357,12 +357,17 @@ public enum PropertyDiff {
     /// - Parameter type: The node type to list.
     /// - Returns: Every `kind.*` path the codec reads and writes on that type.
     static func buildKindKeys(_ type: PenNode.NodeType) -> Set<String> {
+        formatKindKeys(type).union(naturalKindKeys(type))
+    }
+
+    /// The `kind.*` paths of the format's own keys on one type.
+    private static func formatKindKeys(_ type: PenNode.NodeType) -> Set<String> {
         switch type {
         case .frame:
             Set(["kind.width", "kind.height", "kind.cornerRadius", "kind.clip",
                  "kind.fills", "kind.stroke", "kind.strokeWidth",
                  "kind.strokeLinecap", "kind.strokeLinejoin", "kind.strokeAlignment",
-                 "kind.effects", "kind.blendMode",
+                 "kind.effects",
                  "kind.layout", "kind.gap", "kind.padding", "kind.justifyContent", "kind.alignItems",
                  "kind.slot"])
         case .text:
@@ -372,33 +377,33 @@ public enum PropertyDiff {
                  "kind.underline", "kind.strikethrough", "kind.href",
                  "kind.fills", "kind.stroke", "kind.strokeWidth",
                  "kind.strokeLinecap", "kind.strokeLinejoin", "kind.strokeAlignment",
-                 "kind.effects", "kind.blendMode"])
+                 "kind.effects"])
         case .rectangle:
             Set(["kind.width", "kind.height", "kind.cornerRadius",
                  "kind.fills", "kind.stroke", "kind.strokeWidth",
                  "kind.strokeLinecap", "kind.strokeLinejoin", "kind.strokeAlignment",
-                 "kind.effects", "kind.blendMode"])
+                 "kind.effects"])
         case .ellipse:
             Set(["kind.width", "kind.height", "kind.innerRadius", "kind.startAngle", "kind.sweepAngle",
                  "kind.fills", "kind.stroke", "kind.strokeWidth",
                  "kind.strokeLinecap", "kind.strokeLinejoin", "kind.strokeAlignment",
-                 "kind.effects", "kind.blendMode"])
+                 "kind.effects"])
         case .path:
             Set(["kind.width", "kind.height", "kind.geometry", "kind.viewBox", "kind.fillRule",
                  "kind.fills", "kind.stroke", "kind.strokeWidth",
                  "kind.strokeLinecap", "kind.strokeLinejoin", "kind.strokeAlignment",
-                 "kind.effects", "kind.blendMode"])
+                 "kind.effects"])
         case .group:
-            Set(["kind.effects", "kind.blendMode"])
+            Set(["kind.effects"])
         case .line:
             Set(["kind.width", "kind.height", "kind.stroke", "kind.strokeWidth",
                  "kind.strokeLinecap", "kind.strokeLinejoin", "kind.strokeAlignment",
-                 "kind.effects", "kind.blendMode"])
+                 "kind.effects"])
         case .polygon:
             Set(["kind.width", "kind.height", "kind.polygonCount", "kind.cornerRadius",
                  "kind.fills", "kind.stroke", "kind.strokeWidth",
                  "kind.strokeLinecap", "kind.strokeLinejoin", "kind.strokeAlignment",
-                 "kind.effects", "kind.blendMode"])
+                 "kind.effects"])
         case .ref:
             Set(["kind.ref", "kind.descendants", "kind.rootOverrides"])
         case .note, .context:
@@ -407,7 +412,7 @@ public enum PropertyDiff {
             Set(["kind.width", "kind.height", "kind.content", "kind.model"]).union(textStyleKeys)
         case .icon:
             Set(["kind.icon", "kind.library", "kind.weight",
-                 "kind.width", "kind.height", "kind.fills", "kind.effects", "kind.blendMode"])
+                 "kind.width", "kind.height", "kind.fills", "kind.effects"])
         case .script:
             Set(["kind.scriptUri", "kind.inputs", "kind.clip", "kind.width", "kind.height"])
         case .browser:
@@ -421,5 +426,16 @@ public enum PropertyDiff {
                  "kind.stroke", "kind.strokeWidth",
                  "kind.strokeLinecap", "kind.strokeLinejoin", "kind.strokeAlignment"])
         }
+    }
+
+    /// The `kind.*` natural paths of the keys Woodcase stores in `metadata.woodcase` that one
+    /// type takes (``PenMetadata/WoodcaseKey/naturalPathTypes``): `kind.strokeDash` on a
+    /// frame, `kind.spans` on a text.
+    private static func naturalKindKeys(_ type: PenNode.NodeType) -> Set<String> {
+        Set(PenMetadata.WoodcaseKey.allCases.compactMap { key in
+            guard let path = key.naturalPath, path.hasPrefix(NodePropertyCodec.kindPrefix),
+                  key.naturalPathTypes.contains(type) else { return nil }
+            return path
+        })
     }
 }

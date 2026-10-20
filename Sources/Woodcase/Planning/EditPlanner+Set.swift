@@ -24,9 +24,10 @@ extension EditPlanner {
         written: String,
         in document: EditableDocument
     ) throws -> EditPlan {
+        try NodePropertyCodec.checkNoStoragePaths(properties, nodeID: target.targetID)
         switch target {
         case let .node(id):
-            try planNodeSet(properties, on: id, written: written, in: document)
+            return try planNodeSet(properties, on: id, written: written, in: document)
         case let .instanceDescendant(refID, key):
             throw setInsideInstance(properties, refID: refID, descendantKey: key, written: written, in: document)
         }
@@ -103,7 +104,12 @@ extension EditPlanner {
         in document: EditableDocument
     ) -> BatchError {
         let patched = document.patchedDefinitionNode(ofInstance: refID, descendantKey: descendantKey)
-        let folded = patched.flatMap { try? NodePropertyCodec.folding(properties, onto: $0) } ?? properties
+        // A natural path (`kind.strokeDash`) stays itself: an override stores it under its
+        // raw key, which expansion reads into the node's metadata key by key.
+        let natural = properties.filter { path, _ in PenMetadata.WoodcaseKey(naturalPath: path) != nil }
+        let deep = properties.filter { path, _ in natural[path] == nil }
+        let folded = (patched.flatMap { try? NodePropertyCodec.folding(deep, onto: $0) } ?? deep)
+            .merging(natural) { _, new in new }
         return BatchError.setInsideInstance(
             address: written,
             instancePath: document.namePath(of: refID),

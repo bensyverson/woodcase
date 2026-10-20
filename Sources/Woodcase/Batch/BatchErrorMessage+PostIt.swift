@@ -69,7 +69,7 @@ extension BatchErrorMessage {
         in document: EditableDocument,
         dialect: RemedyDialect
     ) -> String {
-        let key = PenMetadata.WoodcaseKey.spans.path
+        let key = PenMetadata.WoodcaseKey.spans.propertyPath
         let shape = "spans take \(PenTextSpans.wireForm), offsets in UTF-16 units of text"
         let example = #"{"text":"Make this bold","runs":[{"start":10,"end":14,"fontWeight":"700"}]}"#
         return sentence(

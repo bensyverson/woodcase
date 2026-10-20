@@ -41,6 +41,7 @@ public extension EditingError {
         case .documentPropertyTypeMismatch: "documentPropertyTypeMismatch"
         case .postItMetadataRejected: "postItMetadataRejected"
         case .textSpansRejected: "textSpansRejected"
+        case .storedAtNaturalPath: "storedAtNaturalPath"
         case .ambiguousAddress: "ambiguousAddress"
         case .addressNotFound: "addressNotFound"
         case .componentHasInstances: "componentHasInstances"

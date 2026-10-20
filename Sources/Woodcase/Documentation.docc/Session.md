@@ -45,7 +45,8 @@ paths, and with deep metadata keys folded onto the node's metadata
 (``EditableDocument/granularInverse(of:)``).
 
 A ``LocalEdit`` may write one metadata entry by its deep key —
-`common.metadata.woodcase.spans` — and the session folds it onto the node's metadata
+`common.metadata.woodcase.tint` — or a Woodcase-owned key by its natural path —
+`kind.spans` — and the session folds it onto the node's metadata
 exactly as the CLI's batch planner does (``NodePropertyCodec/folding(_:onto:)``), so an
 editor never rewrites the object to change one entry. A metadata write is keyed, undone
 and replicated per entry it changes, so it merges with other authors' writes to sibling

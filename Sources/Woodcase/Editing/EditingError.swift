@@ -100,6 +100,12 @@ public enum EditingError: Error, Equatable, Sendable {
     /// write that changes the key.
     case textSpansRejected(nodeID: String, reason: String)
 
+    /// A write names a Woodcase-owned key at the path it is stored under, which only the
+    /// codec writes: `path` is the storage path as written
+    /// (`common.metadata.woodcase.strokeDash`), `naturalPath` the path to write instead
+    /// (`kind.strokeDash`; ``PenMetadata/WoodcaseKey/naturalPath``).
+    case storedAtNaturalPath(nodeID: String, path: String, naturalPath: String)
+
     // MARK: - Addressing
 
     /// An address matched more than one node. Every candidate is listed with its

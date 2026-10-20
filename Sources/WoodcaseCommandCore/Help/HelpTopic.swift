@@ -136,7 +136,7 @@ enum HelpTopic: String, CaseIterable, ExpressibleByArgument {
       front of yours picks one out. Neither is ever a silent no-op.
 
     TWO PROPERTY VOCABULARIES
-      set, cp   codec paths — common.name, kind.width, kind.fills. null clears one.
+      set, cp   codec paths — common.name, kind.fills, kind.strokeDash. null clears one.
       override  raw .pen names — content, not kind.content — because that is what a
                 component instance's descendants map holds in the file.
       set inside an instance refuses and prints the override to run; override elsewhere names set.

@@ -42,9 +42,11 @@ extension EditableDocument {
         try refuseComponentLoops(closedBy: .overrideDescendant(op))
 
         var descendants = refData.descendants ?? [:]
-        let properties = Self.merging(
-            op.properties, into: descendants[op.descendantID]?.properties ?? [:], removing: op.unset
-        )
+        let entry = descendants[op.descendantID]?.properties ?? [:]
+        // A raw operation naming a Woodcase-owned key stores it in the entry's metadata,
+        // as a planned one already does (rule 6).
+        let write = NodePropertyCodec.foldingNaturalOverrideKeys(op.properties, unset: op.unset, onto: entry)
+        let properties = Self.merging(write.properties, into: entry, removing: write.unset)
         // An entry with no keys left is not an override of nothing; it is no override,
         // and that is how it should read back.
         descendants[op.descendantID] = properties.isEmpty

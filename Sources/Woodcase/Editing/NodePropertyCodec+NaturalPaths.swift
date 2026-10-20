@@ -14,9 +14,12 @@ import Foundation
 /// replicated and undone is the ordinary metadata write every other Woodcase key makes
 /// (<doc:PenMetadataNamespace>).
 ///
-/// A natural path belongs to a node exactly when its type's vocabulary lists it
+/// A `kind.*` natural path belongs to a node exactly when its type's vocabulary lists it
 /// (``PropertyDiff/allKindKeys(_:)-(PenNode.Kind)``); on any other node it is the unknown
-/// property it always was.
+/// property it always was. A `common.*` one (``naturalCommonPaths``) belongs to every node.
+///
+/// The storage path is Woodcase's to write: a caller's write there is refused, naming the
+/// natural path (``checkNoStoragePaths(_:nodeID:)``).
 public extension NodePropertyCodec {
     /// The Woodcase key a path stands for on a node of this kind, or `nil` when the path is
     /// no natural path, or not one this kind takes.
@@ -26,9 +29,9 @@ public extension NodePropertyCodec {
     ///   - kind: The node's kind.
     /// - Returns: The key the path is stored under.
     static func naturalKey(of path: String, on kind: PenNode.Kind) -> PenMetadata.WoodcaseKey? {
-        guard let key = PenMetadata.WoodcaseKey(naturalPath: path), kind.nodeType != nil,
-              PropertyDiff.allKindKeys(kind).contains(path)
-        else { return nil }
+        guard let key = PenMetadata.WoodcaseKey(naturalPath: path) else { return nil }
+        if naturalCommonPaths.contains(path) { return key }
+        guard kind.nodeType != nil, PropertyDiff.allKindKeys(kind).contains(path) else { return nil }
         return key
     }
 
@@ -69,6 +72,41 @@ public extension NodePropertyCodec {
             stored[key.path] = value
         }
         return stored
+    }
+
+    /// Refuses a caller's write that names a Woodcase-owned key at its storage path.
+    ///
+    /// `common.metadata.woodcase.strokeDash` — or a deep key below it — is where the codec
+    /// stores `kind.strokeDash`, not a second way in: two spellings of one write drift
+    /// apart. Keys with no natural path, and the whole `common.metadata` object, are
+    /// written as given.
+    ///
+    /// - Parameters:
+    ///   - properties: The writes, by property path or raw key.
+    ///   - nodeID: The node written to, for the error.
+    /// - Throws: ``EditingError/storedAtNaturalPath(nodeID:path:naturalPath:)`` for the first
+    ///   such path, in sorted order.
+    static func checkNoStoragePaths(_ properties: [String: AnyCodable], nodeID: String) throws {
+        for path in properties.keys.sorted() {
+            guard let key = PenMetadata.WoodcaseKey(storagePath: path), let natural = key.naturalPath else { continue }
+            throw EditingError.storedAtNaturalPath(nodeID: nodeID, path: path, naturalPath: natural)
+        }
+    }
+
+    /// The Woodcase-owned values a node sets, at their natural paths.
+    ///
+    /// What `get` prints beside the node JSON, which keeps them in `metadata.woodcase`.
+    ///
+    /// - Parameter node: The node to read.
+    /// - Returns: Each natural path the node takes and sets, with its value; unset paths left out.
+    static func naturalValues(of node: PenNode) -> [String: AnyCodable] {
+        var values: [String: AnyCodable] = [:]
+        for key in PenMetadata.WoodcaseKey.allCases {
+            guard let path = key.naturalPath, naturalKey(of: path, on: node.kind) != nil else { continue }
+            let value = naturalValue(of: key, on: node)
+            if value != .null { values[path] = value }
+        }
+        return values
     }
 
     // MARK: - Internal

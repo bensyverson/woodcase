@@ -174,6 +174,9 @@ public enum PenRefExpander {
         if refCommon.flipX != nil { result.flipX = refCommon.flipX }
         if refCommon.flipY != nil { result.flipY = refCommon.flipY }
         if refCommon.theme != nil { result.theme = refCommon.theme }
+        // The ref's own Woodcase-owned keys — an instance's lock, a dash it overrides on its
+        // root — are laid over the component root's key by key (rule 6).
+        result.metadata = PenMetadata.instanceRoot(of: componentCommon.metadata, under: refCommon.metadata)
         // Don't transfer reusable — the expanded node is not reusable
         result.reusable = nil
         return result

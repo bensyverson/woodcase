@@ -166,6 +166,12 @@ public enum LintCheck: String, Friendly, CaseIterable {
     /// (``PenNode/hasStaleShadowSpread``).
     case shadowSpreadStale = "shadow-spread-stale"
 
+    /// An instance that overrides a Woodcase-owned key — in a `descendants` override's
+    /// `metadata.woodcase`, or in its own `ref` node's, its lock among them — which Pen drops
+    /// when it saves the file. One notice per instance, listing the keys at their natural
+    /// paths: the instance draws as written here, and nothing needs fixing.
+    case penDropsOverride = "pen-drops-override"
+
     /// Components that contain each other — a component that renders an instance of
     /// itself, directly or through others (``ComponentLoop``). One finding per loop, at
     /// the top of the report.
@@ -206,11 +212,12 @@ public enum LintCheck: String, Friendly, CaseIterable {
     /// reading: the text draws, but plain, not as its styling says. ``noteUnsized`` is a notice: nothing is
     /// wrong with the note, which draws at the post-it default; ``metadataOldStyle`` is one
     /// too, since old spellings are still read, and so is ``noteState``, since a note's state
-    /// only draws nothing. ``componentLoop`` is an
+    /// only draws nothing, and ``penDropsOverride``, since the instance draws as written and
+    /// only a save through Pen loses its overrides. ``componentLoop`` is an
     /// error: an edit refuses to make one, and the nesting it closes draws nothing.
     public var severity: PenDiagnostic.Severity {
         switch self {
-        case .noteUnsized, .metadataOldStyle, .noteState:
+        case .noteUnsized, .metadataOldStyle, .noteState, .penDropsOverride:
             .notice
         case .pipeline, .textWithoutFill, .fillContainerInFitParent, .emptyFitContent, .clipped,
              .artboardOverlap, .duplicateName, .textOverflow, .codegenUnmappedOverride, .collapsedText,
@@ -296,6 +303,8 @@ public enum LintCheck: String, Friendly, CaseIterable {
             "A stroke dash every target draws solid: on per-side widths, or one no target can draw."
         case .shadowSpreadStale:
             "A shadow spread made for a shadow the node no longer has there, so it casts without it."
+        case .penDropsOverride:
+            "An instance overriding a Woodcase-owned key (a dash, a lock, a blend), which Pen drops when it saves the file."
         case .componentLoop:
             "Components that contain each other, directly or through others; that nesting is not drawn."
         }

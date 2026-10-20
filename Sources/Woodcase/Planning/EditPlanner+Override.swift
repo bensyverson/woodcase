@@ -29,6 +29,7 @@ extension EditPlanner {
         guard !properties.isEmpty || !unset.isEmpty else {
             throw BatchError.overrideWithoutProperties(address: written)
         }
+        try NodePropertyCodec.checkNoStoragePaths(properties, nodeID: target.targetID)
         let refID: String
         let descendantKey: String?
         switch target {
@@ -61,7 +62,24 @@ extension EditPlanner {
             // one, so the write is translated rather than refused; the values then take
             // the same number-to-string rule a `set` gives them, judged against the node
             // inside the component the override will patch.
-            let requested = NodePropertyCodec.rawKeyed(group.props)
+            let rawRequested = NodePropertyCodec.rawKeyed(group.props)
+            let rawUnset = group.descendantKey == descendantKey ? unsetKeys : []
+            // A Woodcase-owned key lives in the override's own metadata (rule 6): a
+            // descendant's in its entry, the instance root's on the ref node itself.
+            let requested: [String: AnyCodable]
+            let keys: [String]
+            if let entryKey = group.descendantKey {
+                (requested, keys) = NodePropertyCodec.foldingNaturalOverrideKeys(
+                    rawRequested, unset: rawUnset, onto: overrideEntry(of: refID, at: entryKey, in: document)
+                )
+            } else {
+                if let write = rootNaturalWrite(rawRequested, unset: rawUnset, refID: refID, in: document) {
+                    operations.append(write)
+                }
+                requested = rawRequested.filter { NodePropertyCodec.naturalOverrideKey($0.key) == nil }
+                keys = rawUnset.filter { NodePropertyCodec.naturalOverrideKey($0) == nil }
+                guard !requested.isEmpty || !keys.isEmpty else { continue }
+            }
             let patched = group.descendantKey == descendantKey
                 ? definition
                 : group.descendantKey.flatMap {
@@ -76,7 +94,6 @@ extension EditPlanner {
                 overrides, on: patched, refID: refID, descendantKey: group.descendantKey,
                 written: written, in: document
             )
-            let keys = group.descendantKey == descendantKey ? unsetKeys : []
             let edit: EditOperation = group.descendantKey.map { key in
                 .overrideDescendant(EditOperation.OverrideDescendant(
                     refNodeID: refID, descendantID: key, properties: overrides, unset: keys
@@ -105,6 +122,39 @@ extension EditPlanner {
             storage: .instanceOverride,
             divergences: divergences
         )
+    }
+
+    /// The `descendants` entry an instance keeps for one key, as it stands.
+    private static func overrideEntry(
+        of refID: String, at key: String, in document: EditableDocument
+    ) -> [String: AnyCodable] {
+        guard case let .ref(data)? = document.node(id: refID)?.kind else { return [:] }
+        return data.descendants?[key]?.properties ?? [:]
+    }
+
+    /// The write that stores an instance root's overrides of Woodcase-owned keys on the
+    /// `ref` node's own `metadata.woodcase`, which expansion lays over the component root's
+    /// key by key; `nil` when the override names none.
+    ///
+    /// A `null`, like an unset, removes the ref's key, so the root shows the component's:
+    /// to draw a component's dash solid on one instance, override it with `[]`.
+    private static func rootNaturalWrite(
+        _ properties: [String: AnyCodable], unset: [String], refID: String, in document: EditableDocument
+    ) -> EditOperation? {
+        let writes = properties.compactMap { name, value in NodePropertyCodec.naturalOverrideKey(name).map { ($0, value) } }
+        let removals = unset.compactMap(NodePropertyCodec.naturalOverrideKey)
+        guard !writes.isEmpty || !removals.isEmpty, let ref = document.node(id: refID) else { return nil }
+        var metadata = ref.common.metadata ?? PenMetadata(type: nil)
+        for (key, value) in writes {
+            metadata[woodcase: key] = value == .null ? nil : value
+        }
+        for key in removals {
+            metadata[woodcase: key] = nil
+        }
+        let written: AnyCodable = metadata.typedForWriting().map { .dictionary($0.object) } ?? .null
+        return .setProperties(EditOperation.SetProperties(
+            nodeID: refID, properties: [NodePropertyCodec.metadataPath: written]
+        )).normalized(in: document)
     }
 
     /// Holds an override's values to the same constraints, bindings and position rule a
