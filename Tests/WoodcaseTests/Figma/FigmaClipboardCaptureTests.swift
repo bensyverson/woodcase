@@ -63,6 +63,54 @@ struct FigmaClipboardCaptureTests {
         }
     }
 
+    /// Every blob index `value` holds at any depth, by the field that names it.
+    static func blobReferences(in value: KiwiValue, into references: inout [(field: String, index: UInt32)]) {
+        switch value {
+        case let .array(values):
+            for element in values {
+                blobReferences(in: element, into: &references)
+            }
+        case let .structure(record), let .message(record):
+            for (name, field) in record.fields where name != "blobs" {
+                if name == "vectorNetworkBlob" || name == "commandsBlob", let index = field.uintValue {
+                    references.append((name, index))
+                }
+                blobReferences(in: field, into: &references)
+            }
+        default:
+            break
+        }
+    }
+
+    @Test("Every blob a capture references decodes as the kind its field names")
+    func everyBlobDecodes() throws {
+        let captures = try Self.captures()
+        try #require(!captures.isEmpty)
+        for (name, html) in captures.sorted(by: { $0.key < $1.key }) {
+            let clipboard = try FigmaClipboardDecoder().decode(html: html)
+            let table = try clipboard.blobTable()
+            var references: [(field: String, index: UInt32)] = []
+            Self.blobReferences(in: .message(clipboard.message), into: &references)
+            var networks = 0
+            var paths = 0
+            for reference in references {
+                if reference.field == "vectorNetworkBlob" {
+                    let network = try table.vectorNetwork(at: reference.index)
+                    for region in network.regions.indices {
+                        _ = try network.path(ofRegion: region)
+                    }
+                    networks += 1
+                } else {
+                    _ = try table.path(at: reference.index)
+                    paths += 1
+                }
+            }
+            let referenced = Set(references.map(\.index))
+            print("\(name): \(table.blobs.count) blobs, \(networks) network and \(paths) path references, \(table.blobs.count - referenced.count) unreferenced")
+            #expect(referenced.count == table.blobs.count, "\(name): every blob is referenced")
+        }
+    }
+
     @Test("The desktop, Safari and Brave copies of V1 decode to the same nodes")
     func browserCopiesMatchDesktop() throws {
         let captures = try Self.captures()

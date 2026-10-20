@@ -75,6 +75,105 @@ single-bit flips across a real schema chunk, about a quarter decoded to a differ
 schema. The result is always a well-formed schema and message, never a crash, but a
 consumer that needs certainty should compare the schema with one it trusts.
 
+### Blobs
+
+Geometry does not travel in Kiwi fields. The message's `blobs` field is an array of
+`Blob { bytes }`, and a node names an entry by its `uint` index. ``FigmaBlobTable`` reads
+the array (``FigmaClipboard/blobTable()``) and decodes an entry as the kind of blob the
+naming field implies:
+
+| Field | Blob | Decoded by |
+|---|---|---|
+| `vectorData.vectorNetworkBlob` | vector network | ``FigmaBlobTable/vectorNetwork(at:)`` |
+| `derivedTextData.glyphs[].commandsBlob` | glyph outline | ``FigmaBlobTable/path(at:)`` |
+| `Path.commandsBlob` (`fillGeometry`, `strokeGeometry`) | outline | ``FigmaBlobTable/path(at:)`` |
+
+Identical glyphs share one blob, and nodes with the same network share one (P1's three
+join samples name blob 1). In every capture so far — all 19 local ones, FigJam and Slides
+copies included, checked by `FigmaClipboardCaptureTests` with `FIGMA_CASES` set — every
+blob is named at least once and decodes as the kind its field names; an
+instance's glyphs and geometry are named from `derivedSymbolData`, not the node itself.
+`Message.blobBaseIndex` was never set; the table refuses a message that sets it rather than
+guess how it shifts the indices. `Image.dataBlob` was never set either: a clipboard
+carries image hashes, not image bytes.
+
+Blob fields are fixed-width and little-endian — not Kiwi varints. Every count is checked
+against the bytes that remain before anything is read for it, every index against what it
+indexes, and every float must be finite, so a hostile blob fails with a
+``FigmaBlobError`` that names the offset.
+
+#### Vector networks
+
+A ``FigmaVectorNetwork`` blob is a header, then the vertices, segments and regions it
+counts, with nothing after:
+
+```
+header   u32 vertexCount, u32 segmentCount, u32 regionCount
+vertex   u32 styleID, f32 x, f32 y                                          12 bytes
+segment  u32 styleID, u32 start, f32 tangentStartX, f32 tangentStartY,
+         u32 end, f32 tangentEndX, f32 tangentEndY                          28 bytes
+region   u32 (styleID << 1 | nonzero), u32 loopCount,
+         then per loop: u32 segmentCount, u32 segmentIndex × segmentCount
+```
+
+- **Style ids.** The word before each vertex and segment, once read as "flags", is a
+  `styleID`: the key of an entry in the node's `vectorData.styleOverrideTable`, which
+  carries per-vertex overrides such as `strokeCap`, `strokeJoin` and `cornerRadius`; 0 means
+  no override. V1's open curves name style 3 and its table has exactly a style 3; the
+  flattened donut has no table and every vertex says 0. Every segment so far says 0.
+- **Regions.** The region word's low bit is the winding rule — **1 is nonzero, 0 is
+  even-odd**, the reverse of the schema's `WindingRule` enum (`NONZERO = 0`, `ODD = 1`) —
+  and the bits above it are the region's style id. Every captured region word is 0 or 1;
+  the style-id bits are inferred, not yet seen set.
+- **Loops and holes.** A region lists loops of segment indices. A donut is one region with
+  two loops, the hole second; the fill rule decides what the hole does. A loop's segments
+  are listed in order but each may be stored in either direction, so a walk takes each
+  segment from whichever end touches the point reached so far.
+- **Open loops.** A loop need not return to its first vertex. Figma writes a region even
+  for an open path: V1's two-segment open curve and its single-segment line each have one
+  region whose loop is the open chain. A renderer that fills such a region closes it
+  implicitly; the path keeps it open so the stroke stays open.
+- **Coordinates** are in the node's `vectorData.normalizedSize` space. In every fixture
+  that equals the node's `size`.
+
+``FigmaVectorNetwork/path(ofRegion:)`` walks a region's loops into a ``FigmaPath``: a
+segment with both tangents zero is a line, any other is a cubic whose controls are the
+start vertex plus `tangentStart` and the end vertex plus `tangentEnd` (swapped when the
+segment is walked backwards), and a loop that ends where it started closes.
+``FigmaVectorNetwork/segmentPath()`` draws every segment once, for strokes.
+
+Figma's SVG export is the oracle: every V1 network, and P1's stroked samples, reproduce
+the exported path within 0.01 pt once the node's translation is added, and each region's
+rule matches the export's `fill-rule`. Boolean operations carry no network; their geometry
+is their children's.
+
+#### Command streams
+
+A glyph outline or a `Path` is a stream of commands, each an opcode byte followed by its
+little-endian `f32` coordinates, read to the end of the blob (``FigmaPath``):
+
+| Opcode | Command | Coordinates |
+|---|---|---|
+| 0 | close | none |
+| 1 | move | x, y |
+| 2 | line | x, y |
+| 3 | quadratic | control x, y, then x, y |
+| 4 | cubic | two controls, then x, y |
+
+Every glyph stream begins with a 0 before its first move; the decoder drops a close that
+has no open subpath. A glyph with no outline is the single byte `00`: a space, and T1's
+😀, whose glyph carries no outline and no `emojiCodePoints` either. Glyph coordinates are
+in ems with y growing **upward** from the baseline, so a glyph draws at
+`(position.x + x × fontSize, position.y − y × fontSize)` in the text node's space. Glyphs
+use opcode 3 for TrueType curves and 4 for CFF ones: Inter's are all quadratics, and the
+only cubics in T1 are the ten of its CJK fallback's 文. A `Path` stream has no leading 0
+and is in the node's own points, y down.
+
+Glyph outlines are decoded and tested, but text import does not need them: a text node's
+content, fonts and styles come from `textData`, and a glyph blob is read only when someone
+asks for its outline. Figma's SVG export of text snaps each baseline to a whole point
+(`71` for T1a's `31.136`), so the oracle rounds the glyph's baseline before comparing.
+
 ## Topics
 
 ### Decoding
@@ -90,3 +189,13 @@ consumer that needs certainty should compare the schema with one it trusts.
 - ``FigKiwiContainer``
 - ``DeflateDecoder``
 - ``DeflateDecodeError``
+
+### Geometry blobs
+
+- ``FigmaBlobTable``
+- ``FigmaVectorNetwork``
+- ``FigmaPath``
+- ``FigmaPathCommand``
+- ``FigmaPoint``
+- ``FigmaWindingRule``
+- ``FigmaBlobError``
