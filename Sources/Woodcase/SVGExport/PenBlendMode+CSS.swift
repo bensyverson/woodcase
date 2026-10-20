@@ -9,10 +9,10 @@ extension PenBlendMode {
     /// The CSS `mix-blend-mode` keyword an SVG element blends with, or `nil` for `normal`,
     /// which needs none.
     ///
-    /// CSS has no linear burn or linear dodge; they take `color-burn` and `color-dodge`, the
-    /// nearest modes, as the React emitter does. CG maps them to multiply and screen instead
-    /// (``cgBlendMode``), so the two outputs differ on those two modes. `light` is CSS's
-    /// `lighten`. An unknown mode blends normally.
+    /// CSS `mix-blend-mode` has no linear burn or linear dodge; they take `color-burn` and
+    /// `color-dodge`, as the React emitter does, so the SVG differs from the reference
+    /// renderer's true linear burn and add on those two modes. `light` is CSS's `lighten`.
+    /// An unknown mode blends normally.
     var cssMixBlendMode: String? {
         switch self {
         case .normal, .unknown: nil

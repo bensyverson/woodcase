@@ -23,9 +23,12 @@ struct PenBlendModeTests {
         #expect(PenBlendMode.multiply.cgBlendMode == .multiply)
     }
 
-    @Test("linearBurn maps to CGBlendMode.multiply (closest approximation)")
+    /// Plus-darker is linear burn wherever both colors are opaque (and over a transparent
+    /// backdrop); it was multiply, a different formula, before the 2026-10-20 ruling that
+    /// linear burn is a true linear burn. The renderer draws it per pixel where it can.
+    @Test("linearBurn maps to CGBlendMode.plusDarker, its opaque equivalent")
     func linearBurn() {
-        #expect(PenBlendMode.linearBurn.cgBlendMode == .multiply)
+        #expect(PenBlendMode.linearBurn.cgBlendMode == .plusDarker)
     }
 
     @Test("colorBurn maps to CGBlendMode.colorBurn")
@@ -43,9 +46,12 @@ struct PenBlendModeTests {
         #expect(PenBlendMode.screen.cgBlendMode == .screen)
     }
 
-    @Test("linearDodge maps to CGBlendMode.screen (closest approximation)")
+    /// Plus-lighter is linear dodge (an add) wherever both colors are opaque; it was screen,
+    /// a different formula, before the 2026-10-20 ruling. The renderer draws it per pixel
+    /// where it can.
+    @Test("linearDodge maps to CGBlendMode.plusLighter, its opaque equivalent")
     func linearDodge() {
-        #expect(PenBlendMode.linearDodge.cgBlendMode == .screen)
+        #expect(PenBlendMode.linearDodge.cgBlendMode == .plusLighter)
     }
 
     @Test("colorDodge maps to CGBlendMode.colorDodge")
@@ -101,5 +107,28 @@ struct PenBlendModeTests {
     @Test("unknown falls back to CGBlendMode.normal")
     func unknownFallback() {
         #expect(PenBlendMode.unknown("customMode").cgBlendMode == .normal)
+    }
+
+    // MARK: - Compositing
+
+    /// The modes Core Graphics draws by W3C's formula at any alpha, to within 8-bit rounding
+    /// (checked by sweeping colors and alphas against the formula, 2026-10-20).
+    @Test(arguments: [
+        PenBlendMode.normal, .darken, .multiply, .light, .screen, .overlay, .hardLight, .difference, .exclusion,
+        .unknown("x"),
+    ])
+    func `Modes Core Graphics draws exactly composite through it`(mode: PenBlendMode) {
+        #expect(mode.compositing == .coreGraphics)
+    }
+
+    /// The modes whose Core Graphics formula departs from W3C's: soft light always; color
+    /// dodge and burn from a translucent source; plus-darker and plus-lighter over a
+    /// translucent backdrop; the non-separable modes by a few steps everywhere.
+    @Test(arguments: [
+        PenBlendMode.linearBurn, .linearDodge, .colorBurn, .colorDodge, .softLight,
+        .hue, .saturation, .color, .luminosity,
+    ])
+    func `Modes Core Graphics draws inexactly composite per pixel`(mode: PenBlendMode) {
+        #expect(mode.compositing == .perPixel)
     }
 }

@@ -61,29 +61,28 @@ enum PenEffectRenderer {
             let travel = CGSize(width: shift, height: 0).applying(context.ctm)
             let cast = offset(of: shadow, in: context)
 
-            context.saveGState()
-            if let blendMode = shadow.blendMode {
-                context.setBlendMode(blendMode.cgBlendMode)
+            PenBlendLayer.draw(shadow.blendMode, in: context) {
+                context.saveGState()
+                context.beginTransparencyLayer(auxiliaryInfo: nil)
+
+                context.saveGState()
+                context.setShadow(
+                    offset: CGSize(width: cast.width - travel.width, height: cast.height - travel.height),
+                    blur: blur * scale,
+                    color: color(of: shadow)
+                )
+                context.translateBy(x: shift, y: 0)
+                silhouette(context, entry.spread)
+                context.restoreGState()
+
+                context.setBlendMode(.destinationOut)
+                context.beginTransparencyLayer(auxiliaryInfo: nil)
+                silhouette(context, 0)
+                context.endTransparencyLayer()
+
+                context.endTransparencyLayer()
+                context.restoreGState()
             }
-            context.beginTransparencyLayer(auxiliaryInfo: nil)
-
-            context.saveGState()
-            context.setShadow(
-                offset: CGSize(width: cast.width - travel.width, height: cast.height - travel.height),
-                blur: blur * scale,
-                color: color(of: shadow)
-            )
-            context.translateBy(x: shift, y: 0)
-            silhouette(context, entry.spread)
-            context.restoreGState()
-
-            context.setBlendMode(.destinationOut)
-            context.beginTransparencyLayer(auxiliaryInfo: nil)
-            silhouette(context, 0)
-            context.endTransparencyLayer()
-
-            context.endTransparencyLayer()
-            context.restoreGState()
         }
     }
 
@@ -114,22 +113,21 @@ enum PenEffectRenderer {
         let outerRect = path.boundingBox.insetBy(dx: -margin, dy: -margin)
         let scale = deviceScale(of: context)
 
-        context.saveGState()
-        if let blendMode = shadow.blendMode {
-            context.setBlendMode(blendMode.cgBlendMode)
+        PenBlendLayer.draw(shadow.blendMode, in: context) {
+            context.saveGState()
+            context.addPath(path)
+            context.clip(using: fillRule)
+            context.setShadow(offset: offset(of: shadow, in: context), blur: blur * scale, color: color(of: shadow))
+
+            let invertedPath = CGMutablePath()
+            invertedPath.addRect(outerRect)
+            invertedPath.addPath(PenShadowSilhouette.spread(path, rule: fillRule, by: -spread).path)
+            context.addPath(invertedPath)
+            context.setFillColor(PenShadowSilhouette.ink)
+            context.fillPath(using: .evenOdd)
+
+            context.restoreGState()
         }
-        context.addPath(path)
-        context.clip(using: fillRule)
-        context.setShadow(offset: offset(of: shadow, in: context), blur: blur * scale, color: color(of: shadow))
-
-        let invertedPath = CGMutablePath()
-        invertedPath.addRect(outerRect)
-        invertedPath.addPath(PenShadowSilhouette.spread(path, rule: fillRule, by: -spread).path)
-        context.addPath(invertedPath)
-        context.setFillColor(PenShadowSilhouette.ink)
-        context.fillPath(using: .evenOdd)
-
-        context.restoreGState()
     }
 
     /// Renders an inner shadow inside a silhouette that is drawn, not a path: a group's
@@ -159,29 +157,28 @@ enum PenEffectRenderer {
         let outerRect = bounds.insetBy(dx: -margin, dy: -margin)
         let scale = deviceScale(of: context)
 
-        context.saveGState()
-        if let blendMode = shadow.blendMode {
-            context.setBlendMode(blendMode.cgBlendMode)
+        PenBlendLayer.draw(shadow.blendMode, in: context) {
+            context.saveGState()
+            context.beginTransparencyLayer(auxiliaryInfo: nil)
+
+            context.saveGState()
+            context.setShadow(offset: offset(of: shadow, in: context), blur: blur * scale, color: color(of: shadow))
+            context.beginTransparencyLayer(auxiliaryInfo: nil)
+            context.setFillColor(PenShadowSilhouette.ink)
+            context.fill(outerRect)
+            context.setBlendMode(.destinationOut)
+            silhouette(context)
+            context.endTransparencyLayer()
+            context.restoreGState()
+
+            context.setBlendMode(.destinationIn)
+            context.beginTransparencyLayer(auxiliaryInfo: nil)
+            silhouette(context)
+            context.endTransparencyLayer()
+
+            context.endTransparencyLayer()
+            context.restoreGState()
         }
-        context.beginTransparencyLayer(auxiliaryInfo: nil)
-
-        context.saveGState()
-        context.setShadow(offset: offset(of: shadow, in: context), blur: blur * scale, color: color(of: shadow))
-        context.beginTransparencyLayer(auxiliaryInfo: nil)
-        context.setFillColor(PenShadowSilhouette.ink)
-        context.fill(outerRect)
-        context.setBlendMode(.destinationOut)
-        silhouette(context)
-        context.endTransparencyLayer()
-        context.restoreGState()
-
-        context.setBlendMode(.destinationIn)
-        context.beginTransparencyLayer(auxiliaryInfo: nil)
-        silhouette(context)
-        context.endTransparencyLayer()
-
-        context.endTransparencyLayer()
-        context.restoreGState()
     }
 
     // MARK: - Shared

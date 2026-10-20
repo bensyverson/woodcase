@@ -1,0 +1,812 @@
+{
+ "version": "2.19",
+ "children": [
+  {
+   "type": "frame",
+   "id": "gb0",
+   "name": "multiply-group",
+   "x": 0,
+   "y": 0,
+   "width": 200,
+   "height": 200,
+   "layout": "none",
+   "clip": true,
+   "fill": "#FFFFFF",
+   "children": [
+    {
+     "type": "rectangle",
+     "id": "gb0bd",
+     "name": "backdrop",
+     "x": 0,
+     "y": 0,
+     "width": 200,
+     "height": 100,
+     "fill": "#FACC15"
+    },
+    {
+     "type": "group",
+     "id": "gbA1",
+     "name": "mix",
+     "blendMode": "multiply",
+     "children": [
+      {
+       "type": "rectangle",
+       "id": "gbAl",
+       "name": "left",
+       "x": 30,
+       "y": 40,
+       "width": 90,
+       "height": 120,
+       "fill": "#E11D48"
+      },
+      {
+       "type": "rectangle",
+       "id": "gbAr",
+       "name": "right",
+       "x": 80,
+       "y": 40,
+       "width": 90,
+       "height": 120,
+       "fill": "#60A5FA"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "type": "frame",
+   "id": "gb0b",
+   "name": "multiply-group.backdrop",
+   "x": 240,
+   "y": 0,
+   "width": 200,
+   "height": 200,
+   "layout": "none",
+   "clip": true,
+   "fill": "#FFFFFF",
+   "children": [
+    {
+     "type": "rectangle",
+     "id": "gb0bdb",
+     "name": "backdrop",
+     "x": 0,
+     "y": 0,
+     "width": 200,
+     "height": 100,
+     "fill": "#FACC15"
+    }
+   ]
+  },
+  {
+   "type": "frame",
+   "id": "gb0c",
+   "name": "multiply-group.content",
+   "x": 480,
+   "y": 0,
+   "width": 200,
+   "height": 200,
+   "layout": "none",
+   "clip": true,
+   "children": [
+    {
+     "type": "group",
+     "id": "gbA1c",
+     "name": "mix",
+     "children": [
+      {
+       "type": "rectangle",
+       "id": "gbAcl",
+       "name": "left",
+       "x": 30,
+       "y": 40,
+       "width": 90,
+       "height": 120,
+       "fill": "#E11D48"
+      },
+      {
+       "type": "rectangle",
+       "id": "gbAcr",
+       "name": "right",
+       "x": 80,
+       "y": 40,
+       "width": 90,
+       "height": 120,
+       "fill": "#60A5FA"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "type": "frame",
+   "id": "gb1",
+   "name": "multiply-frame",
+   "x": 0,
+   "y": 240,
+   "width": 200,
+   "height": 200,
+   "layout": "none",
+   "clip": true,
+   "fill": "#FFFFFF",
+   "children": [
+    {
+     "type": "rectangle",
+     "id": "gb1bd",
+     "name": "backdrop",
+     "x": 0,
+     "y": 0,
+     "width": 200,
+     "height": 100,
+     "fill": "#FACC15"
+    },
+    {
+     "type": "frame",
+     "id": "gbB1",
+     "name": "mix",
+     "x": 20,
+     "y": 20,
+     "width": 160,
+     "height": 160,
+     "layout": "none",
+     "fill": "#A7F3D0",
+     "blendMode": "multiply",
+     "children": [
+      {
+       "type": "rectangle",
+       "id": "gbBl",
+       "name": "left",
+       "x": 10,
+       "y": 20,
+       "width": 90,
+       "height": 120,
+       "fill": "#E11D48"
+      },
+      {
+       "type": "rectangle",
+       "id": "gbBr",
+       "name": "right",
+       "x": 60,
+       "y": 20,
+       "width": 90,
+       "height": 120,
+       "fill": "#60A5FA"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "type": "frame",
+   "id": "gb1b",
+   "name": "multiply-frame.backdrop",
+   "x": 240,
+   "y": 240,
+   "width": 200,
+   "height": 200,
+   "layout": "none",
+   "clip": true,
+   "fill": "#FFFFFF",
+   "children": [
+    {
+     "type": "rectangle",
+     "id": "gb1bdb",
+     "name": "backdrop",
+     "x": 0,
+     "y": 0,
+     "width": 200,
+     "height": 100,
+     "fill": "#FACC15"
+    }
+   ]
+  },
+  {
+   "type": "frame",
+   "id": "gb1c",
+   "name": "multiply-frame.content",
+   "x": 480,
+   "y": 240,
+   "width": 200,
+   "height": 200,
+   "layout": "none",
+   "clip": true,
+   "children": [
+    {
+     "type": "frame",
+     "id": "gbB1c",
+     "name": "mix",
+     "x": 20,
+     "y": 20,
+     "width": 160,
+     "height": 160,
+     "layout": "none",
+     "fill": "#A7F3D0",
+     "children": [
+      {
+       "type": "rectangle",
+       "id": "gbBcl",
+       "name": "left",
+       "x": 10,
+       "y": 20,
+       "width": 90,
+       "height": 120,
+       "fill": "#E11D48"
+      },
+      {
+       "type": "rectangle",
+       "id": "gbBcr",
+       "name": "right",
+       "x": 60,
+       "y": 20,
+       "width": 90,
+       "height": 120,
+       "fill": "#60A5FA"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "type": "frame",
+   "id": "gb2",
+   "name": "fill-stroke",
+   "x": 0,
+   "y": 480,
+   "width": 200,
+   "height": 200,
+   "layout": "none",
+   "clip": true,
+   "fill": "#FFFFFF",
+   "children": [
+    {
+     "type": "rectangle",
+     "id": "gb2bd",
+     "name": "backdrop",
+     "x": 0,
+     "y": 0,
+     "width": 200,
+     "height": 100,
+     "fill": "#FACC15"
+    },
+    {
+     "type": "rectangle",
+     "id": "gbC1",
+     "name": "mix",
+     "x": 40,
+     "y": 40,
+     "width": 120,
+     "height": 120,
+     "fill": "#60A5FA",
+     "stroke": "#E11D48",
+     "strokeWidth": 24,
+     "strokeAlignment": "center",
+     "blendMode": "multiply"
+    }
+   ]
+  },
+  {
+   "type": "frame",
+   "id": "gb2b",
+   "name": "fill-stroke.backdrop",
+   "x": 240,
+   "y": 480,
+   "width": 200,
+   "height": 200,
+   "layout": "none",
+   "clip": true,
+   "fill": "#FFFFFF",
+   "children": [
+    {
+     "type": "rectangle",
+     "id": "gb2bdb",
+     "name": "backdrop",
+     "x": 0,
+     "y": 0,
+     "width": 200,
+     "height": 100,
+     "fill": "#FACC15"
+    }
+   ]
+  },
+  {
+   "type": "frame",
+   "id": "gb2c",
+   "name": "fill-stroke.content",
+   "x": 480,
+   "y": 480,
+   "width": 200,
+   "height": 200,
+   "layout": "none",
+   "clip": true,
+   "children": [
+    {
+     "type": "rectangle",
+     "id": "gbC1c",
+     "name": "mix",
+     "x": 40,
+     "y": 40,
+     "width": 120,
+     "height": 120,
+     "fill": "#60A5FA",
+     "stroke": "#E11D48",
+     "strokeWidth": 24,
+     "strokeAlignment": "center"
+    }
+   ]
+  },
+  {
+   "type": "frame",
+   "id": "gb3",
+   "name": "screen-frame",
+   "x": 0,
+   "y": 720,
+   "width": 200,
+   "height": 200,
+   "layout": "none",
+   "clip": true,
+   "fill": "#FFFFFF",
+   "children": [
+    {
+     "type": "rectangle",
+     "id": "gb3bd",
+     "name": "backdrop",
+     "x": 0,
+     "y": 0,
+     "width": 200,
+     "height": 100,
+     "fill": "#FACC15"
+    },
+    {
+     "type": "frame",
+     "id": "gbD1",
+     "name": "mix",
+     "x": 20,
+     "y": 20,
+     "width": 160,
+     "height": 160,
+     "layout": "none",
+     "fill": "#A7F3D0",
+     "blendMode": "screen",
+     "children": [
+      {
+       "type": "rectangle",
+       "id": "gbDl",
+       "name": "left",
+       "x": 10,
+       "y": 20,
+       "width": 90,
+       "height": 120,
+       "fill": "#E11D48"
+      },
+      {
+       "type": "rectangle",
+       "id": "gbDr",
+       "name": "right",
+       "x": 60,
+       "y": 20,
+       "width": 90,
+       "height": 120,
+       "fill": "#60A5FA"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "type": "frame",
+   "id": "gb3b",
+   "name": "screen-frame.backdrop",
+   "x": 240,
+   "y": 720,
+   "width": 200,
+   "height": 200,
+   "layout": "none",
+   "clip": true,
+   "fill": "#FFFFFF",
+   "children": [
+    {
+     "type": "rectangle",
+     "id": "gb3bdb",
+     "name": "backdrop",
+     "x": 0,
+     "y": 0,
+     "width": 200,
+     "height": 100,
+     "fill": "#FACC15"
+    }
+   ]
+  },
+  {
+   "type": "frame",
+   "id": "gb3c",
+   "name": "screen-frame.content",
+   "x": 480,
+   "y": 720,
+   "width": 200,
+   "height": 200,
+   "layout": "none",
+   "clip": true,
+   "children": [
+    {
+     "type": "frame",
+     "id": "gbD1c",
+     "name": "mix",
+     "x": 20,
+     "y": 20,
+     "width": 160,
+     "height": 160,
+     "layout": "none",
+     "fill": "#A7F3D0",
+     "children": [
+      {
+       "type": "rectangle",
+       "id": "gbDcl",
+       "name": "left",
+       "x": 10,
+       "y": 20,
+       "width": 90,
+       "height": 120,
+       "fill": "#E11D48"
+      },
+      {
+       "type": "rectangle",
+       "id": "gbDcr",
+       "name": "right",
+       "x": 60,
+       "y": 20,
+       "width": 90,
+       "height": 120,
+       "fill": "#60A5FA"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "type": "frame",
+   "id": "gb4",
+   "name": "multiply-blur",
+   "x": 0,
+   "y": 960,
+   "width": 200,
+   "height": 200,
+   "layout": "none",
+   "clip": true,
+   "fill": "#FFFFFF",
+   "children": [
+    {
+     "type": "rectangle",
+     "id": "gb4bd",
+     "name": "backdrop",
+     "x": 0,
+     "y": 0,
+     "width": 200,
+     "height": 100,
+     "fill": "#FACC15"
+    },
+    {
+     "type": "frame",
+     "id": "gbE1",
+     "name": "mix",
+     "x": 20,
+     "y": 20,
+     "width": 160,
+     "height": 160,
+     "layout": "none",
+     "fill": "#A7F3D0",
+     "blendMode": "multiply",
+     "effect": {
+      "type": "blur",
+      "radius": 6
+     },
+     "children": [
+      {
+       "type": "rectangle",
+       "id": "gbEl",
+       "name": "left",
+       "x": 10,
+       "y": 20,
+       "width": 90,
+       "height": 120,
+       "fill": "#E11D48"
+      },
+      {
+       "type": "rectangle",
+       "id": "gbEr",
+       "name": "right",
+       "x": 60,
+       "y": 20,
+       "width": 90,
+       "height": 120,
+       "fill": "#60A5FA"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "type": "frame",
+   "id": "gb4b",
+   "name": "multiply-blur.backdrop",
+   "x": 240,
+   "y": 960,
+   "width": 200,
+   "height": 200,
+   "layout": "none",
+   "clip": true,
+   "fill": "#FFFFFF",
+   "children": [
+    {
+     "type": "rectangle",
+     "id": "gb4bdb",
+     "name": "backdrop",
+     "x": 0,
+     "y": 0,
+     "width": 200,
+     "height": 100,
+     "fill": "#FACC15"
+    }
+   ]
+  },
+  {
+   "type": "frame",
+   "id": "gb4c",
+   "name": "multiply-blur.content",
+   "x": 480,
+   "y": 960,
+   "width": 200,
+   "height": 200,
+   "layout": "none",
+   "clip": true,
+   "children": [
+    {
+     "type": "frame",
+     "id": "gbE1c",
+     "name": "mix",
+     "x": 20,
+     "y": 20,
+     "width": 160,
+     "height": 160,
+     "layout": "none",
+     "fill": "#A7F3D0",
+     "effect": {
+      "type": "blur",
+      "radius": 6
+     },
+     "children": [
+      {
+       "type": "rectangle",
+       "id": "gbEcl",
+       "name": "left",
+       "x": 10,
+       "y": 20,
+       "width": 90,
+       "height": 120,
+       "fill": "#E11D48"
+      },
+      {
+       "type": "rectangle",
+       "id": "gbEcr",
+       "name": "right",
+       "x": 60,
+       "y": 20,
+       "width": 90,
+       "height": 120,
+       "fill": "#60A5FA"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "type": "frame",
+   "id": "gb5",
+   "name": "multiply-half",
+   "x": 0,
+   "y": 1200,
+   "width": 200,
+   "height": 200,
+   "layout": "none",
+   "clip": true,
+   "fill": "#FFFFFF",
+   "children": [
+    {
+     "type": "rectangle",
+     "id": "gb5bd",
+     "name": "backdrop",
+     "x": 0,
+     "y": 0,
+     "width": 200,
+     "height": 100,
+     "fill": "#FACC15"
+    },
+    {
+     "type": "frame",
+     "id": "gbF1",
+     "name": "mix",
+     "x": 20,
+     "y": 20,
+     "width": 160,
+     "height": 160,
+     "layout": "none",
+     "fill": "#A7F3D0",
+     "blendMode": "multiply",
+     "opacity": 0.5,
+     "children": [
+      {
+       "type": "rectangle",
+       "id": "gbFl",
+       "name": "left",
+       "x": 10,
+       "y": 20,
+       "width": 90,
+       "height": 120,
+       "fill": "#E11D48"
+      },
+      {
+       "type": "rectangle",
+       "id": "gbFr",
+       "name": "right",
+       "x": 60,
+       "y": 20,
+       "width": 90,
+       "height": 120,
+       "fill": "#60A5FA"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "type": "frame",
+   "id": "gb5b",
+   "name": "multiply-half.backdrop",
+   "x": 240,
+   "y": 1200,
+   "width": 200,
+   "height": 200,
+   "layout": "none",
+   "clip": true,
+   "fill": "#FFFFFF",
+   "children": [
+    {
+     "type": "rectangle",
+     "id": "gb5bdb",
+     "name": "backdrop",
+     "x": 0,
+     "y": 0,
+     "width": 200,
+     "height": 100,
+     "fill": "#FACC15"
+    }
+   ]
+  },
+  {
+   "type": "frame",
+   "id": "gb5c",
+   "name": "multiply-half.content",
+   "x": 480,
+   "y": 1200,
+   "width": 200,
+   "height": 200,
+   "layout": "none",
+   "clip": true,
+   "children": [
+    {
+     "type": "frame",
+     "id": "gbF1c",
+     "name": "mix",
+     "x": 20,
+     "y": 20,
+     "width": 160,
+     "height": 160,
+     "layout": "none",
+     "fill": "#A7F3D0",
+     "children": [
+      {
+       "type": "rectangle",
+       "id": "gbFcl",
+       "name": "left",
+       "x": 10,
+       "y": 20,
+       "width": 90,
+       "height": 120,
+       "fill": "#E11D48"
+      },
+      {
+       "type": "rectangle",
+       "id": "gbFcr",
+       "name": "right",
+       "x": 60,
+       "y": 20,
+       "width": 90,
+       "height": 120,
+       "fill": "#60A5FA"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "type": "frame",
+   "id": "gb6",
+   "name": "single-paint",
+   "x": 0,
+   "y": 1440,
+   "width": 200,
+   "height": 200,
+   "layout": "none",
+   "clip": true,
+   "fill": "#FFFFFF",
+   "children": [
+    {
+     "type": "rectangle",
+     "id": "gb6bd",
+     "name": "backdrop",
+     "x": 0,
+     "y": 0,
+     "width": 200,
+     "height": 100,
+     "fill": "#FACC15"
+    },
+    {
+     "type": "rectangle",
+     "id": "gbG1",
+     "name": "mix",
+     "x": 40,
+     "y": 40,
+     "width": 120,
+     "height": 120,
+     "fill": "#60A5FA",
+     "blendMode": "multiply"
+    }
+   ]
+  },
+  {
+   "type": "frame",
+   "id": "gb6b",
+   "name": "single-paint.backdrop",
+   "x": 240,
+   "y": 1440,
+   "width": 200,
+   "height": 200,
+   "layout": "none",
+   "clip": true,
+   "fill": "#FFFFFF",
+   "children": [
+    {
+     "type": "rectangle",
+     "id": "gb6bdb",
+     "name": "backdrop",
+     "x": 0,
+     "y": 0,
+     "width": 200,
+     "height": 100,
+     "fill": "#FACC15"
+    }
+   ]
+  },
+  {
+   "type": "frame",
+   "id": "gb6c",
+   "name": "single-paint.content",
+   "x": 480,
+   "y": 1440,
+   "width": 200,
+   "height": 200,
+   "layout": "none",
+   "clip": true,
+   "children": [
+    {
+     "type": "rectangle",
+     "id": "gbG1c",
+     "name": "mix",
+     "x": 40,
+     "y": 40,
+     "width": 120,
+     "height": 120,
+     "fill": "#60A5FA"
+    }
+   ]
+  }
+ ]
+}

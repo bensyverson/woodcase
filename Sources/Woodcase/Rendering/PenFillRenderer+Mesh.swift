@@ -27,22 +27,21 @@ extension PenFillRenderer {
               let placed = meshImage(grid, domain: target.domain, in: context)
         else { return }
 
-        context.saveGState()
-        defer { context.restoreGState() }
+        PenBlendLayer.draw(mesh.blendMode, in: context, within: target.clip.boundingBoxOfPath) {
+            context.saveGState()
+            defer { context.restoreGState() }
 
-        if let blendMode = mesh.blendMode {
-            context.setBlendMode(blendMode.cgBlendMode)
-        }
-        let opacity = mesh.opacity?.literalValue ?? 1.0
-        if opacity < 1.0 {
-            context.setAlpha(CGFloat(opacity))
-        }
-        target.applyClip(in: context)
+            let opacity = mesh.opacity?.literalValue ?? 1.0
+            if opacity < 1.0 {
+                context.setAlpha(CGFloat(opacity))
+            }
+            target.applyClip(in: context)
 
-        // CG draws images bottom-up; the context is flipped to y-down.
-        context.translateBy(x: placed.rect.minX, y: placed.rect.maxY)
-        context.scaleBy(x: 1, y: -1)
-        context.draw(placed.image, in: CGRect(origin: .zero, size: placed.rect.size))
+            // CG draws images bottom-up; the context is flipped to y-down.
+            context.translateBy(x: placed.rect.minX, y: placed.rect.maxY)
+            context.scaleBy(x: 1, y: -1)
+            context.draw(placed.image, in: CGRect(origin: .zero, size: placed.rect.size))
+        }
     }
 
     /// Rasterizes `grid` for `domain` at the context's resolution.

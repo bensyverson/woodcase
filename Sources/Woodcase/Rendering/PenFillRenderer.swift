@@ -106,13 +106,12 @@ enum PenFillRenderer {
         onto target: Target,
         in context: CGContext
     ) {
-        context.saveGState()
-        if let blendMode {
-            context.setBlendMode(blendMode.cgBlendMode)
+        PenBlendLayer.draw(blendMode, in: context, within: target.clip.boundingBoxOfPath) {
+            context.saveGState()
+            context.addPath(target.clip)
+            context.setFillColor(color)
+            context.fillPath(using: target.fillRule)
+            context.restoreGState()
         }
-        context.addPath(target.clip)
-        context.setFillColor(color)
-        context.fillPath(using: target.fillRule)
-        context.restoreGState()
     }
 }

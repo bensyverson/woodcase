@@ -8,10 +8,10 @@ enum SwiftUIBlendMode {
     /// The `BlendMode` case for `mode`, without its dot, or `nil` for a mode this build
     /// does not know.
     ///
-    /// Every known mode is exact. `linearBurn` and `linearDodge` are `plusDarker` and
-    /// `plusLighter`, the same formulas under Apple's names — which is closer to Pen than
-    /// the Core Graphics renderer's `multiply` and `screen`, since CG has neither — and
-    /// Pen's `light` is `lighten`.
+    /// `linearBurn` and `linearDodge` are `plusDarker` and `plusLighter`, the true linear
+    /// burn and add where both colors are opaque; being plus operators, they depart from
+    /// W3C's formula over a translucent backdrop, which the reference renderer composites
+    /// per pixel (``PenBlendLayer``). Pen's `light` is `lighten`.
     static func name(for mode: PenBlendMode) -> String? {
         switch mode {
         case .normal: "normal"

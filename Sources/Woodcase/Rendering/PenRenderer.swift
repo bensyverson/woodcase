@@ -165,8 +165,8 @@ public enum PenRenderer {
         case renderNode(NodeRef)
         /// Restore a saved graphics state (for node exit or clip exit).
         case restoreGState
-        /// End a transparency layer started for opacity.
-        case endTransparencyLayer
+        /// Close the group layer a node opened for its opacity or blend mode.
+        case endComposite(NodeComposite)
         /// Draw a group's inner shadows, inside its silhouette and over its children.
         case groupInnerShadows(NodeRef, [PenEffect.PenShadowEffect], PenRect)
     }
@@ -214,8 +214,8 @@ public enum PenRenderer {
                 )
             case .restoreGState:
                 context.restoreGState()
-            case .endTransparencyLayer:
-                context.endTransparencyLayer()
+            case let .endComposite(composite):
+                endComposite(composite, in: context)
             case let .groupInnerShadows(ref, shadows, drawRect):
                 guard case let .group(data) = ref.node.kind, let children = data.children else { continue }
                 renderGroupInnerShadows(shadows, bounds: drawRect.cgRect, in: context) { target in
@@ -267,19 +267,6 @@ public enum PenRenderer {
         // Saves the graphics state; the `.restoreGState` pushed below undoes it.
         guard let drawRect = enter(ref, layoutRects: layoutRects, overrides: nodeOverrides, in: context) else { return }
 
-        // Apply opacity — use override if present
-        let effectiveOpacity = nodeOverrides?.opacity ?? ref.node.common.opacity?.literalValue
-        let hasOpacity = effectiveOpacity.map { $0 < 1.0 } ?? false
-        if hasOpacity {
-            context.setAlpha(CGFloat(effectiveOpacity!))
-            context.beginTransparencyLayer(auxiliaryInfo: nil)
-        }
-
-        // Apply blend mode
-        if let bm = blendMode(for: ref.node) {
-            context.setBlendMode(bm.cgBlendMode)
-        }
-
         // Collect effects
         let nodeEffects = effects(for: ref.node)
         let (outerShadows, innerShadows) = PenCastShadow.casts(of: ref.node)
@@ -296,16 +283,25 @@ public enum PenRenderer {
             return bgBlur
         }.first
 
-        // Background blur: capture and blur the current backdrop before drawing node content.
-        // Placed after opacity/blend-mode setup so the blurred backdrop participates
-        // in the node's compositing, but before foreground blur and own-content drawing.
+        // Background blur: capture and blur the backdrop before the node's group layer opens
+        // (a per-pixel layer clears what lies beneath), then draw it inside the layer so it
+        // takes part in the node's compositing, before foreground blur and own content.
         let overrideFills = nodeOverrides?.fills
-        if let bgBlur = backgroundBlurEffect,
-           let clipPath = PenShapeBuilder.buildPath(for: ref.node, rect: drawRect)
-        {
-            PenEffectRenderer.renderBackgroundBlur(
-                bgBlur, fills: overrideFills ?? fills(for: ref.node), clipPath: clipPath, in: context
-            )
+        let backgroundBlur = backgroundBlurEffect.flatMap { bgBlur -> (PenEffectRenderer.BlurredBackdrop, CGPath)? in
+            guard let clipPath = PenShapeBuilder.buildPath(for: ref.node, rect: drawRect),
+                  let backdrop = PenEffectRenderer.blurredBackdrop(
+                      bgBlur, fills: overrideFills ?? fills(for: ref.node), clipPath: clipPath, in: context
+                  )
+            else { return nil }
+            return (backdrop, clipPath)
+        }
+
+        // Opacity (an override wins) and blend mode make the node one isolated group.
+        let effectiveOpacity = nodeOverrides?.opacity ?? ref.node.common.opacity?.literalValue
+        let composite = beginComposite(for: ref.node, opacity: effectiveOpacity, in: context)
+
+        if let (backdrop, clipPath) = backgroundBlur {
+            PenEffectRenderer.drawBlurredBackdrop(backdrop, clipPath: clipPath, in: context)
         }
 
         // Extract children for container nodes
@@ -349,9 +345,9 @@ public enum PenRenderer {
                     renderGroupInnerShadows(innerShadows.map(\.shadow), bounds: drawRect.cgRect, in: offscreenCtx, silhouette: castGroupSilhouette)
                 }
             }
-            // Cleanup: end transparency layer + restore GState
-            if hasOpacity {
-                context.endTransparencyLayer()
+            // Cleanup: close the group layer + restore GState
+            if let composite {
+                endComposite(composite, in: context)
             }
             context.restoreGState()
             return
@@ -362,8 +358,8 @@ public enum PenRenderer {
         // restoreGState — pushed first, executed last.
         renderOwnContent(ref.node, own, groupSilhouette: castGroupSilhouette, imageProvider: imageProvider, in: context)
         stack.append(.restoreGState)
-        if hasOpacity {
-            stack.append(.endTransparencyLayer)
+        if let composite {
+            stack.append(.endComposite(composite))
         }
 
         // Push children + clip cleanup for container nodes

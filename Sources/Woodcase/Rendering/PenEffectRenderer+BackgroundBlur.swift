@@ -28,11 +28,35 @@ extension PenEffectRenderer {
         clipPath: CGPath,
         in context: CGContext
     ) {
+        guard let backdrop = blurredBackdrop(effect, fills: fills, clipPath: clipPath, in: context) else { return }
+        drawBlurredBackdrop(backdrop, clipPath: clipPath, in: context)
+    }
+
+    /// A blurred backdrop captured for a node, and the device rectangle it covers.
+    struct BlurredBackdrop {
+        /// The blurred pixels.
+        let image: CGImage
+        /// Where they go, in device pixels.
+        let region: CGRect
+    }
+
+    /// Captures and blurs the backdrop under `clipPath` — the first half of
+    /// ``renderBackgroundBlur(_:fills:clipPath:in:)``. The renderer captures before it opens
+    /// the node's group layer, which may clear the pixels beneath (``PenBlendLayer``), and
+    /// draws inside it.
+    ///
+    /// - Returns: `nil` wherever ``renderBackgroundBlur(_:fills:clipPath:in:)`` draws nothing.
+    static func blurredBackdrop(
+        _ effect: PenEffect.PenBackgroundBlurEffect,
+        fills: PenFills?,
+        clipPath: CGPath,
+        in context: CGContext
+    ) -> BlurredBackdrop? {
         let radius = CGFloat(effect.radius?.literalValue ?? 0)
         guard effect.enabled?.literalValue != false, radius > 0,
               fills?.hasVisiblePaint == true,
               let canvas = context.makeImage()
-        else { return }
+        else { return nil }
 
         let sigma = radius * deviceScale(of: context) / 2
         let canvasRect = CGRect(x: 0, y: 0, width: canvas.width, height: canvas.height)
@@ -40,7 +64,7 @@ extension PenEffectRenderer {
         let region = clipPath.boundingBoxOfPath.applying(context.ctm)
             .insetBy(dx: -reach, dy: -reach).integral
             .intersection(canvasRect)
-        guard !region.isEmpty else { return }
+        guard !region.isEmpty else { return nil }
 
         // Device space runs bottom-up; the canvas image's rows run top-down.
         let crop = CGRect(
@@ -49,8 +73,12 @@ extension PenEffectRenderer {
         )
         guard let backdrop = canvas.cropping(to: crop),
               let blurred = PenGaussianBlur.blur(backdrop, sigma: sigma, edges: .extend)
-        else { return }
+        else { return nil }
+        return BlurredBackdrop(image: blurred, region: region)
+    }
 
+    /// Draws a captured ``BlurredBackdrop`` clipped to `clipPath`, replacing what is there.
+    static func drawBlurredBackdrop(_ backdrop: BlurredBackdrop, clipPath: CGPath, in context: CGContext) {
         context.saveGState()
         context.addPath(clipPath)
         context.clip()
@@ -58,7 +86,7 @@ extension PenEffectRenderer {
         // drawn into a bottom-up rect lands upright, so no flip is needed here.
         context.concatenate(context.ctm.inverted())
         context.setBlendMode(.copy)
-        context.draw(blurred, in: region)
+        context.draw(backdrop.image, in: backdrop.region)
         context.restoreGState()
     }
 }

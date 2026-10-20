@@ -80,12 +80,11 @@ For each node, the renderer follows this sequence:
 1. **Skip** if the node is disabled or non-visual
 2. **Translate** the context to the node's position
 3. **Transform** — apply rotation and flip around the center of the node's unturned box, centered in its layout rect (a `group`'s box is its children's union, and the context then moves to the group's anchor — see *Transforms*)
-4. **Opacity** — begin a transparency layer if opacity < 1
-5. **Blend mode** — set the node's blend mode
-6. **Background blur** — capture the backdrop under the node, blur it, and draw it back clipped to the node's shape
-7. **Own content, in Pen's paint order** — outer shadows, then fills (or text, icon glyphs), then inner shadows, then the stroke; a layer blur wraps this and the children when present
-8. **Children** — inside the frame's clip, when it clips; a frame's clip never cuts its own shadow or stroke
-9. **Restore** — end transparency layer and restore graphics state
+4. **Background blur** — capture the backdrop under the node and blur it
+5. **Group** — below opacity 1 or at a blend mode, open the node's isolated group layer (*Compositing*); the blurred backdrop is drawn into it, clipped to the node's shape
+6. **Own content, in Pen's paint order** — outer shadows, then fills (or text, icon glyphs), then inner shadows, then the stroke; a layer blur wraps this and the children when present
+7. **Children** — inside the frame's clip, when it clips; a frame's clip never cuts its own shadow or stroke
+8. **Restore** — close the group layer, blending it onto what lies beneath, and restore graphics state
 
 ## Coordinate System
 
@@ -261,7 +260,9 @@ editor's PNG. In a flex flow the union is centered in the group's slot
 > <doc:PenEngine>, *Absolute containers and `fit_content`*.
 
 ### Compositing
-Node-level opacity uses transparency layers to composite children correctly before applying opacity. Per-fill and per-node blend modes are supported across all 16 standard blend modes.
+A node below opacity 1 or at a blend mode is **one isolated group**, as CSS's `mix-blend-mode` and Figma blend one: its paints, effects and children are drawn at the normal blend and full alpha onto a transparent layer — each paint keeping its own blend inside — and the layer is then blended with what lies beneath at the node's mode and opacity (integrator's ruling, 2026-10-20). A node of one paint therefore draws as that paint at the node's mode; the node's mode wins over the paint's own. Before, a blended node set its mode on the graphics state, so each child blended on its own with everything under it, siblings included, and below opacity 1 the mode applied inside the layer and never reached the backdrop (`PenRendererGroupBlendTests`, RapidPro's `group-blend.pen`: 4.2–13.9 MAE against the composed oracle before, 0.000 after). Node-level `blendMode` is Woodcase's own — Pen drops it on load. Pen does isolate a node below opacity 1: a paint's blend inside it never reaches the backdrop (pen CLI, 2026-10-20).
+
+Every blend mode follows W3C Compositing and Blending Level 1 (``PenBlendMode/composite(source:over:)``), over translucent backdrops and from translucent sources alike; linear burn and linear dodge are Photoshop's `max(0, Cb + Cs − 1)` and `min(1, Cb + Cs)` — Ben's ruling of 2026-10-20 (Penumbra `project/2026-10-14-feature-enhancements-plan.md` §5 item 9). Core Graphics draws darken, multiply, lighten, screen, overlay, hard light, difference and exclusion by W3C's formula at any alpha, so those go through it (``PenBlendMode/Compositing``). It does not draw the rest exactly — soft light is its own formula, color dodge and burn ignore a translucent source's alpha in the blend, plus-darker and plus-lighter are Porter–Duff plus operators that sum the alphas, and the non-separable modes are a few steps off — so those **composite per pixel** (`PenBlendLayer`): the renderer copies the bitmap under the region the drawing can reach, clears it, draws the paint, shadow or node there at the normal blend, and blends it over the copy itself. A Core Graphics transparency layer hides its pixels until it ends, so a node whose group holds a per-pixel blend anywhere inside opens its own group per pixel too. It needs an 8-bit RGB bitmap; on a PDF, or another pixel format, those modes fall back to Core Graphics' nearest (``PenBlendMode/cgBlendMode``), as they all drew before. Measured against the pen CLI (2026-10-20, `#3366FF` over `#E6994D`): soft light `#D88D8C` (was `#D88D83`), color dodge over a 40% backdrop red 133 (was 146), a dark-backdrop soft light, a translucent color burn and the non-separable modes all match Pen to a step. Pen draws linear burn as multiply and linear dodge as a plus operator (alpha 230 where W3C's is 179); both are differences the ruling keeps.
 
 ## Animation Overrides
 
