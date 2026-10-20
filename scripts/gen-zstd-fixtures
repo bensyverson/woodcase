@@ -1,0 +1,75 @@
+#!/usr/bin/env python3
+"""gen-zstd-fixtures — write the zstd frames `ZstdDecoderTests` decodes, into
+Tests/WoodcaseTests/Fixtures/zstd/.
+
+  sample.zst                  sample.txt, compressed from a file: the frame header
+                              declares the content size
+  sample-unknown-size.zst     sample.txt, compressed from a pipe: the header declares
+                              no content size, so the decoder must stream
+  pattern.zst                 65,536 bytes of `i % 251`, content size declared — bigger
+                              than the tests' small cap, and regenerated in the test
+  pattern-unknown-size.zst    the same bytes from a pipe, content size unknown
+  sample-window-16mib.zst     sample.txt from a pipe with a 16 MiB window (`--long=24`):
+                              a stream whose window a small cap refuses
+
+sample.txt is committed beside the frames and is their source; the pattern needs no file,
+since the test rebuilds it. Each frame carries a content checksum (the CLI's default).
+
+Usage:
+    scripts/gen-zstd-fixtures [<fixture dir>]   (default: Tests/WoodcaseTests/Fixtures/zstd)
+
+Needs the `zstd` CLI on PATH. Standard library only; runs sandboxed.
+"""
+
+import pathlib
+import subprocess
+import sys
+
+PATTERN_LENGTH = 65_536
+PATTERN_MODULUS = 251
+LEVEL = "-19"
+
+
+def compress(data: bytes, *, from_pipe: bool, source: pathlib.Path | None = None) -> bytes:
+    """Compress `data` with the zstd CLI. From a file the CLI records the content size in
+    the frame header; from a pipe it cannot know it, so the header leaves it out."""
+    if from_pipe:
+        return subprocess.run(
+            ["zstd", LEVEL, "-q", "-c"], input=data, check=True, capture_output=True
+        ).stdout
+    assert source is not None
+    return subprocess.run(
+        ["zstd", LEVEL, "-q", "-c", str(source)], check=True, capture_output=True
+    ).stdout
+
+
+def main() -> None:
+    root = pathlib.Path(__file__).resolve().parent.parent
+    out = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else root / "Tests/WoodcaseTests/Fixtures/zstd"
+    sample_path = out / "sample.txt"
+    sample = sample_path.read_bytes()
+    pattern = bytes(i % PATTERN_MODULUS for i in range(PATTERN_LENGTH))
+    pattern_path = out / "pattern.bin"
+    pattern_path.write_bytes(pattern)
+    try:
+        frames = {
+            "sample.zst": compress(sample, from_pipe=False, source=sample_path),
+            "sample-unknown-size.zst": compress(sample, from_pipe=True),
+            "pattern.zst": compress(pattern, from_pipe=False, source=pattern_path),
+            "pattern-unknown-size.zst": compress(pattern, from_pipe=True),
+            "sample-window-16mib.zst": subprocess.run(
+                ["zstd", LEVEL, "--long=24", "-q", "-c"],
+                input=sample,
+                check=True,
+                capture_output=True,
+            ).stdout,
+        }
+    finally:
+        pattern_path.unlink()
+    for name, frame in frames.items():
+        (out / name).write_bytes(frame)
+        print(f"{name}: {len(frame)} bytes")
+
+
+if __name__ == "__main__":
+    main()

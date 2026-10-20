@@ -1,0 +1,245 @@
+#!/usr/bin/env python3
+"""zstd-upstream — check the vendored zstd decoder against upstream, or re-pin it.
+
+Woodcase vendors zstd's decode-only single file, zstddeclib.c, with the release's own
+zstd.h, zstd_errors.h and LICENSE, in Sources/CZstdDecode/. The pin — tag, release date,
+tarball sha256, each vendored file's sha256 — is Sources/CZstdDecode/VENDORED.json.
+
+Usage:
+    scripts/zstd-upstream               check: is the pin current and unadvised?
+    scripts/zstd-upstream --update      re-vendor from the latest release
+    scripts/zstd-upstream --update <tag>  re-vendor from <tag> (e.g. v1.5.7)
+
+check verifies the vendored files still match the pin's hashes, asks GitHub for the
+latest facebook/zstd release, and lists the repository's published security advisories
+since the pinned release came out. It prints what changed.
+
+--update downloads zstd-<version>.tar.gz and its .sha256 and .sig into a temp dir,
+verifies the checksum (and the signature with gpg when the signing key is in your
+keyring — otherwise it says the signature was not checked), runs the tarball's
+build/single_file_libs/create_single_file_decoder.sh, copies zstddeclib.c, lib/zstd.h,
+lib/zstd_errors.h and LICENSE into Sources/CZstdDecode/, rewrites VENDORED.json and prints
+the diff stats. Then run the suite (`swift test --quiet`) before committing.
+
+Exits 0 when current (check) or re-pinned (--update); 1 when a newer release or an
+advisory exists, or the vendored files differ from the pin; 2 on a usage error; 4 when a
+download fails its checksum or signature, or the generator fails; 5 when `gh` is missing
+or cannot reach GitHub. Needs the network and the `gh` CLI, logged in: run it with the
+Bash sandbox disabled. It is not in the commit hook (no network there); run it from the
+release checklist, before scripts/release.
+"""
+
+import datetime
+import hashlib
+import json
+import os
+import pathlib
+import shutil
+import subprocess
+import sys
+import tarfile
+import tempfile
+
+REPOSITORY = "facebook/zstd"
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+VENDOR_DIR = ROOT / "Sources" / "CZstdDecode"
+PIN = VENDOR_DIR / "VENDORED.json"
+
+# Where each vendored file comes from, relative to the extracted tarball's root.
+VENDORED_SOURCES = {
+    "zstddeclib.c": "build/single_file_libs/zstddeclib.c",
+    "include/zstd.h": "lib/zstd.h",
+    "include/zstd_errors.h": "lib/zstd_errors.h",
+    "LICENSE": "LICENSE",
+}
+
+EXIT_CURRENT = 0
+EXIT_STALE = 1
+EXIT_USAGE = 2
+EXIT_TARGET = 4
+EXIT_ENVIRONMENT = 5
+
+
+def fail(code: int, message: str) -> None:
+    print(f"zstd-upstream: {message}", file=sys.stderr)
+    sys.exit(code)
+
+
+def sha256(path: pathlib.Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def gh_api(endpoint: str):
+    """GET a GitHub REST endpoint through `gh`, so its login and proxy settings apply."""
+    if shutil.which("gh") is None:
+        fail(EXIT_ENVIRONMENT, "the `gh` CLI is not on PATH — install it and run `gh auth login`")
+    result = subprocess.run(["gh", "api", endpoint], capture_output=True, text=True)
+    if result.returncode != 0:
+        fail(
+            EXIT_ENVIRONMENT,
+            f"`gh api {endpoint}` failed — is the sandbox off and `gh` logged in?\n"
+            + result.stderr.strip(),
+        )
+    return json.loads(result.stdout)
+
+
+def read_pin() -> dict:
+    return json.loads(PIN.read_text())
+
+
+def drifted_files(pin: dict) -> list[str]:
+    """The vendored files whose bytes no longer match the pin."""
+    return [
+        name
+        for name, digest in sorted(pin["files"].items())
+        if not (VENDOR_DIR / name).exists() or sha256(VENDOR_DIR / name) != digest
+    ]
+
+
+def check() -> int:
+    pin = read_pin()
+    stale = False
+    print(f"pinned: {pin['tag']} (released {pin['released'][:10]}, vendored {pin['vendoredOn']})")
+
+    drifted = drifted_files(pin)
+    if drifted:
+        stale = True
+        print(f"DRIFT: {', '.join(drifted)} differ from the hashes in VENDORED.json — re-run --update")
+
+    latest = gh_api(f"repos/{REPOSITORY}/releases/latest")
+    if latest["tag_name"] == pin["tag"]:
+        print(f"latest release: {latest['tag_name']} — current")
+    else:
+        stale = True
+        print(
+            f"NEWER RELEASE: {latest['tag_name']} (published {latest['published_at'][:10]}) "
+            f"— {latest['html_url']}"
+        )
+
+    advisories = gh_api(f"repos/{REPOSITORY}/security-advisories?state=published&per_page=100")
+    since = [a for a in advisories if (a.get("published_at") or "") > pin["released"]]
+    if since:
+        stale = True
+        for advisory in since:
+            ident = advisory.get("cve_id") or advisory["ghsa_id"]
+            print(
+                f"ADVISORY: {ident} [{advisory.get('severity')}] published "
+                f"{advisory['published_at'][:10]}: {advisory['summary']} — {advisory['html_url']}"
+            )
+    else:
+        print(f"advisories published since {pin['released'][:10]}: none")
+
+    return EXIT_STALE if stale else EXIT_CURRENT
+
+
+def verify_signature(tarball: pathlib.Path, signature: pathlib.Path) -> str:
+    """Checks the release signature with gpg. Returns how it went, for the pin; exits when
+    the signature is bad. A missing key or missing gpg is reported, not fatal."""
+    if shutil.which("gpg") is None:
+        return "not checked: gpg is not installed"
+    home = os.environ.get("GNUPGHOME") or str(pathlib.Path.home() / ".gnupg")
+    if not pathlib.Path(home).is_dir():
+        return f"not checked: no gpg keyring at {home}"
+    result = subprocess.run(
+        ["gpg", "--status-fd", "1", "--verify", str(signature), str(tarball)],
+        capture_output=True,
+        text=True,
+    )
+    status = result.stdout
+    if "[GNUPG:] GOODSIG" in status and "[GNUPG:] VALIDSIG" in status:
+        fingerprint = next(
+            line.split()[2] for line in status.splitlines() if line.startswith("[GNUPG:] VALIDSIG")
+        )
+        return f"verified with key {fingerprint}"
+    if "[GNUPG:] NO_PUBKEY" in status:
+        key = next(line.split()[2] for line in status.splitlines() if "NO_PUBKEY" in line)
+        return f"not checked: key {key} is not in the keyring"
+    fail(EXIT_TARGET, f"BAD signature on {tarball.name}:\n{result.stderr.strip()}")
+    return ""
+
+
+def update(tag: str | None) -> int:
+    release = gh_api(
+        f"repos/{REPOSITORY}/releases/tags/{tag}" if tag else f"repos/{REPOSITORY}/releases/latest"
+    )
+    tag = release["tag_name"]
+    version = tag.removeprefix("v")
+    tarball_name = f"zstd-{version}.tar.gz"
+    work = pathlib.Path(tempfile.mkdtemp(prefix="zstd-upstream-"))
+    try:
+        download = work / "download"
+        download.mkdir()
+        result = subprocess.run(
+            ["gh", "release", "download", tag, "-R", REPOSITORY,
+             "-p", tarball_name, "-p", f"{tarball_name}.sha256", "-p", f"{tarball_name}.sig",
+             "-D", str(download)],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            fail(EXIT_TARGET, f"downloading {tarball_name} failed:\n{result.stderr.strip()}")
+        tarball = download / tarball_name
+        expected = (download / f"{tarball_name}.sha256").read_text().split()[0]
+        actual = sha256(tarball)
+        if actual != expected:
+            fail(EXIT_TARGET, f"checksum mismatch on {tarball_name}: {actual}, expected {expected}")
+        print(f"checksum: {tarball_name} sha256 {actual} matches its .sha256")
+        signature_status = (
+            verify_signature(tarball, download / f"{tarball_name}.sig")
+            if (download / f"{tarball_name}.sig").exists()
+            else "not checked: the release has no .sig"
+        )
+        print(f"signature: {signature_status}")
+
+        source = work / "source"
+        with tarfile.open(tarball) as archive:
+            archive.extractall(source, filter="data")
+        (tree,) = source.iterdir()
+        generator = tree / "build" / "single_file_libs"
+        result = subprocess.run(
+            ["sh", "./create_single_file_decoder.sh"], cwd=generator, capture_output=True, text=True
+        )
+        if result.returncode != 0 or not (generator / "zstddeclib.c").exists():
+            fail(EXIT_TARGET, f"create_single_file_decoder.sh failed:\n{result.stdout}{result.stderr}")
+
+        files = {}
+        for name, origin in VENDORED_SOURCES.items():
+            destination = VENDOR_DIR / name
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(tree / origin, destination)
+            files[name] = sha256(destination)
+
+        pin = {
+            "files": dict(sorted(files.items())),
+            "released": release["published_at"],
+            "repository": REPOSITORY,
+            "signature": signature_status,
+            "tag": tag,
+            "tarball": tarball_name,
+            "tarballSHA256": actual,
+            "vendoredOn": datetime.date.today().isoformat(),
+        }
+        PIN.write_text(json.dumps(pin, indent=2, sort_keys=True) + "\n")
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+
+    print(f"pinned {tag}; changes:", flush=True)
+    subprocess.run(["git", "-C", str(ROOT), "diff", "--stat", "--", str(VENDOR_DIR)])
+    print("now run the suite: swift test --quiet")
+    return EXIT_CURRENT
+
+
+def main(arguments: list[str]) -> int:
+    if arguments in ([], ["--check"]):
+        return check()
+    if arguments[:1] == ["--update"] and len(arguments) <= 2:
+        return update(arguments[1] if len(arguments) == 2 else None)
+    if arguments in (["-h"], ["--help"]):
+        print(__doc__.strip())
+        return EXIT_CURRENT
+    fail(EXIT_USAGE, f"unknown arguments {' '.join(arguments)} (try --help)")
+    return EXIT_USAGE
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

@@ -120,6 +120,12 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 - ``RemoteImageResolver``
 - ``RemoteImageCache``
 
+### Decompression
+
+- <doc:ZstdDecoding>
+- ``ZstdDecoder``
+- ``ZstdDecodeError``
+
 ### Networking
 
 - ``RemoteDataFetching``

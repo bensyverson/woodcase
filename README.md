@@ -217,4 +217,4 @@ swift test
 
 ## License
 
-MIT — see [LICENSE](LICENSE). Bundled fonts carry their own licenses in [LICENSES/](LICENSES/).
+MIT — see [LICENSE](LICENSE). Bundled fonts carry their own licenses in [LICENSES/](LICENSES/). The vendored zstd decoder in [Sources/CZstdDecode/](Sources/CZstdDecode/) (zstd's `zstddeclib.c`, Copyright Meta Platforms, Inc. and affiliates) is used under zstd's BSD license, kept beside it in [Sources/CZstdDecode/LICENSE](Sources/CZstdDecode/LICENSE); its pinned release is in `VENDORED.json` there.

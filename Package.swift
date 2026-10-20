@@ -40,8 +40,19 @@ let package = Package(
         .package(url: "https://github.com/bensyverson/PixelPeeper.git", branch: "main"),
     ],
     targets: [
+        // zstd's decode-only single file (zstddeclib.c), generated from the release pinned in
+        // VENDORED.json — Figma's clipboard payload is zstd, and no Apple API decodes it.
+        // Vendored rather than a package dependency on facebook/zstd, which would pull in
+        // the compressor and fetch on every fresh build (Ben, 2026-10-19, leaf 70RuH9).
+        // `scripts/zstd-upstream` checks for a newer release and re-pins. Internal: only
+        // `ZstdDecoder` imports it.
+        .target(
+            name: "CZstdDecode",
+            exclude: ["LICENSE", "VENDORED.json"]
+        ),
         .target(
             name: "Woodcase",
+            dependencies: ["CZstdDecode"],
             resources: [
                 .copy("IconFonts/Fonts"),
                 .copy("CodeGen/ViewerTemplates"),
