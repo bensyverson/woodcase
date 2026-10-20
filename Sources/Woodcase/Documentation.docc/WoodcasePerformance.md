@@ -801,6 +801,30 @@ helpers — and it is fixed
 (`project/2026-08-30-release-only-ctfont-sigtrap.md`). `swift test -c release` now runs
 the whole suite green.
 
+## Painted extents of a run
+
+A renderer's culling bounds and an editor's hit shapes need every node's painted extent
+after every edit. Asked one node at a time, each call walks its node's unclipped subtree,
+so a text is measured — set and outlined by Core Text — once for itself and once per
+unclipped ancestor. `PaintedExtentInkCountTests` counts it on one artboard of Penumbra's
+perf board (`PerfBoardFixture`: 308 nodes, 165 texts) and gates the counts: 455 ink
+lookups per node, 165 from one ``PenLayoutEngine/paintedExtents(in:layoutRects:)`` walk,
+and none laid out on a second walk over unchanged texts (the text-ink cache; the first
+lays out 106, since twenty "Open" labels and other repeats share a key).
+
+`swift test --filter PaintedExtentBoardTests | grep PAINTED-EXTENT-BOARD`, debug build,
+best of seven, two runs on 2026-10-20 at load 32–39 (`uptime`; other agents building):
+
+| Pass over the artboard | Time |
+|---|---|
+| `paintedExtent` per node, no ink kept | 21.3 ms |
+| one walk, no ink kept | 8.5–8.6 ms |
+| one walk, every ink kept | 1.7–1.8 ms |
+
+A measurement, not a budget: no ceiling is enforced. The same runs at load 260–340 read
+18.1, 7.3 and 1.6 ms, and in the full suite 103.8, 25.2 and 2.2 ms: the shared machine,
+not the code, sets the spread.
+
 ## What the budgets do not cover
 
 **Font downloads.** `shot` calls

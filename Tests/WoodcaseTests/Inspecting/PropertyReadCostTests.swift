@@ -10,7 +10,7 @@ import Testing
 /// What one property read and one schema lookup may cost: reading a path costs that
 /// path, not the node's whole payload, and a type's schema table is built once.
 ///
-/// Counted with ``PropertyCostCounter`` rather than timed, so the checks hold on a loaded
+/// Counted with ``CostCounter`` rather than timed, so the checks hold on a loaded
 /// machine. `PropertyReadCostProbe` times the same reads on a big document.
 struct PropertyReadCostTests {
     /// A board holding a hundred rectangles — the payload a whole-kind encode would drag
@@ -31,9 +31,9 @@ struct PropertyReadCostTests {
     }
 
     /// Runs `body` with a fresh counter installed and returns the counter.
-    private static func counting(_ body: () throws -> Void) rethrows -> PropertyCostCounter {
-        let counter = PropertyCostCounter()
-        try PropertyCostCounter.$current.withValue(counter) { try body() }
+    private static func counting(_ body: () throws -> Void) rethrows -> CostCounter {
+        let counter = CostCounter()
+        try CostCounter.$current.withValue(counter) { try body() }
         return counter
     }
 

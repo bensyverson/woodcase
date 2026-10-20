@@ -111,7 +111,7 @@ public enum PenSchema {
         prefix: String,
         type: PenNode.NodeType?
     ) -> [PenSchemaTable.Property] {
-        PropertyCostCounter.record(.schemaTable(type))
+        CostCounter.record(.schemaTable(type))
         return paths.sorted().map { path in
             let field = String(path.dropFirst(prefix.count))
             return PenSchemaTable.Property(

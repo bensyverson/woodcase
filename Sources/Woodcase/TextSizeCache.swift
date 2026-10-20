@@ -63,43 +63,6 @@ public final class TextSizeCache: Sendable {
         let height: Double
     }
 
-    /// The sizes, and the font set they were measured in.
-    struct State {
-        /// The ``PenFontRegistry/generation`` every size was measured at.
-        var generation: Int
-        /// The sizes stored or read since the last turn.
-        var young: [PenTextMeasureRequest: Size] = [:]
-        /// The sizes of the generation before, dropped at the next turn.
-        var old: [PenTextMeasureRequest: Size] = [:]
-        /// How many texts reached the base measurer.
-        var measured = 0
-
-        /// Forgets every size.
-        mutating func removeAll() {
-            young.removeAll(keepingCapacity: true)
-            old.removeAll()
-        }
-
-        /// The size kept for a request, moved into the young generation when it was old.
-        mutating func read(_ key: PenTextMeasureRequest, generationSize: Int) -> Size? {
-            if let size = young[key] { return size }
-            guard let size = old.removeValue(forKey: key) else { return nil }
-            store(size, for: key, generationSize: generationSize)
-            return size
-        }
-
-        /// Keeps a size in the young generation, turning the generations first when it
-        /// is full.
-        mutating func store(_ size: Size, for key: PenTextMeasureRequest, generationSize: Int) {
-            if young[key] == nil, young.count >= generationSize {
-                old = young
-                young = [:]
-                young.reserveCapacity(generationSize)
-            }
-            young[key] = size
-        }
-    }
-
     /// Creates an empty cache in front of a measurer.
     ///
     /// - Parameters:
@@ -116,16 +79,12 @@ public final class TextSizeCache: Sendable {
         precondition(capacity >= 2, "a text size cache holds at least two sizes")
         self.base = base
         self.capacity = capacity
-        generationSize = capacity / 2
         generation = fontGeneration
-        state = Mutex(State(generation: fontGeneration()))
+        state = Mutex(FontGenerationStore(capacity: capacity, fontGeneration: fontGeneration()))
     }
 
     /// The most sizes the cache holds.
     public let capacity: Int
-
-    /// The most sizes one generation holds: half the capacity.
-    private let generationSize: Int
 
     /// The measurer behind the cache.
     private let base: TextMeasurer
@@ -134,7 +93,7 @@ public final class TextSizeCache: Sendable {
     private let generation: @Sendable () -> Int
 
     /// The sizes, behind the lock.
-    private let state: Mutex<State>
+    private let state: Mutex<FontGenerationStore<PenTextMeasureRequest, Size>>
 
     /// The font set's generation, as the cache reads it — ``PenFontRegistry/generation``
     /// unless the cache was made with another source.
@@ -144,7 +103,7 @@ public final class TextSizeCache: Sendable {
 
     /// How many sizes the cache holds now; never more than ``capacity``.
     public var count: Int {
-        state.withLock { $0.young.count + $0.old.count }
+        state.withLock { $0.count }
     }
 
     /// How many texts the base measurer has been asked for, for the tests that prove a
@@ -159,21 +118,12 @@ public final class TextSizeCache: Sendable {
         { [self] request in
             let key = request.ignoringColor
             let before = generation()
-            let hit: Size? = state.withLock { state in
-                if state.generation != before {
-                    state.removeAll()
-                    state.generation = before
-                }
-                return state.read(key, generationSize: generationSize)
-            }
-            if let hit { return (hit.width, hit.height) }
+            if let hit = state.withLock({ $0.value(for: key, at: before) }) { return (hit.width, hit.height) }
 
             let measured = base(request)
             let after = generation()
-            state.withLock { state in
-                state.measured += 1
-                guard after == before, state.generation == before else { return }
-                state.store(Size(width: measured.width, height: measured.height), for: key, generationSize: generationSize)
+            state.withLock {
+                $0.keep(Size(width: measured.width, height: measured.height), for: key, measuredFrom: before, to: after)
             }
             return measured
         }

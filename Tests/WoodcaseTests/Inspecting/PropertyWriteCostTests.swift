@@ -10,7 +10,7 @@ import Testing
 /// What one property write may cost: writing a path costs that path, not the node's
 /// whole payload — a board's width is written without encoding or decoding its children.
 ///
-/// Counted with ``PropertyCostCounter`` rather than timed, so the checks hold on a loaded
+/// Counted with ``CostCounter`` rather than timed, so the checks hold on a loaded
 /// machine. `PropertyWriteCostProbe` times the same writes on a big document.
 struct PropertyWriteCostTests {
     /// A hundred rectangles — the subtree a whole-payload write would drag along.
@@ -41,14 +41,14 @@ struct PropertyWriteCostTests {
     }
 
     /// Runs `body` with a fresh counter installed and returns the counter.
-    private static func counting(_ body: () throws -> Void) rethrows -> PropertyCostCounter {
-        let counter = PropertyCostCounter()
-        try PropertyCostCounter.$current.withValue(counter) { try body() }
+    private static func counting(_ body: () throws -> Void) rethrows -> CostCounter {
+        let counter = CostCounter()
+        try CostCounter.$current.withValue(counter) { try body() }
         return counter
     }
 
     /// Whether `counter` saw no payload go through JSON either way.
-    private static func touchedNoJSON(_ counter: PropertyCostCounter) -> Bool {
+    private static func touchedNoJSON(_ counter: CostCounter) -> Bool {
         counter.count(of: .payloadEncode) == 0 && counter.count(of: .payloadDecode) == 0
     }
 

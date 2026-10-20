@@ -508,7 +508,7 @@ sibling, a `fit_content` parent or a group's union, turned or not, and not even 
 |---|---|---|---|
 | (i) Bounds | The axis-aligned bounds of the node's turned, flipped box, in its parent's coordinates | ``PenRect``, as ``PenLayoutEngine/layout(_:textMeasurer:options:)`` settles it; ``PenLayoutEngine/absoluteRects(under:in:layoutRects:)`` composes it | The layout engine; `tree`'s `rect` and `absRect`; `shot`'s `rect=`, `--outline` and `--crop`; overlap lint; snapping and marquee selection; codegen's positioned wrappers |
 | (ii) Placement | The box `0, 0, w, h` (a group's: its children's union, from its anchor) and the map that turns, flips and moves it into the parent, or the canvas | ``PenPlacement``, from ``PenLayoutEngine/placement(of:rect:layoutRects:)`` and ``PenLayoutEngine/canvasPlacement(of:in:layoutRects:)`` | Every renderer; the space children's rects are measured in; hit-testing the turned quad; selection handles and drag |
-| (iii) Painted extent | What may carry ink: the box grown by its stroke band, unclipped children, shadows and blur | ``PenLayoutEngine/paintedExtent(of:rect:layoutRects:)``, ``PenLayoutEngine/canvasPaintedExtent(of:in:layoutRects:)`` | Export and render canvas size; `shot --extent painted`; the render tests that place Pen's references; viewport culling; dirty-rect invalidation; stroke-band hit-testing |
+| (iii) Painted extent | What may carry ink: the box grown by its stroke band, unclipped children, shadows and blur | ``PenLayoutEngine/paintedExtent(of:rect:layoutRects:)``, ``PenLayoutEngine/canvasPaintedExtent(of:in:layoutRects:)``; every node's at once from ``PenLayoutEngine/paintedExtents(of:rect:layoutRects:)`` and ``PenLayoutEngine/paintedExtents(in:layoutRects:)`` | Export and render canvas size; `shot --extent painted`; the render tests that place Pen's references; viewport culling; dirty-rect invalidation; stroke-band hit-testing |
 
 The placement's map sends the box to the quad the node is drawn as, and that quad's
 bounds are (i). Woodcase spells the map as the box centered in the bounds, flipped and
@@ -547,6 +547,19 @@ draws its own bundled vector set, and the two libraries' glyphs are not always t
 shape for the same name). One approximation remains: a sharp corner of a path's stroke
 counts only the band's half width, where Pen counts the miter. A sharp polygon's miters are
 counted at the node's own limit (``PenNode/strokeMiterLimit``, Pen's 4 by default).
+
+**Every node's extent in one walk.** A node's painted extent folds in its unclipped
+descendants', so a renderer's culling bounds or an editor's hit shapes, asking
+``PenLayoutEngine/paintedExtent(of:rect:layoutRects:)`` once per node, measured each text's
+ink again for every unclipped ancestor above it: 455 text inks for the 165 texts of one
+artboard of Penumbra's perf board (`PaintedExtentInkCountTests`).
+``PenLayoutEngine/paintedExtents(of:rect:layoutRects:)`` walks a subtree once, bottom-up,
+and answers every placed node's extent — equal to the per-node call's, to the bit
+(`PenPaintedExtentsTests`), a clipping frame's descendants and a disabled node with a rect
+included — measuring each text once; ``PenLayoutEngine/paintedExtents(in:layoutRects:)``
+does so for a whole document. A text's ink is also kept across walks, process-wide, by
+content, style, runs without their colors and box, and discarded when the font set's
+``PenFontRegistry/generation`` moves, so an edit that changes no text measures no ink.
 
 ## Text Measurement
 

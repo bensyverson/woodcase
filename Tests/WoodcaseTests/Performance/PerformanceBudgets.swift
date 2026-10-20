@@ -26,6 +26,8 @@ import Testing
 /// - ``PerformanceBudgets/ComponentLoopTests`` (runs only on a strict build)
 /// - ``PerformanceBudgets/PaintedExtentWalkTests`` (a measurement, not a budget — no
 ///   fixed ceiling)
+/// - ``PerformanceBudgets/PaintedExtentBoardTests`` (a measurement, not a budget — no
+///   fixed ceiling)
 ///
 /// ```sh
 /// swift test --filter Performance

@@ -83,9 +83,9 @@ struct PropertyWriteFallbackTests {
     }
 
     /// Runs `body` with a fresh counter installed and returns the counter.
-    private static func counting(_ body: () throws -> Void) rethrows -> PropertyCostCounter {
-        let counter = PropertyCostCounter()
-        try PropertyCostCounter.$current.withValue(counter) { try body() }
+    private static func counting(_ body: () throws -> Void) rethrows -> CostCounter {
+        let counter = CostCounter()
+        try CostCounter.$current.withValue(counter) { try body() }
         return counter
     }
 

@@ -67,13 +67,13 @@ extension NodePropertyCodec {
 
     /// Encodes a `Codable` payload to the flat JSON dictionary the .pen file holds.
     static func dictionary(from value: some Encodable) throws -> [String: AnyCodable] {
-        PropertyCostCounter.record(.payloadEncode)
+        CostCounter.record(.payloadEncode)
         return try JSONDecoder().decode([String: AnyCodable].self, from: JSONEncoder().encode(value))
     }
 
     /// Decodes a flat JSON dictionary back into a typed payload.
     static func decode<T: Decodable>(_ type: T.Type, from dictionary: [String: AnyCodable]) throws -> T {
-        PropertyCostCounter.record(.payloadDecode)
+        CostCounter.record(.payloadDecode)
         return try JSONDecoder().decode(type, from: JSONEncoder().encode(dictionary))
     }
 
