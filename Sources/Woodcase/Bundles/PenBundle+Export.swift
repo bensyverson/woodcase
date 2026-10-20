@@ -12,7 +12,9 @@ public extension PenBundle {
     /// and `fonts/` holding every local file the document points at, with relative
     /// references that resolve from there. Files inside the bundle keep their relative
     /// paths; a reference that reached outside the bundle is copied in too, so the folder
-    /// stands alone. The bundle itself, its log and its ``ConvertedFrom`` record are
+    /// stands alone — except a font file Apple made (``PenFontMaker/isApple``), wherever
+    /// it is: Apple's license lets nobody pass its fonts on, so that declaration is left
+    /// out (one at a web address is kept as written). The bundle itself, its log and its ``ConvertedFrom`` record are
     /// left where they are; the new file's log starts with a `new` row, as any file
     /// woodcase creates does. Nothing in the folder is overwritten.
     ///
@@ -34,7 +36,8 @@ public extension PenBundle {
 extension PenBundle {
     /// ``export(_:to:identity:)`` with the document passed through `prepare` before its
     /// files are gathered — how ``export(_:to:identity:fontPlan:bundling:)`` adds the
-    /// fonts it bundles.
+    /// fonts it bundles. Whatever `prepare` returns, a local declared font file Apple
+    /// made is neither copied nor declared (``droppingAppleMadeFonts(_:relativeTo:)``).
     ///
     /// - Parameters:
     ///   - bundle: The bundle to export.
@@ -57,7 +60,10 @@ extension PenBundle {
             throw PenBundleError.destinationExists(destination)
         }
 
-        let document = try await prepare(PenFileTransaction.read(at: location.document) { $0.materialize() }.value)
+        let document = try await droppingAppleMadeFonts(
+            prepare(PenFileTransaction.read(at: location.document) { $0.materialize() }.value),
+            relativeTo: location.document
+        )
         do {
             try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         } catch {
@@ -74,5 +80,28 @@ extension PenBundle {
             copied: gathering.copiedCount,
             missing: gathering.missing.map(\.value)
         )
+    }
+
+    /// The document without its local font declarations whose file Apple made
+    /// (``PenFontMaker/isApple``): Apple's fonts are never bundled, wherever they are
+    /// installed (Ben, 2026-10-15). A declaration at a web address, or of a file that is
+    /// missing or unreadable, is kept as it is.
+    ///
+    /// - Parameters:
+    ///   - document: The document to export.
+    ///   - sourceURL: The .pen file a relative declared url resolves against.
+    /// - Returns: The document, its `fonts` array filtered.
+    static func droppingAppleMadeFonts(_ document: PenDocument, relativeTo sourceURL: URL) -> PenDocument {
+        guard let declarations = document.fonts else { return document }
+        let kept = declarations.filter { declaration in
+            guard case let .local(url) = GoogleFontResolver.location(of: declaration, relativeTo: sourceURL),
+                  let data = try? Data(contentsOf: url, options: .mappedIfSafe)
+            else { return true }
+            return PenFontMaker(fontFile: data)?.isApple != true
+        }
+        guard kept.count < declarations.count else { return document }
+        var filtered = document
+        filtered.fonts = kept.isEmpty ? nil : kept
+        return filtered
     }
 }

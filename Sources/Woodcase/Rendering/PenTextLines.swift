@@ -108,12 +108,17 @@ public struct PenTextLines {
         firstBaseline: CGFloat,
         lineHeight: Double?
     ) {
-        let framesetter = CTFramesetterCreateWithAttributedString(attributedString)
         // Tall enough for any text: Core Text leaves out the lines a path cannot hold, and
         // which lines those are is a question of its line heights, not Pen's.
         let unbounded: CGFloat = 1e7
         let path = CGPath(rect: CGRect(x: 0, y: 0, width: width, height: unbounded), transform: nil)
-        let frame = CTFramesetterCreateFrame(framesetter, CFRange(location: 0, length: 0), path, nil)
+        // Typesetting reaches fontd by itself — a font's properties, a fallback face — so
+        // it goes through the gate (FontRegistryGate).
+        let frame = FontRegistryGate.withAccess {
+            CTFramesetterCreateFrame(
+                CTFramesetterCreateWithAttributedString(attributedString), CFRange(location: 0, length: 0), path, nil
+            )
+        }
         let lines = CTFrameGetLines(frame) as! [CTLine]
         var origins = [CGPoint](repeating: .zero, count: lines.count)
         CTFrameGetLineOrigins(frame, CFRange(location: 0, length: 0), &origins)

@@ -46,7 +46,8 @@ public struct PenFolderFontPlan: Friendly {
         /// Apple's: the operating system ships it — its file is under `/System/` (which
         /// holds `/System/Library/Fonts` and the downloadable fonts under
         /// `/System/Library/AssetsV2`) or `/Library/Apple/` — or Apple made it, wherever
-        /// it is installed (``PenFontMaker/isApple``).
+        /// it is installed (``PenFontMaker/isApple``), or it is the default family, SF Pro,
+        /// which a Mac without Apple's developer download draws as the system UI font.
         case system
         /// Google Fonts has a family of the name, which Pen downloads by name.
         case googleFonts

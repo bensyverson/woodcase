@@ -86,9 +86,13 @@ public enum PenBrowserPlaceholder {
             kCTFontAttributeName: font,
             kCTForegroundColorAttributeName: color,
         ] as CFDictionary
-        let full = CTLineCreateWithAttributedString(CFAttributedStringCreate(nil, text as CFString, attributes))
-        let ellipsis = CTLineCreateWithAttributedString(CFAttributedStringCreate(nil, "…" as CFString, attributes))
-        guard let line = CTLineCreateTruncatedLine(full, available, .end, ellipsis) else { return }
+        // Typesetting reaches fontd by itself, so it goes through the gate.
+        let truncated = FontRegistryGate.withAccess { () -> CTLine? in
+            let full = CTLineCreateWithAttributedString(CFAttributedStringCreate(nil, text as CFString, attributes))
+            let ellipsis = CTLineCreateWithAttributedString(CFAttributedStringCreate(nil, "…" as CFString, attributes))
+            return CTLineCreateTruncatedLine(full, available, .end, ellipsis)
+        }
+        guard let line = truncated else { return }
 
         var ascent: CGFloat = 0
         var descent: CGFloat = 0

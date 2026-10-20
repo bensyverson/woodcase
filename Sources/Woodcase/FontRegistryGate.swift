@@ -9,26 +9,31 @@ import Foundation
 ///
 /// `CTFontCreateWithFontDescriptor` and its neighbors do not resolve a family name
 /// in the calling process. They send a **synchronous XPC message to `fontd`** and
-/// block the calling thread on the reply — `__NSXPCCONNECTION_IS_WAITING_FOR_A_SYNCHRONOUS_REPLY__`,
-/// `mach_msg`, no timeout, no cancellation. That is fine once. It is not fine from
-/// several threads at once: Swift's cooperative pool has one thread per core, a
-/// blocking call occupies one for as long as it blocks, and a render that resolves
-/// fonts on every pool thread simultaneously leaves the process with nothing left to
-/// run — including whatever would have made `fontd` answer sooner.
+/// block the calling thread on the reply — `xpc_connection_send_message_with_reply_sync`,
+/// `mach_msg`, no timeout, no cancellation. So does **typesetting**: Core Text asks
+/// `fontd` for a font's properties the first time it shapes with it
+/// (`TBaseFont::DetermineFontFlags`) and for a fallback face when the font lacks a
+/// character (`TFontCascade::CreateFallback`). Every one of those calls in Woodcase goes
+/// through this gate: resolution, ``PenTextMeasurer``'s typesetting, ``PenTextLines``'
+/// framesetter, ``PenIconGlyph``'s line, the browser placeholder's label.
 ///
-/// That is not theoretical. On 2026-08-30 a full `swift test` under load sat for five
-/// minutes with **all eight** cooperative threads inside this exact XPC wait, six in
-/// ``PenTextMeasurer/resolveFont(family:size:weight:style:)`` and two in
-/// ``PenTextMeasurer/fontFamilyAvailable(_:)``, at ~0 % CPU and a flat 188 MB
-/// footprint; it never recovered and printed nothing. Earlier runs were sampled in
-/// the same place and the hang was recorded as a CoreText bug — see
-/// `project/2026-08-30-suite-stability.md`.
+/// Why: under load, a test host sometimes waits on a `fontd` reply that never comes. Seen
+/// three times — 2026-08-30 (all eight cooperative threads in resolution), issue
+/// `Wz8Lz8` (parallel fallback layouts) and issue `6StvbE` (one thread resolving inside
+/// the gate, one typesetting outside it, six queued on the gate, for 75 minutes, while
+/// `fontd` logged nothing for the connection after opening it). The process is never
+/// deadlocked on a lock of its own: every waiter is behind a reply `fontd` does not send.
+/// Before 2026-10-20 this comment said the wedge was the cooperative pool running out
+/// of threads; that was wrong — a synchronous XPC reply needs no pool thread, and the
+/// 6StvbE sample had an idle main thread and an idle worker.
 ///
-/// So every call that reaches the registry goes through this gate. One request is in
-/// flight at a time, which is what `fontd` serves anyway; the pile-up that wedges it
-/// never forms. The cost is bounded and small: ``FontResolutionCache`` answers a
-/// repeat lookup without coming here at all, so the gate is only ever contended by
-/// *first* resolutions of distinct families.
+/// Why the gate helps without explaining `fontd`: the wedge only ever formed with
+/// several of the process's Core Text calls reaching `fontd` at once, and keeping them
+/// one at a time stops it forming — unserialized `PenTextGeometryTests` hung 9 of 60
+/// fresh test hosts at load 30–150 with layout ungated, and none once layout was gated
+/// (`project/2026-10-20-fontd-wedge-and-the-layout-gate.md`). The cost is bounded:
+/// ``FontResolutionCache`` answers a repeat lookup without coming here, and a
+/// typesetting pass is short, but text layout in one process is now serialized.
 ///
 /// The lock is recursive because the registry calls nest — resolving a font asks
 /// whether its family is available first, and both are gated.

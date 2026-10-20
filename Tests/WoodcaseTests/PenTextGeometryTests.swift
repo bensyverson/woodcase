@@ -11,9 +11,9 @@ import Woodcase
 /// An editor's caret, hit-test and selection, read from ``PenTextLayout/geometry`` on the
 /// shared ``PenTextLayoutSample`` fixture — imported without `@testable`, as Penumbra reads it.
 ///
-/// Serialized because parallel cases that each need a Core Text fallback face wedged in
-/// `fontd` (issue `Wz8Lz8`).
-@Suite(.serialized)
+/// Its cases run in parallel, each laying out text that needs a Core Text fallback face.
+/// They once wedged in `fontd` that way and the suite was serialized (issue `Wz8Lz8`);
+/// layout now goes through the font registry's gate, so the suite is a check on that.
 struct PenTextGeometryTests {
     static func layout(_ sample: PenTextLayoutSample) -> PenTextLayout {
         PenTextLayout(

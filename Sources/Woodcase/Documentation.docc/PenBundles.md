@@ -91,7 +91,8 @@ document takes every row, whatever path it was written under
 - `woodcase unbundle Design.umbra` — ``PenBundle/export(_:to:identity:)`` — copies the
   document out into a plain folder, `Design/` beside the bundle by default: `Design.pen`
   with `images/` and `fonts/`, every reference relative to it, including any the bundle
-  reached outside itself for. The bundle is left as it is; nothing is overwritten.
+  reached outside itself for — except a declared font file Apple made, which is neither
+  copied nor declared (see below). The bundle is left as it is; nothing is overwritten.
 - `woodcase embed Design.umbra`, or `bundle --embed` —
   ``PenBundle/embed(_:identity:fetcher:fonts:)`` — downloads every remote image fill and
   remote declared font into the bundle, and copies the Google Fonts file of every face
@@ -122,7 +123,11 @@ designer's call, since the license is theirs to read, so Woodcase plans and the 
    vendor ID of `APPL`, or a manufacturer (name ID 8) or copyright (name ID 0) naming
    Apple Inc. or Apple Computer — never a list of family names, and never `fsType`:
    SF Pro, New York and Helvetica read 0 (installable), yet Apple's license forbids
-   passing them on.
+   passing them on. Woodcase's default family, SF Pro, is the system's on a stock Mac
+   too: without Apple's developer download there is no SF Pro family to find, and
+   Woodcase draws it as the system UI font — the same design — rather than as a
+   stand-in, so it is never listed as missing. Any *other* family this Mac lacks draws
+   in the system font as a substitute, and is missing.
 2. Each row says whether it ``PenFolderFontPlan/Family/startsChecked`` and why not, as a
    typed ``PenFolderFontPlan/Reason`` the app words: system fonts and Google Fonts (which
    Pen downloads by name) are unchecked and disabled; every other row with a file starts
@@ -138,6 +143,12 @@ designer's call, since the license is theirs to read, so Woodcase plans and the 
    copied into `fonts/` and its url rewritten relative to the exported `.pen`
    (`./fonts/Brand-Bold.ttf`), as images are — Pen copies no font file and keeps a
    relative url as written, so anything else breaks there.
+
+Apple's fonts are never bundled, wherever they are installed (Ben, 2026-10-15), and that
+holds with or without a plan: ``PenBundle/export(_:to:identity:)`` — which an app falls
+back to when it cannot plan — reads every local declared font file and leaves out the
+declaration of one Apple made, so a document declaring `/Library/Fonts/SF-Pro.ttf`
+exports without it. A declaration at a web address is kept as written.
 
 The research and both rulings are in Penumbra's
 `project/2026-10-15-bundling-fonts-in-pen-folders.md`.

@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+#
+# host-soak — Run one filtered slice of a test target in many fresh test hosts, several
+# at once, and sample any host that hangs.
+#
+# A hang that needs a cold process — Core Text's first trips to `fontd`, a fallback face
+# not yet cached — shows up once per process, so `swift test` repeated in one host never
+# finds it. This starts a new `swiftpm-testing-helper` per run, `--parallel` of them at a
+# time, against the already-built bundle (run `swift build --build-tests` first). A host
+# that outlasts `--timeout` seconds is sampled, `fontd` with it, then killed, and named
+# HUNG; its samples land beside its log in <outdir>.
+#
+#   scripts/host-soak 15 WoodcaseTests PenTextGeometryTests /tmp/geo
+#   scripts/host-soak 30 WoodcaseViewerTests "ChangedArtboardsTests|RenderCache" /tmp/viewer --parallel 8
+#
+# Only pids this script started are ever killed. Never `pkill -f`: the pattern matches
+# other agents' runs. See project/2026-10-20-fontd-wedge-and-the-layout-gate.md.
+#
+# Exits non-zero if any host hung or failed.
+
+set -u
+
+usage() {
+    echo "usage: $0 <rounds> <test-target> <filter> <outdir> [--parallel <n>] [--timeout <seconds>]" >&2
+    exit 64
+}
+
+[ $# -ge 4 ] || usage
+rounds=$1 target=$2 filter=$3 outdir=$4
+shift 4
+parallel=4
+timeout=60
+while [ $# -gt 0 ]; do
+    case $1 in
+        --parallel) parallel=$2; shift 2 ;;
+        --timeout) timeout=$2; shift 2 ;;
+        *) usage ;;
+    esac
+done
+
+root=$(cd "$(dirname "$0")/.." && pwd)
+developer=$(xcode-select -p)
+helper="$developer/Toolchains/XcodeDefault.xctoolchain/usr/libexec/swift/pm/swiftpm-testing-helper"
+bundle="$root/.build/debug/$target.xctest/Contents/MacOS/$target"
+[ -x "$helper" ] || { echo "no swiftpm-testing-helper at $helper" >&2; exit 69; }
+[ -f "$bundle" ] || { echo "no built $target at $bundle; run swift build --build-tests" >&2; exit 66; }
+# The test bundles link XCTest from the platform's developer frameworks.
+export DYLD_FRAMEWORK_PATH="$developer/Platforms/MacOSX.platform/Developer/Library/Frameworks"
+export DYLD_LIBRARY_PATH="$developer/Platforms/MacOSX.platform/Developer/usr/lib"
+mkdir -p "$outdir"
+cd "$root" || exit 1
+
+one() {
+    local tag=$1
+    "$helper" --test-bundle-path "$bundle" "$bundle" --testing-library swift-testing --filter "$filter" \
+        > "$outdir/$tag.log" 2>&1 &
+    local pid=$! waited=0
+    while kill -0 "$pid" 2>/dev/null; do
+        sleep 1
+        waited=$((waited + 1))
+        if [ "$waited" -ge "$timeout" ]; then
+            sample "$pid" 3 -file "$outdir/$tag.sample.txt" >/dev/null 2>&1
+            local fontd
+            fontd=$(pgrep -x -u "$(id -u)" fontd | head -1)
+            [ -n "$fontd" ] && sample "$fontd" 2 -file "$outdir/$tag.fontd.txt" >/dev/null 2>&1
+            kill -9 "$pid"
+            echo "HUNG $tag pid=$pid"
+            return
+        fi
+    done
+    wait "$pid"
+    echo "rc=$? $tag ${waited}s"
+}
+
+log="$outdir/results.txt"
+: > "$log"
+for round in $(seq 1 "$rounds"); do
+    for slot in $(seq 1 "$parallel"); do
+        one "r$round-p$slot" >> "$log" &
+    done
+    wait
+done
+passed=$(grep -c '^rc=0 ' "$log")
+total=$((rounds * parallel))
+echo "$passed/$total passed; $(grep -c '^HUNG ' "$log") hung (load $(sysctl -n vm.loadavg))"
+[ "$passed" -eq "$total" ]

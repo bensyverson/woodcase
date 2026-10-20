@@ -107,6 +107,27 @@ struct PenFolderFontPlanTests {
         try Self.expectSystemFont(Self.family("New York", in: plan))
     }
 
+    /// A stock Mac: no developer SF Pro, no family installed, nothing Apple made outside
+    /// `/System`, so whatever this Mac has installed cannot answer for it.
+    static let stockMac = PenFolderFontPlan.LocalFonts(
+        isFamilyAvailable: { _ in false },
+        isSystemFamily: { _ in false },
+        isAppleMade: { _ in false },
+        installedFile: { _ in nil }
+    )
+
+    @Test("On a stock Mac, SF Pro draws as the system UI font, so it is the system's — not missing")
+    func stockMacSFPro() async throws {
+        let plan = try await PenFolderFontPlan.make(
+            expanded: Self.document([("SF Pro", nil, nil), ("SF Pro", "700", "italic"), ("Woodcase Nowhere Sans", nil, nil)]),
+            declarations: [], relativeTo: nil, fonts: Self.resolver(), localFonts: Self.stockMac
+        )
+        try Self.expectSystemFont(Self.family("SF Pro", in: plan))
+        let nowhere = try Self.family("Woodcase Nowhere Sans", in: plan)
+        #expect(nowhere.source == .missing, "a missing family also draws as the system font, but as a stand-in")
+        #expect(nowhere.reason == .notFound)
+    }
+
     @Test("A Google Fonts family is listed, unchecked and disabled: Pen downloads it by name")
     func googleFont() async throws {
         let plan = try await PenFolderFontPlan.make(

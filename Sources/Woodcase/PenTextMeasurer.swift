@@ -89,18 +89,20 @@ public enum PenTextMeasurer {
             let block = typeset(attributedString, width: maxWidth.map { CGFloat($0) })
             return CGSize(width: ceil(block.width), height: ceil(CGFloat(block.lineCount) * lineHeight))
         }
-        let framesetter = CTFramesetterCreateWithAttributedString(attributedString)
         let constraintSize = CGSize(
             width: maxWidth ?? CGFloat.greatestFiniteMagnitude,
             height: CGFloat.greatestFiniteMagnitude
         )
-        let fitSize = CTFramesetterSuggestFrameSizeWithConstraints(
-            framesetter,
-            CFRange(location: 0, length: 0),
-            nil,
-            constraintSize,
-            nil
-        )
+        // Typesetting reaches fontd by itself, so it goes through the gate.
+        let fitSize = FontRegistryGate.withAccess {
+            CTFramesetterSuggestFrameSizeWithConstraints(
+                CTFramesetterCreateWithAttributedString(attributedString),
+                CFRange(location: 0, length: 0),
+                nil,
+                constraintSize,
+                nil
+            )
+        }
         // Ceil to avoid sub-pixel clipping
         return CGSize(width: ceil(fitSize.width), height: ceil(fitSize.height))
     }

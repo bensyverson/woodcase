@@ -145,6 +145,49 @@ struct PenFolderFontPlanExportTests {
         #expect(report.copied == 3)
     }
 
+    @Test("Exporting without a plan copies no font file Apple made, inside the bundle or out, and drops its declaration")
+    func planlessExportSkipsAppleMadeFiles() async throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("PenFolderFontPlanExportTests-\(UUID().uuidString)").resolvingSymlinksInPath()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let bundle = root.appendingPathComponent("Design.umbra")
+        let elsewhere = root.appendingPathComponent("Library/Fonts")
+        for directory in [bundle.appendingPathComponent("mono"), bundle.appendingPathComponent("brand"), elsewhere] {
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        }
+        try FileManager.default.copyItem(
+            at: Self.fonts.appendingPathComponent("WoodcaseDeclaredMono.ttf"),
+            to: bundle.appendingPathComponent("mono/WoodcaseDeclaredMono.ttf")
+        )
+        let appleMade = SyntheticFont.file(vendor: "APPL", names: [.windows(1, "SF Pro")])
+        try appleMade.write(to: bundle.appendingPathComponent("brand/AppleSans.ttf"))
+        try appleMade.write(to: elsewhere.appendingPathComponent("SF-Pro.ttf"))
+        try Data("""
+        {"version": "\(PenDocument.currentFormatVersion)", "children": [
+          {"type": "text", "id": "a", "content": "a", "fontFamily": "Woodcase Declared Mono"},
+          {"type": "text", "id": "b", "content": "b", "fontFamily": "SF Pro"}
+        ], "fonts": [
+          {"name": "Woodcase Declared Mono", "url": "mono/WoodcaseDeclaredMono.ttf"},
+          {"name": "Woodcase Apple Sans", "url": "brand/AppleSans.ttf"},
+          {"name": "SF Pro", "url": "\(elsewhere.appendingPathComponent("SF-Pro.ttf").path)"},
+          {"name": "SF Pro", "url": "https://fonts.example.com/SF-Pro.ttf"}
+        ]}
+        """.utf8).write(to: bundle.appendingPathComponent("document.pen"))
+        let folder = root.appendingPathComponent("Out")
+
+        let report = try await PenBundle.export(bundle, to: folder, identity: nil)
+
+        let exported = try PenParser.parse(contentsOf: report.document)
+        #expect(exported.fonts?.map(\.url) == [
+            "./fonts/WoodcaseDeclaredMono.ttf",
+            "https://fonts.example.com/SF-Pro.ttf",
+        ])
+        let copied = try FileManager.default.contentsOfDirectory(atPath: folder.appendingPathComponent("fonts").path)
+        #expect(copied == ["WoodcaseDeclaredMono.ttf"])
+        #expect(report.copied == 1)
+        #expect(report.missing.isEmpty)
+    }
+
     @Test("The bundle's plan reads the document through the bundle")
     func plansBundle() async throws {
         let root = FileManager.default.temporaryDirectory

@@ -93,25 +93,32 @@ extension PenTextMeasurer {
 
     /// The lines Core Text's typesetter breaks `string` into at `width`, unaligned.
     ///
+    /// Gated by ``FontRegistryGate``: typesetting reaches `fontd` by itself, for a font's
+    /// properties and for a fallback face.
+    ///
     /// - Parameters:
     ///   - string: The styled text.
     ///   - width: The wrapping width.
     /// - Returns: The lines, top to bottom.
     private static func typesetLines(_ string: CFAttributedString, width: CGFloat) -> [CTLine] {
-        let typesetter = CTTypesetterCreateWithAttributedString(string)
-        let length = CFAttributedStringGetLength(string)
-        var lines: [CTLine] = []
-        var start = 0
-        while start < length {
-            let count = CTTypesetterSuggestLineBreak(typesetter, start, Double(width))
-            lines.append(CTTypesetterCreateLine(typesetter, CFRange(location: start, length: count)))
-            start += count
+        FontRegistryGate.withAccess {
+            let typesetter = CTTypesetterCreateWithAttributedString(string)
+            let length = CFAttributedStringGetLength(string)
+            var lines: [CTLine] = []
+            var start = 0
+            while start < length {
+                let count = CTTypesetterSuggestLineBreak(typesetter, start, Double(width))
+                lines.append(CTTypesetterCreateLine(typesetter, CFRange(location: start, length: count)))
+                start += count
+            }
+            return lines
         }
-        return lines
     }
 
     /// The lines of a `CTFrame` over `string` at `width`, aligned, justified and
     /// indented, with each line's start.
+    ///
+    /// Gated by ``FontRegistryGate``, as ``typesetLines(_:width:)`` is.
     ///
     /// - Parameters:
     ///   - string: The styled text.
@@ -121,8 +128,11 @@ extension PenTextMeasurer {
         // Core Text lays out only the lines that fit the path, so the path is taller
         // than any text.
         let path = CGPath(rect: CGRect(x: 0, y: 0, width: width, height: 1e7), transform: nil)
-        let framesetter = CTFramesetterCreateWithAttributedString(string)
-        let frame = CTFramesetterCreateFrame(framesetter, CFRange(location: 0, length: 0), path, nil)
+        let frame = FontRegistryGate.withAccess {
+            CTFramesetterCreateFrame(
+                CTFramesetterCreateWithAttributedString(string), CFRange(location: 0, length: 0), path, nil
+            )
+        }
         let lines = CTFrameGetLines(frame) as! [CTLine]
         var origins = [CGPoint](repeating: .zero, count: lines.count)
         CTFrameGetLineOrigins(frame, CFRange(location: 0, length: 0), &origins)

@@ -190,9 +190,15 @@ the calling thread on the reply, with no timeout. Two consequences shape the cod
 ``FontResolutionCache`` answers a repeat resolution without going out at all — which is
 why it exists, and why it is invalidated wholesale whenever fonts are registered
 (``PenFontRegistry``). And every call that does go out passes through
-``FontRegistryGate``, one at a time: Swift's cooperative pool has a thread per core, a
-blocking call occupies one, and rendering text on every pool thread at once left a whole
-process with nothing runnable for five minutes (`project/2026-08-30-suite-stability.md`).
+``FontRegistryGate``, one at a time — **typesetting included**: Core Text's framesetter
+and typesetter go to `fontd` by themselves, for a font's properties the first time it
+shapes with it and for a fallback face when a font lacks a character. Under load, a
+process with several such calls in flight has waited forever on a reply `fontd` never
+sent, with `fontd` itself idle; one at a time, it has not
+(`project/2026-10-20-fontd-wedge-and-the-layout-gate.md`). Text layout within one process
+is therefore serialized. The earlier reading — that the cooperative pool ran out of
+threads (`project/2026-08-30-suite-stability.md`) — was wrong: an XPC reply needs no pool
+thread.
 
 ### Icon Fonts
 Icon font nodes are rendered as single Unicode glyphs using Core Text. Woodcase bundles six icon font families — Lucide, Feather, Phosphor, and Material Symbols (Outlined, Rounded, Sharp) — which are automatically registered with CoreText on first use via ``PenIconFontRegistry``. Material Symbols variable-weight fonts support the `wght` OpenType variation axis. Users can register additional icon font families via ``PenIconFontRegistry/register(family:fontName:mapping:)``. The glyph is placed as Pen places it, by the font's metrics rather than its ink: its advance centered across the box and its line box centered down it (<doc:PenIconFonts> has the rule and its evidence). An icon's fills paint its glyph exactly as a text node's paint its glyphs, over the icon's box: a gradient on a 120-point icon runs edge to edge of those 120 points, whatever the glyph's ink.

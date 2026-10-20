@@ -22,7 +22,10 @@ public extension PenFolderFontPlan {
     ///    New York families from Apple's developer downloads live in `/Library/Fonts`,
     ///    and Apple's license lets nobody pass them on. Who made a font is read from the
     ///    font itself — its OS/2 vendor ID and its name table's manufacturer and
-    ///    copyright — never from a list of family names.
+    ///    copyright — never from a list of family names. Woodcase's default family,
+    ///    ``PenTextStyle/defaultFontFamily`` ("SF Pro"), is the system's on a Mac without
+    ///    Apple's developer download as well: there Woodcase draws it as the system UI
+    ///    font, the same design, so it is not missing.
     /// 3. **On Google Fonts?** The resolver's cached METADATA, or a fetch of it.
     /// 4. **Installed?** Core Text resolves each face drawn to a file of the family
     ///    elsewhere, which is the file that would ship.
@@ -55,12 +58,14 @@ extension PenFolderFontPlan {
     ///   - declarations: The document's own root `fonts` declarations.
     ///   - sourceURL: The .pen file a relative declared url resolves against, or `nil`.
     ///   - fonts: The resolver asked whether Google Fonts has a family.
+    ///   - localFonts: What this Mac's fonts answer; Core Text's unless a test says.
     /// - Returns: The plan.
     static func make(
         expanded: PenDocument,
         declarations: [PenFontDeclaration],
         relativeTo sourceURL: URL?,
-        fonts: GoogleFontResolver
+        fonts: GoogleFontResolver,
+        localFonts: LocalFonts = .coreText
     ) async -> PenFolderFontPlan {
         let (faces, coverage) = drawnFaces(in: expanded)
         var families: [Family] = []
@@ -70,7 +75,8 @@ extension PenFolderFontPlan {
                 faces: familyFaces.sorted(),
                 declarations: declarations.filter { $0.name == name },
                 relativeTo: sourceURL,
-                fonts: fonts
+                fonts: fonts,
+                localFonts: localFonts
             ))
         }
         return PenFolderFontPlan(families: families, themeCoverage: coverage)
@@ -82,7 +88,8 @@ extension PenFolderFontPlan {
         faces: [PenFontFace],
         declarations: [PenFontDeclaration],
         relativeTo sourceURL: URL?,
-        fonts: GoogleFontResolver
+        fonts: GoogleFontResolver,
+        localFonts: LocalFonts
     ) async -> Family {
         if !declarations.isEmpty {
             var files: [FontFile] = []
@@ -106,14 +113,16 @@ extension PenFolderFontPlan {
             let source: Source = files.isEmpty && !isDeclaredRemotely ? .missing : .declared
             return Family(name: name, faces: faces, source: source, files: sortedUnique(files))
         }
-        if GoogleFontResolver.isSystemFamily(name) || faces.contains(where: isAppleMade) {
+        if localFonts.drawsAsSystemFont(name) || localFonts.isSystemFamily(name)
+            || faces.contains(where: localFonts.isAppleMade)
+        {
             return Family(name: name, faces: faces, source: .system, files: [])
         }
         let answer = await googleFontsAnswer(for: name, fonts: fonts)
         if answer == .listed {
             return Family(name: name, faces: faces, source: .googleFonts, files: [], googleFonts: answer)
         }
-        let installed = sortedUnique(faces.compactMap(installedFile))
+        let installed = sortedUnique(faces.compactMap(localFonts.installedFile))
         return Family(
             name: name, faces: faces, source: installed.isEmpty ? .missing : .installed,
             files: installed, googleFonts: answer

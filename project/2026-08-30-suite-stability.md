@@ -96,6 +96,15 @@ occupies one for as long as it blocks. Eight parallel test cases each rendering 
 put all eight threads into that wait at once, the process had nothing left to run, and
 it never came back.
 
+> **Correction, 2026-10-20 (leaf 6StvbE).** The mechanism above is wrong. A synchronous
+> XPC reply is received on the waiting thread itself and needs no pool thread, so an
+> exhausted pool cannot keep it from arriving. Samples of later hangs show the real
+> state: the process's requests sit unanswered while `fontd` is idle, with one request in
+> flight as readily as eight, and an idle main thread and worker beside them. What the gate
+> changed is how many of the process's Core Text calls reach `fontd` at once — and it
+> left typesetting ungated, which is how the wedge came back. See
+> [2026-10-20-fontd-wedge-and-the-layout-gate.md](2026-10-20-fontd-wedge-and-the-layout-gate.md).
+
 **Fix:** ``FontRegistryGate`` — one process-wide recursive lock, held across every call
 that reaches the font registry (``PenTextMeasurer/fontFamilyAvailable(_:)``, the
 uncached half of ``PenTextMeasurer/resolveFont(family:size:weight:style:)``,

@@ -97,7 +97,8 @@ public struct PenIconGlyph: Hashable {
             kCTForegroundColorAttributeName: color,
         ]
         let attributed = CFAttributedStringCreate(kCFAllocatorDefault, string as CFString, attributes as CFDictionary)!
-        return CTLineCreateWithAttributedString(attributed)
+        // Typesetting reaches fontd by itself, so it goes through the gate.
+        return FontRegistryGate.withAccess { CTLineCreateWithAttributedString(attributed) }
     }
 
     /// The line's pen position in Core Text's y-up space over the box: ``origin`` with its
