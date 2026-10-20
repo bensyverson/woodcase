@@ -14,9 +14,15 @@ public extension PenFolderFontPlan {
     ///
     /// 1. **Declared?** A root `fonts` entry of the name makes it ``Source/declared``,
     ///    with its local files that exist; one whose only local file is missing is
-    ///    ``Source/missing``.
-    /// 2. **The system's?** ``GoogleFontResolver/isSystemFamily(_:)``: Core Text
-    ///    resolves it from a file under `/System/` or `/Library/Apple/`.
+    ///    ``Source/missing``. A declared local file Apple made (``PenFontMaker/isApple``)
+    ///    makes the family ``Source/system`` instead.
+    /// 2. **The system's?** Either ``GoogleFontResolver/isSystemFamily(_:)`` — Core Text
+    ///    resolves it from a file under `/System/` or `/Library/Apple/` — or Apple made
+    ///    the font Core Text draws a face of it in, wherever that file is: the SF Pro and
+    ///    New York families from Apple's developer downloads live in `/Library/Fonts`,
+    ///    and Apple's license lets nobody pass them on. Who made a font is read from the
+    ///    font itself — its OS/2 vendor ID and its name table's manufacturer and
+    ///    copyright — never from a list of family names.
     /// 3. **On Google Fonts?** The resolver's cached METADATA, or a fetch of it.
     /// 4. **Installed?** Core Text resolves each face drawn to a file of the family
     ///    elsewhere, which is the file that would ship.
@@ -81,20 +87,26 @@ extension PenFolderFontPlan {
         if !declarations.isEmpty {
             var files: [FontFile] = []
             var isDeclaredRemotely = false
+            var isAppleMade = false
             for declaration in declarations {
                 switch GoogleFontResolver.location(of: declaration, relativeTo: sourceURL) {
                 case let .local(url) where FileManager.default.fileExists(atPath: url.path):
-                    files.append(declaredFile(declaration, at: url))
+                    let data = try? Data(contentsOf: url, options: .mappedIfSafe)
+                    if data.flatMap(PenFontMaker.init(fontFile:))?.isApple == true { isAppleMade = true }
+                    files.append(declaredFile(declaration, at: url, data: data))
                 case .remote:
                     isDeclaredRemotely = true
                 case .local, .unresolvable:
                     break
                 }
             }
+            if isAppleMade {
+                return Family(name: name, faces: faces, source: .system, files: [])
+            }
             let source: Source = files.isEmpty && !isDeclaredRemotely ? .missing : .declared
             return Family(name: name, faces: faces, source: source, files: sortedUnique(files))
         }
-        if GoogleFontResolver.isSystemFamily(name) {
+        if GoogleFontResolver.isSystemFamily(name) || faces.contains(where: isAppleMade) {
             return Family(name: name, faces: faces, source: .system, files: [])
         }
         let answer = await googleFontsAnswer(for: name, fonts: fonts)
@@ -129,9 +141,10 @@ extension PenFolderFontPlan {
     }
 
     /// A declared file as a row lists it: the declaration's style and weight, and what
-    /// the file says about its family, embedding and license.
-    private static func declaredFile(_ declaration: PenFontDeclaration, at url: URL) -> FontFile {
-        let embedding = (try? Data(contentsOf: url, options: .mappedIfSafe)).flatMap(PenFontEmbedding.init(fontFile:))
+    /// the file — whose bytes are `data`, or `nil` when unreadable — says about its
+    /// family, embedding and license.
+    private static func declaredFile(_ declaration: PenFontDeclaration, at url: URL, data: Data?) -> FontFile {
+        let embedding = data.flatMap(PenFontEmbedding.init(fontFile:))
         let names = FontFileNames(fileAt: url)
         return FontFile(
             url: url,

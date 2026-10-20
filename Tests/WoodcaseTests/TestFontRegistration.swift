@@ -24,6 +24,11 @@ import Woodcase
 /// Woodcase Static Sans is a static family with a cut at 400, 500, 600 and 700, made from
 /// Inter by `scripts/gen-static-test-family.py`; no fixture sets it, and
 /// `PenFaceMatchingTests` checks each weight resolves to the cut CSS picks.
+///
+/// Woodcase Apple Made Mono is JetBrains Mono renamed with its OS/2 vendor ID set to
+/// `APPL` (`scripts/rename-font-family --vendor APPL`): an installed font that reads as
+/// Apple's from outside `/System`, which `PenFolderFontPlanTests` checks a Pen Folder
+/// export never offers to bundle. No other test sets the family.
 enum TestFontRegistration {
     private static let fontsDir = URL(fileURLWithPath: #filePath)
         .deletingLastPathComponent()
@@ -37,6 +42,7 @@ enum TestFontRegistration {
             "StaticSans/WoodcaseStaticSans-Medium.ttf",
             "StaticSans/WoodcaseStaticSans-SemiBold.ttf",
             "StaticSans/WoodcaseStaticSans-Bold.ttf",
+            "WoodcaseAppleMadeMono.ttf",
         ]
 
         for file in fontFiles {
@@ -53,7 +59,7 @@ enum TestFontRegistration {
             }
         }
 
-        waitUntilMatchable(["Inter", "IBM Plex Sans", "Woodcase Static Sans"])
+        waitUntilMatchable(["Inter", "IBM Plex Sans", "Woodcase Static Sans", "Woodcase Apple Made Mono"])
 
         // Any font resolution cached before this point predates these faces.
         PenFontRegistry.didRegisterFonts()
@@ -85,8 +91,8 @@ enum TestFontRegistration {
 
     /// Registers IBM Plex Sans and Inter from the Fonts directory with Core Text.
     ///
-    /// JetBrains Mono and its renamed copies there are left alone: their tests own the
-    /// moment those families appear.
+    /// JetBrains Mono and its renamed copies there, but for Woodcase Apple Made Mono,
+    /// are left alone: their tests own the moment those families appear.
     ///
     /// After calling this, "IBM Plex Sans" and "Inter" become
     /// available to `CTFontCreateWithFontDescriptor` and `PenTextMeasurer`.

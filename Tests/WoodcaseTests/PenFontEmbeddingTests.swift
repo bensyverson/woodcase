@@ -16,36 +16,12 @@ struct PenFontEmbeddingTests {
 
     /// An OS/2 table of `length` bytes whose `fsType` (bytes 8–9) is `fsType`.
     private static func os2Table(fsType: UInt16, length: Int = 96) -> Data {
-        var table = Data(count: length)
-        table[8] = UInt8(fsType >> 8)
-        table[9] = UInt8(fsType & 0xFF)
-        return table
+        SyntheticFont.os2Table(fsType: fsType, length: length)
     }
 
-    /// A big-endian 16-bit value's bytes.
-    private static func u16(_ value: Int) -> [UInt8] {
-        [UInt8((value >> 8) & 0xFF), UInt8(value & 0xFF)]
-    }
-
-    /// A big-endian 32-bit value's bytes.
-    private static func u32(_ value: Int) -> [UInt8] {
-        [UInt8((value >> 24) & 0xFF), UInt8((value >> 16) & 0xFF), UInt8((value >> 8) & 0xFF), UInt8(value & 0xFF)]
-    }
-
-    /// A minimal sfnt: a header, a table directory of `tables` and each table's bytes, in
-    /// order, after the directory. The bytes start `prefix` bytes into the returned data
-    /// so offsets can be checked inside a collection.
+    /// A minimal sfnt of `tables`; see ``SyntheticFont/sfnt(_:placedAt:)``.
     private static func sfnt(_ tables: [(tag: String, data: Data)], placedAt base: Int = 0) -> Data {
-        var bytes: [UInt8] = u32(0x0001_0000) + u16(tables.count) + u16(0) + u16(0) + u16(0)
-        var offset = base + 12 + 16 * tables.count
-        for table in tables {
-            bytes += Array(table.tag.utf8) + u32(0) + u32(offset) + u32(table.data.count)
-            offset += table.data.count
-        }
-        for table in tables {
-            bytes += Array(table.data)
-        }
-        return Data(bytes)
+        SyntheticFont.sfnt(tables, placedAt: base)
     }
 
     @Test("Each permission bit reads as its class, and no bit reads as installable")
@@ -102,7 +78,7 @@ struct PenFontEmbeddingTests {
 
     @Test("A collection is read through its first font")
     func readsACollection() {
-        let header: [UInt8] = Array("ttcf".utf8) + Self.u32(0x0001_0000) + Self.u32(1) + Self.u32(16)
+        let header: [UInt8] = Array("ttcf".utf8) + SyntheticFont.u32(0x0001_0000) + SyntheticFont.u32(1) + SyntheticFont.u32(16)
         let font = Self.sfnt([(tag: "OS/2", data: Self.os2Table(fsType: 0x2))], placedAt: 16)
         #expect(PenFontEmbedding(fontFile: Data(header) + font)?.permission == .restricted)
     }

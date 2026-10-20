@@ -77,6 +77,26 @@ struct PenFolderFontPlanExportTests {
         ])
     }
 
+    @Test("A declared family the plan classed as Apple's loses its local files, even when listed as checked")
+    func appleMadeDeclaredFamily() throws {
+        let document = try PenParser.parse("""
+        {"version": "\(PenDocument.currentFormatVersion)", "children": [
+          {"type": "text", "id": "a", "content": "a", "fontFamily": "SF Pro"}
+        ], "fonts": [
+          {"name": "SF Pro", "url": "/Library/Fonts/SF-Pro.ttf"},
+          {"name": "SF Pro", "url": "https://fonts.example.com/SF-Pro.ttf"}
+        ]}
+        """)
+        let plan = PenFolderFontPlan(families: [
+            PenFolderFontPlan.Family(name: "SF Pro", faces: [.regular(of: "SF Pro")], source: .system, files: []),
+        ], themeCoverage: .everyCombination(count: 1))
+        for bundling: Set<String> in [[], ["SF Pro"]] {
+            #expect(plan.exportedDocument(document, bundling: bundling).fonts == [
+                PenFontDeclaration(name: "SF Pro", url: "https://fonts.example.com/SF-Pro.ttf"),
+            ])
+        }
+    }
+
     @Test("A variable file is declared with its weight range")
     func variableRange() throws {
         let plan = PenFolderFontPlan(families: [PenFolderFontPlan.Family(

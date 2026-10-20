@@ -16,7 +16,8 @@ public extension PenFolderFontPlan {
     ///   absolute path as its url.
     /// - An unchecked ``Source/declared`` family loses its local declarations, so the
     ///   folder neither carries its files nor points at them; one declared at a web
-    ///   address is kept as written.
+    ///   address is kept as written. So does a ``Source/system`` one, checked or not:
+    ///   a document can declare a file Apple made, which is never bundled.
     /// - Everything else is left as it is.
     ///
     /// ``PenBundle/export(_:to:identity:fontPlan:bundling:)`` then copies every local
@@ -31,7 +32,9 @@ public extension PenFolderFontPlan {
     ///     row is not bundleable is ignored.
     /// - Returns: The document with its `fonts` array rewritten.
     func exportedDocument(_ document: PenDocument, bundling families: Set<String>) -> PenDocument {
-        let dropped = Set(self.families.filter { $0.source == .declared && !families.contains($0.name) }.map(\.name))
+        let dropped = Set(self.families.filter { family in
+            family.source == .system || (family.source == .declared && !families.contains(family.name))
+        }.map(\.name))
         var declarations = (document.fonts ?? []).filter { declaration in
             guard dropped.contains(declaration.name) else { return true }
             if case .remote = GoogleFontResolver.location(of: declaration, relativeTo: nil) { return true }

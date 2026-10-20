@@ -60,6 +60,53 @@ struct PenFolderFontPlanTests {
         #expect(helvetica.files.isEmpty)
     }
 
+    /// Expects `family` to be classed as the system's: unchecked, disabled, nothing to ship.
+    static func expectSystemFont(_ family: PenFolderFontPlan.Family) {
+        #expect(family.source == .system, "\(family.name)")
+        #expect(family.reason == .systemFont, "\(family.name)")
+        #expect(!family.isBundleable, "\(family.name)")
+        #expect(!family.startsChecked, "\(family.name)")
+        #expect(family.files.isEmpty, "\(family.name)")
+    }
+
+    @Test("A declared font file Apple made is the system's, outside /System: Apple's fonts are never bundled")
+    func declaredAppleMadeFont() async throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("PenFolderFontPlanTests-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let url = directory.appendingPathComponent("Apple Sans.ttf")
+        try SyntheticFont.file(vendor: "APPL", names: [.windows(1, "Woodcase Apple Sans")]).write(to: url)
+        let extra = #", "fonts": [{"name": "Woodcase Apple Sans", "url": "\#(url.path)"}]"#
+        let plan = try await PenFolderFontPlan.make(
+            for: Self.document([("Woodcase Apple Sans", nil, nil)], extra: extra), relativeTo: nil, fonts: Self.resolver()
+        )
+        try Self.expectSystemFont(Self.family("Woodcase Apple Sans", in: plan))
+    }
+
+    @Test("An installed font Apple made is the system's, though Core Text draws it from outside /System")
+    func installedAppleMadeFont() async throws {
+        TestFontRegistration.registerTestFonts()
+        let plan = try await PenFolderFontPlan.make(
+            for: Self.document([("Woodcase Apple Made Mono", nil, nil)]), relativeTo: nil, fonts: Self.resolver()
+        )
+        try Self.expectSystemFont(Self.family("Woodcase Apple Made Mono", in: plan))
+    }
+
+    @Test(
+        "Apple's developer SF Pro and New York in /Library/Fonts are the system's",
+        .enabled(if: FileManager.default.fileExists(atPath: "/Library/Fonts/SF-Pro.ttf")
+            && FileManager.default.fileExists(atPath: "/Library/Fonts/NewYork.ttf"))
+    )
+    func developerSFPro() async throws {
+        let plan = try await PenFolderFontPlan.make(
+            for: Self.document([("SF Pro", nil, nil), ("SF Pro", "700", "italic"), ("New York", nil, nil)]),
+            relativeTo: nil, fonts: Self.resolver()
+        )
+        try Self.expectSystemFont(Self.family("SF Pro", in: plan))
+        try Self.expectSystemFont(Self.family("New York", in: plan))
+    }
+
     @Test("A Google Fonts family is listed, unchecked and disabled: Pen downloads it by name")
     func googleFont() async throws {
         let plan = try await PenFolderFontPlan.make(

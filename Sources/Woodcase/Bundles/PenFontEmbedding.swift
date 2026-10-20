@@ -12,9 +12,9 @@ import Foundation
 /// print, 8 editable — bit 8 forbids subsetting and bit 9 allows only bitmap embedding.
 /// It is the vendor's statement about embedding in a *document*; shipping the file in a
 /// folder is closer to redistribution, which the vendor's license governs, so it is a
-/// floor, not a grant. Apple's system fonts read 0 and still may not be passed on, which
-/// is why a Pen Folder export decides "system font" by where the file is, never by this
-/// (``PenFolderFontPlan/Source/system``).
+/// floor, not a grant. Apple's fonts read 0 and still may not be passed on, which is why a
+/// Pen Folder export decides "system font" by where the file is and who made it
+/// (``PenFontMaker``), never by this (``PenFolderFontPlan/Source/system``).
 ///
 /// Reading is pure byte parsing, so it builds everywhere; ``init(fontFile:)`` walks a
 /// font file's table directory, ``init(os2Table:)`` takes the table Core Text's
@@ -66,7 +66,7 @@ public struct PenFontEmbedding: Friendly {
     ///   from its own start.
     /// - Returns: `nil` when the table is too short to hold `fsType`.
     public init?(os2Table: Data) {
-        guard let value = Self.uint16(in: os2Table, at: Self.fsTypeOffset) else { return nil }
+        guard let value = SFNTTables.uint16(in: os2Table, at: Self.fsTypeOffset) else { return nil }
         self.init(fsType: value)
     }
 
@@ -77,25 +77,8 @@ public struct PenFontEmbedding: Friendly {
     /// - Returns: `nil` when the bytes are not an sfnt font, it has no OS/2 table, or the
     ///   table runs past the end of the file.
     public init?(fontFile: Data) {
-        let data = Data(fontFile)
-        var fontStart = 0
-        if data.prefix(4) == Data("ttcf".utf8) {
-            guard let first = Self.uint32(in: data, at: 12) else { return nil }
-            fontStart = Int(first)
-        }
-        guard let tableCount = Self.uint16(in: data, at: fontStart + 4) else { return nil }
-        for index in 0 ..< Int(tableCount) {
-            let record = fontStart + 12 + 16 * index
-            guard record + 16 <= data.count else { return nil }
-            guard data[record ..< record + 4] == Data("OS/2".utf8) else { continue }
-            guard let offset = Self.uint32(in: data, at: record + 8),
-                  let length = Self.uint32(in: data, at: record + 12),
-                  Int(offset) + Int(length) <= data.count
-            else { return nil }
-            self.init(os2Table: data[Int(offset) ..< Int(offset) + Int(length)])
-            return
-        }
-        return nil
+        guard let os2 = SFNTTables(fontFile: fontFile)?.table("OS/2") else { return nil }
+        self.init(os2Table: os2)
     }
 
     // MARK: - Private
@@ -108,17 +91,4 @@ public struct PenFontEmbedding: Friendly {
 
     /// Where `fsType` sits in the OS/2 table.
     private static let fsTypeOffset = 8
-
-    /// The big-endian 16-bit value `offset` bytes from `data`'s start, or `nil` past its end.
-    private static func uint16(in data: Data, at offset: Int) -> UInt16? {
-        guard offset >= 0, offset + 2 <= data.count else { return nil }
-        let start = data.startIndex + offset
-        return UInt16(data[start]) << 8 | UInt16(data[start + 1])
-    }
-
-    /// The big-endian 32-bit value `offset` bytes from `data`'s start, or `nil` past its end.
-    private static func uint32(in data: Data, at offset: Int) -> UInt32? {
-        guard let high = uint16(in: data, at: offset), let low = uint16(in: data, at: offset + 2) else { return nil }
-        return UInt32(high) << 16 | UInt32(low)
-    }
 }

@@ -23,7 +23,7 @@ public extension PenFolderFontPlan {
         public var files: [FontFile]
 
         /// What Google Fonts said about the name: only asked of a family neither
-        /// declared nor shipped with the system.
+        /// declared nor Apple's.
         public var googleFonts: GoogleFontsAnswer
 
         /// A row.

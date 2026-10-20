@@ -50,6 +50,24 @@ extension PenFolderFontPlan {
     }
 
     extension PenFolderFontPlan {
+        /// Whether Apple made the font Core Text draws `face` in (``PenFontMaker/isApple``),
+        /// when it is a font of the family — wherever its file is.
+        ///
+        /// The face resolves as ``installedFile(_:)`` resolves it, so this asks of the
+        /// file that would ship; a fallback to another family is not the family's.
+        ///
+        /// - Parameter face: The face.
+        /// - Returns: Whether Apple made it.
+        static func isAppleMade(_ face: PenFontFace) -> Bool {
+            let font = PenTextMeasurer.resolveFont(
+                family: face.family, size: 12, weight: String(face.weight), style: face.style.rawValue
+            )
+            return FontRegistryGate.withAccess {
+                (CTFontCopyFamilyName(font) as String).lowercased() == face.family.lowercased()
+                    && PenFontMaker(font: font)?.isApple == true
+            }
+        }
+
         /// The file Core Text draws `face` in, when it is a font of the family outside the
         /// system's folders — the file a Pen Folder would ship for an installed family.
         ///
@@ -93,6 +111,11 @@ extension PenFolderFontPlan {
     }
 
     extension PenFolderFontPlan {
+        /// No installed fonts, so none Apple made, without Core Text.
+        static func isAppleMade(_: PenFontFace) -> Bool {
+            false
+        }
+
         /// No installed fonts without Core Text.
         static func installedFile(_: PenFontFace) -> FontFile? {
             nil

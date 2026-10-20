@@ -17,9 +17,10 @@ import Foundation
 /// array (``exportedDocument(_:bundling:)``).
 ///
 /// The rules (Ben, 2026-10-15): every family is listed, and every one starts checked
-/// except the operating system's own fonts — which Apple's license does not let anyone
-/// pass on, whatever their `fsType` says — and Google Fonts, which Pen downloads by name
-/// so nothing needs to ship. Those two are unchecked and disabled, with a ``Reason``. A
+/// except Apple's fonts — the operating system's own, and any other font Apple made,
+/// such as the SF Pro installed in `/Library/Fonts` from Apple's developer downloads,
+/// which Apple's license does not let anyone pass on, whatever their `fsType` says — and
+/// Google Fonts, which Pen downloads by name so nothing needs to ship. Those two are unchecked and disabled, with a ``Reason``. A
 /// font whose `fsType` restricts embedding or allows only preview and print starts
 /// checked like the rest, flagged by its reason: the designer reads the license.
 ///
@@ -42,14 +43,16 @@ public struct PenFolderFontPlan: Friendly {
     public enum Source: String, Friendly, CaseIterable {
         /// The document declares it in its root `fonts` array.
         case declared
-        /// The operating system ships it: its file is under `/System/` (which holds
-        /// `/System/Library/Fonts` and the downloadable fonts under
-        /// `/System/Library/AssetsV2`) or `/Library/Apple/`.
+        /// Apple's: the operating system ships it — its file is under `/System/` (which
+        /// holds `/System/Library/Fonts` and the downloadable fonts under
+        /// `/System/Library/AssetsV2`) or `/Library/Apple/` — or Apple made it, wherever
+        /// it is installed (``PenFontMaker/isApple``).
         case system
         /// Google Fonts has a family of the name, which Pen downloads by name.
         case googleFonts
         /// A font on this Mac outside the system's folders — `~/Library/Fonts`,
-        /// `/Library/Fonts`, or anywhere a font manager or app registered it.
+        /// `/Library/Fonts`, or anywhere a font manager or app registered it — that Apple
+        /// did not make.
         case installed
         /// Nothing provides it here: Pen will substitute.
         case missing

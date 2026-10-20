@@ -111,10 +111,18 @@ designer's call, since the license is theirs to read, so Woodcase plans and the 
    for a document in memory) lists every family the document's text draws — instances
    expanded, rich-text runs included, every theme combination resolved — as a
    ``PenFolderFontPlan/Family`` with its ``PenFolderFontPlan/Source``: declared, the
-   system's, Google Fonts', installed, or missing. A system font is recognized by where
-   its file is (`/System/`, which holds `/System/Library/Fonts` and the downloadable
-   fonts in `AssetsV2`, or `/Library/Apple/`), never by `fsType`: SF Pro, New York and
-   Helvetica read 0 (installable), yet Apple's license forbids passing them on.
+   system's, Google Fonts', installed, or missing. Where a font's file is does not
+   settle whether it is Apple's: SF Pro, SF Mono and New York installed from Apple's
+   developer downloads live in `/Library/Fonts`, beside anyone's fonts, and judged by
+   location alone they were offered as installed, bundleable and checked. A family is
+   the system's when its file is under `/System/` (which holds
+   `/System/Library/Fonts` and the downloadable fonts in `AssetsV2`) or
+   `/Library/Apple/`, **or** when Apple made the font, wherever it is installed or
+   declared. Who made it is read from the font itself (``PenFontMaker``): an OS/2
+   vendor ID of `APPL`, or a manufacturer (name ID 8) or copyright (name ID 0) naming
+   Apple Inc. or Apple Computer — never a list of family names, and never `fsType`:
+   SF Pro, New York and Helvetica read 0 (installable), yet Apple's license forbids
+   passing them on.
 2. Each row says whether it ``PenFolderFontPlan/Family/startsChecked`` and why not, as a
    typed ``PenFolderFontPlan/Reason`` the app words: system fonts and Google Fonts (which
    Pen downloads by name) are unchecked and disabled; every other row with a file starts
@@ -176,3 +184,4 @@ not in the bundle.
 
 - ``PenFolderFontPlan``
 - ``PenFontEmbedding``
+- ``PenFontMaker``
