@@ -6,7 +6,7 @@ How Woodcase turns a `mesh_gradient` fill into triangles and pixels, without Cor
 
 A mesh gradient is a `columns × rows` grid of colored vertices joined by Bézier
 patches (``PenFill/PenMeshGradientFill``, ``PenMeshPoint``). The mesh core in
-`Sources/Woodcase/Rendering/Mesh/` is pure Swift and Foundation, so it builds on Linux,
+`Sources/Woodcase/Rendering/Mesh/` is pure Swift and Foundation, with no CoreGraphics,
 and it has three stages that each return plain data:
 
 ```swift

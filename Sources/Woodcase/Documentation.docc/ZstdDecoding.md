@@ -8,7 +8,7 @@ Figma's clipboard payload carries its document as a zstd frame, and no Apple API
 zstd. Woodcase vendors zstd's own decode-only single file, `zstddeclib.c`, as the internal
 `CZstdDecode` target, and wraps it in ``ZstdDecoder``. It is vendored rather than a package
 dependency on facebook/zstd, which would pull in the compressor and fetch on every fresh
-build; it builds wherever Woodcase does, Linux included.
+build; it builds wherever Woodcase does (macOS and iOS).
 
 ```swift
 let decoder = ZstdDecoder(maxDecodedSize: 64 << 20)

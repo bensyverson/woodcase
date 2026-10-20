@@ -2,7 +2,7 @@ IMPORTANT: As you implement features, keep the [DocC documentation](./Sources/Wo
 
 ## Overview
 
-You are working on Woodcase, a Swift library which allows users to parse and render Pen.dev [.pen](https://docs.pencil.dev/for-developers/the-pen-format) files. It is a cross-platform SwiftPM package: the document model, layout engine, variable resolution, code generation, and a reference CoreGraphics renderer. Penumbra (`../Penumbra/`, the macOS editor) and RapidPro (`../RapidPro/`, the Metal renderer) are sibling repos that consume it.
+You are working on Woodcase, a Swift library which allows users to parse and render Pen.dev [.pen](https://docs.pencil.dev/for-developers/the-pen-format) files. It is a SwiftPM package for Apple platforms (macOS and iOS): the document model, layout engine, variable resolution, code generation, and a reference CoreGraphics renderer. Penumbra (`../Penumbra/`, the macOS editor) and RapidPro (`../RapidPro/`, the Metal renderer) are sibling repos that consume it.
 
 ## Documentation
 
@@ -19,6 +19,10 @@ You are working on Woodcase, a Swift library which allows users to parse and ren
 - [project/agents/delegation.md](project/agents/delegation.md) — how to carve, brief and integrate subagent work
 - [project/agents/jobs.md](project/agents/jobs.md) — the `job` tracker: tree shape, criteria, agent identities
 - [project/agents/cli-design.md](project/agents/cli-design.md) — how to design a CLI for agents: grammar, output, exit codes, errors that teach
+
+## Platforms
+
+**Woodcase is Apple-platforms-only: macOS and iOS (Ben, 2026-10-20).** This overrides the shared Swift rule below that library packages stay in Foundation so they build on Linux. Apple frameworks such as Compression, CoreGraphics and CoreText are fair game in the core target; guard macOS-only APIs for iOS. Why: [project/2026-10-20-apple-platforms-only.md](project/2026-10-20-apple-platforms-only.md).
 
 ## Build and test
 

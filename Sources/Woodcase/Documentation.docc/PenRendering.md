@@ -43,7 +43,7 @@ These helpers are `internal` — only ``PenRenderer``, ``PenColorParser``, ``Pen
 
 A node's outline is decided once, without CoreGraphics, and drawn by a thin CoreGraphics
 layer. `Sources/Woodcase/Geometry/` is pure Swift and Foundation, so the code emitters
-read the same outline the renderer draws, and it builds on Linux.
+read the same outline the renderer draws.
 
 - ``PenPath`` is the parse of a `path` node's SVG `geometry`: a list of
   ``PenPathCommand``s — move, line, quadratic, cubic, close — fully resolved. Relative
