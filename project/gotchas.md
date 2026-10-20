@@ -43,3 +43,7 @@ The pre-commit hook's `scripts/mae-check` prints "MISSING: `svg-render-…` was 
 ## 2026-10-17 — swiftformat turns `(consume x).method()` into `consume x.method()`
 
 **Its `redundantParens` rule drops the parentheses, and `consume x.method()` means consuming the call's result, which does not compile for a copyable type** ("'consume' can only be used to partially consume storage of a noncopyable type"). It surfaced only on the next build after formatting (leaf `g5SACU`). Pass the consumed value as an argument instead — `SwiftUIViewCode.lines(of: consume body, indent: 2)` — which the formatter leaves alone.
+
+## 2026-10-20 — Apple's raw-deflate stream never says "error", and skips two checks
+
+**`compression_stream_process` with `COMPRESSION_ZLIB` met every malformed stream we built (block type 3, over-subscribed or incomplete codes, a distance before the output, reserved symbols) by returning `COMPRESSION_STATUS_OK` and producing nothing more — the same as a stream cut short — never `COMPRESSION_STATUS_ERROR`** (macOS 27, leaf Uip9cb). A loop that waits for `ERROR` would never see one; `DeflateDecoder` treats "OK, step not filled, no END" as malformed. It also returns a stored block whose length complement is wrong, and consumes bytes after the final block without complaint, so whatever decodes the inflated bytes (the Kiwi schema, for Figma) is the real check. See DocC `FigmaClipboard.md`.

@@ -9,8 +9,8 @@ varints, structs whose fields are always present, and messages whose fields are 
 optional. Figma's clipboard and `.fig` files carry their document as a Kiwi message, with
 the binary schema that describes it embedded beside it. Woodcase's reader is generic: it
 knows Kiwi, not Figma, and every definition it decodes comes from the schema it is handed.
-Unwrapping a Figma payload — the container, its compression, mapping nodes — is a separate
-layer above it.
+Unwrapping a Figma payload — the container and its compression — is a separate layer
+above it (<doc:FigmaClipboard>), and so is mapping nodes.
 
 ```swift
 let schema = try KiwiSchema(binary: schemaBytes)

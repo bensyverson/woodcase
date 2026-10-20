@@ -125,6 +125,8 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 - <doc:ZstdDecoding>
 - ``ZstdDecoder``
 - ``ZstdDecodeError``
+- ``DeflateDecoder``
+- ``DeflateDecodeError``
 
 ### Kiwi Decoding
 
@@ -137,6 +139,16 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 - ``KiwiValue``
 - ``KiwiByteReader``
 - ``KiwiDecodingError``
+
+### Figma Clipboard
+
+- <doc:FigmaClipboard>
+- ``FigmaClipboardDecoder``
+- ``FigmaClipboard``
+- ``FigmaClipboardPayload``
+- ``FigmaClipboardMetadata``
+- ``FigKiwiContainer``
+- ``FigmaDecodeError``
 
 ### Networking
 
