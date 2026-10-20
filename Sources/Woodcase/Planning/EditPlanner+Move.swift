@@ -51,6 +51,11 @@ public extension EditPlanner {
     ///   - index: Where among the new parent's children it goes; `nil` puts it last, on top.
     ///   - offset: How far the node is carried on the canvas, to keep its drawn place
     ///     there; `nil` plans only the move and the size it keeps.
+    ///   - snapping: How the node's new `x`/`y` are rounded before they are compared with
+    ///     the stored ones; ``PlacementSnapping/wholePoints`` lands a drop on whole points in
+    ///     the new parent's space, and writes a stored fractional coordinate rounded even
+    ///     when the move leaves it in place. Rotation and flips are not snapped, and it
+    ///     changes nothing without `offset`.
     ///   - document: The document, as it stands.
     ///   - layout: The layout of `document` as it stands, which the drawn size and place
     ///     are read from.
@@ -61,6 +66,7 @@ public extension EditPlanner {
         into parentID: String?,
         at index: Int? = nil,
         keepingDrawnPlace offset: PenPoint? = nil,
+        snapping: PlacementSnapping = .none,
         in document: EditableDocument,
         layout: PenLayoutState
     ) throws(EditRefusal) -> [EditOperation] {
@@ -78,7 +84,7 @@ public extension EditPlanner {
             of: id, from: document.parentID(of: id),
             newParentMap: canvasMap(of: parentID, in: document, layout: layout) ?? .identity,
             newParentFlips: flipParity(of: parentID, in: document),
-            placing: placing, movedBy: offset, in: document, layout: layout
+            placing: placing, movedBy: offset, snapping: snapping, in: document, layout: layout
         )
         return writes.isEmpty ? [move] : [move, .setProperties(EditOperation.SetProperties(nodeID: id, properties: writes))]
     }

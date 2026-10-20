@@ -172,7 +172,7 @@ the board under a point by the same rule.
 
 Wherever the copies land, each is sized for its new parent (Penumbra spec §4, Ben's
 ruling of 2026-10-15), the rule a move follows
-(``EditPlanner/planMove(nodeID:into:at:keepingDrawnPlace:in:layout:)``): where the parent lays the copy
+(``EditPlanner/planMove(nodeID:into:at:keepingDrawnPlace:snapping:in:layout:)``): where the parent lays the copy
 out — a stack — a dimension that filled its container where it was copied
 (``PenClip/Origin/width``, ``PenClip/Origin/height``) fills again; where it does not —
 a free frame, a group, the canvas — a dimension still written `fill_container` becomes

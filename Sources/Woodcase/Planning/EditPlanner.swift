@@ -49,7 +49,7 @@ import Foundation
 /// - ``plan(_:routedAt:in:)``
 ///
 /// ### Restructuring
-/// - ``planMove(nodeID:into:at:keepingDrawnPlace:in:layout:)``
+/// - ``planMove(nodeID:into:at:keepingDrawnPlace:snapping:in:layout:)``
 /// - ``planGroup(nodeIDs:kind:in:layout:)``
 /// - ``planUngroup(groupID:in:layout:)``
 public enum EditPlanner {

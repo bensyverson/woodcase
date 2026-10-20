@@ -54,7 +54,7 @@ extension BatchApplier {
 
     /// An `mv` line: the move, and — where the new parent does not lay the node out — its
     /// fill sizes kept at the size they were drawn at, as
-    /// ``EditPlanner/planMove(nodeID:into:at:keepingDrawnPlace:in:layout:)`` plans them. The document is laid
+    /// ``EditPlanner/planMove(nodeID:into:at:keepingDrawnPlace:snapping:in:layout:)`` plans them. The document is laid
     /// out only for a node with a fill size.
     private static func planMove(
         _ op: BatchOperation.MoveOp,

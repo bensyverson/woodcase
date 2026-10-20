@@ -145,6 +145,8 @@ extension EditPlanner {
     ///   - placing: How the new parent places it.
     ///   - offset: How far it is carried on the canvas as it moves; `.zero` keeps it
     ///     exactly where it is drawn.
+    ///   - snapping: How the new `x`/`y` are rounded before they are compared with the
+    ///     stored ones.
     ///   - document: The document, as it stands.
     ///   - layout: The layout of the document as it stands.
     /// - Returns: The property writes: empty when nothing changes, and when the layout
@@ -156,6 +158,7 @@ extension EditPlanner {
         newParentFlips: (x: Bool, y: Bool),
         placing: Placing,
         movedBy offset: PenPoint = .zero,
+        snapping: PlacementSnapping = .none,
         in document: EditableDocument,
         layout: PenLayoutState
     ) -> [String: AnyCodable] {
@@ -197,7 +200,8 @@ extension EditPlanner {
 
         switch placing {
         case .free, .absolute:
-            for (field, value) in [("x", local.tx), ("y", local.ty)] {
+            for (field, raw) in [("x", local.tx), ("y", local.ty)] {
+                let value = snapping.snapped(raw)
                 let stored = field == "x" ? node.common.x : node.common.y
                 if stored?.literalValue.map({ abs($0 - value) > tolerance }) ?? true {
                     writes[common + field] = number(value)

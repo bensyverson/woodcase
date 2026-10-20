@@ -7,7 +7,7 @@ import Foundation
 import Testing
 @testable import Woodcase
 
-/// A move to another parent (``EditPlanner/planMove(nodeID:into:at:keepingDrawnPlace:in:layout:)``): a node
+/// A move to another parent (``EditPlanner/planMove(nodeID:into:at:keepingDrawnPlace:snapping:in:layout:)``): a node
 /// whose new parent does not lay it out keeps the size it was drawn at, so each
 /// `fill_container` dimension becomes that number; a `fit_content` one stays, and a stack
 /// fills it on both axes, so moving into one changes nothing (Penumbra spec §4.4, Ben's

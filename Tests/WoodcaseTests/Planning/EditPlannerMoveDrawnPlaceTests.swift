@@ -8,7 +8,7 @@ import Testing
 @testable import Woodcase
 
 /// A move that keeps the node's drawn place
-/// (``EditPlanner/planMove(nodeID:into:at:keepingDrawnPlace:in:layout:)``): where the new
+/// (``EditPlanner/planMove(nodeID:into:at:keepingDrawnPlace:snapping:in:layout:)``): where the new
 /// parent places the node by position, its `x`/`y`, rotation and flips are rewritten
 /// together, so it is drawn where it was, moved by the offset — whatever the parents' turns
 /// and flips (Penumbra issue qIds8z).

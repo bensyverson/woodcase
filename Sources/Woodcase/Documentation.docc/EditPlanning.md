@@ -196,7 +196,7 @@ document.firstFontFamilyVariableName()   // e.g. "body": bind a new text's famil
 
 ### Moving a node
 
-``EditPlanner/planMove(nodeID:into:at:keepingDrawnPlace:in:layout:)`` plans a move to another parent: the
+``EditPlanner/planMove(nodeID:into:at:keepingDrawnPlace:snapping:in:layout:)`` plans a move to another parent: the
 `moveNode`, then — when the new parent does not lay the node out — each `fill_container`
 width or height written as the number it was drawn at; a `fit_content` one stays (Ben's
 ruling of 2026-10-15, Penumbra spec §4.4, leaf `skbh2k`, as Figma does). A stack lays a
@@ -230,6 +230,11 @@ let operations = try EditPlanner.planMove(
     nodeID: "chip", into: "turnedBoard", keepingDrawnPlace: PenPoint(x: 120, y: -40), in: document, layout: layout
 )
 ```
+
+Pass `snapping: .wholePoints` (``PlacementSnapping``) to land the drop on whole points, as a
+plain move does: the node's new `x`/`y` are rounded in the new parent's space before they are
+compared with the stored ones, so a stored fractional coordinate the move would leave in
+place is written rounded too. Rotation and flips are never snapped.
 
 A paste needs no rule of its own: a clip already freezes a fill size at the size it was
 drawn at when it copies a node out of its parent (``PenClip``).
@@ -342,7 +347,7 @@ let drawn = await document.materializeSnapshot(overlaying: preview)
 - ``EditIntent``
 - ``EditPlan``
 - ``EditPlanner/plan(_:routedAt:in:)``
-- ``EditPlanner/planMove(nodeID:into:at:keepingDrawnPlace:in:layout:)``
+- ``EditPlanner/planMove(nodeID:into:at:keepingDrawnPlace:snapping:in:layout:)``
 - ``EditPlanner/planGroup(nodeIDs:kind:in:layout:)``
 - ``EditPlanner/planUngroup(groupID:in:layout:)``
 - ``EditPlanner/planScale(nodeIDs:by:anchor:in:layout:)``
