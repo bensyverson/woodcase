@@ -7,7 +7,7 @@
   },
   "released": "2025-02-19T21:50:11Z",
   "repository": "facebook/zstd",
-  "signature": "not checked: key EF8FE99528B52FFD is not in the keyring",
+  "signature": "good: key 4EF4AC63455FC9F4545D9B7DEF8FE99528B52FFD (Zstandard Release Signing Key <signing@zstd.net>), from keyserver.ubuntu.com, checked 2026-10-20",
   "tag": "v1.5.7",
   "tarball": "zstd-1.5.7.tar.gz",
   "tarballSHA256": "eb33e51f49a15e023950cd7825ca74a4a2b43db8354825ac24fc1b7ee09e6fa3",
