@@ -54,6 +54,8 @@ extension ReactEmitter {
         let node = turnedFillSizes.sized(node)
         warnDroppedShaders(node, ctx: ctx)
         warnUnblendedShadows(node, ctx: ctx)
+        warnStrokeBlendOverFills(node, ctx: ctx)
+        warnApproximatedBlends(node, ctx: ctx)
         warnDroppedInnerShadows(node, ctx: ctx)
         warnTextImageCrops(node, ctx: ctx)
         var steps: [ReactEmitStep] = []

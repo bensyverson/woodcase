@@ -29,12 +29,14 @@ struct PenNestedDefaultEngineTests {
         ["type": "rectangle", "id": "s3", "x": 90, "y": 0, "width": 20, "height": 300, "fill": "#000000"],
     ]
 
-    /// A node over the stripes, with `key` set to `value`.
+    /// A node over the stripes, with `key` set to `value`. A fill under test sits over a
+    /// translucent fill of the node's own: a paint's blend mode blends only within its
+    /// node's paints (Ben's reading-1 ruling, 2026-10-20), so it needs a paint beneath.
     private static func document(_ key: String, _ value: AnyCodable, stroked: Bool = false) -> AnyCodable {
         var node: [String: AnyCodable] = [
             "type": "rectangle", "id": "t", "x": 20, "y": 20, "width": 100, "height": 60,
         ]
-        node[key] = value
+        node[key] = key == "fill" ? ["#33CC6699", value] : value
         // Translucent, so a backdrop blur under the node shows through it.
         if key != "fill" { node["fill"] = "#3366FF99" }
         if stroked { node["stroke"] = "#FF0000" }

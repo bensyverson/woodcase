@@ -253,6 +253,7 @@ public enum DocumentLinter {
         found += perSideStrokeOnShape(row, node: node)
         found += strokeDashIgnored(row, node: node)
         found += shadowSpreadStale(row, node: node)
+        found += paintBlendLowest(row, node: node)
         found += noteUnsized(row, node: node)
         found += metadataOldStyle(row, in: context)
         found += penDropsOverride(row, in: context)

@@ -5,7 +5,8 @@
 
 extension ReactEmitter {
     /// A paint stack split where a CSS background stops being able to draw it: at the first
-    /// cropped image paint (``ReactEmitter/isCroppedImage(_:)``).
+    /// cropped image paint (``ReactEmitter/isCroppedImage(_:)``), or the first enabled paint
+    /// at linear dodge above another (``needsOwnElement(_:)``).
     ///
     /// The paints beneath it stay the element's own background, as before. That paint and
     /// every paint above it are drawn by elements of their own, laid over that background in
@@ -19,7 +20,10 @@ extension ReactEmitter {
 
         /// Splits `fills`, bottom first as .pen lists them.
         init(_ fills: [PenFill]) {
-            let first = fills.firstIndex(where: ReactEmitter.isCroppedImage) ?? fills.endIndex
+            let lowest = fills.firstIndex(where: \.isEnabled) ?? fills.endIndex
+            let first = fills.indices.first { index in
+                ReactEmitter.isCroppedImage(fills[index]) || index > lowest && Self.needsOwnElement(fills[index])
+            } ?? fills.endIndex
             background = Array(fills[..<first])
             layered = Array(fills[first...])
         }
@@ -27,6 +31,13 @@ extension ReactEmitter {
         /// Splits a node's `fills`.
         init(_ fills: PenFills?) {
             self.init(fills?.all ?? [])
+        }
+
+        /// Whether `fill` blends in a way only an element of its own can: linear dodge, whose
+        /// add is `mix-blend-mode: plus-lighter` (``mixBlendModeToCSSValue(_:)``), which
+        /// `background-blend-mode` does not take.
+        static func needsOwnElement(_ fill: PenFill) -> Bool {
+            fill.isEnabled && fill.blendMode == .linearDodge
         }
 
         /// The background paints as a fill list, or `nil` when there are none.

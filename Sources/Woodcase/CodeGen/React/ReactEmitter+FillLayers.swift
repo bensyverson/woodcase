@@ -10,7 +10,9 @@ extension ReactEmitter {
     ///
     /// Each covers the node's box and clips to its shape (`borderRadius: inherit`). A crop's
     /// layer holds its ``imageCropElement(_:href:frame:ctx:)`` and carries the paint's
-    /// opacity and blend mode; any other paint is the layer's own background.
+    /// opacity and blend mode; any other paint is the layer's own background, with its blend
+    /// mode as the layer's `mix-blend-mode`. A blended layer blends with the paints beneath
+    /// it only because the host isolates (``isolatesPaints(_:hasChildren:)``).
     ///
     /// - Parameters:
     ///   - layered: The paints, bottom first (``PaintSplit/layered``).
@@ -39,6 +41,9 @@ extension ReactEmitter {
                 let paint = emitFillStyles(.single(fill), box: box, ctx: ctx)
                 guard !paint.isEmpty else { return nil }
                 styles.append(contentsOf: paint)
+                if let mode = fill.blendMode, mode.blends {
+                    styles.append(("mixBlendMode", "\"\(mixBlendModeToCSSValue(mode))\""))
+                }
                 content = nil
             }
             if beneathChildren {
@@ -56,8 +61,8 @@ extension ReactEmitter {
         if let opacity = image.opacity {
             styles.append(("opacity", emitPenValue(opacity)))
         }
-        if let mode = image.blendMode, mode != .normal {
-            styles.append(("mixBlendMode", "\"\(blendModeToCSSValue(mode))\""))
+        if let mode = image.blendMode, mode.blends {
+            styles.append(("mixBlendMode", "\"\(mixBlendModeToCSSValue(mode))\""))
         }
         return styles
     }

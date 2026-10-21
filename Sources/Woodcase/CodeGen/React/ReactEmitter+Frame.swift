@@ -153,10 +153,9 @@ extension ReactEmitter {
         styles.append(contentsOf: emitCommonStyles(node.common, blendMode: node.blendMode, pivot: ctx.transformPivot(for: node.common)))
         styles.append(contentsOf: turnedSlotStyles(node, width: data.width, height: data.height, isRoot: isRoot, ctx: ctx))
 
-        // Isolation: create stacking context when children use fill-level blend modes
-        // Isolation also keeps a stroke overlay's and a fill layer's negative z-index above the
-        // frame's background.
-        if (data.children ?? []).contains(where: { nodeHasFillBlendMode($0) }) || ((overlay != nil || !layersOverFill.isEmpty) && hasChildren) {
+        // Isolation keeps a stroke overlay's and a fill layer's negative z-index above the
+        // frame's background, and a childless frame's blended paints within it.
+        if (overlay != nil || !layersOverFill.isEmpty) && hasChildren || isolatesPaints(node, hasChildren: hasChildren) {
             styles.append(("isolation", "\"isolate\""))
         }
 

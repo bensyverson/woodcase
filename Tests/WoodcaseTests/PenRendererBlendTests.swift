@@ -53,10 +53,16 @@ struct PenRendererBlendTests {
         return try #require(PixelGrid(image)).pixel(5, 5)
     }
 
-    /// `source` filled with `mode` over a `backdrop` rectangle — a fill-level blend, the one
-    /// Pen draws.
+    /// `source` filled with `mode` over a `backdrop` fill beneath it on the same node — a
+    /// paint-level blend, which blends only within its node's paint stack (Ben's reading-1
+    /// ruling, 2026-10-20; `PenRendererPaintIsolationTests`).
     private static func fillBlend(_ mode: PenBlendMode, _ source: String, over backdrop: String) throws -> PixelGrid.RGBA {
-        try render([rect("bd", fill(backdrop)), rect("src", fill(source, mode))])
+        try render([stack("src", [fill(backdrop), fill(source, mode)])])
+    }
+
+    /// A 10-point rectangle painted by `fills`, bottom first.
+    private static func stack(_ id: String, _ fills: [PenFill]) -> PenNode {
+        PenNode(id: id, common: PenNodeCommon(), kind: .rectangle(PenNode.RectangleData(fills: .multiple(fills))))
     }
 
     /// `source` as a node blended by `mode` over a `backdrop` rectangle.
@@ -198,15 +204,15 @@ struct PenRendererBlendTests {
         try Self.expectColor(Self.render([Self.rect("bd", Self.fill("#E6994D")), frame]), "#2E7A1F")
     }
 
-    /// A soft-light fill inside a frame at 50% opacity blends against the frame's own fill,
+    /// A soft-light fill inside a frame at 50% opacity blends against the fill beneath it,
     /// inside the frame's group: B(#E6994D, #3366FF) = #D88D8C, then the group is drawn at
     /// half alpha over the empty canvas.
     @Test func `A per-pixel blend inside a translucent frame blends inside the frame`() throws {
         let frame = PenNode(
             id: "grp", common: PenNodeCommon(opacity: .literal(0.5)),
             kind: .frame(PenNode.FrameData(
-                fills: .single(Self.fill("#E6994D")), layout: PenLayoutDirection.none,
-                children: [Self.rect("src", Self.fill("#3366FF", .softLight))]
+                layout: PenLayoutDirection.none,
+                children: [Self.stack("src", [Self.fill("#E6994D"), Self.fill("#3366FF", .softLight)])]
             ))
         )
         try Self.expectColor(Self.render([frame]), "#D88D8C", alpha: 128)
@@ -216,7 +222,8 @@ struct PenRendererBlendTests {
     @Test func `A per-pixel blend leaves the backdrop around the node`() throws {
         let image = try #require(PenRenderer.render(
             PenDocument(version: "2.20", children: [
-                Self.rect("bd", Self.fill("#E6994D66")), Self.rect("src", Self.fill("#3366FF", .softLight)),
+                Self.rect("bd", Self.fill("#E6994D66")),
+                Self.stack("src", [Self.fill("#E6994D66"), Self.fill("#3366FF", .softLight)]),
             ]),
             layoutRects: ["bd": Self.box, "src": PenRect(x: 0, y: 0, width: 4, height: 10)], size: Self.size
         ))
@@ -230,7 +237,8 @@ struct PenRendererBlendTests {
     @Test func `A per-pixel blend finds the node's rows`() throws {
         let image = try #require(PenRenderer.render(
             PenDocument(version: "2.20", children: [
-                Self.rect("bd", Self.fill("#E6994D66")), Self.rect("src", Self.fill("#3366FF", .softLight)),
+                Self.rect("bd", Self.fill("#E6994D66")),
+                Self.stack("src", [Self.fill("#E6994D66"), Self.fill("#3366FF", .softLight)]),
             ]),
             layoutRects: ["bd": Self.box, "src": PenRect(x: 0, y: 0, width: 10, height: 4)], size: Self.size
         ))

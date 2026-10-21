@@ -92,6 +92,10 @@ extension ReactEmitter {
     /// shape (``svgConicLayer(_:shape:overhang:attributes:)``); a layer nothing can paint
     /// (a themed mesh, a shader) is left out. The strokes are drawn after, over these.
     ///
+    /// A blended layer blends by `mix-blend-mode` with the layers beneath it, inside the
+    /// `<svg>`, which isolates when the node's paints blend (``isolatesPaints(_:hasChildren:)``);
+    /// the lowest is written without its blend, which has nothing to act on.
+    ///
     /// - Parameters:
     ///   - shape: The shape; its `fillRule` is each copy's.
     ///   - fills: The enabled fills, bottom to top (``PaintRoute/layeredFills``).
@@ -105,7 +109,8 @@ extension ReactEmitter {
         var defs: [String] = []
         var layers: [String] = []
         for (index, fill) in fills.enumerated() {
-            let blend = fill.blendMode.flatMap { $0 == .normal ? nil : blendModeToCSSValue($0) }
+            // The lowest paint has nothing beneath it in the node's paints to blend with.
+            let blend = fill.blendMode.flatMap { index == 0 || !$0.blends ? nil : mixBlendModeToCSSValue($0) }
                 .map { " style={{ mixBlendMode: \"\($0)\" }}" } ?? ""
             if let gradient = angularGradient(fill) {
                 let clip = svgShapeClip(shape, defs: &defs)

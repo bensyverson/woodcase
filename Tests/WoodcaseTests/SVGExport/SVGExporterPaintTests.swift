@@ -126,6 +126,33 @@
             let fill = try Fixture.elements("path", in: rect(##""fill": {"type": "color", "color": "#FF0000", "blendMode": "hardLight"}"##))
             #expect(fill.first.flatMap { Fixture.attribute("style", of: $0) } == "mix-blend-mode:hard-light")
         }
+
+        @Test("Linear dodge is plus-lighter, a true add; linear burn stays color-burn")
+        func linearModes() throws {
+            let dodge = try Fixture.elements("g", in: rect(##""fill": "#FF0000", "blendMode": "linearDodge""##))
+            #expect(dodge.contains { Fixture.attribute("style", of: $0) == "mix-blend-mode:plus-lighter" })
+            let burn = try Fixture.elements("g", in: rect(##""fill": "#FF0000", "blendMode": "linearBurn""##))
+            #expect(burn.contains { Fixture.attribute("style", of: $0) == "mix-blend-mode:color-burn" })
+        }
+
+        /// A paint blends only within its node's paints (Ben's reading-1 ruling, 2026-10-20),
+        /// so a node whose paints blend draws them in an isolated group of their own; its
+        /// outer shadow stays outside it.
+        @Test("Blended paints draw in an isolated group, and only blended ones")
+        func blendedPaintsIsolate() throws {
+            let xml = try rect(##"""
+            "fill": ["#FFFF00", {"type": "color", "color": "#0000FF", "blendMode": "multiply"}],
+            "effect": {"type": "shadow", "shadowType": "outer", "offset": {"x": 4, "y": 4}, "blur": 0, "color": "#000000"}
+            """##)
+            let isolated = try Fixture.elements("g", in: xml).filter { Fixture.attribute("style", of: $0) == "isolation:isolate" }
+            let group = try #require(isolated.first)
+            #expect(isolated.count == 1)
+            let paths = (group.children ?? []).compactMap { $0 as? XMLElement }
+            #expect(paths.compactMap { Fixture.attribute("fill", of: $0) } == ["#ffff00", "#0000ff"])
+
+            let plain = try Fixture.elements("g", in: rect(##""fill": ["#FFFF00", "#0000FF80"]"##))
+            #expect(!plain.contains { Fixture.attribute("style", of: $0) == "isolation:isolate" })
+        }
     }
 
 #endif

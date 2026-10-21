@@ -1,0 +1,7 @@
+{"version":"2.20","children":[
+ {"type":"frame","id":"bg","x":0,"y":0,"width":300,"height":120,"fill":"#FFFFFF","layout":"none","children":[
+  {"type":"rectangle","id":"red","x":20,"y":20,"width":260,"height":80,"fill":"#FF0000"},
+  {"type":"rectangle","id":"a","x":40,"y":30,"width":60,"height":60,"fill":{"type":"color","color":"#0000FF","blendMode":"multiply"}},
+  {"type":"rectangle","id":"b","x":120,"y":30,"width":60,"height":60,"fill":[{"type":"color","color":"#FFFF00"},{"type":"color","color":"#0000FF","blendMode":"multiply"}]},
+  {"type":"rectangle","id":"c","x":200,"y":30,"width":60,"height":60,"fill":"#0000FF","blendMode":"multiply"}
+ ]}]}

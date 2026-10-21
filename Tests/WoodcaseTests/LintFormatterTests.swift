@@ -92,6 +92,7 @@ struct LintFormatterTests {
             "override-key-unread",
             "override-target-not-found",
             "override-value-rejected",
+            "paint-blend-lowest",
             "pen-drops-override",
             "per-side-stroke-on-shape",
             "pipeline",

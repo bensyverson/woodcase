@@ -59,7 +59,7 @@ never re-derived from SVG's own primitives.
 | Dashed stroke (``PenNode/strokeDash``) | `stroke-dasharray` and `stroke-dashoffset` on the stroke, along the renderer's outline, which starts where SVG starts each shape; a paint filled through the outline fills the dashed one |
 | Frame `clip` | a `clipPath` on its children |
 | Opacity | the node's `<g opacity>` |
-| Blend mode | `mix-blend-mode` on the node's or fill's element |
+| Blend mode | `mix-blend-mode` on the node's or paint's element; a node whose paints blend draws them in a `<g style="isolation:isolate">`, so a paint blends only with the paints beneath it on its node (Ben's reading-1 ruling, 2026-10-20) |
 | Outer shadow | a filter on the node's silhouette: blur, offset, flood, knocked out under the silhouette; a spread (``PenShadowSpread``) dilates or erodes the silhouette first with `feMorphology` |
 | Inner shadow | a filter on the silhouette's complement, kept inside it; a spread dilates the complement first |
 | Layer blur | `feGaussianBlur` on the node's `<g>`, sigma half the radius |
@@ -101,8 +101,15 @@ These degrade, on purpose:
 - **Background blur.** SVG cannot read what lies behind an element (`BackgroundImage` was
   never implemented by browsers). The node draws; the backdrop is not blurred.
 - **Shader fills.** Not drawn, as in the CG renderer.
-- **Linear burn and linear dodge.** CSS has neither; they blend as `color-burn` and
-  `color-dodge`, where the CG renderer uses multiply and screen.
+- **Linear burn and linear dodge.** Linear dodge is `mix-blend-mode: plus-lighter`, CSS
+  Compositing Level 2's add, which matches the CG renderer's add where the source is
+  opaque; it is a Porter–Duff plus, so a translucent source adds its color scaled by its
+  alpha where the renderer mixes the add by it, as Photoshop does. CSS has no linear burn;
+  it blends as `color-burn`, where the CG renderer draws `max(0, Cb + Cs − 1)`.
+
+> **Correction, 2026-10-20 (leaf 8nwlNY):** this entry said the CG renderer drew linear burn
+> and linear dodge as multiply and screen; since leaf 22DryP it draws Photoshop's true
+> linear burn and add.
 - **A group's silhouette** is built from its descendants' outlines, as Pen casts it; a
   descendant's own clip does not cut it.
 

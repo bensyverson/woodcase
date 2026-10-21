@@ -63,30 +63,30 @@ extension SVGWriter {
             elements += outerShadows(effects.outerShadows, silhouette: ink, region: silhouette.path.boundingBoxOfPath)
         }
         let shape = SVGShape(path: outline, rule: rule)
-        elements += paint(fills, through: shape, domain: box.cgRect)
-        elements += innerShadows(effects.innerShadows, silhouette: shape.element(fill: "#000000"), region: outline.boundingBoxOfPath)
-        elements += self.stroke(
+        var paints = paint(fills, through: shape, domain: box.cgRect)
+        paints += innerShadows(effects.innerShadows, silhouette: shape.element(fill: "#000000"), region: outline.boundingBoxOfPath)
+        paints += self.stroke(
             stroke.drawn(on: node), path: outline, box: box,
             roundedBox: PenStrokeRenderer.roundedBox(for: node, rect: box), dash: node.strokeDash,
             miterLimit: node.strokeMiterLimit
         )
-        return elements
+        return elements + isolatingPaints(of: node, paints)
     }
 
     /// A line: only its stroke, laid over its band where it has no extent.
     private func line(_ node: PenNode, data: PenNode.LineData, box: PenRect) -> [SVGElement] {
         guard let path = PenShapeBuilder.buildPath(for: node, rect: box) else { return [] }
         let stroke = data.drawn(on: node)
-        return self.stroke(
+        return isolatingPaints(of: node, self.stroke(
             stroke, path: path, box: PenRenderer.lineBand(box, strokeWidth: stroke.uniformStrokeWidth ?? 1),
             roundedBox: nil, dash: node.strokeDash, miterLimit: node.strokeMiterLimit
-        )
+        ))
     }
 
     /// An icon: its glyph's outline, painted and shadowed like a shape, so it draws without
     /// the icon font installed wherever the SVG is opened.
     private func icon(
-        _: PenNode,
+        _ node: PenNode,
         data: PenNode.IconData,
         box: PenRect,
         effects: Effects
@@ -100,8 +100,11 @@ extension SVGWriter {
         let shape = SVGShape(path: outline, rule: .winding)
         let ink = shape.element(fill: "#000000")
         return outerShadows(effects.outerShadows, silhouette: ink, region: outline.boundingBoxOfPath)
-            + paint(data.fills, through: shape, domain: box.cgRect)
-            + innerShadows(effects.innerShadows, silhouette: ink, region: outline.boundingBoxOfPath)
+            + isolatingPaints(
+                of: node,
+                paint(data.fills, through: shape, domain: box.cgRect)
+                    + innerShadows(effects.innerShadows, silhouette: ink, region: outline.boundingBoxOfPath)
+            )
     }
 
     /// What a group may paint, in its own coordinates: the region its shadows' filters

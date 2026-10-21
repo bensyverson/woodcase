@@ -92,7 +92,7 @@ extension ReactEmitter {
         var defs: [String] = []
         var layers: [StrokeLayer] = []
         for (index, fill) in fills.enumerated() {
-            let blend = fill.blendMode.flatMap { $0 == .normal ? nil : blendModeToCSSValue($0) }
+            let blend = fill.blendMode.flatMap { $0 == .normal ? nil : mixBlendModeToCSSValue($0) }
             if let gradient = angularGradient(fill) {
                 layers.append(StrokeLayer(paint: .conic(gradient), blend: blend))
             } else if let paint = svgPaint(fill, index: index, shape: shape, overhang: overhang, defs: &defs, ctx: ctx) {

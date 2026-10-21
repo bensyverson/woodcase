@@ -131,4 +131,11 @@ struct PenBlendModeTests {
     func `Modes Core Graphics draws inexactly composite per pixel`(mode: PenBlendMode) {
         #expect(mode.compositing == .perPixel)
     }
+
+    @Test func `Normal and an unknown mode do not blend; every other mode does`() {
+        #expect(!PenBlendMode.normal.blends)
+        #expect(!PenBlendMode.unknown("x").blends)
+        #expect(PenBlendMode.multiply.blends)
+        #expect(PenBlendMode.luminosity.blends)
+    }
 }

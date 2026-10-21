@@ -50,6 +50,9 @@ extension ReactEmitter {
         svgStyles.append(contentsOf: emitCommonStyles(node.common, blendMode: node.blendMode, pivot: ctx.transformPivot(for: node.common)))
         svgStyles.append(contentsOf: turnedSlotStyles(node, width: data.width, height: data.height, isRoot: isRoot, ctx: ctx))
         svgStyles.append(contentsOf: filterEffectStyles(data.effects))
+        if isolatesPaints(node, hasChildren: false) {
+            svgStyles.append(("isolation", "\"isolate\""))
+        }
 
         if svgStyles.isEmpty {
             ctx.lines.append("\(pad)<svg width={\(Int(w))} height={\(Int(h))} viewBox=\"0 0 \(Int(w)) \(Int(h))\"\(overflow)>")
@@ -114,6 +117,9 @@ extension ReactEmitter {
         svgStyles.append(contentsOf: emitCommonStyles(node.common, blendMode: node.blendMode, pivot: ctx.transformPivot(for: node.common)))
         svgStyles.append(contentsOf: turnedSlotStyles(node, width: data.width, height: data.height, isRoot: isRoot, ctx: ctx))
         svgStyles.append(contentsOf: filterEffectStyles(data.effects))
+        if isolatesPaints(node, hasChildren: false) {
+            svgStyles.append(("isolation", "\"isolate\""))
+        }
 
         if svgStyles.isEmpty {
             ctx.lines.append("\(pad)<svg \(svgAttrs)>")
@@ -240,6 +246,9 @@ extension ReactEmitter {
             ))
             svgStyles.append(contentsOf: emitCommonStyles(node.common, blendMode: node.blendMode, pivot: ctx.transformPivot(for: node.common)))
             svgStyles.append(contentsOf: filterEffectStyles(data.effects))
+            if isolatesPaints(node, hasChildren: false) {
+                svgStyles.append(("isolation", "\"isolate\""))
+            }
 
             ctx.lines.append("\(pad)<svg \(svgAttrs)")
             ctx.lines.append("\(pad)  style={{")

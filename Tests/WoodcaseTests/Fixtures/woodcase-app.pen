@@ -7258,12 +7258,12 @@
                   "children": [
                     {
                       "fill": {
-                        "blendMode": "multiply",
                         "color": "#7B68B0",
                         "enabled": true,
                         "type": "color"
                       },
                       "height": 48,
+                      "metadata": {"type": "woodcase", "woodcase": {"blendMode": "multiply"}},
                       "id": "XxCse",
                       "name": "Multiply",
                       "type": "rectangle",
@@ -7273,12 +7273,12 @@
                     },
                     {
                       "fill": {
-                        "blendMode": "screen",
                         "color": "#7B68B0",
                         "enabled": true,
                         "type": "color"
                       },
                       "height": 48,
+                      "metadata": {"type": "woodcase", "woodcase": {"blendMode": "screen"}},
                       "id": "4Zv0y",
                       "name": "Screen",
                       "type": "rectangle",
@@ -7288,12 +7288,12 @@
                     },
                     {
                       "fill": {
-                        "blendMode": "overlay",
                         "color": "#7B68B0",
                         "enabled": true,
                         "type": "color"
                       },
                       "height": 48,
+                      "metadata": {"type": "woodcase", "woodcase": {"blendMode": "overlay"}},
                       "id": "5BKYx",
                       "name": "Overlay",
                       "type": "rectangle",
@@ -7303,12 +7303,12 @@
                     },
                     {
                       "fill": {
-                        "blendMode": "difference",
                         "color": "#7B68B0",
                         "enabled": true,
                         "type": "color"
                       },
                       "height": 48,
+                      "metadata": {"type": "woodcase", "woodcase": {"blendMode": "difference"}},
                       "id": "7ch0r",
                       "name": "Difference",
                       "type": "rectangle",

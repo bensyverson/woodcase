@@ -92,7 +92,7 @@ extension ReactEmitter {
             }
             styles.append(("boxShadow", "\"\(shadow.cssShadow(spread: shadowSpread(stroke)))\""))
             if let mode = shadow.blendMode, shadow.isBlended {
-                styles.append(("mixBlendMode", "\"\(blendModeToCSSValue(mode))\""))
+                styles.append(("mixBlendMode", "\"\(mixBlendModeToCSSValue(mode))\""))
             }
             styles.append(("pointerEvents", "\"none\""))
             return styles

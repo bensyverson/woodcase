@@ -119,6 +119,15 @@ react-layout-text-two-fill,0.80,1.3
 react-layout-text-vertical-fill,1.23,1.7
 react-layout-vertical,0.14,1.0
 react-layout-zero-children,0.00,1.0
+react-paint-blend-gradient-screen,0.05,0.3
+react-paint-blend-linear-dodge-half,3.19,4.8
+react-paint-blend-linear-dodge-node,0.00,0.2
+react-paint-blend-linear-dodge-stack,0.00,0.2
+react-paint-blend-linear-dodge-translucent,0.62,0.9
+react-paint-blend-lone-multiply,0.00,0.2
+react-paint-blend-softlight-stack,0.19,0.4
+react-paint-blend-stack-multiply,0.00,0.2
+react-paint-blend-stroke-over-fill,0.00,0.2
 react-paint-ellipse-lin-h-outer,0.16,0.4
 react-paint-frame-perside-lin-h-outer,0.01,0.3
 react-paint-frame-perside-lin-h-unset,0.02,0.3

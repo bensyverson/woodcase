@@ -21,7 +21,7 @@ extension ReactEmitter {
         var styles: [(String, String)] = []
 
         // Fill: a color, or paint clipped to the glyphs
-        styles.append(contentsOf: textPaintStyles(data, nodeBlendMode: node.blendMode, ctx: ctx))
+        styles.append(contentsOf: textPaintStyles(data, ctx: ctx))
 
         // Font
         if let fontFamily = data.fontFamily {

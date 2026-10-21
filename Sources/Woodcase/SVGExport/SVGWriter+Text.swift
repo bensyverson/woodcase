@@ -36,17 +36,18 @@ extension SVGWriter {
         let region = (layout.inkBounds ?? .null).union(box.cgRect)
         let ink = shape.element(fill: "#000000")
 
-        var elements = outerShadows(effects.outerShadows, silhouette: ink, region: region)
+        let elements = outerShadows(effects.outerShadows, silhouette: ink, region: region)
+        var paints: [SVGElement] = []
         switch paint {
         case .nothing:
-            elements.append(shape.element(fill: "none"))
+            paints.append(shape.element(fill: "none"))
         case let .solid(color):
-            elements.append(shape.paintedSolid(color, blend: nil))
+            paints.append(shape.paintedSolid(color, blend: nil))
         case .glyphOutlines:
-            elements += self.paint(fills, through: shape, domain: box.cgRect)
+            paints += self.paint(fills, through: shape, domain: box.cgRect)
         }
-        elements += innerShadows(effects.innerShadows, silhouette: ink, region: region)
-        return elements
+        paints += innerShadows(effects.innerShadows, silhouette: ink, region: region)
+        return elements + isolatingPaints(of: node, paints)
     }
 
     /// A text node's glyphs as a region to paint, or `nil` when it sets no lines.

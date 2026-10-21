@@ -35,22 +35,39 @@ extension ReactEmitter {
 
         // Blend mode
         if let blendMode, blendMode != .normal {
-            styles.append(("mixBlendMode", "\"\(blendModeToCSSValue(blendMode))\""))
+            styles.append(("mixBlendMode", "\"\(mixBlendModeToCSSValue(blendMode))\""))
         }
 
         return styles
     }
 
+    /// The CSS `<blend-mode>` keyword for `mode`, as `background-blend-mode` and an SVG
+    /// `feBlend` take it.
+    ///
+    /// `<blend-mode>` has no linear burn or linear dodge: they take `color-burn` and
+    /// `color-dodge`, the nearest (``warnApproximatedBlends(_:ctx:)`` says so). `light` is
+    /// CSS's `lighten`, and a mode Woodcase does not know blends normally. An element's own
+    /// blend takes ``mixBlendModeToCSSValue(_:)``, which has a true add.
     static func blendModeToCSSValue(_ mode: PenBlendMode) -> String {
         switch mode {
-        case .linearBurn: "color-burn" // CSS approximation
-        case .linearDodge: "color-dodge" // CSS approximation
+        case .linearBurn: "color-burn"
+        case .linearDodge: "color-dodge"
         case .softLight: "soft-light"
         case .hardLight: "hard-light"
         case .colorBurn: "color-burn"
         case .colorDodge: "color-dodge"
+        case .light: "lighten"
+        case .unknown: "normal"
         default: mode.rawString
         }
+    }
+
+    /// The `mix-blend-mode` value for `mode`: the ``blendModeToCSSValue(_:)`` keyword, except
+    /// linear dodge, which is `plus-lighter` — CSS Compositing Level 2's add, which
+    /// `mix-blend-mode` alone takes (WebKit drops a `background-blend-mode` that names it)
+    /// and Safari, Chrome and Firefox draw.
+    static func mixBlendModeToCSSValue(_ mode: PenBlendMode) -> String {
+        mode == .linearDodge ? "plus-lighter" : blendModeToCSSValue(mode)
     }
 
     // MARK: - Visual Styles (shared)
@@ -99,26 +116,24 @@ extension ReactEmitter {
     /// Emit background styles for fills: returns [(key, value)] pairs.
     /// Handles solid colors, gradients, images, mesh gradients, multi-fill, enabled flag,
     /// blend modes. `box` sizes a mesh raster; `ctx` resolves and collects its themes.
+    ///
+    /// A paint blends only with the paints beneath it on its node (Ben's reading-1 ruling,
+    /// 2026-10-20; `PenPaintStack`), which is what `background-blend-mode` does: a stack keeps
+    /// each layer's mode there, and a lone fill, which has nothing beneath it, is written
+    /// without one. A fill drawn by an element of its own carries its blend there
+    /// (``fillLayers(_:box:beneathChildren:imageHref:ctx:)``).
     static func emitFillStyles(_ fills: PenFills, box: FillBox, ctx: EmitContext) -> [(String, String)] {
         let enabledFills = fills.all.filter(\.isEnabled)
         guard !enabledFills.isEmpty else { return [] }
 
         // Single simple color fill → backgroundColor
         if enabledFills.count == 1, let single = emitFillValue(enabledFills[0]) {
-            var result = [("backgroundColor", single)]
-            if let blendMode = enabledFills[0].blendMode, blendMode != .normal {
-                result.append(("mixBlendMode", "\"\(blendModeToCSSValue(blendMode))\""))
-            }
-            return result
+            return [("backgroundColor", single)]
         }
 
         // Single complex fill (gradient/image) → use background
         if enabledFills.count == 1 {
-            var result = emitSingleComplexFill(enabledFills[0], box: box, ctx: ctx)
-            if let blendMode = enabledFills[0].blendMode, blendMode != .normal {
-                result.append(("mixBlendMode", "\"\(blendModeToCSSValue(blendMode))\""))
-            }
-            return result
+            return emitSingleComplexFill(enabledFills[0], box: box, ctx: ctx)
         }
 
         // Multiple fills → layer backgrounds
@@ -144,21 +159,6 @@ extension ReactEmitter {
             result.append(("backgroundBlendMode", "\"\(blendModes.joined(separator: ", "))\""))
         }
         return result
-    }
-
-    /// Check if a node has any fill-level blend mode (not node-level).
-    static func nodeHasFillBlendMode(_ node: PenNode) -> Bool {
-        let fills: PenFills? = switch node.kind {
-        case let .frame(d): d.fills
-        case let .rectangle(d): d.fills
-        case let .ellipse(d): d.fills
-        default: nil
-        }
-        guard let fills else { return false }
-        return fills.all.contains { fill in
-            if let mode = fill.blendMode, mode != .normal { return true }
-            return false
-        }
     }
 
     static func emitFillValue(_ fill: PenFill) -> String? {

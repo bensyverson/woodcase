@@ -100,7 +100,7 @@ extension ReactEmitter {
             let body = svgInnerShadowFilter(shadow, id: "%@", region: region, scale: shape.scale, composite: .shadowOnly)
             let id = paintID("wc-inner", shape.nodeID, "\(index)|\(shape.geometry)|\(body.joined())")
             defs.append(contentsOf: body.map { $0.replacingOccurrences(of: "%@", with: id) })
-            let blend = shadow.blendMode.flatMap { shadow.isBlended ? " style={{ mixBlendMode: \"\(blendModeToCSSValue($0))\" }}" : nil } ?? ""
+            let blend = shadow.blendMode.flatMap { shadow.isBlended ? " style={{ mixBlendMode: \"\(mixBlendModeToCSSValue($0))\" }}" : nil } ?? ""
             copies.append("<\(shape.element) \(shape.geometry) fill=\"black\"\(rule) filter=\"url(#\(id))\"\(blend) />")
         }
         ctx.lines.append(contentsOf: svgDefinitions(defs, pad: pad))

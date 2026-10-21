@@ -35,7 +35,7 @@ extension ReactEmitter {
         let outsets = EdgeLengths(all: SymbolicLength(points: overhang))
         guard let css = cssGradient(gradient, box: box, outsets: outsets) else { return nil }
         let layer = PaintLayer(
-            image: css.image, size: css.size, origin: .borderBox, blendMode: PenBlendMode.normal.rawString, position: css.position
+            image: css.image, size: css.size, origin: .borderBox, mode: .normal, position: css.position
         )
         let styles = [("width", "\"100%\""), ("height", "\"100%\"")] + paintLayerDeclarations([layer], withOrigin: false)
         return [

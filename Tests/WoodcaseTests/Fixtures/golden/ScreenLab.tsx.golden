@@ -163,7 +163,6 @@ export function ScreenLab({
           className="flex flex-col gap-3"
           style={{
             width: "100%",
-            isolation: "isolate",
           }}
         >
           <p
@@ -247,6 +246,7 @@ export function ScreenLab({
               backgroundBlendMode: "overlay, normal",
               borderRadius: 8,
               flexShrink: 0,
+              isolation: "isolate",
             }}
           />
         </div>
@@ -628,7 +628,6 @@ export function ScreenLab({
               backgroundColor: "var(--accent)",
               borderRadius: 8,
               flexShrink: 0,
-              isolation: "isolate",
             }}
           >
             <div
@@ -643,8 +642,8 @@ export function ScreenLab({
                   width: 48,
                   height: 48,
                   backgroundColor: "#7B68B0",
-                  mixBlendMode: "multiply",
                   flexShrink: 0,
+                  mixBlendMode: "multiply",
                 }}
               />
             </div>
@@ -660,8 +659,8 @@ export function ScreenLab({
                   width: 48,
                   height: 48,
                   backgroundColor: "#7B68B0",
-                  mixBlendMode: "screen",
                   flexShrink: 0,
+                  mixBlendMode: "screen",
                 }}
               />
             </div>
@@ -677,8 +676,8 @@ export function ScreenLab({
                   width: 48,
                   height: 48,
                   backgroundColor: "#7B68B0",
-                  mixBlendMode: "overlay",
                   flexShrink: 0,
+                  mixBlendMode: "overlay",
                 }}
               />
             </div>
@@ -694,8 +693,8 @@ export function ScreenLab({
                   width: 48,
                   height: 48,
                   backgroundColor: "#7B68B0",
-                  mixBlendMode: "difference",
                   flexShrink: 0,
+                  mixBlendMode: "difference",
                 }}
               />
             </div>

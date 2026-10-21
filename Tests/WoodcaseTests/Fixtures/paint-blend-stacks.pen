@@ -1,0 +1,58 @@
+{"version": "2.20", "children": [
+ {"type": "frame", "id": "pbs01", "name": "stack-multiply", "x": 0, "y": 0, "width": 120, "height": 120,
+  "fill": "#FFFFFF", "layout": "none", "children": [
+   {"type": "rectangle", "id": "pbs01r", "x": 10, "y": 10, "width": 100, "height": 100, "fill": "#FF0000"},
+   {"type": "rectangle", "id": "pbs01a", "x": 30, "y": 30, "width": 60, "height": 60,
+    "fill": [{"type": "color", "color": "#FFFF00"}, {"type": "color", "color": "#0000FF", "blendMode": "multiply"}]}
+ ]},
+ {"type": "frame", "id": "pbs02", "name": "lone-multiply", "x": 140, "y": 0, "width": 120, "height": 120,
+  "fill": "#FFFFFF", "layout": "none", "children": [
+   {"type": "rectangle", "id": "pbs02r", "x": 10, "y": 10, "width": 100, "height": 100, "fill": "#FF0000"},
+   {"type": "rectangle", "id": "pbs02a", "x": 30, "y": 30, "width": 60, "height": 60,
+    "fill": {"type": "color", "color": "#0000FF", "blendMode": "multiply"}}
+ ]},
+ {"type": "frame", "id": "pbs03", "name": "gradient-screen", "x": 280, "y": 0, "width": 120, "height": 120,
+  "fill": "#FFFFFF", "layout": "none", "children": [
+   {"type": "rectangle", "id": "pbs03r", "x": 10, "y": 10, "width": 100, "height": 100, "fill": "#00FF00"},
+   {"type": "rectangle", "id": "pbs03a", "x": 30, "y": 30, "width": 60, "height": 60,
+    "fill": [{"type": "gradient", "gradientType": "linear", "rotation": 90,
+              "colors": [{"color": "#FF0000", "position": 0}, {"color": "#0000FF", "position": 1}]},
+             {"type": "color", "color": "#33333380", "blendMode": "screen"}]}
+ ]},
+ {"type": "frame", "id": "pbs04", "name": "stroke-over-fill", "x": 420, "y": 0, "width": 120, "height": 120,
+  "fill": "#FFFFFF", "layout": "none", "children": [
+   {"type": "rectangle", "id": "pbs04r", "x": 10, "y": 10, "width": 100, "height": 100, "fill": "#FF0000"},
+   {"type": "rectangle", "id": "pbs04a", "x": 30, "y": 30, "width": 60, "height": 60, "fill": "#FFFF00",
+    "stroke": {"type": "color", "color": "#0000FF", "blendMode": "multiply"}, "strokeWidth": 12, "strokeAlignment": "center"}
+ ]},
+ {"type": "frame", "id": "pbs05", "name": "softlight-stack", "x": 560, "y": 0, "width": 120, "height": 120,
+  "fill": "#FFFFFF", "layout": "none", "children": [
+   {"type": "rectangle", "id": "pbs05r", "x": 10, "y": 10, "width": 100, "height": 100, "fill": "#FF0000"},
+   {"type": "rectangle", "id": "pbs05a", "x": 30, "y": 30, "width": 60, "height": 60,
+    "fill": [{"type": "color", "color": "#E6994D66"}, {"type": "color", "color": "#3366FF", "blendMode": "softLight"}]}
+ ]},
+ {"type": "frame", "id": "pbs06", "name": "linear-dodge-stack", "x": 700, "y": 0, "width": 120, "height": 120,
+  "fill": "#FFFFFF", "layout": "none", "children": [
+   {"type": "rectangle", "id": "pbs06r", "x": 10, "y": 10, "width": 100, "height": 100, "fill": "#00FF00"},
+   {"type": "rectangle", "id": "pbs06a", "x": 30, "y": 30, "width": 60, "height": 60,
+    "fill": [{"type": "color", "color": "#E6994D"}, {"type": "color", "color": "#3366FF", "blendMode": "linearDodge"}]}
+ ]},
+ {"type": "frame", "id": "pbs07", "name": "linear-dodge-translucent", "x": 840, "y": 0, "width": 120, "height": 120,
+  "fill": "#FFFFFF", "layout": "none", "children": [
+   {"type": "rectangle", "id": "pbs07r", "x": 10, "y": 10, "width": 100, "height": 100, "fill": "#00FF00"},
+   {"type": "rectangle", "id": "pbs07a", "x": 30, "y": 30, "width": 60, "height": 60,
+    "fill": [{"type": "color", "color": "#E6994D66"}, {"type": "color", "color": "#3366FF", "blendMode": "linearDodge"}]}
+ ]},
+ {"type": "frame", "id": "pbs08", "name": "linear-dodge-node", "x": 980, "y": 0, "width": 120, "height": 120,
+  "fill": "#FFFFFF", "layout": "none", "children": [
+   {"type": "rectangle", "id": "pbs08r", "x": 10, "y": 10, "width": 100, "height": 100, "fill": "#E6994D"},
+   {"type": "rectangle", "id": "pbs08a", "x": 30, "y": 30, "width": 60, "height": 60, "fill": "#3366FF",
+    "metadata": {"type": "woodcase", "woodcase": {"blendMode": "linearDodge"}}}
+ ]},
+ {"type": "frame", "id": "pbs09", "name": "linear-dodge-half", "x": 1120, "y": 0, "width": 120, "height": 120,
+  "fill": "#FFFFFF", "layout": "none", "children": [
+   {"type": "rectangle", "id": "pbs09r", "x": 10, "y": 10, "width": 100, "height": 100, "fill": "#00FF00"},
+   {"type": "rectangle", "id": "pbs09a", "x": 30, "y": 30, "width": 60, "height": 60,
+    "fill": [{"type": "color", "color": "#E6994D"}, {"type": "color", "color": "#3366FF80", "blendMode": "linearDodge"}]}
+ ]}
+]}

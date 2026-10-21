@@ -133,12 +133,12 @@
             },
             {
               "fill": {
-                "blendMode": "multiply",
                 "color": "#0000FF",
                 "enabled": true,
                 "type": "color"
               },
               "height": 80,
+              "metadata": {"type": "woodcase", "woodcase": {"blendMode": "multiply"}},
               "id": "NkSsO",
               "name": "blend-top-multiply",
               "type": "rectangle",

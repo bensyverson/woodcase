@@ -11,8 +11,10 @@ extension ReactEmitter {
     /// every enabled fill is a background layer laid out over the text's own box, top fill
     /// first, shown only through the glyphs by `background-clip: text` with the glyph fill
     /// made transparent. A stack keeps each layer's blend mode as `background-blend-mode`;
-    /// a lone blended fill blends the element. Auto-width text is sized to its content so
-    /// that the box the paint spans is the text's, not its container's.
+    /// a lone fill's blend mode is left out, since a paint blends only with the paints
+    /// beneath it on its node (Ben's reading-1 ruling, 2026-10-20) and a lone one has none.
+    /// Auto-width text is sized to its content so that the box the paint spans is the
+    /// text's, not its container's.
     ///
     /// No enabled paint — or only paint the emitter cannot draw, a shader — writes a
     /// transparent color, since an element with none inherits the page's black and Pen
@@ -20,24 +22,13 @@ extension ReactEmitter {
     ///
     /// - Parameters:
     ///   - data: The text node.
-    ///   - nodeBlendMode: The node's own blend mode, which a fill's blend mode must not
-    ///     overwrite: both would be `mix-blend-mode`.
     ///   - ctx: The emission context, for a themed mesh.
-    static func textPaintStyles(
-        _ data: PenNode.TextData,
-        nodeBlendMode: PenBlendMode?,
-        ctx: EmitContext
-    ) -> [(String, String)] {
-        let elementBlendFree = nodeBlendMode.map { $0 == .normal } ?? true
+    static func textPaintStyles(_ data: PenNode.TextData, ctx: EmitContext) -> [(String, String)] {
         switch PaintRoute(data.fills) {
         case .none:
             return [("color", "\"\(noGlyphPaint)\"")]
-        case let .solid(color, blendMode):
-            var styles = [("color", "\"\(glyphColor(color))\"")]
-            if elementBlendFree, let blendMode, blendMode != .normal {
-                styles.append(("mixBlendMode", "\"\(blendModeToCSSValue(blendMode))\""))
-            }
-            return styles
+        case let .solid(color, _):
+            return [("color", "\"\(glyphColor(color))\"")]
         case let .painted(fills):
             let layers = paintLayers(
                 fills, outsets: EdgeLengths(all: .zero), box: FillBox(width: data.width, height: data.height), ctx: ctx
@@ -50,9 +41,6 @@ extension ReactEmitter {
                 ("WebkitTextFillColor", "\"transparent\""),
                 ("color", "\"transparent\""),
             ])
-            if elementBlendFree, let blend = loneLayerBlend(layers) {
-                styles.append(("mixBlendMode", "\"\(blend)\""))
-            }
             if (data.textGrowth ?? .auto) == .auto {
                 styles.append(("width", "\"fit-content\""))
             }

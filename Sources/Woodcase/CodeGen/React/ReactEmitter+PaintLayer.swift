@@ -26,8 +26,13 @@ extension ReactEmitter {
         /// The box the layer is laid out against.
         var origin: Origin
 
-        /// The CSS blend mode against the layers beneath it.
-        var blendMode: String
+        /// The paint's blend mode against the layers beneath it.
+        var mode: PenBlendMode
+
+        /// The layer's `background-blend-mode` keyword.
+        var blendMode: String {
+            ReactEmitter.blendModeToCSSValue(mode)
+        }
 
         /// The `background-position` value: centered, unless a gradient's tile sits off
         /// the element's center (``ReactEmitter/tilePosition(outsets:)``).
@@ -54,7 +59,7 @@ extension ReactEmitter {
         ctx: EmitContext
     ) -> [PaintLayer] {
         fills.reversed().compactMap { fill -> PaintLayer? in
-            let blend = fill.blendMode.map(blendModeToCSSValue) ?? PenBlendMode.normal.rawString
+            let blend = fill.blendMode ?? .normal
             switch fill {
             case .shorthand, .color:
                 guard let color = emitFillValueRaw(fill) else { return nil }
@@ -62,17 +67,17 @@ extension ReactEmitter {
                     image: "linear-gradient(\(color), \(color))",
                     size: PaintLayer.fullSize,
                     origin: .borderBox,
-                    blendMode: blend
+                    mode: blend
                 )
             case let .gradient(gradient):
                 guard let css = cssGradient(gradient, box: box, outsets: outsets) else { return nil }
-                return PaintLayer(image: css.image, size: css.size, origin: .borderBox, blendMode: blend, position: css.position)
+                return PaintLayer(image: css.image, size: css.size, origin: .borderBox, mode: blend, position: css.position)
             case let .image(image):
                 guard let url = image.url else { return nil }
-                return PaintLayer(image: "url('\(url)')", size: cssImageSize(image.placement), origin: .paddingBox, blendMode: blend)
+                return PaintLayer(image: "url('\(url)')", size: cssImageSize(image.placement), origin: .paddingBox, mode: blend)
             case let .meshGradient(mesh):
                 guard let css = emitMeshImage(mesh, box: box, ctx: ctx) else { return nil }
-                return PaintLayer(image: css, size: PaintLayer.fullSize, origin: .paddingBox, blendMode: blend)
+                return PaintLayer(image: css, size: PaintLayer.fullSize, origin: .paddingBox, mode: blend)
             case .shader, .unknown:
                 return nil
             }
@@ -106,17 +111,18 @@ extension ReactEmitter {
         if withOrigin {
             declarations.append(("backgroundOrigin", "\"\(layers.map(\.origin.rawValue).joined(separator: ", "))\""))
         }
-        let normal = PenBlendMode.normal.rawString
-        if layers.count > 1, layers.contains(where: { $0.blendMode != normal }) {
+        if layers.count > 1, layers.contains(where: \.mode.blends) {
             declarations.append(("backgroundBlendMode", "\"\(layers.map(\.blendMode).joined(separator: ", "))\""))
         }
         return declarations
     }
 
-    /// The `mix-blend-mode` a lone layer needs, which `background-blend-mode` cannot give it:
-    /// that blends a layer only with the layers beneath it on the same element.
+    /// The `mix-blend-mode` a stroke overlay's lone layer needs, which `background-blend-mode`
+    /// cannot give it: that blends a layer only with the layers beneath it on the same
+    /// element, and the stroke blends with the node's fills, on its host. The host isolates
+    /// (``isolatesPaints(_:hasChildren:)``), so the blend goes no further than the node.
     static func loneLayerBlend(_ layers: [PaintLayer]) -> String? {
-        guard layers.count == 1, layers[0].blendMode != PenBlendMode.normal.rawString else { return nil }
-        return layers[0].blendMode
+        guard layers.count == 1, layers[0].mode.blends else { return nil }
+        return mixBlendModeToCSSValue(layers[0].mode)
     }
 }

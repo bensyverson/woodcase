@@ -16,6 +16,10 @@ extension PenRenderer {
     /// Renders a node's own content — everything but its children — in Pen's paint order:
     /// outer shadows, fills, inner shadows, stroke. The caller draws the children after.
     ///
+    /// When any of the node's paints blends, everything after the outer shadows is drawn as
+    /// one isolated group (``beginPaintStack(_:innerShadows:in:)``), so a paint's blend mode blends only
+    /// with the paints beneath it (``PenPaintStack``).
+    ///
     /// - Parameters:
     ///   - node: The node.
     ///   - own: Its draw rect, shadows and fill override.
@@ -41,6 +45,24 @@ extension PenRenderer {
             }
         }
 
+        let paintGroup = beginPaintStack(
+            PenPaintStack(node, overrideFills: own.overrideFills), innerShadows: own.innerShadows, in: context
+        )
+        renderPaintStack(node, own, imageProvider: imageProvider, in: context)
+        if let paintGroup {
+            endComposite(paintGroup, in: context)
+        }
+    }
+
+    /// The node's fills, inner shadows and stroke — or a text's or icon's glyphs and inner
+    /// shadows — after its outer shadows.
+    private static func renderPaintStack(
+        _ node: PenNode,
+        _ own: OwnContent,
+        imageProvider: ImageProvider,
+        in context: CGContext
+    ) {
+        let rect = own.drawRect
         switch node.kind {
         case let .frame(data):
             renderShape(

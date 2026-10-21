@@ -60,6 +60,9 @@ extension ReactEmitter {
         ))
         styles.append(contentsOf: emitCommonStyles(node.common, blendMode: node.blendMode, pivot: ctx.transformPivot(for: node.common)))
         styles.append(contentsOf: turnedSlotStyles(node, width: data.width, height: data.height, isRoot: isRoot, ctx: ctx))
+        if isolatesPaints(node, hasChildren: false) {
+            styles.append(("isolation", "\"isolate\""))
+        }
 
         // var() substitution for state-affected properties
         substituteStateVars(&styles, pivot: ctx.transformPivot(for: node.common), ctx: ctx)
@@ -102,6 +105,9 @@ extension ReactEmitter {
             svgStyles.append(contentsOf: emitCommonStyles(node.common, blendMode: node.blendMode, pivot: ctx.transformPivot(for: node.common)))
             svgStyles.append(contentsOf: turnedSlotStyles(node, width: data.width, height: data.height, isRoot: isRoot, ctx: ctx))
             svgStyles.append(contentsOf: filterEffectStyles(data.effects))
+            if isolatesPaints(node, hasChildren: false) {
+                svgStyles.append(("isolation", "\"isolate\""))
+            }
 
             if svgStyles.isEmpty {
                 ctx.lines.append("\(pad)<svg width={\(Int(w))} height={\(Int(h))} viewBox=\"0 0 \(Int(w)) \(Int(h))\"\(overflow)>")
@@ -173,6 +179,9 @@ extension ReactEmitter {
             ))
             styles.append(contentsOf: emitCommonStyles(node.common, blendMode: node.blendMode, pivot: ctx.transformPivot(for: node.common)))
             styles.append(contentsOf: turnedSlotStyles(node, width: data.width, height: data.height, isRoot: isRoot, ctx: ctx))
+            if isolatesPaints(node, hasChildren: false) {
+                styles.append(("isolation", "\"isolate\""))
+            }
 
             emitBoxElement(styles, shadowLayers: shadowLayers, fillLayers: layersOverFill, overlay: overlay, indent: indent, ctx: ctx)
         }

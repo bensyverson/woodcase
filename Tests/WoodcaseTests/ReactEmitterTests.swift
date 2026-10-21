@@ -2668,90 +2668,9 @@ struct ReactEmitterTests {
 
     // MARK: - Fill-level blend mode (Fix 6)
 
-    @Test("Single fill with blend mode emits mixBlendMode")
-    func singleFillBlendMode() {
-        let doc = PenDocument(version: "2.9", children: [
-            PenNode(
-                id: "c1",
-                common: PenNodeCommon(name: "Component/Card", reusable: true, metadata: ["type": "component"]),
-                kind: .frame(PenNode.FrameData(
-                    fills: .single(.color(PenFill.PenColorFill(
-                        blendMode: .multiply,
-                        color: .literal("#7B68B0")
-                    ))),
-                    layout: .vertical
-                ))
-            ),
-        ])
-        let components = ComponentAnalyzer.analyze(doc)
-        let theme = ThemeAnalyzer.analyze(doc)
-        let files = ReactEmitter.emit(document: doc, components: components, theme: theme).files
-        let content = files[0].content
-        #expect(content.contains("backgroundColor: \"#7B68B0\""))
-        #expect(content.contains("mixBlendMode: \"multiply\""))
-    }
-
-    @Test("Rectangle with single fill blend mode emits mixBlendMode")
-    func rectangleSingleFillBlendMode() {
-        let doc = PenDocument(version: "2.9", children: [
-            PenNode(
-                id: "c1",
-                common: PenNodeCommon(name: "Component/Card", reusable: true, metadata: ["type": "component"]),
-                kind: .frame(PenNode.FrameData(
-                    layout: .vertical,
-                    children: [
-                        PenNode(
-                            id: "r1",
-                            common: PenNodeCommon(name: "Rect"),
-                            kind: .rectangle(PenNode.RectangleData(
-                                width: .fixed(100), height: .fixed(100),
-                                fills: .single(.color(PenFill.PenColorFill(
-                                    blendMode: .screen,
-                                    color: .literal("#FF0000")
-                                )))
-                            ))
-                        ),
-                    ]
-                ))
-            ),
-        ])
-        let components = ComponentAnalyzer.analyze(doc)
-        let theme = ThemeAnalyzer.analyze(doc)
-        let files = ReactEmitter.emit(document: doc, components: components, theme: theme).files
-        let content = files[0].content
-        #expect(content.contains("mixBlendMode: \"screen\""))
-    }
-
-    @Test("Parent frame of child with fill-level blendMode gets isolation: isolate")
-    func parentIsolationForBlendMode() {
-        let doc = PenDocument(version: "2.9", children: [
-            PenNode(
-                id: "c1",
-                common: PenNodeCommon(name: "Component/Card", reusable: true, metadata: ["type": "component"]),
-                kind: .frame(PenNode.FrameData(
-                    layout: .vertical,
-                    children: [
-                        PenNode(
-                            id: "r1",
-                            common: PenNodeCommon(name: "Overlay"),
-                            kind: .rectangle(PenNode.RectangleData(
-                                width: .fixed(100), height: .fixed(100),
-                                fills: .single(.color(PenFill.PenColorFill(
-                                    blendMode: .multiply,
-                                    color: .literal("#7B68B0")
-                                )))
-                            ))
-                        ),
-                    ]
-                ))
-            ),
-        ])
-        let components = ComponentAnalyzer.analyze(doc)
-        let theme = ThemeAnalyzer.analyze(doc)
-        let files = ReactEmitter.emit(document: doc, components: components, theme: theme).files
-        let content = files[0].content
-        #expect(content.contains("isolation: \"isolate\""))
-    }
+    // A paint's blend now blends only within its node's paints (Ben's reading-1 ruling,
+    // 2026-10-20): a lone blended fill emits no mixBlendMode and its parent no isolation.
+    // `ReactEmitterPaintBlendTests` holds those cases.
 
     // MARK: - Line with fill_container width (Fix 1)
 

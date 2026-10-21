@@ -55,11 +55,13 @@ struct ReactEmitterTextPaintTests {
         #expect(!content.contains("backgroundClip"))
     }
 
-    @Test("A lone solid color with a blend mode blends the text element")
+    /// A paint blends only with the paints beneath it on its node (Ben's reading-1 ruling,
+    /// 2026-10-20), so a lone one blends with nothing; it used to blend the element.
+    @Test("A lone solid color with a blend mode is a plain color, unblended")
     func blendedSolidBlendsElement() throws {
         let content = try card(fill: ##"{"type": "color", "color": "#123456", "blendMode": "multiply"}"##)
         #expect(content.contains(##"color: "#123456","##))
-        #expect(content.contains(##"mixBlendMode: "multiply","##))
+        #expect(!content.contains("mixBlendMode"))
         #expect(!content.contains("backgroundClip"))
     }
 
@@ -101,11 +103,11 @@ struct ReactEmitterTextPaintTests {
         #expect(content.contains(##"backgroundBlendMode: "multiply, normal","##))
     }
 
-    @Test("A lone blended gradient blends the text element")
+    @Test("A lone blended gradient is written unblended")
     func loneBlendedGradient() throws {
         let blended = Self.ramp.replacingOccurrences(of: "\"linear\",", with: "\"linear\", \"blendMode\": \"screen\",")
         let content = try card(fill: blended)
-        #expect(content.contains(##"mixBlendMode: "screen","##))
+        #expect(!content.contains("mixBlendMode"))
         #expect(!content.contains("backgroundBlendMode"))
     }
 

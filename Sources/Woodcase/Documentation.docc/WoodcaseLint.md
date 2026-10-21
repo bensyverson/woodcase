@@ -89,6 +89,7 @@ no document, so accepting any of those would be accepting an argument it ignores
 | `spans-stale` | warning | A text whose `metadata.woodcase.spans` were made for other words than its content, so its runs over part of the text are ignored |
 | `stroke-dash-ignored` | warning | A `metadata.woodcase.strokeDash` every target draws solid: on a per-side `strokeWidth`, or one that is not an array of at most 16 non-negative lengths, not all zero |
 | `shadow-spread-stale` | warning | A `metadata.woodcase.shadowSpread` entry made for a shadow the node no longer has at its place — Pen changed, moved or removed it — so the shadow casts without its spread |
+| `paint-blend-lowest` | warning | A node's lowest drawn paint — its first enabled fill, or its first stroke paint when it has no fill — has a blend mode. A paint blends only with the paints beneath it on its node, so this one blends with nothing and draws as normal; Pen blends it with what lies behind the node. The fix moves the blend to the node |
 
 The two sizing checks fire only where the engine has *nothing to fall back on*:
 `fill_container(200)` under a `fit_content` parent, and `fit_content(200)` with no
@@ -540,6 +541,24 @@ spreading the wrong one. A row inside an instance is skipped, as for `spans-stal
 
 ```text
 warning shadow-spread-stale  Board/Card (Rct01)  has a shadow spread for effect 0 made for a shadow it no longer has there, so it casts without it. Restate `common.metadata.woodcase.shadowSpread` for the shadow as it is now, or remove it with `woodcase set <file> Rct01 common.metadata.woodcase.shadowSpread=null`.
+```
+
+`paint-blend-lowest` is a warning, one finding per node whose lowest drawn paint blends.
+A paint's blend mode blends only within its node's own paints — fills, then strokes —
+drawn as one isolated group, and only the node's own blend mode reaches the backdrop
+(<doc:PenRendering>, *Compositing*; Ben's ruling of 2026-10-20). The lowest paint has
+nothing beneath it, so its blend does nothing on any Woodcase target, while Pen blends it
+with whatever lies behind the node: a lone blue fill at multiply over red is blue here and
+black in Pen. The finding's command moves the blend to the node — `kind.blendMode` set to
+the paint's mode, and the paint list (`kind.fills`, or `kind.stroke` for a stroke-only
+node) rewritten without it — which restores the Pen-style look exactly for a node whose
+only paint it is and which has no children; above other paints or under children, the
+node's blend applies to them as well. A node that already has a blend mode of its own gets
+no command: the paint's blend does nothing, so remove it. A row inside an instance is
+skipped, as for `spans-stale`.
+
+```text
+warning paint-blend-lowest  #bg/#a (a)  has a multiply blend on fill 0, its lowest paint, which blends with nothing beneath it in the node's own paints, so Woodcase draws it as normal; Pen blends it with what lies behind the node. To draw it as Pen does, move the blend to the node: `woodcase set <file> a kind.blendMode=multiply kind.fills='{"color":"#0000FF","type":"color"}'`.
 ```
 
 ## What `generate react` will choke on

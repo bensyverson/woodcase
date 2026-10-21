@@ -44,13 +44,19 @@ struct PenTextPaintRouteTests {
         #expect(ink.contains { $0.b > 128 }, "no blue end of the ramp in \(ink.count) glyph pixels")
     }
 
-    @Test("A single solid with a blend mode blends through the glyphs")
+    /// A paint's blend blends only within its node's paints (Ben's reading-1 ruling,
+    /// 2026-10-20): over a white fill beneath it, red at multiply is red, and the green behind
+    /// the node never reaches it. Before the ruling it multiplied the green to black.
+    @Test("A blended solid blends through the glyphs with the fill beneath it, not the backdrop")
     func blendedSolid() throws {
-        let fill = PenFill.color(PenFill.PenColorFill(blendMode: .multiply, color: .literal("#FF0000")))
-        let ink = try Self.opaqueInk(Self.renderOnGreen(fills: .single(fill)))
-        // Red multiplied over green is black; unblended red would stay red.
-        let red = ink.filter { $0.r > 128 }
-        #expect(red.isEmpty, "\(red.count) of \(ink.count) glyph pixels are still red")
+        let fills = PenFills.multiple([
+            .shorthand("#FFFFFF"), .color(PenFill.PenColorFill(blendMode: .multiply, color: .literal("#FF0000"))),
+        ])
+        let ink = try Self.opaqueInk(Self.renderOnGreen(fills: fills))
+        // Multiplied over the green the glyphs would be black; edges mix red with green.
+        let black = ink.filter { $0.r < 60 && $0.g < 60 && $0.b < 60 }
+        #expect(ink.contains { $0.r > 200 && $0.g < 60 }, "no red among \(ink.count) glyph pixels")
+        #expect(black.isEmpty, "\(black.count) of \(ink.count) glyph pixels are black")
     }
 
     @Test("Stacked solids composite through the glyphs one on the other")

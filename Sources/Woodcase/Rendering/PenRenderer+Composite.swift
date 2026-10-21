@@ -65,6 +65,34 @@ extension PenRenderer {
         }
     }
 
+    /// Opens the isolated group a node's paint stack draws in when any of its paints blends,
+    /// or returns `nil` when none does and the paints draw straight onto the backdrop.
+    ///
+    /// The group starts transparent, so a blended paint blends only with the paints drawn
+    /// beneath it inside, and the group then composites at the normal blend (``PenPaintStack``).
+    /// It is a per-pixel layer when a paint or inner shadow inside blends per pixel — a Core
+    /// Graphics layer would hide the pixels that blend reads — and a Core Graphics
+    /// transparency layer otherwise, which is also the fallback where the context's pixels
+    /// cannot be read.
+    ///
+    /// - Parameters:
+    ///   - stack: The node's paints.
+    ///   - innerShadows: The inner shadows drawn among them.
+    ///   - context: The context they draw into.
+    static func beginPaintStack(
+        _ stack: PenPaintStack, innerShadows: [PenCastShadow], in context: CGContext
+    ) -> NodeComposite? {
+        guard stack.blends else { return nil }
+        let shadowsPerPixel = innerShadows.contains { $0.shadow.blendMode?.compositing == .perPixel }
+        if stack.blendsPerPixel || shadowsPerPixel, let layer = PenBlendLayer(mode: .normal, opacity: 1, in: context) {
+            return .pixelLayer(layer)
+        }
+        // The graphics state is at full alpha and the normal blend here: a node's own
+        // composite resets both once its layer is open.
+        context.beginTransparencyLayer(auxiliaryInfo: nil)
+        return .transparencyLayer
+    }
+
     /// Whether any paint, shadow or descendant of `node` blends by a per-pixel mode.
     static func containsPerPixelBlend(_ node: PenNode) -> Bool {
         var pending = [node]
@@ -93,7 +121,7 @@ extension PenRenderer {
     }
 
     /// The node's stroke paints, for the kinds that carry a stroke.
-    private static func strokePaints(for node: PenNode) -> PenFills? {
+    static func strokePaints(for node: PenNode) -> PenFills? {
         switch node.kind {
         case let .frame(data): data.stroke
         case let .rectangle(data): data.stroke

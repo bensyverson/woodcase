@@ -166,6 +166,12 @@ public enum LintCheck: String, Friendly, CaseIterable {
     /// (``PenNode/hasStaleShadowSpread``).
     case shadowSpreadStale = "shadow-spread-stale"
 
+    /// A node whose lowest drawn paint has a blend mode. A paint blends only within its
+    /// node's paint stack (`PenPaintStack`), so the lowest blends with nothing and draws
+    /// as normal, where Pen blends it with what lies behind the node. The fix moves the blend
+    /// to the node, which restores the Pen-style look.
+    case paintBlendLowest = "paint-blend-lowest"
+
     /// An instance that overrides a Woodcase-owned key — in a `descendants` override's
     /// `metadata.woodcase`, or in its own `ref` node's, its lock among them — which Pen drops
     /// when it saves the file. One notice per instance, listing the keys at their natural
@@ -207,6 +213,7 @@ public enum LintCheck: String, Friendly, CaseIterable {
     /// are warnings because Pen still draws the node, only not as the file says.
     /// ``shaderNotDrawn`` is a warning on the same reading from the other side: the file
     /// is well formed and Pen draws it as written; only Woodcase's render and code differ.
+    /// So is ``paintBlendLowest``: the file is well formed, and only Pen draws it otherwise.
     /// ``perSideStrokeOnShape`` is a warning because the node draws, Pen and Woodcase alike,
     /// only not with the widths the file writes. ``spansStale`` is a warning on the same
     /// reading: the text draws, but plain, not as its styling says. ``noteUnsized`` is a notice: nothing is
@@ -223,7 +230,7 @@ public enum LintCheck: String, Friendly, CaseIterable {
              .artboardOverlap, .duplicateName, .textOverflow, .codegenUnmappedOverride, .collapsedText,
              .collapsedAbsoluteFrame, .meshGradientDistorted, .textStyleStripped, .importNotFollowed,
              .shaderNotDrawn, .perSideStrokeOnShape, .spansStale, .strokeDashIgnored,
-             .shadowSpreadStale:
+             .shadowSpreadStale, .paintBlendLowest:
             .warning
         case .brokenRef, .importNotFound, .importUnreadable, .unresolvedVariable, .unknownIcon, .unknownIconLibrary,
              .overrideValueRejected, .overrideTargetNotFound, .overrideKeyUnread,
@@ -303,6 +310,8 @@ public enum LintCheck: String, Friendly, CaseIterable {
             "A stroke dash every target draws solid: on per-side widths, or one no target can draw."
         case .shadowSpreadStale:
             "A shadow spread made for a shadow the node no longer has there, so it casts without it."
+        case .paintBlendLowest:
+            "A blended paint lowest in its node's stack, which blends with nothing here but with what lies behind the node in Pen."
         case .penDropsOverride:
             "An instance overriding a Woodcase-owned key (a dash, a lock, a blend), which Pen drops when it saves the file."
         case .componentLoop:
