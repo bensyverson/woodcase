@@ -150,6 +150,15 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 - ``FigKiwiContainer``
 - ``FigmaDecodeError``
 
+### Figma Import
+
+- <doc:FigmaImport>
+- ``FigmaImporter``
+- ``FigmaImport``
+- ``FigmaImportOptions``
+- ``FigmaImportLoss``
+- ``FigmaImportError``
+
 ### Networking
 
 - ``RemoteDataFetching``

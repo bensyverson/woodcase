@@ -18,7 +18,7 @@ clipboard.message["type"]?.enumName      // "NODE_CHANGES"
 ```
 
 The message is generic Kiwi (<doc:KiwiDecoding>); turning its nodes into Pen nodes is a
-separate step.
+separate step, ``FigmaImporter`` (<doc:FigmaImport>).
 
 ### The HTML
 
