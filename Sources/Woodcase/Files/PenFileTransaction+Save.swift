@@ -12,8 +12,9 @@ public extension PenFileTransaction {
         /// in the log.
         case wrote
 
-        /// The file already held the snapshot's document byte for byte; nothing was
-        /// written or logged.
+        /// The file already held the snapshot's document, encoding to the bytes this save
+        /// would write — left by an earlier save of the same snapshot when two overlap;
+        /// nothing was written or logged.
         case unchanged
 
         /// The file no longer holds what the session last synced — someone wrote it
@@ -51,7 +52,10 @@ public extension PenFileTransaction {
     /// the session last synced (``DocumentSnapshot/syncedRevision``). If another writer
     /// got there first, nothing is written and the outcome is
     /// ``SaveOutcome/fileChanged(found:lineage:)``: merge `found` and save again, so an
-    /// agent's write is never overwritten. If the file holds that revision but the log
+    /// agent's write is never overwritten. When what changed the file was a save of this
+    /// same snapshot — an app's debounced save overlapping its explicit one — the file
+    /// already holds what this save would write, and the outcome is
+    /// ``SaveOutcome/unchanged`` instead of a merge of the app's own work. If the file holds that revision but the log
     /// does not explain it — an outside writer from before the session opened — an
     /// ``ActivityEvent/Kind/external`` row goes first, as a CLI transaction would record.
     /// And if the session folded in work that wrote no rows of its own after its last
@@ -115,11 +119,16 @@ public extension PenFileTransaction {
         let found = EditableDocument(from: parsed).documentRevision
         let activity = log ?? ActivityLogLocation.log(for: url)
         let lineage = try LogLineage.read(url, at: found, from: activity)
+        let updated = try encode(snapshot.document, for: url)
         guard found == expected else {
+            // A save of this same snapshot got there first — two saves overlapped — so the
+            // file holds exactly what this one would write: no other writer to merge.
+            if found == snapshot.documentRevision, try updated == encode(parsed, for: url) {
+                return .unchanged
+            }
             return .fileChanged(found: parsed, lineage: lineage)
         }
 
-        let updated = try encode(snapshot.document, for: url)
         guard try updated != encode(parsed, for: url) else { return .unchanged }
         try write(updated, replacing: lock)
 

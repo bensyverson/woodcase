@@ -151,6 +151,10 @@ contract:
    call ``DocumentSession/noteSynced(_:)`` with that snapshot. Changes made while the save
    ran stay unsaved, and the next save checks against what this one wrote
    (``DocumentSession/syncedRevision``, carried as ``DocumentSnapshot/syncedRevision``).
+   Two saves can overlap — a debounced save begun while an explicit one still writes —
+   and both carry the older synced revision; the later one finds the file holding its
+   own snapshot and reports ``PenFileTransaction/SaveOutcome/unchanged``, not a file
+   change, so the app never merges its own save back in.
 3. **Merge when told.** On ``PenFileTransaction/SaveOutcome/fileChanged(found:lineage:)``
    someone wrote the file since the last sync and nothing was written. Submit
    ``SessionOrigin/file(_:author:)`` with `found` and the lineage's
