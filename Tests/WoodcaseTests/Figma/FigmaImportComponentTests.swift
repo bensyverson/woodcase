@@ -83,6 +83,7 @@ struct FigmaImportComponentTests {
         #expect(data.width == .fixed(40) && data.height == .fixed(20))
         #expect(data.fills?.all == [.color(PenFill.PenColorFill(color: .literal("#FF0000FF")))])
         #expect(result.losses.map(\.feature) == [.missingComponent])
+        #expect(result.losses.map(\.treatment) == [.placeholder])
     }
 
     @Test("Asked to, the importer refuses an instance whose component is not in the clipboard")

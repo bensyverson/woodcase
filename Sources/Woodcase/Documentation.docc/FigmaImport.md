@@ -72,7 +72,7 @@ What each Figma node type becomes:
 | `SECTION` | `frame` | `section`, approximated |
 | `SYMBOL` (component) | `frame`, `reusable: true` | component properties: `componentProperties`, dropped |
 | `INSTANCE` of a carried component | `ref`, overrides as root and descendant overrides | see Instances |
-| `INSTANCE` of a component not in the clipboard | `frame` of its size and paint, no children | `missingComponent`, dropped; or refused (``FigmaImportOptions/MissingComponents/refuse``) |
+| `INSTANCE` of a component not in the clipboard | `frame` of its size and paint, no children | `missingComponent`, placeholder; or refused (``FigmaImportOptions/MissingComponents/refuse``) |
 | `ROUNDED_RECTANGLE`, `RECTANGLE` | `rectangle`, per-corner radii included | — |
 | `LINE` | `line`, length from `size`, turn from `transform` | arrow and marker caps: `strokeCap`, approximated |
 | `REGULAR_POLYGON` | `polygon`, `polygonCount` from `count`, its box fitted so the corners land on Figma's | a gradient or image over a grown box: `polygonBox`, approximated |
@@ -137,7 +137,7 @@ is the loss reported):
 | `GRADIENT_LINEAR`, `…RADIAL`, `…ANGULAR` | `gradient`; stops with their alpha; paint opacity as `opacity`; the transform as `center`, `size`, `rotation` | a skewed transform: `gradientSkew`, approximated |
 | `GRADIENT_DIAMOND` | radial `gradient` | `diamondGradient`, approximated |
 | `IMAGE` whose hash the caller resolved (``FigmaImportOptions/imageURLs``) | `image`: `FILL` cover, `FIT` contain, `STRETCH` stretch with the inverse of Figma's crop transform | `TILE`: `imageTile`, approximated as cover; a rotated image: `unsupportedPaint` |
-| `IMAGE` otherwise | — | `imageNotEmbedded`, dropped, the hash as detail |
+| `IMAGE` otherwise | ``FigmaImagePlaceholder``: a `color` fill of ``FigmaImagePlaceholder/gray``, the paint's visibility and blend mode kept and its opacity in the alpha | `imageNotEmbedded`, placeholder, the hash as detail |
 | `VIDEO`, `EMOJI`, `NOISE`, `PATTERN`, … | — | `unsupportedPaint`, dropped |
 | a paint's `visible: false` | `enabled: false` | — |
 | a paint's `blendMode` | `blendMode` | — |
@@ -232,18 +232,47 @@ a root override, any other a descendant override keyed by the path's ids joined 
 | a resized instance | root `width`, `height` | — |
 | any other override field | — | `instanceOverride`, dropped, the field named |
 
+## Images
+
+The clipboard carries an image's hash — the lowercase hex SHA-1 of its bytes — never the
+bytes. Figmeta's `imageHashes` (``FigmaClipboardMetadata/imageHashes``) maps each hash to a
+signed URL, and fetching stays outside the importer, which is synchronous and never touches
+the network:
+
+1. A ``FigmaImageFetcher``, made once and kept (per paste or for the app's life), downloads
+   each URL — one image at a time with ``FigmaImageFetcher/fetch(hash:url:)``, so each can
+   draw as it lands, or a whole clipboard with ``FigmaImageFetcher/fetch(_:)``. Every call
+   shares one bound on downloads in flight (four by default) and each download has a
+   timeout (30 seconds by default). It goes through a ``RemoteDataFetching``
+   (``StandardDataFetcher/make(environment:)`` by default, whose `URLSession`s are shared
+   process-wide by route, so connections pool; tests inject one). It refuses a URL that is
+   not `https` — a clipboard is untrusted, and a `file:` URL would read the disk — and
+   checks the bytes' SHA-1 against the hash and their format by signature
+   (``ImageFileFormat``). Per hash it returns the bytes and format, or a
+   ``FigmaImageFetchError``. It writes nothing.
+2. The caller stores the bytes where its document can reach them and passes each hash's
+   location as ``FigmaImportOptions/imageURLs``. Because the hash names the bytes, a caller
+   can name the location (`./images/<hash>`) before the download finishes, paste at once,
+   and fill the images in as they land.
+3. A hash with no URL becomes ``FigmaImagePlaceholder``'s gray fill in the paint's place,
+   reported as `imageNotEmbedded`, treated as a placeholder, with the hash. A caller whose
+   fetch failed after it named a URL swaps the image fill for
+   ``FigmaImagePlaceholder/fill(replacing:)``, so both routes draw alike.
+
 ## Open questions
 
 These defaults are Ben's to confirm; each is one place in the code.
 
-- **Images.** The clipboard carries an image's hash, never its bytes. The default drops the
-  paint and reports its hash, and a caller that fetched the bytes (figmeta's `imageHashes`
-  names a URL per hash) passes ``FigmaImportOptions/imageURLs``. A placeholder fill is the
-  alternative.
 - **Instances of absent components.** Copying an instance without its master gives no
   children at all. The default is a placeholder frame; ``FigmaImportOptions/MissingComponents/refuse``
-  refuses instead. Flattening from `derivedSymbolData` (which carries outlines and text
-  layout) is a third way.
+  refuses instead. Ben ruled (2026-10-20) that such an instance be flattened from
+  `derivedSymbolData` into plain layers instead, but that is not built: in every capture so
+  far `derivedSymbolData` holds, per component layer, only a guid path, its outline
+  (`fillGeometry`) or glyphs (`derivedTextData`) in the layer's *own* coordinates, and
+  sometimes a size — no position, type, paints, strokes or effects — and an instance of a
+  childless component carries none at all. No capture yet has an instance whose master is
+  truly absent (Figma ships hidden nodes on an internal canvas, and may ship masters there
+  too).
 - **Variables and styles** are resolved to the values Figma drew and reported. Mapping
   collections and modes onto Pen variables and themes is not built.
 - **Auto layout** is flattened to absolute positions and reported. Mapping `stackMode` onto

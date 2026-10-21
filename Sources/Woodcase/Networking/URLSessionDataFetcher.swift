@@ -17,6 +17,10 @@ import Foundation
 /// Default ``RemoteDataFetching`` implementation, over `URLSession`, that honors the
 /// proxy environment.
 ///
+/// Every instance shares its sessions with every other, one per route
+/// (`pooledSession(_:)`), so a fetcher can be made per call without defeating connection
+/// pooling or leaking a session that is never invalidated.
+///
 /// When the environment names no proxy this is plain `URLSession.shared`, and the
 /// system's own proxy settings apply as they do for any app. When it does — `HTTPS_PROXY`
 /// and friends, read by ``ProxyEnvironment`` — the environment is authoritative, as it is
@@ -40,10 +44,11 @@ public struct URLSessionDataFetcher: RemoteDataFetching {
     /// The proxies read from the environment at creation.
     public let proxies: ProxyEnvironment
 
-    /// The session for requests that go direct.
+    /// The session for requests that go direct: `URLSession.shared`, or the pooled direct
+    /// session when the environment names a proxy.
     private let directSession: URLSession
 
-    /// One session per proxy the environment names.
+    /// The pooled session of each proxy the environment names.
     private let proxiedSessions: [ProxyEndpoint: URLSession]
 
     /// Creates a fetcher routed by the given environment's proxy variables.
@@ -57,10 +62,10 @@ public struct URLSessionDataFetcher: RemoteDataFetching {
             proxiedSessions = [:]
             return
         }
-        directSession = URLSession(configuration: Self.configuration(through: nil))
+        directSession = Self.pooledSession(.direct)
         var sessions: [ProxyEndpoint: URLSession] = [:]
         for endpoint in [proxies.https, proxies.http].compactMap(\.self) where sessions[endpoint] == nil {
-            sessions[endpoint] = URLSession(configuration: Self.configuration(through: endpoint))
+            sessions[endpoint] = Self.pooledSession(.proxy(endpoint))
         }
         proxiedSessions = sessions
     }
@@ -72,9 +77,8 @@ public struct URLSessionDataFetcher: RemoteDataFetching {
     /// - Throws: ``RemoteFetchError/httpError(statusCode:)`` for any status other than
     ///   200, ``RemoteFetchError/unreachable(_:)`` when the request got no answer.
     public func fetch(url: URL) async throws -> Data {
-        let route = proxies.route(for: url)
-        let proxy: ProxyEndpoint? = if case let .proxy(endpoint) = route { endpoint } else { nil }
-        let session = proxy.flatMap { proxiedSessions[$0] } ?? directSession
+        let proxy = proxy(for: url)
+        let session = session(for: url)
         let data: Data
         let response: URLResponse
         do {
@@ -94,11 +98,21 @@ public struct URLSessionDataFetcher: RemoteDataFetching {
 
     // MARK: - Sessions
 
+    /// The proxy the environment routes `url` through, or `nil` for direct.
+    private func proxy(for url: URL) -> ProxyEndpoint? {
+        if case let .proxy(endpoint) = proxies.route(for: url) { endpoint } else { nil }
+    }
+
+    /// The session a fetch of `url` goes through.
+    func session(for url: URL) -> URLSession {
+        proxy(for: url).flatMap { proxiedSessions[$0] } ?? directSession
+    }
+
     /// An ephemeral configuration that goes through `proxy`, or direct when it is `nil`.
     ///
     /// Ephemeral because a sandboxed process usually cannot write the on-disk URL cache,
     /// and a failed attempt logs half a dozen lines to standard error on every run.
-    private static func configuration(through proxy: ProxyEndpoint?) -> URLSessionConfiguration {
+    static func configuration(through proxy: ProxyEndpoint?) -> URLSessionConfiguration {
         let configuration = URLSessionConfiguration.ephemeral
         #if canImport(Network)
             if let proxyConfiguration = proxy.flatMap(proxyConfiguration(for:)) {

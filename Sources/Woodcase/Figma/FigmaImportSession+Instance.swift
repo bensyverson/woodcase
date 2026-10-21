@@ -14,7 +14,7 @@ extension FigmaImportSession {
     /// its `parameterConsumptionMap`.
     mutating func instance(_ record: KiwiRecord, common: inout PenNodeCommon) -> PenNode.Kind {
         guard let symbol = FigmaGUID(record["symbolData"]?["symbolID"]), components.contains(symbol) else {
-            report(.missingComponent, .dropped, on: record)
+            report(.missingComponent, .placeholder, on: record)
             let size = size(of: record)
             let graphics = graphics(of: record, common: &common)
             return .frame(PenNode.FrameData(

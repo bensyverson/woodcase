@@ -31,7 +31,7 @@ extension FigmaImportSession {
         case "GRADIENT_LINEAR", "GRADIENT_RADIAL", "GRADIENT_ANGULAR", "GRADIENT_DIAMOND":
             return .gradient(gradient(paint, type: type, enabled: enabled, blendMode: blend, opacity: opacity, on: record))
         case "IMAGE":
-            return image(paint, enabled: enabled, blendMode: blend, opacity: opacity, on: record).map(PenFill.image)
+            return image(paint, enabled: enabled, blendMode: blend, opacity: opacity, on: record)
         default:
             report(.unsupportedPaint, .dropped, on: record, detail: type)
             return nil
@@ -82,15 +82,15 @@ extension FigmaImportSession {
         return fill
     }
 
-    /// An image paint as a Pen image fill, or `nil` when the caller named no URL for its
-    /// hash (reported, with the hash).
+    /// An image paint as a Pen image fill, or as ``FigmaImagePlaceholder``'s gray when the
+    /// caller named no URL for its hash (reported, with the hash).
     private mutating func image(
         _ paint: KiwiRecord, enabled: PenValue<Bool>?, blendMode: PenBlendMode?, opacity: Double, on record: KiwiRecord
-    ) -> PenFill.PenImageFill? {
+    ) -> PenFill {
         let hash = (paint["image"]?["hash"]?.bytesValue ?? Data()).map { String(format: "%02x", $0) }.joined()
         guard let url = options.imageURLs[hash] else {
-            report(.imageNotEmbedded, .dropped, on: record, detail: hash)
-            return nil
+            report(.imageNotEmbedded, .placeholder, on: record, detail: hash)
+            return .color(FigmaImagePlaceholder.fill(enabled: enabled, blendMode: blendMode, opacity: opacity))
         }
         var fill = PenFill.PenImageFill(enabled: enabled, blendMode: blendMode, opacity: opacity == 1 ? nil : .literal(opacity), url: url)
         switch paint["imageScaleMode"]?.enumName {
@@ -111,7 +111,7 @@ extension FigmaImportSession {
         if let rotation = paint["rotation"]?.doubleValue, rotation != 0 {
             report(.unsupportedPaint, .dropped, on: record, detail: "image rotation")
         }
-        return fill
+        return .image(fill)
     }
 
     /// Whether any of the node's visible fills lets what is under it show through.

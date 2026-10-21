@@ -134,14 +134,7 @@ struct EmbeddedDownloads {
 
     /// The extension the bytes' signature implies, with its dot, or `.img`.
     private static func sniffedExtension(_ data: Data) -> String {
-        let signatures: [(bytes: [UInt8], ext: String)] = [
-            ([0x89, 0x50, 0x4E, 0x47], ".png"),
-            ([0xFF, 0xD8, 0xFF], ".jpg"),
-            ([0x47, 0x49, 0x46, 0x38], ".gif"),
-            ([0x52, 0x49, 0x46, 0x46], ".webp"),
-        ]
-        let head = [UInt8](data.prefix(4))
-        return signatures.first { head.starts(with: $0.bytes) }?.ext ?? ".img"
+        ImageFileFormat(sniffing: data).map { "." + $0.fileExtension } ?? ".img"
     }
 
     /// Sixteen hex digits of the string's FNV-1a hash: stable across processes, unlike

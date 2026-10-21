@@ -123,15 +123,29 @@ struct FigmaImportPaintTests {
         #expect(node.common.opacity == .literal(0.5))
     }
 
-    @Test("An image paint with no URL for its hash is dropped and reported with the hash")
+    @Test("An image paint with no URL for its hash is a gray placeholder fill, reported with the hash")
     func imageWithoutBytes() throws {
         let result = try Fixtures.imported("I1")
         let node = try Fixtures.node("I1a image-fill", in: result.clip.document)
-        #expect(node.kind.paintLists.fills == nil)
+        #expect(node.kind.paintLists.fills?.all == [.color(FigmaImagePlaceholder.fill())])
         let loss = try #require(Fixtures.losses("I1a image-fill", in: result).first)
         #expect(loss.feature == .imageNotEmbedded)
-        #expect(loss.treatment == .dropped)
+        #expect(loss.treatment == .placeholder)
         #expect(loss.detail?.count == 40)
+    }
+
+    @Test("An image placeholder keeps the paint's visibility, blend mode and opacity")
+    func imagePlaceholderKeepsPaintSettings() throws {
+        let paint = KiwiValue.message(KiwiRecord(typeName: "Paint", fields: [
+            "type": .enumeration("IMAGE"), "visible": .bool(false), "opacity": .float(0.5),
+            "blendMode": .enumeration("MULTIPLY"),
+            "image": .message(KiwiRecord(typeName: "Image", fields: ["hash": .bytes(Data(repeating: 0xAB, count: 20))])),
+        ]))
+        let node = Fixtures.nodeChange("RECTANGLE", name: "picture", id: 60, extra: ["fillPaints": .array([paint])])
+        let result = try FigmaImporter().clip(from: Fixtures.message([node]))
+        let fills = try #require(result.clip.document.children.first?.kind.paintLists.fills?.all)
+        #expect(fills == [.color(FigmaImagePlaceholder.fill(enabled: .literal(false), blendMode: .multiply, opacity: 0.5))])
+        #expect(result.losses.map(\.detail) == [String(repeating: "ab", count: 20)])
     }
 
     @Test("An image paint whose hash the caller resolved is an image fill, its scale mode and crop mapped")

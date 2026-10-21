@@ -67,6 +67,13 @@ struct HermeticNetworkTests {
             primary and which is the fallback — and never calls fetch on it.
             """
         ),
+        Exemption(
+            file: "URLSessionDataFetcherSessionTests.swift",
+            reason: """
+            It compares which pooled URLSession each fetcher would route a URL through, \
+            by identity, and never calls fetch; making a session opens no socket.
+            """
+        ),
     ]
 
     /// The names a test may not write, and what to do instead.

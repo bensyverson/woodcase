@@ -158,6 +158,10 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 - ``FigmaImportOptions``
 - ``FigmaImportLoss``
 - ``FigmaImportError``
+- ``FigmaImagePlaceholder``
+- ``FigmaImageFetcher``
+- ``FigmaImageFetchError``
+- ``ImageFileFormat``
 
 ### Networking
 

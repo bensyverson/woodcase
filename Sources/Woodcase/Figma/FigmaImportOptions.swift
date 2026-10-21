@@ -11,16 +11,18 @@ public struct FigmaImportOptions: Friendly {
     /// What becomes of an instance whose component the clipboard does not carry.
     public enum MissingComponents: String, Friendly, CaseIterable {
         /// A frame of the instance's size and paints, with no children, and a
-        /// ``FigmaImportLoss/Feature/missingComponent`` loss.
+        /// ``FigmaImportLoss/Feature/missingComponent`` loss treated as a
+        /// ``FigmaImportLoss/Treatment/placeholder``.
         case placeholder
         /// Refuse the selection with ``FigmaImportError/missingComponent(_:)``.
         case refuse
     }
 
     /// The URL to write for each image, by its hash as lowercase hex. The clipboard carries
-    /// hashes only; a caller that fetched the bytes (the figmeta `imageHashes` names a URL
-    /// for each) names where it put them. An image paint whose hash is not here is dropped
-    /// and reported (``FigmaImportLoss/Feature/imageNotEmbedded``), its hash in the loss.
+    /// hashes only; a caller that fetches the bytes (``FigmaImageFetcher``, from the URL
+    /// figmeta's `imageHashes` names for each) names where it puts them. An image paint
+    /// whose hash is not here becomes ``FigmaImagePlaceholder``'s gray fill and is reported
+    /// (``FigmaImportLoss/Feature/imageNotEmbedded``), its hash in the loss.
     public var imageURLs: [String: String]
     /// What becomes of an instance whose component the clipboard does not carry.
     public var missingComponents: MissingComponents

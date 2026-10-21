@@ -37,7 +37,8 @@ public struct FigmaImportLoss: Friendly, CustomStringConvertible {
         case instanceSwap
         /// An instance override Pen has no property for.
         case instanceOverride
-        /// An instance whose component the clipboard does not carry.
+        /// An instance whose component the clipboard does not carry, standing in as a
+        /// placeholder frame.
         case missingComponent
         /// A shared style, resolved to the values it applies.
         case styleReference
@@ -49,8 +50,8 @@ public struct FigmaImportLoss: Friendly, CustomStringConvertible {
         case diamondGradient
         /// A gradient transform with a skew, drawn without it.
         case gradientSkew
-        /// An image paint whose bytes the caller did not supply: the clipboard carries only
-        /// the image's hash.
+        /// An image paint whose bytes the caller did not supply — the clipboard carries only
+        /// the image's hash — drawn as ``FigmaImagePlaceholder``.
         case imageNotEmbedded
         /// A tiled image paint, drawn to cover the box.
         case imageTile
@@ -105,6 +106,10 @@ public struct FigmaImportLoss: Friendly, CustomStringConvertible {
         case resolved
         /// Baked into geometry or positions that no longer respond to it.
         case flattened
+        /// Replaced by a stand-in that keeps its place, size and settings but not its look:
+        /// a gray fill for an image (``FigmaImagePlaceholder``), an empty frame for an
+        /// instance.
+        case placeholder
     }
 
     /// The id of the Pen node the loss is on.
