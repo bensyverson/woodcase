@@ -11,7 +11,7 @@ extension PenPostIt {
     ///
     /// Not ``Friendly``: it holds the caller's functions, and lives for one expansion.
     struct Drawing {
-        /// The chrome's measures at the node's font size.
+        /// The look's measures at the node's look scale and type size.
         let chrome: Chrome
         /// The layout's text measurer, for the chrome's labels.
         let measure: TextMeasurer

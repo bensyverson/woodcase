@@ -160,15 +160,6 @@ struct PostItExpansionTests {
         #expect(expansion.identity?.author == long)
     }
 
-    @Test("Chrome scales with the note's font size")
-    func chromeScales() throws {
-        let expansion = try expansion("""
-        {"id": "N1", "type": "note", "content": "x", "metadata": {"woodcase": {"author": "ben", "fontSize": 26}}}
-        """)
-        #expect(expansion.part(.identityDot)?.frame.width == 2 * PenPostIt.Style.standard.identityDotDiameter)
-        #expect(expansion.text(.author)?.style.fontSize == 2 * PenPostIt.Style.standard.labelFontSize)
-    }
-
     // MARK: - No state
 
     @Test(

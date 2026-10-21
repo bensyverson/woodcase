@@ -11,7 +11,8 @@ public extension PenPostIt {
     ///
     /// A note with an author adds its author line to the bottom inset; a
     /// prompt adds its header row to the top and its run row to the bottom; a context adds
-    /// its header row to the top. The chrome scales with the node's font size. The layout
+    /// its header row to the top. The insets and the chrome scale with the node's look scale
+    /// (``PenNode/noteScale``), not its type size. The layout
     /// grows a node by its text plus these insets (Penumbra's notes design, decision 4), and
     /// the expansion sets the body in the box they leave, so the two agree on where the
     /// text ends and the author line begins.
@@ -21,9 +22,8 @@ public extension PenPostIt {
     ///   - style: The look whose chrome is measured.
     /// - Returns: The insets, or `nil` for a node that is not a note, prompt or context.
     static func bodyInsets(of node: PenNode, style: Style = .standard) -> PenPadding.Edges? {
-        guard let variant = Variant(node.kind), let text = node.noteTextStyle else { return nil }
-        let chrome = Chrome(style: style, fontSize: text.fontSize)
-        let base = textInsets
+        guard let variant = Variant(node.kind), let chrome = Chrome(of: node, style: style) else { return nil }
+        let base = chrome.insets
         switch variant {
         case .note:
             let footer = Chrome.author(PenPostIt.Metadata(node)) == nil ? 0 : chrome.footerGap + chrome.labelLine

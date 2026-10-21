@@ -135,6 +135,14 @@ public extension PenPostItExpansion {
             self.color = color
         }
 
+        /// The shadow with its offset and blur multiplied by `factor`; its color is kept.
+        ///
+        /// - Parameter factor: The factor, such as a note's look scale.
+        /// - Returns: The scaled shadow.
+        public func scaled(by factor: Double) -> Shadow {
+            Shadow(offsetX: offsetX * factor, offsetY: offsetY * factor, blur: blur * factor, color: color)
+        }
+
         /// The shadow as a `.pen` outer shadow effect.
         public var effect: PenEffect {
             .shadow(PenEffect.PenShadowEffect(

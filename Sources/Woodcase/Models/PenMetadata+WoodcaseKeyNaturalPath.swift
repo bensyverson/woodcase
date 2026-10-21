@@ -43,7 +43,7 @@ public extension PenMetadata.WoodcaseKey {
         case .props, .role, .states, .action, .scroll: "\(NodePropertyCodec.codegenPrefix)\(rawValue)"
         case .type, .state, .author, .leaf, .stage, .tint, .copiedFrom, .anchor, .replyTo, .requestedBy, .createdAt,
              .fontFamily, .fontSize, .fontWeight, .fontStyle, .letterSpacing, .lineHeight, .textAlign,
-             .textAlignVertical:
+             .textAlignVertical, .scale:
             "\(NodePropertyCodec.notePrefix)\(rawValue)"
         default: nil
         }
@@ -65,7 +65,7 @@ public extension PenMetadata.WoodcaseKey {
         case .defaultTextStyle, .spans: [.text]
         case .type, .state, .author, .leaf, .stage, .tint, .copiedFrom, .anchor, .replyTo, .requestedBy, .createdAt,
              .fontFamily, .fontSize, .fontWeight, .fontStyle, .letterSpacing, .lineHeight, .textAlign,
-             .textAlignVertical:
+             .textAlignVertical, .scale:
             Self.noteTypes
         default: []
         }

@@ -34,7 +34,8 @@
         ///   - mentions: The mentions, with their colors.
         ///   - ink: The inks.
         ///   - paper: The paper's color.
-        ///   - chrome: The chrome's measures, whose scale the marks' sizes take.
+        ///   - chrome: The look's measures, whose type scale (``Chrome/typeScale``) the marks'
+        ///     sizes take: they sit in the body's lines, so they follow its letters.
         /// - Returns: The parts, in paint order, and the checkboxes with their hit rects.
         static func bodyMarks(
             of markdown: PenNoteMarkdown, text: PenPostItExpansion.Text, frame: PenRect,
@@ -52,7 +53,7 @@
                 let run = text.runs.first { $0.mention != nil && $0.range == mention.range }
                 return mentionPills(mention, padding: run?.inlinePadding ?? 0, metrics: metrics)
             }
-            let diameter = style.bulletDiameter * chrome.scale
+            let diameter = style.bulletDiameter * chrome.typeScale
             for offset in markdown.bulletDisplayOffsets {
                 guard let line = metrics.line(containing: offset) else { continue }
                 let x = metrics.x(of: offset, on: line) + (metrics.capHeight - diameter) / 2
@@ -114,14 +115,14 @@
             _ box: PenRect, isChecked: Bool, ink: Ink, paper: PenHexColor, chrome: Chrome
         ) -> [PenPostItExpansion.Part] {
             let style = chrome.style
-            let form = PenPostItExpansion.Shape.Form.roundedRect(cornerRadius: style.checkboxCornerRadius * chrome.scale)
+            let form = PenPostItExpansion.Shape.Form.roundedRect(cornerRadius: style.checkboxCornerRadius * chrome.typeScale)
             guard isChecked else {
-                let edge = PenPostItExpansion.Hairline(color: ink.secondary, width: style.checkboxStroke * chrome.scale)
+                let edge = PenPostItExpansion.Hairline(color: ink.secondary, width: style.checkboxStroke * chrome.typeScale)
                 return [PenPostItExpansion.Part(
                     role: .checkbox, frame: box, paint: .shape(PenPostItExpansion.Shape(form: form, fill: nil, hairline: edge))
                 )]
             }
-            let stroke = PenPostItExpansion.Hairline(color: paper, width: style.checkMarkStroke * chrome.scale)
+            let stroke = PenPostItExpansion.Hairline(color: paper, width: style.checkMarkStroke * chrome.typeScale)
             return [
                 PenPostItExpansion.Part(
                     role: .checkbox, frame: box, paint: .shape(PenPostItExpansion.Shape(form: form, fill: ink.secondary))

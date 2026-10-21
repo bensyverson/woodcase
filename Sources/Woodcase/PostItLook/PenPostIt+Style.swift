@@ -18,10 +18,12 @@ public extension PenPostIt {
     /// It holds no words: the chrome's labels are ``PenPostIt/Label``s, which the
     /// expansion's caller turns into strings, so an editor can localize them.
     ///
-    /// Geometry is in points at a body size of ``PenPostIt/defaultFontSize``. The text of
-    /// the chrome — the author line, a card's header, chip, status and Run — scales with
-    /// the note's own font size, so resizing a note, which scales its text (spec §5.9), scales
-    /// its chrome with it; the paper's radius, hairline and shadows do not.
+    /// Geometry is in points at a look scale of 1 (``PenNode/noteScale``). The paper's
+    /// radius, hairline and shadows, the padding, the author line and a card's chrome are
+    /// multiplied by the node's look scale, independent of its type size (Ben's ruling of
+    /// 2026-10-20); the marks set in the body's lines — a bullet, a checkbox's edge and
+    /// corner, a check mark — by its type size over ``PenPostIt/defaultFontSize``, since
+    /// they follow its letters.
     struct Style: Friendly {
         /// The rev 2 look.
         public static let standard = Style()

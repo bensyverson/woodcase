@@ -61,6 +61,7 @@ under the Woodcase namespace, `metadata.woodcase`, rather than in properties of 
 | `lineHeight` | > 0 and ≤ 10, a multiple of fontSize (as `kind.lineHeight`) | The note's line height |
 | `letterSpacing` | any number, in points | The note's letter spacing |
 | `textAlign`, `textAlignVertical` | as on a text node | The note's text alignment |
+| `scale` | > 0, a scale factor | The size of the note's look — radius, padding, shadows, author line, a card's chrome — independent of its type size; absent is 1 (``PenNode/noteScale``) |
 
 ```json
 { "type": "note", "name": "Device check", "content": "Does the scanner …",
@@ -70,6 +71,13 @@ under the Woodcase namespace, `metadata.woodcase`, rather than in properties of 
 
 `woodcase schema postit` prints the same table from ``PenPostIt/keys``, and
 ``SchemaPostItReport`` is its machine-readable form.
+
+**The look's scale is its own.** `scale` sizes the look, not the type: a note at 26 pt
+with no `scale` draws the standard radius, padding and author line around larger letters,
+and two notes of one size may set different type sizes (Ben's ruling, 2026-10-20). A
+proportional scale (`woodcase scale`, Penumbra's Scale) multiplies `scale` with the box and
+the type size, so the whole note grows. A `scale` that is not a number above 0 is refused
+on a write and drawn as 1 from a file.
 
 **Text-style numbers keep the text node's ranges.** `fontSize`, `lineHeight` and
 `letterSpacing` carry the ``PenValueConstraint`` of the `kind.` key they stand in for

@@ -53,7 +53,7 @@ struct NotePathAliasTests {
 
     @Test("Each note key's alias is note.<key>, on the three note types, and its raw write stays accepted")
     func table() {
-        #expect(Self.noteKeys.count == 19)
+        #expect(Self.noteKeys.count == 20)
         for key in Self.noteKeys {
             #expect(key.naturalPath == "note.\(key.rawValue)")
             #expect(key.naturalPathTypes == [.note, .prompt, .context])

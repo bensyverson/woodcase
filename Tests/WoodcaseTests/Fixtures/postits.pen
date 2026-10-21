@@ -119,8 +119,8 @@
           "y": 400,
           "width": 240,
           "height": 200,
-          "content": "Text and chrome scale together.",
-          "metadata": { "type": "woodcase", "woodcase": { "author": "ben", "tint": "#FFCC80", "fontSize": 20 } }
+          "content": "Text and look scale together.",
+          "metadata": { "type": "woodcase", "woodcase": { "author": "ben", "tint": "#FFCC80", "fontSize": 20, "scale": 1.5385 } }
         },
         {
           "id": "PiN09",

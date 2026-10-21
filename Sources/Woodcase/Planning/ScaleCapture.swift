@@ -22,8 +22,10 @@ import Foundation
 /// - **shape and layout**: `cornerRadius`, `gap` and `padding`.
 /// - **effects**: a shadow's offset, blur and spread; a layer blur's and a background
 ///   blur's radius.
-/// - **notes, prompts and contexts**: the box and the text style together, as a note's own
-///   resize scales them (spec §5.9).
+/// - **notes, prompts and contexts**: the box, the text style (type size, and letter
+///   spacing when set) and the look's own scale factor (`note.scale`, ``PenNode/noteScale``)
+///   together, so the radius, padding, author line and marks grow with the type (Ben's
+///   ruling of 2026-10-20). The factor keeps four decimals.
 ///
 /// It leaves alone what is not a length — rotation, flips, opacity, fills, line-height
 /// multiples, an icon's weight — and every **sizing mode**: an `auto` text keeps fitting its

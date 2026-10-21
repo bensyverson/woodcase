@@ -59,6 +59,13 @@ Things the brief did not spell out:
    with its box (spec §5.9). Only-move would make a note the one thing Scale does not scale.
    The resize ruling of 2026-10-12 (a note in a multi-selection resize keeps its type size)
    is about resize, which is geometry-only by the session 21 ruling.
+
+   > **Updated 2026-10-21 (leaf YPi92I):** Ben ruled on 2026-10-20 (Penumbra spec §5) that
+   > scaling a note scales its whole look. The look's size is now a stored factor,
+   > `metadata.woodcase.scale` (`note.scale`, absent is 1), independent of the type size, and
+   > a scale multiplies it with the box and the type, kept to four decimals rather than a
+   > length's hundredth so it tracks the type size. Until then the chrome scaled with the
+   > type size and the radius, padding, hairline and shadows never scaled.
 2. **Variable-bound values stay bound** and are reported in `ScalePlan.unscaled` (node,
    property, variable). Scaling one would either unbind it or change the variable for every
    node that reads it.

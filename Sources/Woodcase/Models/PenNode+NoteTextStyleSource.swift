@@ -52,14 +52,15 @@ extension PenNode {
         /// The note's own text-style properties.
         let data: any PenTextStyleProperties
 
-        /// A metadata number the drawing uses: finite, and for the type size above 0.
+        /// A metadata number the drawing uses: finite, and for the type size and the look
+        /// scale above 0.
         func number(_ key: PenMetadata.WoodcaseKey) -> Double? {
             let value: Double? = switch metadata[woodcase: key] {
             case let .int(value)?: Double(value)
             case let .double(value)? where value.isFinite: value
             default: nil
             }
-            guard key == .fontSize else { return value }
+            guard key == .fontSize || key == .scale else { return value }
             return value.flatMap { $0 > 0 ? $0 : nil }
         }
 
@@ -87,7 +88,7 @@ extension PenNode {
         /// Whether the metadata supplies the value drawn for `key`.
         func metadataSupplies(_ key: PenMetadata.WoodcaseKey) -> Bool {
             switch key {
-            case .fontSize, .lineHeight, .letterSpacing: number(key) != nil
+            case .fontSize, .lineHeight, .letterSpacing, .scale: number(key) != nil
             default: string(key) != nil
             }
         }

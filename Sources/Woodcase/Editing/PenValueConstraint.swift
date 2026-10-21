@@ -132,9 +132,13 @@ public struct PenValueConstraint: Friendly {
 
     /// How a number breaks this constraint, or `nil` when it keeps to it.
     ///
+    /// A number that is not finite breaks any constraint that limits values: infinity is
+    /// above every range, and negative infinity and NaN below it.
+    ///
     /// - Parameter number: The number written.
     /// - Returns: The first broken rule — range before step.
     public func violation(by number: Double) -> Violation? {
+        if limitsValues, !number.isFinite { return number == .infinity ? .aboveMaximum : .belowMinimum }
         if let minimum, number < minimum.value || (!minimum.isInclusive && number == minimum.value) {
             return .belowMinimum
         }

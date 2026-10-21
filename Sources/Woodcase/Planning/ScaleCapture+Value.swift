@@ -20,6 +20,8 @@ extension ScaleCapture.Entry {
 
             /// One length.
             case length
+            /// A dimensionless factor, such as a note's look scale.
+            case factor
             /// A length or a list of them: a radius, a padding, a dash.
             case lengths
             /// A `width` or `height`, its sizing mode kept.
@@ -45,6 +47,7 @@ extension ScaleCapture.Entry {
             func apply(to value: AnyCodable, by scaler: inout ProportionalScaler, about pivot: PenPoint) -> AnyCodable {
                 switch self {
                 case .length: scaler.length(value)
+                case .factor: scaler.factor(value)
                 case .lengths: scaler.lengths(value)
                 case .sizing: scaler.sizing(value)
                 case .sides: scaler.sides(value)

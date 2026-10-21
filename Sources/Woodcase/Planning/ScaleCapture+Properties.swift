@@ -42,6 +42,11 @@ extension ScaleCapture.Entry {
                     PenMetadata.WoodcaseKey.letterSpacing.path, .length, drawn: ProportionalScaler.number(spacing)
                 )
             }
+            // The look's size is its own factor, which an unset note draws at 1: a scale
+            // multiplies it with the type, so the radius, padding and author line grow too.
+            reader.read(
+                PenMetadata.WoodcaseKey.scale.path, .factor, drawn: ProportionalScaler.number(node.noteScale ?? 1)
+            )
         } else {
             reader.read("kind.fontSize", .length, default: reader.unsetNumber("kind.fontSize"))
             reader.read("kind.letterSpacing", .length)

@@ -106,9 +106,21 @@ There is no kind mark: the post-it kinds are gone (decision 1).
 - **No state.** A note has none — only comments are open or resolved (Ben's ruling,
   2026-10-11) — so a `state` a note still carries draws nothing, and `woodcase lint` names it
   (`note-state`).
-- **Scale.** The chrome's text, dots and gaps scale with the note's font size over 13, so a
-  note resized with its text (spec §5.9) keeps its proportions; radius, hairline, shadows and
-  the 14-point ``PenPostIt/textInsets`` do not.
+- **Scale.** The look's size is the note's own stored factor, `note.scale`
+  (``PenNode/noteScale``, absent is 1), independent of its type size (Ben's ruling,
+  2026-10-20; Penumbra spec §5): the corner radius, hairline, shadows, the 14-point
+  ``PenPostIt/textInsets``, the author line, and a card's header, chip, run row, status and
+  ⓘ mark all multiply by it. A note set at 26 pt with no `scale` keeps the standard look
+  around larger letters, so notes of one size may set different type sizes. The marks set in
+  the body's lines — a bullet, a checkbox's edge and corner, a check mark, a mention's pill —
+  are sized by the body's letters (a bullet by the type size over 13, a checkbox by the cap
+  height), so they follow the type. A proportional scale (``ScaleCapture``) multiplies the
+  factor with the box and the type, so a note scaled by 2 draws as the same note at twice the
+  size, every part of it (`ScaleNoteLookTests`), and so do prompts and contexts.
+
+  > Revised 2026-10-21 (leaf YPi92I): until Ben's ruling the chrome's text, dots and gaps
+  > scaled with the font size over 13, and the radius, hairline, shadows and padding never
+  > scaled, so a scaled note kept a small radius and padding around large type.
 
 ### Identity colors and mentions
 
@@ -193,6 +205,8 @@ needs layout, since it adds or removes the author line; a change to its state do
 ### The look
 
 - ``PenPostIt/Style``
+- ``PenNode/noteScale``
+- ``PenPostIt/scaleConstraint``
 - ``PenPostIt/Label``
 - ``PenPostIt/Ink``
 - ``PenPostIt/Tint``

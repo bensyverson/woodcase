@@ -18,12 +18,13 @@ extension PenPostIt {
         let measure = drawing.measure
         let style = chrome.style
         let ink = Ink(on: style.promptPaper, style: style)
-        let left = textInsets.left
-        let right = box.width - textInsets.right
-        let top = textInsets.top
+        let insets = chrome.insets
+        let left = insets.left
+        let right = box.width - insets.right
+        let top = insets.top
         var parts = [plate(
             style.promptPaper, box: box, cornerRadius: style.cardCornerRadius, hairline: style.hairline,
-            shadows: style.shadows, style: style
+            shadows: chrome.shadows, chrome: chrome
         )]
 
         // The header, and the model chip at the right.
@@ -54,7 +55,7 @@ extension PenPostIt {
         parts += content.parts
 
         // The run row: ▶ Run, or Cancel while queued, at the right; the status at the left.
-        let rowTop = box.height - textInsets.bottom - chrome.runRow
+        let rowTop = box.height - insets.bottom - chrome.runRow
         let runStyle = chrome.label(size: chrome.runSize, weight: style.runWeight)
         let padX = style.runPaddingX * chrome.scale
         let buttonLabel: Label = metadata?.runState?.value == .queued ? .cancel : .run
@@ -101,11 +102,12 @@ extension PenPostIt {
         let measure = drawing.measure
         let style = chrome.style
         let ink = Ink(on: style.contextPaper, style: style)
-        let left = textInsets.left
-        let top = textInsets.top
+        let insets = chrome.insets
+        let left = insets.left
+        let top = insets.top
         var parts = [plate(
             style.contextPaper, box: box, cornerRadius: style.cardCornerRadius, hairline: style.contextHairline,
-            shadows: [], style: style
+            shadows: [], chrome: chrome
         )]
         let diameter = style.infoMarkDiameter * chrome.scale
         let mark = PenRect(x: left, y: top + (chrome.contextHeader - diameter) / 2, width: diameter, height: diameter)
@@ -129,7 +131,7 @@ extension PenPostIt {
             .header, drawing.text(.contextTitle),
             style: chrome.label(weight: style.headerWeight, tracking: style.headerTracking),
             at: (x, top + (chrome.contextHeader - chrome.labelLine) / 2),
-            maxWidth: max(0, box.width - textInsets.right - x), color: ink.secondary, label: .contextTitle,
+            maxWidth: max(0, box.width - insets.right - x), color: ink.secondary, label: .contextTitle,
             measure: measure
         ))
         let content = body(of: node, box: box, color: ink.primary, ink: ink, paper: style.contextPaper, drawing: drawing)

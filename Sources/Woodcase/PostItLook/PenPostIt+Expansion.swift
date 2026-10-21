@@ -40,11 +40,11 @@ public extension PenPostIt {
         identityColor: @escaping (String) -> PenHexColor? = { _ in nil },
         body: BodyText = .styled
     ) -> PenPostItExpansion? {
-        guard let variant = Variant(node.kind), let text = node.noteTextStyle else { return nil }
+        guard let variant = Variant(node.kind), let chrome = Chrome(of: node, style: style) else { return nil }
         let metadata = Metadata(node)
         if metadata?.type == .valid(.comment) { return nil }
         let drawing = Drawing(
-            chrome: Chrome(style: style, fontSize: text.fontSize), measure: measure, labels: labels,
+            chrome: chrome, measure: measure, labels: labels,
             identityColors: identityColor, bodyText: body
         )
         let box = (width: width, height: height)
@@ -92,12 +92,13 @@ extension PenPostIt {
     static func noteExpansion(
         _ node: PenNode, metadata: Metadata?, box: (width: Double, height: Double), drawing: Drawing
     ) -> PenPostItExpansion {
-        let style = drawing.style
+        let chrome = drawing.chrome
+        let style = chrome.style
         let paper = metadata?.tint?.value ?? Tint.default.color
         let ink = Ink(on: paper, style: style)
         var parts = [plate(
             paper, box: box, cornerRadius: style.noteCornerRadius, hairline: style.hairline,
-            shadows: style.shadows, style: style
+            shadows: chrome.shadows, chrome: chrome
         )]
         let content = body(of: node, box: box, color: ink.primary, ink: ink, paper: paper, drawing: drawing)
         parts += content.parts
@@ -121,13 +122,14 @@ extension PenPostIt {
         let chrome = drawing.chrome
         let style = chrome.style
         let label = chrome.label(weight: style.authorWeight)
-        let top = box.height - textInsets.bottom - chrome.labelLine
-        let left = textInsets.left
-        let right = box.width - textInsets.right
+        let insets = chrome.insets
+        let top = box.height - insets.bottom - chrome.labelLine
+        let left = insets.left
+        let right = box.width - insets.right
         let diameter = style.identityDotDiameter * chrome.scale
         let color = drawing.identityColor(for: author)
         let ring = ink == style.inkOnDark
-            ? PenPostItExpansion.Hairline(color: style.identityRingOnDark, width: style.identityRingWidth)
+            ? PenPostItExpansion.Hairline(color: style.identityRingOnDark, width: style.identityRingWidth * chrome.scale)
             : nil
         let dot = PenPostItExpansion.Part(
             role: .identityDot,
@@ -143,7 +145,8 @@ extension PenPostIt {
     }
 
     /// The shadows a node's paper casts, as effects, for its painted extent: a note's or a
-    /// prompt's ``Style/shadows``; none for a context or a comment.
+    /// prompt's ``Style/shadows`` at its look scale (``PenNode/noteScale``); none for a
+    /// context or a comment.
     ///
     /// - Parameters:
     ///   - node: Any node.
@@ -152,20 +155,22 @@ extension PenPostIt {
     static func paperEffects(of node: PenNode, style: Style = .standard) -> [PenEffect]? {
         guard let variant = Variant(node.kind) else { return nil }
         if variant == .context || Metadata(node)?.type == .valid(.comment) { return [] }
-        return style.shadows.map(\.effect)
+        let scale = node.noteScale ?? 1
+        return style.shadows.map { $0.scaled(by: scale).effect }
     }
 
-    /// The paper: the whole box, filled, edged inside and shadowed.
+    /// The paper: the whole box, filled, edged inside and shadowed, its radius and hairline
+    /// at the look's scale. `shadows` are already scaled (``Chrome/shadows``).
     static func plate(
         _ paper: PenHexColor, box: (width: Double, height: Double), cornerRadius: Double, hairline: PenHexColor,
-        shadows: [PenPostItExpansion.Shadow], style: Style
+        shadows: [PenPostItExpansion.Shadow], chrome: Chrome
     ) -> PenPostItExpansion.Part {
         PenPostItExpansion.Part(
             role: .plate,
             frame: PenRect(x: 0, y: 0, width: box.width, height: box.height),
             paint: .shape(PenPostItExpansion.Shape(
-                form: .roundedRect(cornerRadius: cornerRadius), fill: paper,
-                hairline: PenPostItExpansion.Hairline(color: hairline, width: style.hairlineWidth), shadows: shadows
+                form: .roundedRect(cornerRadius: cornerRadius * chrome.scale), fill: paper,
+                hairline: PenPostItExpansion.Hairline(color: hairline, width: chrome.hairlineWidth), shadows: shadows
             ))
         )
     }

@@ -92,6 +92,10 @@ public extension PenMetadata {
         case textAlign
         /// The vertical alignment of the note's text.
         case textAlignVertical
+        /// The size of the note's look — its corner radius, padding, hairline, shadows, author
+        /// line and a card's chrome — as a factor of the standard look; absent is 1. It is
+        /// independent of the type size: a scale multiplies both (<doc:PenPostItLook>).
+        case scale
 
         // MARK: A text node's rich text
 
@@ -198,7 +202,7 @@ public extension PenMetadata {
             case .type, .state, .author, .leaf, .stage, .tint, .copiedFrom, .anchor, .replyTo, .requestedBy, .createdAt:
                 .note
             case .fontFamily, .fontSize, .fontWeight, .fontStyle, .letterSpacing, .lineHeight, .textAlign,
-                 .textAlignVertical: .noteTextStyle
+                 .textAlignVertical, .scale: .noteTextStyle
             case .spans, .textDecoration: .text
             case .strokeDash, .strokeDashOffset, .strokeMiterLimit: .stroke
             case .shadowSpread: .effect
@@ -218,7 +222,7 @@ public extension PenMetadata {
             case .props, .role, .states, .action, .scroll: "_\(rawValue)"
             case .type, .state, .author, .leaf, .stage, .tint, .copiedFrom: rawValue
             case .anchor, .replyTo, .requestedBy, .createdAt, .fontFamily, .fontSize, .fontWeight, .fontStyle, .letterSpacing,
-                 .lineHeight, .textAlign, .textAlignVertical, .spans, .textDecoration, .strokeDash, .strokeDashOffset,
+                 .lineHeight, .textAlign, .textAlignVertical, .scale, .spans, .textDecoration, .strokeDash, .strokeDashOffset,
                  .strokeMiterLimit, .shadowSpread, .blendMode, .locked, .defaultTextStyle: nil
             }
         }
@@ -236,7 +240,7 @@ public extension PenMetadata {
             case .author, .leaf, .stage, .copiedFrom, .replyTo, .requestedBy, .fontFamily, .fontWeight, .fontStyle,
                  .blendMode:
                 .string
-            case .fontSize, .letterSpacing, .lineHeight, .strokeDashOffset, .strokeMiterLimit: .number
+            case .fontSize, .letterSpacing, .lineHeight, .scale, .strokeDashOffset, .strokeMiterLimit: .number
             case .spans: .textSpans
             case .textDecoration: .textDecoration
             case .strokeDash: .dashLengths
@@ -299,6 +303,7 @@ public extension PenMetadata {
             case .lineHeight: "The line height, as a multiple of the font size."
             case .textAlign: "The horizontal alignment of the note's lines."
             case .textAlignVertical: "The vertical alignment of the note's text."
+            case .scale: "The size of the note's look (radius, padding, shadows, author line, chrome), as a factor; absent is 1."
             case .spans: "A text node's styled runs, and the content they were made for."
             case .textDecoration: "A text's underline and strikethrough, kept from Pen, and the content they were made for."
             case .strokeDash: "The stroke's alternating dash and gap lengths, in points; absent or empty is solid."

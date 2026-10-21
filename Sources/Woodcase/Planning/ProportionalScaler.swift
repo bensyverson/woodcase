@@ -45,6 +45,20 @@ struct ProportionalScaler {
         }
     }
 
+    /// A factor multiplied and kept to four decimals (``factorPrecision``), finer than a
+    /// length's hundredth, so a note's look scale tracks its type size: 20 / 13 is 1.5385.
+    /// A factor above zero stays above zero; anything that is not a number is kept.
+    func factor(_ value: AnyCodable) -> AnyCodable {
+        let number: Double
+        switch value {
+        case let .int(int): number = Double(int)
+        case let .double(double) where double.isFinite: number = double
+        default: return value
+        }
+        let scaled = (number * factor * Self.factorPrecision).rounded() / Self.factorPrecision
+        return Self.number(scaled == 0 && number > 0 ? 1 / Self.factorPrecision : scaled)
+    }
+
     /// A member's coordinate scaled about `pivot`, the anchor's coordinate on the same axis
     /// of its parent: a number moved, a `$name` kept and noted.
     mutating func coordinate(_ value: AnyCodable, about pivot: Double) -> AnyCodable {
@@ -74,6 +88,9 @@ struct ProportionalScaler {
 
     /// How finely a scaled length is kept: hundredths of a point.
     static let precision = 100.0
+
+    /// How finely a scaled factor is kept: four decimals.
+    static let factorPrecision = 10000.0
 
     /// Notes a `$name` and returns it unchanged.
     private mutating func note(_ reference: String) -> AnyCodable {
