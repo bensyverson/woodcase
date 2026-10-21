@@ -15,7 +15,7 @@
 ///
 /// What it teaches is what `ComponentAnalyzer` and `ReactEmitter` actually read, not what
 /// the format could carry: `_bind` is documented here as unread because no version of the
-/// analyzer has ever looked at it, and `woodcase.action` is documented as
+/// analyzer has ever looked at it, and `codegen.action` is documented as
 /// recorded-but-unemitted
 /// because nothing downstream of `ComponentDefinition.actions` consumes it.
 extension HelpTopic {
@@ -30,26 +30,26 @@ extension HelpTopic {
       markup, and a document of nothing but components emits no pages/ directory at all.
 
     THE FOUR METADATA KEYS THAT ARE READ
-      Everything a component declares beyond its drawing lives in common.metadata.woodcase.
-      Writing common.metadata whole DROPS every key already there; write one key at a time, a
-      further dot goes into the map, and =null takes an entry away. An object one of these
-      writes CREATES carries type="woodcase", which nothing here reads; add
+      Everything a component declares beyond its drawing is written at a codegen.* path, and
+      Woodcase stores it in the node's metadata, which Pen keeps. Write one key at a time: a
+      further dot goes into the map, and =null takes an entry away. A metadata object one of
+      these writes CREATES carries type="woodcase", which nothing here reads; add
       common.metadata.type=component to the same write to choose it.
-        woodcase.role    what the component is — its element, its extra props, its state triggers
-          `woodcase set design.pen Button common.metadata.woodcase.role=button`
-        woodcase.props   the parameters it publishes: name -> a name path to one descendant
-          `woodcase set design.pen Button common.metadata.woodcase.props.label=Label`
-        woodcase.action  a name for what a role-carrying node does
-          `woodcase set design.pen Button common.metadata.woodcase.action=submit`
-        woodcase.states  a variant the naming convention below will not find, by node id
-          `woodcase set design.pen Button common.metadata.woodcase.states.hover=<node id>`
-      Old spellings (_role, _props, _action, _states) are still read, woodcase.* winning;
+        codegen.role     what the component is — its element, its extra props, its state triggers
+          `woodcase set design.pen Button codegen.role=button`
+        codegen.props    the parameters it publishes: name -> a name path to one descendant
+          `woodcase set design.pen Button codegen.props.label=Label`
+        codegen.action   a name for what a role-carrying node does
+          `woodcase set design.pen Button codegen.action=submit`
+        codegen.states   a variant the naming convention below will not find, by node id
+          `woodcase set design.pen Button codegen.states.hover=<node id>`
+      Old spellings (_role, _props, _action, _states) are still read, codegen.* winning;
       `woodcase migrate` moves them in. Two warnings, because the format is wider than the
-      reader: _bind is NOT read — a component's bindings come from woodcase.role alone — and
-      woodcase.action is recorded but nothing in the React output reflects it yet, so declare it
+      reader: _bind is NOT read — a component's bindings come from codegen.role alone — and
+      codegen.action is recorded but nothing in the React output reflects it yet, so declare it
       for intent, not for an onSubmit prop.
 
-    woodcase.role — SIX VALUES, ON THE COMPONENT'S OWN ROOT
+    codegen.role — SIX VALUES, ON THE COMPONENT'S OWN ROOT
       button   link   toggle   textInput   select   tabBar
       Only the root of a reusable node is read for the role, and it buys three things:
         the element  button and toggle emit <button>, link an <a href={href}>, tabBar a
@@ -62,7 +62,7 @@ extension HelpTopic {
       A role on a DESCENDANT is read only into the analysis — it is what makes a textInput,
       toggle or select node a binding — and no React output reflects a binding yet.
 
-    woodcase.props — THE PARAMETERS A CONSUMER SETS
+    codegen.props — THE PARAMETERS A CONSUMER SETS
       One entry per parameter: the name a consumer writes, and a name path from the
       component's root down to the one descendant it stands for ("Label", "Body/Title"). The
       property and the TypeScript type are inferred from what that descendant IS — a text node
@@ -72,14 +72,14 @@ extension HelpTopic {
       Button` prints a props block of name, resolved path and type, and says so in the row
       when a declared path resolves to no node. Give each parameter its own descendant: an
       override is keyed by node id, so two parameters naming one node cannot be told apart.
-      `common.metadata.woodcase.props.spare=null` drops one.
+      `codegen.props.spare=null` drops one.
 
     INSTANCES: AN OVERRIDE BECOMES A PROP, OR INLINES THE COMPONENT
       `cp` of a reusable node makes an instance — a ref — and `override` writes one property
       on one descendant of it. A declared parameter name is accepted in place of the property
       name, so `woodcase override design.pen Home/Save label=Send` lands on whatever
-      woodcase.props says label is. The emitter walks those overrides back through
-      woodcase.props: one that lands on a declared parameter's node becomes an attribute on
+      codegen.props says label is. The emitter walks those overrides back through
+      codegen.props: one that lands on a declared parameter's node becomes an attribute on
       the tag. One that lands anywhere ELSE cannot be said as a prop, so the emitter gives up
       on the tag and INLINES the component — the whole patched tree is pasted into the page
       under a {/* Customized from: Button */} comment, and that instance stops sharing the
@@ -95,7 +95,7 @@ extension HelpTopic {
       hover/active/focused; toggle on/disabled/focused; textInput focused/filled/disabled;
       select focused/open/disabled. Any other name becomes [data-<name>="true"], and a
       variant that adds or removes children becomes a boolean prop and a second render
-      function. A component with NO woodcase.role gets no states from the naming convention at all
+      function. A component with NO codegen.role gets no states from the naming convention at all
       — the sibling is ignored in silence, so give it a role. tabBar is the other exception:
       its variants are siblings at its own level, may themselves be reusable, and merge
       into one component with selected?: "home" | "log" instead of booleans.
@@ -116,9 +116,9 @@ extension HelpTopic {
      {"type":"rectangle","name":"Dot","width":8,"height":8,"fill":"#FFFFFF"}]}
     JSON
       woodcase set design.pen Button common.reusable=true --as ana
-      woodcase set design.pen Button common.metadata.woodcase.role=button --as ana
-      woodcase set design.pen Button common.metadata.woodcase.props.label=Label --as ana
-      woodcase set design.pen Button common.metadata.woodcase.props.tint=Dot --as ana
+      woodcase set design.pen Button codegen.role=button --as ana
+      woodcase set design.pen Button codegen.props.label=Label --as ana
+      woodcase set design.pen Button codegen.props.tint=Dot --as ana
       woodcase get design.pen Button
       # props
       #   label  Label/kind.content  string
@@ -150,8 +150,8 @@ extension HelpTopic {
       command above assumes. `woodcase generate react --help` — the flags: --output,
       --package, --preview; `woodcase generate swiftui --help` — --output, --name, --floor.
       `woodcase lint` is where the traps in this topic become a report rather than a surprise:
-      a woodcase.props path that resolves to nothing, or two entries reading one field of one
-      descendant (codegen-prop-path), a woodcase.role outside the six (codegen-role), and an
+      a codegen.props path that resolves to nothing, or two entries reading one field of one
+      descendant (codegen-prop-path), a codegen.role outside the six (codegen-role), and an
       instance the emitter would inline (codegen-unmapped-override). Run `woodcase lint
       --list` to see which checks this build carries; if those three are not in it, it
       predates them.

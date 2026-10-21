@@ -60,7 +60,9 @@ public extension NodePropertyCodec {
         }
         throw EditingError.postItMetadataRejected(
             nodeID: nodeID,
-            key: violation.key.propertyPath,
+            // The key as the metadata object spells it; the planner names it as the caller
+            // wrote it (`EditPlanner.spelling(of:asWritten:)`).
+            key: violation.key.path,
             value: PenPostIt.json(violation.value),
             accepted: violation.accepted,
             suggestion: violation.suggestion

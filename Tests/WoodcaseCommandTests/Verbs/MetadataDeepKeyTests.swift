@@ -40,7 +40,7 @@ struct MetadataDeepKeyTests {
         let fixture = try CommandFixture(fixture: "component-props.pen")
 
         let run = try fixture.run(
-            "set", fixture.file.path, "StatCard", "common.metadata.woodcase.role=button", "--as", "ana"
+            "set", fixture.file.path, "StatCard", "codegen.role=button", "--as", "ana"
         )
 
         #expect(run.status == 0)
@@ -60,7 +60,7 @@ struct MetadataDeepKeyTests {
     func aDeepKeyCreatesTheObject() throws {
         let fixture = try CommandFixture(fixture: "component-props.pen")
 
-        let run = try fixture.run("set", fixture.file.path, "Plain", "common.metadata.woodcase.role=button")
+        let run = try fixture.run("set", fixture.file.path, "Plain", "codegen.role=button")
 
         #expect(run.status == 0)
         #expect(try namespace(metadata(of: PenFileProbe(fixture.file).node("Plain")))["role"] == .string("button"))
@@ -70,7 +70,7 @@ struct MetadataDeepKeyTests {
     func aCreatedObjectCarriesTheRequiredType() throws {
         let fixture = try CommandFixture(fixture: "component-props.pen")
 
-        let run = try fixture.run("set", fixture.file.path, "Plain", "common.metadata.woodcase.role=button")
+        let run = try fixture.run("set", fixture.file.path, "Plain", "codegen.role=button")
 
         #expect(run.status == 0)
         // `type` is required by the .pen schema (Pen-Schema-2.20 line 117), so an object
@@ -84,7 +84,7 @@ struct MetadataDeepKeyTests {
 
         let run = try fixture.run(
             "set", fixture.file.path, "Plain",
-            "common.metadata.type=component", "common.metadata.woodcase.role=button"
+            "common.metadata.type=component", "codegen.role=button"
         )
 
         #expect(run.status == 0)
@@ -98,7 +98,7 @@ struct MetadataDeepKeyTests {
         let fixture = try CommandFixture(fixture: "component-props.pen")
 
         let run = try fixture.run(
-            "set", fixture.file.path, "StatCard", "common.metadata.woodcase.props.caption=Body/Title"
+            "set", fixture.file.path, "StatCard", "codegen.props.caption=Body/Title"
         )
 
         #expect(run.status == 0)
@@ -135,10 +135,10 @@ struct MetadataDeepKeyTests {
     func aNullDeepKeyRemovesOneKey() throws {
         let fixture = try CommandFixture(fixture: "component-props.pen")
 
-        let seeded = try fixture.run("set", fixture.file.path, "StatCard", "common.metadata.woodcase.role=button")
+        let seeded = try fixture.run("set", fixture.file.path, "StatCard", "codegen.role=button")
         #expect(seeded.status == 0)
 
-        let run = try fixture.run("set", fixture.file.path, "StatCard", "common.metadata.woodcase.role=null")
+        let run = try fixture.run("set", fixture.file.path, "StatCard", "codegen.role=null")
 
         #expect(run.status == 0)
         let written = try metadata(of: PenFileProbe(fixture.file).node("StatCard"))
@@ -152,7 +152,7 @@ struct MetadataDeepKeyTests {
         let fixture = try CommandFixture(fixture: "component-props.pen")
 
         let run = try fixture.run(
-            "set", fixture.file.path, "StatCard", "common.metadata.woodcase.props.gone=null"
+            "set", fixture.file.path, "StatCard", "codegen.props.gone=null"
         )
 
         #expect(run.status == 0)
@@ -185,7 +185,7 @@ struct MetadataDeepKeyTests {
 
         let run = try fixture.run(
             "set", fixture.file.path, "StatCard",
-            #"common.metadata={"type":"component"}"#, "common.metadata.woodcase.role=button"
+            #"common.metadata={"type":"component"}"#, "codegen.role=button"
         )
 
         #expect(run.status == 0)
@@ -199,7 +199,7 @@ struct MetadataDeepKeyTests {
     func aBatchSetTakesDeepKeys() throws {
         let fixture = try CommandFixture(fixture: "component-props.pen")
         let batch = fixture.root.appendingPathComponent("batch.jsonl")
-        try #"{"op":"set","target":"StatCard","props":{"common.metadata.woodcase.role":"button"}}"#
+        try #"{"op":"set","target":"StatCard","props":{"codegen.role":"button"}}"#
             .write(to: batch, atomically: true, encoding: .utf8)
 
         let run = try fixture.run("apply", fixture.file.path, "-F", batch.path)

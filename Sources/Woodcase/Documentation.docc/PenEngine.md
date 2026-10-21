@@ -152,9 +152,10 @@ alike, the way Pen 1.2.14 does when it opens one:
   (``PenShadowSpread``): one entry per spread shadow, addressed to the shadow's place among
   the node's effects and holding the migrated shadow it was made for, so the CG renderer
   still draws it and a later change to that shadow in Pen leaves it stale and ignored
-  (leaf `zRp9CO`). A spread of 0 goes silently; one naming a variable, or on a `descendants`
-  override bag with no metadata of its own — whose `metadata` would replace the component
-  node's whole metadata — is discarded with a warning.
+  (leaf `zRp9CO`). A spread of 0 goes silently; one naming a variable is discarded with a
+  warning. One on a `descendants` override bag is kept in the bag's own metadata, laid over
+  the component node's key by key (rule 6; until oNeklc it was discarded when the bag had
+  no metadata of its own).
 
 Pen does both silently; Woodcase reports the inner-to-outer conversion as a warning at
 ``PenDiagnostic/Stage/migration`` naming the node. A 2.19 file's inner shadow is an
@@ -253,8 +254,9 @@ sits on per-side widths, when it is discarded with a diagnostic. `miterAngle` �
 sharpest corner, in degrees, still mitered — moves into `metadata.woodcase.strokeMiterLimit`
 as the limit it stands for, 1 / sin(angle / 2) to four places (``PenNode/strokeMiterLimit``);
 one naming a variable, or not strictly between 0° and 180°, is discarded with a diagnostic
-(leaf `zRp9CO`; before, every `miterAngle` was). Either is discarded with a diagnostic on a
-`descendants` override bag with no metadata of its own (``PenStrokeMigrationRule``).
+(leaf `zRp9CO`; before, every `miterAngle` was). On a `descendants` override bag either is
+kept in the bag's own metadata, laid over the component node's key by key (rule 6,
+``PenStrokeMigrationRule``); until oNeklc it was discarded when the bag had no metadata of its own.
 
 ### Rich text
 

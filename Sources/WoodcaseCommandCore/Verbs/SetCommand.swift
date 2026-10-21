@@ -21,13 +21,14 @@ struct SetCommand: AsyncParsableCommand {
         \(PropertyAssignment.valueRules)
 
         common.metadata is an object, and writing it REPLACES the whole thing — every \
-        key already there, woodcase.props and woodcase.role included, goes with it. \
+        key already there, codegen.props and codegen.role included, goes with it. \
         common.metadata.<key>=<value> writes ONE entry instead, merging it into what \
-        is there and creating the object if there is none; a dot goes deeper, so \
-        common.metadata.woodcase.props.label=Body/Title declares one parameter without \
+        is there and creating the object if there is none; a dot goes deeper. The keys \
+        code generation reads have paths of their own, stored in metadata for you: \
+        codegen.props.label=Body/Title declares one parameter without \
         rewriting the others. An object a write leaves without a type carries type: "woodcase" \
         beside the entry, the schema requiring metadata.type, so choose it in the same \
-        write: common.metadata.type=component common.metadata.woodcase.role=button. Setting a \
+        write: common.metadata.type=component codegen.role=button. Setting a \
         deep key to null removes that one entry. No other property takes a deep key.
 
         Properties can also come from a JSON object with -F, and a key=value on the \
@@ -56,7 +57,7 @@ struct SetCommand: AsyncParsableCommand {
         EXAMPLES
           woodcase set design.pen Card/Title kind.content=Hello kind.fontSize=18 \\
             --rev 4f2a1b0c9d8e7f60 --as ana
-          woodcase set design.pen Card common.metadata.woodcase.props.label=Body/Title
+          woodcase set design.pen Card codegen.props.label=Body/Title
         """
     )
 

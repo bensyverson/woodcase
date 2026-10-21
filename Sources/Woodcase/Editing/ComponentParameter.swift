@@ -5,7 +5,7 @@
 
 import Foundation
 
-/// One parameter a component publishes, declared in `common.metadata.woodcase.props`.
+/// One parameter a component publishes, declared in `codegen.props`.
 ///
 /// The declaration is codegen's, and has been since components were first emitted:
 /// `{"label": "Body/Title"}` on a reusable node's metadata means "the parameter

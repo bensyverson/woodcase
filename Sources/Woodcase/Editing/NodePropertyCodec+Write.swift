@@ -25,7 +25,8 @@ extension NodePropertyCodec {
     /// where a number written to a text property becomes the string it spells — see
     /// ``coercing(_:at:on:)``. Nothing else about the value changes. A natural path such as
     /// `kind.blendMode` writes the metadata key it is stored under, the rest of the
-    /// node's metadata kept (<doc:PenMetadataNamespace>).
+    /// node's metadata kept (<doc:PenMetadataNamespace>), and a `kind.effects` whose shadows
+    /// name a `spread` stores the spreads there too (``restatingShadowSpreads(_:on:)``).
     ///
     /// - Parameters:
     ///   - value: The new JSON value, in the .pen file's own shape.
@@ -40,8 +41,11 @@ extension NodePropertyCodec {
         if isExtrasPath(path) {
             return try settingExtra(value, at: path, on: node)
         }
-        if naturalKey(of: path, on: node.kind) != nil {
+        if naturalKey(of: path, on: node.kind) != nil || naturalStoragePath(of: path) != nil {
             return try settingNaturalPath(value, at: path, on: node)
+        }
+        if writesNamedSpread([path: value], on: node.kind) {
+            return try settingNamedSpreads(value, on: node)
         }
         let written = coercing(value, at: path, on: node.kind)
         var patched = node

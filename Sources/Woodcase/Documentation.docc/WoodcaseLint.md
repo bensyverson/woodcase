@@ -74,8 +74,8 @@ no document, so accepting any of those would be accepting an argument it ignores
 | `override-value-rejected` | error | A `ref`'s stored override carries a value the descendant it patches cannot decode |
 | `override-target-not-found` | error | A `ref`'s stored override key names no descendant Pen lets it reach, so Pen drops it |
 | `override-key-unread` | error | A `ref`'s stored override carries a property path (`kind.content`) instead of the raw .pen key the merge reads |
-| `codegen-prop-path` | error | A reusable node's `woodcase.props` entry is not a path, names no descendant, or reads a field another entry already reads |
-| `codegen-role` | error | A `woodcase.role` value is outside ``ComponentRole`` |
+| `codegen-prop-path` | error | A reusable node's `codegen.props` entry is not a path, names no descendant, or reads a field another entry already reads |
+| `codegen-role` | error | A `codegen.role` value is outside ``ComponentRole`` |
 | `codegen-unmapped-override` | warning | An instance overrides a descendant no declared prop reads |
 | `mesh-gradient-dropped` | error | A mesh gradient's `points` or `colors` do not number `columns × rows`, one of the four is missing, the grid is under 2×2, or a point is malformed in a way Pen cannot place: Pen paints nothing |
 | `mesh-gradient-distorted` | warning | A mesh gradient has a color Pen's mesh misreads (4-digit `#RGBA`, a word), a patch that folds over itself, or a malformed point Pen places its own way |
@@ -146,17 +146,17 @@ edge are not overlapping.
 
 A clipping frame — `clip:true` — that overflows is not always a bug: a row five
 screens down a scrolling list is designed to sit outside the fold. `common.metadata`
-carries a `woodcase.scroll` key for saying so, following the `woodcase.role`/`woodcase.props`
+carries a `codegen.scroll` key for saying so, following the `codegen.role`/`codegen.props`
 keys ``ComponentAnalyzer`` already reads under `metadata.woodcase` (an old file's `_scroll` is
 still read): set it to `"vertical"`
 or `"horizontal"` on the clipping frame, and `clipped` treats an overflow along that
 axis as designed rather than as a finding.
 
 ```bash
-woodcase set design.pen banking-home/list common.metadata.woodcase.scroll=vertical
+woodcase set design.pen banking-home/list codegen.scroll=vertical
 ```
 
-The deep key merges one entry into `common.metadata` and leaves `woodcase.role`, `woodcase.props` and
+The deep key merges one entry into `common.metadata` and leaves `codegen.role`, `codegen.props` and
 anything else set there alone (see <doc:WoodcaseEditor>); writing the whole object would
 drop them. Every `clipped` finding proposes the command in this form.
 
@@ -165,7 +165,7 @@ past the fold it goes:
 
 ```text
 $ woodcase lint design.pen
-# nothing, once List declares woodcase.scroll=vertical and its rows only overflow downward
+# nothing, once List declares codegen.scroll=vertical and its rows only overflow downward
 ```
 
 **A child that also crosses the cross axis keeps its finding**, worded exactly as an
@@ -183,7 +183,7 @@ sixty-bar histogram or a long list produces one finding, not sixty, and the find
 proposes the exact fix:
 
 ```text
-warning clipped  List (Lst01)  57 children continue 2280pt past the fold on the vertical axis, and List clips them. A designed scroll? Run `woodcase set <file> List common.metadata.woodcase.scroll=vertical` to say so.
+warning clipped  List (Lst01)  57 children continue 2280pt past the fold on the vertical axis, and List clips them. A designed scroll? Run `woodcase set <file> List codegen.scroll=vertical` to say so.
 ```
 
 "Past the fold" is measured from the farthest child, not summed across all of
@@ -191,14 +191,14 @@ them — the number answers "how far would a reader have to scroll," not "how ma
 points of content exist." A child that also overflows the cross axis is excluded from
 the fold and keeps its own individual finding instead. A freeform frame
 (`layout: none`) has no single stacking axis, so nothing here collapses; every
-overflowing child is reported on its own, exactly as before `woodcase.scroll` existed.
+overflowing child is reported on its own, exactly as before `codegen.scroll` existed.
 
-**An invalid `woodcase.scroll` value** — anything but `"vertical"` or `"horizontal"` — is its
+**An invalid `codegen.scroll` value** — anything but `"vertical"` or `"horizontal"` — is its
 own finding, on whatever node carries it, on top of whichever behavior above applies
 as though the key were absent:
 
 ```text
-warning clipped  List (Lst01)  declares common.metadata.woodcase.scroll="diagonal", which is not a designed scroll axis. Valid values are "vertical" and "horizontal".
+warning clipped  List (Lst01)  declares codegen.scroll="diagonal", which is not a designed scroll axis. Valid values are "vertical" and "horizontal".
 ```
 
 **The check id stays `clipped`.** Every finding here — suppressed, collapsed, or
@@ -535,12 +535,14 @@ warning stroke-dash-ignored  Board/Card (Rct01)  has a dash on a per-side stroke
 `shadow-spread-stale` is a warning, one finding per node holding a
 `metadata.woodcase.shadowSpread` entry made for a shadow other than the one at its place
 (``PenShadowSpread/isStale(for:)``): Pen keeps the entry but cannot see it, so changing,
-moving or removing the shadow there leaves it behind, and a write that changes `effect`
+moving or removing the shadow there leaves it behind, and a raw edit that changes `effect`
 without restating the spreads does the same. The shadow casts without spread rather than
-spreading the wrong one. A row inside an instance is skipped, as for `spans-stale`.
+spreading the wrong one. A row inside an instance is skipped, as for `spans-stale`. The way
+out is a write of `kind.effects` with `spread` on each shadow that should have one, which
+restates every spread and drops the stale entry (<doc:PenMetadataNamespace>).
 
 ```text
-warning shadow-spread-stale  Board/Card (Rct01)  has a shadow spread for effect 0 made for a shadow it no longer has there, so it casts without it. Restate `common.metadata.woodcase.shadowSpread` for the shadow as it is now, or remove it with `woodcase set <file> Rct01 common.metadata.woodcase.shadowSpread=null`.
+warning shadow-spread-stale  Board/Card (Rct01)  has a shadow spread for effect 0 made for a shadow it no longer has there, so it casts without it. Write `kind.effects` again with `spread` on each shadow that should have one; a write of `kind.effects` drops every spread it does not name.
 ```
 
 `paint-blend-lowest` is a warning, one finding per node whose lowest drawn paint blends.
@@ -565,7 +567,7 @@ warning paint-blend-lowest  #bg/#a (a)  has a multiply blend on fill 0, its lowe
 
 Three checks read nothing but the metadata the React emitter reads, and answer the one
 question `lint` could not answer before: *will this file generate?* They fire only on a
-document that has opted into codegen — a reusable node, and a `woodcase.props` or `woodcase.role` key on
+document that has opted into codegen — a reusable node, and a `codegen.props` or `codegen.role` key on
 it — so a design nobody intends to generate never sees them.
 
 They are cheap. Each runs over reusable nodes and `ref`s alone, off
@@ -574,7 +576,7 @@ handed — and none of them expands an instance or settles a second layout.
 
 ### `codegen-prop-path`
 
-`common.metadata.woodcase.props` is how a component declares its named parameters:
+`codegen.props` is how a component declares its named parameters:
 `{"title": "Body/Title"}` maps the prop `title` to the descendant at that path. It is
 the declaration ``ComponentAnalyzer`` has read since the React emitter shipped, and the
 one `override` and `cp --each` resolve a prop name through.
@@ -588,7 +590,7 @@ An entry fails on its own in two ways, and neither says anything today:
   the author meant is inlined (see `codegen-unmapped-override`, below).
 
 ```text
-error codegen-prop-path  Card (Cmp01)  declares the prop `title` in common.metadata.woodcase.props as `Nope`, but no descendant of Card answers to that path, so `generate react` emits the prop with nothing wired to it and inlines every instance that overrides the descendant it meant. It contains: Label (Lbl01), Row (Row01), Row/Tag (Tag01). Run `woodcase set <file> Cmp01 common.metadata.woodcase.props.title=<path>` with one of them.
+error codegen-prop-path  Card (Cmp01)  declares the prop `title` in codegen.props as `Nope`, but no descendant of Card answers to that path, so `generate react` emits the prop with nothing wired to it and inlines every instance that overrides the descendant it meant. It contains: Label (Lbl01), Row (Row01), Row/Tag (Tag01). Run `woodcase set <file> Cmp01 codegen.props.title=<path>` with one of them.
 ```
 
 And two entries fail **together** when they resolve to the same descendant *and* read the
@@ -598,7 +600,7 @@ declared with nothing wired to them, and the finding names the pair, the node th
 and the edit that separates them:
 
 ```text
-error codegen-prop-path  StatCard (Stc01)  declares the props `label` and `width` in common.metadata.woodcase.props as paths that resolve to Title (Ttl01), and each reads the same string value from it, so `generate react` cannot tell them apart: it keeps `label` — the first by name — and `width` is declared with nothing wired to it. Point it at another descendant: run `woodcase set <file> Stc01 common.metadata.woodcase.props.width=<path>`. StatCard contains: Body (Bdy01), Body/Title (Ttl01), Body/Swatch (Swt01).
+error codegen-prop-path  StatCard (Stc01)  declares the props `label` and `width` in codegen.props as paths that resolve to Title (Ttl01), and each reads the same string value from it, so `generate react` cannot tell them apart: it keeps `label` — the first by name — and `width` is declared with nothing wired to it. Point it at another descendant: run `woodcase set <file> Stc01 codegen.props.width=<path>`. StatCard contains: Body (Bdy01), Body/Title (Ttl01), Body/Swatch (Swt01).
 ```
 
 Sharing a descendant is not itself the fault: a `label` reading a text node's content and
@@ -611,9 +613,9 @@ node-id lookup was built with `Dictionary(uniqueKeysWithValues:)`.
 The path is resolved by ``ComponentAnalyzer/resolveDescendantPath(_:from:)`` **itself**,
 which was extracted from the analyzer for this check rather than re-implemented beside
 it: a path the lint calls good is by construction a path codegen wires, and the two
-cannot drift. The remedy uses `common.metadata.woodcase.props.<name>=<path>` — the deep metadata
+cannot drift. The remedy uses `codegen.props.<name>=<path>` — the deep metadata
 key, which merges one key rather than overwriting the object and silently dropping
-`woodcase.role` or `woodcase.scroll` alongside it.
+`codegen.role` or `codegen.scroll` alongside it.
 
 ### `codegen-role`
 
@@ -624,11 +626,11 @@ unrecognized role gets no default action and no binding. What generates is a pla
 `<div>` with no semantic element, no `wc-*` class and no state rules.
 
 ```text
-error codegen-role  Card (Cmp01)  declares common.metadata.woodcase.role="buton", which is not a role `generate react` knows, so the declaration is read and dropped: the component emits a plain <div>, with no semantic element, no interactive states and no state rules. The roles are button, link, toggle, textInput, select, or tabBar. Run `woodcase set <file> Cmp01 common.metadata.woodcase.role=<role>` with one of them, or drop the key.
+error codegen-role  Card (Cmp01)  declares codegen.role="buton", which is not a role `generate react` knows, so the declaration is read and dropped: the component emits a plain <div>, with no semantic element, no interactive states and no state rules. The roles are button, link, toggle, textInput, select, or tabBar. Run `woodcase set <file> Cmp01 codegen.role=<role>` with one of them, or drop the key.
 ```
 
 **Scope is exactly what codegen reads.** ``ComponentAnalyzer`` enters `walkDescendants`
-only from a reusable node, so a `woodcase.role` on a page — or on anything outside every
+only from a reusable node, so a `codegen.role` on a page — or on anything outside every
 reusable subtree — reaches no emitter and is not a finding. The key is the file's own
 above that line.
 
@@ -643,29 +645,29 @@ right and the reuse is gone; a dozen such instances generate a dozen copies of o
 component.
 
 ```text
-warning codegen-unmapped-override  Root/Chip (Rf001)  overrides `Sub01` (Subtitle) on Card, which declares props in common.metadata.woodcase.props but none that reads that descendant, so `generate react` inlines a whole copy of Card here instead of emitting a `<Card />` tag. Declare it: run `woodcase set <file> Cmp01 common.metadata.woodcase.props.subtitle=Subtitle`.
+warning codegen-unmapped-override  Root/Chip (Rf001)  overrides `Sub01` (Subtitle) on Card, which declares props in codegen.props but none that reads that descendant, so `generate react` inlines a whole copy of Card here instead of emitting a `<Card />` tag. Declare it: run `woodcase set <file> Cmp01 codegen.props.subtitle=Subtitle`.
 ```
 
-Two silences are deliberate. **A definition that declares no `woodcase.props` at all is never a
+Two silences are deliberate. **A definition that declares no `codegen.props` at all is never a
 finding** — nothing was declared, so nothing failed to map, and a component nobody has
 parameterized yet is a stage of a design rather than a fault. And **a key naming no
 descendant of the definition is `override-target-not-found` instead**, which says the
 more specific thing; reporting both would be one fault twice.
 
 What is left divides in two, and the message says which one it is holding. A key naming
-a **named** descendant is one `woodcase.props` entry away, so the message writes that entry out.
+a **named** descendant is one `codegen.props` entry away, so the message writes that entry out.
 A key naming an **unnamed** one cannot be declared at all — a path is a run of child
 names, so ``ComponentAnalyzer/resolveDescendantPath(_:from:)`` has nothing to match —
 and the message asks for the name first:
 
 ```text
-warning codegen-unmapped-override  Root/Chip (Rf001)  overrides `Unn01` on Row, which declares props in common.metadata.woodcase.props but none that reads that descendant, so `generate react` inlines a whole copy of Row here instead of emitting a `<Row />` tag. `Unn01` has no name, and a woodcase.props path is a run of child names, so no entry can reach it until it is named: run `woodcase set <file> Unn01 common.name=<name>`, then declare the prop the same way.
+warning codegen-unmapped-override  Root/Chip (Rf001)  overrides `Unn01` on Row, which declares props in codegen.props but none that reads that descendant, so `generate react` inlines a whole copy of Row here instead of emitting a `<Row />` tag. `Unn01` has no name, and a codegen.props path is a run of child names, so no entry can reach it until it is named: run `woodcase set <file> Unn01 common.name=<name>`, then declare the prop the same way.
 ```
 
 That is not a corner case. On `Tests/WoodcaseTests/Fixtures/woodcase-app.pen` — a file
 drawn in an editor rather than written by hand — four of the seventeen findings are
 unnamed wrapper frames inside
-`Component/Toggle Row`, and no amount of `woodcase.props` would have silenced them
+`Component/Toggle Row`, and no amount of `codegen.props` would have silenced them
 (`woodcase lint Tests/WoodcaseTests/Fixtures/woodcase-app.pen --summary`).
 
 It is a `warning` where the other two are errors, on the grading in ``LintCheck/severity``:

@@ -32,7 +32,7 @@ struct OverrideCommand: AsyncParsableCommand {
         what comes back is the raw one.
 
         A key may also be a name the component PUBLISHES. A component declares its \
-        parameters in common.metadata.woodcase.props as name → the name path of the node the \
+        parameters in codegen.props as name → the name path of the node the \
         value belongs to, which is what code generation reads; write the name and the \
         value lands there — `label=Hi` on the instance means the content of whatever \
         node label names. `woodcase get <component>` lists them. A name the addressed \

@@ -234,7 +234,7 @@ extension SwiftUIEmitter {
         for prop in component.props where control.memberNames.contains(prop.name) {
             diagnostics?.warn(
                 "The prop \"\(prop.name)\" of \(component.typeName) takes a name its \(control.kind.rawValue) needs; "
-                    + "rename it in woodcase.props",
+                    + "rename it in codegen.props",
                 stage: .codeGen, nodeID: id
             )
         }

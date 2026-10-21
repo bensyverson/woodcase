@@ -12,7 +12,7 @@ import Woodcase
 ///
 /// ```bash
 /// woodcase prompts design.pen --state queued --json
-/// woodcase set design.pen Pr01 common.metadata.woodcase.state=running --rev <rev> --as claude
+/// woodcase set design.pen Pr01 note.state=running --rev <rev> --as claude
 /// ```
 struct Prompts: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
@@ -22,7 +22,7 @@ struct Prompts: AsyncParsableCommand {
         A read verb: it takes a shared lock and writes nothing.
 
         Run queues work in the file. Pressing Run on a prompt sets \
-        `metadata.woodcase.state` to queued and `woodcase.requestedBy` to whoever \
+        `note.state` to queued and `note.requestedBy` to whoever \
         pressed it; an agent claims the work by writing running, answers in a comment \
         thread anchored to the prompt, and writes done. Each row is the state (`-` for \
         a prompt never run), who requested it, the model it names, its first line, and \
@@ -33,7 +33,7 @@ struct Prompts: AsyncParsableCommand {
         the second write fails with exit 3:
 
           woodcase prompts design.pen --state queued --json
-          woodcase set design.pen Pr01 common.metadata.woodcase.state=running \\
+          woodcase set design.pen Pr01 note.state=running \\
             --rev <rev> --as claude
 
         --state takes queued, running, done or all; --requested-by keeps one \

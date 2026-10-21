@@ -21,15 +21,19 @@ struct PenSchemaTests {
     @Test("A type's table names every kind path the codec accepts", arguments: PenNode.NodeType.allCases)
     func tableCoversEveryKindPath(type: PenNode.NodeType) {
         let table = PenSchema.table(for: type)
-        #expect(Set(table.properties.map(\.path)) == PropertyDiff.allKindKeys(type))
+        // A note type's table lists its note.* aliases too (DPY8DH).
+        let aliases = PenMetadata.WoodcaseKey.noteTypes.contains(type) ? NodePropertyCodec.naturalNotePaths : []
+        #expect(Set(table.properties.map(\.path)) == PropertyDiff.allKindKeys(type).union(aliases))
     }
 
     @Test("The common table names every common path the codec accepts")
     func commonTableCoversEveryCommonPath() {
-        // The format's own common paths, and `common.locked`, which Woodcase stores in metadata.
+        // The format's own common paths, and `common.locked` and the `codegen.*` paths (tRzkPS),
+        // which every node takes and Woodcase stores in metadata.
         #expect(
             Set(PenSchema.common.properties.map(\.path))
                 == NodePropertyCodec.commonPaths.union(NodePropertyCodec.naturalCommonPaths)
+                .union(NodePropertyCodec.naturalCodegenPaths)
         )
     }
 
@@ -216,8 +220,11 @@ struct PenSchemaTests {
         } else {
             try Self.storedKeys(of: JSONDecoder().decode(PenEffect.self, from: data))
         }
+        // A shadow's spread is the one key the codec keeps outside the payload, in the node's
+        // metadata (leaf oNeklc).
+        let listed = Set(variant.fields.map(\.key)).subtracting(sample.spelling == "shadow" ? ["spread"] : [])
         #expect(
-            Set(variant.fields.map(\.key)) == Set(stored),
+            listed == Set(stored),
             "the \(sample.spelling) \(sample.shape) table lists \(variant.fields.map(\.key)), the payload holds \(stored)"
         )
     }

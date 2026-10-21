@@ -30,7 +30,8 @@ public extension NodePropertyCodec {
     /// - Returns: The key the path is stored under.
     static func naturalKey(of path: String, on kind: PenNode.Kind) -> PenMetadata.WoodcaseKey? {
         guard let key = PenMetadata.WoodcaseKey(naturalPath: path) else { return nil }
-        if naturalCommonPaths.contains(path) { return key }
+        if naturalCommonPaths.contains(path) || naturalCodegenPaths.contains(path) { return key }
+        if naturalNotePaths.contains(path) { return notePaths(on: kind).contains(path) ? key : nil }
         guard kind.nodeType != nil, PropertyDiff.allKindKeys(kind).contains(path) else { return nil }
         return key
     }
@@ -40,16 +41,52 @@ public extension NodePropertyCodec {
     /// - Parameters:
     ///   - properties: The writes, by property path.
     ///   - kind: The node's kind.
-    /// - Returns: `true` when ``storingNaturalPaths(_:on:)`` would rewrite a key.
+    /// - Returns: `true` when ``storingNaturalPaths(_:on:)`` would rewrite a key: a natural
+    ///   path, or a `spread` on a shadow in `kind.effects`.
     static func writesNaturalPath(_ properties: [String: AnyCodable], on kind: PenNode.Kind) -> Bool {
-        properties.keys.contains { naturalKey(of: $0, on: kind) != nil }
+        properties.keys.contains { naturalKey(of: $0, on: kind) != nil || naturalStoragePath(of: $0) != nil }
+            || writesNamedSpread(properties, on: kind)
+    }
+
+    /// The storage path a deep key below a natural path writes: `codegen.props.label` is
+    /// `common.metadata.woodcase.props.label`.
+    ///
+    /// Only the code-generation paths take deep keys: `codegen.props` and `codegen.states`
+    /// hold objects a caller writes one entry of, as they did at their storage paths.
+    ///
+    /// - Parameter path: A property path.
+    /// - Returns: The deep storage key, or `nil` when the path is no deep key below a
+    ///   `codegen.*` path.
+    static func naturalStoragePath(of path: String) -> String? {
+        guard path.hasPrefix(codegenPrefix) else { return nil }
+        for natural in naturalCodegenPaths where path.hasPrefix(natural + ".") {
+            guard let key = PenMetadata.WoodcaseKey(naturalPath: natural) else { return nil }
+            let below = path.dropFirst(natural.count + 1)
+            guard !below.isEmpty, !below.split(separator: ".", omittingEmptySubsequences: false).contains(where: \.isEmpty)
+            else { return nil }
+            return "\(key.path).\(below)"
+        }
+        return nil
+    }
+
+    /// Whether a write at this path lands in the node's metadata: `common.metadata`, a
+    /// natural path the kind takes, or a deep key below a `codegen.*` path.
+    ///
+    /// - Parameters:
+    ///   - path: A property path.
+    ///   - kind: The node's kind.
+    /// - Returns: `true` for a metadata write.
+    static func writesMetadata(at path: String, on kind: PenNode.Kind) -> Bool {
+        path == metadataPath || naturalKey(of: path, on: kind) != nil || naturalStoragePath(of: path) != nil
     }
 
     /// The writes with every natural path aimed at the deep key it is stored under.
     ///
     /// `kind.blendMode=multiply` becomes `common.metadata.woodcase.blendMode=multiply`, which
     /// ``folding(_:onto:)`` then merges onto the metadata the node carries. A value of the
-    /// wrong form is refused here, under the path the caller wrote.
+    /// wrong form is refused here, under the path the caller wrote. A `kind.effects` whose
+    /// shadows name a `spread` leaves it without them, and its spreads become a write of
+    /// `common.metadata.woodcase.shadowSpread` (``restatingShadowSpreads(_:on:)``).
     ///
     /// - Parameters:
     ///   - properties: The writes, by property path.
@@ -62,8 +99,13 @@ public extension NodePropertyCodec {
         on node: PenNode
     ) throws -> [String: AnyCodable] {
         guard writesNaturalPath(properties, on: node.kind) else { return properties }
+        let properties = try storingNamedSpreads(properties, on: node)
         var stored: [String: AnyCodable] = [:]
         for (path, value) in properties {
+            if let storage = naturalStoragePath(of: path) {
+                stored[storage] = value
+                continue
+            }
             guard let key = naturalKey(of: path, on: node.kind) else {
                 stored[path] = value
                 continue
@@ -88,8 +130,12 @@ public extension NodePropertyCodec {
     ///   such path, in sorted order.
     static func checkNoStoragePaths(_ properties: [String: AnyCodable], nodeID: String) throws {
         for path in properties.keys.sorted() {
-            guard let key = PenMetadata.WoodcaseKey(storagePath: path), let natural = key.naturalPath else { continue }
-            throw EditingError.storedAtNaturalPath(nodeID: nodeID, path: path, naturalPath: natural)
+            guard let key = PenMetadata.WoodcaseKey(storagePath: path), let natural = key.writtenThrough else { continue }
+            // A deep key below a code-generation key names the same deep key below its path,
+            // the one kind of natural path that takes deep keys (`naturalStoragePath(of:)`).
+            let below = path.dropFirst(key.path.count)
+            let named = natural.hasPrefix(codegenPrefix) && below.hasPrefix(".") ? natural + below : natural
+            throw EditingError.storedAtNaturalPath(nodeID: nodeID, path: path, naturalPath: named)
         }
     }
 
@@ -98,13 +144,18 @@ public extension NodePropertyCodec {
     /// What `get` prints beside the node JSON, which keeps them in `metadata.woodcase`.
     ///
     /// - Parameter node: The node to read.
-    /// - Returns: Each natural path the node takes and sets, with its value; unset paths left out.
+    /// - Returns: Each natural path the node takes and sets, with its value; unset paths left
+    ///   out. A node that draws a shadow with a spread lists `kind.effects` too, each shadow
+    ///   carrying its spread (``presentedValue(at:of:)``).
     static func naturalValues(of node: PenNode) -> [String: AnyCodable] {
         var values: [String: AnyCodable] = [:]
         for key in PenMetadata.WoodcaseKey.allCases {
             guard let path = key.naturalPath, naturalKey(of: path, on: node.kind) != nil else { continue }
             let value = naturalValue(of: key, on: node)
             if value != .null { values[path] = value }
+        }
+        if takesEffects(node.kind), showsShadowSpread(node), let effects = try? presentedValue(at: effectsPath, of: node) {
+            values[effectsPath] = effects
         }
         return values
     }

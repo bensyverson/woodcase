@@ -19,13 +19,22 @@ struct NaturalPathTableTests {
         .locked: "common.locked",
         .defaultTextStyle: "kind.defaultTextStyle",
         .spans: "kind.spans",
-    ]
+        // The code-generation keys' own namespace (leaf tRzkPS).
+        .props: "codegen.props",
+        .role: "codegen.role",
+        .states: "codegen.states",
+        .action: "codegen.action",
+        .scroll: "codegen.scroll",
+    ].merging(
+        // The note keys' aliases (leaf DPY8DH); their raw keys stay accepted.
+        PenMetadata.WoodcaseKey.allCases.filter { $0.group == .note || $0.group == .noteTextStyle }
+            .map { ($0, "note.\($0.rawValue)") }
+    ) { old, _ in old }
 
     /// `woodcaseFields` rows still at their storage path, each waiting on a named leaf.
     /// A row that is neither here nor at a natural path fails `everyFieldRowIsNatural`.
-    private static let pendingRows: Set<String> = [
-        PenMetadata.WoodcaseKey.shadowSpread.path, // oNeklc: spread becomes a field of the shadow
-    ]
+    /// Empty since oNeklc made a shadow's spread a field of the shadow in `kind.effects`.
+    private static let pendingRows: Set<String> = []
 
     @Test("Each Woodcase-owned key names its natural path, and only those keys do")
     func tableIsExact() {
@@ -47,7 +56,8 @@ struct NaturalPathTableTests {
     func propertyPath() {
         #expect(PenMetadata.WoodcaseKey.strokeDash.propertyPath == "kind.strokeDash")
         #expect(PenMetadata.WoodcaseKey.locked.propertyPath == "common.locked")
-        #expect(PenMetadata.WoodcaseKey.tint.propertyPath == PenMetadata.WoodcaseKey.tint.path)
+        // tint has had an alias since DPY8DH; textDecoration has no natural path.
+        #expect(PenMetadata.WoodcaseKey.textDecoration.propertyPath == PenMetadata.WoodcaseKey.textDecoration.path)
     }
 
     @Test("Every woodcaseFields row of every type is at a natural path, but the pending ones")
@@ -64,6 +74,8 @@ struct NaturalPathTableTests {
         for type in PenNode.NodeType.allCases {
             let rows = Set(PenSchema.woodcaseFields(for: type).map(\.path)).subtracting(Self.pendingRows)
             let vocabulary = PropertyDiff.allKindKeys(type).union(NodePropertyCodec.naturalCommonPaths)
+                .union(NodePropertyCodec.naturalCodegenPaths)
+                .union(PenMetadata.WoodcaseKey.noteTypes.contains(type) ? NodePropertyCodec.naturalNotePaths : [])
             let natural = vocabulary.filter { PenMetadata.WoodcaseKey(naturalPath: $0) != nil && $0 != "kind.blendMode" }
             #expect(natural == rows, "\(type)")
         }

@@ -5,20 +5,20 @@
 
 import Foundation
 
-/// What a node's `common.metadata.woodcase.scroll` key says about its designed overflow.
+/// What a node's `codegen.scroll` key says about its designed overflow.
 ///
-/// `woodcase.scroll` sits beside `woodcase.role` and `woodcase.props`, the keys
+/// `codegen.scroll` sits beside `codegen.role` and `codegen.props`, the keys
 /// ``ComponentAnalyzer`` reads under ``PenMetadata/woodcaseNamespace``: a key a document
 /// author sets, which Pen.app carries verbatim through a resave. An old file's `_scroll`
 /// is still read (``PenMetadata/subscript(woodcase:)``).
 private enum DeclaredScrollAxis {
-    /// No `woodcase.scroll` key at all.
+    /// No `codegen.scroll` key at all.
     case none
 
-    /// `woodcase.scroll` is `"vertical"` or `"horizontal"`.
+    /// `codegen.scroll` is `"vertical"` or `"horizontal"`.
     case axis(TreeRow.OverflowAxis)
 
-    /// `woodcase.scroll` is set to something else, described the way the value reads in the
+    /// `codegen.scroll` is set to something else, described the way the value reads in the
     /// file — quoted for a string, named for anything else — for a warning to quote.
     case invalid(String)
 }
@@ -41,20 +41,20 @@ private enum DeclaredScrollAxis {
 ///
 /// A row's parent must be a `frame` with `clip:true` for any of this to apply — a
 /// `group` has no `clip` flag, and a frame that does not clip shows every pixel of an
-/// overflowing child regardless of what `woodcase.scroll` says. Against such a frame:
+/// overflowing child regardless of what `codegen.scroll` says. Against such a frame:
 ///
-/// 1. **A valid `woodcase.scroll`.** A child whose ``TreeRow/overflowAxes`` is exactly the
+/// 1. **A valid `codegen.scroll`.** A child whose ``TreeRow/overflowAxes`` is exactly the
 ///    declared axis is not a finding, however far past the fold it goes — that is the
 ///    scroll working as designed. A child that also crosses the cross axis keeps its
 ///    ``DocumentLinter/clipped(_:parent:)`` finding unchanged.
-/// 2. **No `woodcase.scroll` (or an invalid one).** When the frame itself stacks its children
+/// 2. **No `codegen.scroll` (or an invalid one).** When the frame itself stacks its children
 ///    on an axis (``PenNode/FrameData/layout`` is `.horizontal` or `.vertical`), every
 ///    child whose overflow is exactly that stacking axis is folded into one finding
 ///    on the frame, naming how many and how far the farthest continues, and
-///    proposing the `woodcase.scroll` value that would quiet them. A freeform frame
+///    proposing the `codegen.scroll` value that would quiet them. A freeform frame
 ///    (`layout: none`) has no stacking axis to collapse onto, so nothing here applies
 ///    and every overflowing child keeps its own finding.
-/// 3. **An invalid `woodcase.scroll`.** Whatever kind of node carries it, a `woodcase.scroll` value
+/// 3. **An invalid `codegen.scroll`.** Whatever kind of node carries it, a `codegen.scroll` value
 ///    that is not `"vertical"` or `"horizontal"` is its own finding, on top of
 ///    whichever of the two behaviors above applies as if it were absent.
 extension DocumentLinter {
@@ -64,7 +64,7 @@ extension DocumentLinter {
     /// - Parameters:
     ///   - rows: The rows of the listing being linted, in pre-order.
     ///   - context: The settled tree, for reading a clipping frame's own `clip` flag
-    ///     and `woodcase.scroll` metadata the same way every other check reads a node.
+    ///     and `codegen.scroll` metadata the same way every other check reads a node.
     /// - Returns: Row id → the findings to report on that row, in document order.
     static func clippedFindings(rows: [TreeRow], in context: Context) -> [String: [LintFinding]] {
         var byRow: [String: [LintFinding]] = [:]
@@ -142,7 +142,7 @@ extension DocumentLinter {
         }
     }
 
-    /// Parses a node's `woodcase.scroll` metadata key, in either spelling.
+    /// Parses a node's `codegen.scroll` metadata key, in either spelling.
     private static func declaredScrollAxis(_ metadata: PenMetadata?) -> DeclaredScrollAxis {
         guard let raw = metadata?[woodcase: .scroll] else { return .none }
         guard case let .string(value) = raw else { return .invalid(describe(raw)) }
@@ -166,7 +166,7 @@ extension DocumentLinter {
 
     // MARK: - Findings
 
-    /// The one finding for a `woodcase.scroll` value that is not `"vertical"` or
+    /// The one finding for a `codegen.scroll` value that is not `"vertical"` or
     /// `"horizontal"`, on whatever node carries it — a stray key is as much a
     /// mistake on a node that never clips as on one that does.
     private static func invalidScrollFinding(_ row: TreeRow, node: PenNode) -> LintFinding? {
@@ -175,7 +175,7 @@ extension DocumentLinter {
             check: .clipped,
             nodeID: row.id,
             path: row.address,
-            message: "declares common.metadata.woodcase.scroll=\(described), which is not a designed scroll axis. "
+            message: "declares codegen.scroll=\(described), which is not a designed scroll axis. "
                 + "Valid values are \"vertical\" and \"horizontal\"."
         )
     }
@@ -186,7 +186,7 @@ extension DocumentLinter {
     ///
     /// - Parameters:
     ///   - row: The clipping frame.
-    ///   - node: The frame's settled node, for its current `woodcase.scroll` metadata.
+    ///   - node: The frame's settled node, for its current `codegen.scroll` metadata.
     ///   - axis: The frame's stacking axis, which is also the axis every child in
     ///     `children` overflows on and nothing else.
     ///   - children: The children folded into this one finding, in document order.
@@ -204,7 +204,7 @@ extension DocumentLinter {
             path: row.address,
             message: "\(children.count) children continue \(number(total))pt past the fold on the "
                 + "\(axis.rawValue) axis, and \(name(of: row)) clips them. A designed scroll? Run "
-                + "`woodcase set <file> \(row.address) common.metadata.woodcase.scroll=\(axis.rawValue)` "
+                + "`woodcase set <file> \(row.address) codegen.scroll=\(axis.rawValue)` "
                 + "to say so."
         )
     }

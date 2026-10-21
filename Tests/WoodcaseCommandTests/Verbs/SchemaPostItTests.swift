@@ -19,7 +19,8 @@ struct SchemaPostItTests {
 
         #expect(run.status == 0, "schema postit failed: \(run.stderr)")
         for key in PenPostIt.keys {
-            let row = run.stdoutLines.first { $0.contains("\(key.path) ") }
+            // Printed at its note.* alias since DPY8DH.
+            let row = run.stdoutLines.first { $0.contains("\(key.propertyPath) ") }
             #expect(row != nil, "the table omits \(key.rawValue)")
             for spelling in key.spellings {
                 #expect(row?.contains(spelling) == true, "\(key.rawValue)'s row omits \(spelling)")
@@ -35,12 +36,13 @@ struct SchemaPostItTests {
         #expect(run.status == 0, "schema postit --json failed: \(run.stderr)")
         let report = try JSONDecoder().decode(SchemaPostItReport.self, from: Data(run.stdout.utf8))
         #expect(report.type == PenPostIt.typeValue)
-        #expect(report.keys.map(\.key) == PenPostIt.keys.map { "common.metadata.woodcase.\($0.rawValue)" })
-        #expect(report.keys.first { $0.key == "common.metadata.woodcase.state" }?.spellings == ["open", "resolved"])
+        // note.* aliases since DPY8DH; the raw keys stay accepted.
+        #expect(report.keys.map(\.key) == PenPostIt.keys.map { "note.\($0.rawValue)" })
+        #expect(report.keys.first { $0.key == "note.state" }?.spellings == ["open", "resolved"])
         let fontSize = PenMetadata.WoodcaseKey.fontSize.constraint?.summary
         #expect(fontSize != nil)
-        #expect(report.keys.first { $0.key == "common.metadata.woodcase.fontSize" }?.takes == fontSize)
-        #expect(report.keys.first { $0.key == "common.metadata.woodcase.letterSpacing" }?.takes == "any number")
+        #expect(report.keys.first { $0.key == "note.fontSize" }?.takes == fontSize)
+        #expect(report.keys.first { $0.key == "note.letterSpacing" }?.takes == "any number")
     }
 
     @Test("The overview points at the convention")
@@ -60,6 +62,7 @@ struct SchemaPostItTests {
         )
 
         #expect(run.status != 0)
+        // The suggestion keeps the caller's spelling: raw here, note.state for an alias write.
         #expect(run.stderr.contains("common.metadata.woodcase.state=resolved"), "the refusal reads \(run.stderr)")
         #expect(run.stderr.contains("did you mean"), "the refusal reads \(run.stderr)")
     }

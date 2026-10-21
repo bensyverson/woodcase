@@ -44,9 +44,9 @@ import Foundation
 ///   strictly between 0° and 180°, names no limit.
 ///
 /// Either goes silently with its stroke when the stroke has no `fill`. Otherwise one that
-/// cannot be kept, or sits on an instance override with no metadata of its own — whose
-/// `metadata` would replace the component node's whole metadata — is discarded with a
-/// diagnostic naming the node.
+/// cannot be kept is discarded with a diagnostic naming the node. One on an instance
+/// override is kept in the override's own metadata, which expansion lays over the component
+/// node's key by key (rule 6).
 public struct PenStrokeMigrationRule: PenMigrationRule {
     /// Creates the rule.
     public init() {}
@@ -125,12 +125,7 @@ public struct PenStrokeMigrationRule: PenMigrationRule {
             return
         }
         guard PenStrokeDash.lengths(in: dash)?.isEmpty == false else { return }
-        guard PenMigrationMetadata.keep(dash, as: .strokeDash, in: &node) else {
-            diagnostics?.warn(
-                "Discarded stroke dashPattern: \(PenMigrationMetadata.barePatchReason)", stage: .migration, nodeID: id
-            )
-            return
-        }
+        PenMigrationMetadata.keep(dash, as: .strokeDash, in: &node)
     }
 
     // MARK: - Miter
@@ -150,12 +145,7 @@ public struct PenStrokeMigrationRule: PenMigrationRule {
             )
             return
         }
-        guard PenMigrationMetadata.keep(PenMigrationMetadata.number(limit), as: .strokeMiterLimit, in: &node) else {
-            diagnostics?.warn(
-                "Discarded stroke miterAngle: \(PenMigrationMetadata.barePatchReason)", stage: .migration, nodeID: id
-            )
-            return
-        }
+        PenMigrationMetadata.keep(PenMigrationMetadata.number(limit), as: .strokeMiterLimit, in: &node)
     }
 
     /// The miter limit a miter angle stands for — 1 / sin(angle / 2), to four decimal

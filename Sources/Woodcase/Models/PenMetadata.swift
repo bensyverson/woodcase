@@ -13,7 +13,7 @@ import Foundation
 /// key is absent, and is written back out only when it holds a value, so reading and
 /// re-writing a file that never had `type` round-trips exactly, adding no key Pen
 /// never wrote. A caller that must satisfy the schema when *creating* a metadata
-/// object from nothing (`woodcase set common.metadata.woodcase.role=…`) chooses its own
+/// object from nothing (`woodcase set codegen.role=…`) chooses its own
 /// default explicitly, rather than relying on one here — see
 /// `NodePropertyCodec.folding(_:onto:)`.
 ///

@@ -21,7 +21,7 @@ struct EditPlannerParityTests {
 
     @Test("A set line and the planner's set give the same edits on a plain node")
     func setOnNode() throws {
-        let props: [String: AnyCodable] = ["common.opacity": 0.5, "common.metadata.woodcase.role": "card"]
+        let props: [String: AnyCodable] = ["common.opacity": 0.5, "codegen.role": "card"]
         let target = PlannerFixture.address("Board/Free")
 
         #expect(try batchOperations(.set(BatchOperation.SetOp(target: target, props: props)))

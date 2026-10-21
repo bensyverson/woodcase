@@ -54,7 +54,7 @@ struct DocumentLinterCodegenTests {
         #expect(title?.severity == .error)
         #expect(title?.message.contains("Nope") == true)
         // The remedy names the deep metadata key `set` takes.
-        #expect(title?.message.contains("common.metadata.woodcase.props.title=") == true)
+        #expect(title?.message.contains("codegen.props.title=") == true)
         // It lists the descendants that *do* answer to a path.
         #expect(title?.message.contains("Row/Tag") == true)
     }
@@ -73,7 +73,7 @@ struct DocumentLinterCodegenTests {
         let count = tripped.first { $0.message.contains("`count`") }
         #expect(count?.nodeID == "Cmp01")
         #expect(count?.message.contains("path") == true)
-        #expect(count?.message.contains("common.metadata.woodcase.props.count=") == true)
+        #expect(count?.message.contains("codegen.props.count=") == true)
     }
 
     @Test("One finding per faulty _props entry, in prop-name order")
@@ -113,7 +113,7 @@ struct DocumentLinterCodegenTests {
         #expect(ambiguous.message.contains("Label"))
         #expect(ambiguous.message.contains("Lbl01"))
         // The remedy points the *other* prop somewhere else, with the deep metadata key.
-        #expect(ambiguous.message.contains("common.metadata.woodcase.props.width="))
+        #expect(ambiguous.message.contains("codegen.props.width="))
     }
 
     @Test("The ambiguity is one finding for the pair, and the resolving prop is clean")
@@ -140,7 +140,7 @@ struct DocumentLinterCodegenTests {
         // The emitter keeps the first by prop name; lint's remedy moves the others.
         #expect(shared.map(\.name) == ["label", "width"])
         let tripped = try findings("codegen-prop-path-ambiguous.pen", check: "codegen-prop-path")
-        #expect(tripped.first?.message.contains("common.metadata.woodcase.props.label=") == false)
+        #expect(tripped.first?.message.contains("codegen.props.label=") == false)
     }
 
     // MARK: - codegen-role
@@ -160,7 +160,7 @@ struct DocumentLinterCodegenTests {
         for role in ["button", "link", "toggle", "textInput", "select", "tabBar"] {
             #expect(root?.message.contains(role) == true)
         }
-        #expect(root?.message.contains("common.metadata.woodcase.role=") == true)
+        #expect(root?.message.contains("codegen.role=") == true)
     }
 
     @Test("An unknown _role on a descendant of a definition is a finding on that descendant")
@@ -201,7 +201,7 @@ struct DocumentLinterCodegenTests {
         #expect(finding?.message.contains("Sub01") == true)
         // The mapped key is not named — only the ones that force the inline.
         #expect(finding?.message.contains("Lbl01") == false)
-        #expect(finding?.message.contains("common.metadata.woodcase.props.subtitle=Subtitle") == true)
+        #expect(finding?.message.contains("codegen.props.subtitle=Subtitle") == true)
         #expect(finding?.message.contains("Cmp01") == true)
     }
 

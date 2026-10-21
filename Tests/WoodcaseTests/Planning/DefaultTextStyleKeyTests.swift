@@ -38,7 +38,7 @@ struct DefaultTextStyleKeyTests {
     @Test("A write keeps the node's other metadata")
     func keepsOtherMetadata() throws {
         let document = try DefaultTextStyleFixture.document()
-        let role = PenMetadata.WoodcaseKey.role.path
+        let role = PenMetadata.WoodcaseKey.role.propertyPath
         let plan = try EditPlanner.plan(.set([role: "heading"]), at: PlannerFixture.address("#Body"), in: document)
         try DefaultTextStyleFixture.apply(plan.operations, to: document)
         try DefaultTextStyleFixture.write(true, on: ["Body"], in: document)

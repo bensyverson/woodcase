@@ -5,7 +5,7 @@
 
 import Foundation
 import Testing
-import Woodcase
+@testable import Woodcase
 
 /// Covers what reading a file older than 2.19 does to its shadows, the way Pen 1.2.14
 /// does when it opens one: every inner shadow becomes an outer shadow — which is what
@@ -190,13 +190,22 @@ struct PenFormat219MigrationTests {
         #expect(node.shadowSpread(forEffect: 0) == 2)
     }
 
-    @Test("In an instance override with no metadata of its own, a spread is discarded with a warning")
-    func spreadInBareOverrideIsDiscarded() {
+    /// Rule 6 merges an override's `metadata.woodcase` key by key over the component node's,
+    /// so a spread in a bag with no metadata is kept, where it was once discarded.
+    @Test("In an instance override with no metadata of its own, a spread is kept in new metadata")
+    func spreadInBareOverrideIsKept() throws {
         let diagnostics = PenDiagnosticCollector()
         var bag: [String: AnyCodable] = ["effect": .dictionary(["type": "shadow", "blur": 4, "spread": 2])]
         PenShadowMigrationRule().apply(toNode: &bag, id: "inst/child", diagnostics: diagnostics)
-        #expect(bag["metadata"] == nil)
-        #expect(diagnostics.diagnostics.contains { $0.message.contains("spread") && $0.nodeID == "inst/child" })
+        guard case let .dictionary(object)? = bag["metadata"] else {
+            Issue.record("no metadata kept")
+            return
+        }
+        let metadata = PenMetadata(object: object)
+        #expect(metadata.type == PenMetadata.woodcaseType)
+        let entries = try PenShadowSpread.entries(in: metadata[woodcase: .shadowSpread] ?? .null)
+        #expect(entries.map(\.spread) == [2])
+        #expect(!diagnostics.diagnostics.contains { $0.message.contains("Discarded") })
     }
 
     @Test("Migration is idempotent: re-reading the written file changes nothing more")

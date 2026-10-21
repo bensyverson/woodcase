@@ -37,7 +37,10 @@ struct DocumentLinterShadowSpreadTests {
         #expect(finding.nodeID == "Rct01")
         #expect(finding.check.severity == .warning)
         #expect(finding.message.contains("effect 0"), "\(finding.message)")
-        #expect(finding.message.contains(PenMetadata.WoodcaseKey.shadowSpread.path), "\(finding.message)")
+        // The way out is a write of kind.effects with spread on the shadow; the storage path
+        // is no longer a way in (leaf oNeklc).
+        #expect(finding.message.contains("`kind.effects`"), "\(finding.message)")
+        #expect(!finding.message.contains(PenMetadata.WoodcaseKey.shadowSpread.path), "\(finding.message)")
     }
 
     @Test("A spread made for the shadow it addresses is clean")

@@ -228,26 +228,35 @@ struct PenStrokeMigrationRuleTests {
         #expect(diagnostics.diagnostics.isEmpty)
     }
 
-    /// An override bag's `metadata` replaces the component node's whole metadata in the
-    /// instance, so a key written into a bag that had none would wipe the rest.
-    @Test("In an instance override with no metadata of its own, a miterAngle is discarded with a diagnostic")
-    func miterAngleInBareOverrideIsDiscarded() {
+    /// An override's `metadata.woodcase` merges key by key over the component node's (rule 6,
+    /// leaf 9Sw8C0), so a key written into a bag that had no metadata no longer wipes the rest:
+    /// it is kept, in metadata typed woodcase. Before rule 6 these were discarded.
+    @Test("In an instance override with no metadata of its own, a miterAngle is kept in new metadata")
+    func miterAngleInBareOverrideIsKept() {
         let diagnostics = PenDiagnosticCollector()
         var bag: [String: AnyCodable] = ["stroke": .dictionary(["fill": .string("#000"), "miterAngle": .int(45)])]
         PenStrokeMigrationRule().apply(toNode: &bag, id: "inst/child", diagnostics: diagnostics)
-        #expect(bag["metadata"] == nil)
-        #expect(diagnostics.diagnostics.contains { $0.message.contains("miterAngle") && $0.nodeID == "inst/child" })
+        let metadata = bag["metadata"].flatMap { value -> PenMetadata? in
+            if case let .dictionary(object) = value { PenMetadata(object: object) } else { nil }
+        }
+        #expect(metadata?.type == PenMetadata.woodcaseType)
+        #expect(metadata?[woodcase: .strokeMiterLimit] != nil)
+        #expect(!diagnostics.diagnostics.contains { $0.message.contains("Discarded") })
     }
 
-    @Test("In an instance override with no metadata of its own, a dash is discarded with a diagnostic")
-    func dashInBareOverrideIsDiscarded() {
+    @Test("In an instance override with no metadata of its own, a dash is kept in new metadata")
+    func dashInBareOverrideIsKept() {
         let diagnostics = PenDiagnosticCollector()
         var bag: [String: AnyCodable] = [
             "stroke": .dictionary(["fill": .string("#000"), "dashPattern": .array([.int(5), .int(3)])]),
         ]
         PenStrokeMigrationRule().apply(toNode: &bag, id: "inst/child", diagnostics: diagnostics)
-        #expect(bag["metadata"] == nil)
-        #expect(diagnostics.diagnostics.contains { $0.message.contains("dashPattern") && $0.nodeID == "inst/child" })
+        guard case let .dictionary(object)? = bag["metadata"] else {
+            Issue.record("no metadata kept")
+            return
+        }
+        #expect(PenMetadata(object: object)[woodcase: .strokeDash] == [5, 3])
+        #expect(!diagnostics.diagnostics.contains { $0.message.contains("Discarded") })
     }
 
     @Test("In an instance override that writes metadata of its own, a miterAngle joins it")

@@ -5,7 +5,7 @@
 
 import Foundation
 
-/// Reading a component's published parameter list off its `common.metadata.woodcase.props`.
+/// Reading a component's published parameter list off its `codegen.props`.
 ///
 /// One reading, used by every verb that has to turn a published name into a write:
 /// `override`, `cp`, and the `get` that prints the list. ``ComponentAnalyzer`` reads

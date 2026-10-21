@@ -5,18 +5,18 @@
 
 import Foundation
 
-/// The ``LintCheck/codegenRole`` check: a `common.metadata.woodcase.role` value
+/// The ``LintCheck/codegenRole`` check: a `codegen.role` value
 /// `generate react` does not know.
 ///
 /// ``ComponentRole`` is a closed vocabulary — `button`, `link`, `toggle`, `textInput`,
-/// `select`, `tabBar` — and ``ComponentAnalyzer`` reads `woodcase.role` in two places, both
+/// `select`, `tabBar` — and ``ComponentAnalyzer`` reads `codegen.role` in two places, both
 /// inside a reusable node: on the component's own root, where `ComponentRole(rawValue:)`
 /// answers `nil` for anything else and the component simply has no role; and on every
 /// descendant, where an unknown role produces no default action and no binding. Either
 /// way the declaration is read and thrown away without a word, and the component emits
 /// as a plain `<div>` with no semantic element, no `wc-*` class and no state rules.
 ///
-/// **Scope is exactly what codegen reads.** A `woodcase.role` on a page, or on any node outside
+/// **Scope is exactly what codegen reads.** A `codegen.role` on a page, or on any node outside
 /// every reusable subtree, is not a finding: `walkDescendants` is only ever entered from
 /// a component definition, so nothing there reaches the emitter and reporting it would
 /// be the check firing at a key the file is free to use for its own purposes.
@@ -50,21 +50,21 @@ extension DocumentLinter {
                     : "no action and no binding are generated for it"
                 found[nodeID, default: []].append(finding(
                     .codegenRole, target,
-                    "declares common.metadata.woodcase.role=\"\(role)\", which is not a role `generate react` knows, "
+                    "declares codegen.role=\"\(role)\", which is not a role `generate react` knows, "
                         + "so the declaration is read and dropped: \(consequence). The roles are "
                         + "\(PenPropertyShape.list(ComponentRole.allCases.map(\.rawValue))). Run `woodcase set "
-                        + "<file> \(target.id) common.metadata.woodcase.role=<role>` with one of them, or drop the key."
+                        + "<file> \(target.id) codegen.role=<role>` with one of them, or drop the key."
                 ))
             }
         }
         return found
     }
 
-    /// Every `woodcase.role` in a definition's subtree — its own root included — that
+    /// Every `codegen.role` in a definition's subtree — its own root included — that
     /// ``ComponentRole`` does not spell, in document order.
     ///
     /// Walked with ``ComponentAnalyzer/childNodes(of:)``, the step the analyzer's own
-    /// `walkDescendants` takes, so this reaches exactly the nodes whose `woodcase.role` codegen
+    /// `walkDescendants` takes, so this reaches exactly the nodes whose `codegen.role` codegen
     /// reads and no others.
     private static func unknownRoles(in definition: PenNode) -> [(id: String, role: String)] {
         var found: [(id: String, role: String)] = []

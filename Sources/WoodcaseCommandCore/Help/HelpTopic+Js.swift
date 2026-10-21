@@ -176,7 +176,7 @@ extension HelpTopic {
       interface OverrideOptions { unset?: string[]; rev?: string }
       interface ForceOptions { force?: boolean }
 
-      type Props = { [path: string]: any };     // common.name, kind.content, Child/kind.fill
+      type Props = { [path: string]: any };     // common.name, codegen.role, Child/kind.fill
       type RawProps = { [name: string]: any };  // content, not kind.content — override only
       type Theme = { [axis: string]: string };  // { mode: 'dark' }
 

@@ -128,30 +128,33 @@ struct PenShadowSpreadTests {
 
     // MARK: - Schema
 
-    @Test("Every node that takes effects publishes the spread as a field", arguments: [
+    @Test("Every node that takes effects publishes the spread as a field of its shadows", arguments: [
         PenNode.NodeType.frame, .rectangle, .ellipse, .polygon, .path, .text, .group, .icon,
     ])
     func schemaField(type: PenNode.NodeType) throws {
-        let row = try #require(PenSchema.field(PenMetadata.WoodcaseKey.shadowSpread.path, for: type))
-        #expect(row.key.written == "metadata.woodcase.shadowSpread")
+        // Was a row at the storage path; since oNeklc the spread is a field of the shadow.
+        let row = try #require(PenSchema.field(NodePropertyCodec.effectsPath, for: type))
+        let shadow = row.nested.first { $0.name == "effect" }?.variants.first { $0.spelling == "shadow" }
+        #expect(shadow?.fields.contains { $0.key == "spread" } == true)
     }
 
-    @Test("A write that is not entries is refused as the wrong form")
+    @Test("A spread that is not a number is refused, and a number is taken")
     @MainActor
     func malformedWriteIsRefused() throws {
+        // Was a write of the storage path, which is refused since oNeklc; the spread is now
+        // written on its shadow.
         let document = try EditableDocument(from: PenParser.parse("""
         {"version": "2.19", "children": [
           {"type": "rectangle", "id": "r", "width": 100, "height": 60, "effect": \(Self.shadow)}
         ]}
         """))
-        let path = PenMetadata.WoodcaseKey.shadowSpread.path
-        let refusal = try #require(PlannerFixture.refusal(.set([path: 4]), at: "r", in: document))
-        #expect(refusal.code == .invalidForm)
-        let entries = try PenShadowSpread.entries(in: AnyCodable.array([
-            .dictionary(["effect": 0, "spread": 4, "shadow": .dictionary(["type": "shadow", "blur": 8])]),
-        ]))
+        let path = NodePropertyCodec.effectsPath
+        let refusal = try #require(PlannerFixture.refusal(
+            .set([path: .dictionary(["type": "shadow", "blur": 8, "spread": .array([4])])]), at: "r", in: document
+        ))
+        #expect(refusal.property == path)
         #expect(PlannerFixture.refusal(
-            .set([path: PenShadowSpread.metadataValue(of: entries)]), at: "r", in: document
+            .set([path: .dictionary(["type": "shadow", "blur": 8, "spread": 4])]), at: "r", in: document
         ) == nil)
     }
 }

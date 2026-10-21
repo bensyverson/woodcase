@@ -27,7 +27,7 @@ public enum ComponentAnalyzer {
 
         // Pass 2-4: Resolve roles, discover variants, fill smart defaults
         for i in results.indices {
-            // Pass 2: Resolve role from root woodcase.role metadata
+            // Pass 2: Resolve role from root codegen.role metadata
             if let metadata = results[i].sourceNode.common.metadata,
                case let .string(roleString) = metadata[woodcase: .role]
             {
@@ -40,7 +40,7 @@ public enum ComponentAnalyzer {
             var states: [StateDefinition] = []
             var coveredStateNames: Set<String> = []
 
-            // 3a: woodcase.states metadata (highest priority)
+            // 3a: codegen.states metadata (highest priority)
             if let metadata = results[i].sourceNode.common.metadata,
                case let .dictionary(statesDict) = metadata[woodcase: .states]
             {
@@ -95,7 +95,7 @@ public enum ComponentAnalyzer {
                     guard isTabBar else { continue }
                 }
 
-                // Skip if already covered by woodcase.states metadata
+                // Skip if already covered by codegen.states metadata
                 guard !coveredStateNames.contains(lowerState) else { continue }
 
                 if isTabBar {
@@ -211,10 +211,10 @@ public enum ComponentAnalyzer {
         var actions: [ActionDefinition] = []
         var bindings: [BindingDefinition] = []
 
-        // Check the root node itself for woodcase.role
+        // Check the root node itself for codegen.role
         extractInteractiveMetadata(from: node, actions: &actions, bindings: &bindings)
 
-        // Walk descendants for woodcase.role and woodcase.action
+        // Walk descendants for codegen.role and codegen.action
         walkDescendants(of: node, actions: &actions, bindings: &bindings)
 
         return ComponentDefinition(
@@ -260,7 +260,7 @@ public enum ComponentAnalyzer {
     /// for the editing verbs: `get` prints the type codegen will emit, and it has to be
     /// *this* answer rather than a second one that drifts.
     ///
-    /// - Parameter node: The descendant a `woodcase.props` entry names, or `nil` when the path
+    /// - Parameter node: The descendant a `codegen.props` entry names, or `nil` when the path
     ///   resolves to nothing.
     /// - Returns: The inferred type and the target's current value, where it has one.
     static func inferPropType(from node: PenNode?) -> (type: PropType, defaultValue: AnyCodable?) {
@@ -337,7 +337,7 @@ public enum ComponentAnalyzer {
             return
         }
 
-        // Check for explicit woodcase.action
+        // Check for explicit codegen.action
         if case let .string(actionName) = metadata[woodcase: .action] {
             actions.append(ActionDefinition(name: actionName, role: role, nodeID: node.id))
         } else if let defaultAction = defaultAction(for: role) {

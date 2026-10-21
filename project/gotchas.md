@@ -47,3 +47,7 @@ The pre-commit hook's `scripts/mae-check` prints "MISSING: `svg-render-…` was 
 ## 2026-10-20 — Apple's raw-deflate stream never says "error", and skips two checks
 
 **`compression_stream_process` with `COMPRESSION_ZLIB` met every malformed stream we built (block type 3, over-subscribed or incomplete codes, a distance before the output, reserved symbols) by returning `COMPRESSION_STATUS_OK` and producing nothing more — the same as a stream cut short — never `COMPRESSION_STATUS_ERROR`** (macOS 27, leaf Uip9cb). A loop that waits for `ERROR` would never see one; `DeflateDecoder` treats "OK, step not filled, no END" as malformed. It also returns a stored block whose length complement is wrong, and consumes bytes after the final block without complaint, so whatever decodes the inflated bytes (the Kiwi schema, for Figma) is the real check. See DocC `FigmaClipboard.md`.
+
+## 2026-10-20 — The commit hook's "MISSING … not in this test run" doesn't mean lost baseline rows
+
+**`scripts/mae-check` compares `performance/mae-baseline.csv` with `performance/mae-test.csv`, the file the WebView tests write in the checkout where they last ran.** On main, after squashing an agent's branch that added WebView boards, the hook prints `MISSING: <id> was in the baseline … but not in this test run` for each new board, because main's `mae-test.csv` predates them, and then says "MAE baseline updated" (session 41, Knr8GN). The committed baseline kept every row; check with `git show HEAD:performance/mae-baseline.csv | grep <id>` rather than assuming they were dropped.

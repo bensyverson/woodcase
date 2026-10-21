@@ -10,8 +10,8 @@ import Foundation
 /// `common.metadata` is a single property holding an open object, so the only way to
 /// annotate a node used to be to write the object out again — and every write that did
 /// so silently dropped everything else already in it. A deep key says which entry is
-/// meant: `common.metadata.woodcase.role=button` merges one key and leaves the rest
-/// exactly as they were, and `common.metadata.woodcase.props.label=Body/Title` reaches
+/// meant: `common.metadata.woodcase.tint=#A5D6A7` merges one key and leaves the rest
+/// exactly as they were, and `common.metadata.owner.team=design` reaches
 /// one entry inside a nested object.
 ///
 /// The fold happens in the library — in the batch planner before an ``EditOperation``
@@ -21,8 +21,8 @@ import Foundation
 /// and replicated per entry it changes (<doc:PenMetadataNamespace>).
 ///
 /// ```swift
-/// NodePropertyCodec.deepKey(of: "common.metadata.woodcase.props.label")
-/// // (property: "common.metadata", keyPath: ["woodcase", "props", "label"])
+/// NodePropertyCodec.deepKey(of: "common.metadata.woodcase.tint")
+/// // (property: "common.metadata", keyPath: ["woodcase", "tint"])
 /// ```
 public extension NodePropertyCodec {
     /// The whole-object properties a dotted key may reach inside.
@@ -34,7 +34,7 @@ public extension NodePropertyCodec {
 
     /// Splits a deep key into the property it writes into and the key path inside it.
     ///
-    /// - Parameter path: The key as written, such as `common.metadata.woodcase.role`.
+    /// - Parameter path: The key as written, such as `common.metadata.woodcase.tint`.
     /// - Returns: The whole-object property and the keys to walk inside it, or `nil`
     ///   when the path is not a deep key at all.
     static func deepKey(of path: String) -> (property: String, keyPath: [String])? {
@@ -51,7 +51,7 @@ public extension NodePropertyCodec {
     ///
     /// A whole-object write to the same property is applied *first* and the deep keys
     /// merge onto it, so `common.metadata={"type":"component"}` alongside
-    /// `common.metadata.woodcase.role=button` means the object it reads as. A deep key whose
+    /// `common.metadata.woodcase.tint=#A5D6A7` means the object it reads as. A deep key whose
     /// value is ``AnyCodable/null`` removes that entry, which is the same rule a null
     /// follows everywhere else.
     ///

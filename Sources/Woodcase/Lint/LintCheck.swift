@@ -50,7 +50,7 @@ public enum LintCheck: String, Friendly, CaseIterable {
     /// A node whose settled rect falls outside its parent's.
     ///
     /// A clipping frame (`clip:true`) exempts overflow along the axis its
-    /// `common.metadata.woodcase.scroll` declares — a designed scroll, not a bug — and folds
+    /// `codegen.scroll` declares — a designed scroll, not a bug — and folds
     /// several children overflowing only its own stacking axis into one finding on
     /// the frame when nothing declares it. See <doc:WoodcaseLint>.
     case clipped
@@ -96,17 +96,17 @@ public enum LintCheck: String, Friendly, CaseIterable {
     /// silently absorbed and never applies.
     case overrideKeyUnread = "override-key-unread"
 
-    /// A reusable node's `common.metadata.woodcase.props` entry that `generate react` cannot
+    /// A reusable node's `codegen.props` entry that `generate react` cannot
     /// turn into a prop: a value that is not a path, a path naming no descendant, or two
     /// entries reading the same field of one descendant.
     case codegenPropPath = "codegen-prop-path"
 
-    /// A `common.metadata.woodcase.role` value outside ``ComponentRole``, which
+    /// A `codegen.role` value outside ``ComponentRole``, which
     /// `generate react` reads and drops.
     case codegenRole = "codegen-role"
 
     /// An instance whose descendant override no declared prop reads, on a definition
-    /// that declares `woodcase.props` at all — the emitter inlines the component rather than
+    /// that declares `codegen.props` at all — the emitter inlines the component rather than
     /// writing a tag for it.
     case codegenUnmappedOverride = "codegen-unmapped-override"
 
@@ -283,9 +283,9 @@ public enum LintCheck: String, Friendly, CaseIterable {
         case .overrideKeyUnread:
             "A ref's stored override carries a property path instead of the raw .pen key the merge reads."
         case .codegenPropPath:
-            "A component's woodcase.props entry is not a path, names no descendant, or reads a field another entry already reads."
+            "A component's codegen.props entry is not a path, names no descendant, or reads a field another entry already reads."
         case .codegenRole:
-            "A component's woodcase.role is not one generate react knows, so the role is read and dropped."
+            "A component's codegen.role is not one generate react knows, so the role is read and dropped."
         case .codegenUnmappedOverride:
             "An instance overrides a descendant no declared prop reads, so codegen inlines the component."
         case .meshGradientDropped:

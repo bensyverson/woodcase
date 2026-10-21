@@ -209,7 +209,7 @@ belong to the host itself are `timeout`, `syntaxError`, `unknownMember`, `unknow
 ## The `doc` object
 
 Property paths are the prefixed vocabulary `set` takes — `common.name`, `kind.content`,
-`null` to clear one — except on `override`, which takes the raw .pen names an instance's
+`kind.strokeDash`, `codegen.role`, `null` to clear one — except on `override`, which takes the raw .pen names an instance's
 `descendants` map holds; <doc:WoodcaseBatches> has the asymmetry and why it is in the
 storage rather than in what a line may write. An address is an id, a name path, or a path
 stepping into an instance; a parent may be `null`, meaning the document root. Values
@@ -266,7 +266,7 @@ interface RmOptions { detach?: boolean; rev?: string }
 interface OverrideOptions { unset?: string[]; rev?: string }
 interface ForceOptions { force?: boolean }
 
-type Props = { [path: string]: any };     // common.name, kind.content, Child/kind.fill
+type Props = { [path: string]: any };     // common.name, codegen.role, Child/kind.fill
 type RawProps = { [name: string]: any };  // content, not kind.content — override only
 type Theme = { [axis: string]: string };  // { mode: 'dark' }
 

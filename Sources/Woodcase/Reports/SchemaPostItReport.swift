@@ -39,7 +39,7 @@ public struct SchemaPostItReport: Friendly {
         ///
         /// - Parameter key: The convention key.
         public init(_ key: PenMetadata.WoodcaseKey) {
-            self.key = key.path
+            self.key = key.propertyPath
             spellings = key.spellings
             takes = switch key.shape {
             case .number: key.constraint.flatMap { $0.limitsValues ? $0.summary : nil } ?? "any number"
@@ -54,7 +54,8 @@ public struct SchemaPostItReport: Friendly {
             summary = key.summary
         }
 
-        /// The path `set` writes it at, such as `common.metadata.woodcase.state`.
+        /// The path Woodcase writes it at, such as `note.state`: an alias of its storage path,
+        /// `common.metadata.woodcase.state`, which `set` accepts too.
         public let key: String
 
         /// The values it takes; empty for any value of the kind ``takes`` names.

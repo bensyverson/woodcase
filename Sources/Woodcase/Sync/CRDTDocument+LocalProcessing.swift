@@ -255,16 +255,14 @@ extension CRDTDocument {
         }
         // Metadata replicates per entry, and a natural path (`kind.blendMode`) is one of its
         // entries, so either kind of write emits the entries the patch changed, once.
-        let writesMetadata = op.properties.keys.contains {
-            $0 == NodePropertyCodec.metadataPath || NodePropertyCodec.naturalKey(of: $0, on: node.kind) != nil
-        }
+        // So is a `kind.effects` whose shadows name spreads, which are stored in metadata.
+        let writesMetadata = op.properties.keys.contains { NodePropertyCodec.writesMetadata(at: $0, on: node.kind) }
+            || NodePropertyCodec.writesNamedSpread(op.properties, on: node.kind)
         if writesMetadata {
             ops += processLocalMetadata(nodeID: op.nodeID, from: node.common.metadata, to: patched.common.metadata)
         }
         for (path, value) in op.properties where !NodePropertyCodec.isExtrasPath(path) {
-            if path == NodePropertyCodec.metadataPath || NodePropertyCodec.naturalKey(of: path, on: node.kind) != nil {
-                continue
-            }
+            if NodePropertyCodec.writesMetadata(at: path, on: node.kind) { continue }
             let normalized = (try? NodePropertyCodec.value(at: path, of: patched)) ?? value
             let crdtOp = makeOp(.setProperty(CRDTOperation.SetProperty(
                 nodeID: op.nodeID,

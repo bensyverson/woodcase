@@ -49,15 +49,21 @@ extension EditPlanner {
                 storage: .node
             )
         }
-        // A deep key — `common.metadata.woodcase.role` — is folded onto the object the node
+        // A deep key — `codegen.role` — is folded onto the object the node
         // already carries before the edit exists, so what is recorded, replicated and
         // undone is the ordinary whole-object write the format has always had.
-        let props = try NodePropertyCodec.folding(properties, onto: node)
+        // A whole `kind.effects` restates every spread: the ones its shadows name, by place.
+        let restated = try NodePropertyCodec.restatingShadowSpreads(properties, on: node)
+        let props = try NodePropertyCodec.folding(restated, onto: node)
         // Before the convention's own check, so a number out of range is refused as
         // outOfRange, as the `kind.` key it stands in for would be, not as a bad form.
-        try checkMetadataValues(props, on: node, address: written)
+        try checkMetadataValues(props, asWritten: properties, on: node, address: written)
         try checkStrokeDash(props, on: node, address: written)
-        try NodePropertyCodec.checkAuthored(props, on: node)
+        do {
+            try NodePropertyCodec.checkAuthored(props, on: node)
+        } catch {
+            throw respelled(error, asWritten: properties)
+        }
         try checkValues(
             props.keys.sorted().compactMap { path in
                 NodePropertyCodec.fieldName(of: path).map { field in

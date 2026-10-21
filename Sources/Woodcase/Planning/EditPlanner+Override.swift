@@ -63,6 +63,9 @@ extension EditPlanner {
             // the same number-to-string rule a `set` gives them, judged against the node
             // inside the component the override will patch.
             let rawRequested = NodePropertyCodec.rawKeyed(group.props)
+            // A spread the effects name is refused here if it is no number; it is stored in
+            // the override's metadata, as a Woodcase-owned key is.
+            let spreads = try NodePropertyCodec.splittingOverrideSpreads(rawRequested, nodeID: refID)
             let rawUnset = group.descendantKey == descendantKey ? unsetKeys : []
             // A Woodcase-owned key lives in the override's own metadata (rule 6): a
             // descendant's in its entry, the instance root's on the ref node itself.
@@ -73,10 +76,12 @@ extension EditPlanner {
                     rawRequested, unset: rawUnset, onto: overrideEntry(of: refID, at: entryKey, in: document)
                 )
             } else {
-                if let write = rootNaturalWrite(rawRequested, unset: rawUnset, refID: refID, in: document) {
+                if let write = rootNaturalWrite(
+                    spreads.properties, unset: rawUnset, shadowSpread: spreads.shadowSpread, refID: refID, in: document
+                ) {
                     operations.append(write)
                 }
-                requested = rawRequested.filter { NodePropertyCodec.naturalOverrideKey($0.key) == nil }
+                requested = spreads.properties.filter { NodePropertyCodec.naturalOverrideKey($0.key) == nil }
                 keys = rawUnset.filter { NodePropertyCodec.naturalOverrideKey($0) == nil }
                 guard !requested.isEmpty || !keys.isEmpty else { continue }
             }
@@ -137,11 +142,14 @@ extension EditPlanner {
     /// key by key; `nil` when the override names none.
     ///
     /// A `null`, like an unset, removes the ref's key, so the root shows the component's:
-    /// to draw a component's dash solid on one instance, override it with `[]`.
+    /// to draw a component's dash solid on one instance, override it with `[]`. The spreads
+    /// the root's effects name (`shadowSpread`) are one more such key.
     private static func rootNaturalWrite(
-        _ properties: [String: AnyCodable], unset: [String], refID: String, in document: EditableDocument
+        _ properties: [String: AnyCodable], unset: [String], shadowSpread: AnyCodable?, refID: String,
+        in document: EditableDocument
     ) -> EditOperation? {
-        let writes = properties.compactMap { name, value in NodePropertyCodec.naturalOverrideKey(name).map { ($0, value) } }
+        var writes = properties.compactMap { name, value in NodePropertyCodec.naturalOverrideKey(name).map { ($0, value) } }
+        if let shadowSpread { writes.append((.shadowSpread, shadowSpread)) }
         let removals = unset.compactMap(NodePropertyCodec.naturalOverrideKey)
         guard !writes.isEmpty || !removals.isEmpty, let ref = document.node(id: refID) else { return nil }
         var metadata = ref.common.metadata ?? PenMetadata(type: nil)

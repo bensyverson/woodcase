@@ -13,8 +13,8 @@ import Foundation
 /// (<doc:PenMetadataNamespace>) — so an inspector wants it as one more
 /// row: the path it writes, the forms and constraint it keeps to, and what an unset key
 /// draws. A row's path is the key's natural path (``PenMetadata/WoodcaseKey/naturalPath``),
-/// which ``PenSchema/table(for:)`` and ``PenSchema/common`` list with the same row; a key
-/// with none yet (a shadow's spread) keeps its storage path, and only this list has it.
+/// which ``PenSchema/table(for:)`` and ``PenSchema/common`` list with the same row. A
+/// shadow's spread is a field of the shadow in `kind.effects` instead (``PenEffect/spreadField``).
 /// ``PenSchema/field(_:for:)`` finds every row by its path.
 public extension PenSchema {
     /// The `metadata.woodcase` keys a node of one type takes as fields of its own.
@@ -23,18 +23,17 @@ public extension PenSchema {
     /// (``PenMetadata/WoodcaseKey/naturalPathTypes``): ``PenMetadata/WoodcaseKey/locked`` on
     /// every type, ``PenMetadata/WoodcaseKey/defaultTextStyle`` and
     /// ``PenMetadata/WoodcaseKey/spans`` on a text, the dash on every type whose stroke the
-    /// renderer dashes and the miter limit on each of those but a line. Every type that takes
-    /// effects also takes ``PenMetadata/WoodcaseKey/shadowSpread``, at its storage path until
-    /// it becomes a field of the shadow.
+    /// renderer dashes and the miter limit on each of those but a line. A shadow's spread
+    /// has no row: it is a `spread` field of each shadow in `kind.effects`
+    /// (``PenEffect/spreadField``).
     ///
     /// - Parameter type: The node type.
     /// - Returns: The rows, sorted by path.
     static func woodcaseFields(for type: PenNode.NodeType) -> [PenSchemaTable.Property] {
-        var rows = PenMetadata.WoodcaseKey.allCases.compactMap { key in
+        PenMetadata.WoodcaseKey.allCases.compactMap { key in
             key.naturalPathTypes.contains(type) ? woodcaseRow(for: key) : nil
         }
-        if shadowedTypes.contains(type) { rows.append(shadowSpreadRow) }
-        return rows.sorted { $0.path < $1.path }
+        .sorted { $0.path < $1.path }
     }
 
     /// The row of a key read and written at its natural path, or `nil` for a key the
@@ -51,16 +50,72 @@ public extension PenSchema {
         case .strokeDash: strokeDashRow
         case .strokeDashOffset: strokeDashOffsetRow
         case .strokeMiterLimit: strokeMiterLimitRow
-        default: nil
+        case .props: codegenPropsRow
+        case .role: codegenRoleRow
+        case .states: codegenStatesRow
+        case .action: codegenActionRow
+        case .scroll: codegenScrollRow
+        default: noteRow(for: key)
         }
     }
 
-    // MARK: - Private
+    // MARK: - Code generation
 
-    /// The types that take effects, and so shadows.
-    private static let shadowedTypes: Set<PenNode.NodeType> = [
-        .frame, .rectangle, .ellipse, .polygon, .path, .line, .group, .text, .icon, .browser,
-    ]
+    /// A component's published parameters.
+    private static let codegenPropsRow = PenSchemaTable.Property(
+        path: PenMetadata.WoodcaseKey.props.propertyPath,
+        key: .key(metadataKey(.props)),
+        shape: PenPropertyShape(
+            forms: [.open(PenValueForm.OpenShape(phrase: "a parameters object", signature: "{name: name path}"))],
+            detail: "each parameter's name to the name path of the descendant it sets; write one with "
+                + "codegen.props.<name>=<name path>",
+            example: #"{"label": "Body/Title"}"#
+        )
+    )
+
+    /// The role a node plays in generated code.
+    private static let codegenRoleRow = PenSchemaTable.Property(
+        path: PenMetadata.WoodcaseKey.role.propertyPath,
+        key: .key(metadataKey(.role)),
+        shape: PenPropertyShape(
+            forms: [.text(.plain)],
+            detail: "on a component's root, one of \(ComponentRole.allCases.map(\.rawValue).joined(separator: ", ")); "
+                + "lint reports any other",
+            example: #""button""#
+        )
+    )
+
+    /// A component's state variants.
+    private static let codegenStatesRow = PenSchemaTable.Property(
+        path: PenMetadata.WoodcaseKey.states.propertyPath,
+        key: .key(metadataKey(.states)),
+        shape: PenPropertyShape(
+            forms: [.open(PenValueForm.OpenShape(phrase: "a states object", signature: "{state: node id}"))],
+            detail: "each state's name to the id of the node drawing that variant; write one with "
+                + "codegen.states.<state>=<node id>",
+            example: #"{"hover": "Btn02"}"#
+        )
+    )
+
+    /// The action an interactive node fires.
+    private static let codegenActionRow = PenSchemaTable.Property(
+        path: PenMetadata.WoodcaseKey.action.propertyPath,
+        key: .key(metadataKey(.action)),
+        shape: PenPropertyShape(forms: [.text(.plain)], detail: "a name for what the node does", example: #""submit""#)
+    )
+
+    /// The axis a clipping frame scrolls along.
+    private static let codegenScrollRow = PenSchemaTable.Property(
+        path: PenMetadata.WoodcaseKey.scroll.propertyPath,
+        key: .key(metadataKey(.scroll)),
+        shape: PenPropertyShape(
+            forms: [.spelling("vertical"), .spelling("horizontal")],
+            detail: "on a clipping frame; lint reports any other value",
+            example: #""vertical""#
+        )
+    )
+
+    // MARK: - Private
 
     /// The miter limit: absent is Pen's 4.
     private static let strokeMiterLimitRow = PenSchemaTable.Property(
@@ -73,35 +128,6 @@ public extension PenSchema {
             constraint: PenNode.miterLimitConstraint
         ),
         default: .number(PenNode.defaultMiterLimit)
-    )
-
-    /// The shadow spreads: none is no spread.
-    private static let shadowSpreadRow = PenSchemaTable.Property(
-        path: PenMetadata.WoodcaseKey.shadowSpread.path,
-        key: .key(metadataKey(.shadowSpread)),
-        shape: PenPropertyShape(
-            forms: [.many(shadowSpreadEntry)],
-            detail: "one entry per spread shadow; an entry whose shadow no longer matches the effect at its place "
-                + "is ignored",
-            example: #"[{"effect": 0, "spread": 4, "shadow": {"type": "shadow", "blur": 8}}]"#
-        )
-    )
-
-    /// One entry of ``PenMetadata/WoodcaseKey/shadowSpread`` (``PenShadowSpread``).
-    private static let shadowSpreadEntry = PenNestedShape(
-        name: "shadowSpread",
-        singular: "a shadow spread object",
-        plural: "an array of shadow spread objects",
-        summary: "how far one shadow is grown before it is cast, and the shadow it was made for",
-        variants: [
-            PenNestedShape.Variant(fields: [
-                PenNestedShape.Field(key: "effect", forms: [.number], isRequired: true),
-                PenNestedShape.Field(
-                    key: "spread", forms: [.number], isRequired: true, constraint: PenValueConstraint(unit: .points)
-                ),
-                PenNestedShape.Field(key: "shadow", forms: [.one(PenEffect.schema)], isRequired: true),
-            ]),
-        ]
     )
 
     /// The dash's lengths: none, or an empty list, is solid.

@@ -13,7 +13,7 @@ import Foundation
 /// three-way merge resolves it entry by entry. An entry is a top-level key of the
 /// object, except the Woodcase namespace, which splits one level deeper: each key under
 /// `metadata.woodcase` is its own entry. Below that a value is whole — two edits to
-/// different parameters inside `woodcase.props` are one entry both sides changed.
+/// different parameters inside `codegen.props` are one entry both sides changed.
 ///
 /// An entry's path is a deep key: `common.metadata.type`,
 /// `common.metadata.woodcase.tint`. A key holding `.` or `%` is percent-escaped in it

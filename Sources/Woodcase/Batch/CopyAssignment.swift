@@ -54,7 +54,7 @@ public enum CopyAssignment {
     ///
     /// **This is the seam.** Every form a copy's key may take is decided here and
     /// nowhere else, so a new form — a parameter name declared in a component's
-    /// `common.metadata.woodcase.props`, say — is added by extending this one function and is
+    /// `codegen.props`, say — is added by extending this one function and is
     /// then understood by the verb, by the batch op and by `--each` rows at once.
     ///
     /// A property path never contains a slash and a name path always does, so the last
@@ -63,7 +63,7 @@ public enum CopyAssignment {
     ///
     /// A key with no slash may still name a node inside the copy, if the source
     /// *publishes* it: a component's ``ComponentParameter`` list — its
-    /// `common.metadata.woodcase.props` — maps a published name to a descendant path and the
+    /// `codegen.props` — maps a published name to a descendant path and the
     /// property there, so `label` means `Body/Title/kind.content` and is routed as if
     /// it had been written that way. A name the component root already has a property
     /// of is not routed: the raw property wins, which is what

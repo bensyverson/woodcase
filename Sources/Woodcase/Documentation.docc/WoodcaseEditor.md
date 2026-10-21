@@ -311,7 +311,12 @@ kind.contnet is not a property of a text — banking-home/header/hdrG/hdrL (DhDs
 no dash, miter limit, lock, rich text or node blend mode, so Woodcase stores those in
 `metadata.woodcase`, which Pen keeps. You still write them where you would guess:
 `kind.strokeDash`, `kind.strokeDashOffset`, `kind.strokeMiterLimit`, `kind.blendMode`,
-`kind.spans`, `kind.defaultTextStyle` and `common.locked`. `tree --props` reads them at
+`kind.spans`, `kind.defaultTextStyle` and `common.locked` — and the keys code generation
+reads, which have a namespace of their own: `codegen.role`, `codegen.props` (one parameter
+is `codegen.props.label`), `codegen.states`, `codegen.action` and `codegen.scroll`. A note's
+keys have `note.*` aliases (`note.state=resolved`, `note.tint`); for those alone the raw
+`common.metadata.woodcase.state` is accepted too, since the note convention is published for
+tools without Woodcase (<doc:PenPostItConvention>). `tree --props` reads them at
 those paths, `get` lists the ones a node sets in a `woodcase-owned` block above the JSON,
 and `woodcase schema` names where each is stored. The storage path is not a second way in:
 
@@ -322,9 +327,20 @@ common.metadata.woodcase.strokeDash is stored for you; write kind.strokeDash on 
 $ woodcase set design.pen Card kind.strokeDash=[4,2]
 ```
 
+A shadow's spread, which the format dropped in 2.19, has no path of its own: it is a
+`spread` field on the shadow in `kind.effects`, as CSS writes it, and Woodcase stores it in
+`metadata.woodcase.shadowSpread`. `get` and `tree --props kind.effects` show each shadow
+with its spread. A write of `kind.effects` is the whole list, so it restates every spread:
+a reordered list keeps each on its own shadow, and a shadow written without one has none.
+
+```text
+$ woodcase set design.pen Card kind.effects='[{"type":"shadow","blur":8,"spread":4}]'
+```
+
 An instance overrides them the same way, `override design.pen Page/Card/Box kind.strokeDash=[2,2]`
 (or `strokeDash=[2,2]`), and Woodcase stores the override in its own metadata, laid over the
-component's key by key; an instance's own lock is `set design.pen Page/Card common.locked=true`.
+component's key by key — an override of `kind.effects` that names a spread stores it there
+too, and one that names none leaves the component's spreads alone; an instance's own lock is `set design.pen Page/Card common.locked=true`.
 Pen drops those overrides when it saves the file, and `lint --severity notice` says so
 (`pen-drops-override`). <doc:PenMetadataNamespace> has the table.
 
@@ -1170,12 +1186,12 @@ you, faithfully, forever.
 
 A component can publish the handful of things an instance is *meant* to vary, so a
 caller does not have to know which node inside it holds the title. The declaration is
-`common.metadata.woodcase.props` — the one code generation reads (files from before the
+`codegen.props` — the one code generation reads (files from before the
 namespace spell it `_props`; <doc:PenMetadataNamespace>) — mapping a name to
 the name path of the node the value belongs to:
 
 ```text
-$ woodcase set design.pen StatCard common.metadata.woodcase.props.label=Body/Title
+$ woodcase set design.pen StatCard codegen.props.label=Body/Title
 $ woodcase get design.pen StatCard
 Stc01  StatCard  rev 91b0c2d3e4f50617
 props
@@ -1184,16 +1200,16 @@ props
 ```
 
 `common.metadata` is a whole object, and writing it replaces everything in it — which
-is how `woodcase.props` used to get dropped by a write that only meant to add `woodcase.role`.
+is how `codegen.props` used to get dropped by a write that only meant to add `codegen.role`.
 `common.metadata.<key>` writes one entry and leaves the rest; a dot goes deeper, and a
 null takes one entry away. Nothing else takes a deep key. The same key reads one entry
-back — `woodcase tree design.pen --props common.metadata.woodcase.role`, or `r.props[…]`
+back — `woodcase tree design.pen --props codegen.role`, or `r.props[…]`
 in `find` — and an absent entry reads as `null`.
 
 A deep key that *creates* the object writes a `type` beside your key:
 
 ```text
-$ woodcase set design.pen Button common.metadata.woodcase.role=button
+$ woodcase set design.pen Button codegen.role=button
 $ woodcase get design.pen Button --json | jq .node.metadata
 { "type": "woodcase", "woodcase": { "role": "button" } }
 ```
@@ -1203,11 +1219,11 @@ required, so Woodcase never writes one without: an object created from nothing �
 any metadata a write leaves without a type — takes `woodcase`, Woodcase's own name (Ben's
 ruling, 2026-10-11). A read of a file that already has a typeless metadata object leaves
 it exactly as it was, and a type anyone else wrote is never touched. Nothing reads it — code generation decides what a node is
-from `common.reusable` and `woodcase.role` — so it is free to leave. Choose it in the same write
+from `common.reusable` and `codegen.role` — so it is free to leave. Choose it in the same write
 when you have a better answer, and the two keys land together:
 
 ```text
-$ woodcase set design.pen Button common.metadata.type=component common.metadata.woodcase.role=button
+$ woodcase set design.pen Button common.metadata.type=component codegen.role=button
 $ woodcase get design.pen Button --json | jq .node.metadata
 { "type": "component", "woodcase": { "role": "button" } }
 ```
@@ -1615,12 +1631,12 @@ woodcase lint design.pen && woodcase render design.pen
 Filter what's reported with `--exclude <check-id>` (repeatable) and `--severity
 <level>` — the gate still exits 1 for anything left *after* filtering, 0 otherwise. A
 phone screen whose scrolling list is meant to overflow the fold trips `clipped` on
-purpose — or say so instead of excluding it: `common.metadata.woodcase.scroll` on the clipping
+purpose — or say so instead of excluding it: `codegen.scroll` on the clipping
 frame declares which axis is a designed scroll, and lint stays quiet there while still
 catching a genuine bug on the other axis.
 
 ```bash
-woodcase set design.pen banking-home/list common.metadata.woodcase.scroll=vertical
+woodcase set design.pen banking-home/list codegen.scroll=vertical
 ```
 
 For a pre-render gate that wants everything past clipping out of the way regardless:

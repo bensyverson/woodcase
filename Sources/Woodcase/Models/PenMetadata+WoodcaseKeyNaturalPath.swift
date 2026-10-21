@@ -22,9 +22,15 @@ public extension PenMetadata.WoodcaseKey {
     /// The property path a caller reads and writes this key at, or `nil` for a key read and
     /// written at its storage path (``path``).
     ///
-    /// The code-generation keys (leaf tRzkPS), the note keys (DPY8DH) and a shadow's spread
-    /// (oNeklc, a field of the shadow) have none yet; a text's protected `textDecoration`
-    /// mirrors the native `kind.underline` and `kind.strikethrough`, so it needs none.
+    /// The code-generation keys are written under a namespace of their own, `codegen.role`
+    /// (leaf tRzkPS): only Woodcase reads them, and the namespace keeps them clear of any
+    /// future Pen field. The note keys and a note's text style take `note.state`,
+    /// `note.fontSize` (leaf DPY8DH) as aliases: their raw keys stay accepted
+    /// (``storagePathRule``). A
+    /// shadow's spread has none either: paths don't address array elements, so it is written
+    /// as a `spread` field on its shadow in `kind.effects` (``writtenThrough``). A text's
+    /// protected `textDecoration` mirrors the native `kind.underline` and
+    /// `kind.strikethrough`, so it needs none.
     var naturalPath: String? {
         switch self {
         case .blendMode: "kind.blendMode"
@@ -34,24 +40,67 @@ public extension PenMetadata.WoodcaseKey {
         case .locked: "common.locked"
         case .defaultTextStyle: "kind.defaultTextStyle"
         case .spans: "kind.spans"
+        case .props, .role, .states, .action, .scroll: "\(NodePropertyCodec.codegenPrefix)\(rawValue)"
+        case .type, .state, .author, .leaf, .stage, .tint, .copiedFrom, .anchor, .replyTo, .requestedBy, .createdAt,
+             .fontFamily, .fontSize, .fontWeight, .fontStyle, .letterSpacing, .lineHeight, .textAlign,
+             .textAlignVertical:
+            "\(NodePropertyCodec.notePrefix)\(rawValue)"
         default: nil
         }
     }
 
     /// The node types that take this key at its natural path; empty for a key with none.
     ///
-    /// Every type takes a lock; the drawn shapes, text, icons and the two containers a blend
+    /// Every type takes a lock and the code-generation keys; the drawn shapes, text, icons and the two containers a blend
     /// (``PenNode/blendedTypes``); every type whose stroke follows one outline a dash, and
     /// every one of those but a line, which has no corners, a miter limit; a text its spans
-    /// and the default-text-style mark.
+    /// and the default-text-style mark; a note, a prompt and a context the note keys and a
+    /// note's text style.
     var naturalPathTypes: Set<PenNode.NodeType> {
         switch self {
         case .blendMode: PenNode.blendedTypes
         case .strokeDash, .strokeDashOffset: Self.dashedTypes
         case .strokeMiterLimit: Self.dashedTypes.subtracting([.line])
-        case .locked: Set(PenNode.NodeType.allCases)
+        case .locked, .props, .role, .states, .action, .scroll: Set(PenNode.NodeType.allCases)
         case .defaultTextStyle, .spans: [.text]
+        case .type, .state, .author, .leaf, .stage, .tint, .copiedFrom, .anchor, .replyTo, .requestedBy, .createdAt,
+             .fontFamily, .fontSize, .fontWeight, .fontStyle, .letterSpacing, .lineHeight, .textAlign,
+             .textAlignVertical:
+            Self.noteTypes
         default: []
+        }
+    }
+
+    /// The property a caller writes to set this key, when that is not its storage path: its
+    /// ``naturalPath``, or `kind.effects` for a shadow's spread, which is a `spread` field on
+    /// each shadow there (``NodePropertyCodec/presentedValue(at:of:)``).
+    ///
+    /// A write at the storage path of a key with one is refused, naming it
+    /// (``NodePropertyCodec/checkNoStoragePaths(_:nodeID:)``).
+    var writtenThrough: String? {
+        naturalPath ?? (self == .shadowSpread ? NodePropertyCodec.effectsPath : nil)
+    }
+
+    /// Whether a caller may write a key at its storage path as well as at its natural path.
+    enum StoragePathRule: Friendly {
+        /// The storage path is refused, naming the natural path: one way in, so two spellings
+        /// cannot drift (rule 3).
+        case refused
+        /// Both spellings are accepted and write the same key: the natural path is an alias.
+        /// The note convention publishes the raw keys for tools without Woodcase
+        /// (<doc:PenPostItConvention>), so its keys keep them.
+        case accepted
+    }
+
+    /// Whether this key's storage path is refused as a way in, or accepted beside its alias.
+    ///
+    /// The note keys and a note's text style are ``StoragePathRule/accepted``: their
+    /// `note.*` paths are aliases (leaf DPY8DH). Every other key with a natural path is
+    /// ``StoragePathRule/refused``.
+    var storagePathRule: StoragePathRule {
+        switch group {
+        case .note, .noteTextStyle: .accepted
+        case .codegen, .text, .stroke, .editor, .effect, .compositing: .refused
         }
     }
 
@@ -70,16 +119,19 @@ public extension PenMetadata.WoodcaseKey {
         self = key
     }
 
-    /// The key with a natural path that a storage path, or a deep key below one, writes.
+    /// The key written through another property (``writtenThrough``) that a storage path, or
+    /// a deep key below one, writes.
     ///
     /// - Parameter storagePath: A property path such as `common.metadata.woodcase.strokeDash`
     ///   or `common.metadata.woodcase.spans.text`.
-    /// - Returns: The key, or `nil` when the path writes no key that has a natural path.
+    /// - Returns: The key, or `nil` when the path writes no key a caller writes elsewhere, or
+    ///   one whose storage path stays accepted (``storagePathRule``).
     init?(storagePath: String) {
         let prefix = "\(NodePropertyCodec.metadataPath).\(PenMetadata.woodcaseNamespace)."
         guard storagePath.hasPrefix(prefix) else { return nil }
         let field = storagePath.dropFirst(prefix.count).prefix { $0 != "." }
-        guard let key = Self(rawValue: String(field)), key.naturalPath != nil else { return nil }
+        guard let key = Self(rawValue: String(field)), key.writtenThrough != nil, key.storagePathRule == .refused
+        else { return nil }
         self = key
     }
 
@@ -97,6 +149,9 @@ public extension PenMetadata.WoodcaseKey {
     var naturalField: String? {
         naturalPath.flatMap(NodePropertyCodec.fieldName(of:))
     }
+
+    /// The three note types: a note, a prompt and a context.
+    static let noteTypes: Set<PenNode.NodeType> = [.note, .prompt, .context]
 
     /// The types whose stroke follows one outline the dashes can flow around.
     private static let dashedTypes: Set<PenNode.NodeType> = [.frame, .rectangle, .ellipse, .polygon, .path, .line]

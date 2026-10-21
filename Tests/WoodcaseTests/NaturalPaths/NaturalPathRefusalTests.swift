@@ -60,9 +60,9 @@ struct NaturalPathRefusalTests {
         #expect(message.contains("common.metadata.woodcase.strokeDash is stored for you; write kind.strokeDash"), "\(message)")
     }
 
+    /// A code-generation key has a natural path since tRzkPS (codegen.role), so it left this test.
     @Test("Keys with no natural path are still written at their storage path")
     func otherKeysStillWrite() throws {
-        #expect(try refusal(.set(["common.metadata.woodcase.role": "card"]), at: "Board/Plain") == nil)
         #expect(try refusal(.set(["common.metadata.woodcase.tint": "#A5D6A7"]), at: "Board/Plain") == nil)
     }
 

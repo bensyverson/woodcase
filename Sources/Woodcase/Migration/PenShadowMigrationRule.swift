@@ -33,8 +33,9 @@ import Foundation
 /// ```
 /// with `{"effect": 0, "spread": 4, "shadow": {"type": "shadow", "shadowType": "outer", "blur": 8}}`
 /// in the node's shadow spreads. A spread of 0 draws nothing and goes silently; one naming a
-/// variable, or on an instance override with no metadata of its own — whose `metadata`
-/// would replace the component node's whole metadata — is discarded with a warning.
+/// variable is discarded with a warning. One on an instance override is kept in the
+/// override's own metadata, which expansion lays over the component node's key by key
+/// (rule 6).
 ///
 /// It runs for every document older than 2.19 — see ``PenLegacyMigrator/rules(upgrading:)``.
 public struct PenShadowMigrationRule: PenMigrationRule {
@@ -77,11 +78,7 @@ public struct PenShadowMigrationRule: PenMigrationRule {
             break
         }
         guard !spreads.isEmpty else { return }
-        if !PenMigrationMetadata.keep(.array(spreads), as: .shadowSpread, in: &node) {
-            diagnostics?.warn(
-                "Discarded shadow spread: \(PenMigrationMetadata.barePatchReason)", stage: .migration, nodeID: id
-            )
-        }
+        PenMigrationMetadata.keep(.array(spreads), as: .shadowSpread, in: &node)
     }
 
     /// One effect object, migrated if it is a shadow, its spread appended to `spreads` as a

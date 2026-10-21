@@ -221,8 +221,11 @@ extension BatchErrorMessage {
             // The statement is the design doc's own wording (rule 3), so an agent that has
             // read either recognizes the other.
             let address = document.namePath(of: nodeID)
+            // A shadow's spread has no path of its own: it is a field of each shadow.
+            let field = naturalPath == NodePropertyCodec.effectsPath
+                ? ", with `\(NodePropertyCodec.spreadField)` on each shadow," : ""
             return sentence(
-                "\(path) is stored for you; write \(naturalPath) on \(name(nodeID, in: document))",
+                "\(path) is stored for you; write \(naturalPath)\(field) on \(name(nodeID, in: document))",
                 batch: "write `\(naturalPath)` in `props`; `common.metadata` still reads what is stored",
                 command: "run `woodcase set \(file) \(address) \(naturalPath)=…`; "
                     + "`common.metadata` still reads what is stored",

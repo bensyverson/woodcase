@@ -30,13 +30,15 @@ public enum PenSchema {
     /// The `common.*` table, built once.
     private static let commonTable: PenSchemaTable = buildCommonTable()
 
-    /// Builds the `common.*` table from the codec's vocabulary.
+    /// Builds the `common.*` table from the codec's vocabulary, with the `codegen.*` paths
+    /// every node takes too.
     static func buildCommonTable() -> PenSchemaTable {
         PenSchemaTable(
             type: nil,
             summary: "every node of every type takes these",
             properties: rows(
-                for: NodePropertyCodec.commonPaths.union(NodePropertyCodec.naturalCommonPaths),
+                for: NodePropertyCodec.commonPaths.union(NodePropertyCodec.naturalCommonPaths)
+                    .union(NodePropertyCodec.naturalCodegenPaths),
                 prefix: NodePropertyCodec.commonPrefix,
                 type: nil
             )
@@ -59,7 +61,8 @@ public enum PenSchema {
         uniqueKeysWithValues: PenNode.NodeType.allCases.map { ($0, buildTable(for: $0)) }
     )
 
-    /// Builds one type's `kind.*` table from the codec's vocabulary.
+    /// Builds one type's `kind.*` table from the codec's vocabulary, with a note type's
+    /// `note.*` aliases.
     ///
     /// - Parameter type: The node type to describe.
     /// - Returns: Its rows, sorted by path.
@@ -67,7 +70,12 @@ public enum PenSchema {
         PenSchemaTable(
             type: type,
             summary: type.summary,
-            properties: rows(for: PropertyDiff.allKindKeys(type), prefix: NodePropertyCodec.kindPrefix, type: type)
+            properties: rows(
+                for: PropertyDiff.allKindKeys(type).union(PenMetadata.WoodcaseKey.noteTypes.contains(type)
+                    ? NodePropertyCodec.naturalNotePaths : []),
+                prefix: NodePropertyCodec.kindPrefix,
+                type: type
+            )
         )
     }
 

@@ -18,6 +18,9 @@ import Foundation
 public extension NodePropertyCodec {
     /// An override entry's writes with every Woodcase-owned key moved into its `metadata`.
     ///
+    /// The spreads the entry's effects name move there too, as its own `shadowSpread`
+    /// (`splittingOverrideSpreads(_:nodeID:)`).
+    ///
     /// - Parameters:
     ///   - properties: The keys the write assigns, raw or as natural paths.
     ///   - unset: The keys the write removes, raw or as natural paths.
@@ -32,7 +35,13 @@ public extension NodePropertyCodec {
         onto existing: [String: AnyCodable] = [:]
     ) -> (properties: [String: AnyCodable], unset: [String]) {
         guard properties[PenDescendantOverride.typeKey] == nil else { return (properties, unset) }
-        let writes = properties.compactMap { name, value in naturalOverrideKey(name).map { ($0, value) } }
+        // A spread its effects name is one more key of the override's metadata; a bad one is
+        // refused by the planner before this (`splittingOverrideSpreads`), and kept here.
+        let spreads: (properties: [String: AnyCodable], shadowSpread: AnyCodable?) =
+            (try? splittingOverrideSpreads(properties, nodeID: "")) ?? (properties, nil)
+        let properties = spreads.properties
+        var writes = properties.compactMap { name, value in naturalOverrideKey(name).map { ($0, value) } }
+        if let shadowSpread = spreads.shadowSpread { writes.append((.shadowSpread, shadowSpread)) }
         let removals = unset.compactMap(naturalOverrideKey)
         guard !writes.isEmpty || !removals.isEmpty else { return (properties, unset) }
 

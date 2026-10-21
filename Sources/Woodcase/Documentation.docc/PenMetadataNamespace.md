@@ -61,9 +61,9 @@ node types it again.
 | a shadow's spread | `shadowSpread` | ``PenShadowSpread`` and ``PenNode/shadowSpread(forEffect:)``: the CG renderer and SVG export, and the `shadow-spread-stale` lint; one entry per spread shadow, addressed by its place among the effects and stale once that shadow changes |
 | a node's blend mode | `blendMode` | ``PenNode/blendMode``: every renderer and emitter (the CG renderer, SVG export, React and SwiftUI), as one isolated group. A write never emits a top-level `blendMode`. Pen keeps the key (pen CLI, 2026-10-20) |
 
-Every key of the last five groups but `shadowSpread` and `textDecoration` is read and
-written at a natural path — `kind.strokeDash`, `common.locked`, `kind.spans` — not at
-its storage path; see *Natural paths* below.
+Every key of the last five groups but `textDecoration` is read and written at a natural
+path — `kind.strokeDash`, `common.locked`, `kind.spans`, and a shadow's spread as a `spread`
+field on the shadow in `kind.effects` — not at its storage path; see *Natural paths* below.
 
 ### Natural paths
 
@@ -80,6 +80,9 @@ names each:
 | `kind.strokeMiterLimit` | `metadata.woodcase.strokeMiterLimit` | as above, but not line |
 | `common.locked` | `metadata.woodcase.locked` | every type (``NodePropertyCodec/naturalCommonPaths``) |
 | `kind.defaultTextStyle`, `kind.spans` | `metadata.woodcase.defaultTextStyle`, `.spans` | text |
+| `codegen.props`, `codegen.role`, `codegen.states`, `codegen.action`, `codegen.scroll` | `metadata.woodcase.props`, `.role`, `.states`, `.action`, `.scroll` | every type (``NodePropertyCodec/naturalCodegenPaths``) |
+| `note.type`, `note.state`, … `note.createdAt`, and `note.fontFamily` … `note.textAlignVertical` — aliases | `metadata.woodcase.type`, `.state`, …, the same keys, whose raw paths stay accepted | note, prompt, context (``NodePropertyCodec/naturalNotePaths``) |
+| `spread` on a shadow in `kind.effects` | `metadata.woodcase.shadowSpread`, one entry per spread shadow, by its place among the effects | every type that takes effects |
 
 The codec converts at the door (``NodePropertyCodec/storingNaturalPaths(_:on:)``): a
 write of `kind.strokeDash` is planned, applied, replicated and undone as the ordinary
@@ -99,8 +102,44 @@ accessors — ``PenNode/strokeDash``, ``PenNode/strokeMiterLimit``, ``PenNode/is
 spellings of one write cannot drift. The whole `common.metadata` object is still written
 as given, and reading `common.metadata` (or a deep key into it) still shows what is
 stored. A raw ``EditOperation`` — an undo, a CRDT entry, a session edit — is not an
-authored write and lands as written. Keys with no natural path yet — the code-generation
-keys, the note keys and a shadow's spread — are written at their storage paths as before.
+authored write and lands as written.
+
+**The note keys and a note's text style take `note.*` aliases, and their raw keys stay
+accepted** (leaf DPY8DH; rule 4, widened). The note convention is published for tools
+without Woodcase (<doc:PenPostItConvention>), so `common.metadata.woodcase.state` is not
+refused: it and `note.state` write the same key
+(``PenMetadata/WoodcaseKey/storagePathRule`` is ``PenMetadata/WoodcaseKey/StoragePathRule/accepted``).
+`get`, `tree --props`, `woodcase schema` (the note types' tables and `schema postit`) and
+refusals print `note.*`. Only a note, a prompt and a context take the aliases.
+
+**The code-generation keys have a namespace of their own, `codegen.*`** (leaf tRzkPS; the
+ruling's rule 4, widened the same day). Only Woodcase reads them, so the storage path is
+refused as for the rest, and the namespace keeps them clear of any field Pen might add. A
+deep key below one writes one entry of the object it holds, as it did at the storage path:
+`codegen.props.label=Body/Title` declares one parameter, `codegen.states.hover=Btn02` one
+variant, and `=null` drops one (``NodePropertyCodec/naturalStoragePath(of:)``); a deep key
+below a storage path is refused naming the deep `codegen.*` path. ``ComponentAnalyzer``,
+``PageAnalyzer`` and the codegen lints read the stored keys through
+``PenMetadata/subscript(woodcase:)`` as before. An instance override of one —
+`override Home/Save codegen.action=cancel` — is stored in the override's metadata (rule 6).
+
+**A shadow's spread is a field of its shadow** (leaf oNeklc). Paths don't address array
+elements, so the spelling is the one CSS, Figma and Sketch use:
+`kind.effects=[{"type":"shadow","blur":8,"spread":4}]`. ``NodePropertyCodec/presentedValue(at:of:)``
+reads `kind.effects` with each shadow carrying the spread it is drawn with — a stale entry
+is not shown — and `get`, `tree --props` and the `doc` API read it that way; `get` lists
+`kind.effects` among the Woodcase-owned values when a node draws a spread.
+``NodePropertyCodec/value(at:of:)`` stays the stored effects, which undo, merges and
+replication write back as they are. A planned write of `kind.effects` is the whole list, so
+it restates every spread (``NodePropertyCodec/restatingShadowSpreads(_:on:)``): the shadows
+naming one are stored by their new places, and every other entry — a moved shadow's old
+place, a removed shadow's, a stale one — is dropped. A spread of `0` or `null` stores
+nothing; one that is not a number is refused. Below the planner (a raw operation, the
+codec's own ``NodePropertyCodec/setting(_:at:on:)``) a write whose shadows name a spread is
+folded the same way, and one that names none is the plain effects write it always was. The
+storage path is refused like the others, naming `kind.effects`; the schema lists `spread`
+as a field of the shadow (``PenEffect/spreadField``), and ``PenSchema/woodcaseFields(for:)``
+has no row for it.
 
 **An instance override of a Woodcase-owned key is stored in the override's own
 `metadata.woodcase`** (rule 6; Ben's ruling, 2026-10-20). `override Inst/Box
@@ -111,7 +150,13 @@ planner, ``EditOperation/normalized(in:)``, the document's apply, the CRDT and d
 use). On expansion the override's metadata is laid over the component node's **per
 entry**, `woodcase` key by key (``PenMetadata/overlaying(_:onto:)``): the component's notes
 and other Woodcase keys still reach the instance, later edits to them still flow through,
-and a `null` clears one key on that instance alone. The instance root takes the `ref`
+and a `null` clears one key on that instance alone. An override of `kind.effects` names only
+what it changes: one whose shadows name no spread leaves the spreads to the component (an
+entry still applies where its shadow still matches), and one that names a spread stores the
+override's own `shadowSpread` — an empty list when every spread named is `0`, which clears
+the component's spreads on that instance; the same fold does it. An inspection (``EditableDocument/inspect(_:)``) lists an override
+of `kind.effects` with each shadow carrying the spread the instance draws it with, so an
+inspector that edits the list and writes it back restates every spread. The instance root takes the `ref`
 node's own `metadata.woodcase` laid over the component root's
 (``PenMetadata/instanceRoot(of:under:)``), so an override of the root, and an instance's
 lock (`set Inst common.locked=true`), are written on the ref node. A raw key a file from
@@ -181,7 +226,7 @@ it changes under the namespace only
 the namespace removes its old spelling, and a key written under its old spelling
 (`common.metadata._role=button`, a legacy post-it's `common.metadata.state=resolved`)
 lands in the namespace. A deep key into a namespaced key whose value still lives under
-its old spelling (`common.metadata.woodcase.props.caption=…` beside an old `_props`)
+its old spelling (`codegen.props.caption=…` beside an old `_props`)
 moves that value in first, so the entry merges with it. Keys the write leaves alone keep
 their spelling, so a write never rewrites more than it names.
 
@@ -216,7 +261,7 @@ note's tint and its author both keep their edit.
   at the entry's path (<doc:MergingDocuments>).
 
 Below an entry a value is whole: two edits to different parameters inside
-`woodcase.props` are one entry both sides changed. A key holding `.` or `%` is
+`codegen.props` are one entry both sides changed. A key holding `.` or `%` is
 percent-escaped in an entry path (`%2E`, `%25`).
 
 ### Writing one entry from an app
@@ -266,6 +311,13 @@ throughout:
 - ``PenMetadata/WoodcaseKey/init(naturalPath:)``
 - ``PenMetadata/WoodcaseKey/init(storagePath:)``
 - ``NodePropertyCodec/naturalCommonPaths``
+- ``NodePropertyCodec/naturalCodegenPaths``
+- ``NodePropertyCodec/naturalNotePaths``
+- ``PenMetadata/WoodcaseKey/storagePathRule``
+- ``PenMetadata/WoodcaseKey/StoragePathRule``
+- ``PenMetadata/WoodcaseKey/noteTypes``
+- ``NodePropertyCodec/naturalStoragePath(of:)``
+- ``NodePropertyCodec/writesMetadata(at:on:)``
 - ``NodePropertyCodec/naturalKey(of:on:)``
 - ``NodePropertyCodec/naturalValues(of:)``
 - ``NodePropertyCodec/checkNoStoragePaths(_:nodeID:)``
@@ -274,6 +326,13 @@ throughout:
 - ``PenMetadata/instanceRoot(of:under:)``
 - ``NodePropertyCodec/writesNaturalPath(_:on:)``
 - ``NodePropertyCodec/storingNaturalPaths(_:on:)``
+- ``PenMetadata/WoodcaseKey/writtenThrough``
+- ``NodePropertyCodec/effectsPath``
+- ``NodePropertyCodec/spreadField``
+- ``NodePropertyCodec/presentedValue(at:of:)``
+- ``NodePropertyCodec/showsShadowSpread(_:)``
+- ``NodePropertyCodec/restatingShadowSpreads(_:on:)``
+- ``PenEffect/spreadField``
 - ``PenNode/blendMode``
 - ``PenNode/blendedTypes``
 

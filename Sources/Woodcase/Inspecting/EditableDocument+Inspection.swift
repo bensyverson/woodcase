@@ -40,13 +40,18 @@ public extension EditableDocument {
                 return inspection(of: target, source: .ownStorage, node: node, overrides: [:])
             }
             let componentID = componentRoot(ofInstanceChain: [id])
+            let component = componentID.flatMap(componentNode)
+            let overrides = (refData.rootOverrides ?? [:]).merging(
+                Self.naturalOverrides(in: node.common.metadata.map { .dictionary($0.object) }, kindOnly: true)
+            ) { stored, _ in stored }
             return inspection(
                 of: target,
                 source: .instance(componentID: componentID),
-                node: componentID.flatMap(componentNode),
-                overrides: (refData.rootOverrides ?? [:]).merging(
-                    Self.naturalOverrides(in: node.common.metadata.map { .dictionary($0.object) }, kindOnly: true)
-                ) { stored, _ in stored }
+                node: component,
+                overrides: Self.presentingSpreads(
+                    overrides, on: component,
+                    metadata: PenMetadata.instanceRoot(of: component?.common.metadata, under: node.common.metadata)
+                )
             )
         case let .instanceDescendant(refID, key):
             guard case let .ref(refData)? = node(id: refID)?.kind,
@@ -55,11 +60,20 @@ public extension EditableDocument {
             if ownSlotContentKeys(ofInstance: refID).contains(key) {
                 return inspection(of: target, source: .slotContent, node: shown, overrides: [:])
             }
+            let entry = refData.descendants?[key]?.properties ?? [:]
+            let metadata = entry[NodePropertyCodec.rawKey(for: NodePropertyCodec.metadataPath)].map { override in
+                PenMetadata.overlaying(override, onto: shown.common.metadata)
+            }
             return inspection(
                 of: target,
                 source: .componentNode(definitionID: shown.id),
                 node: shown,
-                overrides: Self.expandingNaturalOverrides(refData.descendants?[key]?.properties ?? [:])
+                overrides: Self.presentingSpreads(
+                    Self.expandingNaturalOverrides(entry), on: shown,
+                    metadata: metadata.map { value in
+                        if case let .dictionary(object) = value { PenMetadata(object: object) } else { nil }
+                    } ?? shown.common.metadata
+                )
             )
         }
     }
@@ -89,6 +103,30 @@ public extension EditableDocument {
             found[field] = value
         }
         return found
+    }
+
+    /// The overrides with an override of the effects carrying each shadow's spread, as the
+    /// instance draws it (``NodePropertyCodec/presentedValue(at:of:)``), so an inspector that
+    /// edits the list and writes it back restates every spread.
+    ///
+    /// - Parameters:
+    ///   - overrides: The overrides, by raw key.
+    ///   - base: The node the overrides patch.
+    ///   - metadata: The metadata the instance's node carries, its override's laid over the
+    ///     component's.
+    /// - Returns: The same overrides, the effects' shadows carrying their spreads.
+    private static func presentingSpreads(
+        _ overrides: [String: AnyCodable], on base: PenNode?, metadata: PenMetadata?
+    ) -> [String: AnyCodable] {
+        let effectKey = NodePropertyCodec.rawKey(for: NodePropertyCodec.effectsPath)
+        guard let effects = overrides[effectKey], var shown = base else { return overrides }
+        shown.common.metadata = metadata
+        guard let patched = try? NodePropertyCodec.setting(effects, at: NodePropertyCodec.effectsPath, on: shown),
+              let presented = try? NodePropertyCodec.presentedValue(at: NodePropertyCodec.effectsPath, of: patched)
+        else { return overrides }
+        var listed = overrides
+        listed[effectKey] = presented
+        return listed
     }
 
     /// Assembles an inspection, turning stored overrides into sorted rows.

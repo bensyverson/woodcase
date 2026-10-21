@@ -37,7 +37,9 @@ struct SchemaCommandTests {
     private func acceptedPaths(_ fixture: CommandFixture, _ id: String) throws -> Set<String> {
         let run = try fixture.run("set", fixture.file.path, id, "kind.bogus=1", "--as", "t")
         #expect(run.status == 2, "set \(id) kind.bogus was not refused as a usage error")
-        let matches = run.stderr.matches(of: /`((?:common|kind)\.[A-Za-z]+)`/)
+        // codegen.* since tRzkPS: the code-generation keys every node takes; note.* since
+        // DPY8DH, on the three note types.
+        let matches = run.stderr.matches(of: /`((?:common|kind|codegen|note)\.[A-Za-z]+)`/)
         return Set(matches.map { String($0.1) })
     }
 
@@ -262,7 +264,7 @@ struct SchemaCommandTests {
 
     // MARK: - Format 2.19
 
-    @Test("`help schema` lists browser, fonts and connection, and spread nowhere")
+    @Test("`help schema` lists browser, fonts and connection, and spread only as the field Woodcase stores")
     func helpSchemaSpeaks219() throws {
         let fixture = try CommandFixture(fixture: "every-node-type.pen")
         let overview = try fixture.run("help", "schema")
@@ -273,11 +275,17 @@ struct SchemaCommandTests {
         for key in ["name*", "url*", "style", "weight"] {
             #expect(overview.stdout.contains(key), "the fonts table omits \(key)")
         }
+        // Format 2.19 dropped a shadow's spread. Since leaf oNeklc Woodcase takes it as a field of
+        // the shadow and stores it in metadata, so it appears only as that field and in the
+        // footer that says where it is stored — never as a key of the file's own shadow.
+        let footer = "A shadow's spread is one"
         for type in PenNode.NodeType.allCases {
             let table = try fixture.run("help", "schema", type.rawValue)
-            #expect(!table.stdout.contains("spread"), "`help schema \(type.rawValue)` still offers spread")
+            let lines = table.stdoutLines.filter { $0.contains("spread") }
+            let offered = lines.filter { !$0.contains(footer) && !$0.hasPrefix("      spread ") }
+            #expect(offered.isEmpty, "`help schema \(type.rawValue)` offers spread as \(offered)")
         }
-        #expect(!overview.stdout.contains("spread"))
+        #expect(overview.stdoutLines.filter { $0.contains("spread") }.allSatisfy { $0.contains(footer) })
     }
 
     @Test("A connection's table names its endpoints and the anchors they take")

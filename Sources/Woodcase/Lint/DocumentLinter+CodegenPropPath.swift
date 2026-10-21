@@ -5,10 +5,10 @@
 
 import Foundation
 
-/// The ``LintCheck/codegenPropPath`` check: a `woodcase.props` entry `generate react` cannot
+/// The ``LintCheck/codegenPropPath`` check: a `codegen.props` entry `generate react` cannot
 /// turn into a prop.
 ///
-/// A reusable node declares its named parameters in `common.metadata.woodcase.props`, as
+/// A reusable node declares its named parameters in `codegen.props`, as
 /// `{"<prop name>": "<path of child names>"}` — the declaration the React emitter has
 /// read since it shipped. ``ComponentAnalyzer`` resolves each path to the descendant it
 /// names and hands the prop that node's id; a prop whose entry it cannot resolve is
@@ -40,7 +40,7 @@ extension DocumentLinter {
     /// Every `codegen-prop-path` finding for one row.
     ///
     /// - Parameters:
-    ///   - row: The row to check. A row that is not a reusable node has no `woodcase.props` to
+    ///   - row: The row to check. A row that is not a reusable node has no `codegen.props` to
     ///     read: the emitter only looks at a component's own root.
     ///   - node: The row's node, resolved the way every other check reads it.
     ///   - context: The walk's shared state, for the materialized component subtree the
@@ -77,22 +77,22 @@ extension DocumentLinter {
             guard case let .string(path) = value else {
                 return finding(
                     .codegenPropPath, row,
-                    "declares the prop `\(propName)` in common.metadata.woodcase.props as \(shape(of: value)), but a "
+                    "declares the prop `\(propName)` in codegen.props as \(shape(of: value)), but a "
                         + "prop is declared as the \"/\"-separated path of child names the prop reads — "
                         + "`generate react` skips an entry of any other shape, so \(component) never grows the "
                         + "prop at all. Run `woodcase set <file> \(row.id) "
-                        + "common.metadata.woodcase.props.\(propName)=\(suggestion(in: definition))` with the path to "
+                        + "codegen.props.\(propName)=\(suggestion(in: definition))` with the path to "
                         + "the descendant it should read."
                 )
             }
             guard ComponentAnalyzer.resolveDescendantPath(path, from: definition) == nil else { return nil }
             return finding(
                 .codegenPropPath, row,
-                "declares the prop `\(propName)` in common.metadata.woodcase.props as `\(path)`, but no descendant of "
+                "declares the prop `\(propName)` in codegen.props as `\(path)`, but no descendant of "
                     + "\(component) answers to that path, so `generate react` emits the prop with nothing wired "
                     + "to it and inlines every instance that overrides the descendant it meant. It contains: "
                     + "\(descendantPaths(in: definition)). Run `woodcase set <file> \(row.id) "
-                    + "common.metadata.woodcase.props.\(propName)=<path>` with one of them."
+                    + "codegen.props.\(propName)=<path>` with one of them."
             )
         }
     }
@@ -155,8 +155,8 @@ extension DocumentLinter {
         let kept = names[0]
         let dropped = Array(names.dropFirst())
         let one: Bool = dropped.count == 1
-        let remedies = dropped.map { "common.metadata.woodcase.props.\($0)=<path>" }
-        return "declares the props \(and(names.map { "`\($0)`" })) in common.metadata.woodcase.props as paths that "
+        let remedies = dropped.map { "codegen.props.\($0)=<path>" }
+        return "declares the props \(and(names.map { "`\($0)`" })) in codegen.props as paths that "
             + "resolve to \(group.nodeName) (\(group.nodeID)), and each reads the same \(group.type.rawValue) "
             + "value from it, so `generate react` cannot tell them apart: it keeps `\(kept)` — the first by "
             + "name — and \(and(dropped.map { "`\($0)`" })) \(one ? "is" : "are") declared with "
@@ -181,7 +181,7 @@ extension DocumentLinter {
 
     // MARK: - Naming the descendants
 
-    /// The paths every descendant of a definition answers to, as a `woodcase.props` entry would
+    /// The paths every descendant of a definition answers to, as a `codegen.props` entry would
     /// spell them, with each node's id so the reader can find it in `tree`.
     ///
     /// Capped, because a component with forty descendants would otherwise print all
@@ -204,7 +204,7 @@ extension DocumentLinter {
     /// How many descendants a message lists before it counts the rest.
     private static let descendantListLimit = 8
 
-    /// Every descendant of a definition, in document order, with the `woodcase.props` path it
+    /// Every descendant of a definition, in document order, with the `codegen.props` path it
     /// answers to.
     ///
     /// Walked with ``ComponentAnalyzer/childNodes(of:)``, the same step the path
@@ -224,7 +224,7 @@ extension DocumentLinter {
         return found
     }
 
-    /// What a non-string `woodcase.props` value is, for a sentence that says why it was skipped.
+    /// What a non-string `codegen.props` value is, for a sentence that says why it was skipped.
     private static func shape(of value: AnyCodable) -> String {
         switch value {
         case .int, .double: "a number"

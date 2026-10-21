@@ -10,7 +10,8 @@ import Foundation
 /// The spelling an agent gets wrong here is `background_blur` — a blur *behind* a node
 /// is not `backdrop`, and the only defense against inventing a name is printing the
 /// three the decoder takes. `PenSchemaTests` checks each variant's keys against the
-/// payload's own stored properties with `Mirror`.
+/// payload's own stored properties with `Mirror` — all but a shadow's ``spreadField``,
+/// which the codec keeps in metadata.
 public extension PenEffect {
     /// An effect object, in every spelling its `type` key takes.
     static let schema = PenNestedShape(
@@ -54,6 +55,7 @@ public extension PenEffect {
                         forms: [.text(.blendMode)],
                         default: .string(PenBlendMode.normal.rawString)
                     ),
+                    spreadField,
                 ]
             ),
         ]
@@ -79,6 +81,17 @@ public extension PenEffect {
                 ),
             ]),
         ]
+    )
+
+    /// `spread` — how far a shadow is grown before it is cast, in points; negative shrinks
+    /// it. The one key of this table the payload does not hold: format 2.19 dropped it, so
+    /// the codec stores it in the node's `metadata.woodcase.shadowSpread` and reads it back
+    /// onto the shadow (``NodePropertyCodec/presentedValue(at:of:)``). It lists no default:
+    /// a file's own shadow cannot carry one, so no renderer reads it there; unset is no spread.
+    static let spreadField = PenNestedShape.Field(
+        key: NodePropertyCodec.spreadField,
+        forms: [.number],
+        constraint: PenValueConstraint(unit: .points)
     )
 
     // MARK: - Keys more than one effect carries

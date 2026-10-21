@@ -24,6 +24,8 @@ A key is **Woodcase-owned** when it stands in for a property Pen's format lacks:
 | `kind.defaultTextStyle` | `metadata.woodcase.defaultTextStyle` | text |
 | `kind.spans` | `metadata.woodcase.spans` | text |
 
+> Corrected 2026-10-20 (leaf oNeklc, w-keys): the path is **`kind.effects`**, not `kind.effect`. The file writes `"effect"`; the path vocabulary names the model's field, as `kind.fills` does for `"fill"` (DocC `WoodcaseEditor.md`). A planned write of `kind.effects` restates every spread; `NodePropertyCodec.value(at:of:)` stays the stored effects and `presentedValue(at:of:)` is the read with each spread on its shadow (DocC `PenMetadataNamespace.md`, *Natural paths*).
+
 `common.locked` sits under `common` because every type takes it. The rest sit under `kind`, beside their Pen siblings (`kind.strokeWidth`, then `kind.strokeDash`). Shadow spread has no path of its own because paths don't address array elements: a `spread` field on a shadow object, which is where CSS, Figma and Sketch put it, is the natural spelling.
 
 1. **Every reader and writer uses the natural path.** That covers `woodcase set` and `get`, batches, `tree --props`, `woodcase schema` and `woodcase help`, the `doc` API in `woodcase js`, `PenSchema.field(_:for:)` and the inspector's rows. `get` and `tree` print the natural path, and only the raw `.pen` JSON shows the metadata.

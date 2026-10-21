@@ -314,12 +314,13 @@ public enum TreeView {
     ///
     /// A path that is not a property of this node's kind is left out — the column is
     /// simply not applicable here — while a path that is a property but unset is
-    /// present as ``AnyCodable/null``.
+    /// present as ``AnyCodable/null``. Each is read as a caller reads it
+    /// (``NodePropertyCodec/presentedValue(at:of:)``), so `kind.effects` shows each shadow's spread.
     private static func propertyColumns(of node: PenNode, paths: [String]) -> [String: AnyCodable]? {
         guard !paths.isEmpty else { return nil }
         var columns: [String: AnyCodable] = [:]
         for path in paths {
-            if let value = try? NodePropertyCodec.value(at: path, of: node) {
+            if let value = try? NodePropertyCodec.presentedValue(at: path, of: node) {
                 columns[path] = value
             }
         }

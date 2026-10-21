@@ -50,7 +50,7 @@ public extension NodePropertyCodec {
     /// A write to an old spelling (`common.metadata._props.label`, a post-it's bare
     /// `state`) is aimed at its namespaced key instead, and a key written into the
     /// namespace whose value still lives under its old spelling is moved in first, so a
-    /// write of one entry inside `woodcase.props` merges with the declared parameters
+    /// write of one entry inside `codegen.props` merges with the declared parameters
     /// rather than starting a new map beside them.
     ///
     /// - Parameters:

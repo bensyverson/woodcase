@@ -143,7 +143,8 @@ enum SchemaHelp {
 
         \(rows.joined(separator: "\n"))
 
-        Write one key with a deep key: woodcase set <file> <note> common.metadata.woodcase.tint=#A5D6A7
+        Write one key at its note.* path: woodcase set <file> <note> note.tint=#A5D6A7. The raw \
+        common.metadata.woodcase.tint is the same key, and a tool without Woodcase writes it there.
         A note written before the namespace keeps bare keys beside metadata.type "\(PenPostIt.typeValue)"; \
         they are still read, and `woodcase migrate` moves them in.
         """
@@ -168,6 +169,8 @@ enum SchemaHelp {
     fontSize, so 1.4 is 140% leading and 21 is a line box fourteen times too tall.
     A key marked * is required; `null` clears a property. A .pen key under \
     metadata.woodcase is a property Pen's format lacks, which Woodcase stores there: \
-    write its path, never that key.
+    write its path, never that key. A shadow's spread is one: write it as spread on \
+    the shadow in kind.effects, and a write of kind.effects drops every spread it does \
+    not name.
     """
 }

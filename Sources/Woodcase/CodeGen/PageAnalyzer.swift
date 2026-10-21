@@ -13,7 +13,7 @@ public enum PageAnalyzer {
     ///
     /// A page is a top-level frame (direct child of the document) that is not
     /// marked as `reusable: true`, and not a top-level component's state variant — a
-    /// `{Name}:{state}` sibling, or a frame its `woodcase.states` metadata names.
+    /// `{Name}:{state}` sibling, or a frame its `codegen.states` metadata names.
     ///
     /// A page is named by the rule a component is (``ComponentAnalyzer``), a leading
     /// `Screen/` or `Component/Screen/` folder dropped as well as `Component/`, and each name

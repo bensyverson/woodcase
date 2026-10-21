@@ -75,7 +75,7 @@ under the Woodcase namespace, `metadata.woodcase`, rather than in properties of 
 `letterSpacing` carry the ``PenValueConstraint`` of the `kind.` key they stand in for
 (``PenMetadata/WoodcaseKey/constraint``), so ``EditPlanner`` refuses a 0 pt or negative
 type size, or a line height written in points, with ``EditRefusal/Code/outOfRange`` and
-`common.metadata.woodcase.fontSize` as the property — exactly as it refuses
+`note.fontSize` as the property — exactly as it refuses
 `kind.fontSize: 0` on a text. An `add` or `replace` subtree is held to the same range
 through ``PenPostIt/violation(in:comparedTo:on:)``. A file already holding one still
 opens, and a write that leaves it unchanged passes.
@@ -186,6 +186,16 @@ if let postIt = PenPostIt.Metadata(node) {
 
 ### Writing
 
+**Each key has a `note.*` alias, and the raw key stays the published format** (leaf
+DPY8DH; `project/2026-10-20-natural-paths-for-woodcase-properties.md`). Woodcase's own
+tools write and print `note.state`, `note.tint`, `note.fontSize` — `woodcase set board.pen
+Nte01 note.state=resolved` — on a note, a prompt or a context
+(``NodePropertyCodec/naturalNotePaths``). The convention is meant to be legible without
+Woodcase, for example to an agent editing the file through Pen's own tools, so the raw
+`common.metadata.woodcase.state` is written the same key and stays accepted
+(``PenMetadata/WoodcaseKey/storagePathRule``): both spellings land in
+`metadata.woodcase.state`, and the file never holds `note.` anything.
+
 An agent's write is held to the convention; a file is not. A `set` of
 `common.metadata` — a deep key such as `common.metadata.woodcase.state=resolved` is
 folded into the whole object first, and stored under the namespace
@@ -200,7 +210,7 @@ not a number is refused with
 one most likely meant:
 
 ```text
-common.metadata.woodcase.state on Board/Sticky (Nte01) takes open or resolved, but the value given is "reslved" — did you mean `woodcase set board.pen Nte01 common.metadata.woodcase.state=resolved`? …
+note.state on Board/Sticky (Nte01) takes open or resolved, but the value given is "reslved" — did you mean `woodcase set board.pen Nte01 note.state=resolved`? …
 ```
 
 Only the keys a write *changes* are checked, read in either spelling. A file that

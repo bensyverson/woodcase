@@ -42,7 +42,7 @@ struct EditPlannerDefaultTextStyleTests {
     @Test("Marking and unmarking keep every other metadata key")
     func keepsOtherMetadata() throws {
         let document = try DefaultTextStyleFixture.document()
-        let role = PenMetadata.WoodcaseKey.role.path
+        let role = PenMetadata.WoodcaseKey.role.propertyPath
         for id in ["Title", "Body"] {
             let plan = try EditPlanner.plan(.set([role: "heading"]), at: PlannerFixture.address("#\(id)"), in: document)
             try DefaultTextStyleFixture.apply(plan.operations, to: document)

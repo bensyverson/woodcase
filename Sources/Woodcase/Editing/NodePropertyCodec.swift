@@ -63,13 +63,41 @@ public enum NodePropertyCodec {
         PenMetadata.WoodcaseKey.allCases.compactMap(\.naturalPath).filter { $0.hasPrefix(commonPrefix) }
     )
 
+    /// The `codegen.*` natural paths of the code-generation keys Woodcase stores in
+    /// `metadata.woodcase` — `codegen.role`, `codegen.props` — which every node takes
+    /// (``PenMetadata/WoodcaseKey/naturalPath``). A deep key below one, such as
+    /// `codegen.props.label`, writes one entry of the object it holds
+    /// (``naturalStoragePath(of:)``).
+    public static let naturalCodegenPaths: Set<String> = Set(
+        PenMetadata.WoodcaseKey.allCases.compactMap(\.naturalPath).filter { $0.hasPrefix(codegenPrefix) }
+    )
+
+    /// The `note.*` aliases of the note keys and a note's text style — `note.state`,
+    /// `note.fontSize` — which a note, a prompt and a context take
+    /// (``PenMetadata/WoodcaseKey/naturalPath``). Their raw storage paths stay accepted
+    /// (``PenMetadata/WoodcaseKey/storagePathRule``).
+    public static let naturalNotePaths: Set<String> = Set(
+        PenMetadata.WoodcaseKey.allCases.compactMap(\.naturalPath).filter { $0.hasPrefix(notePrefix) }
+    )
+
     /// Every property path that can be read from or written to this node, sorted.
     ///
     /// - Parameter node: The node whose vocabulary to list.
-    /// - Returns: The `common.*` paths followed by the `kind.*` paths of the
-    ///   node's own kind, in one sorted array.
+    /// - Returns: The `codegen.*`, `common.*` and the node's own `kind.*` paths, and on a
+    ///   note its `note.*` aliases, in one sorted array.
     public static func paths(for node: PenNode) -> [String] {
-        commonPaths.union(naturalCommonPaths).union(PropertyDiff.allKindKeys(node.kind)).sorted()
+        commonPaths.union(naturalCommonPaths).union(naturalCodegenPaths).union(PropertyDiff.allKindKeys(node.kind))
+            .union(notePaths(on: node.kind)).sorted()
+    }
+
+    /// The `note.*` aliases a node of this kind takes: all of them on a note, a prompt or a
+    /// context, none elsewhere.
+    ///
+    /// - Parameter kind: The node's kind.
+    /// - Returns: The aliases.
+    static func notePaths(on kind: PenNode.Kind) -> Set<String> {
+        guard let type = kind.nodeType, PenMetadata.WoodcaseKey.noteTypes.contains(type) else { return [] }
+        return naturalNotePaths
     }
 
     // MARK: - Reading
@@ -80,12 +108,16 @@ public enum NodePropertyCodec {
     ///   - path: A path from ``paths(for:)``, or a deep key inside one of
     ///     ``deepKeyedPaths`` such as `common.metadata.woodcase.author`, which reads the
     ///     way ``deepValue(in:at:of:)`` describes. A natural path such as `kind.blendMode`
-    ///     reads the metadata key it is stored under (``naturalKey(of:on:)``).
+    ///     reads the metadata key it is stored under (``naturalKey(of:on:)``), and a deep key
+    ///     below one, such as `codegen.props.label`, the entry below it.
     ///   - node: The node to read from.
     /// - Returns: The property's JSON value, or ``AnyCodable/null`` if it is unset.
     /// - Throws: ``EditingError/unknownProperty(nodeID:key:nodeType:)`` if the path
     ///   is not a property of this node's kind.
     public static func value(at path: String, of node: PenNode) throws -> AnyCodable {
+        if let storage = naturalStoragePath(of: path) {
+            return try value(at: storage, of: node)
+        }
         if let (property, keyPath) = deepKey(of: path) {
             return try deepValue(in: property, at: keyPath, of: node)
         }
@@ -157,6 +189,10 @@ public enum NodePropertyCodec {
 
     static let commonPrefix = "common."
     static let kindPrefix = "kind."
+    /// The prefix of the code-generation keys' natural paths (``naturalCodegenPaths``).
+    static let codegenPrefix = "codegen."
+    /// The prefix of the note keys' aliases (``naturalNotePaths``).
+    static let notePrefix = "note."
 
     /// Validates a `kind.*` path against a kind's vocabulary and returns its field name.
     ///

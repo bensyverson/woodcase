@@ -37,7 +37,7 @@ struct CopyCommand: AsyncParsableCommand {
         command and one vocabulary. A raw name is taken as written, either way.
 
         A key may also be a name the source PUBLISHES: a component declares its \
-        parameters in common.metadata.woodcase.props as name → the name path of the node the \
+        parameters in codegen.props as name → the name path of the node the \
         value belongs to, so `label=Hi` means the same as Body/Title/kind.content=Hi. \
         `woodcase get <component>` lists them, and a row of an --each file may be \
         keyed by them too.
