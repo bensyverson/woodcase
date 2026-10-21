@@ -31,6 +31,9 @@ final class CostCounter: Sendable {
         case payloadEncode
         /// A node's whole `common` or `kind` payload decoded from a JSON dictionary.
         case payloadDecode
+        /// A node's `common` or `kind` payload captured and decoded again over new values
+        /// through ``PenNodeOverlay`` — one pass, however many of its keys it writes.
+        case payloadOverlay
         /// One schema table's rows built — `nil` is the `common.*` table.
         case schemaTable(PenNode.NodeType?)
         /// A text's ink asked of ``PenLayoutEngine/textInkBounds(of:box:)``, answered from

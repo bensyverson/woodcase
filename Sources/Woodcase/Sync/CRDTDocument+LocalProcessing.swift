@@ -240,11 +240,7 @@ extension CRDTDocument {
 
         // Resolve the whole patch before emitting anything, so a rejected patch
         // leaves no half-replicated trail.
-        var patched = node
-        for (path, value) in op.properties {
-            guard let next = try? NodePropertyCodec.setting(value, at: path, on: patched) else { return [] }
-            patched = next
-        }
+        guard let patched = try? NodePropertyCodec.setting(op.properties, on: node) else { return [] }
 
         var ops: [CRDTOperation] = []
         // A node's extras replicate as one register, never key by key: a per-key write

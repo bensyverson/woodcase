@@ -59,17 +59,38 @@ extension NodePropertyCodec {
         key: String,
         value: AnyCodable
     ) throws -> Payload? {
+        try overlaying(payload, patch: [key: value])
+    }
+
+    /// Returns `payload` with every top-level key of `patch` set, in one pass through
+    /// ``PenNodeOverlay`` — or `nil` where the overlay declines.
+    ///
+    /// - Parameters:
+    ///   - payload: The payload to patch.
+    ///   - patch: The new JSON values, keyed as the payload's `CodingKeys` spell them;
+    ///     ``AnyCodable/null`` removes a key, so the payload decodes as though the file
+    ///     never wrote it.
+    /// - Returns: The patched payload, or `nil` when the payload encodes or decodes itself
+    ///   in a way the overlay does not follow.
+    /// - Throws: The `DecodingError` the payload raises for a new value.
+    static func overlaying<Payload: Codable>(
+        _ payload: Payload,
+        patch: [String: AnyCodable]
+    ) throws -> Payload? {
+        CostCounter.record(.payloadOverlay)
         let capture = PenNodeOverlay.Capture()
         try payload.encode(to: capture)
         guard !capture.storage.declined else { return nil }
         var captured = capture.storage.values
-        captured.removeValue(forKey: key)
-        var patch: [String: AnyCodable] = [:]
-        if value != .null {
-            patch[key] = value
+        var overlay: [String: AnyCodable] = [:]
+        for (key, value) in patch {
+            captured.removeValue(forKey: key)
+            if value != .null {
+                overlay[key] = value
+            }
         }
         do {
-            return try Payload(from: PenNodeOverlay(captured: captured, patch: patch))
+            return try Payload(from: PenNodeOverlay(captured: captured, patch: overlay))
         } catch is PenNodeOverlay.Unsupported {
             return nil
         }

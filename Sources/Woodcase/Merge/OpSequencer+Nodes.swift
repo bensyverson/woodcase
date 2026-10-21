@@ -48,7 +48,7 @@ extension OpSequencer {
         // another case of one JSON number (a live `.double(0)` returns as `.int(0)`),
         // which is no drift.
         assert(
-            (try? properties.reduce(now) { try NodePropertyCodec.setting($1.value, at: $1.key, on: $0) })
+            (try? NodePropertyCodec.setting(properties, on: now))
                 .flatMap { try? NodePropertyCodec.encode($0) } == (try? NodePropertyCodec.encode(merged)),
             "Node \(id): patching its content through the codec does not reach the merged node — the vocabulary has drifted"
         )

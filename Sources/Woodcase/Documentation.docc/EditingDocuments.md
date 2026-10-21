@@ -109,7 +109,14 @@ hold anything between reads. A write costs its one path too:
 payload's other keys over as they are (through the same capture-and-overlay
 `PenNodeOverlay` applies overrides with), so writing a board's width neither encodes nor
 decodes its children. A payload the overlay cannot follow is written the old way, whole.
-That matters wherever a node holds its subtree inline — a clip, a parsed tree; the nodes
+A patch of many keys — ``EditOperation/setProperties(_:)``, which
+``EditableDocument/previewNodes(for:)`` runs at every step of a gesture — goes through
+``NodePropertyCodec/setting(_:on:)``, which lays every plain `common.*` key over the
+`common` payload in one pass and every plain `kind.*` key over the `kind` payload in
+another, rather than one pass per key. It gives exactly what the per-key writes give, in the
+patch's own order, refusals included: a natural path, an `extras.*` key, a `kind.effects`
+naming a spread or any instance key is written on its own in its turn, and a pass that
+declines or refuses is replayed key by key. That matters wherever a node holds its subtree inline — a clip, a parsed tree; the nodes
 an ``EditableDocument`` stores keep their children apart already. `"kind.type"` is
 deliberately not a path — changing a node's type is ``EditOperation/updateKind(_:)``'s job, or
 ``EditOperation/replaceSubtree(_:)``'s when its contents change with it.

@@ -86,11 +86,7 @@ extension EditableDocument {
         for op: EditOperation.SetProperties, onto base: PenNode? = nil
     ) throws -> (old: PenNode, new: PenNode) {
         let oldNode = try requireNode(op.nodeID)
-        var newNode = base ?? oldNode
-        for (path, value) in op.properties {
-            newNode = try NodePropertyCodec.setting(value, at: path, on: newNode)
-        }
-        return (oldNode, newNode)
+        return try (oldNode, NodePropertyCodec.setting(op.properties, on: base ?? oldNode))
     }
 
     /// Checks a ``EditOperation/SetProperties``: every key and value resolves, and the
