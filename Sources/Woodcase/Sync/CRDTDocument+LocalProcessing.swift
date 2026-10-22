@@ -257,7 +257,7 @@ extension CRDTDocument {
         if writesMetadata {
             ops += processLocalMetadata(nodeID: op.nodeID, from: node.common.metadata, to: patched.common.metadata)
         }
-        for (path, value) in op.properties where !NodePropertyCodec.isExtrasPath(path) {
+        for (path, value) in op.orderedProperties where !NodePropertyCodec.isExtrasPath(path) {
             if NodePropertyCodec.writesMetadata(at: path, on: node.kind) { continue }
             let normalized = (try? NodePropertyCodec.value(at: path, of: patched)) ?? value
             let crdtOp = makeOp(.setProperty(CRDTOperation.SetProperty(

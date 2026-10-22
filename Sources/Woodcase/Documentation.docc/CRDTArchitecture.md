@@ -72,6 +72,14 @@ that changed (``NodePropertyCodec/metadataEntryWrites(from:to:)``), so two peers
 one note's tint and its state both keep their edit, and no whole-object write exists to
 race an entry write. See <doc:PenMetadataNamespace>.
 
+A local `setProperties` is resolved, and its writes emitted, in one order on every peer:
+broadest storage first, ties by path (``EditOperation/SetProperties/orderedProperties``;
+<doc:EditingDocuments> has the rule). Its keys can share storage — `common.metadata`
+beside `note.fontSize` — so the patch's own dictionary order, which is hash order seeded
+per process, would let two peers resolve one patch to different nodes. A replica receiving
+the writes holds no map to order: each `setProperty` names one path, carries the value the
+sender resolved, and is applied in the order the log delivers it.
+
 ### RGA Lists
 
 Child ordering within a parent uses a Replicated Growable Array (``RGAList``).

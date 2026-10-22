@@ -21,14 +21,17 @@ import Foundation
 /// key of an instance or of an unrecognized type, any key that would be refused — is
 /// written on its own, in its turn, with the plain keys before it written first, so two
 /// keys that store into the same place land in the order the per-key writes would have
-/// put them. Where the one pass declines or refuses, the keys it held are written again
-/// one at a time from where they started, which gives exactly the per-key outcome.
+/// put them — ``applicationOrder(of:)``, the same in every process. Where the one pass
+/// declines or refuses, the keys it held are written again one at a time from where they
+/// started, which gives exactly the per-key outcome.
 extension NodePropertyCodec {
     /// Returns a copy of `node` with every property in `properties` set.
     ///
-    /// Equal to writing each entry with ``setting(_:at:on:)``, in the dictionary's own
-    /// order, and costing at most one payload pass for all of its plain `common.*` keys and
-    /// one for all of its plain `kind.*` keys.
+    /// Equal to writing each entry with ``setting(_:at:on:)`` in
+    /// ``applicationOrder(of:)`` — broadest storage first, ties by path — so every process
+    /// and every replica writes a map the same way however its dictionary iterates, and
+    /// costing at most one payload pass for all of its plain `common.*` keys and one for
+    /// all of its plain `kind.*` keys. A map of one key is written as it stands, unsorted.
     ///
     /// - Parameters:
     ///   - properties: The values to write, keyed by property path — any path
@@ -39,8 +42,22 @@ extension NodePropertyCodec {
     ///   ``EditingError/unknownProperty(nodeID:key:nodeType:)`` or
     ///   ``EditingError/propertyTypeMismatch(nodeID:key:expected:actual:)``.
     public static func setting(_ properties: [String: AnyCodable], on node: PenNode) throws -> PenNode {
+        guard properties.count > 1 else { return try setting(inOrder: properties, on: node) }
+        return try setting(inOrder: applicationOrder(of: properties), on: node)
+    }
+
+    /// Writes `entries` in the order given, batching the plain payload keys.
+    ///
+    /// - Parameters:
+    ///   - entries: The writes, already in ``applicationOrder(of:)``.
+    ///   - node: The node to patch.
+    /// - Returns: The patched node.
+    /// - Throws: Whatever the first refused key's ``setting(_:at:on:)`` throws.
+    private static func setting(
+        inOrder entries: some Sequence<(key: String, value: AnyCodable)>, on node: PenNode
+    ) throws -> PenNode {
         var batch = Batch(node: node)
-        for (path, value) in properties {
+        for (path, value) in entries {
             guard let write = payloadWrite(value, at: path, on: node) else {
                 try batch.flush()
                 batch.node = try setting(value, at: path, on: batch.node)

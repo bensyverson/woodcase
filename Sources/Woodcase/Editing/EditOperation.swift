@@ -280,7 +280,16 @@ public enum EditOperation: Friendly {
         /// The ID of the node to patch.
         public var nodeID: String
         /// The properties to set, keyed by property path.
+        ///
+        /// A dictionary iterates in hash order, which differs between processes; walk
+        /// ``orderedProperties`` to write or replicate them.
         public var properties: [String: AnyCodable]
+
+        /// The properties in the order they are written: broadest storage first, ties by
+        /// path (``NodePropertyCodec/applicationOrder(of:)``), the same on every replica.
+        public var orderedProperties: [(key: String, value: AnyCodable)] {
+            NodePropertyCodec.applicationOrder(of: properties)
+        }
     }
 
     /// Parameters for adding a variable.

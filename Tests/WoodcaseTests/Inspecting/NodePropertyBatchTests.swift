@@ -8,16 +8,17 @@ import Testing
 @testable import Woodcase
 
 /// A batch write (``NodePropertyCodec/setting(_:on:)``) gives exactly what writing its keys
-/// one at a time (``NodePropertyCodec/setting(_:at:on:)``) gives, in the dictionary's own
-/// order — the node, or the refusal and the key it names — on every node of every bundled
+/// one at a time (``NodePropertyCodec/setting(_:at:on:)``) gives, in
+/// ``NodePropertyCodec/applicationOrder(of:)`` — the node, or the refusal and the key it names — on every node of every bundled
 /// fixture, for whole-vocabulary maps, scale-shaped maps, maps holding a bad key or value,
 /// and maps whose keys store into the same place.
 struct NodePropertyBatchTests {
     typealias Outcome = PropertyWriteOracleTests.Outcome
 
-    /// The per-key writes a batch must equal, in `properties`' own iteration order.
+    /// The per-key writes a batch must equal, in the application order — never the
+    /// dictionary's own iteration order, which differs between processes.
     static func sequential(_ properties: [String: AnyCodable], on node: PenNode) throws -> PenNode {
-        try properties.reduce(node) { try NodePropertyCodec.setting($1.value, at: $1.key, on: $0) }
+        try NodePropertyCodec.applicationOrder(of: properties).reduce(node) { try NodePropertyCodec.setting($1.value, at: $1.key, on: $0) }
     }
 
     /// The same entries in dictionaries of several capacities, so they iterate in
@@ -149,7 +150,7 @@ struct NodePropertyBatchTests {
         }
     }
 
-    @Test("Keys that store into the same place land in the per-key order")
+    @Test("Keys that store into the same place land in the application order")
     func sharedStorage() {
         let note = PenNode(
             id: "n", common: PenNodeCommon(x: .literal(1)),

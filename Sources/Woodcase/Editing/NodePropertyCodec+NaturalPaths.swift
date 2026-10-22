@@ -101,7 +101,8 @@ public extension NodePropertyCodec {
         guard writesNaturalPath(properties, on: node.kind) else { return properties }
         let properties = try storingNamedSpreads(properties, on: node)
         var stored: [String: AnyCodable] = [:]
-        for (path, value) in properties {
+        // Two spellings of one storage key keep the later one in the application order.
+        for (path, value) in applicationOrder(of: properties) {
             if let storage = naturalStoragePath(of: path) {
                 stored[storage] = value
                 continue

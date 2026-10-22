@@ -113,10 +113,24 @@ A patch of many keys — ``EditOperation/setProperties(_:)``, which
 ``EditableDocument/previewNodes(for:)`` runs at every step of a gesture — goes through
 ``NodePropertyCodec/setting(_:on:)``, which lays every plain `common.*` key over the
 `common` payload in one pass and every plain `kind.*` key over the `kind` payload in
-another, rather than one pass per key. It gives exactly what the per-key writes give, in the
-patch's own order, refusals included: a natural path, an `extras.*` key, a `kind.effects`
-naming a spread or any instance key is written on its own in its turn, and a pass that
-declines or refuses is replayed key by key. That matters wherever a node holds its subtree inline — a clip, a parsed tree; the nodes
+another, rather than one pass per key. It gives exactly what the per-key writes give,
+refusals included: a natural path, an `extras.*` key, a `kind.effects` naming a spread or
+any instance key is written on its own in its turn, and a pass that declines or refuses is
+replayed key by key.
+
+**The order a patch's keys are written in** is fixed, not the dictionary's: a `Dictionary`
+iterates in hash order, seeded per process, so two replicas walking one patch would visit
+its keys differently. Most keys never meet, but some share storage — `note.fontSize`,
+`codegen.role` and `common.locked` live inside `common.metadata`, a `kind.effects` naming a
+spread writes `metadata.woodcase.shadowSpread`, `codegen.props.label` is one entry of
+`codegen.props` — and for those the last write wins. So keys are written **broadest storage
+first, ties by path** (``NodePropertyCodec/applicationOrder(of:)``, and
+``EditOperation/SetProperties/orderedProperties`` on the op): a whole `common.metadata`
+lands first and the narrower `note.fontSize` beside it refines it, the reading a caller
+writing both means, and the same rule deep keys already fold by. The refusal a patch with
+two bad keys earns names the first in that order. The document's apply and preview, the
+CRDT's local emission and the merge's drift check all write through it; a patch of one key
+skips the sort. That matters wherever a node holds its subtree inline — a clip, a parsed tree; the nodes
 an ``EditableDocument`` stores keep their children apart already. `"kind.type"` is
 deliberately not a path — changing a node's type is ``EditOperation/updateKind(_:)``'s job, or
 ``EditOperation/replaceSubtree(_:)``'s when its contents change with it.
