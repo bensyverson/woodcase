@@ -148,9 +148,8 @@
             let (built, checked) = try await (build, check)
             let lowerFloorFailure = checked.succeeded ? nil : checked.output
             guard built.succeeded else { return Outcome(buildFailure: built.output, lowerFloorFailure: lowerFloorFailure) }
-            let inter = WoodcaseHome.directory().appendingPathComponent("fonts/inter").path
             let rendered = try await SwiftUIRenderBatch.runAsync(
-                [binary, renders.path, inter, SwiftUIRenderBatch.testFonts.path],
+                [binary, renders.path, SwiftUIRenderBatch.testFonts.path],
                 log: root.appendingPathComponent("render.log")
             )
             guard rendered.succeeded else {

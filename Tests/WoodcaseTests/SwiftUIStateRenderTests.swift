@@ -29,7 +29,9 @@
         /// three boards 2.57, 4.09 and 4.98 (`woodcase shot … --scale 2`, then `scripts/png-mae`).
         ///
         /// Recorded 2026-09-27, Xcode 27.0, macOS 27.0, with Inter from `~/.woodcase/fonts`
-        /// (`swift test --filter SwiftUIStateRenderTests`).
+        /// (`swift test --filter SwiftUIStateRenderTests`), byte-identical to the committed
+        /// `Fonts/Inter[opsz,wght].ttf`, the only Inter the batch registers since leaf RFot2O;
+        /// re-measured 2026-10-22 the same way, unchanged.
         static let baselines: [String: (mae: Double, why: String)] = [
             "StatesButton": (0.958, "text antialiasing"),
             "StatesButton-pressed": (1.052, "text antialiasing"),

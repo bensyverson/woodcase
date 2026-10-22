@@ -167,7 +167,11 @@
         /// The fonts the test process registers (``TestFontRegistration``): Inter, which
         /// most boards set, and IBM Plex Sans, which the `layout-text-*` boards set. The
         /// harness registers the same files, so both sides draw in the same faces and
-        /// neither reads the user's `~/.woodcase` font cache.
+        /// neither reads the user's `~/.woodcase` font cache, whose version the machine
+        /// decides: every batch passes this directory and no other. A suite that only
+        /// compares a harness render with Pen's export sets no text in the test process, so
+        /// it needs no ``TestFontRegistration`` call of its own; one that also draws the CG
+        /// reference (``SwiftUIRenderTests``) does.
         static let testFonts = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
             .appendingPathComponent("Fonts")
