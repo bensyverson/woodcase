@@ -6,6 +6,7 @@
 import Foundation
 import Testing
 @testable import Woodcase
+import WoodcasePerfFixtures
 
 /// Counts the text inks a painted-extent pass over one artboard of Penumbra's perf board
 /// (``PerfBoardFixture``) asks for and lays out: what RapidPro's render stage and

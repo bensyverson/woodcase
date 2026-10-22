@@ -7,6 +7,7 @@
     import Foundation
     import Testing
     @testable import Woodcase
+    import WoodcasePerfFixtures
 
     /// How much stack each stage of the settled-tree read needs in a debug build.
     ///

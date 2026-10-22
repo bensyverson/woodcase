@@ -108,10 +108,28 @@ let package = Package(
             name: "WoodcaseCommand",
             dependencies: ["WoodcaseCommandCore"]
         ),
+        // The generated documents and the stack meter that the suite's budgets and
+        // WoodcaseBench both measure on. A target of its own so neither copies them; not
+        // a product, so no consumer of the library sees it. It reads its .pen files from
+        // Tests/WoodcaseTests/Fixtures in the source tree (`PerfFixtureFile`).
+        .target(
+            name: "WoodcasePerfFixtures",
+            dependencies: ["Woodcase"]
+        ),
+        // The release-mode benches: `swift run -c release WoodcaseBench list`. An
+        // executable over the library, so timing one call optimizes the library and a
+        // few files, never the test target — `swift test -c release` optimizes every
+        // test file to run one probe (project/2026-10-21-build-test-loop-baseline.md).
+        // No test target may depend on it: see the comment on WoodcaseCommandCore.
+        .executableTarget(
+            name: "WoodcaseBench",
+            dependencies: ["Woodcase", "WoodcasePerfFixtures"]
+        ),
         .testTarget(
             name: "WoodcaseTests",
             dependencies: [
                 "Woodcase",
+                "WoodcasePerfFixtures",
                 // One suite: `PerformanceBudgets.SetVerbTests` times the `set` verb itself,
                 // so the budget covers what a caller waits for. It lives here because every
                 // budget must run inside the one `.serialized` `PerformanceBudgets` suite —

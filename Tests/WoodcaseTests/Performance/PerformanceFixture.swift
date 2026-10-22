@@ -6,6 +6,7 @@
 import Foundation
 import Testing
 import Woodcase
+import WoodcasePerfFixtures
 
 /// The two documents every budget is measured against, on disk and writable.
 ///
@@ -23,8 +24,9 @@ enum PerformanceFixture {
     /// How many nodes the synthetic document has.
     ///
     /// Five thousand: an order of magnitude past the largest real fixture, and the
-    /// size the performance leaf names.
-    static let syntheticNodeCount: Int = 5000
+    /// size the performance leaf names. ``SyntheticPenDocument/budgetNodeCount``, which
+    /// `WoodcaseBench` measures too.
+    static let syntheticNodeCount: Int = SyntheticPenDocument.budgetNodeCount
 
     /// The largest real fixture, 244 KB of hand-authored document.
     ///

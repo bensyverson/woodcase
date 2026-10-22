@@ -215,6 +215,8 @@ swift test
 
 > **Note:** `PenTextMeasurerTests` are skipped when running via `swift test` because Core Text requires a hosted environment. Run those tests from Xcode.
 
+To time code on an optimized build, use the benches, not `swift test -c release` (which optimizes the whole test target): `swift run -c release WoodcaseBench list` names them. See [Performance](Sources/Woodcase/Documentation.docc/WoodcasePerformance.md).
+
 ## License
 
 MIT — see [LICENSE](LICENSE). Bundled fonts carry their own licenses in [LICENSES/](LICENSES/). The vendored zstd decoder in [Sources/CZstdDecode/](Sources/CZstdDecode/) (zstd's `zstddeclib.c`, Copyright Meta Platforms, Inc. and affiliates) is used under zstd's BSD license, kept beside it in [Sources/CZstdDecode/LICENSE](Sources/CZstdDecode/LICENSE); its pinned release is in `VENDORED.json` there.

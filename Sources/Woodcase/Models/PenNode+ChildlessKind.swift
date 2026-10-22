@@ -12,7 +12,7 @@ import Foundation
 /// own synthesized conformance, so every other field is covered without being named — a
 /// field added to a payload is compared, hashed and encoded with no change here. (Naming
 /// the fields instead saved nothing in release and made a debug `==` 70% slower:
-/// `PenNodeTreeCostProbe`, 2026-10-17.)
+/// `PenNodeTreeCostProbe`, 2026-10-17, now `WoodcaseBench node-tree-cost`.)
 ///
 /// The containers are the kinds ``Kind/inlineChildrenIfPresent`` lists; a new kind with
 /// children must join it, ``Kind/replacingInlineChildren(with:)`` and the switches here.

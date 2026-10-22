@@ -27,11 +27,13 @@ struct PostItLookTests {
         let style = PenPostIt.Style.standard
         let light = PenPostIt.Ink(on: PenPostIt.Tint.yellow.color, style: style)
         #expect(light == style.inkOnLight)
-        #expect([light.primary, light.secondary, light.tertiary].allSatisfy { $0.red == 0 && $0.green == 0 && $0.blue == 0 })
+        let lightInks: [PenHexColor] = [light.primary, light.secondary, light.tertiary]
+        #expect(lightInks.allSatisfy { (ink: PenHexColor) -> Bool in ink.red == 0 && ink.green == 0 && ink.blue == 0 })
 
         let dark = try PenPostIt.Ink(on: #require(PenHexColor("#37474F")), style: style)
         #expect(dark == style.inkOnDark)
-        #expect([dark.primary, dark.secondary, dark.tertiary].allSatisfy { $0.red == 255 && $0.green == 255 && $0.blue == 255 })
+        let darkInks: [PenHexColor] = [dark.primary, dark.secondary, dark.tertiary]
+        #expect(darkInks.allSatisfy { (ink: PenHexColor) -> Bool in ink.red == 255 && ink.green == 255 && ink.blue == 255 })
 
         #expect(light.primary.alpha > light.secondary.alpha)
         #expect(light.secondary.alpha > light.tertiary.alpha)

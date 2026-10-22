@@ -190,7 +190,8 @@ struct FigmaImportShapeTypeTests {
         Self.expectClose(points[0], PenPoint(x: 50, y: 0))
         Self.expectClose(points[1], PenPoint(x: 61.80, y: 38.20))
         Self.expectClose(points[2], PenPoint(x: 100, y: 38.20))
-        #expect(points.map(\.y).max().map { abs($0 - 100) < 0.01 } == true)
+        let bottom: Double = try #require(points.map(\.y).max())
+        #expect(abs(bottom - 100) < 0.01)
         #expect(result.losses.isEmpty)
     }
 

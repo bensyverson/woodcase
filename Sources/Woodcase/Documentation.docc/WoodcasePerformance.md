@@ -115,6 +115,29 @@ third — `tree` of the synthetic document reported 1507 ms beside its neighbors
 1115 ms alone, on the same build in the same minute. A timing test measures the
 machine as much as the code, so two of them at once measure each other.
 
+## Benches: release timing without the test target
+
+A measurement that has no ceiling — what one call costs on an optimized build — is a
+**bench**, not a test. The benches live in the `WoodcaseBench` executable, which depends on
+the library and on `WoodcasePerfFixtures` (the generated documents, Penumbra's perf
+board and the stack meter that the budgets measure on too), so timing one call optimizes
+the library and a dozen files:
+
+```sh
+swift run -c release WoodcaseBench list
+swift run -c release WoodcaseBench property-read-cost
+swift run -c release WoodcaseBench codegen-dump /tmp/after   # then diff -r against a before dump
+```
+
+Each prints `PROBE` lines, median and p90; read them beside `uptime`. **Never time code
+with `swift test -c release`**: it optimizes every file of `WoodcaseTests` to run one
+probe, and one compiler job of that ran about 43 minutes (2026-10-21; build and bench
+figures in `project/2026-10-21-build-test-loop-baseline.md`). The release-only probes
+that used to sit in the suite behind an environment variable (`*CostProbe`,
+`BoardScalePatchProbe`, `CodeGenCorpusProbe`, `PaintedExtentBoardTests`,
+`PaintedExtentWalkTests`) are benches now. The release *budgets* below still confirm
+through `swift test -c release`, which pays that compile; budget a long first run.
+
 ## Reproducing every figure
 
 Machine: Apple silicon, 2026-08-29. Load average at measurement is given per table,
@@ -813,7 +836,10 @@ and none laid out on a second walk over unchanged texts (the text-ink cache; the
 lays out 106, since twenty "Open" labels and other repeats share a key).
 
 `swift test --filter PaintedExtentBoardTests | grep PAINTED-EXTENT-BOARD`, debug build,
-best of seven, two runs on 2026-10-20 at load 32–39 (`uptime`; other agents building):
+best of seven, two runs on 2026-10-20 at load 32–39 (`uptime`; other agents building).
+That test is now the `painted-extent-board` bench (`swift run -c release WoodcaseBench
+painted-extent-board`, median of seven, optimized), so a new figure is not comparable
+with this table:
 
 | Pass over the artboard | Time |
 |---|---|
@@ -902,10 +928,12 @@ have measured nothing. The fix belongs in `Sources/WoodcaseCommandCore/Verbs/Sho
 
 ## Where the code lives
 
-The budget types are test-target types — `PerformanceBudget`, `PerformanceSample`,
-`PerformanceFixture` and `SyntheticPenDocument` — and they do not appear in this
-library's symbol graph. They are in `Tests/WoodcaseTests/Performance/`, one type per
-file, beside the suites that use them. `PerformanceSetVerbBudgetTests` is why the
+The budget types are test-target types — `PerformanceBudget`, `PerformanceSample` and
+`PerformanceFixture` — and they do not appear in this library's symbol graph. They are
+in `Tests/WoodcaseTests/Performance/`, one type per file, beside the suites that use
+them. The documents they measure on — `SyntheticPenDocument`, `PerfBoardFixture`,
+`DeepDocuments` — and `StackHighWater` are in `Sources/WoodcasePerfFixtures/`, a target
+that is not a product, shared with the benches in `Sources/WoodcaseBench/`. `PerformanceSetVerbBudgetTests` is why the
 `WoodcaseTests` target depends on `WoodcaseCommandCore`: the verb budget has to sit inside
 the one serialized `PerformanceBudgets` suite, and the verb lives in the CLI's library.
 

@@ -7,6 +7,7 @@
     import Foundation
     import Testing
     @testable import Woodcase
+    import WoodcasePerfFixtures
 
     /// How much stack ``PenLayoutEngine/paintedExtent(of:rect:layoutRects:)`` needs in a
     /// debug build.

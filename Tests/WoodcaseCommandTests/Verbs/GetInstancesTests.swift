@@ -23,7 +23,8 @@ struct GetInstancesTests {
         #expect(run.status == 0)
         let rows = run.stdoutLines.dropFirst()
         #expect(rows.count == 3)
-        #expect(rows.map { $0.split(separator: " ").map(String.init)[1] } == ["Zta01", "Alp01", "Mid01"])
+        let ids: [String] = rows.map { (row: String) -> String in String(row.split(separator: " ")[1]) }
+        #expect(ids == ["Zta01", "Alp01", "Mid01"])
         #expect(!run.stdout.contains("Oth01"))
     }
 

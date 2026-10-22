@@ -7,6 +7,7 @@
     import Foundation
     import Testing
     @testable import Woodcase
+    import WoodcasePerfFixtures
 
     /// How much stack the walks that start from a node in memory need: comparing,
     /// hashing, encoding, freeing and inserting a deep tree.

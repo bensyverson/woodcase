@@ -8,6 +8,7 @@
     import Foundation
     import Testing
     @testable import Woodcase
+    import WoodcasePerfFixtures
 
     /// How much stack the descendant-key and injected-node walks need in a debug build.
     ///

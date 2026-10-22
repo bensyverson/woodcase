@@ -1,10 +1,10 @@
 //
 //  PerfBoardFixture.swift
-//  WoodcaseTests
+//  WoodcasePerfFixtures
 //
 
 import Foundation
-@testable import Woodcase
+import Woodcase
 
 /// One artboard of Penumbra's perf board (Penumbra `scripts/perf-board`), rebuilt here so
 /// Woodcase's tests need no file from Penumbra: a free-placement 1200×1000 frame holding a
@@ -12,17 +12,17 @@ import Foundation
 /// grid, each a vertical stack of a photo and a content stack — a title, a wrapping body,
 /// an avatar row, three tags and a button. 308 nodes, 165 of them texts; the image fills
 /// are left out, since they change no extent.
-enum PerfBoardFixture {
+public enum PerfBoardFixture {
     /// How many nodes the artboard holds.
-    static let nodeCount = 308
+    public static let nodeCount = 308
 
     /// How many texts it holds.
-    static let textCount = 165
+    public static let textCount = 165
 
     /// The text inks a call to `paintedExtent` per node asks for: each text once for
     /// itself and once for every unclipped ancestor below its card or up to the artboard —
     /// 22 per card and 3 per header text.
-    static let perNodeInkLookups = 455
+    public static let perNodeInkLookups = 455
 
     /// The palette the cards' accents cycle through.
     private static let palette = ["#4F46E5", "#0EA5E9", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#14B8A6"]
@@ -32,7 +32,7 @@ enum PerfBoardFixture {
         + "stroke radius label badge avatar canvas spacing outline").split(separator: " ").map(String.init)
 
     /// The artboard, parsed.
-    static func document() throws -> PenDocument {
+    public static func document() throws -> PenDocument {
         var builder = Builder()
         let root: [String: Any] = ["version": "2.20", "children": [builder.artboard()]]
         return try PenParser.parse(JSONSerialization.data(withJSONObject: root))

@@ -1,6 +1,6 @@
 //
 //  StackHighWater.swift
-//  WoodcaseTests
+//  WoodcasePerfFixtures
 //
 
 #if canImport(Darwin)
@@ -17,9 +17,9 @@
     /// much it used. A guard page below the stack turns a runaway into a crash rather
     /// than a scribble; the default 64 MiB is far above any budget a test asserts, so
     /// even a badly regressed walk reports a number instead of killing the run.
-    enum StackHighWater {
+    public enum StackHighWater {
         /// The stack a Swift task gets on Apple platforms.
-        static let taskStackSize = 512 * 1024
+        public static let taskStackSize = 512 * 1024
 
         /// The byte the unused stack is painted with.
         private static let paint: UInt8 = 0xA5
@@ -30,7 +30,7 @@
         ///   - stackSize: The stack the thread gets; a multiple of the page size.
         ///   - work: The work to measure.
         /// - Returns: The bytes of stack the deepest call reached, and the work's result.
-        static func measure<T>(stackSize: Int = 64 * 1024 * 1024, _ work: @escaping () -> T) -> (bytes: Int, result: T) {
+        public static func measure<T>(stackSize: Int = 64 * 1024 * 1024, _ work: @escaping () -> T) -> (bytes: Int, result: T) {
             let page = Int(getpagesize())
             let mapped = stackSize + page
             guard let base = mmap(nil, mapped, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0),

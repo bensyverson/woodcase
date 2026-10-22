@@ -1,12 +1,12 @@
 //
 //  SyntheticPenDocument+EditorBoard.swift
-//  WoodcaseTests
+//  WoodcasePerfFixtures
 //
 
 import Foundation
 import Woodcase
 
-extension SyntheticPenDocument {
+public extension SyntheticPenDocument {
     /// The rows in the board's long list — the container a reorder or a removal is
     /// measured in.
     static let editorBoardListRows: Int = 400

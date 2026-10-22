@@ -1,14 +1,14 @@
 //
 //  DeepDocuments+InMemory.swift
-//  WoodcaseTests
+//  WoodcasePerfFixtures
 //
 
 import Foundation
-@testable import Woodcase
+import Woodcase
 
 /// Deep trees built from Swift values rather than parsed, for the walks that start from a
 /// node in memory: comparing, hashing, encoding, freeing and inserting.
-extension DeepDocuments {
+public extension DeepDocuments {
     /// The deepest frame tree a file can hold: Foundation refuses JSON nested past 512
     /// arrays and objects, and each level of a node tree is an object and its `children`
     /// array, under the document's own two.
@@ -42,9 +42,7 @@ extension DeepDocuments {
     /// - Returns: The document.
     /// - Throws: Whatever parsing the fixture throws.
     static func settingsMockup() throws -> PenDocument {
-        guard let url = Bundle.module.url(forResource: "settings-mockup", withExtension: "pen", subdirectory: "Fixtures")
-        else { throw CocoaError(.fileNoSuchFile) }
-        return try PenParser.parse(Data(contentsOf: url))
+        try PenParser.parse(Data(contentsOf: PerfFixtureFile.settingsMockup.url))
     }
 
     /// A tree as wide at every level as the settings mockup and as deep as a file can
@@ -63,13 +61,30 @@ extension DeepDocuments {
         guard let board = try settingsMockup().children.first else { throw CocoaError(.fileReadCorruptFile) }
         var tree = board
         for wrap in 0 ..< wraps {
-            guard var wrapped = PenTreeRewrite.rewrite(board, context: (), visit: { node, _ in
-                .descend(PenNode(id: "w\(wrap)-\(node.id)", common: node.common, kind: node.kind, extras: node.extras), ())
-            }) else { break }
-            wrapped.kind = wrapped.kind.replacingInlineChildren(with: wrapped.kind.inlineChildren + [tree])
+            var wrapped = prefixingIDs(of: board, with: "w\(wrap)-")
+            wrapped.kind = wrapped.kind.withChildren(wrapped.kind.inlineChildren + [tree])
             tree = wrapped
         }
         return tree
+    }
+
+    /// `node` and everything under it with `prefix` put before each id.
+    ///
+    /// Recursive, which is safe only because it walks the mockup's own board, eight
+    /// levels deep; the trees built from it are what the deep walks are measured on.
+    private static func prefixingIDs(of node: PenNode, with prefix: String) -> PenNode {
+        var kind = node.kind
+        switch kind {
+        case var .frame(data):
+            data.children = data.children?.map { prefixingIDs(of: $0, with: prefix) }
+            kind = .frame(data)
+        case var .group(data):
+            data.children = data.children?.map { prefixingIDs(of: $0, with: prefix) }
+            kind = .group(data)
+        default:
+            break
+        }
+        return PenNode(id: prefix + node.id, common: node.common, kind: kind, extras: node.extras)
     }
 
     /// The tree with the deepest leaf on its last-child path renamed — a difference a
@@ -91,7 +106,7 @@ extension DeepDocuments {
         while var parent = path.popLast() {
             var children = parent.kind.inlineChildren
             children[children.count - 1] = rebuilt
-            parent.kind = parent.kind.replacingInlineChildren(with: children)
+            parent.kind = parent.kind.withChildren(children)
             rebuilt = parent
         }
         return rebuilt

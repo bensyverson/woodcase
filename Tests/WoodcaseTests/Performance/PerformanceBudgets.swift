@@ -24,10 +24,9 @@ import Testing
 /// - ``PerformanceBudgets/LayoutEditTests`` (targets, not yet enforced; runs only on a
 ///   strict build)
 /// - ``PerformanceBudgets/ComponentLoopTests`` (runs only on a strict build)
-/// - ``PerformanceBudgets/PaintedExtentWalkTests`` (a measurement, not a budget — no
-///   fixed ceiling)
-/// - ``PerformanceBudgets/PaintedExtentBoardTests`` (a measurement, not a budget — no
-///   fixed ceiling)
+///
+/// Measurements with no ceiling — what a call costs on an optimized build — are not
+/// here: they are `WoodcaseBench` benches (`swift run -c release WoodcaseBench list`).
 ///
 /// ```sh
 /// swift test --filter Performance

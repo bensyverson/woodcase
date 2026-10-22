@@ -120,7 +120,7 @@ reconciliation settles only the nodes and lists the journal names
 (``EditableDocument/reconcileChildrenWithParents(after:)``), and the comparison reads
 only the journal's entries. A collaborator's one-property change therefore costs its
 spine, not the document: about 0.14 ms on Penumbra's 2,464-node perf board, flat across
-500 changes (release, `RemoteApplyCostProbe`). Scoping is exact while the flat store
+500 changes (release, `WoodcaseBench remote-apply-cost`). Scoping is exact while the flat store
 agrees with the CRDT; a local edit that leaves it disagreeing (an index the CRDT's lists
 cannot give, a node created again under a tombstoned id) marks the store, and the next
 batch reconciles the whole document once, which is when the store always caught up.

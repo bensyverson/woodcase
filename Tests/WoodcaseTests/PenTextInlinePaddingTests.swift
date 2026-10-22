@@ -54,11 +54,17 @@ struct PenTextInlinePaddingTests {
     func midLine() throws {
         let plain = glyphStarts("x @ben y")
         let padded = glyphStarts("x @ben y", runs: [PenTextRun(start: 2, end: 6, inlinePadding: 3)])
-        #expect(try abs(#require(padded[1]) - #require(plain[1])) < 0.001, "the space before the run is unmoved")
-        #expect(try abs(#require(padded[2]) - #require(plain[2]) - 3) < 0.001, "the run starts after its padding")
-        #expect(try abs(#require(padded[5]) - #require(plain[5]) - 3) < 0.001)
-        #expect(try abs(#require(padded[6]) - #require(plain[6]) - 6) < 0.001, "what follows starts after the padding")
-        #expect(try abs(#require(padded[7]) - #require(plain[7]) - 6) < 0.001)
+        /// How far glyph `index` moved; one typed step, so no `#expect` has to infer the arithmetic.
+        func shift(_ index: Int) throws -> Double {
+            let after: Double = try #require(padded[index])
+            let before: Double = try #require(plain[index])
+            return after - before
+        }
+        #expect(try abs(shift(1)) < 0.001, "the space before the run is unmoved")
+        #expect(try abs(shift(2) - 3) < 0.001, "the run starts after its padding")
+        #expect(try abs(shift(5) - 3) < 0.001)
+        #expect(try abs(shift(6) - 6) < 0.001, "what follows starts after the padding")
+        #expect(try abs(shift(7) - 6) < 0.001)
     }
 
     @Test("At a paragraph's start, a padded run starts its padding in from the text column")

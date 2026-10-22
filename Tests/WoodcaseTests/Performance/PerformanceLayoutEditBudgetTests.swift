@@ -6,6 +6,7 @@
 import Foundation
 import Testing
 import Woodcase
+import WoodcasePerfFixtures
 
 extension PerformanceBudgets {
     /// Measures what one editor gesture costs the layout engine on a 2,000-node board.

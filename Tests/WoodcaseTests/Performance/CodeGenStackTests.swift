@@ -7,6 +7,7 @@
     import Foundation
     import Testing
     @testable import Woodcase
+    import WoodcasePerfFixtures
 
     /// How much stack code generation needs in a debug build, on trees far deeper than any
     /// design: analysis, emission and the code's layout on the page.

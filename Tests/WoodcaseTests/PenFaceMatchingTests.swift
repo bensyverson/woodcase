@@ -24,8 +24,9 @@ struct PenFaceMatchingTests {
 
     /// CSS Fonts 4 §5.2 step 4: an exact weight; between 400 and 500, heavier up to 500,
     /// then lighter, then heavier; below 400, lighter then heavier; above 500, heavier
-    /// then lighter.
-    @Test("The weight CSS picks among a family's cuts", arguments: [
+    /// then lighter. Desired weight, the family's cuts, the cut picked. Typed, so the
+    /// `@Test` macro does not infer a literal of tuples of arrays.
+    static let cssCases: [(Double, [Double], Double)] = [
         (450.0, [300.0, 400, 500, 600], 500.0),
         (450.0, [300.0, 400, 600], 400.0),
         (400.0, [300.0, 500, 600], 500.0),
@@ -36,7 +37,9 @@ struct PenFaceMatchingTests {
         (300.0, [200.0, 400], 200.0),
         (300.0, [400.0, 700], 400.0),
         (275.0, [275.0, 400], 275.0),
-    ])
+    ]
+
+    @Test("The weight CSS picks among a family's cuts", arguments: cssCases)
     func cssWeightMatching(desired: Double, available: [Double], picked: Double) {
         #expect(PenFaceMatching.cssMatch(weight: desired, among: available) == picked)
     }

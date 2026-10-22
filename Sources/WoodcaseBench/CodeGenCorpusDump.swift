@@ -1,11 +1,11 @@
 //
-//  CodeGenCorpusProbe.swift
-//  WoodcaseTests
+//  CodeGenCorpusDump.swift
+//  WoodcaseBench
 //
 
 import Foundation
-import Testing
 import Woodcase
+import WoodcasePerfFixtures
 
 /// Everything code generation writes for every `.pen` under `Tests/`, dumped to a
 /// directory so two builds' output can be compared byte for byte with `diff -r`.
@@ -13,39 +13,42 @@ import Woodcase
 /// A record, not a check: it is how the iterative emitters (issue `g5SACU`) were shown to
 /// write what the recursive ones wrote. For each fixture that parses it writes the whole
 /// React and SwiftUI emit, each run's diagnostics, and ``CodeGeneration``'s code for every
-/// component and root of the document. It runs only when asked:
+/// component and root of the document.
 ///
 /// ```sh
-/// WOODCASE_CODEGEN_DUMP=/path/to/dump swift test --filter CodeGenCorpusProbe
+/// swift run -c release WoodcaseBench codegen-dump /path/to/after
 /// diff -r /path/to/before /path/to/after
 /// ```
-struct CodeGenCorpusProbe {
-    /// The directory to dump into, or `nil` when the probe was not asked for.
-    private static let destination = ProcessInfo.processInfo.environment["WOODCASE_CODEGEN_DUMP"]
+enum CodeGenCorpusDump {
+    /// The bench.
+    static let bench = Bench(
+        name: "codegen-dump",
+        summary: "Dump every Tests/ fixture's generated React, SwiftUI and selection code, for diff -r",
+        arguments: "<directory>",
+        run: { arguments in
+            guard let destination = arguments.first else {
+                throw Bench.UsageError(description: "usage: WoodcaseBench codegen-dump <directory>")
+            }
+            try run(to: URL(fileURLWithPath: destination))
+        }
+    )
 
-    /// `Tests/`, in the source tree.
-    private static let testsDirectory = URL(fileURLWithPath: #filePath)
-        .deletingLastPathComponent()
-        .deletingLastPathComponent()
-        .deletingLastPathComponent()
-
-    @Test("Dump every fixture's generated code", .enabled(if: destination != nil))
-    func dump() throws {
-        let destination = try URL(fileURLWithPath: #require(Self.destination))
-        let fixtures = try Self.fixtures()
+    private static func run(to destination: URL) throws {
+        let tests = PerfFixtureFile.testsDirectory
+        let fixtures = fixtures(under: tests)
         var dumped = 0
         for fixture in fixtures {
             guard let document = try? PenParser.parse(Data(contentsOf: fixture)) else { continue }
-            let relative = String(fixture.path.dropFirst(Self.testsDirectory.path.count + 1))
-            try Self.dump(document, to: destination.appendingPathComponent(relative))
+            let relative = String(fixture.path.dropFirst(tests.path.count + 1))
+            try dump(document, to: destination.appendingPathComponent(relative))
             dumped += 1
         }
         print("PROBE codegen corpus: \(dumped) of \(fixtures.count) fixtures dumped to \(destination.path)")
     }
 
-    /// Every `.pen` under `Tests/`, in path order.
-    private static func fixtures() throws -> [URL] {
-        let enumerator = FileManager.default.enumerator(at: testsDirectory, includingPropertiesForKeys: nil)
+    /// Every `.pen` under `directory`, in path order.
+    private static func fixtures(under directory: URL) -> [URL] {
+        let enumerator = FileManager.default.enumerator(at: directory, includingPropertiesForKeys: nil)
         var found: [URL] = []
         while let url = enumerator?.nextObject() as? URL {
             if url.pathExtension == "pen" { found.append(url) }

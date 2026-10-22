@@ -1,6 +1,6 @@
 //
 //  SyntheticPenDocument.swift
-//  WoodcaseTests
+//  WoodcasePerfFixtures
 //
 
 import Foundation
@@ -28,28 +28,32 @@ import Woodcase
 /// ```swift
 /// let document = SyntheticPenDocument.make(nodeCount: 5000)
 /// ```
-enum SyntheticPenDocument {
+public enum SyntheticPenDocument {
     /// Text leaves under one row frame.
-    static let textsPerRow: Int = 3
+    public static let textsPerRow: Int = 3
 
     /// Row frames under one artboard, before truncation.
     ///
     /// Large on purpose: `shot` renders **one** artboard, so a document split into
     /// many small ones would make the render budget a measurement of nothing.
-    static let rowsPerArtboard: Int = 400
+    public static let rowsPerArtboard: Int = 400
 
     /// The width every artboard is fixed at, in points.
-    static let artboardWidth: Double = 400
+    public static let artboardWidth: Double = 400
 
     /// The horizontal gap between artboards, in points.
-    static let artboardStride: Double = 480
+    public static let artboardStride: Double = 480
+
+    /// The node count the budgets and benches measure: five thousand, an order of
+    /// magnitude past the largest real fixture.
+    public static let budgetNodeCount: Int = 5000
 
     /// Builds a document with exactly `nodeCount` nodes.
     ///
     /// - Parameter nodeCount: How many nodes the document should contain, counting
     ///   artboards, rows and text leaves alike. Zero produces an empty document.
     /// - Returns: The document, ready to hand to ``PenParser/encodeForFile(_:)``.
-    static func make(nodeCount: Int) -> PenDocument {
+    public static func make(nodeCount: Int) -> PenDocument {
         var identifier = 0
         var remaining = max(0, nodeCount)
         var artboards: [PenNode] = []
@@ -65,7 +69,7 @@ enum SyntheticPenDocument {
     ///
     /// Always present for any `nodeCount` above zero, because the first artboard is
     /// the first thing ``make(nodeCount:)`` emits.
-    static let firstArtboardName: String = "Screen 1"
+    public static let firstArtboardName: String = "Screen 1"
 
     // MARK: - Nodes
 

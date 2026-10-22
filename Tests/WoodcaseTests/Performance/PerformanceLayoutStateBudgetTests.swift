@@ -6,6 +6,7 @@
 import Foundation
 import Testing
 import Woodcase
+import WoodcasePerfFixtures
 
 extension PerformanceBudgets {
     /// Measures node-granular layout on a 2,000-node board: a hypothetical reorder and

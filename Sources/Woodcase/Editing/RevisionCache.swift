@@ -33,7 +33,7 @@ import Foundation
 /// A forgotten node keeps its ``encodings`` entry unless the edit wrote it, so refolding
 /// the closure costs a few string combines per node, not a JSON encoding: an edit inside
 /// a component nested in 25 others, with 400 instances on the page, refolds 512 nodes in
-/// about 0.56 ms (release, `ComponentLoopEditCostProbe`'s document, load about 10).
+/// about 0.56 ms (release, `WoodcaseBench component-loop-edit-cost`'s document, load about 10).
 ///
 /// Components that render each other share a group revision
 /// (``EditableDocument/revision(of:)``), kept per member in ``cycles``. A revision that

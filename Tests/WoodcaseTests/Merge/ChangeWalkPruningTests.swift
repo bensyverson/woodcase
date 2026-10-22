@@ -6,6 +6,7 @@
 import Foundation
 import Testing
 @testable import Woodcase
+import WoodcasePerfFixtures
 
 /// How much of a document the two-way change walk visits: equal revisions prune whole subtrees.
 @MainActor

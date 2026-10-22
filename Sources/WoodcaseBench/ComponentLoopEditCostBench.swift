@@ -1,33 +1,31 @@
 //
-//  ComponentLoopEditCostProbe.swift
-//  WoodcaseTests
+//  ComponentLoopEditCostBench.swift
+//  WoodcaseBench
 //
 
 import Foundation
-import Testing
-@testable import Woodcase
+import Woodcase
 
-/// What one local edit costs through a session on a 2,580-node, 30-component document —
+/// What one local edit costs through a session on a 2,580-node, 30-component document:
 /// a property nudge and a plain-rectangle insert, on the page and inside a component,
 /// each alone and followed by one instance's expansion, then inside a component with the
-/// document's layout cache primed — printed as `PROBE` lines.
-///
-/// A measurement, not a check: it runs only when asked, in a release build, and its
-/// figures mean something only beside `uptime`:
-///
-/// ```sh
-/// WOODCASE_LOOP_COST_PROBE=1 swift test -c release -Xswiftc -enable-testing --filter ComponentLoopEditCostProbe
-/// ```
-@MainActor
-struct ComponentLoopEditCostProbe {
+/// document's layout cache primed.
+enum ComponentLoopEditCostBench {
+    /// The bench.
+    static let bench = Bench(
+        name: "component-loop-edit-cost",
+        summary: "Local edits through a session on a 2,580-node, 30-component document",
+        run: { _ in try run() }
+    )
+
     /// A node named by its id.
-    static func node(_ id: String, _ kind: PenNode.Kind, reusable: Bool = false) -> PenNode {
+    private static func node(_ id: String, _ kind: PenNode.Kind, reusable: Bool = false) -> PenNode {
         PenNode(id: id, common: PenNodeCommon(name: id, reusable: reusable ? true : nil), kind: kind)
     }
 
     /// Thirty components of 25 nodes, each nesting the one before, and a page of 60
     /// boards holding eight instances and 21 plain nodes each.
-    static func document() -> PenDocument {
+    private static func document() -> PenDocument {
         var roots: [PenNode] = []
         for c in 0 ..< 30 {
             var kids: [PenNode] = []
@@ -55,52 +53,45 @@ struct ComponentLoopEditCostProbe {
     }
 
     /// Times forty submits of `make`'s edits and prints the median and p90.
-    static func measure(_ label: String, _ session: DocumentSession, _ make: (Int) -> EditOperation, readBack: Bool) throws {
-        let clock = ContinuousClock()
-        var samples: [Duration] = []
-        for i in 0 ..< 40 {
-            let op = make(i)
-            try samples.append(clock.measure {
-                try session.submit(.local(LocalEdit(operations: [op])))
-                if readBack { _ = try session.document.expandRef(nodeID: "B0i0") }
-            })
+    private static func measure(
+        _ label: String, _ session: DocumentSession, _ make: (Int) -> EditOperation, readBack: Bool
+    ) throws {
+        var edit = 0
+        try BenchClock.measure(label, runs: 40) {
+            let op = make(edit)
+            edit += 1
+            try session.submit(.local(LocalEdit(operations: [op])))
+            if readBack { _ = try session.document.expandRef(nodeID: "B0i0") }
         }
-        samples.sort()
-        let ms = { (d: Duration) in Double(d.components.attoseconds) / 1e15 + Double(d.components.seconds) * 1000 }
-        print(String(format: "PROBE %@ median %.3f ms p90 %.3f ms", label, ms(samples[20]), ms(samples[36])))
     }
 
-    @Test(
-        "Edit cost on a 2,580-node, 30-component document",
-        .enabled(if: ProcessInfo.processInfo.environment["WOODCASE_LOOP_COST_PROBE"] != nil)
-    )
-    func probe() throws {
+    private static func run() throws {
         let author = Author(name: "ana", peerID: PeerID(rawValue: "peer-ana"))
-        let session = DocumentSession(document: Self.document(), author: author)
+        let session = DocumentSession(document: document(), author: author)
         print("PROBE nodes \(session.document.nodes.count) components \(session.document.componentRegistry.count)")
         for readBack in [false, true] {
             let tag = readBack ? "+expandRef" : ""
-            try Self.measure("set x on page rect\(tag)", session, { i in
+            try measure("set x on page rect\(tag)", session, { i in
                 .setProperties(EditOperation.SetProperties(nodeID: "B5r1l0", properties: ["common.x": .int(i)]))
             }, readBack: readBack)
-            try Self.measure("set x in component\(tag)", session, { i in
+            try measure("set x in component\(tag)", session, { i in
                 .setProperties(EditOperation.SetProperties(nodeID: "C5k1l0", properties: ["common.x": .int(i)]))
             }, readBack: readBack)
-            try Self.measure("insert rect on page\(tag)", session, { i in
-                .insertNode(EditOperation.InsertNode(node: Self.node("NP\(tag)\(i)", .rectangle(PenNode.RectangleData())), parentID: "B7r2"))
+            try measure("insert rect on page\(tag)", session, { i in
+                .insertNode(EditOperation.InsertNode(node: node("NP\(tag)\(i)", .rectangle(PenNode.RectangleData())), parentID: "B7r2"))
             }, readBack: readBack)
-            try Self.measure("insert rect in component\(tag)", session, { i in
-                .insertNode(EditOperation.InsertNode(node: Self.node("NC\(tag)\(i)", .rectangle(PenNode.RectangleData())), parentID: "C7k2"))
+            try measure("insert rect in component\(tag)", session, { i in
+                .insertNode(EditOperation.InsertNode(node: node("NC\(tag)\(i)", .rectangle(PenNode.RectangleData())), parentID: "C7k2"))
             }, readBack: readBack)
         }
         // A host that keeps the document's layout cache — Penumbra primes it — has each
         // structural edit work out which boards it changes.
         session.document.primeLayoutCache(with: [:])
-        try Self.measure("set x in component, layout primed", session, { i in
+        try measure("set x in component, layout primed", session, { i in
             .setProperties(EditOperation.SetProperties(nodeID: "C5k1l0", properties: ["common.x": .int(1000 + i)]))
         }, readBack: false)
-        try Self.measure("insert rect in component, layout primed", session, { i in
-            .insertNode(EditOperation.InsertNode(node: Self.node("NL\(i)", .rectangle(PenNode.RectangleData())), parentID: "C7k2"))
+        try measure("insert rect in component, layout primed", session, { i in
+            .insertNode(EditOperation.InsertNode(node: node("NL\(i)", .rectangle(PenNode.RectangleData())), parentID: "C7k2"))
         }, readBack: false)
     }
 }

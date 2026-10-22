@@ -7,6 +7,7 @@ import CoreGraphics
 import Foundation
 import Testing
 import Woodcase
+import WoodcasePerfFixtures
 
 extension PerformanceBudgets {
     /// Holds the render of one artboard — what `woodcase shot` writes — to its budget.

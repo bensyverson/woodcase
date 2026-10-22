@@ -136,7 +136,8 @@ struct PenImagePlacementTests {
         expectCrop(placed.crop, [1.3, 0, 0.39, 1.3, -0.345, -0.15])
         // The crop box's sides are the crop axes' lengths in image pixels, 256 and |(-76.8, 128)|,
         // over 1.3; it covers 200×120 by its height.
-        let width = 120 * 256 / (76.8 * 76.8 + 128 * 128).squareRoot()
+        let axis = 76.8 * 76.8 + 128 * 128
+        let width: Double = 120 * 256 / axis.squareRoot()
         expectRect(placed.cropBox, (200 - width) / 2, 0, width, 120)
         expectMap(
             placed.imageTransform,

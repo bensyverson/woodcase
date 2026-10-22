@@ -6,6 +6,7 @@
 import Foundation
 import Testing
 import Woodcase
+import WoodcasePerfFixtures
 
 /// Holds the editor-board generator to what a benchmark needs of a fixture: the same
 /// bytes every time, an exact node count, and a file the loader accepts.

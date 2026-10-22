@@ -47,17 +47,20 @@ import Synchronization
 /// At most ``capacity`` inks (``defaultCapacity`` unless its maker says otherwise), the
 /// least recently used forgotten first, by the two-generation turn ``TextSizeCache``
 /// describes.
-final class TextInkCache: Sendable {
+///
+/// `package`, not internal, so `WoodcaseBench` can install a cache that keeps no ink and
+/// time a painted-extent pass without one; nothing outside the package sees it.
+package final class TextInkCache: Sendable {
     /// How many inks a cache holds unless its maker says otherwise: more texts than a
     /// large board shows at several widths, at a few megabytes.
-    static let defaultCapacity = 20000
+    package static let defaultCapacity = 20000
 
     /// The process's cache, which every painted-extent pass shares.
     static let shared = TextInkCache()
 
     /// The cache ``PenLayoutEngine/textInkBounds(of:box:)`` reads: ``shared``, unless a
     /// test installs its own for the work it runs.
-    @TaskLocal static var current: TextInkCache = shared
+    @TaskLocal package static var current: TextInkCache = shared
 
     /// Everything a text's ink depends on but the font set.
     struct Key: Friendly {
@@ -107,7 +110,7 @@ final class TextInkCache: Sendable {
     ///   - fontGeneration: Reads the font set's generation. Production reads
     ///     ``PenFontRegistry/generation``; a test passes its own so a registration by
     ///     another suite cannot move it.
-    init(
+    package init(
         capacity: Int = TextInkCache.defaultCapacity,
         fontGeneration: @escaping @Sendable () -> Int = { PenFontRegistry.generation }
     ) {
