@@ -159,13 +159,12 @@ struct PenImageFillTests {
         #expect(bottomA == 0)
     }
 
-    @Test("Image fill with nil provider skips fill")
+    @Test("Image fill with nil provider draws the loading gray")
     func nilProvider() throws {
         let image = try #require(renderWithImageFill { _ in nil })
         let reader = try #require(PixelReader(image))
-        // Should be transparent — no image returned
-        let (_, _, _, a) = reader.rgba(at: 50, 50)
-        #expect(a == 0)
+        let gray = PenImageLoadingPlaceholder.color
+        #expect(reader.matches(at: 50, 50, r: gray.red, g: gray.green, b: gray.blue, a: gray.alpha))
     }
 
     @Test("Image fill with 50% opacity renders semi-transparent")

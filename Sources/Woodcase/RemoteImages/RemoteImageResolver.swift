@@ -29,8 +29,8 @@ import os
 /// )
 /// ```
 ///
-/// Skipping the prepare step is not an error: an image that is not cached simply is not
-/// drawn, the same as a missing file on disk.
+/// Skipping the prepare step is not an error: an image that is not cached draws
+/// ``PenImageLoadingPlaceholder``'s gray, the same as a missing file on disk.
 public final class RemoteImageResolver: Sendable {
     /// Shared singleton using `$WOODCASE_HOME/images` and ``StandardDataFetcher``.
     public static let shared = RemoteImageResolver(

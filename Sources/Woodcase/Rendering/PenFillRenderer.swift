@@ -100,7 +100,7 @@ enum PenFillRenderer {
 
     /// A solid color covers the whole domain, so it is filled straight through the outline
     /// rather than clipped — the same pixels, with the path's own anti-aliasing.
-    private static func renderSolid(
+    static func renderSolid(
         _ color: CGColor,
         blendMode: PenBlendMode?,
         onto target: Target,

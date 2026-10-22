@@ -33,7 +33,7 @@ let image = PenRenderer.render(
 )
 ```
 
-`render`, `shot` and `serve` all do this already. Skipping the prepare step is not an error: an image nobody downloaded is simply not drawn, exactly like a missing file on disk. ``PenRenderer/fileImageProvider(relativeTo:)`` remains available for a caller that deliberately wants only local fills.
+`render`, `shot` and `serve` all do this already. Skipping the prepare step is not an error: an image nobody downloaded draws the loading gray (``PenImageLoadingPlaceholder``), exactly like a missing file on disk. ``PenRenderer/fileImageProvider(relativeTo:)`` remains available for a caller that deliberately wants only local fills.
 
 ## What Counts as Remote
 
@@ -61,7 +61,7 @@ Caching is best-effort. If the directory cannot be created or written — a read
 
 ## Failures
 
-A download that fails is remembered for the life of the resolver, so a document with a dead URL is not re-fetched on every render. ``RemoteImageResolver/prepareImages(for:diagnostics:)`` reports each one as a warning at the ``PenDiagnostic/Stage/imageResolution`` stage; the fill draws nothing.
+A download that fails is remembered for the life of the resolver, so a document with a dead URL is not re-fetched on every render. ``RemoteImageResolver/prepareImages(for:diagnostics:)`` reports each one as a warning at the ``PenDiagnostic/Stage/imageResolution`` stage; the fill draws the loading gray.
 
 The warning says why, not just that: the server's status when it answered ("the server answered HTTP 404"), or the reason the request never got an answer at all — no route, a refused proxy, a certificate that could not be checked — from the fetcher's ``NetworkFailure``. A custom ``RemoteDataFetching`` that throws something other than ``RemoteFetchError`` still reads as unreachable rather than as a bare, reasonless miss. The phrasing is shared with <doc:PenGoogleFonts>'s own download-failure warning through `RemoteFetchError.reasonPhrase`, defined beside this resolver rather than in `RemoteFetchError` itself — the wording is a decision the two callers make together, not one the transport error should carry.
 

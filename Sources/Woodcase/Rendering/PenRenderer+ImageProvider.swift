@@ -12,8 +12,8 @@ public extension PenRenderer {
     ///
     /// Remote images must have been downloaded first —
     /// ``RemoteImageResolver/prepareImages(for:)``, once, before rendering. A remote URL
-    /// nobody prepared yields `nil` and its fill is simply not drawn, the same as a
-    /// missing file.
+    /// nobody prepared yields `nil` and its fill draws ``PenImageLoadingPlaceholder``'s
+    /// gray, the same as a missing file.
     ///
     /// - Parameters:
     ///   - baseDir: The directory to resolve relative URLs against, typically the
