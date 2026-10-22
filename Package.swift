@@ -108,9 +108,10 @@ let package = Package(
             name: "WoodcaseCommand",
             dependencies: ["WoodcaseCommandCore"]
         ),
-        // The generated documents and the stack meter that the suite's budgets and
-        // WoodcaseBench both measure on. A target of its own so neither copies them; not
-        // a product, so no consumer of the library sees it. It reads its .pen files from
+        // The generated documents, the stack meter, and the performance budgets with the
+        // pipelines they time, which the suite and WoodcaseBench (`budgets`) both run. A
+        // target of its own so neither copies them; not a product, so no consumer of the
+        // library sees it. It reads its .pen files from
         // Tests/WoodcaseTests/Fixtures in the source tree (`PerfFixtureFile`).
         .target(
             name: "WoodcasePerfFixtures",

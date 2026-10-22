@@ -131,7 +131,8 @@ struct PenFileTransactionSaveMergeTests {
         let fixture = try SaveFixture()
         defer { fixture.remove() }
         let saved = try await mergeThenSave(fixture)
-        try await undo(saved.url, log: fixture.log, as: "ben")
+        let first = try await undo(saved.url, log: fixture.log, as: "ben")
+        #expect(!first.undone.isEmpty, "the first undo as ben reverses ben's row")
         let after = try Data(contentsOf: saved.url)
 
         let result = try await undo(saved.url, log: fixture.log, as: "ben")

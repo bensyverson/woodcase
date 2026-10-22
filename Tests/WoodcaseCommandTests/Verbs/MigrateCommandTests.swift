@@ -109,7 +109,7 @@ struct MigrateCommandTests {
         let file = root.appendingPathComponent("legacy.pen")
         try Self.write(Self.legacyJSON, to: file)
 
-        var command = try Migrate.parse([file.path])
+        let command = try Migrate.parse([file.path])
         try await command.run()
 
         let rewritten = try String(contentsOf: file, encoding: .utf8)
@@ -124,7 +124,7 @@ struct MigrateCommandTests {
         let file = root.appendingPathComponent("legacy.pen")
         try Self.write(Self.legacyJSON, to: file)
 
-        var command = try Migrate.parse([file.path, "--dry-run"])
+        let command = try Migrate.parse([file.path, "--dry-run"])
         try await command.run()
 
         #expect(try String(contentsOf: file, encoding: .utf8) == Self.legacyJSON)
@@ -137,7 +137,7 @@ struct MigrateCommandTests {
         let file = root.appendingPathComponent("current.pen")
         try Self.write(Self.currentJSON, to: file)
 
-        var command = try Migrate.parse([file.path])
+        let command = try Migrate.parse([file.path])
         try await command.run()
 
         #expect(try String(contentsOf: file, encoding: .utf8) == Self.currentJSON)
@@ -150,7 +150,7 @@ struct MigrateCommandTests {
         let file = root.appendingPathComponent("current.pen")
         try Self.write(Self.currentJSON, to: file)
 
-        var command = try Migrate.parse([file.path, "--force"])
+        let command = try Migrate.parse([file.path, "--force"])
         try await command.run()
 
         let rewritten = try String(contentsOf: file, encoding: .utf8)
@@ -166,7 +166,7 @@ struct MigrateCommandTests {
         let good = root.appendingPathComponent("legacy.pen")
         try Self.write(Self.legacyJSON, to: good)
 
-        var command = try Migrate.parse([root.path])
+        let command = try Migrate.parse([root.path])
         await #expect(throws: ExitCode.targetFailure) {
             try await command.run()
         }

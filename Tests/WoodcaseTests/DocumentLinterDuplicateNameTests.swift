@@ -74,7 +74,7 @@ struct DocumentLinterDuplicateNameTests {
         #expect(finding.message.contains("Fl001"))
         #expect(finding.message.contains("Fl002"))
         #expect(finding.path == "FL-TopBar")
-        let firstPath = try #require(doc.namePath(of: "Fl001"))
+        let firstPath = doc.namePath(of: "Fl001")
         #expect(finding.message.contains(firstPath))
     }
 

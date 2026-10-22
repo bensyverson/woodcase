@@ -8,11 +8,15 @@ do when one of them stops fitting.
 Speed is a feature here, not a nicety. An agent reads a document with `tree`, changes
 it with `set`, and looks at it with `shot`, over and over inside one conversation; a
 pipeline that takes a second is a pipeline nobody runs twice. So the three costs are
-budgeted, and the budgets are **tests** — `Tests/WoodcaseTests/Performance/`, run by
-plain `swift test`. On a release build, or under `WOODCASE_BUDGET_STRICT=1`, exceeding
-a budget fails; on the default debug build it only ever warns, because
-there the number measures the machine as much as the code (see
-[A debug budget is advisory](#A-debug-budget-is-advisory)).
+budgeted. Each budget's ceiling and the pipeline it times live in `WoodcasePerfFixtures`
+(`TreeBudget`, `SetTransactionBudget`, `ShotBudget`, `LayoutEditBudget`,
+`LayoutStateBudget`, `StructuralEditBudget`), and two things run them: the **tests** in
+`Tests/WoodcaseTests/Performance/`, under plain `swift test`, and the **`budgets` bench**,
+`swift run -c release WoodcaseBench budgets`, which runs them optimized against the release
+ceilings and prints `PASS`, `FAIL` or `TARGET` for each. On the bench's optimized build,
+or under `WOODCASE_BUDGET_STRICT=1`, exceeding a budget fails; on the default debug build
+it only ever warns, because there the number measures the machine as much as the code
+(see [A debug budget is advisory](#A-debug-budget-is-advisory)).
 
 | Pipeline | Document | Budget (release) | Measured (release) |
 |---|---|---|---|
@@ -135,8 +139,22 @@ probe, and one compiler job of that ran about 43 minutes (2026-10-21; build and 
 figures in `project/2026-10-21-build-test-loop-baseline.md`). The release-only probes
 that used to sit in the suite behind an environment variable (`*CostProbe`,
 `BoardScalePatchProbe`, `CodeGenCorpusProbe`, `PaintedExtentBoardTests`,
-`PaintedExtentWalkTests`) are benches now. The release *budgets* below still confirm
-through `swift test -c release`, which pays that compile; budget a long first run.
+`PaintedExtentWalkTests`) are benches now, and the release *budgets* confirm through the
+`budgets` bench (2026-10-22, leaf `GYWxMW`):
+
+```sh
+swift run -c release WoodcaseBench budgets          # every budget, against its release ceiling
+swift run -c release WoodcaseBench budgets set      # one group: tree, set, shot, layout-edit,
+                                                    # layout-state or structural-edit
+```
+
+It prints each budget's `BUDGET` line, then `PASS`, `FAIL` or `TARGET`, and exits 1 when
+an enforced budget fails. Two budgets have no bench: `PerformanceBudgets.SetVerbTests` runs
+`WoodcaseCommandCore`'s internal `SetCommand`, so its release figure is
+`scripts/perf-binary --config release`'s `set` (which adds process start-up), and
+`PerformanceBudgets.ComponentLoopTests` draws its documents with the test target's merge
+fuzzer, so it confirms with `WOODCASE_BUDGET_STRICT=1 swift test --filter
+PerformanceBudgets.ComponentLoopTests` against the debug limit.
 
 ## Reproducing every figure
 
@@ -145,16 +163,17 @@ because it is part of the number.
 
 ```sh
 # The release budgets — the column the ceilings are stated for. Strict: over is a
-# failure. This is where the "Measured (release)" column above comes from.
-swift test -c release --filter Performance 2>&1 | grep BUDGET
+# failure. The "Measured (release)" column above came from the optimized test build
+# that confirmed budgets until 2026-10-22; this bench runs the same bodies.
+swift run -c release WoodcaseBench budgets | grep -E 'BUDGET|PASS|FAIL|TARGET'
 
 # The same budgets on the default unoptimized build, scaled by debugMultiplier.
 # Load average 13 when these were taken; the minima are stable from ~load 2 upward.
 swift test --filter Performance 2>&1 | grep BUDGET
 
 # The layout-edit targets on the 2,000-node editor board (see "Layout edits on an
-# editor board" below). Strict only; a debug run skips them.
-WOODCASE_BUDGET_STRICT=1 swift test -c release --filter PerformanceBudgets.LayoutEditTests 2>&1 | grep BUDGET
+# editor board" below). The suite runs them only when strict; the bench always does.
+swift run -c release WoodcaseBench budgets layout-edit
 
 # Where the milliseconds go inside a settled read.
 WOODCASE_TEST_PROFILE=1 swift test --filter Performance 2>&1 | grep PROFILE
@@ -767,11 +786,12 @@ repetition was inflated together. On 2026-08-29 `set` on a synthetic 5000-node
 document reported **2626 ms** against its then-2000 ms debug limit in a four-agent run and
 **1767 ms** alone. Failing there reports the machine, not the code.
 
-So `PerformanceBudget.check(_:)` decides what being over the limit means:
+So `PerformanceBudget.verdict(_:)` decides what being over the limit means — the suite's
+`check(_:)` records a failure as an issue, and the `budgets` bench prints `FAIL` and exits 1:
 
 | build | over `limit` |
 | --- | --- |
-| release, or `WOODCASE_BUDGET_STRICT=1` | **fails** |
+| release (`swift run -c release WoodcaseBench budgets`), or `WOODCASE_BUDGET_STRICT=1` | **fails** |
 | default `swift test` | prints `BUDGET-ADVISORY`: how many times over, and the release run that confirms it |
 | any build, for a budget whose `standing` is `.target` | prints `BUDGET-TARGET`: how far the code still is from a ceiling set for work not yet landed |
 
@@ -789,8 +809,9 @@ run when you want one.
 
 ### `swift test -c release` and the two `@main`s
 
-`swift test -c release` runs, and `PerformanceBudget.isOptimized` asserts the release
-ceilings verbatim under it. It did not always: until 2026-08-30 the release run ended
+`swift test -c release` runs, though nothing should time with it any more: the `budgets`
+bench is where `PerformanceBudget.isOptimized` asserts the release ceilings verbatim. It did
+not always run: until 2026-08-30 the release run ended
 with
 
 ```text

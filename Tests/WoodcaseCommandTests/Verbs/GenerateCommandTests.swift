@@ -96,7 +96,7 @@ struct GenerateCommandTests {
         // ArgumentParser wraps ValidationError in CommandError during parse,
         // so we validate at the parse level where the error surfaces correctly.
         #expect {
-            var command = try Generate.React.parse(["input.pen", "--name", "@myorg/ui"])
+            let command = try Generate.React.parse(["input.pen", "--name", "@myorg/ui"])
             try command.validate()
         } throws: { error in
             String(describing: error).contains("--name requires --package")
@@ -130,7 +130,7 @@ struct GenerateCommandTests {
     @Test("--preview without --package fails validation")
     func previewWithoutPackageFails() throws {
         #expect {
-            var command = try Generate.React.parse(["input.pen", "--preview"])
+            let command = try Generate.React.parse(["input.pen", "--preview"])
             try command.validate()
         } throws: { error in
             String(describing: error).contains("--preview requires --package")

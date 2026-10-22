@@ -7,6 +7,7 @@ import Foundation
 import Testing
 import Woodcase
 @testable import WoodcaseCommandCore
+import WoodcasePerfFixtures
 
 extension PerformanceBudgets {
     /// Holds `woodcase set` — the verb, as a caller runs it — to its budget.
@@ -30,6 +31,10 @@ extension PerformanceBudgets {
         /// every override through JSON. Applying overrides through ``PenNodeOverlay``
         /// brought it to 172.7 ms in process (`swift test -c release --filter
         /// PerformanceBudgets`, 2026-09-27, load average 18–31) and the binary to 203.9 ms.
+        ///
+        /// The one enforced budget `WoodcaseBench budgets` cannot run: `SetCommand` is
+        /// internal to `WoodcaseCommandCore`. Confirm it on release with
+        /// `scripts/perf-binary --config release`, whose `set` adds process start-up.
         private static let budget = PerformanceBudget(
             name: "set verb on woodcase-app.pen",
             release: .milliseconds(200)
@@ -37,7 +42,7 @@ extension PerformanceBudgets {
 
         @Test("The set verb, overlap warnings included, stays under budget on the largest real fixture")
         func setVerbOnLargestFixture() async throws {
-            let url = try PerformanceFixture.workingCopy(of: PerformanceFixture.largestBundled())
+            let url = try PerformanceFixture.workingCopy(of: PerformanceFixture.largestReal)
             defer { PerformanceFixture.discard(url) }
             let rootID = try await PenFileTransaction.read(at: url) { document in
                 try #require(document.rootOrder.first, "woodcase-app.pen has no root nodes.")
@@ -46,7 +51,7 @@ extension PerformanceBudgets {
             var attempt = 0
             let sample = try await PerformanceSample.measure(repetitions: Self.budget.repetitions) {
                 attempt += 1
-                var command = try SetCommand.parse([
+                let command = try SetCommand.parse([
                     url.path, NodeAddress.marker(forID: rootID), "common.name=Budgeted rename \(attempt)",
                 ])
                 try await command.run()

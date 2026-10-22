@@ -64,8 +64,8 @@ struct RGAListTests {
     func deleteByIndex() throws {
         var list = RGAList<String>()
         list.insert("A", after: nil, timestamp: Timestamp(time: 1, peerID: peerA))
-        let pos1 = list.positionID(atIndex: 0)
-        try list.insert("B", after: #require(pos1), timestamp: Timestamp(time: 2, peerID: peerA))
+        let pos1 = try #require(list.positionID(atIndex: 0))
+        list.insert("B", after: pos1, timestamp: Timestamp(time: 2, peerID: peerA))
 
         list.deleteAtIndex(0)
         #expect(list.elements == ["B"])
@@ -144,7 +144,8 @@ struct RGAListTests {
         list.insert("C", after: pos2, timestamp: Timestamp(time: 3, peerID: peerA))
 
         // Move "A" to after "C" (effectively end)
-        let newPos = try list.move(positionID: pos1, after: #require(list.positionID(atIndex: 2)), timestamp: Timestamp(time: 4, peerID: peerA))
+        let end = try #require(list.positionID(atIndex: 2))
+        let newPos = list.move(positionID: pos1, after: end, timestamp: Timestamp(time: 4, peerID: peerA))
         _ = newPos
         #expect(list.elements == ["B", "C", "A"])
     }
@@ -234,7 +235,8 @@ struct RGAListTests {
     func isFriendly() throws {
         var list = RGAList<String>()
         list.insert("A", after: nil, timestamp: Timestamp(time: 1, peerID: peerA))
-        try list.insert("B", after: #require(list.positionID(atIndex: 0)), timestamp: Timestamp(time: 2, peerID: peerA))
+        let first = try #require(list.positionID(atIndex: 0))
+        list.insert("B", after: first, timestamp: Timestamp(time: 2, peerID: peerA))
 
         let data = try JSONEncoder().encode(list)
         let decoded = try JSONDecoder().decode(RGAList<String>.self, from: data)

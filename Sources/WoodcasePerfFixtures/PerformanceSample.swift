@@ -1,6 +1,6 @@
 //
 //  PerformanceSample.swift
-//  WoodcaseTests
+//  WoodcasePerfFixtures
 //
 
 import Foundation
@@ -9,29 +9,36 @@ import Woodcase
 /// The elapsed times of several in-process repetitions of one pipeline.
 ///
 /// A budget is asserted on ``best`` and never on a single run. The machine these
-/// tests run on is routinely shared with other builds, and a single sample there can
+/// budgets run on is routinely shared with other builds, and a single sample there can
 /// be four times the true figure while the minimum barely moves — so the minimum is
 /// the measurement, and the spread between it and the rest is how loaded the machine
 /// was.
 ///
 /// The work is timed **in process**. Timing the `woodcase` binary instead would put
-/// process start-up and an unoptimized `ArgumentParser` into every number, neither of
-/// which is the library's to fix; the binary's end-to-end time is recorded separately
-/// in <doc:WoodcasePerformance> as information.
-struct PerformanceSample: Friendly {
+/// process start-up and `ArgumentParser` into every number, neither of which is the
+/// library's to fix; `scripts/perf-binary` records the binary's end-to-end time
+/// separately, as information.
+public struct PerformanceSample: Friendly {
     /// Every repetition's elapsed time, in the order they ran.
-    var elapsed: [Duration]
+    public var elapsed: [Duration]
+
+    /// Creates a sample from times measured elsewhere.
+    ///
+    /// - Parameter elapsed: Every repetition's elapsed time.
+    public init(elapsed: [Duration]) {
+        self.elapsed = elapsed
+    }
 
     /// The fastest repetition — the only figure a budget is checked against.
     ///
     /// An empty sample reports zero, which cannot happen: ``measure(repetitions:_:)``
     /// refuses to run fewer than one repetition.
-    var best: Duration {
+    public var best: Duration {
         elapsed.min() ?? .zero
     }
 
     /// Every repetition, fastest first, for a failure message.
-    var summary: String {
+    public var summary: String {
         elapsed
             .sorted()
             .map(PerformanceBudget.milliseconds)
@@ -48,11 +55,11 @@ struct PerformanceSample: Friendly {
     ///   - repetitions: How many times to run `body`. At least one; a smaller number
     ///     is raised to one rather than producing an empty sample.
     ///   - body: The pipeline to time. Run on the main actor, one repetition at a
-    ///     time, so nothing in this suite overlaps with itself.
+    ///     time, so no budget overlaps with itself.
     /// - Returns: The elapsed time of every repetition.
     /// - Throws: Anything `body` throws, on the repetition that threw.
     @MainActor
-    static func measure(
+    public static func measure(
         repetitions: Int,
         _ body: () async throws -> Void
     ) async rethrows -> PerformanceSample {

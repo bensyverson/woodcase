@@ -95,7 +95,7 @@
                 let new = try #require(PenRenderer.render(
                     newDocument, layoutRects: newRects, size: size, scale: 2, rootNodeID: root.id
                 ))
-                let mae = try PenSnapshotTestHelpers.meanAbsoluteError(between: old, and: new)
+                let mae = PenSnapshotTestHelpers.meanAbsoluteError(between: old, and: new)
                 #expect(mae == 0, "\(root.common.name ?? root.id): MAE \(mae)")
             }
         }

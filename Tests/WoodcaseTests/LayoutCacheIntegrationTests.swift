@@ -168,7 +168,8 @@ struct LayoutCacheIntegrationTests {
             variable: PenVariable(type: .number, value: .simple(.double(8.0)))
         )))
 
-        #expect(try #require(editable._layoutCache?.isFullyInvalidated))
+        let cache = try #require(editable._layoutCache)
+        #expect(cache.isFullyInvalidated)
     }
 
     // MARK: - Theme Change → Full Invalidation
@@ -180,7 +181,8 @@ struct LayoutCacheIntegrationTests {
             name: "mode", options: ["light", "dark"]
         )))
 
-        #expect(try #require(editable._layoutCache?.isFullyInvalidated))
+        let cache = try #require(editable._layoutCache)
+        #expect(cache.isFullyInvalidated)
     }
 
     // MARK: - Import Change → Full Invalidation
@@ -192,7 +194,8 @@ struct LayoutCacheIntegrationTests {
             alias: "lib", path: "./library.pen"
         )))
 
-        #expect(try #require(editable._layoutCache?.isFullyInvalidated))
+        let cache = try #require(editable._layoutCache)
+        #expect(cache.isFullyInvalidated)
     }
 
     // MARK: - Common Property Changes

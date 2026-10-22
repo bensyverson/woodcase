@@ -119,6 +119,8 @@ struct CRDTSnapshotTests {
         let opsA = try editableA.applyLocal(.updateCommon(
             EditOperation.UpdateCommon(nodeID: "r1", common: PenNodeCommon(name: "A's Edit"))
         ))
+        // B never receives these ops: they reach it through the snapshot.
+        #expect(!opsA.isEmpty)
 
         // Peer B joins from A's snapshot + original .pen
         let snapshot = try #require(editableA.crdtDocument?.snapshot())

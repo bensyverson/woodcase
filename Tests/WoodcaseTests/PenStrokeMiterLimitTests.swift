@@ -109,8 +109,8 @@ struct PenStrokeMiterLimitTests {
             from: PenParser.parse(#"{"version": "2.19", "children": ["# + triangle() + "]}")
         )
         let path = PenMetadata.WoodcaseKey.strokeMiterLimit.propertyPath
-        let refusal = try #require(try PlannerFixture.refusal(.set([path: 0.5]), at: "t", in: document))
+        let refusal = try #require(PlannerFixture.refusal(.set([path: 0.5]), at: "t", in: document))
         #expect(refusal.code == .outOfRange)
-        #expect(try PlannerFixture.refusal(.set([path: 1]), at: "t", in: document) == nil)
+        #expect(PlannerFixture.refusal(.set([path: 1]), at: "t", in: document) == nil)
     }
 }

@@ -25,7 +25,7 @@ struct FileWatcherTests {
         func consume(_ watcher: FileWatcher) async -> Task<Void, Never> {
             let stream = watcher.changes
             return Task { for await url in stream {
-                await self.record(url)
+                self.record(url)
             } }
         }
     }

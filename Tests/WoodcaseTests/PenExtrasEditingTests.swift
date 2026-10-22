@@ -39,7 +39,7 @@ struct PenExtrasEditingTests {
     @Test("materialize writes back root and node extras unchanged")
     func materializeRoundTrips() throws {
         let document = try fixture()
-        #expect(try EditableDocument(from: document).materialize() == document)
+        #expect(EditableDocument(from: document).materialize() == document)
     }
 
     @Test("Root extras live on the editable document")

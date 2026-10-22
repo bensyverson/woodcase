@@ -6,6 +6,7 @@
 import Foundation
 import Testing
 @testable import Woodcase
+import WoodcasePerfFixtures
 
 extension PerformanceBudgets {
     /// Holds a detach or an override in a document that arrives with component loops
@@ -15,10 +16,14 @@ extension PerformanceBudgets {
     /// guard off (``ComponentLoopFuzzTests``); before the loop rule, their detaches and
     /// overrides expanded 12 million and 80 thousand nodes. Each repetition detaches
     /// every instance and overrides one key of each, each on a fresh copy, and keeps the
-    /// slowest single operation; the budget holds the fastest of those repetitions. Run:
+    /// slowest single operation; the budget holds the fastest of those repetitions.
+    ///
+    /// `WoodcaseBench budgets` cannot run it — the documents come from the test target's
+    /// merge fuzzer, built on `@testable` internals — so it confirms strict on the debug
+    /// build, against the scaled limit:
     ///
     /// ```sh
-    /// swift test -c release --filter PerformanceBudgets.ComponentLoopTests 2>&1 | grep BUDGET
+    /// WOODCASE_BUDGET_STRICT=1 swift test --filter PerformanceBudgets.ComponentLoopTests 2>&1 | grep BUDGET
     /// ```
     @Suite(.enabled(
         if: PerformanceBudget.isStrict,

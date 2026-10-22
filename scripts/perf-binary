@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """End-to-end timing of the `woodcase` binary, as information beside the budgets.
 
-The performance budgets in `Tests/WoodcaseTests/Performance/` time the library
+The performance budgets (`WoodcasePerfFixtures`, run by the suite and the bench) time the library
 in process, on purpose: process start-up and an unoptimized `ArgumentParser` are
 not the library's to fix, and putting them inside an assertion would make the
 number un-actionable. This script measures the other half — what a caller
 actually waits for at a shell prompt.
 
-For the in-process release figures, run the budgets themselves:
+For the in-process release figures, run the budgets through the bench:
 
-    swift test -c release --filter Performance 2>&1 | grep BUDGET
+    swift run -c release WoodcaseBench budgets
 
 Every timing is the minimum of several runs, for the same reason the budgets
 are: one sample on a loaded machine is several times the true figure, and the

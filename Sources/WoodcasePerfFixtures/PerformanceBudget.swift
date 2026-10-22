@@ -1,38 +1,39 @@
 //
 //  PerformanceBudget.swift
-//  WoodcaseTests
+//  WoodcasePerfFixtures
 //
 
 import Foundation
-import Testing
 import Woodcase
 
 /// A ceiling one pipeline must stay under, and what that ceiling becomes in a build
 /// without the optimizer.
 ///
 /// The budgets are stated for a **release** build, because that is what anybody
-/// consuming Woodcase actually runs:
+/// consuming Woodcase actually runs. The bench confirms them there, verbatim:
 ///
 /// ```sh
-/// swift test -c release --filter Performance
+/// swift run -c release WoodcaseBench budgets
 /// ```
 ///
-/// asserts them verbatim. The default `swift test` is unoptimized, and every figure
-/// in this suite is several times larger there — the layout engine, the ref expander
-/// and the parser spend their time in generic `Array`/`Dictionary` subscripts, enum
-/// copies and retain/release traffic that only `-O` removes. Rather than carry two
-/// unrelated sets of numbers, the same budget is scaled by ``debugMultiplier``.
+/// The suite runs the same bodies on the default unoptimized `swift test`, where every
+/// figure is several times larger — the layout engine, the ref expander and the parser
+/// spend their time in generic `Array`/`Dictionary` subscripts, enum copies and
+/// retain/release traffic that only `-O` removes. Rather than carry two unrelated sets
+/// of numbers, the same budget is scaled by ``debugMultiplier``. Never confirm a budget
+/// with `swift test -c release`: it optimizes every file of the test target to run one
+/// probe (`project/2026-10-21-build-test-loop-baseline.md`).
 ///
 /// Nothing here is asserted against a single wall-clock sample: a budget is always
 /// checked against ``PerformanceSample/best``, the minimum of several in-process
 /// repetitions. A loaded machine inflates a single run several-fold (see
-/// `project/2026-08-29-test-suite-speed.md`), and
-/// the minimum is the figure that survives a neighbor building in another worktree.
-struct PerformanceBudget: Friendly {
+/// `project/2026-08-29-test-suite-speed.md`), and the minimum is the figure that survives
+/// a neighbor building in another worktree.
+public struct PerformanceBudget: Friendly {
     /// How much slower the same pipeline is when built without optimization.
     ///
-    /// Measured on both sides by this suite itself — `swift test --filter Performance`
-    /// (load 13, 2026-08-29) against `swift test -c release --filter Performance`
+    /// Measured on both sides by the budgets themselves — `swift test --filter Performance`
+    /// (load 13, 2026-08-29) against the optimized test build that confirmed budgets then
     /// (load 3.6, 2026-08-30), minimum of 5 each:
     ///
     /// | pipeline | debug | release | ratio |
@@ -56,14 +57,14 @@ struct PerformanceBudget: Friendly {
     ///
     /// The ratios are small because most of the time is not in our Swift at all — it
     /// is in CoreText measuring strings and in `JSONEncoder`, both already optimized
-    /// inside the system frameworks. See <doc:WoodcasePerformance>.
-    static let debugMultiplier: Double = 2.5
+    /// inside the system frameworks. See `WoodcasePerformance.md`.
+    public static let debugMultiplier: Double = 2.5
 
     /// Whether this build asserts ``release`` verbatim.
     ///
     /// `false` under the default `swift test`, which builds unoptimized; `true` under
-    /// `swift test -c release`.
-    static let isOptimized: Bool = {
+    /// `swift run -c release WoodcaseBench budgets`.
+    public static let isOptimized: Bool = {
         #if DEBUG
             false
         #else
@@ -71,26 +72,43 @@ struct PerformanceBudget: Friendly {
         #endif
     }()
 
+    /// The command that confirms a budget on the build it is stated for.
+    public static let confirmCommand = "swift run -c release WoodcaseBench budgets"
+
     /// What is being budgeted, as it appears in a failure — `"tree of woodcase-app.pen"`.
-    var name: String
+    public var name: String
 
     /// The ceiling on a release build.
-    var release: Duration
+    public var release: Duration
 
     /// How many in-process repetitions a measurement takes the minimum of.
     ///
     /// Five is enough for the minimum to shake off a scheduler hiccup and cheap enough
     /// that the whole performance suite stays a rounding error on the full run.
-    var repetitions: Int = 5
+    public var repetitions: Int = 5
 
     /// Whether being over the ceiling can fail a run.
-    var standing: Standing = .enforced
+    public var standing: Standing = .enforced
+
+    /// Creates a budget.
+    ///
+    /// - Parameters:
+    ///   - name: What is being budgeted, as a failure names it.
+    ///   - release: The ceiling on a release build.
+    ///   - repetitions: How many repetitions a measurement takes the minimum of.
+    ///   - standing: Whether being over the ceiling can fail a run.
+    public init(name: String, release: Duration, repetitions: Int = 5, standing: Standing = .enforced) {
+        self.name = name
+        self.release = release
+        self.repetitions = repetitions
+        self.standing = standing
+    }
 
     /// Whether a budget is a promise about code that exists or a target for code that
     /// does not exist yet.
-    enum Standing: Friendly {
-        /// A ceiling the code is held to: ``check(_:sourceLocation:)`` fails a strict
-        /// run that is over it.
+    public enum Standing: Friendly {
+        /// A ceiling the code is held to: ``verdict(_:)`` is a failure on a strict run
+        /// that is over it.
         case enforced
 
         /// A ceiling a design set for work that has not landed. Over it prints a
@@ -99,9 +117,27 @@ struct PerformanceBudget: Friendly {
         case target
     }
 
+    /// What being over or under the limit means for one measurement.
+    public enum Verdict: Friendly {
+        /// At or under ``limit``.
+        case pass
+
+        /// Over an ``Standing/enforced`` budget on a strict build: the run fails, with
+        /// this ``report(_:)``.
+        case failure(String)
+
+        /// Over an ``Standing/enforced`` budget on an advisory build: a warning, with
+        /// this ``advisory(_:)`` line.
+        case advisory(String)
+
+        /// Over a ``Standing/target`` budget, on any build: a note, with this
+        /// ``targetNote(_:)`` line.
+        case target(String)
+    }
+
     /// The ceiling this build is held to: ``release``, scaled by ``debugMultiplier``
     /// when the build is unoptimized.
-    var limit: Duration {
+    public var limit: Duration {
         Self.isOptimized ? release : release * Self.debugMultiplier
     }
 
@@ -109,12 +145,12 @@ struct PerformanceBudget: Friendly {
     ///
     /// - Parameter measured: The figure to check — always a minimum, never one sample.
     /// - Returns: `true` when `measured` is at or under ``limit``.
-    func admits(_ measured: Duration) -> Bool {
+    public func admits(_ measured: Duration) -> Bool {
         measured <= limit
     }
 
     /// The environment variable that makes a debug run assert its budgets verbatim.
-    static let strictEnvironmentVariable = "WOODCASE_BUDGET_STRICT"
+    public static let strictEnvironmentVariable = "WOODCASE_BUDGET_STRICT"
 
     /// Whether a measurement over ``limit`` fails the run.
     ///
@@ -130,50 +166,44 @@ struct PerformanceBudget: Friendly {
     /// once also failed past 4× the limit, and a loaded soak of the suite tripped that on
     /// a healthy `tree` (3063 ms against 750 ms, `project/2026-09-28-suite-speed.md`), so
     /// an advisory run only ever warns.
-    static let isStrict: Bool = isOptimized
+    public static let isStrict: Bool = isOptimized
         || ProcessInfo.processInfo.environment[strictEnvironmentVariable] != nil
 
-    /// Announces a measurement and records a failure if it is one.
+    /// Decides what a measurement means: by ``admits(_:)``, then ``standing``, then
+    /// ``isStrict``.
     ///
-    /// The one call site a budget test needs: it prints the `BUDGET` line either way,
-    /// and decides — by ``standing`` and then ``isStrict`` — whether being over
-    /// ``limit`` is a failure or a note (``targetNote(_:)`` for a target,
-    /// ``advisory(_:)`` otherwise). See <doc:WoodcasePerformance>.
-    ///
-    /// - Parameters:
-    ///   - sample: The repetitions that were measured.
-    ///   - sourceLocation: Where to attribute a failure; defaults to the caller.
-    func check(_ sample: PerformanceSample, sourceLocation: SourceLocation = #_sourceLocation) {
-        announce(sample)
-        guard !admits(sample.best) else { return }
-        if standing == .target {
-            print(targetNote(sample))
-        } else if Self.isStrict {
-            Issue.record(Comment(rawValue: report(sample)), sourceLocation: sourceLocation)
-        } else {
-            print(advisory(sample))
-        }
+    /// - Parameter sample: The repetitions that were measured.
+    /// - Returns: ``Verdict/pass`` inside the limit; otherwise the note or failure the
+    ///   caller prints or records.
+    public func verdict(_ sample: PerformanceSample) -> Verdict {
+        guard !admits(sample.best) else { return .pass }
+        if standing == .target { return .target(targetNote(sample)) }
+        return Self.isStrict ? .failure(report(sample)) : .advisory(advisory(sample))
     }
 
     /// What a blown budget prints: the numbers, and what to do about them.
     ///
     /// - Parameter sample: The repetitions that were measured.
     /// - Returns: A message naming the budget, the measurement, and the next command.
-    func report(_ sample: PerformanceSample) -> String {
+    public func report(_ sample: PerformanceSample) -> String {
         let configuration = Self.isOptimized ? "release" : "debug"
         let scaling = Self.isOptimized
             ? ""
             : " (\(Self.milliseconds(release)) release × \(Self.debugMultiplier) debug multiplier)"
+        let confirm: String = Self.isOptimized
+            ? "Confirm it on a quiet machine, reading the figure beside `uptime` — a loaded"
+            + " machine inflates even a minimum:"
+            : "Confirm it on an optimized build — the budget is stated for one, and a loaded"
+            + " machine inflates even a minimum:"
         return """
         \(name) took \(Self.milliseconds(sample.best)), over its \(Self.milliseconds(limit)) \
         budget on this \(configuration) build\(scaling).
         Samples: \(sample.summary).
-        Confirm it on an optimized build — the budget is stated for one, and a loaded \
-        machine inflates even a minimum:
-          swift test -c release --filter Performance
-        If release is also over, profile the phases before touching the number:
-          WOODCASE_TEST_PROFILE=1 swift test -c release --filter Performance 2>&1 | grep PROFILE
-        See <doc:WoodcasePerformance> for what each budget covers and how it was set.
+        \(confirm)
+          \(Self.confirmCommand)
+        If release is also over, see which phase grew before touching the number:
+          WOODCASE_TEST_PROFILE=1 swift test --filter PerformanceBudgets 2>&1 | grep PROFILE
+        See WoodcasePerformance.md for what each budget covers and how it was set.
         """
     }
 
@@ -182,11 +212,11 @@ struct PerformanceBudget: Friendly {
     ///
     /// - Parameter sample: The repetitions that were measured.
     /// - Returns: One `BUDGET-ADVISORY` line.
-    func advisory(_ sample: PerformanceSample) -> String {
+    public func advisory(_ sample: PerformanceSample) -> String {
         let ratio = sample.best / limit
         return "BUDGET-ADVISORY | \(name) | min \(Self.milliseconds(sample.best))"
             + " | \(String(format: "%.1f", ratio))× its \(Self.milliseconds(limit)) debug limit"
-            + " | confirm with: swift test -c release --filter Performance"
+            + " | confirm with: \(Self.confirmCommand)"
             + " (or set $\(Self.strictEnvironmentVariable) to fail on this)"
     }
 
@@ -195,34 +225,33 @@ struct PerformanceBudget: Friendly {
     ///
     /// - Parameter sample: The repetitions that were measured.
     /// - Returns: One `BUDGET-TARGET` line.
-    func targetNote(_ sample: PerformanceSample) -> String {
+    public func targetNote(_ sample: PerformanceSample) -> String {
         let ratio = sample.best / limit
         return "BUDGET-TARGET | \(name) | min \(Self.milliseconds(sample.best))"
             + " | \(String(format: "%.1f", ratio))× its \(Self.milliseconds(limit)) target"
             + " | not enforced until the work that meets it lands"
     }
 
-    /// Prints one machine-readable line for a measurement, pass or fail.
+    /// One machine-readable line for a measurement, pass or fail.
     ///
-    /// This is how the figures in <doc:WoodcasePerformance> are produced — the whole
-    /// table is `swift test -c release --filter Performance 2>&1 | grep BUDGET`. A
-    /// budget that only spoke up when it failed would leave the doc's numbers to be
-    /// re-derived by hand, and hand-derived numbers go stale silently.
+    /// This is how the figures in `WoodcasePerformance.md` are produced — the release
+    /// table is `swift run -c release WoodcaseBench budgets | grep BUDGET`. A budget
+    /// that only spoke up when it failed would leave the doc's numbers to be re-derived
+    /// by hand, and hand-derived numbers go stale silently.
     ///
     /// - Parameter sample: The repetitions that were measured.
-    func announce(_ sample: PerformanceSample) {
+    /// - Returns: One `BUDGET` line.
+    public func announcement(_ sample: PerformanceSample) -> String {
         let configuration = Self.isOptimized ? "release" : "debug"
-        print(
-            "BUDGET | \(name) | \(configuration) | min \(Self.milliseconds(sample.best))"
-                + " | limit \(Self.milliseconds(limit)) | samples \(sample.summary)"
-        )
+        return "BUDGET | \(name) | \(configuration) | min \(Self.milliseconds(sample.best))"
+            + " | limit \(Self.milliseconds(limit)) | samples \(sample.summary)"
     }
 
     /// Formats a duration as milliseconds with one decimal.
     ///
     /// - Parameter duration: The duration to format.
     /// - Returns: A string such as `"87.4 ms"`.
-    static func milliseconds(_ duration: Duration) -> String {
+    public static func milliseconds(_ duration: Duration) -> String {
         let value = Double(duration.components.seconds) * 1000
             + Double(duration.components.attoseconds) / 1_000_000_000_000_000
         return String(format: "%.1f ms", value)

@@ -47,3 +47,7 @@ The pre-commit hook's `scripts/mae-check` prints "MISSING: `svg-render-…` was 
 ## 2026-10-20 — The commit hook's "MISSING … not in this test run" doesn't mean lost baseline rows
 
 **`scripts/mae-check` compares `performance/mae-baseline.csv` with `performance/mae-test.csv`, the file the WebView tests write in the checkout where they last ran.** On main, after squashing an agent's branch that added WebView boards, the hook prints `MISSING: <id> was in the baseline … but not in this test run` for each new board, because main's `mae-test.csv` predates them, and then says "MAE baseline updated" (session 41, Knr8GN). The committed baseline kept every row; check with `git show HEAD:performance/mae-baseline.csv | grep <id>` rather than assuming they were dropped.
+
+## 2026-10-22 — `swift test --scratch-path` fails every binary-driven command test
+
+**`CommandFixture` looks for `woodcase` only in the toolchain's directory and `.build/debug`/`.build/release`, so a run with `--scratch-path <dir>` (a clean build in a scratch folder, as `../Penumbra/scripts/build-warnings` does) records ~1000 "Could not find the built `woodcase` binary" issues in `WoodcaseCommandTests`** (leaf nnawnR). Set `WOODCASE_BINARY=<dir>/out/Products/Debug/woodcase` (Swift Build's layout) for that run.

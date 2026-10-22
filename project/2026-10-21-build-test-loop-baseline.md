@@ -214,6 +214,11 @@ Two earlier runs, 08:11–08:57, are void:
   target. To avoid that compile, the budget bodies and `PerformanceBudget`/`Sample` would
   have to move into a shared target that a `budgets` bench runs. That is a separate
   design question, proposed as a follow-up leaf.
+
+  > **Done 2026-10-22 (leaf `GYWxMW`).** The budgets, their samples and their pipelines
+  > live in `WoodcasePerfFixtures`; `swift run -c release WoodcaseBench budgets` confirms
+  > them, and the failure note names it. `SetVerbTests` and `ComponentLoopTests` have no
+  > bench (see DocC `WoodcasePerformance.md` ▸ Benches).
 - **`patchedNode` timing** (see `board-scale-patch` above).
 - **The icon codepoint literals** (above).
 - **Stale doc comments in tests this leaf may not touch.** `PropertyReadCostTests`,

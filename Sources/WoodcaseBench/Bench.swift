@@ -9,7 +9,8 @@ import Foundation
 ///
 /// A bench prints `PROBE` lines and checks nothing: the suite holds the line by
 /// counting work, and a bench says what that work costs on an optimized build, which
-/// means something only beside `uptime`.
+/// means something only beside `uptime`. The one exception is `budgets`, which holds
+/// the suite's performance budgets to their release ceilings.
 struct Bench {
     /// What to type after `WoodcaseBench`, in kebab case.
     let name: String
@@ -21,7 +22,7 @@ struct Bench {
     var arguments: String = ""
 
     /// Runs the bench with the arguments after its name.
-    let run: @MainActor ([String]) throws -> Void
+    let run: @MainActor ([String]) async throws -> Void
 }
 
 extension Bench {

@@ -136,8 +136,8 @@ struct PenFileTransactionTests {
             #expect(outcome.didWrite)
             #expect(outcome.url == url)
             let reloaded = try PenParser.parse(contentsOf: url)
-            let editable = await EditableDocument(from: reloaded)
-            let name = await editable.nodes[Self.targetNodeID]?.common.name
+            let editable = EditableDocument(from: reloaded)
+            let name = editable.nodes[Self.targetNodeID]?.common.name
             #expect(name == outcome.value)
             // The bytes on disk are the canonical encoding, not merely valid JSON.
             try #expect(Data(contentsOf: url) == PenParser.encodeForFile(reloaded))
@@ -334,8 +334,8 @@ struct PenFileTransactionTests {
             #expect(outcomes[1].didWrite)
 
             let reloaded = try PenParser.parse(contentsOf: url)
-            let editable = await EditableDocument(from: reloaded)
-            let name = try await #require(editable.nodes[Self.targetNodeID]?.common.name)
+            let editable = EditableDocument(from: reloaded)
+            let name = try #require(editable.nodes[Self.targetNodeID]?.common.name)
             #expect(name.contains("-A"), "lost the first transaction's edit: \(name)")
             #expect(name.contains("-B"), "lost the second transaction's edit: \(name)")
         }

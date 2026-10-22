@@ -1872,11 +1872,11 @@ struct ReactEmitterTests {
         let files = ReactEmitter.emit(document: doc, components: [], pages: [], theme: theme).files
         let provider = files.first { $0.path == "ThemeProvider.tsx" }
 
-        #expect(provider != nil)
-        #expect(try #require(provider?.content.contains("data-mode={mode}")))
-        #expect(try #require(provider?.content.contains("data-density={density}")))
-        #expect(try #require(provider?.content.contains("useState(\"light\")")))
-        #expect(try #require(provider?.content.contains("useState(\"default\")")))
+        let content = try #require(provider?.content)
+        #expect(content.contains("data-mode={mode}"))
+        #expect(content.contains("data-density={density}"))
+        #expect(content.contains("useState(\"light\")"))
+        #expect(content.contains("useState(\"default\")"))
     }
 
     @Test("cn.ts utility is generated with correct content")
@@ -1887,10 +1887,10 @@ struct ReactEmitterTests {
         let files = ReactEmitter.emit(document: doc, components: [], pages: [], theme: theme).files
         let cn = files.first { $0.path == "lib/cn.ts" }
 
-        #expect(cn != nil)
-        #expect(try #require(cn?.content.contains("twMerge")))
-        #expect(try #require(cn?.content.contains("clsx")))
-        #expect(try #require(cn?.content.contains("export function cn")))
+        let content = try #require(cn?.content)
+        #expect(content.contains("twMerge"))
+        #expect(content.contains("clsx"))
+        #expect(content.contains("export function cn"))
     }
 
     @Test("theme.css is included in output")
@@ -1906,8 +1906,8 @@ struct ReactEmitterTests {
         let files = ReactEmitter.emit(document: doc, components: components, pages: pages, theme: theme).files
         let css = files.first { $0.path == "theme.css" }
 
-        #expect(css != nil)
-        #expect(try !#require(css?.content.isEmpty))
+        let content = try #require(css?.content)
+        #expect(!content.isEmpty)
     }
 
     // MARK: - Complete File Structure

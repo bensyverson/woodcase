@@ -68,7 +68,7 @@ struct PenDocumentFileTokenTests {
     @Test("A fileToken survives an off-actor materialization")
     func roundTripsThroughMaterializeSnapshot() async throws {
         let document = try PenParser.parse(contentsOf: goldenURL("parser-stroke-variants"))
-        let editable = await EditableDocument(from: document)
+        let editable = EditableDocument(from: document)
         let materialized = await editable.materializeSnapshot()
         #expect(materialized.fileToken == document.fileToken)
     }

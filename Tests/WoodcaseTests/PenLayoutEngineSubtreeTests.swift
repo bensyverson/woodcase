@@ -6,6 +6,7 @@
 import Foundation
 import Testing
 import Woodcase
+import WoodcasePerfFixtures
 
 struct PenLayoutEngineSubtreeTests {
     // MARK: - Helpers
@@ -252,7 +253,7 @@ struct PenLayoutEngineSubtreeTests {
 
     @Test("Performance: 20 flex children layout completes quickly")
     @MainActor
-    func performanceWith20Children() async throws {
+    func performanceWith20Children() async {
         var children: [PenNode] = []
         for i in 0 ..< 20 {
             children.append(PenNode(
@@ -315,7 +316,7 @@ struct PenLayoutEngineSubtreeTests {
             name: "layoutSubtree of 20 flex children",
             release: .milliseconds(5)
         )
-        let sample = try await PerformanceSample.measure(repetitions: budget.repetitions) {
+        let sample = await PerformanceSample.measure(repetitions: budget.repetitions) {
             _ = PenLayoutEngine.layoutSubtree(
                 rootID: "perf-container",
                 in: doc,

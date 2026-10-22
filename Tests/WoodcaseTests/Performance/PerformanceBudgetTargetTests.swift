@@ -6,6 +6,7 @@
 import Foundation
 import Testing
 import Woodcase
+import WoodcasePerfFixtures
 
 /// What ``PerformanceBudget/check(_:sourceLocation:)`` does with a budget that is a
 /// *target* — a ceiling a design has set for code that has not landed yet.

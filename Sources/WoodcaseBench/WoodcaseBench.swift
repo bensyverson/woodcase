@@ -11,9 +11,12 @@ import Foundation
 /// ```sh
 /// swift run -c release WoodcaseBench list
 /// swift run -c release WoodcaseBench property-read-cost
+/// swift run -c release WoodcaseBench budgets
 /// ```
 ///
-/// Each bench prints `PROBE` lines; a figure means something only beside `uptime`. Never
+/// Each bench prints `PROBE` lines; a figure means something only beside `uptime`.
+/// `budgets` runs the suite's performance budgets against their release ceilings
+/// instead, and exits 1 when one fails. Never
 /// time code with `swift test -c release`: that optimizes every file of `WoodcaseTests`
 /// to run one probe (`project/2026-10-21-build-test-loop-baseline.md`).
 @main
@@ -29,6 +32,7 @@ enum WoodcaseBench {
             ComponentLoopEditCostBench.bench,
             RemoteApplyCostBench.bench,
             CodeGenCorpusDump.bench,
+            BudgetsBench.bench,
         ]
         #if canImport(Darwin)
             all.insert(NodeTreeCostBench.bench, at: 3)
@@ -38,7 +42,7 @@ enum WoodcaseBench {
 
     /// Parses the command line and runs the bench it names.
     @MainActor
-    static func main() {
+    static func main() async {
         let arguments = Array(CommandLine.arguments.dropFirst())
         guard let name = arguments.first, name != "help", name != "--help" else {
             printUsage()
@@ -56,7 +60,7 @@ enum WoodcaseBench {
             exit(2)
         }
         do {
-            try bench.run(Array(arguments.dropFirst()))
+            try await bench.run(Array(arguments.dropFirst()))
         } catch let error as Bench.UsageError {
             FileHandle.standardError.write(Data("\(error.description)\n".utf8))
             exit(2)

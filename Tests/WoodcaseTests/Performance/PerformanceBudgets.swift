@@ -25,11 +25,16 @@ import Testing
 ///   strict build)
 /// - ``PerformanceBudgets/ComponentLoopTests`` (runs only on a strict build)
 ///
-/// Measurements with no ceiling — what a call costs on an optimized build — are not
-/// here: they are `WoodcaseBench` benches (`swift run -c release WoodcaseBench list`).
+/// The budgets and the pipelines they time live in `WoodcasePerfFixtures`, so the
+/// suite runs them on the debug build (where an overage is advisory) and
+/// `swift run -c release WoodcaseBench budgets` confirms them on the optimized build
+/// their ceilings are stated for. Measurements with no ceiling — what a call costs on
+/// an optimized build — are not here either: they are `WoodcaseBench` benches
+/// (`swift run -c release WoodcaseBench list`).
 ///
 /// ```sh
 /// swift test --filter Performance
+/// swift run -c release WoodcaseBench budgets
 /// ```
 ///
 /// See <doc:WoodcasePerformance> for the budgets, the measured numbers, and what to

@@ -6,6 +6,7 @@
 import Foundation
 import Testing
 import Woodcase
+import WoodcasePerfFixtures
 
 /// What ``PerformanceBudget/check(_:sourceLocation:)`` does with a measurement that is
 /// over the limit.
@@ -57,7 +58,28 @@ struct PerformanceBudgetAdvisoryTests {
         let note = budget.advisory(sample(budget.limit * 3))
         #expect(note.hasPrefix("BUDGET-ADVISORY | a budget under test |"))
         #expect(note.contains("3.0×"))
-        #expect(note.contains("swift test -c release --filter Performance"))
+        #expect(note.contains("swift run -c release WoodcaseBench budgets"))
+        #expect(!note.contains("swift test -c release"))
+    }
+
+    @Test("A failure report names the bench, never the optimized test build")
+    func reportNamesTheBench() {
+        let report = budget.report(sample(budget.limit * 3))
+        #expect(report.contains("swift run -c release WoodcaseBench budgets"))
+        #expect(!report.contains("swift test -c release"))
+    }
+
+    @Test("The verdict follows the limit, the standing and the build")
+    func verdictFollowsTheRules() {
+        #expect(budget.verdict(sample(budget.limit / 2)) == .pass)
+        let over = sample(budget.limit * 2)
+        let expected: PerformanceBudget.Verdict = PerformanceBudget.isStrict
+            ? .failure(budget.report(over))
+            : .advisory(budget.advisory(over))
+        #expect(budget.verdict(over) == expected)
+        var target = budget
+        target.standing = .target
+        #expect(target.verdict(over) == .target(target.targetNote(over)))
     }
 
     @Test("Strictness follows the build, and the environment can force it on")

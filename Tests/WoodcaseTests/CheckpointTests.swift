@@ -119,7 +119,8 @@ struct CheckpointTests {
         let fullClock = editable.checkpoint()
         editable.truncateLog(acknowledgedBy: fullClock)
 
-        #expect(try #require(editable.crdtDocument?.operationLog.operations.isEmpty))
+        let operations = try #require(editable.crdtDocument?.operationLog.operations)
+        #expect(operations.isEmpty)
     }
 
     @Test("truncateLog preserves unacknowledged ops")
@@ -135,7 +136,8 @@ struct CheckpointTests {
         editable.truncateLog(acknowledgedBy: partialClock)
 
         // Ops should still be there
-        #expect(try !#require(editable.crdtDocument?.operationLog.operations.isEmpty))
+        let operations = try #require(editable.crdtDocument?.operationLog.operations)
+        #expect(!operations.isEmpty)
     }
 
     // MARK: - Full checkpoint flow

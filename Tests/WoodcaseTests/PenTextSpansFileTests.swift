@@ -24,7 +24,7 @@ struct PenTextSpansFileTests {
         var json = try #require(JSONSerialization.jsonObject(with: Data(contentsOf: fixture)) as? [String: Any])
         if let strip { json = removingMetadata(of: strip, from: json) }
         let parsed = try PenParser.parse(JSONSerialization.data(withJSONObject: json))
-        return try PenVariableResolver.resolve(PenRefExpander.expand(parsed))
+        return PenVariableResolver.resolve(PenRefExpander.expand(parsed))
     }
 
     /// A JSON node tree with one node's `metadata` taken out.
