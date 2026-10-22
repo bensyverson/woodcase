@@ -24,6 +24,13 @@ struct PenPaintedExtentsTests {
         "parser-icon-font", "instances", "addressing-nested-instance", "clip", "blur2", "component-props",
     ]
 
+    /// Registers Inter and IBM Plex Sans, which the fixtures set, before any test walks them:
+    /// registration moves the font set, so one that lands between a test's two passes sets
+    /// their texts in different faces (``fixtureFamiliesAreRegistered(_:)``).
+    init() {
+        TestFontRegistration.registerTestFonts()
+    }
+
     /// A board of its own for the cases the fixtures miss: a turned group holding a turned,
     /// shadowed, stroked frame; a disabled child; a clipping frame whose children still
     /// get extents; an empty group; a blurred group.
@@ -62,6 +69,26 @@ struct PenPaintedExtentsTests {
         let data = try Data(contentsOf: Self.fixturesDir.appendingPathComponent("\(fixture).pen"))
         let document = try PenVariableResolver.resolve(PenRefExpander.expand(PenParser.parse(data)))
         try Self.expectMatches(document)
+    }
+
+    /// The suite compares two passes taken one after the other, so a family registered
+    /// between them sets the second pass's texts in a face the first never saw. Every
+    /// family the fixtures set must already be registered when the suite starts, not
+    /// whenever a parallel suite registers it (leaf dyQakq).
+    @Test("Every family the fixtures' texts set is registered before the suite walks them", arguments: fixtures)
+    func fixtureFamiliesAreRegistered(_ fixture: String) throws {
+        let data = try Data(contentsOf: Self.fixturesDir.appendingPathComponent("\(fixture).pen"))
+        let document = try PenVariableResolver.resolve(PenRefExpander.expand(PenParser.parse(data)))
+        var families: Set<String> = []
+        var pending = document.children
+        while let node = pending.popLast() {
+            if case let .text(text) = node.kind { families.insert(PenTextStyle(text).fontFamily) }
+            pending.append(contentsOf: node.kind.inlineChildren)
+        }
+        families.remove(PenTextStyle.defaultFontFamily)
+        for family in families {
+            #expect(PenTextMeasurer.fontFamilyAvailable(family), "\(fixture) sets \(family), which is not registered")
+        }
     }
 
     @Test("Every node's extent from one walk equals paintedExtent's on a turned, clipped, disabled board")

@@ -200,6 +200,13 @@ flip with the node (r6's 24 pt left side paints on the right).
 > unions the glyph outlines (`CTFontCreatePathForGlyph`, what Pen's `fillPath.bounds`
 > measures), and x8 and x9 both land within 4 px of Pen's exports. `textInkBounds` uses the
 > same measure; for Inter it changes nothing (x5–x7 off by the same 2–15 px either way).
+>
+> **Corrected 2026-10-22 (leaf dyQakq):** the 2–15 px was not Inter, and not a Core
+> Text/Skia gap. `PenPaintedExtentProbeTests` never registered Inter, so run alone
+> (`swift test -j 3 --filter PenPaintedExtentProbeTests`) it set x5–x7 in the SF Pro
+> fallback. With Inter registered, x5 and x7 are Pen's export size to the pixel, and x6 (the
+> italic) is 3 px narrower. Unregister it and the same command gives back (5, 4), (8, 4)
+> and (15, 2).
 
 ### Woodcase against Pen
 

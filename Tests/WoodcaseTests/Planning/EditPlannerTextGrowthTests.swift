@@ -13,6 +13,12 @@ import Testing
 /// 2026-10-15, leaf Q2hXKO).
 @MainActor
 struct EditPlannerTextGrowthTests {
+    /// Registers Inter, which the board's texts set, so a registration by a parallel suite
+    /// cannot land between a test's drawn size and its re-laid-out one.
+    init() {
+        TestFontRegistration.registerTestFonts()
+    }
+
     /// `Auto` follows its text both ways; `Wide` holds a width of 120 and grows down;
     /// `Boxed` holds 120 × 40; `Filled` fills a stack's width; `Chip` is an instance of
     /// `Card`, whose `Label` follows its text.

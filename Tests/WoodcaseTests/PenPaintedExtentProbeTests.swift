@@ -20,6 +20,12 @@ struct PenPaintedExtentProbeTests {
         .deletingLastPathComponent()
         .appendingPathComponent("Fixtures")
 
+    /// Registers Inter, which the probe's texts set, before any test measures them: without
+    /// it they are set in the SF Pro fallback until some other suite registers Inter.
+    init() {
+        TestFontRegistration.registerTestFonts()
+    }
+
     /// Pen's exports are at 2x.
     private static let scale: CGFloat = 2
 
@@ -78,13 +84,15 @@ struct PenPaintedExtentProbeTests {
     /// MAE ceilings for the renders framed on the painted extent, set by the margin rule
     /// (max(measured×1.5, measured+0.25), `project/2026-09-26-mae-margin-rule.md`).
     ///
-    /// Measured 2026-09-28 (leaf Wkr2Pd, `swift test -j 3 --filter PenPaintedExtentProbeTests`):
-    /// `x1` 0.045, `x2` 0.035, `x3` 0.486 (the layer blur), `x4` 0.000, `free` 0.229,
-    /// `groups` 0.045. Framed instead on the extent snapped outward to whole pixels —
-    /// the first guess at Pen's framing — `x2` scored 0.348, `free` 1.073 and `groups`
-    /// 0.270: Pen keeps the extent's fractional corner and rounds only the pixel size up.
+    /// Measured 2026-10-22 with the test fonts registered (leaf dyQakq, `swift test -j 3
+    /// --filter PenPaintedExtentProbeTests`, load 118–250; the same with Inter unregistered):
+    /// `x1` 0.045, `x2` 0.035, `x3` 0.486 (the layer blur), `x4` 0.000, `free` 0.070,
+    /// `groups` 0.045. On 2026-09-28 (leaf Wkr2Pd) `free` scored 0.229; the rest matched.
+    /// Framed instead on the extent snapped outward to whole pixels — the first guess at
+    /// Pen's framing — `x2` scored 0.348, `free` 1.073 and `groups` 0.270 (2026-09-28): Pen
+    /// keeps the extent's fractional corner and rounds only the pixel size up.
     private static let maeCeilings: [(board: String, ceiling: Double)] = [
-        ("x1", 0.30), ("x2", 0.29), ("x3", 0.74), ("x4", 0.25), ("free", 0.48), ("groups", 0.30),
+        ("x1", 0.30), ("x2", 0.29), ("x3", 0.74), ("x4", 0.25), ("free", 0.32), ("groups", 0.30),
     ]
 
     @Test("Framed on its painted extent, each board lines up with Pen's export", arguments: maeCeilings)
@@ -110,22 +118,23 @@ struct PenPaintedExtentProbeTests {
     /// own text measurement (``Woodcase/PenLayoutEngine/textInkBounds(of:box:)``) now
     /// grows to follow them there instead of stopping at the box.
     ///
-    /// Not held to the same whole-pixel exactness as x1–x4: Core Text and Pen's Skia
-    /// disagree on Inter's exact glyph metrics at these sizes even with optical sizing
-    /// off (``Woodcase/PenTextMeasurer/opticalSizingOff``, `PenTextOpticalSizeTests`: "3 pt
-    /// narrower … for two letters at 32 pt, 9 pt for a 56 pt word") — a font-rendering-engine
-    /// gap this fix does not close, not a geometry bug. Measured 2026-09-28
-    /// (`swift test -j 3 --filter PenPaintedExtentProbeTests`): x5 off by (5, 4) px, x6 by
-    /// (8, 4), x7 by (15, 2), with image or outline bounds alike; each board is held to its
-    /// own gap plus 2 px. The box
-    /// this replaced missed by (19, 131), (58, 3) and (87, 57) — the fix is not a rounding
-    /// nicety, it changes which shape is even being measured.
+    /// Measured 2026-10-22 with Inter registered (leaf dyQakq, `swift test -j 3 --filter
+    /// PenPaintedExtentProbeTests`, load 118–250): x5 and x7 are Pen's size to the pixel,
+    /// and x6 is 3 px narrower and the right height. Each board is held to its own gap plus
+    /// 2 px. The x6 gap is not explained. A likely suspect is the italic: the tests register
+    /// only Inter's upright variable file, where Pen sets Inter's own italic.
+    ///
+    /// > Correction (2026-10-22, leaf dyQakq): the 2026-09-28 figures — x5 off by (5, 4) px,
+    /// > x6 by (8, 4), x7 by (15, 2), put down to Core Text and Skia disagreeing on Inter's
+    /// > glyph metrics — were wrong about the cause. The suite never registered Inter, so run
+    /// > alone it measured the SF Pro fallback; those exact gaps come back with Inter
+    /// > unregistered. The box this replaced missed by (19, 131), (58, 3) and (87, 57).
     private static let textOverflowExports: [(board: String, width: Int, height: Int, tolerance: Int)] = [
-        ("x5", 101, 171, 7), ("x6", 122, 77, 10), ("x7", 153, 117, 17),
+        ("x5", 101, 171, 2), ("x6", 122, 77, 5), ("x7", 153, 117, 2),
     ]
 
     @Test(
-        "A text's painted extent grows toward Pen's export, within the Core Text/Skia glyph gap",
+        "A text's painted extent matches Pen's export, within a few pixels",
         arguments: textOverflowExports
     )
     func textExtentApproachesPensExport(board: String, width: Int, height: Int, tolerance: Int) throws {
