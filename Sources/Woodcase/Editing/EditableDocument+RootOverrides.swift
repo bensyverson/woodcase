@@ -50,11 +50,43 @@ extension EditableDocument {
         )
         refData.rootOverrides = overrides.isEmpty ? nil : overrides
         // A raw operation naming a Woodcase-owned key stores it on the ref's own metadata,
-        // as a planned one does (rule 6).
+        // as a planned one does (rule 6), so unsetting one removes it from there.
         let moved = PenNode.movingRootNaturalKeys(node.common, refData)
         node.common = moved.common
         node.kind = .ref(moved.data)
+        let removed = op.unset.compactMap(NodePropertyCodec.naturalOverrideKey)
+        if !removed.isEmpty, var metadata = node.common.metadata {
+            for key in removed {
+                metadata[woodcase: key] = nil
+            }
+            node.common.metadata = metadata.typedForWriting()
+        }
         return node
+    }
+
+    /// A ref's root overrides as an undo restores them: the stored map, plus the value
+    /// the ref's own `metadata.woodcase` holds for each Woodcase-owned key `op` names,
+    /// under the spelling `op` uses.
+    ///
+    /// A raw override of such a key is stored in the ref's metadata, never the map (rule
+    /// 6), so an inverse written from the map alone would unset the key where it was
+    /// never stored, and an earlier value would be lost. Written back through
+    /// ``EditOperation/OverrideRoot``, each restored key lands in the metadata again.
+    ///
+    /// - Parameters:
+    ///   - op: The override about to be applied.
+    ///   - refData: The ref's payload as it stands.
+    ///   - common: The ref's shared properties as they stand.
+    /// - Returns: The keys an inverse writes back; a key absent here is one to unset.
+    static func restorableRootOverrides(
+        for op: EditOperation.OverrideRoot, refData: PenNode.RefData, common: PenNodeCommon
+    ) -> [String: AnyCodable] {
+        var restorable = refData.rootOverrides ?? [:]
+        for name in Set(op.properties.keys).union(op.unset) {
+            guard let key = NodePropertyCodec.naturalOverrideKey(name) else { continue }
+            if let value = common.metadata?[woodcase: key] { restorable[name] = value }
+        }
+        return restorable
     }
 
     /// Refuses a root override whose key the ref node reserves for itself.

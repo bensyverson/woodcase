@@ -84,9 +84,13 @@ extension EditableDocument {
         }
     }
 
-    /// One step per root-override key the edit touches.
+    /// One step per root-override key the edit touches; a Woodcase-owned key restores
+    /// the ref's metadata entry it is stored in.
     private func rootOverrideSteps(_ op: EditOperation.OverrideRoot) throws -> [GuardedInverse] {
-        let existing = try requireRefData(op.refNodeID).rootOverrides ?? [:]
+        let node = try requireNode(op.refNodeID)
+        let existing = try Self.restorableRootOverrides(
+            for: op, refData: requireRefData(op.refNodeID), common: node.common
+        )
         return Self.keyedRestores(of: op.properties, unset: op.unset, from: existing).map { restore in
             GuardedInverse(
                 operation: .overrideRoot(EditOperation.OverrideRoot(

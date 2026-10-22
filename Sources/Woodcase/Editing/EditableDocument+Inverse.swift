@@ -209,7 +209,8 @@ extension EditableDocument {
         ))
     }
 
-    /// Inverse of overrideRoot: restore the ref's root overrides exactly as they stood.
+    /// Inverse of overrideRoot: restore the ref's root overrides exactly as they stood,
+    /// and the ref metadata entries of the Woodcase-owned keys the edit names.
     private func prepareInverseOverrideRoot(_ op: EditOperation.OverrideRoot) throws -> EditOperation {
         guard let node = nodes[op.refNodeID] else {
             throw EditingError.nodeNotFound(id: op.refNodeID)
@@ -218,7 +219,7 @@ extension EditableDocument {
             throw EditingError.notARefNode(id: op.refNodeID)
         }
 
-        let oldProperties = refData.rootOverrides ?? [:]
+        let oldProperties = Self.restorableRootOverrides(for: op, refData: refData, common: node.common)
         return .overrideRoot(EditOperation.OverrideRoot(
             refNodeID: op.refNodeID,
             properties: oldProperties,

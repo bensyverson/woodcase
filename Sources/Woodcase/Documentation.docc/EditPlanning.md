@@ -272,7 +272,9 @@ plan.unscaled   // [BoundValue(nodeID: "Card", property: "kind.gap", variable: "
 - **Where it moves things**: a member placed by its own `x`/`y` lands where the scale about
   the canvas anchor sends it, under a turned or flipped parent too; a member a stack places
   grows in its slot. ``ScaleAnchor`` names the nine points of ``ScaleCapture/bounds``, the
-  members' canvas union. Lengths keep two decimals.
+  members' canvas union. Lengths keep two decimals and a note's look scale four, never
+  rounded to nothing (``PenScaleRounding``, which an editor that sizes a note another way
+  rounds through too).
 - **Where it writes**: as ``EditPlanner/routeWrites(_:at:in:)`` routes every gesture's
   values (below): a node with storage of its own takes one `setProperties`; inside an
   instance every write is an override on the instance, and the component is unchanged. An
@@ -364,6 +366,7 @@ let drawn = await document.materializeSnapshot(overlaying: preview)
 - ``ScaleCapture``
 - ``ScalePlan``
 - ``ScaleAnchor``
+- ``PenScaleRounding``
 
 ### Previewing
 

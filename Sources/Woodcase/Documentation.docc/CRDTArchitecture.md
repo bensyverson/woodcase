@@ -72,6 +72,12 @@ that changed (``NodePropertyCodec/metadataEntryWrites(from:to:)``), so two peers
 one note's tint and its state both keep their edit, and no whole-object write exists to
 race an entry write. See <doc:PenMetadataNamespace>.
 
+An instance's root override goes out as the ref node the document stores for it. A raw
+``EditOperation/OverrideRoot`` naming a Woodcase-owned key (`kind.strokeDash`,
+`common.locked`) is stored on the ref's own `metadata.woodcase`, not among its root
+overrides, so it replicates as those metadata entries, sorted by path, followed by the
+`kind.rootOverrides` register for the rest.
+
 A local `setProperties` is resolved, and its writes emitted, in one order on every peer:
 broadest storage first, ties by path (``EditOperation/SetProperties/orderedProperties``;
 <doc:EditingDocuments> has the rule). Its keys can share storage — `common.metadata`

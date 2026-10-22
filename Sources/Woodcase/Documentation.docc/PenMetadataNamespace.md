@@ -159,7 +159,10 @@ of `kind.effects` with each shadow carrying the spread the instance draws it wit
 inspector that edits the list and writes it back restates every spread. The instance root takes the `ref`
 node's own `metadata.woodcase` laid over the component root's
 (``PenMetadata/instanceRoot(of:under:)``), so an override of the root, and an instance's
-lock (`set Inst common.locked=true`), are written on the ref node. A raw key a file from
+lock (`set Inst common.locked=true`), are written on the ref node. A raw
+``EditOperation/OverrideRoot`` naming such a key writes, and its `unset` removes, that ref
+metadata entry; its undo restores the entry as it stood, and a collaborator receives it as
+the entry's own write (<doc:CRDTArchitecture>). A raw key a file from
 before the rule wrote (`descendants.Box.blendMode`, or a ref's root override `blendMode`) is
 read into that metadata on load. A file or an `add` that writes a natural field top-level on
 a node is read into the node's own metadata the same way.

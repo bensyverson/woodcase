@@ -45,18 +45,14 @@ struct ProportionalScaler {
         }
     }
 
-    /// A factor multiplied and kept to four decimals (``factorPrecision``), finer than a
-    /// length's hundredth, so a note's look scale tracks its type size: 20 / 13 is 1.5385.
-    /// A factor above zero stays above zero; anything that is not a number is kept.
+    /// A factor multiplied and kept to four decimals (``PenScaleRounding/factor(_:by:)``), so
+    /// a note's look scale tracks its type size; anything that is not a number is kept.
     func factor(_ value: AnyCodable) -> AnyCodable {
-        let number: Double
         switch value {
-        case let .int(int): number = Double(int)
-        case let .double(double) where double.isFinite: number = double
-        default: return value
+        case let .int(int): Self.number(PenScaleRounding.factor(Double(int), by: factor))
+        case let .double(double) where double.isFinite: Self.number(PenScaleRounding.factor(double, by: factor))
+        default: value
         }
-        let scaled = (number * factor * Self.factorPrecision).rounded() / Self.factorPrecision
-        return Self.number(scaled == 0 && number > 0 ? 1 / Self.factorPrecision : scaled)
     }
 
     /// A member's coordinate scaled about `pivot`, the anchor's coordinate on the same axis
@@ -69,15 +65,14 @@ struct ProportionalScaler {
         default: return length(value)
         }
         let moved = pivot + factor * (coordinate - pivot)
-        return Self.number((moved * Self.precision).rounded() / Self.precision)
+        let precision = PenScaleRounding.lengthPrecision
+        return Self.number((moved * precision).rounded() / precision)
     }
 
-    /// `length` multiplied and kept to a hundredth of a point; a length above zero stays
-    /// above zero.
+    /// `length` multiplied and kept to a hundredth of a point
+    /// (``PenScaleRounding/length(_:by:)``); a length off zero stays off zero.
     func scaled(_ length: Double) -> Double {
-        let rounded = (length * factor * Self.precision).rounded() / Self.precision
-        if rounded == 0, length != 0 { return length > 0 ? 1 / Self.precision : -1 / Self.precision }
-        return rounded
+        PenScaleRounding.length(length, by: factor)
     }
 
     /// A number as the codec writes one: a whole number as `.int`.
@@ -85,12 +80,6 @@ struct ProportionalScaler {
         if value == value.rounded(), abs(value) < Double(Int.max) { return .int(Int(value)) }
         return .double(value)
     }
-
-    /// How finely a scaled length is kept: hundredths of a point.
-    static let precision = 100.0
-
-    /// How finely a scaled factor is kept: four decimals.
-    static let factorPrecision = 10000.0
 
     /// Notes a `$name` and returns it unchanged.
     private mutating func note(_ reference: String) -> AnyCodable {

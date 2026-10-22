@@ -302,34 +302,37 @@ extension CRDTDocument {
         )
     }
 
-    /// Records a root override as the `kind.rootOverrides` change the wire already has.
+    /// Records a root override as the ref node the document stores for it.
     ///
-    /// The map is one CRDT property, exactly as `kind.descendants` is: a peer that
-    /// writes one key and a peer that writes another converge on whichever wrote last,
-    /// which is the granularity `set kind.rootOverrides=…` has always had.
+    /// The ref is resolved exactly as ``EditableDocument/applyLocal(_:)`` resolves it, so a
+    /// Woodcase-owned key (`kind.strokeDash`, `common.locked`) that the document moves onto
+    /// the ref's own `metadata.woodcase` (rule 6) replicates as those metadata entries,
+    /// one per entry and sorted by path, before the `kind.rootOverrides` change that
+    /// carries the rest. The map is one CRDT property, exactly as `kind.descendants` is: a
+    /// peer that writes one key and a peer that writes another converge on whichever wrote
+    /// last, which is the granularity `set kind.rootOverrides=…` has always had.
     ///
     /// - Parameters:
     ///   - op: The root override applied locally.
-    ///   - document: The document it was applied to.
-    /// - Returns: The operations to broadcast, empty when the node is not a live ref.
+    ///   - document: The document it is about to be applied to.
+    /// - Returns: The operations to broadcast, empty when the node is not a live ref or
+    ///   the override will not resolve.
     func processLocalOverrideRoot(
         _ op: EditOperation.OverrideRoot,
         document: EditableDocument
     ) -> [CRDTOperation] {
-        guard let node = document.nodes[op.refNodeID] else { return [] }
-        guard case var .ref(refData) = node.kind else { return [] }
+        guard let node = document.nodes[op.refNodeID], case .ref = node.kind,
+              let overridden = try? document.overriddenNode(for: op)
+        else { return [] }
 
-        var overrides = refData.rootOverrides ?? [:]
-        overrides.merge(op.properties) { _, new in new }
-        for key in op.unset {
-            overrides.removeValue(forKey: key)
-        }
-        refData.rootOverrides = overrides.isEmpty ? nil : overrides
-
-        return processLocalUpdateKind(
-            EditOperation.UpdateKind(nodeID: op.refNodeID, kind: .ref(refData)),
+        var ops = processLocalMetadata(
+            nodeID: op.refNodeID, from: node.common.metadata, to: overridden.common.metadata
+        )
+        ops += processLocalUpdateKind(
+            EditOperation.UpdateKind(nodeID: op.refNodeID, kind: overridden.kind),
             document: document
         )
+        return ops
     }
 
     /// Generic local LWW handler: creates an op, records the timestamp, returns the op.
