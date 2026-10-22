@@ -128,7 +128,8 @@ extension SwiftUINodeEmitter {
 
     /// `shape` in Pen's paint order: painted with the node's fills
     /// (``paintedShape(_:layers:)``), sized by the node's frame and clipped to the shape
-    /// when a layer is a view, then its inner shadows and its stroke over them; its outer
+    /// when a layer is a view, then its inner shadows and its stroke over them — a group of
+    /// their own when a paint blends (``isolatesPaints(fills:stroke:)``); its outer
     /// shadows, cast by its ``Silhouette``, its background blur and its layer blur last.
     func filledShape(
         _ node: PenNode, shape: Outline, fills: PenFills?, stroke: (any PenStrokable)?, effects: PenEffects?,
@@ -147,17 +148,23 @@ extension SwiftUINodeEmitter {
         view = view.modified(innerShadows(effects, in: shape, underContent: false))
         let drawn = stroke?.drawn(on: node)
         let outset = drawn.flatMap { FlatOutset(width: width, height: height, stroke: $0) }
+        var paintedStroke: (any PenStrokable)?
         if let drawn {
             let stroked = outset.map { shape.outset($0) } ?? shape
             if var strokeView = strokeView(
                 drawn, shape: stroked, box: box, dash: node.strokeDash, miterLimit: Self.writtenMiterLimit(of: node),
-                unemitted: &unemitted
+                overFills: !layers.isEmpty, unemitted: &unemitted
             ) {
                 if let outset {
                     strokeView = strokeView.modified(outset.padding)
                 }
                 view.modifiers.append(SwiftUIViewCode.Modifier(".overlay", content: [strokeView]))
+                paintedStroke = drawn
             }
+        }
+        // Its paints, inner shadows and stroke blend among themselves, not with the backdrop.
+        if isolatesPaints(fills: layers, stroke: paintedStroke) {
+            view = view.modified(".compositingGroup()")
         }
         warnUnemitted(node, unemitted)
         let silhouette = silhouette(of: node, shape: shape, stroke: drawn, box: box, outset: outset)

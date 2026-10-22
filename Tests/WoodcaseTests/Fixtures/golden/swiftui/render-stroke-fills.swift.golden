@@ -380,6 +380,7 @@ public struct RectBlendMultiply: View {
                         .fill(.linearGradient(Gradient(stops: [.init(color: Color(hex: 0xFF0000), location: 0), .init(color: Color(hex: 0x0000FF), location: 1)]).colorSpace(.device), startPoint: .leading, endPoint: .trailing).blendMode(.multiply))
                         .background(Color(hex: 0x00FF00), in: Rectangle().penStroke(.center, lineWidth: 24))
                 }
+                .compositingGroup()
                 .offset(x: 60, y: 60)
         }
         .frame(width: 320, height: 240, alignment: .topLeading)

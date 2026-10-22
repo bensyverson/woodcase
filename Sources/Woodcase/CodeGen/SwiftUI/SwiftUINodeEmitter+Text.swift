@@ -83,6 +83,10 @@ extension SwiftUINodeEmitter {
         } else if !layers.isEmpty {
             // After the frame: Pen lays a text's paint out over the node's box.
             view.modifiers.append(SwiftUIViewCode.Modifier(".penTextFill", content: layers.map(\.view)))
+            // A blended paint stays within the text's paints (the inner-shadow fill groups already).
+            if isolatesPaints(fills: layers, stroke: nil) {
+                view = view.modified(".compositingGroup()")
+            }
         } else if !(data.fills?.all ?? []).contains(where: \.isEnabled) {
             // Pen draws a text with no enabled paint as nothing; left unstyled, SwiftUI
             // would draw it in `.primary`, black or white by the color scheme.

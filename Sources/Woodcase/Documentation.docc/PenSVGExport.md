@@ -104,8 +104,14 @@ These degrade, on purpose:
 - **Linear burn and linear dodge.** Linear dodge is `mix-blend-mode: plus-lighter`, CSS
   Compositing Level 2's add, which matches the CG renderer's add where the source is
   opaque; it is a Porter–Duff plus, so a translucent source adds its color scaled by its
-  alpha where the renderer mixes the add by it, as Photoshop does. CSS has no linear burn;
-  it blends as `color-burn`, where the CG renderer draws `max(0, Cb + Cs − 1)`.
+  alpha where the renderer mixes the add by it, as Photoshop does. A linear burn writes two
+  declarations, `mix-blend-mode:color-burn;mix-blend-mode:plus-darker` (Ben's ruling,
+  2026-10-21): WebKit draws `plus-darker` as an exact linear burn (`#3366FF` over `#E6994D`
+  is `#1A004D`, the CG renderer's `max(0, Cb + Cs − 1)`; `SVGExportLinearBurnWebViewTests`),
+  and a browser that does not know `plus-darker`, Chrome among them, drops that declaration
+  and keeps `color-burn`, the nearest blend standard CSS has. Like `plus-lighter`,
+  `plus-darker` is a Porter–Duff plus, so it departs from the renderer over a translucent
+  backdrop.
 
 > **Correction, 2026-10-20 (leaf 8nwlNY):** this entry said the CG renderer drew linear burn
 > and linear dodge as multiply and screen; since leaf 22DryP it draws Photoshop's true

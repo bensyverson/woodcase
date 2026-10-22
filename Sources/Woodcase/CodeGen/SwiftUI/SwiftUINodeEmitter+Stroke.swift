@@ -9,7 +9,7 @@ extension SwiftUINodeEmitter {
     /// number for (reported in `unemitted`). A uniform or per-side width the theme has a
     /// number for is read through it.
     ///
-    /// The stroke is painted like a fill, over the node's box (``paintLayers(_:box:unemitted:)``),
+    /// The stroke is painted like a fill, over the node's box (``paintLayers(_:box:of:overPaints:unemitted:)``),
     /// through the region it covers. A centered stroke of one paint is SwiftUI's own
     /// `.stroke`, and an inside one on a rectangle whose corners are at least half the width
     /// is `.strokeBorder`, which then draws exactly Pen's band. Everything else is a support
@@ -22,17 +22,19 @@ extension SwiftUINodeEmitter {
     /// draws nothing. A dash (``PenNode/strokeDash``) goes in the uniform stroke's
     /// `StrokeStyle` — SwiftUI's own shapes start their outlines where they choose, so its
     /// dashes need not start where the renderer's do; a per-side band takes none. A
-    /// `miterLimit` (``writtenMiterLimit(of:)``) goes in the same `StrokeStyle`.
+    /// `miterLimit` (``writtenMiterLimit(of:)``) goes in the same `StrokeStyle`. With
+    /// `overFills` false, the stroke's lowest paint is the node's lowest and is written
+    /// without its blend mode (``paintLayers(_:box:of:overPaints:unemitted:)``).
     func strokeView(
         _ stroke: any PenStrokable, shape: Outline, box: FillBox, dash: PenStrokeDash? = nil, miterLimit: Double? = nil,
-        unemitted: inout [String]
+        overFills: Bool, unemitted: inout [String]
     ) -> SwiftUIViewCode? {
         guard PaintRoute(stroke.stroke) != .none else { return nil }
         let region: Outline
         switch stroke.strokeWidth {
         case let .perSide(sides):
             guard let corners = shape.corners, let widths = sideWidths(sides, unemitted: &unemitted) else { return nil }
-            let layers = paintLayers(stroke.stroke, box: box, unemitted: &unemitted)
+            let layers = paintLayers(stroke.stroke, box: box, overPaints: overFills, unemitted: &unemitted)
             guard !layers.isEmpty else { return nil }
             let alignment = stroke.strokeAlignment ?? .center
             region = sideRegion(widths, alignment: alignment, shape: shape, corners: corners)
@@ -41,12 +43,13 @@ extension SwiftUINodeEmitter {
         case let .uniform(value):
             guard let width = number(value, unemitted: &unemitted) else { return nil }
             return uniformStroke(
-                stroke, width: width, shape: shape, box: box, dash: dash, miterLimit: miterLimit, unemitted: &unemitted
+                stroke, width: width, shape: shape, box: box, dash: dash, miterLimit: miterLimit, overFills: overFills,
+                unemitted: &unemitted
             )
         case nil:
             return uniformStroke(
                 stroke, width: SwiftUINumber(1), shape: shape, box: box, dash: dash, miterLimit: miterLimit,
-                unemitted: &unemitted
+                overFills: overFills, unemitted: &unemitted
             )
         }
     }
@@ -55,11 +58,11 @@ extension SwiftUINodeEmitter {
     /// its widest value.
     private func uniformStroke(
         _ stroke: any PenStrokable, width number: SwiftUINumber, shape: Outline, box: FillBox, dash: PenStrokeDash?,
-        miterLimit: Double?, unemitted: inout [String]
+        miterLimit: Double?, overFills: Bool, unemitted: inout [String]
     ) -> SwiftUIViewCode? {
         guard number.largest > 0 else { return nil }
         let width = number.largest
-        let layers = paintLayers(stroke.stroke, box: box, unemitted: &unemitted)
+        let layers = paintLayers(stroke.stroke, box: box, overPaints: overFills, unemitted: &unemitted)
         guard !layers.isEmpty else { return nil }
         let alignment = stroke.strokeAlignment ?? .center
         // A box that is a point — a sizeless `layout: none` frame — has no outline to stroke,

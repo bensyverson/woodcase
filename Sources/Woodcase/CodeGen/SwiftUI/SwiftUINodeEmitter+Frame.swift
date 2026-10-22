@@ -48,7 +48,7 @@ extension SwiftUINodeEmitter {
             let outset = FlatOutset(width: width, height: height, stroke: data)
             var stroke = strokeView(
                 data, shape: outset.map { shape.outset($0) } ?? shape, box: box, dash: node.strokeDash,
-                miterLimit: Self.writtenMiterLimit(of: node), unemitted: &unemitted
+                miterLimit: Self.writtenMiterLimit(of: node), overFills: !layers.isEmpty, unemitted: &unemitted
             )
             if let outset {
                 stroke = stroke?.modified(outset.padding)
@@ -76,18 +76,42 @@ extension SwiftUINodeEmitter {
             if data.clip?.literalValue == true {
                 view = clip(view, to: shape)
             }
-            // Pen's order under the children: fills, inner shadows, stroke. A later
-            // background draws under an earlier one.
-            if let stroke {
-                view.modifiers.append(SwiftUIViewCode.Modifier(".background", content: [stroke]))
-            }
-            view = view.modified(innerShadows(data.effects, in: shape, underContent: true))
-            view.modifiers += backgrounds(layers, in: shape)
+            // Pen's order under the children: fills, inner shadows, stroke.
+            view.modifiers += ownPaint(
+                layers: layers, innerShadows: innerShadows(data.effects, in: shape, underContent: true), stroke: stroke,
+                in: shape, isolated: isolatesPaints(fills: layers, stroke: stroke == nil ? nil : data)
+            )
             warnUnemitted(node, unemitted)
             // Cast by its box and its stroke band, not its children.
             let silhouette = silhouette(of: node, shape: shape, stroke: data, box: box, outset: outset)
             return withEffects(view, of: node, effects: data.effects, fills: data.fills, silhouette: silhouette)
         }
+    }
+
+    /// The backgrounds that draw a frame's own paint under its children: its fills, its
+    /// inner shadows (`.background` modifiers) and its stroke, bottom to top.
+    ///
+    /// Each is a background of its own, a later one drawn under an earlier, unless the
+    /// paints blend (``isolatesPaints(fills:stroke:)``): then they are one background, a
+    /// `ZStack` composited as a group, so a blended paint stays within the frame's paints
+    /// while the children above it — and their own blend modes — are not grouped with them.
+    private func ownPaint(
+        layers: [SwiftUIPaintLayer], innerShadows: [SwiftUIViewCode.Modifier], stroke: SwiftUIViewCode?,
+        in shape: Outline, isolated: Bool
+    ) -> [SwiftUIViewCode.Modifier] {
+        guard isolated else {
+            let strokeBackground = stroke.map { [SwiftUIViewCode.Modifier(".background", content: [$0])] } ?? []
+            return strokeBackground + innerShadows + backgrounds(layers, in: shape)
+        }
+        var paints: [SwiftUIViewCode] = []
+        if !layers.isEmpty {
+            let fill = paintedShape(shape, layers: layers)
+            paints.append(needsClip(layers) ? clip(fill, to: shape) : fill)
+        }
+        paints += innerShadows.flatMap { $0.content ?? [] }
+        paints += [stroke].compactMap(\.self)
+        let group = SwiftUIViewCode(head: "ZStack", body: paints).modified(".compositingGroup()")
+        return [SwiftUIViewCode.Modifier(".background", content: [group])]
     }
 
     /// The stack for `layout`, its children interleaved with `Spacer`s for the two

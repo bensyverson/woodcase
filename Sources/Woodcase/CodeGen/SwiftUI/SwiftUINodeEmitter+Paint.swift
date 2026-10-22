@@ -20,7 +20,17 @@ extension SwiftUINodeEmitter {
     /// In a component's body, the paint a color or image prop of the node `nodeID` reads
     /// (``SwiftUIProp/boundFillIndex(_:)``) is the prop: the `Color`, or the `Image` placed
     /// by the fill's mode.
-    func paintLayers(_ fills: PenFills?, box: FillBox, of nodeID: String? = nil, unemitted: inout [String]) -> [SwiftUIPaintLayer] {
+    ///
+    /// A paint blends only with the paints beneath it on its node (Ben's reading-1 ruling,
+    /// 2026-10-20; `PenPaintStack`), so the lowest paint of the node's stack — the first
+    /// layer here unless `overPaints` — is written without its blend mode: it has nothing
+    /// to blend with. ``isolatesPaints(fills:stroke:)`` keeps the rest within the node.
+    ///
+    /// - Parameter overPaints: Whether the node draws paints beneath these — its fills,
+    ///   under a stroke's paints.
+    func paintLayers(
+        _ fills: PenFills?, box: FillBox, of nodeID: String? = nil, overPaints: Bool = false, unemitted: inout [String]
+    ) -> [SwiftUIPaintLayer] {
         let boundIndex = nodeID == nil ? nil : SwiftUIProp.boundFillIndex(fills)
         let color = nodeID.flatMap { scope.prop(.color, at: $0) }
         let image = nodeID.flatMap { scope.prop(.image, at: $0) }
@@ -61,7 +71,7 @@ extension SwiftUINodeEmitter {
             if let opacity, opacity < 1 {
                 layer.opacity = max(0, opacity)
             }
-            if let mode = fill.blendMode, mode != .normal {
+            if let mode = fill.blendMode, mode != .normal, overPaints || !layers.isEmpty {
                 if let name = SwiftUIBlendMode.name(for: mode) {
                     layer.blendMode = ".\(name)"
                 } else {
@@ -120,10 +130,16 @@ extension SwiftUINodeEmitter {
             let stack = clip(SwiftUIViewCode(head: "ZStack", body: layers.map(\.view)), to: shape)
             return [SwiftUIViewCode.Modifier(".background", content: [stack])]
         }
-        return styles.reversed().map { style in
-            SwiftUIViewCode.Modifier(
-                shape == .rectangle ? ".background(\(style))" : ".background(\(style), in: \(shape.argument)\(shape.fillStyle(label: "fillStyle")))"
-            )
+        // A blended style names its shape even on a rectangle: `.background(style.blendMode(…))`
+        // is ambiguous between `ShapeStyle`'s `blendMode` and `View`'s, and does not compile.
+        return layers.reversed().compactMap { layer in
+            layer.style.map { style in
+                SwiftUIViewCode.Modifier(
+                    shape == .rectangle && layer.blendMode == nil
+                        ? ".background(\(style))"
+                        : ".background(\(style), in: \(shape.argument)\(shape.fillStyle(label: "fillStyle")))"
+                )
+            }
         }
     }
 }

@@ -127,12 +127,11 @@
             #expect(fill.first.flatMap { Fixture.attribute("style", of: $0) } == "mix-blend-mode:hard-light")
         }
 
-        @Test("Linear dodge is plus-lighter, a true add; linear burn stays color-burn")
+        /// Linear burn is `SVGExporterLinearBurnTests`'.
+        @Test("Linear dodge is plus-lighter, a true add")
         func linearModes() throws {
             let dodge = try Fixture.elements("g", in: rect(##""fill": "#FF0000", "blendMode": "linearDodge""##))
             #expect(dodge.contains { Fixture.attribute("style", of: $0) == "mix-blend-mode:plus-lighter" })
-            let burn = try Fixture.elements("g", in: rect(##""fill": "#FF0000", "blendMode": "linearBurn""##))
-            #expect(burn.contains { Fixture.attribute("style", of: $0) == "mix-blend-mode:color-burn" })
         }
 
         /// A paint blends only within its node's paints (Ben's reading-1 ruling, 2026-10-20),
