@@ -73,6 +73,9 @@ extension BatchApplier {
         )
     }
 
+    /// An `rm` line: the public planner's ``EditPlanner/planDelete(nodeIDs:in:)``, so the
+    /// connectors that end on the node go with it, after detaching the component's
+    /// instances when the line asks.
     private static func planRemove(
         _ op: BatchOperation.RemoveOp,
         in document: EditableDocument,
@@ -85,11 +88,15 @@ extension BatchApplier {
         let detaches: [EditOperation] = detached.map {
             .detachRef(EditOperation.DetachRef(refNodeID: $0))
         }
+        let deletion = try EditPlanner.planDelete(nodeIDs: [id], in: document)
         return BatchPlan(
-            operations: detaches + [.deleteNode(EditOperation.DeleteNode(nodeID: id))],
+            operations: detaches + deletion.operations,
             expecting: expecting(op.rev, on: id),
             actedOnID: id,
-            divergences: [detachment(of: detached, removing: id, in: document)].compactMap(\.self)
+            divergences: [
+                detachment(of: detached, removing: id, in: document),
+                connectorRemoval(of: deletion.connectorIDs, removing: id, in: document),
+            ].compactMap(\.self)
         )
     }
 

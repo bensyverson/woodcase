@@ -78,6 +78,11 @@ public struct WriteDivergence: Friendly {
         /// before removing it.
         case detachedInstances
 
+        /// A delete, or a replace that dropped nodes, also deleted the connectors attached
+        /// to what it removed, so none is left pointing at a node that no longer exists.
+        /// A ``Severity/note``: it is what deleting a node means.
+        case deletedConnectors
+
         /// A `var` line carried a themed value: several values on one line, one per
         /// theme option, plus whatever axes the document had to grow to hold them.
         case themedVariable

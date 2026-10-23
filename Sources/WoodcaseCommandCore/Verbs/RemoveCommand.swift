@@ -19,8 +19,11 @@ struct RemoveCommand: AsyncParsableCommand {
         that consequence is opted into: every instance is detached into a real copy \
         of what it showed, and only then is the component deleted.
 
-        The answer names what went and the document's new revision. There is no node \
-        revision to report, because there is no longer a node.
+        The connectors that end on the node, or on anything inside it, go with it in \
+        the same edit, so none is left pointing at nothing; one undo brings both back.
+
+        The answer names what went, the connectors included, and the document's new \
+        revision. There is no node revision to report, because there is no longer a node.
 
         \(AddressArgument.addressForms)
 

@@ -92,7 +92,7 @@ return are listed here, so a script knows what it must branch on.
 | `group` | write | Wrap nodes in a new group, or a free frame with `--frame`, keeping them where they are drawn | 0 2 3 4 5 |
 | `ungroup` | write | Take a group or frame apart, keeping its children where they are drawn | 0 2 3 4 5 |
 | `scale` | write | Scale nodes proportionally by one factor: sizes, type, strokes, radii, effects, spacing | 0 2 3 4 5 |
-| `rm` | write | Delete a node, refusing to strand instances | 0 2 3 4 5 |
+| `rm` | write | Delete a node and the connectors that end on it, refusing to strand instances | 0 2 3 4 5 |
 | `override` | write | Write an override into a component instance | 0 2 3 4 5 |
 | `apply` | write | A JSONL batch of the above, in one transaction | 0 1 2 3 4 5 |
 | `js` | write | A JavaScript program over the document, in one transaction | 0 1 2 3 4 5 |

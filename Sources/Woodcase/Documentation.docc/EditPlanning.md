@@ -164,6 +164,36 @@ Lock has no planner of its own: it is a set of `common.locked`, stored in
 `metadata.woodcase.locked` (``PenMetadata/WoodcaseKey/locked``), planned as any other set, and ``PenNode/isLocked``
 reads it back; see <doc:PenMetadataNamespace>.
 
+### Deleting a node
+
+Deleting a node also deletes every connector attached to it or to anything inside it, in
+the same edit, so no connector is left pointing at a node that no longer exists — Pen's
+format has no free end (Ben's ruling of 2026-10-23, Penumbra's interaction spec §11).
+``EditPlanner/planDelete(nodeIDs:in:)`` is the one place that decides it: Delete and Cut in
+an editor, `woodcase rm`, a batch's `rm` line and a script's remove all plan through it.
+
+```swift
+let plan = try EditPlanner.planDelete(nodeIDs: ["Card"], in: document)
+plan.connectorIDs    // the connectors that end on Card or inside it, in document order
+try session.submit(.local(LocalEdit(operations: plan.operations)))
+```
+
+A connector end is attached to a deleted node when any id its path names is one: the node,
+a node inside it, an instance inside it (`Chip/Label` goes with `Chip`), or a component's
+own node that an instance shows (`Chip/Label` goes with `Label` too). The plan
+(``DeletionPlan``) deletes the connectors first and then the nodes, so the undo — one step,
+the reverse — puts the nodes back before the connectors that name them, each where it was.
+Each id is deleted once: a node inside another given node goes with it, and a connector
+that is itself being deleted is not taken again. An id inside a component instance is
+refused (``EditRefusal/Code/insideInstance``), and one naming nothing
+(``EditRefusal/Code/addressNotFound``).
+
+A batch `replace` that drops nodes from the subtree it rewrites takes their connectors the
+same way. Both answers name what went, as a ``WriteDivergence/Kind/deletedConnectors``
+note: `removing Card also removed 2 connectors that ended on it or inside it: Flow, Link`.
+
+Ungroup is not a delete of its children: they keep their ids and their connectors.
+
 ### The default text style
 
 A document's default text style is a text marked with `metadata.woodcase.defaultTextStyle:
@@ -353,6 +383,8 @@ let drawn = await document.materializeSnapshot(overlaying: preview)
 - ``EditPlanner/planMove(nodeID:into:at:keepingDrawnPlace:snapping:in:layout:)``
 - ``EditPlanner/planGroup(nodeIDs:kind:in:layout:)``
 - ``EditPlanner/planUngroup(groupID:in:layout:)``
+- ``EditPlanner/planDelete(nodeIDs:in:)``
+- ``DeletionPlan``
 - ``EditPlanner/planScale(nodeIDs:by:anchor:in:layout:)``
 - ``EditPlanner/planMarkDefaultTextStyle(nodeID:in:)``
 - ``EditPlanner/planUnmarkDefaultTextStyle(in:)``

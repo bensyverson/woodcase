@@ -52,6 +52,7 @@ import Foundation
 /// - ``planMove(nodeID:into:at:keepingDrawnPlace:snapping:in:layout:)``
 /// - ``planGroup(nodeIDs:kind:in:layout:)``
 /// - ``planUngroup(groupID:in:layout:)``
+/// - ``planDelete(nodeIDs:in:)``
 public enum EditPlanner {
     /// Plans an intent against the node an address names.
     ///

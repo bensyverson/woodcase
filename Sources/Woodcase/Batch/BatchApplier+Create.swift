@@ -77,11 +77,17 @@ extension BatchApplier {
         // Checked against the node each id names now, so a legacy value the replacement
         // carries over unchanged passes.
         try NodePropertyCodec.checkAuthoredPostIts(in: replacement) { document.node(id: $0) }
+        // A node the replacement drops is deleted, so the connectors that end on it go
+        // too, as ``EditPlanner/planDelete(nodeIDs:in:)`` takes them.
+        let dropped = freed.subtracting(document.collectInsertedIDs(in: replacement))
+        let connectors = EditPlanner.connectorIDs(attachedTo: dropped, in: document).filter { !freed.contains($0) }
+        let deletes = connectors.map { EditOperation.deleteNode(EditOperation.DeleteNode(nodeID: $0)) }
         return BatchPlan(
-            operations: [.replaceSubtree(EditOperation.ReplaceSubtree(node: replacement))],
+            operations: deletes + [.replaceSubtree(EditOperation.ReplaceSubtree(node: replacement))],
             expecting: expecting(op.rev, on: targetID),
             createdRootID: targetID,
-            actedOnID: targetID
+            actedOnID: targetID,
+            divergences: [connectorRemoval(of: connectors, removing: targetID, in: document)].compactMap(\.self)
         )
     }
 

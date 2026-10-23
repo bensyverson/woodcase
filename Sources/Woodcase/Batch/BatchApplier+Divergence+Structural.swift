@@ -129,6 +129,37 @@ extension BatchApplier {
         )
     }
 
+    /// The note a delete or replace that took connectors with it implies.
+    ///
+    /// A ``WriteDivergence/Severity/note``: deleting a node means deleting the connectors
+    /// that end on it (``EditPlanner/planDelete(nodeIDs:in:)``), but the caller asked for
+    /// one node and the answer has to say what else went.
+    ///
+    /// - Parameters:
+    ///   - connectorIDs: The connectors taken along.
+    ///   - nodeID: The node removed or replaced.
+    ///   - document: The document before the write, for the names.
+    /// - Returns: The note, or `nil` when no connector went.
+    static func connectorRemoval(
+        of connectorIDs: [String],
+        removing nodeID: String,
+        in document: EditableDocument
+    ) -> WriteDivergence? {
+        guard !connectorIDs.isEmpty else { return nil }
+        let name = document.node(id: nodeID)?.common.name ?? nodeID
+        let paths = connectorIDs.map { document.namePath(of: $0) }
+        let subject = connectorIDs.count == 1 ? "1 connector" : "\(connectorIDs.count) connectors"
+        return WriteDivergence(
+            kind: .deletedConnectors,
+            severity: .note,
+            target: name,
+            requested: "removing \(name)",
+            applied: "removing \(name) and \(subject)",
+            note: "removing \(name) also removed \(subject) that ended on it or inside it: "
+                + paths.joined(separator: ", ")
+        )
+    }
+
     // MARK: - Spelling
 
     /// A root node's coordinates as a sentence reads them, or `nil` when it has none.
