@@ -81,8 +81,24 @@ name a node by id — or by an `instance/child` path into a component instance �
 `bottom` or `right` edge. It takes the five stroke keys and the properties every node
 has, and nothing else: no fill, no size, no effects. Pen's validator accepts a
 connection only at the top level of a document. A connection has no box of its own —
-it is drawn from where its endpoints are (``PenNode/ConnectionData/segment(in:)``) — so
-the layout engine gives it no size and moves nothing for it.
+it is drawn from where its endpoints are (``PenNode/ConnectionData/route(in:routing:)``) — so
+the layout engine gives it no size and moves nothing for it, `add` gives it no artboard
+position, and `tree` and `find` rows name its two ends (``TreeRow/Connection``).
+
+Beyond Pen's keys, a connection takes a **routing** and two **arrowheads**, Woodcase's own
+format extension (Penumbra ruling R11) stored in `metadata.woodcase` and written at
+`kind.routing`, `kind.startArrowhead` and `kind.endArrowhead` (``PenNode/connectionStyle``;
+<doc:PenMetadataNamespace>). Pen drops a connection entirely when it opens a file, so no
+choice of storage survives Pen; the metadata keys were chosen so the connection keeps exactly
+the keys Pen's validator accepts, and so the keys get the namespace's authoring check,
+schema rows and lint for free. ``PenNode/ConnectionData/Routing`` is `straight` or `elbow`;
+``PenNode/ConnectionData/Arrowhead`` is `none`, `triangle`, `chevron` or `circle`. A file
+with none of the keys draws straight and bare, as it always did; an editor creating a
+connector writes ``PenNode/ConnectionData/Style/newConnector`` (elbow, a triangle at the
+target). An editor redraws the connectors a change moved through
+``PenConnectionIndex``, and hit-tests one on its route
+(``PenLayoutEngine/connectionBandContains(_:of:canvasRects:tolerance:)``), not its
+meaningless layout rect.
 
 ### The version gate
 

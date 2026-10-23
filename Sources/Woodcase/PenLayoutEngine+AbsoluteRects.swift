@@ -10,7 +10,7 @@ public extension PenLayoutEngine {
     ///
     /// ``absoluteRects(under:in:layoutRects:)`` for each top-level node, merged: the one
     /// frame a top-level `connection` finds its endpoints in (see
-    /// ``PenNode/ConnectionData/segment(in:)``). Both renderers draw connections from it.
+    /// ``PenNode/ConnectionData/route(in:routing:)``). Both renderers draw connections from it.
     ///
     /// - Parameters:
     ///   - document: The expanded, resolved document the layout ran on.

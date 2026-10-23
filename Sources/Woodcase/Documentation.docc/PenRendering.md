@@ -162,9 +162,17 @@ A `note`, `prompt` or `context` is drawn from its expansion, ``PenPostIt/expansi
 
 ### Connections
 
-A `connection` (``PenNode/ConnectionData``) is drawn as a straight segment from its source's anchor to its target's — the center of a node's box, or the middle of one of its edges — painted by the connection's own stroke exactly as a `line` is: every paint a stroke takes, its width, cap and join, and the connection's opacity. With no stroke paint it draws nothing, as a line does. Its `x`, `y`, rotation and flips play no part; a connector is where its endpoints are. The endpoints are found in canvas coordinates, composed once per render by ``PenLayoutEngine/canvasRects(in:layoutRects:)``, so an endpoint nested in a frame, or inside a component instance by its `instance/child` path, is found where it is drawn. A connection whose endpoint names no node draws nothing.
+A `connection` (``PenNode/ConnectionData``) is drawn along its route from its source's anchor to its target's — the center of a node's box, or the middle of one of its edges — painted by the connection's own stroke as a `line` is: every paint a stroke takes, its width, cap and join, and the connection's opacity, always centered on the route (a connector has no inside for an alignment to cut against). With no stroke paint it draws nothing, as a line does. Its `x`, `y`, rotation and flips play no part; a connector is where its endpoints are. The endpoints are found in canvas coordinates, composed once per render by ``PenLayoutEngine/canvasRects(in:layoutRects:)``, so an endpoint nested in a frame, or inside a component instance by its `instance/child` path, is found where it is drawn. A connection whose endpoint names no node draws nothing.
 
-There is no Pen rendering to match. Pen 1.2.14's validator accepts a connection, but neither Pen's desktop app nor its headless engine loads one: both drop the node when they open the file. `PenConnectionRenderTests` pins Woodcase's drawing with pixel probes, and RapidPro draws the same segment. The React emitter writes nothing for a connection: Pen allows one only between artboards at the top level, where no component or page markup reaches.
+**Routing.** `kind.routing` (``PenNode/ConnectionData/Routing``) is `straight` — one segment, anchor to anchor, the default and what every file without the key draws — or `elbow`: an orthogonal route (``PenNode/ConnectionData/route(in:routing:)``) that leaves the source's side along its outward normal and enters the target's against its normal, every run horizontal or vertical. Facing sides meet in one step at the middle of the gap, or one straight run when they line up; sides facing the same way go out past the farther box and back; perpendicular sides take one corner when they can. A target behind its source is reached round the gap between the two boxes, or a 16-pt margin round the nearer side of both. It routes round the two endpoint boxes only, never round other nodes, and the same boxes always give the same points. A center anchor leaves toward the other end along the longer axis between them.
+
+**Arrowheads.** `kind.startArrowhead` and `kind.endArrowhead` (``PenNode/ConnectionData/Arrowhead``) are `none` (the default), `triangle` (filled, its tip on the anchor), `chevron` (two stroked arms, set back so the stroked tip lands on the anchor) or `circle` (a filled disc touching the anchor), all in the stroke's paint and sized from its width `w`: a triangle or chevron is `3w + 8` long and half that wide either side of the line, a circle's radius is `1.5w + 3`. The line is cut back where an arrowhead covers its end, so a thick line never shows past a tip. A stroke of no width draws no arrowheads.
+
+**One geometry for every renderer.** ``PenNode/ConnectionData/Drawing`` (from ``PenNode/connectionDrawing(in:)``) is everything a connection paints — the route, the cut line, each arrowhead's ``PenNode/ConnectionData/Arrowhead/Shape``, the stroke's width, cap and join, and the box its paint is laid over (``PenNode/ConnectionData/Drawing/paintDomain``, the route's bounds). The CG renderer draws from it, and RapidPro is to draw the same points rather than re-derive them. It also gives an editor the connection's hit test on its stroke band (``PenNode/ConnectionData/Drawing/contains(_:tolerance:)``, and ``PenLayoutEngine/connectionBandContains(_:of:canvasRects:tolerance:)`` with the stroke gate) and its painted extent (``PenLayoutEngine/connectionPaintedExtent(of:canvasRects:)``), which ``PenLayoutEngine/paintedExtent(of:rect:layoutRects:)`` cannot measure from a connection's layout rect.
+
+**In a render of one subtree.** A connection is a top-level node of its own, so a render of one frame would never reach it. ``PenRenderer/render(_:layoutRects:size:scale:colorSpace:rootNodeID:overrides:imageProvider:postIt:)`` and ``PenRenderer/render(_:layoutRects:into:rootNodeID:overrides:imageProvider:postIt:)`` with a root draw, over the subtree, every top-level connection whose two anchors fall inside the picture — `render`'s pages, `woodcase shot`'s node and a PDF page all show the connectors between their cards. One that leaves the picture is not drawn.
+
+There is no Pen rendering to match. Pen 1.2.14's validator accepts a connection, but neither Pen's desktop app nor its headless engine loads one: both drop the node when they open the file. `PenConnectionRenderTests` and `ConnectionStyleRenderTests` pin Woodcase's drawing with pixel probes; `Tests/WoodcaseTests/Fixtures/connectors-routes.pen` exercises every routing and arrowhead for a renderer to match. The React emitter writes nothing for a connection: Pen allows one only between artboards at the top level, where no component or page markup reaches.
 
 ### Text
 Text content is a string or a `$variable`; font, color and decorations are node-level properties. Horizontal alignment (left, center, right, justify) and vertical alignment (top, middle, bottom). Styled runs were removed from the format in 2.17 — a legacy document's runs are flattened into one string by ``PenRichTextMigrationRule``. Woodcase brings them back beside `content`, not in it: a text node's ``PenTextSpans`` style ranges of its plain string, and every step below sets, measures and draws them — see <doc:PenRichText>.
@@ -322,3 +330,19 @@ as an SVG; see <doc:PenSVGExport>.
 - ``PenPostItExpansion``
 - ``PenPostIt/DrawingOptions``
 - ``ShaderFills``
+
+### Connections
+
+- ``PenNode/ConnectionData``
+- ``PenNode/ConnectionData/Style``
+- ``PenNode/ConnectionData/Routing``
+- ``PenNode/ConnectionData/Arrowhead``
+- ``PenNode/ConnectionData/Arrowhead/Shape``
+- ``PenNode/ConnectionData/Route``
+- ``PenNode/ConnectionData/Drawing``
+- ``PenNode/connectionStyle``
+- ``PenNode/connectionRoute(in:)``
+- ``PenNode/connectionDrawing(in:)``
+- ``PenLayoutEngine/connectionBandContains(_:of:canvasRects:tolerance:)``
+- ``PenLayoutEngine/connectionPaintedExtent(of:canvasRects:)``
+- ``PenConnectionIndex``

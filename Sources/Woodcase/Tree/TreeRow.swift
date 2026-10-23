@@ -176,6 +176,9 @@ public struct TreeRow: Friendly {
     /// A text node's rich text, or `nil` for a node that holds no readable spans.
     public let spans: Spans?
 
+    /// A connection's two ends, or `nil` for a node that is not a connection.
+    public let connection: Connection?
+
     /// What a row says about a text node's rich text (``PenNode/textSpans``).
     public struct Spans: Friendly {
         /// How many runs the spans hold.
@@ -219,6 +222,7 @@ public struct TreeRow: Friendly {
     ///   - childCount: How many children the node has.
     ///   - properties: The requested property columns, or `nil` if none were requested.
     ///   - spans: A text node's rich text, or `nil` for none.
+    ///   - connection: A connection's two ends, or `nil` for any other node.
     public init(
         id: String,
         address: String,
@@ -235,7 +239,8 @@ public struct TreeRow: Friendly {
         isSlot: Bool,
         childCount: Int,
         properties: [String: AnyCodable]?,
-        spans: Spans? = nil
+        spans: Spans? = nil,
+        connection: Connection? = nil
     ) {
         self.id = id
         self.address = address
@@ -254,5 +259,6 @@ public struct TreeRow: Friendly {
         self.childCount = childCount
         self.properties = properties
         self.spans = spans
+        self.connection = connection
     }
 }

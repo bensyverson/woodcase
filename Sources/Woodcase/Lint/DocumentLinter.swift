@@ -252,6 +252,7 @@ public enum DocumentLinter {
         found += shaderFindings(row, node: node)
         found += perSideStrokeOnShape(row, node: node)
         found += strokeDashIgnored(row, node: node)
+        found += connectionStyleIgnored(row, node: node)
         found += shadowSpreadStale(row, node: node)
         found += paintBlendLowest(row, node: node)
         found += noteUnsized(row, node: node)

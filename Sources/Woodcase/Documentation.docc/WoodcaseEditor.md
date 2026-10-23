@@ -308,10 +308,12 @@ kind.contnet is not a property of a text — banking-home/header/hdrG/hdrL (DhDs
 ```
 
 **Some properties are Woodcase's, and the file keeps them in metadata.** Pen's format has
-no dash, miter limit, lock, rich text or node blend mode, so Woodcase stores those in
-`metadata.woodcase`, which Pen keeps. You still write them where you would guess:
+no dash, miter limit, lock, rich text, node blend mode or connector routing and arrowheads,
+so Woodcase stores those in `metadata.woodcase`, which Pen keeps (a connection itself Pen
+drops). You still write them where you would guess:
 `kind.strokeDash`, `kind.strokeDashOffset`, `kind.strokeMiterLimit`, `kind.blendMode`,
-`kind.spans`, `kind.defaultTextStyle` and `common.locked` — and the keys code generation
+`kind.spans`, `kind.defaultTextStyle`, a connection's `kind.routing`, `kind.startArrowhead`
+and `kind.endArrowhead`, and `common.locked` — and the keys code generation
 reads, which have a namespace of their own: `codegen.role`, `codegen.props` (one parameter
 is `codegen.props.label`), `codegen.states`, `codegen.action` and `codegen.scroll`. A note's
 keys have `note.*` aliases (`note.state=resolved`, `note.tint`); for those alone the raw

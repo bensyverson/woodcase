@@ -116,7 +116,7 @@ struct PenConnectionDataTests {
     ])
     func anchorPoint(anchor: PenNode.ConnectionData.Anchor, x: Double, y: Double) {
         let point = anchor.point(on: PenRect(x: 10, y: 20, width: 100, height: 40))
-        #expect(point == PenNode.ConnectionData.AnchorPoint(x: x, y: y))
+        #expect(point == PenPoint(x: x, y: y))
     }
 
     @Test("A segment runs from the source's anchor to the target's, in the rects given")
@@ -124,8 +124,8 @@ struct PenConnectionDataTests {
         let data = try connection(node(json))
         let rects = ["A": PenRect(x: 0, y: 0, width: 40, height: 20), "I/K": PenRect(x: 100, y: 60, width: 40, height: 20)]
         let segment = try #require(data.segment(in: rects))
-        #expect(segment.from == PenNode.ConnectionData.AnchorPoint(x: 40, y: 10))
-        #expect(segment.to == PenNode.ConnectionData.AnchorPoint(x: 100, y: 70))
+        #expect(segment.from == PenPoint(x: 40, y: 10))
+        #expect(segment.to == PenPoint(x: 100, y: 70))
     }
 
     @Test("A segment whose endpoint names no node is nil")
@@ -136,13 +136,15 @@ struct PenConnectionDataTests {
 
     // MARK: - The vocabulary
 
-    @Test("connection is a node type, described, with its endpoints and stroke keys")
+    @Test("connection is a node type, described, with its endpoints, stroke keys, routing and arrowheads")
     func nodeType() {
         #expect(PenNode.NodeType(rawValue: "connection") == .connection)
         #expect(PenNode.NodeType.connection.summary.contains("two nodes"))
+        // The last three are Woodcase's, stored in metadata.woodcase (ruling R11).
         #expect(PropertyDiff.allKindKeys(.connection) == [
             "kind.source", "kind.target",
             "kind.stroke", "kind.strokeWidth", "kind.strokeLinecap", "kind.strokeLinejoin", "kind.strokeAlignment",
+            "kind.routing", "kind.startArrowhead", "kind.endArrowhead",
         ])
     }
 }

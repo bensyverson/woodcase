@@ -38,7 +38,8 @@ extension BatchApplier {
     /// copy's properties, which are applied after the insert and win outright.
     ///
     /// Nodes added to a laid-out parent are never placed: their parent's layout
-    /// positions them, and coordinates would only be ignored.
+    /// positions them, and coordinates would only be ignored. Nor is a connection, which is
+    /// drawn from where its ends are.
     ///
     /// Positions come from ``RootOverlap/roots(in:textMeasurer:)`` rather than the declared
     /// `x`/`y`, so a root sized to its content is measured at the width it actually
@@ -58,8 +59,13 @@ extension BatchApplier {
         if coordinates == .authored, node.common.x != nil || node.common.y != nil {
             return node
         }
+        // A connection is drawn from where its ends are: a position would only be ignored.
+        if RootOverlap.isConnection(node) { return node }
 
-        let roots = RootOverlap.roots(in: document).map(\.rect)
+        // A connection is no artboard: its x and y mean nothing, so it never pushes one along.
+        let roots = RootOverlap.roots(in: document)
+            .filter { !RootOverlap.isConnection(document.nodes[$0.id]) }
+            .map(\.rect)
         guard !roots.isEmpty else { return node }
 
         var placed = node

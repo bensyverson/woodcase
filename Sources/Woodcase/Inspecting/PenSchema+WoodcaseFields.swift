@@ -23,7 +23,8 @@ public extension PenSchema {
     /// (``PenMetadata/WoodcaseKey/naturalPathTypes``): ``PenMetadata/WoodcaseKey/locked`` on
     /// every type, ``PenMetadata/WoodcaseKey/defaultTextStyle`` and
     /// ``PenMetadata/WoodcaseKey/spans`` on a text, the dash on every type whose stroke the
-    /// renderer dashes and the miter limit on each of those but a line. A shadow's spread
+    /// renderer dashes and the miter limit on each of those but a line, and a connection's
+    /// routing and arrowheads on a connection. A shadow's spread
     /// has no row: it is a `spread` field of each shadow in `kind.effects`
     /// (``PenEffect/spreadField``).
     ///
@@ -55,6 +56,9 @@ public extension PenSchema {
         case .states: codegenStatesRow
         case .action: codegenActionRow
         case .scroll: codegenScrollRow
+        case .routing: routingRow
+        case .startArrowhead: arrowheadRow(.startArrowhead, end: "source")
+        case .endArrowhead: arrowheadRow(.endArrowhead, end: "target")
         default: noteRow(for: key)
         }
     }
@@ -114,6 +118,36 @@ public extension PenSchema {
             example: #""vertical""#
         )
     )
+
+    // MARK: - A connection's routing and arrowheads
+
+    /// How a connection runs between its anchors: absent is straight.
+    private static let routingRow = PenSchemaTable.Property(
+        path: PenMetadata.WoodcaseKey.routing.propertyPath,
+        key: .key(metadataKey(.routing)),
+        shape: PenPropertyShape(
+            forms: PenNode.ConnectionData.Routing.allCases.map { .spelling($0.rawValue) },
+            detail: "straight runs anchor to anchor; elbow runs along the axes, leaving and entering "
+                + "perpendicular to the anchors' sides. Pen drops connections, so this is Woodcase's own",
+            example: #""elbow""#
+        ),
+        default: .string(PenNode.ConnectionData.Style.plain.routing.rawValue)
+    )
+
+    /// The arrowhead at one end of a connection: absent is none.
+    private static func arrowheadRow(_ key: PenMetadata.WoodcaseKey, end: String) -> PenSchemaTable.Property {
+        PenSchemaTable.Property(
+            path: key.propertyPath,
+            key: .key(metadataKey(key)),
+            shape: PenPropertyShape(
+                forms: PenNode.ConnectionData.Arrowhead.allCases.map { .spelling($0.rawValue) },
+                detail: "what the connection draws at its \(end) end, in its stroke's paint and sized from "
+                    + "its width: a filled triangle, an open chevron or a filled circle",
+                example: #""triangle""#
+            ),
+            default: .string(PenNode.ConnectionData.Arrowhead.none.rawValue)
+        )
+    }
 
     // MARK: - Private
 

@@ -25,9 +25,11 @@ public extension PenNode {
     /// endpoints are, so its `x`, `y` and rotation play no part in the drawing.
     ///
     /// Pen 1.2.14's validator knows the node, but neither its app nor its headless engine
-    /// loads one, so there is no Pen rendering to match. Woodcase draws a straight
-    /// segment between the two anchor points, painted by the stroke like a `line` —
-    /// no stroke, nothing drawn (see <doc:PenRendering>).
+    /// loads one, so there is no Pen rendering to match. Woodcase draws its route between
+    /// the two anchor points — straight, or an elbow — with any arrowheads, painted by the
+    /// stroke like a `line`: no stroke, nothing drawn. The routing and arrowheads are
+    /// Woodcase's own keys, in `metadata.woodcase` (``PenNode/connectionStyle``; see
+    /// <doc:PenRendering>).
     struct ConnectionData: Friendly, PenStrokable {
         /// Creates a connection payload.
         ///
@@ -130,36 +132,20 @@ public extension PenNode {
             case right
         }
 
-        // MARK: AnchorPoint
-
-        /// A point on the canvas, in points: where an anchor lands.
-        public struct AnchorPoint: Friendly {
-            /// Creates a point.
-            public init(x: Double, y: Double) {
-                self.x = x
-                self.y = y
-            }
-
-            /// The horizontal coordinate.
-            public var x: Double
-            /// The vertical coordinate.
-            public var y: Double
-        }
-
         // MARK: Segment
 
         /// The straight run of a connector, from its source's anchor to its target's.
         public struct Segment: Friendly {
             /// Creates a segment.
-            public init(from: AnchorPoint, to: AnchorPoint) {
+            public init(from: PenPoint, to: PenPoint) {
                 self.from = from
                 self.to = to
             }
 
             /// Where the connector starts.
-            public var from: AnchorPoint
+            public var from: PenPoint
             /// Where the connector ends.
-            public var to: AnchorPoint
+            public var to: PenPoint
         }
     }
 }

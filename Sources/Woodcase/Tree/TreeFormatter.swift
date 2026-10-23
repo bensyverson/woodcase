@@ -139,10 +139,11 @@ public enum TreeFormatter {
         let spans = row.spans.map { spans in
             spans.isStale ? " ⚠ stale runs" : spans.runs == 1 ? " [1 run]" : " [\(spans.runs) runs]"
         } ?? ""
+        let ends = row.connection.map { " [\(oneLine($0.summary))]" } ?? ""
         let columns = properties.map { path in
             row.properties?[path].map(display) ?? "-"
         }
-        return [indent + label + hidden + spans + clip, row.type, rect(absolute ? row.absRect : row.rect)]
+        return [indent + label + hidden + spans + ends + clip, row.type, rect(absolute ? row.absRect : row.rect)]
             + columns + [row.id]
     }
 

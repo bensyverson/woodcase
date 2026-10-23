@@ -46,7 +46,11 @@
                 id: "", address: "", rev: "", depth: 0, type: "", name: "",
                 rect: .zero, absRect: .zero, clip: .none, overflowAxes: [.horizontal],
                 isReusable: false, isInstance: false, isSlot: false, childCount: 0,
-                properties: [:], spans: TreeRow.Spans(runs: 0, isStale: false)
+                properties: [:], spans: TreeRow.Spans(runs: 0, isStale: false),
+                connection: TreeRow.Connection(
+                    source: TreeRow.Connection.End(path: "", anchor: "", name: ""),
+                    target: TreeRow.Connection.End(path: "", anchor: "", name: "")
+                )
             )
             guard let data = try? JSONEncoder().encode(sample),
                   let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any]

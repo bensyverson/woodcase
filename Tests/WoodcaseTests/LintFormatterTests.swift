@@ -78,6 +78,7 @@ struct LintFormatterTests {
             "collapsed-absolute-frame",
             "collapsed-text",
             "component-loop",
+            "connection-style-ignored",
             "duplicate-name",
             "empty-fit-content",
             "fill-in-fit-parent",

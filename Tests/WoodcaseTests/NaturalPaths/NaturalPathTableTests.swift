@@ -19,6 +19,10 @@ struct NaturalPathTableTests {
         .locked: "common.locked",
         .defaultTextStyle: "kind.defaultTextStyle",
         .spans: "kind.spans",
+        // A connection's routing and arrowheads (Penumbra ruling R11).
+        .routing: "kind.routing",
+        .startArrowhead: "kind.startArrowhead",
+        .endArrowhead: "kind.endArrowhead",
         // The code-generation keys' own namespace (leaf tRzkPS).
         .props: "codegen.props",
         .role: "codegen.role",

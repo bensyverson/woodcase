@@ -40,6 +40,7 @@ public extension PenMetadata.WoodcaseKey {
         case .locked: "common.locked"
         case .defaultTextStyle: "kind.defaultTextStyle"
         case .spans: "kind.spans"
+        case .routing, .startArrowhead, .endArrowhead: "kind.\(rawValue)"
         case .props, .role, .states, .action, .scroll: "\(NodePropertyCodec.codegenPrefix)\(rawValue)"
         case .type, .state, .author, .leaf, .stage, .tint, .copiedFrom, .anchor, .replyTo, .requestedBy, .createdAt,
              .fontFamily, .fontSize, .fontWeight, .fontStyle, .letterSpacing, .lineHeight, .textAlign,
@@ -55,7 +56,7 @@ public extension PenMetadata.WoodcaseKey {
     /// (``PenNode/blendedTypes``); every type whose stroke follows one outline a dash, and
     /// every one of those but a line, which has no corners, a miter limit; a text its spans
     /// and the default-text-style mark; a note, a prompt and a context the note keys and a
-    /// note's text style.
+    /// note's text style; a connection its routing and arrowheads.
     var naturalPathTypes: Set<PenNode.NodeType> {
         switch self {
         case .blendMode: PenNode.blendedTypes
@@ -63,6 +64,7 @@ public extension PenMetadata.WoodcaseKey {
         case .strokeMiterLimit: Self.dashedTypes.subtracting([.line])
         case .locked, .props, .role, .states, .action, .scroll: Set(PenNode.NodeType.allCases)
         case .defaultTextStyle, .spans: [.text]
+        case .routing, .startArrowhead, .endArrowhead: [.connection]
         case .type, .state, .author, .leaf, .stage, .tint, .copiedFrom, .anchor, .replyTo, .requestedBy, .createdAt,
              .fontFamily, .fontSize, .fontWeight, .fontStyle, .letterSpacing, .lineHeight, .textAlign,
              .textAlignVertical, .scale:
@@ -100,7 +102,7 @@ public extension PenMetadata.WoodcaseKey {
     var storagePathRule: StoragePathRule {
         switch group {
         case .note, .noteTextStyle: .accepted
-        case .codegen, .text, .stroke, .editor, .effect, .compositing: .refused
+        case .codegen, .text, .stroke, .editor, .effect, .compositing, .connector: .refused
         }
     }
 

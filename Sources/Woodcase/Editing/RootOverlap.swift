@@ -190,7 +190,7 @@ public struct RootOverlap: Friendly {
     ///   - document: The document to measure.
     ///   - textMeasurer: A function that measures text bounding boxes.
     /// - Returns: One ``Root`` per node in ``EditableDocument/rootOrder`` that settles,
-    ///   in that order.
+    ///   in that order. A connection settles at 0×0, so it never overlaps anything.
     public static func roots(
         in document: EditableDocument,
         textMeasurer: TextMeasurer = PenLayoutEngine.defaultTextMeasurer
@@ -200,6 +200,12 @@ public struct RootOverlap: Friendly {
             guard let rect = rects[id] else { return nil }
             return Root(id: id, name: document.nodes[id]?.common.name, rect: rect)
         }
+    }
+
+    /// Whether a node is a connection, which has no box of its own to place or overlap.
+    static func isConnection(_ node: PenNode?) -> Bool {
+        guard case .connection? = node?.kind else { return false }
+        return true
     }
 
     /// Whether two rects share more than a tolerance of area.

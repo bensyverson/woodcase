@@ -1,0 +1,76 @@
+{
+  "version": "2.20",
+  "children": [
+    {
+      "type": "frame",
+      "id": "Board",
+      "name": "Board",
+      "x": 0,
+      "y": 0,
+      "width": 640,
+      "height": 420,
+      "layout": "none",
+      "fill": "#FFFFFF",
+      "children": [
+        { "type": "rectangle", "id": "Start", "name": "Start", "x": 40, "y": 40, "width": 120, "height": 60, "fill": "#DBEAFE", "cornerRadius": 8 },
+        { "type": "rectangle", "id": "Ahead", "name": "Ahead", "x": 260, "y": 40, "width": 120, "height": 60, "fill": "#DCFCE7", "cornerRadius": 8 },
+        { "type": "rectangle", "id": "Below", "name": "Below", "x": 260, "y": 180, "width": 120, "height": 60, "fill": "#FEF9C3", "cornerRadius": 8 },
+        { "type": "rectangle", "id": "Behind", "name": "Behind", "x": 40, "y": 300, "width": 120, "height": 60, "fill": "#FCE7F3", "cornerRadius": 8 },
+        {
+          "type": "frame",
+          "id": "Card",
+          "name": "Card",
+          "x": 460,
+          "y": 160,
+          "width": 140,
+          "height": 100,
+          "layout": "none",
+          "fill": "#F4F4F5",
+          "children": [
+            { "type": "rectangle", "id": "Dot", "name": "Dot", "x": 50, "y": 30, "width": 40, "height": 40, "fill": "#A1A1AA" }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "connection",
+      "id": "Plain",
+      "name": "plain straight",
+      "source": { "path": "Start", "anchor": "right" },
+      "target": { "path": "Ahead", "anchor": "left" },
+      "stroke": "#18181B",
+      "strokeWidth": 2
+    },
+    {
+      "type": "connection",
+      "id": "Step",
+      "name": "elbow, arrow at the target",
+      "source": { "path": "Start", "anchor": "bottom" },
+      "target": { "path": "Below", "anchor": "left" },
+      "stroke": "#2563EB",
+      "strokeWidth": 2,
+      "metadata": { "type": "woodcase", "woodcase": { "routing": "elbow", "endArrowhead": "triangle" } }
+    },
+    {
+      "type": "connection",
+      "id": "Around",
+      "name": "elbow behind, circle to chevron",
+      "source": { "path": "Ahead", "anchor": "right" },
+      "target": { "path": "Behind", "anchor": "left" },
+      "stroke": "#DB2777",
+      "strokeWidth": 3,
+      "strokeLinejoin": "round",
+      "metadata": { "type": "woodcase", "woodcase": { "routing": "elbow", "startArrowhead": "circle", "endArrowhead": "chevron" } }
+    },
+    {
+      "type": "connection",
+      "id": "Nested",
+      "name": "straight into a nested node, arrows both ends",
+      "source": { "path": "Below", "anchor": "right" },
+      "target": { "path": "Dot", "anchor": "top" },
+      "stroke": "#16A34A",
+      "strokeWidth": 2,
+      "metadata": { "type": "woodcase", "woodcase": { "routing": "straight", "startArrowhead": "triangle", "endArrowhead": "triangle" } }
+    }
+  ]
+}

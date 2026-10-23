@@ -31,7 +31,8 @@ public enum PenRenderer {
     ///   - size: The output image size in points.
     ///   - scale: The scale factor (e.g. 2 for @2x). Defaults to 1.
     ///   - colorSpace: The color space for the output. Defaults to sRGB.
-    ///   - rootNodeID: If provided, render only this node and its children.
+    ///   - rootNodeID: If provided, render only this node and its children — and every
+    ///     top-level connection whose two anchors fall inside the image, drawn over them.
     ///   - overrides: Per-node property overrides for animation.
     ///   - imageProvider: Callback to load images for image fills.
     ///   - postIt: The words and identity colors notes, prompts and contexts are drawn with.
@@ -83,6 +84,10 @@ public enum PenRenderer {
                 context.translateBy(x: CGFloat(-rootRect.x), y: CGFloat(-rootRect.y))
             }
             renderNodesIteratively([targetNode], layoutRects: layoutRects, in: context, overrides: overrides, imageProvider: imageProvider, postIt: postIt)
+            PenConnectionRenderer.renderConnections(
+                over: rootNodeID, in: document, layoutRects: layoutRects, into: context,
+                overrides: overrides, imageProvider: imageProvider
+            )
         } else {
             render(document, layoutRects: layoutRects, into: context, overrides: overrides, imageProvider: imageProvider, postIt: postIt)
         }
@@ -94,6 +99,10 @@ public enum PenRenderer {
     ///
     /// The context should already have its coordinate system set up (typically
     /// flipped so that (0,0) is top-left).
+    ///
+    /// With a `rootNodeID`, the node is drawn at its layout rect, in its parent's
+    /// coordinates, and every top-level connection whose two anchors fall inside the
+    /// context's clip bounds is drawn over it.
     ///
     /// - Parameter postIt: The words and identity colors notes, prompts and contexts are
     ///   drawn with.
@@ -111,6 +120,10 @@ public enum PenRenderer {
             // No coordinate translation — caller manages positioning
             guard let targetNode = findNode(id: rootNodeID, in: document.children) else { return }
             renderNodesIteratively([targetNode], layoutRects: layoutRects, in: context, overrides: overrides, imageProvider: imageProvider, postIt: postIt)
+            PenConnectionRenderer.renderConnections(
+                over: rootNodeID, in: document, layoutRects: layoutRects, into: context,
+                overrides: overrides, imageProvider: imageProvider
+            )
         } else {
             renderNodesIteratively(
                 document.children, layoutRects: layoutRects,
@@ -256,7 +269,7 @@ public enum PenRenderer {
             return
         case let .connection(data):
             PenConnectionRenderer.render(
-                data, opacity: nodeOverrides?.opacity ?? ref.node.common.opacity?.literalValue,
+                ref.node, data: data, opacity: nodeOverrides?.opacity ?? ref.node.common.opacity?.literalValue,
                 canvasRects: canvasRects, in: context, imageProvider: imageProvider
             )
             return

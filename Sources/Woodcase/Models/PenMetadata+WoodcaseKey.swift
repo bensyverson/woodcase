@@ -132,6 +132,19 @@ public extension PenMetadata {
         /// top-level `blendMode` on load.
         case blendMode
 
+        // MARK: A connection's routing and arrowheads
+
+        /// How a connection runs between its anchors: `straight` or `elbow`
+        /// (``PenNode/ConnectionData/Routing``), written and read at `kind.routing`. Pen drops a
+        /// connection entirely when it opens a file, so the key is Woodcase's alone.
+        case routing
+        /// The arrowhead at a connection's source end (``PenNode/ConnectionData/Arrowhead``),
+        /// written and read at `kind.startArrowhead`.
+        case startArrowhead
+        /// The arrowhead at a connection's target end (``PenNode/ConnectionData/Arrowhead``),
+        /// written and read at `kind.endArrowhead`.
+        case endArrowhead
+
         // MARK: Editor state
 
         /// Whether the node is locked: an editor will not select or hit it on the canvas,
@@ -163,6 +176,8 @@ public extension PenMetadata {
             /// How a node as a whole composites onto what lies beneath it, which Pen's format
             /// cannot hold.
             case compositing
+            /// A connection's routing and arrowheads, beyond Pen's format.
+            case connector
         }
 
         /// What an authored value of a key must be.
@@ -208,6 +223,7 @@ public extension PenMetadata {
             case .shadowSpread: .effect
             case .blendMode: .compositing
             case .locked, .defaultTextStyle: .editor
+            case .routing, .startArrowhead, .endArrowhead: .connector
             }
         }
 
@@ -223,7 +239,8 @@ public extension PenMetadata {
             case .type, .state, .author, .leaf, .stage, .tint, .copiedFrom: rawValue
             case .anchor, .replyTo, .requestedBy, .createdAt, .fontFamily, .fontSize, .fontWeight, .fontStyle, .letterSpacing,
                  .lineHeight, .textAlign, .textAlignVertical, .scale, .spans, .textDecoration, .strokeDash, .strokeDashOffset,
-                 .strokeMiterLimit, .shadowSpread, .blendMode, .locked, .defaultTextStyle: nil
+                 .strokeMiterLimit, .shadowSpread, .blendMode, .locked, .defaultTextStyle, .routing, .startArrowhead,
+                 .endArrowhead: nil
             }
         }
 
@@ -247,6 +264,8 @@ public extension PenMetadata {
             case .shadowSpread: .shadowSpreads
             case .createdAt: .utcTimestamp
             case .locked, .defaultTextStyle: .boolean
+            case .routing: .oneOf(PenNode.ConnectionData.Routing.allCases.map(\.rawValue))
+            case .startArrowhead, .endArrowhead: .oneOf(PenNode.ConnectionData.Arrowhead.allCases.map(\.rawValue))
             }
         }
 
@@ -313,6 +332,9 @@ public extension PenMetadata {
             case .strokeMiterLimit: "The longest a mitered join reaches, in stroke widths, before it is beveled; absent is Pen's 4."
             case .shadowSpread: "How far each shadow is grown before it is cast, per effect, and the shadow it was made for."
             case .blendMode: "How the node as a whole blends with what lies beneath it; absent is normal. Write kind.blendMode."
+            case .routing: "How a connection runs between its anchors: straight, or elbow; absent is straight."
+            case .startArrowhead: "The arrowhead at a connection's source end; absent is none."
+            case .endArrowhead: "The arrowhead at a connection's target end; absent is none."
             }
         }
 

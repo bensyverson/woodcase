@@ -161,6 +161,10 @@ public enum LintCheck: String, Friendly, CaseIterable {
     /// per-side stroke, or one no target can draw (``PenStrokeDash/problem(in:)``).
     case strokeDashIgnored = "stroke-dash-ignored"
 
+    /// A connection whose `metadata.woodcase` routing or arrowhead is not a spelling Woodcase
+    /// draws, so it draws straight or bare instead (``PenNode/connectionStyle``).
+    case connectionStyleIgnored = "connection-style-ignored"
+
     /// A node whose `metadata.woodcase.shadowSpread` holds an entry made for a shadow the
     /// node no longer has at that place, so the shadow casts without its spread
     /// (``PenNode/hasStaleShadowSpread``).
@@ -229,7 +233,7 @@ public enum LintCheck: String, Friendly, CaseIterable {
         case .pipeline, .textWithoutFill, .fillContainerInFitParent, .emptyFitContent, .clipped,
              .artboardOverlap, .duplicateName, .textOverflow, .codegenUnmappedOverride, .collapsedText,
              .collapsedAbsoluteFrame, .meshGradientDistorted, .textStyleStripped, .importNotFollowed,
-             .shaderNotDrawn, .perSideStrokeOnShape, .spansStale, .strokeDashIgnored,
+             .shaderNotDrawn, .perSideStrokeOnShape, .spansStale, .strokeDashIgnored, .connectionStyleIgnored,
              .shadowSpreadStale, .paintBlendLowest:
             .warning
         case .brokenRef, .importNotFound, .importUnreadable, .unresolvedVariable, .unknownIcon, .unknownIconLibrary,
@@ -308,6 +312,8 @@ public enum LintCheck: String, Friendly, CaseIterable {
             "A text whose styled runs were made for other words than its content, so it draws plain."
         case .strokeDashIgnored:
             "A stroke dash every target draws solid: on per-side widths, or one no target can draw."
+        case .connectionStyleIgnored:
+            "A connection routing or arrowhead Woodcase does not know, so it draws straight or bare."
         case .shadowSpreadStale:
             "A shadow spread made for a shadow the node no longer has there, so it casts without it."
         case .paintBlendLowest:

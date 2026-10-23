@@ -85,6 +85,16 @@ struct PenSchemaDefaultEngineTests {
         "stroke": "#FF0000", "strokeWidth": 10,
     ])
 
+    /// Two boxes and a connection `t` from one's right to the other's left, a step apart,
+    /// so an elbow and either arrowhead draw differently from the default.
+    private static let connection: AnyCodable = ["children": [
+        backdrop,
+        ["type": "rectangle", "id": "a", "x": 20, "y": 20, "width": 60, "height": 40, "fill": "#3366FF"],
+        ["type": "rectangle", "id": "b", "x": 240, "y": 160, "width": 60, "height": 40, "fill": "#3366FF"],
+        ["type": "connection", "id": "t", "source": ["path": "a", "anchor": "right"],
+         "target": ["path": "b", "anchor": "left"], "stroke": "#FF0000", "strokeWidth": 3],
+    ]]
+
     // MARK: - Pins
 
     /// One default held to the engine.
@@ -135,6 +145,10 @@ struct PenSchemaDefaultEngineTests {
         // A right angle's miter reaches √2 stroke widths: Pen's 4 keeps it, 1 bevels it.
         Pin(type: .rectangle, path: "kind.strokeMiterLimit", fixture: rectangle, alternative: 1),
         Pin(type: .line, path: "kind.strokeLinecap", fixture: line, alternative: "round"),
+        // A connection's routing and arrowheads (Penumbra ruling R11).
+        Pin(type: .connection, path: "kind.routing", fixture: connection, alternative: "elbow"),
+        Pin(type: .connection, path: "kind.startArrowhead", fixture: connection, alternative: "circle"),
+        Pin(type: .connection, path: "kind.endArrowhead", fixture: connection, alternative: "triangle"),
         Pin(type: .ellipse, path: "kind.innerRadius", fixture: ellipse, alternative: 0.5),
         Pin(type: .ellipse, path: "kind.startAngle", fixture: ellipse, alternative: 90),
         Pin(type: .ellipse, path: "kind.sweepAngle", fixture: ellipse, alternative: 90),

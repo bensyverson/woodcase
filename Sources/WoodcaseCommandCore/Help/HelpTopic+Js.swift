@@ -182,17 +182,17 @@ extension HelpTopic {
 
       /** A settled tree row — what `tree --json` and `find --json` print. */
       interface TreeRow {
-        id: string; address: string; rev: string; depth: number;
-        type: string; name: string | null;
+        id: string; address: string; rev: string; depth: number; type: string; name: string | null;
         rect: Rect | null; absRect: Rect | null;   // the parent's space, and the document's
-        clip: 'none' | 'partial' | 'full';
-        overflowAxes: ('horizontal' | 'vertical')[];
+        clip: 'none' | 'partial' | 'full'; overflowAxes: ('horizontal' | 'vertical')[];
         isReusable: boolean; isInstance: boolean; isSlot: boolean; childCount: number;
         spans?: { runs: number; isStale: boolean };  // a text's rich text, when it has some
+        connection?: { source: End; target: End };   // a connection's two ends
         properties?: Props;     // only the paths the `props` option asked for
         props?: Props;          // the same bag under find's spelling — one guarded view
       }
       interface Rect { x: number; y: number; width: number; height: number }
+      interface End { path: string; anchor: string; name?: string }  // a connection end
 
       /** What every write answers with, `vars`, `themes` and `imports` included. */
       interface WriteReport {

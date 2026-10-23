@@ -88,6 +88,7 @@ no document, so accepting any of those would be accepting an argument it ignores
 | `note-state` | notice | A plain note — not a comment, not a prompt — carries a `state`, in either spelling. Only comments are open or resolved, so it draws nothing; remove it, or make the note a comment |
 | `spans-stale` | warning | A text whose `metadata.woodcase.spans` were made for other words than its content, so its runs over part of the text are ignored |
 | `stroke-dash-ignored` | warning | A `metadata.woodcase.strokeDash` every target draws solid: on a per-side `strokeWidth`, or one that is not an array of at most 16 non-negative lengths, not all zero |
+| `connection-style-ignored` | warning | A connection whose `metadata.woodcase` routing or arrowhead is not a spelling Woodcase draws, so it draws straight or with no arrowhead there |
 | `shadow-spread-stale` | warning | A `metadata.woodcase.shadowSpread` entry made for a shadow the node no longer has at its place — Pen changed, moved or removed it — so the shadow casts without its spread |
 | `paint-blend-lowest` | warning | A node's lowest drawn paint — its first enabled fill, or its first stroke paint when it has no fill — has a blend mode. A paint blends only with the paints beneath it on its node, so this one blends with nothing and draws as normal; Pen blends it with what lies behind the node. The fix moves the blend to the node |
 
@@ -530,6 +531,16 @@ another tool can still hold one.
 
 ```text
 warning stroke-dash-ignored  Board/Card (Rct01)  has a dash on a per-side strokeWidth, so its stroke draws solid: dashes flow round the whole outline, which per-side bands are not. Write one strokeWidth, or remove kind.strokeDash.
+```
+
+`connection-style-ignored` is a warning, one finding per key: a connection whose
+`metadata.woodcase.routing`, `startArrowhead` or `endArrowhead` holds a value that is not
+one of the key's spellings (``PenNode/connectionStyle``) draws that key's default —
+straight, or no arrowhead at that end. An edit refuses one; a file written by hand or by
+another tool can still hold it.
+
+```text
+warning connection-style-ignored  elbow, arrow at the target (Step)  has a kind.routing of "curved", which Woodcase does not draw, so it draws straight. Write one of straight, elbow.
 ```
 
 `shadow-spread-stale` is a warning, one finding per node holding a

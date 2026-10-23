@@ -272,17 +272,17 @@ type Theme = { [axis: string]: string };  // { mode: 'dark' }
 
 /** A settled tree row — what `tree --json` and `find --json` print. */
 interface TreeRow {
-  id: string; address: string; rev: string; depth: number;
-  type: string; name: string | null;
+  id: string; address: string; rev: string; depth: number; type: string; name: string | null;
   rect: Rect | null; absRect: Rect | null;   // the parent's space, and the document's
-  clip: 'none' | 'partial' | 'full';
-  overflowAxes: ('horizontal' | 'vertical')[];
+  clip: 'none' | 'partial' | 'full'; overflowAxes: ('horizontal' | 'vertical')[];
   isReusable: boolean; isInstance: boolean; isSlot: boolean; childCount: number;
   spans?: { runs: number; isStale: boolean };  // a text's rich text, when it has some
+  connection?: { source: End; target: End };   // a connection's two ends
   properties?: Props;     // only the paths the `props` option asked for
   props?: Props;          // the same bag under find's spelling — one guarded view
 }
 interface Rect { x: number; y: number; width: number; height: number }
+interface End { path: string; anchor: string; name?: string }  // a connection end
 
 /** What every write answers with, `vars`, `themes` and `imports` included. */
 interface WriteReport {
@@ -414,8 +414,8 @@ lists the ones it has:
 ```text
 $ woodcase find banking.pen 'r => r.fontSize < 12'
 The predicate threw on row #j4hLC (j4hLC): a row has no fontSize. Its members are
-absRect, address, childCount, clip, depth, id, isInstance, isReusable, isSlot, name,
-overflowAxes, properties, rect, rev, spans, type, and a property of the node itself is read
+absRect, address, childCount, clip, connection, depth, id, isInstance, isReusable, isSlot,
+name, overflowAxes, properties, rect, rev, spans, type, and a property of the node itself is read
 as r.props['kind.fontSize'] with --props kind.fontSize on the command line.
 [exit 2]
 ```

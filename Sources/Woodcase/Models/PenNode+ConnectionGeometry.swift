@@ -10,15 +10,29 @@ public extension PenNode.ConnectionData.Anchor {
     ///
     /// - Parameter rect: The node's box.
     /// - Returns: The box's center, or the middle of the edge the anchor names.
-    func point(on rect: PenRect) -> PenNode.ConnectionData.AnchorPoint {
+    func point(on rect: PenRect) -> PenPoint {
         let midX = rect.x + rect.width / 2
         let midY = rect.y + rect.height / 2
         return switch self {
-        case .center: PenNode.ConnectionData.AnchorPoint(x: midX, y: midY)
-        case .top: PenNode.ConnectionData.AnchorPoint(x: midX, y: rect.y)
-        case .bottom: PenNode.ConnectionData.AnchorPoint(x: midX, y: rect.y + rect.height)
-        case .left: PenNode.ConnectionData.AnchorPoint(x: rect.x, y: midY)
-        case .right: PenNode.ConnectionData.AnchorPoint(x: rect.x + rect.width, y: midY)
+        case .center: PenPoint(x: midX, y: midY)
+        case .top: PenPoint(x: midX, y: rect.y)
+        case .bottom: PenPoint(x: midX, y: rect.y + rect.height)
+        case .left: PenPoint(x: rect.x, y: midY)
+        case .right: PenPoint(x: rect.x + rect.width, y: midY)
+        }
+    }
+
+    /// The unit direction pointing out of the box through this anchor's side, y growing
+    /// downward, or `nil` for the center, which has no side.
+    ///
+    /// An elbow route leaves its source along this direction and enters its target against it.
+    var outwardNormal: PenPoint? {
+        switch self {
+        case .center: nil
+        case .top: PenPoint(x: 0, y: -1)
+        case .bottom: PenPoint(x: 0, y: 1)
+        case .left: PenPoint(x: -1, y: 0)
+        case .right: PenPoint(x: 1, y: 0)
         }
     }
 }

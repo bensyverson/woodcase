@@ -45,7 +45,7 @@ node types it again.
 
 ### The keys
 
-``PenMetadata/WoodcaseKey`` lists every key, in six groups
+``PenMetadata/WoodcaseKey`` lists every key, in its groups
 (``PenMetadata/WoodcaseKey/Group``):
 
 | Group | Keys | Read by |
@@ -60,9 +60,10 @@ node types it again.
 | a stroke's miter limit | `strokeMiterLimit` | ``PenNode/strokeMiterLimit``: every renderer and emitter, painted extent and the stroke-band hit test; Pen's 4 where absent; see <doc:PenInteroperability>, *Miter Limits and Shadow Spreads Live in Metadata* |
 | a shadow's spread | `shadowSpread` | ``PenShadowSpread`` and ``PenNode/shadowSpread(forEffect:)``: the CG renderer and SVG export, and the `shadow-spread-stale` lint; one entry per spread shadow, addressed by its place among the effects and stale once that shadow changes |
 | a node's blend mode | `blendMode` | ``PenNode/blendMode``: every renderer and emitter (the CG renderer, SVG export, React and SwiftUI), as one isolated group. A write never emits a top-level `blendMode`. Pen keeps the key (pen CLI, 2026-10-20) |
+| a connection's routing and arrowheads | `routing`, `startArrowhead`, `endArrowhead` | ``PenNode/connectionStyle`` (``PenNode/ConnectionData/Style``): the CG renderer, ``PenNode/ConnectionData/Drawing`` (the geometry RapidPro draws too), the connection hit test and painted extent, and the `connection-style-ignored` lint. Penumbra ruling R11: a format extension beyond Pen, which drops a connection entirely when it opens a file, so nothing protects these keys there; absent is straight with no arrowheads, and an editor writes ``PenNode/ConnectionData/Style/newConnector`` on a connector it creates. See <doc:PenRendering>, *Connections* |
 
-Every key of the last five groups but `textDecoration` is read and written at a natural
-path — `kind.strokeDash`, `common.locked`, `kind.spans`, and a shadow's spread as a `spread`
+Every key of the last six groups but `textDecoration` is read and written at a natural
+path — `kind.strokeDash`, `common.locked`, `kind.spans`, `kind.routing`, and a shadow's spread as a `spread`
 field on the shadow in `kind.effects` — not at its storage path; see *Natural paths* below.
 
 ### Natural paths
@@ -80,6 +81,7 @@ names each:
 | `kind.strokeMiterLimit` | `metadata.woodcase.strokeMiterLimit` | as above, but not line |
 | `common.locked` | `metadata.woodcase.locked` | every type (``NodePropertyCodec/naturalCommonPaths``) |
 | `kind.defaultTextStyle`, `kind.spans` | `metadata.woodcase.defaultTextStyle`, `.spans` | text |
+| `kind.routing`, `kind.startArrowhead`, `kind.endArrowhead` | `metadata.woodcase.routing`, `.startArrowhead`, `.endArrowhead` | connection |
 | `codegen.props`, `codegen.role`, `codegen.states`, `codegen.action`, `codegen.scroll` | `metadata.woodcase.props`, `.role`, `.states`, `.action`, `.scroll` | every type (``NodePropertyCodec/naturalCodegenPaths``) |
 | `note.type`, `note.state`, … `note.createdAt`, and `note.fontFamily` … `note.textAlignVertical` — aliases | `metadata.woodcase.type`, `.state`, …, the same keys, whose raw paths stay accepted | note, prompt, context (``NodePropertyCodec/naturalNotePaths``) |
 | `spread` on a shadow in `kind.effects` | `metadata.woodcase.shadowSpread`, one entry per spread shadow, by its place among the effects | every type that takes effects |
@@ -338,6 +340,7 @@ throughout:
 - ``PenEffect/spreadField``
 - ``PenNode/blendMode``
 - ``PenNode/blendedTypes``
+- ``PenNode/connectionStyle``
 
 ### Merging
 
