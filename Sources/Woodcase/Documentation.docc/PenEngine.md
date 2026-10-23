@@ -195,7 +195,9 @@ Pen 1.2.15 does when it opens one:
 | no `mode` (drawn stretched) | `stretch`, written out — a missing mode now means `cover` |
 
 Nothing draws differently, so the rule is silent. 2.20 also added an image paint's
-`transform`, an affine crop (``PenImageTransform``); no older file has one.
+`transform`, an affine crop (``PenImageTransform``) in fractions of the image, not
+pixels — ``PenImageTransform/init(cropping:imageSize:)`` writes one from a pixel rect;
+no older file has one.
 
 Reading a mode is lenient in every version: `fill` and `fit` read as `cover` and
 `contain` wherever they appear, and a spelling Woodcase does not know is kept as

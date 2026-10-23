@@ -1,0 +1,106 @@
+#!/usr/bin/env python3
+"""image-crop-rect-probe — check that a pixel crop rect written as an image fill's
+`transform` shows exactly that rect in Pen, in every fill mode.
+
+Writes <dir>/crop-rects.pen and <dir>/images/uv-map.png: two off-center pixel rects of
+the 256×128 UV map (red = u, green = v), each written as
+[W/cw, 0, 0, H/ch, -cx/cw, -cy/ch] — what PenImageTransform(cropping:imageSize:) makes —
+in stretch, cover and contain, on a box of the rect's aspect ratio (2× the rect) and on a
+200×200 square. Every board is a black, clipped, `layout: "none"` frame, so Pen's PNG is
+exactly the board. Then, by hand:
+
+    scripts/image-crop-rect-probe <dir>
+    scripts/pen-oracle <dir>/crop-rects.pen --scale 2 --no-layout      # sandbox off
+    scripts/image-crop-rect-probe <dir> --read
+
+`--read` prints, for each matching-aspect board of Pen's export, the image pixel shown
+just inside the node's top-left and bottom-right corners, beside the rect's corners, and
+the ids to give `woodcase shot <dir>/crop-rects.pen <id> --scale 2` for a comparison
+with scripts/png-mae. Reading needs Pillow; writing is standard library only.
+
+Run 2026-10-23 (leaf Rtjhr5) against Pen 1.2.15: see DocC PenRendering, "image fills".
+"""
+
+import json
+import os
+import shutil
+import sys
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+UV_MAP = os.path.join(ROOT, "Tests", "WoodcaseTests", "Fixtures", "images", "uv-map.png")
+W, H = 256, 128
+RECTS = {"r1": (40, 20, 120, 80), "r2": (160, 64, 64, 48)}
+MODES = ("stretch", "cover", "contain")
+MARGIN = 40
+SCALE = 2
+
+
+def boards():
+    """Yields (board name, board id, node id, node size) in document order."""
+    count = 0
+    for rect_name, (_, _, cw, ch) in RECTS.items():
+        for box in ("match", "square"):
+            size = (cw * 2, ch * 2) if box == "match" else (200, 200)
+            for mode in MODES:
+                count += 2
+                yield f"{rect_name}-{box}-{mode}", f"pr{count:03d}", f"pr{count - 1:03d}", size
+
+
+def write(directory):
+    os.makedirs(os.path.join(directory, "images"), exist_ok=True)
+    shutil.copyfile(UV_MAP, os.path.join(directory, "images", "uv-map.png"))
+    children, cursor = [], 0
+    for name, board_id, node_id, (width, height) in boards():
+        cx, cy, cw, ch = RECTS[name.split("-")[0]]
+        transform = [W / cw, 0, 0, H / ch, -cx / cw, -cy / ch]
+        node = {
+            "type": "rectangle", "id": node_id, "name": "n", "x": MARGIN, "y": MARGIN,
+            "width": width, "height": height,
+            "fill": {"type": "image", "url": "./images/uv-map.png", "mode": name.split("-")[2], "transform": transform},
+        }
+        board_width, board_height = width + 2 * MARGIN, height + 2 * MARGIN
+        children.append({
+            "type": "frame", "id": board_id, "name": name, "x": cursor, "y": 0,
+            "width": board_width, "height": board_height, "layout": "none", "clip": True,
+            "fill": "#000000", "children": [node],
+        })
+        cursor += board_width + 40
+    with open(os.path.join(directory, "crop-rects.pen"), "w") as f:
+        json.dump({"version": "2.20", "children": children}, f, indent=2)
+        f.write("\n")
+    print(f"wrote {directory}/crop-rects.pen")
+
+
+def read(directory):
+    from PIL import Image
+
+    for name, board_id, _, (width, height) in boards():
+        if "-match-" not in name:
+            print(f"{name}: woodcase shot id {board_id}")
+            continue
+        cx, cy, cw, ch = RECTS[name.split("-")[0]]
+        image = Image.open(os.path.join(directory, f"crop-rects-{name}.png")).convert("RGB")
+        left, top = MARGIN * SCALE, MARGIN * SCALE
+        right, bottom = left + width * SCALE - 1, top + height * SCALE - 1
+        shown = []
+        for x, y in ((left + 2, top + 2), (right - 2, bottom - 2)):
+            red, green, _ = image.getpixel((x, y))
+            shown.append((round(red / 255 * W, 1), round(green / 255 * H, 1)))
+        print(f"{name}: rect {(cx, cy)}–{(cx + cw, cy + ch)}, Pen shows {shown[0]}–{shown[1]}; "
+              f"woodcase shot id {board_id}")
+
+
+def main():
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    if len(args) != 1:
+        print(__doc__, file=sys.stderr)
+        return 2
+    if "--read" in sys.argv[1:]:
+        read(args[0])
+    else:
+        write(args[0])
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

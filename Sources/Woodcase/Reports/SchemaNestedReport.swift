@@ -66,6 +66,7 @@ public struct SchemaNestedReport: Friendly {
             required = field.isRequired
             nested = field.forms.compactMap(\.nestedShape).map(\.name)
             constraint = field.constraint?.summary
+            note = field.note
             self.default = field.default?.value
             if case let .derived(derivation)? = field.default {
                 defaultFrom = derivation.phrase
@@ -103,5 +104,9 @@ public struct SchemaNestedReport: Friendly {
         /// Where a default no literal states comes from — "the font's own line height" —
         /// or absent.
         public let defaultFrom: String?
+
+        /// What the key's numbers mean when no constraint can say it — an image fill's
+        /// crop `transform` — or absent.
+        public let note: String?
     }
 }

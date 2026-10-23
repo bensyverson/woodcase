@@ -106,9 +106,10 @@ enum SchemaTableFormatter {
                 let key = field.key + (field.isRequired ? "*" : "")
                 let constraint = field.constraint.map { " — \($0.summary)" } ?? ""
                 let unset = field.default.map { " — default \($0.summary)" } ?? ""
+                let note = field.note.map { " — \($0)" } ?? ""
                 lines.append(
                     "      \(key.padding(toLength: keyWidth, withPad: " ", startingAt: 0))  "
-                        + "\(field.value)\(constraint)\(unset)"
+                        + "\(field.value)\(constraint)\(unset)\(note)"
                 )
             }
         }

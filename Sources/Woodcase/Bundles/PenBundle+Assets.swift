@@ -32,16 +32,17 @@ public extension PenBundle {
         return files
     }
 
-    /// Copies a file into a bundle's folder for its kind — a dropped image, an installed
-    /// font — and returns the relative reference a fill or a `fonts` entry should hold.
+    /// Copies a file into a bundle's folder for its kind — an installed font — and
+    /// returns the relative reference a `fonts` entry or a fill should hold.
     ///
-    /// The copy takes the file's own name, numbered (`hero-2.png`) when the name is taken,
+    /// The copy takes the file's own name, numbered (`Mono-2.ttf`) when the name is taken,
     /// so nothing in the bundle is ever overwritten. A file already inside the bundle is
-    /// not copied: its own path is returned.
+    /// not copied: its own path is returned. A dropped or pasted image goes through
+    /// ``storeImage(contentsOf:in:)`` instead, which stores it once by its content.
     ///
     /// ```swift
-    /// let url = try PenBundle.importAsset(dropped, as: .image, into: bundle)
-    /// // "./images/hero.png"
+    /// let url = try PenBundle.importAsset(installed, as: .font, into: bundle)
+    /// // "./fonts/Mono.ttf"
     /// ```
     ///
     /// - Parameters:
@@ -63,8 +64,9 @@ public extension PenBundle {
         }
     }
 
-    /// Writes bytes into a bundle's folder for their kind — a pasted image — and returns
-    /// the relative reference a fill or a `fonts` entry should hold.
+    /// Writes bytes into a bundle's folder for their kind under the name given, and
+    /// returns the relative reference a fill or a `fonts` entry should hold. Pasted image
+    /// bytes go through ``storeImage(_:fileExtension:in:)`` instead.
     ///
     /// - Parameters:
     ///   - data: The file's bytes.

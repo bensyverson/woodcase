@@ -35,7 +35,9 @@ struct EmbeddedDownloads {
     /// The references and families that could not be downloaded.
     private(set) var missing: [String] = []
 
-    /// Downloads one remote image or declared font into the bundle.
+    /// Downloads one remote image or declared font into the bundle: an image under its
+    /// content hash (``PenBundle/storeImage(_:fileExtension:in:)``), so two addresses
+    /// serving the same bytes share one file; a font under its own name.
     ///
     /// - Parameters:
     ///   - reference: The remote reference.
@@ -44,8 +46,14 @@ struct EmbeddedDownloads {
         guard replacements[reference.value] == nil, let url = URL(string: reference.value) else { return }
         do {
             let data = try await fetcher.fetch(url: url)
-            let relative = try store(data, named: Self.fileName(for: url, data: data), kind: reference.kind)
-            replacements[reference.value] = "./" + relative
+            switch reference.kind {
+            case .image:
+                replacements[reference.value] = try PenBundle.storeImage(
+                    data, fileExtension: url.pathExtension, in: bundle
+                )
+            case .font:
+                replacements[reference.value] = try "./" + store(data, named: Self.fileName(for: url, data: data), kind: .font)
+            }
             count += 1
         } catch {
             missing.append(reference.value)
@@ -121,7 +129,7 @@ struct EmbeddedDownloads {
         return kind.directoryName + "/" + candidate
     }
 
-    /// A file name for a download: the URL's own last component when it is a plain name
+    /// A file name for a downloaded font: the URL's own last component when it is a plain name
     /// with an extension, otherwise `remote-<hash>` with an extension sniffed from the
     /// bytes.
     static func fileName(for url: URL, data: Data) -> String {

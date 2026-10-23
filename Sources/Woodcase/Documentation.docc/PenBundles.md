@@ -9,7 +9,7 @@ A **bundle** is a directory that holds one document and everything it uses:
 ```
 Design.umbra/                    a directory; a package on macOS (one icon in Finder)
 ├── document.pen                 a plain .pen file, paths relative to this folder
-├── images/                      image fills: "./images/hero.png"
+├── images/                      image fills: "./images/5280ed5c223e2c4a.png"
 ├── fonts/                       declared fonts: "./fonts/Inter[wght].ttf"
 ├── converted-from.json          only in a bundle made from a bare .pen
 └── .woodcase/
@@ -95,7 +95,8 @@ document takes every row, whatever path it was written under
   copied nor declared (see below). The bundle is left as it is; nothing is overwritten.
 - `woodcase embed Design.umbra`, or `bundle --embed` —
   ``PenBundle/embed(_:identity:fetcher:fonts:)`` — downloads every remote image fill and
-  remote declared font into the bundle, and copies the Google Fonts file of every face
+  remote declared font into the bundle — each image under its content hash, as an added
+  image is (below), so two addresses serving the same bytes share one file — and copies the Google Fonts file of every face
   the document draws into `fonts/`, declaring it in the root `fonts` array. The bundle
   then renders offline and the same everywhere. **It is explicit only**: nothing embeds
   on its own. The rewrite is one logged change (`replace` rows and a `set` row for
@@ -153,13 +154,48 @@ exports without it. A declaration at a web address is kept as written.
 The research and both rulings are in Penumbra's
 `project/2026-10-15-bundling-fonts-in-pen-folders.md`.
 
-## Adding a file
+## Adding an image
 
-``PenBundle/importAsset(_:as:into:)`` copies one file into the bundle's `images/` or
-`fonts/` — a dropped image, an installed font — under its own name, numbered
-(`hero-2.png`) when the name is taken, and returns the reference to write:
-`./images/hero.png`. A file already inside the bundle is not copied. Bytes with no file
-— a pasted image — go through ``PenBundle/importAsset(_:named:as:into:)``.
+A dropped or pasted image is stored **by its content**, so the same image added twice is
+one file that every fill showing it references (Ben, 2026-10-13):
+
+```swift
+let dropped = try PenBundle.storeImage(contentsOf: fileURL, in: bundle)    // a Finder drop
+let pasted = try PenBundle.storeImage(pngData, fileExtension: "png", in: bundle) // a paste
+// The same bytes: both "./images/5280ed5c223e2c4a.png", one file on disk.
+```
+
+- **The name** is ``PenBundle/imageFileName(for:fileExtension:)``: the first 16 hex digits
+  of the bytes' SHA-256 (``PenBundle/imageHashLength``, 64 bits) and the extension their
+  signature names — `png`, `jpg`, `gif`, `webp` — whatever the file was called; bytes no
+  signature names keep their own extension (`svg`), or take `img`. At 64 bits two
+  different images in one bundle collide with odds of about n² / 2⁶⁵, one in 3.7 × 10¹¹ for
+  ten thousand images.
+- **Reuse is checked byte for byte.** A file already at that name is reused only when it
+  holds exactly these bytes; one that differs (that collision, or a file someone edited)
+  is never overwritten, and the bytes go to the first of `<hash>-2.png`, `<hash>-3.png`…
+  that holds them or is free.
+- **No half-written image.** The bytes are written in the bundle's `.woodcase/` and
+  hard-linked into `images/`, which fails rather than replaces when another writer got
+  there first, so two processes adding one image end with one file.
+- **A file already inside the bundle** is not copied: its own path comes back.
+- **Pen reads it as it reads any image.** The reference is an ordinary relative path,
+  `./images/<hash>.png`, inside a plain `document.pen`; nothing about the format changes,
+  and nothing reads meaning into the name. Pen, `woodcase unbundle`'s Pen folder and every
+  other `.pen` tool open it exactly as they open `./images/hero.png`.
+
+A remote image ``PenBundle/embed(_:identity:fetcher:fonts:)`` downloads goes through the
+same store. ``PenBundle/convert(_:identity:)`` and ``PenBundle/export(_:to:identity:)``
+keep the names a document's files already have.
+
+## Adding a font
+
+``PenBundle/importAsset(_:as:into:)`` copies one file into the bundle's `fonts/` — an
+installed font — under its own name, numbered (`Mono-2.ttf`) when the name is taken, and
+returns the reference to write: `./fonts/Mono.ttf`. A file already inside the bundle is
+not copied. Bytes with no file go through ``PenBundle/importAsset(_:named:as:into:)``.
+Both still take `.image`, and then store under the file's own name; an app adding an
+image calls ``PenBundle/storeImage(contentsOf:in:)`` instead.
 
 ## Two sources of truth
 
@@ -183,6 +219,15 @@ not in the bundle.
 ### Locations
 
 - ``PenLocation``
+
+### Adding files
+
+- ``PenBundle/storeImage(_:fileExtension:in:)``
+- ``PenBundle/storeImage(contentsOf:in:)``
+- ``PenBundle/imageFileName(for:fileExtension:)``
+- ``PenBundle/imageHashLength``
+- ``PenBundle/importAsset(_:as:into:)``
+- ``PenBundle/importAsset(_:named:as:into:)``
 
 ### Converting
 

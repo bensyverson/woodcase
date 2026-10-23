@@ -115,18 +115,22 @@ public struct PenNestedShape: Friendly {
         ///     or `nil`.
         ///   - default: What the key is when an object leaves it unset, or `nil` when it
         ///     is nothing the renderer fills in.
+        ///   - note: What the key's numbers mean when no range or unit can say it, or
+        ///     `nil`.
         public init(
             key: String,
             forms: [PenValueForm],
             isRequired: Bool = false,
             constraint: PenValueConstraint? = nil,
-            default: PenPropertyDefault? = nil
+            default: PenPropertyDefault? = nil,
+            note: String? = nil
         ) {
             self.key = key
             self.forms = forms
             self.isRequired = isRequired
             self.constraint = constraint
             self.default = `default`
+            self.note = note
         }
 
         /// The key as the .pen file writes it.
@@ -158,9 +162,15 @@ public struct PenNestedShape: Friendly {
         /// `uniforms`).
         public let `default`: PenPropertyDefault?
 
+        /// What the key's numbers mean, in one sentence, when no ``constraint`` can say
+        /// it — an image fill's crop `transform`, an affine map between two unit squares —
+        /// or `nil`. `woodcase schema` prints it after the key's value, and its JSON
+        /// carries it as `note`, so a writer reads the units where it reads the key.
+        public let note: String?
+
         /// The same key with no default stated, for a variant whose default nothing pins.
         public var withoutDefault: Field {
-            Field(key: key, forms: forms, isRequired: isRequired, constraint: constraint)
+            Field(key: key, forms: forms, isRequired: isRequired, constraint: constraint, note: note)
         }
 
         /// The value column: the forms as one union.

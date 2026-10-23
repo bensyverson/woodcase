@@ -88,7 +88,8 @@ struct PenBundleEmbedTests {
 
         let document = try PenParser.parse(contentsOf: scratch.bundle)
         let references = try PenAssetReferences.collect(from: document).map(\.value)
-        #expect(references.contains { $0.hasPrefix("./images/remote-") && $0.hasSuffix(".png") })
+        let photo = try Data(contentsOf: Self.fixtures.appendingPathComponent("Fixtures/blur1.png"))
+        #expect(references.contains("./images/" + PenBundle.imageFileName(for: photo, fileExtension: nil)))
         #expect(references.contains("./fonts/Fetched.ttf"))
         #expect(references.contains("https://images.example.com/dead.png"))
         #expect(report.missing == ["https://images.example.com/dead.png"])
@@ -168,6 +169,34 @@ struct PenBundleEmbedTests {
                 #expect(FileManager.default.fileExists(atPath: url.path))
             }
         }
+    }
+
+    @Test("embed stores two remote images with the same bytes as one file, both fills pointing at it")
+    func embedDedupesImages() async throws {
+        let scratch = try Scratch()
+        defer { scratch.remove() }
+        let twin = "https://cdn.example.com/same-photo.png"
+        try Data("""
+        {"version": "\(PenDocument.currentFormatVersion)", "children": [
+          {"type": "rectangle", "id": "a", "width": 10, "height": 10,
+           "fill": {"type": "image", "url": "\(Self.photo)", "mode": "cover"}},
+          {"type": "rectangle", "id": "b", "width": 10, "height": 10,
+           "fill": {"type": "image", "url": "\(twin)", "mode": "cover"}}
+        ]}
+        """.utf8).write(to: scratch.bundle.appendingPathComponent("document.pen"))
+        let photo = try Data(contentsOf: Self.fixtures.appendingPathComponent("Fixtures/blur1.png"))
+        let fonts = GoogleFontResolver(cache: GoogleFontCache(rootDirectory: scratch.cache), fetcher: TableFetcher())
+
+        try await PenBundle.embed(
+            scratch.bundle, identity: nil, fetcher: TableFetcher([Self.photo: photo, twin: photo]), fonts: fonts
+        )
+
+        let stored = "./images/" + PenBundle.imageFileName(for: photo, fileExtension: nil)
+        let saved = try String(decoding: Data(contentsOf: scratch.bundle.appendingPathComponent("document.pen")), as: UTF8.self)
+        #expect(saved.components(separatedBy: "\"\(stored)\"").count - 1 == 2)
+        #expect(!saved.contains("example.com"))
+        let images = scratch.bundle.appendingPathComponent("images")
+        #expect(try FileManager.default.contentsOfDirectory(atPath: images.path) == [String(stored.dropFirst(9))])
     }
 
     @Test("embed refuses a bare .pen")

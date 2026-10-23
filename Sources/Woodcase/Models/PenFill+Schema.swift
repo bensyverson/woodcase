@@ -55,7 +55,11 @@ public extension PenFill {
                         key: "mode",
                         forms: PenImageFillMode.allCases.map { .spelling($0.rawString) }
                     ),
-                    PenNestedShape.Field(key: "transform", forms: [.slots(PenImageTransform.slotNames)]),
+                    PenNestedShape.Field(
+                        key: "transform",
+                        forms: [.slots(PenImageTransform.slotNames)],
+                        note: PenImageTransform.schemaNote
+                    ),
                 ]
             ),
             PenNestedShape.Variant(

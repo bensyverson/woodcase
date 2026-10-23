@@ -12,6 +12,12 @@ import Foundation
 /// the unit square of the crop box: `x' = a·x + c·y + tx`, `y' = b·x + d·y + ty`, the
 /// `CGAffineTransform` convention. `[2, 0, 0, 1, -1, 0]` shows the image's right half across
 /// the whole crop box. A missing transform is ``identity``: no crop.
+///
+/// The numbers are fractions of the image, never pixels: the pixel rect `(cx, cy, cw, ch)`
+/// of a `W × H` image is `[W/cw, 0, 0, H/ch, -cx/cw, -cy/ch]`. Write a crop from a pixel rect
+/// with ``init(cropping:imageSize:)`` and read one back with ``cropRect(imageSize:)``; the
+/// meaning is the same in every fill mode, and ``PenImagePlacement`` says where each mode
+/// puts the crop box.
 public struct PenImageTransform: Friendly {
     /// The x-axis column's x.
     public var a: Double
@@ -49,6 +55,12 @@ public struct PenImageTransform: Friendly {
 
     /// The names of the array's six slots, in the order the file writes them.
     public static let slotNames = ["a", "b", "c", "d", "tx", "ty"]
+
+    /// What `woodcase schema` says the six numbers mean, after the `transform` key of an
+    /// image fill.
+    public static let schemaNote = "maps the image's unit square onto the crop box's, in fractions, not pixels: "
+        + "the pixel rect (cx, cy, cw, ch) of a W×H image is [W/cw, 0, 0, H/ch, -cx/cw, -cy/ch]; "
+        + "missing is no crop"
 
     /// The same map as a layout-engine transform, which shares its coefficients and convention.
     public var planeTransform: PenLayoutEngine.PlaneTransform {
