@@ -1,6 +1,8 @@
 # Fixture provenance audit: Pen.dev-authored material in the repo
 
 > **Correction (2026-10-23, leaf zeSAV7):** this audit listed and extracted Pen's bundled documents from `app.asar` (and its appendix carries `asar.py` for doing so). Ben ruled on 2026-10-14 that we never read Pen.app's bundled files, or appear to. Its findings are a record of what the audit concluded then, not a method to repeat; do not re-run that comparison, and do not file `asar.py` under `scripts/` as Appendix A proposes. The published sources for comparison are the CLI package's `dist/out/data/` and what `pen` renders.
+>
+> **Retired (2026-10-23, Ben):** `scripts/pen-provenance-check`, which filed this audit's comparison as a script and read `app.asar` to do it, is deleted. Its mentions below and in `2026-09-27-fidelity-gaps.md` record what it reported then.
 
 **Date:** 2026-09-26. **Leaf:** `jxrS92` (parent `PMyYps`). **Author:** agent `fixture-audit`.
 **Scope:** every file `git ls-files` reports, plus git history. Pen.app 1.2.14 (`/Applications/Pen.app`,
