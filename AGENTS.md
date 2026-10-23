@@ -36,7 +36,7 @@ You are working on Woodcase, a Swift library which allows users to parse and ren
 ## Working with .pen files
 
 - To look at a .pen file, read it directly (it's JSON) rather than using the Pencil MCP.
-- The .pen format specification is at `./local/Pen-Format.md`; the schema is at `./local/Pen-Schema-2.20.md` — the app's own 2.20 schema (Pen 1.2.15). Older copies: `./local/Pen-Schema-2.17.md` (2.17, with a section on what Pen writes beyond the schema, still true), `./local/Pen-Schema.js` (2.10) and `./local/Pen-Schema-v2.js` (2.17 dev docs). Read them only when you need to.
+- The .pen format specification is at `./local/Pen-Format.md`; the schema is at `./local/Pen-Schema-2.21.md` — Pen's published 2.21 schema as the `pen` CLI 0.3.13 serves it (`read_skill({ path: "pen-schema.md" })`; never read Pen.app's bundle). Older copies: `./local/Pen-Schema-2.17.md` (2.17, with a section on what Pen writes beyond the schema, still true), `./local/Pen-Schema.js` (2.10) and `./local/Pen-Schema-v2.js` (2.17 dev docs). Read them only when you need to.
 
 <!-- agents:begin core@3a7a5e -->
 ## Working rules

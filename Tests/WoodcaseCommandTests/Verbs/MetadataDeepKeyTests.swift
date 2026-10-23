@@ -73,7 +73,7 @@ struct MetadataDeepKeyTests {
         let run = try fixture.run("set", fixture.file.path, "Plain", "codegen.role=button")
 
         #expect(run.status == 0)
-        // `type` is required by the .pen schema (Pen-Schema-2.20 line 117), so an object
+        // `type` is required by the .pen schema (Pen-Schema-2.21 line 110), so an object
         // the fold creates has to carry one; Woodcase writes its own name (Ben, 2026-10-11).
         #expect(try metadata(of: PenFileProbe(fixture.file).node("Plain"))["type"] == .string("woodcase"))
     }
