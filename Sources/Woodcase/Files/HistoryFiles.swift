@@ -45,15 +45,24 @@ struct HistoryFiles: Friendly {
     /// - Returns: Each writer's ``HistoryWriter/rawValue``; empty when the directory is
     ///   missing.
     func writers() -> [String] {
+        Set(fileNames().map(\.stem)).sorted()
+    }
+
+    /// Every file here that belongs to a writer, live or archived, sorted by name: what a
+    /// copy of the history carries. A legacy `activity.jsonl` or a sync service's
+    /// conflicted copy is not one.
+    ///
+    /// - Returns: Each file's name and its writer's stem; empty when the directory is
+    ///   missing.
+    func fileNames() -> [(name: String, stem: String)] {
         let names = (try? FileManager.default.contentsOfDirectory(atPath: directory.path)) ?? []
-        let stems = names.compactMap { name -> String? in
+        return names.sorted().compactMap { name in
             guard name.hasSuffix(Self.fileExtension),
                   let stem = name.split(separator: ".", maxSplits: 1).first.map(String.init),
                   HistoryWriter(fileStem: stem) != nil
             else { return nil }
-            return stem
+            return (name, stem)
         }
-        return Set(stems).sorted()
     }
 
     /// Reads every writer's rows after a position, merged.

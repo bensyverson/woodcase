@@ -90,6 +90,33 @@ revision to the one it found. The details, and the wire format, are in
 Because the history is shared, editing a bundle's `document.pen` by hand is discouraged
 (Ben, 2026-10-23): it works, and leaves a seam rather than a record.
 
+## Copying a bundle, and its history
+
+A bundle's `history/` is part of the design's story, so every way of copying one out
+takes an explicit ``HistoryInclusion`` (Ben, 2026-10-23, ruling H5; no path defaults it):
+
+| Move | Call | History |
+|------|------|---------|
+| Save As, Duplicate | ``PenBundle/copy(_:to:history:)`` | `.included`: the copy is the same design going on |
+| Save To | ``PenBundle/copy(_:to:history:)`` | the person is asked |
+| Export ▸ Pen Folder | ``PenBundle/export(_:to:identity:history:)`` | the person is asked; "Export Without History" is `.omitted` |
+| `woodcase unbundle` | the same | `.omitted`; `--history` is `.included` |
+
+``PenBundle/copy(_:to:history:)`` makes a new `.umbra`: `document.pen` byte for byte
+(so the same revision), `images/`, `fonts/`, anything else at the root, and — when
+included — every writer's live and archived file from `history/`. The copy then reads and
+appends as one history with the original's rows, and its next edit adds the copier's own
+writer file. An export carries the same files into the folder's `history/`; a plain
+`.pen` has no shared history, so nothing reads them there, and an export refuses before
+writing anything when a file of the same name is already in that folder's `history/`.
+
+Only writers' files travel (`<identity>@<device>.jsonl` and its archives). The bundle's
+`.woodcase/` local state and its own `.gitignore` never do — the copy writes its own
+`.gitignore` on its first edit — and neither does a legacy `activity.jsonl` or a sync
+service's conflicted copy. ``PenBundle/convert(_:identity:)`` and
+``PenBundle/convert(_:to:identity:)`` take no choice: a bare `.pen`'s log is local state
+for its whole project, not a per-document history, and stays where it was written.
+
 ## Converting
 
 - `woodcase bundle Design.pen` — ``PenBundle/convert(_:identity:)`` — converts in place:
@@ -106,7 +133,7 @@ Because the history is shared, editing a bundle's `document.pen` by hand is disc
   read — a sandboxed app without a grant for the original's folder — is left as it was
   and reported in ``PenBundle/Report/missing``, as a missing one is; an app asks first
   for the folders of the files ``PenBundle/localAssets(of:)`` lists that it cannot read.
-- `woodcase unbundle Design.umbra` — ``PenBundle/export(_:to:identity:)`` — copies the
+- `woodcase unbundle Design.umbra` — ``PenBundle/export(_:to:identity:history:)`` — copies the
   document out into a plain folder, `Design/` beside the bundle by default: `Design.pen`
   with `images/` and `fonts/`, every reference relative to it, including any the bundle
   reached outside itself for — except a declared font file Apple made, which is neither
@@ -122,7 +149,7 @@ Because the history is shared, editing a bundle's `document.pen` by hand is disc
 
 ## Fonts in a Pen Folder
 
-``PenBundle/export(_:to:identity:)`` carries the fonts the document already declares. An
+``PenBundle/export(_:to:identity:history:)`` carries the fonts the document already declares. An
 app's Export ▸ Pen Folder can carry more: the fonts installed on this Mac that the
 document draws, which Pen would otherwise silently replace. Which ones is the
 designer's call, since the license is theirs to read, so Woodcase plans and the app asks:
@@ -164,7 +191,7 @@ designer's call, since the license is theirs to read, so Woodcase plans and the 
    relative url as written, so anything else breaks there.
 
 Apple's fonts are never bundled, wherever they are installed (Ben, 2026-10-15), and that
-holds with or without a plan: ``PenBundle/export(_:to:identity:)`` — which an app falls
+holds with or without a plan: ``PenBundle/export(_:to:identity:history:)`` — which an app falls
 back to when it cannot plan — reads every local declared font file and leaves out the
 declaration of one Apple made, so a document declaring `/Library/Fonts/SF-Pro.ttf`
 exports without it. A declaration at a web address is kept as written.
@@ -203,7 +230,7 @@ let pasted = try PenBundle.storeImage(pngData, fileExtension: "png", in: bundle)
   other `.pen` tool open it exactly as they open `./images/hero.png`.
 
 A remote image ``PenBundle/embed(_:identity:fetcher:fonts:)`` downloads goes through the
-same store. ``PenBundle/convert(_:identity:)`` and ``PenBundle/export(_:to:identity:)``
+same store. ``PenBundle/convert(_:identity:)`` and ``PenBundle/export(_:to:identity:history:)``
 keep the names a document's files already have.
 
 ## Adding a font

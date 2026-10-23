@@ -14,28 +14,42 @@ public extension PenBundle {
     /// paths; a reference that reached outside the bundle is copied in too, so the folder
     /// stands alone — except a font file Apple made (``PenFontMaker/isApple``), wherever
     /// it is: Apple's license lets nobody pass its fonts on, so that declaration is left
-    /// out (one at a web address is kept as written). The bundle itself, its log and its ``ConvertedFrom`` record are
-    /// left where they are; the new file's log starts with a `new` row, as any file
-    /// woodcase creates does. Nothing in the folder is overwritten.
+    /// out (one at a web address is kept as written). The bundle itself, its local state and
+    /// its ``ConvertedFrom`` record are left where they are; the new file's log starts
+    /// with a `new` row, as any file woodcase creates does. Nothing in the folder is
+    /// overwritten.
+    ///
+    /// With `history` ``HistoryInclusion/included`` every writer's file from the
+    /// bundle's `history/` is also copied into the folder's own `history/`. A plain
+    /// `.pen` has no shared history, so Woodcase does not read those files there; they
+    /// keep the record with the export, for a person or a later conversion. Export
+    /// refuses, before writing anything, when the folder's `history/` already holds a
+    /// file of the same name.
     ///
     /// - Parameters:
     ///   - bundle: The bundle to export.
     ///   - folder: Where to write. Created if missing; it may already hold other files.
     ///   - identity: The writer's name for the new file's `new` row, or `nil`.
+    ///   - history: Whether the writers' history files go with it.
     /// - Returns: The exported `.pen`, its revision, how many files were copied, and any
     ///   reference whose file was missing.
-    /// - Throws: ``PenBundleError`` when `bundle` is not a bundle or `<name>.pen` exists
-    ///   in `folder`; ``PenFileError`` or ``PenParserError`` when the bundle cannot be
+    /// - Throws: ``PenBundleError`` when `bundle` is not a bundle or `<name>.pen` or a
+    ///   history file exists in `folder`; ``PenFileError`` or ``PenParserError`` when the bundle cannot be
     ///   read or the folder written.
     @discardableResult
-    static func export(_ bundle: URL, to folder: URL, identity: String?) async throws -> Report {
-        try await export(bundle, to: folder, identity: identity) { $0 }
+    static func export(
+        _ bundle: URL,
+        to folder: URL,
+        identity: String?,
+        history: HistoryInclusion
+    ) async throws -> Report {
+        try await export(bundle, to: folder, identity: identity, history: history) { $0 }
     }
 }
 
 extension PenBundle {
-    /// ``export(_:to:identity:)`` with the document passed through `prepare` before its
-    /// files are gathered — how ``export(_:to:identity:fontPlan:bundling:)`` adds the
+    /// ``export(_:to:identity:history:)`` with the document passed through `prepare` before its
+    /// files are gathered — how ``export(_:to:identity:history:fontPlan:bundling:)`` adds the
     /// fonts it bundles. Whatever `prepare` returns, a local declared font file Apple
     /// made is neither copied nor declared (``droppingAppleMadeFonts(_:relativeTo:)``).
     ///
@@ -43,14 +57,16 @@ extension PenBundle {
     ///   - bundle: The bundle to export.
     ///   - folder: Where to write.
     ///   - identity: The writer's name for the new file's `new` row, or `nil`.
+    ///   - history: Whether the writers' history files go with it.
     ///   - prepare: The bundle's document to the document to write, its references
     ///     still relative to the bundle.
     /// - Returns: The report.
-    /// - Throws: As ``export(_:to:identity:)`` does.
+    /// - Throws: As ``export(_:to:identity:history:)`` does.
     static func export(
         _ bundle: URL,
         to folder: URL,
         identity: String?,
+        history: HistoryInclusion,
         prepare: (PenDocument) -> PenDocument
     ) async throws -> Report {
         let location = PenLocation(bundle)
@@ -58,6 +74,10 @@ extension PenBundle {
         let destination = folder.appendingPathComponent(location.name).appendingPathExtension("pen")
         guard !FileManager.default.fileExists(atPath: destination.path) else {
             throw PenBundleError.destinationExists(destination)
+        }
+        let historyFolder = folder.appendingPathComponent(ActivityLog.historyDirectoryName, isDirectory: true)
+        if history == .included, let taken = collidingHistoryFile(from: bundle, into: historyFolder) {
+            throw PenBundleError.destinationExists(taken)
         }
 
         let document = try await droppingAppleMadeFonts(
@@ -74,11 +94,13 @@ extension PenBundle {
             try gathering.place(kind, value)
         }
         let created = try await PenFileTransaction.create(at: destination, document: exported, identity: identity)
+        let historyCopied = history == .included ? try copyHistory(from: bundle, into: historyFolder) : 0
         return Report(
             document: destination,
             revision: created.value,
             copied: gathering.copiedCount,
-            missing: gathering.missing.map(\.value)
+            missing: gathering.missing.map(\.value),
+            historyCopied: historyCopied
         )
     }
 

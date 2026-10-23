@@ -145,7 +145,7 @@ struct PenBundleTests {
         let bundle = project.folder.appendingPathComponent("Design.umbra")
         let folder = project.root.appendingPathComponent("exported")
 
-        let report = try await PenBundle.export(bundle, to: folder, identity: "ana")
+        let report = try await PenBundle.export(bundle, to: folder, identity: "ana", history: .omitted)
 
         #expect(report.document.path == folder.path + "/Design.pen")
         #expect(FileManager.default.fileExists(atPath: bundle.appendingPathComponent("document.pen").path))
@@ -169,7 +169,7 @@ struct PenBundleTests {
         )
         let folder = project.root.appendingPathComponent("out")
 
-        let report = try await PenBundle.export(bundle, to: folder, identity: nil)
+        let report = try await PenBundle.export(bundle, to: folder, identity: nil, history: .omitted)
 
         let references = try project.references(in: report.document)
         #expect(references.contains("./images/photo.png"))
@@ -185,7 +185,7 @@ struct PenBundleTests {
         try Data("{}".utf8).write(to: project.folder.appendingPathComponent("Design.pen"))
 
         await #expect(throws: PenBundleError.self) {
-            try await PenBundle.export(project.folder.appendingPathComponent("Design.umbra"), to: project.folder, identity: nil)
+            try await PenBundle.export(project.folder.appendingPathComponent("Design.umbra"), to: project.folder, identity: nil, history: .omitted)
         }
     }
 
@@ -195,7 +195,7 @@ struct PenBundleTests {
         defer { project.remove() }
 
         await #expect(throws: PenBundleError.self) {
-            try await PenBundle.export(project.file, to: project.root, identity: nil)
+            try await PenBundle.export(project.file, to: project.root, identity: nil, history: .omitted)
         }
     }
 

@@ -119,7 +119,7 @@ public extension PenBundle {
 
     /// `file`'s path relative to `folder`: `Design.pen` beside it, `../project/Design.pen`
     /// one folder over.
-    private static func relativePath(of file: URL, from folder: URL) -> String {
+    internal static func relativePath(of file: URL, from folder: URL) -> String {
         let target = file.standardizedFileURL.resolvingSymlinksInPath().pathComponents
         let base = folder.standardizedFileURL.resolvingSymlinksInPath().pathComponents
         let shared = zip(target, base).prefix { $0 == $1 }.count

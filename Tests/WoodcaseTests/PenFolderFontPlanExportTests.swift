@@ -127,7 +127,7 @@ struct PenFolderFontPlanExportTests {
         let folder = root.appendingPathComponent("Out")
 
         let report = try await PenBundle.export(
-            bundle, to: folder, identity: nil,
+            bundle, to: folder, identity: nil, history: .omitted,
             fontPlan: Self.plan(), bundling: ["Woodcase Declared Mono", "woodcase static sans"]
         )
 
@@ -175,7 +175,7 @@ struct PenFolderFontPlanExportTests {
         """.utf8).write(to: bundle.appendingPathComponent("document.pen"))
         let folder = root.appendingPathComponent("Out")
 
-        let report = try await PenBundle.export(bundle, to: folder, identity: nil)
+        let report = try await PenBundle.export(bundle, to: folder, identity: nil, history: .omitted)
 
         let exported = try PenParser.parse(contentsOf: report.document)
         #expect(exported.fonts?.map(\.url) == [

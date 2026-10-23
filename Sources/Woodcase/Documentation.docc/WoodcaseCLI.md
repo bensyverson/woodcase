@@ -770,17 +770,22 @@ The reverse of `bundle`, as a copy: write the bundle out as `<folder>/design.pen
 including one the bundle reached outside itself for. Pen, or any `.pen` tool, opens the
 folder as it is. The bundle is left alone; the folder defaults to `design/` beside it, is
 created if missing, and nothing in it is overwritten (an existing `design.pen` is exit 3).
-A bare `.pen` is refused (exit 2).
+A bare `.pen` is refused (exit 2). The bundle's shared `history/` stays behind unless you
+pass `--history`, which copies every writer's file into `<folder>/history/` (a plain
+`.pen` does not read them; they keep the record with the export). A file of the same
+name already there is exit 3, and nothing is written.
 
 ```bash
 woodcase unbundle design.umbra --to ~/Desktop/design-for-pen
+woodcase unbundle design.umbra --history
 ```
 
 | Option | Default | Description |
 |--------|---------|-------------|
 | `--to` | `<bundle's folder>/<name>/` | The folder to write into |
+| `--history` | `false` | Also copy the bundle's `history/` into the folder |
 | `--as` | `$WOODCASE_AS` | Who the exported file's `new` row is attributed to |
-| `--json` | `false` | As `bundle` |
+| `--json` | `false` | As `bundle`, plus `historyFiles` |
 
 ### `embed`
 

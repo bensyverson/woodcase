@@ -12,7 +12,7 @@ public extension PenBundle {
     ///
     /// An app in the App Sandbox asks before a conversion or an export which of these it
     /// may read, and asks the user for the folders of the rest, since
-    /// ``convert(_:to:identity:)`` and ``export(_:to:identity:)`` leave an unreadable
+    /// ``convert(_:to:identity:)`` and ``export(_:to:identity:history:)`` leave an unreadable
     /// file behind.
     ///
     /// - Parameter document: A bare `.pen`, or a `.umbra` bundle.

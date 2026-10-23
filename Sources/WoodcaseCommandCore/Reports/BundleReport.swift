@@ -13,8 +13,11 @@ import Woodcase
 /// Design.umbra/document.pen
 /// document  a1b2c3d4e5f60718
 /// copied    4 files
+/// history   2 files
 /// missing   ./missing.png
 /// ```
+///
+/// The `history` line appears only when history files were copied (`unbundle --history`).
 struct BundleReport: Friendly {
     /// Creates a report from the library's.
     ///
@@ -25,6 +28,7 @@ struct BundleReport: Friendly {
         path = report.document.path
         documentRevision = report.revision
         files = report.copied
+        historyFiles = report.historyCopied
         missing = report.missing
         self.verb = verb
     }
@@ -46,6 +50,9 @@ struct BundleReport: Friendly {
     /// How many image and font files came along.
     let files: Int
 
+    /// How many history files came along; 0 unless `unbundle --history`.
+    let historyFiles: Int
+
     /// The references and families left as they were, because their file could not be
     /// found or fetched.
     let missing: [String]
@@ -56,6 +63,9 @@ struct BundleReport: Friendly {
     /// The outline form.
     var text: String {
         var lines = [path, "document  \(documentRevision)", "\(verb.rawValue)  \(files) file\(files == 1 ? "" : "s")"]
+        if historyFiles > 0 {
+            lines.append("history   \(historyFiles) file\(historyFiles == 1 ? "" : "s")")
+        }
         for reference in missing {
             lines.append("missing   \(reference)")
         }

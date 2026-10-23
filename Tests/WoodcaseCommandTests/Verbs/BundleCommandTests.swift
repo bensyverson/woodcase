@@ -198,6 +198,28 @@ struct BundleCommandTests {
         #expect(run.stdout.contains("\"files\" : 0"))
     }
 
+    @Test("unbundle --history copies every writer's file into the folder's history/, and without it none")
+    func unbundleHistoryFlag() throws {
+        let fixture = try CommandFixture(fixture: "batch.pen")
+        let bundle = try makeBundle(fixture)
+        let history = bundle.appendingPathComponent("history")
+        try Data("{}\n".utf8).write(to: history.appendingPathComponent("claude@mac.jsonl"))
+        let written = try FileManager.default.contentsOfDirectory(atPath: history.path).sorted()
+        #expect(written.count == 2)
+
+        let without = fixture.root.appendingPathComponent("without")
+        let plain = try fixture.run("unbundle", bundle.path, "--to", without.path)
+        #expect(plain.status == 0, "\(plain.stderr)")
+        #expect(!FileManager.default.fileExists(atPath: without.appendingPathComponent("history").path))
+        #expect(!plain.stdout.contains("history"))
+
+        let with = fixture.root.appendingPathComponent("with")
+        let carried = try fixture.run("unbundle", bundle.path, "--to", with.path, "--history")
+        #expect(carried.status == 0, "\(carried.stderr)")
+        #expect(try FileManager.default.contentsOfDirectory(atPath: with.appendingPathComponent("history").path).sorted() == written)
+        #expect(carried.stdout.contains("history   2 files"))
+    }
+
     @Test("unbundle refuses a bare .pen")
     func unbundleRefusesABareFile() throws {
         let fixture = try CommandFixture(fixture: "batch.pen")

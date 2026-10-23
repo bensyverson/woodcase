@@ -27,7 +27,7 @@ public extension PenBundle {
         )
     }
 
-    /// Copies a bundle out into a plain folder, as ``export(_:to:identity:)`` does, and
+    /// Copies a bundle out into a plain folder, as ``export(_:to:identity:history:)`` does, and
     /// bundles the checked families' fonts with it.
     ///
     /// The document written is ``PenFolderFontPlan/exportedDocument(_:bundling:)``'s:
@@ -41,20 +41,22 @@ public extension PenBundle {
     ///   - bundle: The bundle to export.
     ///   - folder: Where to write. Created if missing.
     ///   - identity: The writer's name for the new file's `new` row, or `nil`.
+    ///   - history: Whether the writers' history files go with it.
     ///   - fontPlan: The plan the person chose from (``exportFontPlan(_:fonts:)``).
     ///   - families: The names of the families they left checked.
     /// - Returns: The exported `.pen`, its revision, how many files were copied, and any
     ///   reference whose file was missing or unreadable.
-    /// - Throws: As ``export(_:to:identity:)`` does.
+    /// - Throws: As ``export(_:to:identity:history:)`` does.
     @discardableResult
     static func export(
         _ bundle: URL,
         to folder: URL,
         identity: String?,
+        history: HistoryInclusion,
         fontPlan: PenFolderFontPlan,
         bundling families: Set<String>
     ) async throws -> Report {
-        try await export(bundle, to: folder, identity: identity) { document in
+        try await export(bundle, to: folder, identity: identity, history: history) { document in
             fontPlan.exportedDocument(document, bundling: families)
         }
     }

@@ -8,7 +8,7 @@ import Foundation
 import Woodcase
 
 /// Copies a `.umbra` bundle out into a plain folder any `.pen` tool opens —
-/// ``Woodcase/PenBundle/export(_:to:identity:)``.
+/// ``Woodcase/PenBundle/export(_:to:identity:history:)``.
 struct UnbundleCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "unbundle",
@@ -21,11 +21,16 @@ struct UnbundleCommand: AsyncParsableCommand {
         the bundle, beside it (design/); it is created if missing, and nothing in it \
         is overwritten — an existing design.pen there is refused (exit 3).
 
-        The new file's history starts with a `new` row in its own log, attributed to --as.
+        The new file's history starts with a `new` row in its own log, attributed to --as. \
+        The bundle's own shared history (design.umbra/history/, one file per writer) stays \
+        behind unless you pass --history, which copies every writer's file into \
+        <folder>/history/; a plain .pen does not read them, they keep the record with the \
+        export. A file of the same name already there is refused (exit 3).
 
         EXAMPLE
           woodcase unbundle design.umbra
           woodcase unbundle design.umbra --to ~/Desktop/design-for-pen
+          woodcase unbundle design.umbra --history
         """
     )
 
@@ -34,6 +39,9 @@ struct UnbundleCommand: AsyncParsableCommand {
 
     @Option(name: .long, help: ArgumentHelp("The folder to write into.", valueName: "folder"))
     var to: String?
+
+    @Flag(name: .long, help: "Also copy the bundle's history/ (every writer's file) into the folder.")
+    var history = false
 
     @OptionGroup var identity: IdentityOptions<Identity.Attribution>
     @OptionGroup var output: OutputOptions
@@ -56,7 +64,10 @@ struct UnbundleCommand: AsyncParsableCommand {
             ?? location.containingDirectory.appendingPathComponent(location.name, isDirectory: true)
         let report: PenBundle.Report
         do {
-            report = try await PenBundle.export(location.url, to: folder, identity: identity.identity)
+            report = try await PenBundle.export(
+                location.url, to: folder, identity: identity.identity,
+                history: history ? .included : .omitted
+            )
         } catch {
             throw CommandFailure.describing(error, editing: document)
         }
