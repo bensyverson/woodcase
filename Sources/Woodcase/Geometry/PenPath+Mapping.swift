@@ -1,6 +1,12 @@
 import Foundation
 
 public extension PenPath {
+    /// The same path with every point its commands name — endpoints and control points —
+    /// passed through `transform`.
+    func mappingPoints(_ transform: (PenPoint) -> PenPoint) -> PenPath {
+        PenPath(commands: commands.map { $0.mappingPoints(transform) })
+    }
+
     /// The region of the path's own coordinates that is mapped onto a node's box.
     ///
     /// A usable `viewBox` names it. Without one, Pen's default applies: the path's tight
@@ -23,10 +29,8 @@ public extension PenPath {
         guard let source = sourceRegion(viewBox: viewBox) else { return self }
         let scaleX = source.width > 0 ? rect.width / source.width : 1
         let scaleY = source.height > 0 ? rect.height / source.height : 1
-        return PenPath(commands: commands.map { command in
-            command.mappingPoints { point in
-                PenPoint(x: rect.x + (point.x - source.x) * scaleX, y: rect.y + (point.y - source.y) * scaleY)
-            }
-        })
+        return mappingPoints { point in
+            PenPoint(x: rect.x + (point.x - source.x) * scaleX, y: rect.y + (point.y - source.y) * scaleY)
+        }
     }
 }

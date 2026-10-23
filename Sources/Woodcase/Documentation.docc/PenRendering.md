@@ -35,7 +35,7 @@ The renderer is composed of several internal helper types, each responsible for 
 | `PenShadowSilhouette` | The opaque shape an outer shadow is cast by |
 | `PenGaussianBlur` | The CPU Gaussian both blurs use, on encoded sRGB values |
 
-These helpers are `internal` — only ``PenRenderer``, ``PenColorParser``, ``PenHexColor``, ``PenSVGPathParser`` (with ``PenPath``, ``PenPathCommand`` and ``PenPoint``), ``PenBrowserPlaceholder/Style``, and the ``PenBlendMode`` extension are public API.
+These helpers are `internal` — only ``PenRenderer``, ``PenColorParser``, ``PenHexColor``, ``PenSVGPathParser`` (with ``PenPath``, ``PenPathCommand``, ``PenPoint`` and the path-editing types of <doc:EditingPaths>), ``PenBrowserPlaceholder/Style``, and the ``PenBlendMode`` extension are public API.
 
 ``PenHexColor`` is the format's one hex color grammar (`#RGB`, `#RRGGBB`, `#RRGGBBAA`, the `#` optional; `#RGBA` and signed numbers refused). It needs only Foundation, and ``PenColorParser`` wraps its result into a `CGColor`. The mesh core does not use it: Pen's mesh reads its color strings its own way (``PenMeshColor/init(penMesh:)``, <doc:PenMeshGradients>).
 
@@ -49,8 +49,11 @@ read the same outline the renderer draws.
   ``PenPathCommand``s — move, line, quadratic, cubic, close — fully resolved. Relative
   commands are absolute, `H`/`V` are lines, the reflected control point of `S`/`T` is
   written out, and every elliptical arc is converted to cubics (at most 90° each, per
-  the SVG implementation notes). ``PenPath/mapped(onto:viewBox:)`` maps it onto the node's
-  box, through its viewBox or by stretching its ``PenPath/tightBounds``.
+  the SVG implementation notes; the last ends exactly on the arc's end point).
+  ``PenPath/mapped(onto:viewBox:)`` maps it onto the node's box, through its viewBox or by
+  stretching its ``PenPath/tightBounds``. ``PenPath/svgPathData`` writes it back as SVG path
+  data that parses back equal, and ``PenPath/contours`` reads it as the anchors an editor
+  edits — see <doc:EditingPaths>.
 - `PenShapeGeometry` computes every shape's `PenShapeOutline`: rectangles (plain, uniformly
   rounded, or per-corner with tangent arcs), ellipses, rings, pie slices and arc donuts,
   polygons (sharp or rounded), lines and mapped paths, and the fill rule each is filled with.
@@ -63,7 +66,7 @@ read the same outline the renderer draws.
   at the right edge's middle — every outline starts where SVG starts the shape, so a
   dashed stroke's pattern does too (*Dashed strokes*, below). A rounded polygon starts
   exactly where its first vertex's rounding ends. `PenShapeOutline.svgPathData(number:)` writes the same outline as
-  SVG path data — an elliptical arc as an SVG `A` between its end points, a tangent arc as
+  SVG path data, through the writer ``PenPath/svgPathData`` uses, — an elliptical arc as an SVG `A` between its end points, a tangent arc as
   its lead-in line and circular arc — which is how the React emitter draws an arc or a ring.
 - `PenShapeBuilder` and ``PenSVGPathParser`` are the CoreGraphics side: they build a
   `CGPath` from the outline, element for element, and nothing more.

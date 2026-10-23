@@ -78,9 +78,19 @@ struct PenSVGArc: Friendly {
         let segments = max(1, Int(ceil(abs(dtheta) / (.pi / 2))))
         let segmentAngle = dtheta / Double(segments)
         let ellipse = Ellipse(cx: cx, cy: cy, rx: rx, ry: ry, cosPhi: cosPhi, sinPhi: sinPhi)
-        return (0 ..< segments).map { i in
+        var cubics = (0 ..< segments).map { i in
             ellipse.cubic(from: theta1 + Double(i) * segmentAngle, sweeping: segmentAngle)
         }
+        // The trigonometry lands the last end a few ulps off `to` (sin π is not 0), but the
+        // next command starts from `to` exactly: end there, the last handle moved with it.
+        if case let .cubicCurve(end, control1, control2) = cubics[cubics.count - 1] {
+            cubics[cubics.count - 1] = .cubicCurve(
+                to: to,
+                control1: control1,
+                control2: PenPoint(x: control2.x + (to.x - end.x), y: control2.y + (to.y - end.y))
+            )
+        }
+        return cubics
     }
 
     /// The signed angle from vector u to vector v.

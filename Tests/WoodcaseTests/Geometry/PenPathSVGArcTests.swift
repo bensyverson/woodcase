@@ -103,4 +103,13 @@ struct PenPathSVGArcTests {
         #expect(near(parsed.last.flatMap(end), 100, 0))
         #expect(parsed == commands("M0 0a50 50 0 0 1 100 0"))
     }
+
+    @Test("An arc's last cubic ends exactly on the arc's end point, where the next command starts")
+    func endsExactly() throws {
+        // sin(π) is 1.2e-16, not 0, so the computed end of this arc is off by ulps.
+        let parsed = try #require(commands("M100 50 A50 50 0 1 1 0 50 A50 50 0 1 1 100 50"))
+        let ends = parsed.compactMap(end)
+        #expect(ends.contains(PenPoint(x: 0, y: 50)))
+        #expect(ends.last == PenPoint(x: 100, y: 50))
+    }
 }
