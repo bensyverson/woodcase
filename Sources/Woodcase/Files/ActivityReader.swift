@@ -25,6 +25,17 @@ import Foundation
 /// ``read(after:file:identity:)`` from ``ActivityCursor/start`` reads every archive and
 /// then the live file.
 ///
+/// ## A bundle's history
+///
+/// A bundle's log is one file per writer (``ActivityLog/Layout/perWriter``), and every
+/// read here merges them: rows come back in time order, a tie going to the writer whose
+/// file name sorts first, each writer's own rows in the order it appended them (see
+/// ``HistoryFiles``). Each row's ``ActivityEvent/file``, which the history does not
+/// store, is filled in with the bundle's document as it is named now. Its positions are
+/// per-writer ``ActivityCursor``s; a byte offset means nothing across several files, so
+/// resume a bundle's history with ``Page/cursor`` and ``read(after:file:identity:)``, not
+/// with ``Page/nextOffset``.
+///
 /// ## No lock, on purpose
 ///
 /// A writer appends whole lines under an exclusive lock, but a reader takes no lock at
@@ -97,7 +108,9 @@ public struct ActivityReader: Friendly {
         /// The offset just past the last complete line, to pass to the next read.
         ///
         /// It counts every complete line the read covered, filtered out or not, so a
-        /// filtered follower still advances past events it does not care about.
+        /// filtered follower still advances past events it does not care about. Always
+        /// zero for a bundle's history, which has no single offset: resume it with
+        /// ``cursor``.
         public var nextOffset: UInt64
 
         /// Whether the log was rotated and this read started over from its beginning.
@@ -130,7 +143,8 @@ public struct ActivityReader: Friendly {
     ///
     /// - Parameters:
     ///   - offset: Where to start, from a previous ``Page/nextOffset``. Zero reads the
-    ///     live file from its beginning.
+    ///     live file from its beginning — in a bundle, every writer's live file. A bundle
+    ///     has no other offset to give: anything else reads from its end.
     ///   - file: Show only events for this .pen file. Compared as
     ///     ``ActivityEvent/canonicalPath(for:)``, so any spelling of the path matches.
     ///   - identity: Show only events written by this `--as` name.
@@ -144,7 +158,12 @@ public struct ActivityReader: Friendly {
         file: URL? = nil,
         identity: String? = nil
     ) throws -> Page {
-        try readFile(at: log.fileURL, from: offset, file: file, identity: identity)
+        switch log.layout {
+        case .single:
+            try readFile(at: log.fileURL, from: offset, file: file, identity: identity)
+        case .perWriter:
+            try read(after: liveCursor(atOffset: offset), file: file, identity: identity)
+        }
     }
 
     /// The last `count` matching events in the live file; rows rotated into archives are
@@ -170,6 +189,9 @@ public struct ActivityReader: Friendly {
     /// and decodes only as far as it must: one chunk for the ordinary case, more only
     /// when the newest lines belong to other files.
     ///
+    /// In a bundle's history it is the newest row of any writer, read from the end of
+    /// each writer's live file.
+    ///
     /// - Parameter file: The .pen file to look for. `nil` takes the newest event of any
     ///   file, which is what a caller with a single-file log wants.
     /// - Returns: The newest matching event, or `nil` when the log holds none — a log
@@ -178,6 +200,11 @@ public struct ActivityReader: Friendly {
     /// - Throws: ``PenFileError/cannotOpen(url:reason:)`` if the log exists but cannot
     ///   be read.
     public func newest(file: URL? = nil) throws -> ActivityEvent? {
-        try log.lines.newest(matching: matching(file: file, identity: nil))
+        switch log.layout {
+        case .single:
+            try log.lines.newest(matching: matching(file: file, identity: nil))
+        case .perWriter:
+            try log.history.newest(matching: matching(file: file, identity: nil)).map(stamped)
+        }
     }
 }

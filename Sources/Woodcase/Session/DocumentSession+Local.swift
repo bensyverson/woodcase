@@ -61,6 +61,11 @@ extension DocumentSession {
         let probe = ChangeInvalidation.Probe(operation: forward, keys: operationKeys, in: document)
         let touched = ActivityEvent.nodeIDs(touchedBy: forward)
         let pathsBefore = touched.map(document.namePath(of:))
+        // The revision the row starts from: the change's previous row produced it, so
+        // only a change's first logged operation folds the document for it.
+        let parent = pending.logsActivity && file != nil
+            ? pending.activity.last?.revision ?? document.documentRevision
+            : nil
 
         pending.broadcast += try applyThroughCRDT(forward)
 
@@ -74,7 +79,8 @@ extension DocumentSession {
             kind: pending.activityKind,
             nodes: touched,
             pathsBefore: pathsBefore,
-            batch: pending.batch
+            batch: pending.batch,
+            parent: parent
         ) {
             pending.activity.append(event)
         }
@@ -217,7 +223,7 @@ extension DocumentSession {
     /// Each name path is read from whichever side of the edit still has its node: after
     /// it for a node that survived, before it for one the operation removed. The row's
     /// `forward` is the operation as submitted, not normalized, so a reader sees what
-    /// the writer asked for.
+    /// the writer asked for; its `parent` is the revision before the operation.
     private func activityEvent(
         for operation: EditOperation,
         as submitted: EditOperation,
@@ -225,7 +231,8 @@ extension DocumentSession {
         kind: ActivityEvent.Kind?,
         nodes: [String],
         pathsBefore: [String],
-        batch: String
+        batch: String,
+        parent: String?
     ) -> ActivityEvent? {
         guard let file else { return nil }
         let paths = zip(nodes, pathsBefore).map { nodeID, before in
@@ -241,7 +248,8 @@ extension DocumentSession {
             inverse: inverse.map(\.operation),
             forward: [submitted],
             revision: document.documentRevision,
-            batch: batch
+            batch: batch,
+            parent: parent
         )
     }
 

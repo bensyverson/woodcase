@@ -73,9 +73,12 @@ public extension PenFileTransaction {
         let now = Date()
         let rewrite = ActivityEvent(
             time: now, identity: identity ?? ActivityEvent.unattributed, file: url,
-            op: .migrate, revision: revision, batch: UUID().uuidString
+            op: .migrate, revision: revision, batch: UUID().uuidString, parent: revision
         )
-        try await activity.append([lineage.external(naming: url, at: now), rewrite].compactMap(\.self))
+        try await activity.append(
+            [lineage.external(naming: url, at: now), rewrite].compactMap(\.self),
+            as: identity ?? ActivityEvent.unattributed
+        )
         return Outcome(value: migration, commit: .wrote, url: url, lineage: lineage)
     }
 }

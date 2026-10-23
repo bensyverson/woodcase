@@ -36,7 +36,7 @@ struct NewCommand: AsyncParsableCommand {
         revision, because no file was made.
 
         A path ending in .umbra creates a bundle — the directory, holding \
-        document.pen, with its history in design.umbra/.woodcase/ — and is the \
+        document.pen, with its shared history in design.umbra/history/ — and is the \
         shape to prefer: images and fonts copied into it travel with the document. \
         Every verb takes the bundle's path.
 

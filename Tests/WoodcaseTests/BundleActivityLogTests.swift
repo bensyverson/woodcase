@@ -7,8 +7,13 @@ import Foundation
 import Testing
 @testable import Woodcase
 
-/// A bundle keeps its own history: its log is `<bundle>/.woodcase/activity.jsonl`
+/// A bundle keeps its own history: its log is `<bundle>/history/`, one file per writer,
 /// wherever the bundle sits, and it travels with the bundle.
+///
+/// Changed 2026-10-23 (shared history, leaf KAJTF3): the log moved from
+/// `<bundle>/.woodcase/activity.jsonl` to `<bundle>/history/`, and a bundle stopped
+/// adding `.woodcase/` to its repository's `.gitignore`, because the history is now
+/// meant to be committed.
 struct BundleActivityLogTests {
     private func withScratch<T>(_ body: (URL) async throws -> T) async throws -> T {
         let directory = FileManager.default.temporaryDirectory
@@ -22,7 +27,7 @@ struct BundleActivityLogTests {
         ActivityEvent(time: Date(), identity: "ana", file: file, op: .set, revision: revision)
     }
 
-    @Test("a bundle's log is its own .woodcase, even inside a repository")
+    @Test("a bundle's log is its own history/, even inside a repository")
     func bundleLogIsInsideTheBundle() async throws {
         try await withScratch { scratch in
             try FileManager.default.createDirectory(
@@ -32,9 +37,9 @@ struct BundleActivityLogTests {
 
             let log = ActivityLogLocation.log(for: bundle, environment: [:])
 
-            #expect(log.fileURL.path == bundle.path + "/.woodcase/activity.jsonl")
-            #expect(log.origin == .bundle(root: URL(fileURLWithPath: bundle.path, isDirectory: true), repository: URL(fileURLWithPath: scratch.path, isDirectory: true)))
-            #expect(log.origin.repositoryRoot?.path == scratch.path)
+            #expect(log.home.path == bundle.path + "/history")
+            #expect(log.origin == .bundle(root: URL(fileURLWithPath: bundle.path, isDirectory: true)))
+            #expect(log.origin.repositoryRoot == nil)
         }
     }
 
@@ -59,7 +64,7 @@ struct BundleActivityLogTests {
 
             let log = ActivityLogLocation.log(for: bundle, environment: environment)
 
-            #expect(log.fileURL.path == bundle.path + "/.woodcase/activity.jsonl")
+            #expect(log.home.path == bundle.path + "/history")
         }
     }
 
@@ -76,8 +81,8 @@ struct BundleActivityLogTests {
         }
     }
 
-    @Test("the first append to a bundle log inside a repository ignores .woodcase/ there")
-    func bundleLogIgnoresItselfInTheRepository() async throws {
+    @Test("the first append to a bundle log inside a repository leaves the repository's .gitignore alone")
+    func bundleLogLeavesTheRepositoryIgnoreAlone() async throws {
         try await withScratch { scratch in
             try FileManager.default.createDirectory(
                 at: scratch.appendingPathComponent(".git"), withIntermediateDirectories: true
@@ -87,9 +92,8 @@ struct BundleActivityLogTests {
 
             try await log.append([Self.event(file: bundle)])
 
-            #expect(FileManager.default.fileExists(atPath: bundle.path + "/.woodcase/activity.jsonl"))
-            let ignore = try String(contentsOf: scratch.appendingPathComponent(".gitignore"), encoding: .utf8)
-            #expect(ignore.contains(ActivityLog.ignorePattern))
+            #expect(FileManager.default.fileExists(atPath: bundle.path + "/history"))
+            #expect(!FileManager.default.fileExists(atPath: scratch.appendingPathComponent(".gitignore").path))
         }
     }
 

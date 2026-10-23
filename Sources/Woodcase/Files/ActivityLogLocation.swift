@@ -15,10 +15,11 @@ import Foundation
 ///
 /// ## The rule
 ///
-/// 0. A `.umbra` bundle — or the `document.pen` inside one — keeps its own log, at
-///    `<bundle>/.woodcase/activity.jsonl`, before any rule below is consulted, so its
-///    history travels with it (``ActivityLog/Origin/bundle(root:repository:)``). This
-///    is the one exception to rule 1. See <doc:PenBundles>.
+/// 0. A `.umbra` bundle — or the `document.pen` inside one — keeps its own shared
+///    history, one file per writer in `<bundle>/history/`, before any rule below is
+///    consulted, so its history travels with it (``ActivityLog/Origin/bundle(root:)``,
+///    ``ActivityLog/Layout/perWriter``). This is the one exception to rule 1. See
+///    <doc:PenBundles>.
 /// 1. `$WOODCASE_HOME`, if set and not empty, is the whole answer for a bare file: one log at
 ///    `$WOODCASE_HOME/activity.jsonl`, whatever file is being edited. It is the escape
 ///    hatch for a test, a sandbox, or a person who wants one feed for everything.
@@ -41,17 +42,18 @@ public enum ActivityLogLocation {
     ///
     /// - Parameters:
     ///   - file: The .pen file being edited. It need not exist yet.
-    ///   - environment: The environment to read `$WOODCASE_HOME` from. Defaults to this
-    ///     process's.
+    ///   - environment: The environment to read `$WOODCASE_HOME` from — and, for a
+    ///     bundle, `$WOODCASE_DEVICE` (``HistoryWriter/deviceEnvironmentVariable``), which
+    ///     becomes the log's ``ActivityLog/device``. Defaults to this process's.
     /// - Returns: The log, with the ``ActivityLog/Origin`` that explains the choice.
     public static func log(
         for file: URL,
         environment: [String: String] = ProcessInfo.processInfo.environment
     ) -> ActivityLog {
         let location = PenLocation(file)
-        if let bundle = location.bundle, let state = location.stateDirectory {
-            let repository = repositoryRoot(above: location.containingDirectory)
-            return ActivityLog(home: state, origin: .bundle(root: bundle, repository: repository))
+        if let bundle = location.bundle, let history = location.historyDirectory {
+            let named = environment[HistoryWriter.deviceEnvironmentVariable].flatMap { $0.isEmpty ? nil : $0 }
+            return ActivityLog(home: history, origin: .bundle(root: bundle), device: named)
         }
         return log(inDirectory: file.deletingLastPathComponent(), environment: environment)
     }

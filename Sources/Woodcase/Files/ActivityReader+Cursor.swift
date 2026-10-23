@@ -18,6 +18,10 @@ public extension ActivityReader {
     ///   the live log from zero and says ``Page/restarted``: the gap is real and the
     ///   caller is told.
     /// - ``ActivityCursor/start`` reads every archive and the live log.
+    /// - In a bundle's history each writer's file is read from its own position in the
+    ///   cursor — from its first row when the cursor does not name it — and the rows are
+    ///   merged by time. A one-file cursor from another log reads everything and says
+    ///   ``Page/restarted``.
     ///
     /// - Parameters:
     ///   - cursor: Where the last read ended, from ``Page/cursor`` or ``Page/eventCursors``.
@@ -31,6 +35,11 @@ public extension ActivityReader {
         file: URL? = nil,
         identity: String? = nil
     ) throws -> Page {
-        try Page(log.lines.read(after: cursor, matching: matching(file: file, identity: identity)))
+        switch log.layout {
+        case .single:
+            try Page(log.lines.read(after: cursor, matching: matching(file: file, identity: identity)))
+        case .perWriter:
+            try stamped(Page(log.history.read(after: cursor, matching: matching(file: file, identity: identity))))
+        }
     }
 }

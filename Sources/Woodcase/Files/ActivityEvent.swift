@@ -52,6 +52,8 @@ public struct ActivityEvent: Friendly {
     ///     operation was applied.
     ///   - batch: An id shared by every event of one transaction, or `nil` for an event
     ///     that stands alone.
+    ///   - parent: The document's revision *before* the operation, or `nil` when it is
+    ///     not known.
     public init(
         time: Date,
         identity: String,
@@ -62,7 +64,8 @@ public struct ActivityEvent: Friendly {
         inverse: [EditOperation] = [],
         forward: [EditOperation] = [],
         revision: String,
-        batch: String? = nil
+        batch: String? = nil,
+        parent: String? = nil
     ) {
         self.time = Self.roundedToMilliseconds(time)
         self.identity = identity
@@ -74,6 +77,7 @@ public struct ActivityEvent: Friendly {
         self.forward = forward
         self.revision = revision
         self.batch = batch
+        self.parent = parent
     }
 
     /// When the operation was applied, to millisecond precision, written as an
@@ -95,6 +99,11 @@ public struct ActivityEvent: Friendly {
     public static let unattributed: String = ""
 
     /// The absolute, canonicalized path of the .pen file that was edited.
+    ///
+    /// A bundle's history does not store it — every row there is about the bundle's one
+    /// document, and a path would leak where the bundle sat on its writer's disk — so a
+    /// reader fills it in with the document's path as it is now. Empty only for a row
+    /// decoded straight from such a line.
     public var file: String
 
     /// The short verb this operation reads as in a feed.
@@ -131,6 +140,18 @@ public struct ActivityEvent: Friendly {
 
     /// An id shared by every event of one transaction, or `nil` for a lone event.
     public var batch: String?
+
+    /// The document's revision *before* this operation was applied: the one it started
+    /// from, beside the ``revision`` it produced.
+    ///
+    /// Consecutive rows chain — each row's parent is the revision the one before it
+    /// produced — so a row whose parent no earlier row produced marks a seam in the
+    /// history. An ``Kind/external`` row's parent is the last revision the log recorded
+    /// and its revision the one the file was found at: the seam itself. A `migrate` row's
+    /// parent is its revision, which a migration does not change. `nil` for a `new` row,
+    /// which starts the history, and for a row written before the field existed
+    /// (2026-10-23); omitted from the wire when `nil`.
+    public var parent: String?
 
     // MARK: - Canonical file paths
 

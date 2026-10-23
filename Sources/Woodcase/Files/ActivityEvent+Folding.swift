@@ -22,7 +22,8 @@ public extension ActivityEvent {
     ///   of node properties or instance overrides is dropped, and only by another such
     ///   write of at least the same keys; every structural operation stays.
     ///
-    /// The run's row keeps the batch id of its first row.
+    /// The run's row keeps the batch id and the ``parent`` of its first row: it starts
+    /// where the run started.
     ///
     /// - Parameter rows: The rows, oldest first.
     /// - Returns: One row per run, oldest first.
@@ -40,6 +41,7 @@ public extension ActivityEvent {
             folded.inverse = collapsingCoveredWrites(run.reversed().flatMap(\.inverse))
             folded.forward = collapsingCoveredWrites(run.flatMap(\.forward))
             folded.batch = first.batch
+            folded.parent = first.parent
             return folded
         }
     }

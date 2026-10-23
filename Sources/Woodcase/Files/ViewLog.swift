@@ -5,7 +5,8 @@
 
 import Foundation
 
-/// The append-only JSONL file of reads: `views.jsonl`, beside `activity.jsonl`.
+/// The append-only JSONL file of reads: `views.jsonl`, beside a bare file's
+/// `activity.jsonl`, or in a bundle's local `.woodcase/`.
 ///
 /// One ``ViewEvent`` per line. It shares the activity log's directory, lock discipline
 /// and rotation (``JSONLinesFile``) but is a separate file with its own archives
@@ -30,19 +31,21 @@ public struct ViewLog: Friendly {
     /// Uses an explicit directory.
     ///
     /// - Parameters:
-    ///   - home: The directory the log lives in — the activity log's. Created on first
-    ///     write.
+    ///   - home: The directory the log lives in — the activity log's
+    ///     ``ActivityLog/stateDirectory``. Created on first write.
     ///   - origin: Why it is that directory, as for ``ActivityLog/init(home:origin:)``.
     public init(home: URL, origin: ActivityLog.Origin = .directory) {
         self.home = home
         self.origin = origin
     }
 
-    /// The view log kept beside an activity log.
+    /// The view log kept beside an activity log, in its ``ActivityLog/stateDirectory``:
+    /// a bundle's views are local state in its `.woodcase/`, not part of its shared
+    /// history.
     ///
     /// - Parameter log: The activity log, from ``ActivityLogLocation``.
     public init(beside log: ActivityLog) {
-        self.init(home: log.home, origin: log.origin)
+        self.init(home: log.stateDirectory, origin: log.origin)
     }
 
     /// The log's file name inside ``home``.
@@ -78,7 +81,7 @@ public struct ViewLog: Friendly {
 
         var payload = try event.jsonLine()
         payload.append(JSONLinesFile.newline)
-        try ActivityLog(home: home, origin: origin).prepareDirectory()
+        try ActivityLog.prepare(home, for: origin, naming: fileURL)
         try await lines.append(payload, timeout: timeout)
         return true
     }

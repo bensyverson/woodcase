@@ -8,7 +8,11 @@ import Testing
 @testable import Woodcase
 
 /// Every read and write accepts a `.umbra` bundle where it accepts a `.pen`, and goes to
-/// the `document.pen` inside it, with the history in the bundle's own `.woodcase/`.
+/// the `document.pen` inside it, with the history in the bundle's own `history/`.
+///
+/// Changed 2026-10-23 (leaf KAJTF3): the history moved from `.woodcase/activity.jsonl` to
+/// `history/`, one file per writer, and the bundle now holds its own `.gitignore` for its
+/// local `.woodcase/`.
 struct BundleTransactionTests {
     private static let nodeID = "jSUCH"
 
@@ -39,7 +43,7 @@ struct BundleTransactionTests {
         }
 
         var log: ActivityLog {
-            ActivityLog(home: bundle.appendingPathComponent(".woodcase"))
+            ActivityLogLocation.log(for: bundle, environment: [:])
         }
 
         func remove() {
@@ -82,7 +86,7 @@ struct BundleTransactionTests {
         }
 
         let root = try FileManager.default.contentsOfDirectory(atPath: scratch.bundle.path)
-        #expect(root.sorted() == [".woodcase", "document.pen"])
+        #expect(root.sorted() == [".gitignore", ".woodcase", "document.pen", "history"])
     }
 
     @Test("a read of a bundle sees its document, with relative paths resolving inside it")
@@ -109,10 +113,10 @@ struct BundleTransactionTests {
 
         #expect(outcome.didWrite)
         #expect(FileManager.default.fileExists(atPath: fresh.appendingPathComponent("document.pen").path))
-        let log = ActivityLog(home: fresh.appendingPathComponent(".woodcase"))
+        let log = ActivityLogLocation.log(for: fresh, environment: [:])
         #expect(try ActivityReader(log: log).read().events.map(\.op) == [.new])
         let root = try FileManager.default.contentsOfDirectory(atPath: fresh.path)
-        #expect(root.sorted() == [".woodcase", "document.pen"])
+        #expect(root.sorted() == [".gitignore", ".woodcase", "document.pen", "history"])
     }
 
     @Test("create refuses a bundle that already holds a document")
@@ -140,7 +144,7 @@ struct BundleTransactionTests {
         #expect(outcome == .wrote)
         #expect(try ActivityReader(log: scratch.log).read().events.map(\.identity) == ["ben"])
         let root = try FileManager.default.contentsOfDirectory(atPath: scratch.bundle.path)
-        #expect(root.sorted() == [".woodcase", "document.pen"])
+        #expect(root.sorted() == [".gitignore", ".woodcase", "document.pen", "history"])
     }
 
     @Test("an import of another bundle reads that bundle's document")

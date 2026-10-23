@@ -972,10 +972,14 @@ the terminal.
 
 ## The activity log, and undo
 
-Every write appends to the project's log: `.woodcase/activity.jsonl` at the
-nearest `.git` above the .pen file, or beside the file when there is no repository. The
-write that first creates `.woodcase/` adds it to that repository's `.gitignore`, so the
-history stays local. `$WOODCASE_HOME`, if set, overrides all of that with one log.
+Every write to a bundle appends to the bundle's shared history: your own file in
+`design.umbra/history/`, named `<you>@<this Mac>.jsonl` (`claude@grace.jsonl`), which is
+committed with the document; set `$WOODCASE_DEVICE` to name the device yourself. Every
+reader merges all writers' files by time. A bare .pen file's writes append to the
+project's log instead: `.woodcase/activity.jsonl` at the nearest `.git` above the file, or
+beside it when there is no repository. The write that first creates that `.woodcase/`
+adds it to the repository's `.gitignore`, so a bare file's history stays local.
+`$WOODCASE_HOME`, if set, overrides that with one log; it never moves a bundle's.
 
 Identity comes from `--as` or `$WOODCASE_AS`; with neither, the edit still applies and
 is still logged, as an unattributed write with an empty identity. Nothing you do to a

@@ -12,7 +12,9 @@ import Foundation
 #endif
 
 /// Where each identity's last look at each file is kept: one small JSON file per
-/// identity, `cursors/<identity>.json`, beside the activity log it points into.
+/// identity, `cursors/<identity>.json`, in the log's ``ActivityLog/stateDirectory``:
+/// beside a bare file's log, and in a bundle's local `.woodcase/` — never in its shared
+/// `history/`, since a cursor is one machine's place in it.
 ///
 /// ```json
 /// {"/Users/ben/Designs/home.pen":"1a2b3c-40960"}
@@ -31,10 +33,10 @@ public struct ActivityCursorStore: Friendly {
     /// A store beside a log.
     ///
     /// - Parameter log: The activity log the cursors point into; the store lives in its
-    ///   ``ActivityLog/home``.
+    ///   ``ActivityLog/stateDirectory``.
     public init(log: ActivityLog) {
         self.log = log
-        directory = log.home.appendingPathComponent(Self.directoryName, isDirectory: true)
+        directory = log.stateDirectory.appendingPathComponent(Self.directoryName, isDirectory: true)
     }
 
     /// The log the cursors point into.
@@ -108,10 +110,11 @@ public struct ActivityCursorStore: Friendly {
     /// Letters, digits, `-` and `_`: everything else — a dot, a slash — is encoded.
     private static let nameCharacters = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-_"))
 
-    /// Makes the directory, through the log's own preparation so a repository learns to
-    /// ignore `.woodcase/` exactly as it does on the first write, and the file, empty.
+    /// Makes the directory, through the log's own preparation so local state is ignored
+    /// exactly as it is on the first write (see ``ActivityLog/prepare(_:for:naming:)``), and the
+    /// file, empty.
     private func prepare(_ url: URL) throws {
-        try log.prepareDirectory()
+        try ActivityLog.prepare(log.stateDirectory, for: log.origin)
         do {
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         } catch {

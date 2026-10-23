@@ -38,7 +38,7 @@ extension PenFileTransaction {
         let explained = rows.last?.revision ?? lineage.newest?.revision
         // A file with no history explains itself, as it does to a CLI transaction.
         if let explained, explained != snapshot.documentRevision {
-            rows.append(mergeRow(for: snapshot, folding: folded(in: included), at: url))
+            rows.append(mergeRow(for: snapshot, folding: folded(in: included), at: url, from: explained))
         }
         return rows
     }
@@ -64,11 +64,14 @@ extension PenFileTransaction {
     ///   - snapshot: The snapshot being saved.
     ///   - folding: The folded-in changes, oldest first.
     ///   - url: The .pen file.
+    ///   - parent: The revision the save's rows before it explain: where the folded-in
+    ///     work starts.
     /// - Returns: The row, under the snapshot's author.
     private static func mergeRow(
         for snapshot: DocumentSnapshot,
         folding: [CommittedChange],
-        at url: URL
+        at url: URL,
+        from parent: String
     ) -> ActivityEvent {
         var nodes: [String] = []
         for change in folding {
@@ -94,7 +97,8 @@ extension PenFileTransaction {
             inverse: inverse,
             forward: folding.flatMap { $0.applied.map(\.forward) },
             revision: snapshot.documentRevision,
-            batch: UUID().uuidString
+            batch: UUID().uuidString,
+            parent: parent
         )
     }
 }

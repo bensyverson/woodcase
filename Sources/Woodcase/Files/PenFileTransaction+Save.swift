@@ -132,7 +132,10 @@ public extension PenFileTransaction {
         guard try updated != encode(parsed, for: url) else { return .unchanged }
         try write(updated, replacing: lock)
 
-        try await activity.append(saveRows(for: snapshot, changes: changes, lineage: lineage, at: url))
+        try await activity.append(
+            saveRows(for: snapshot, changes: changes, lineage: lineage, at: url),
+            as: snapshot.author?.name ?? ActivityEvent.unattributed
+        )
         return .wrote
     }
 }

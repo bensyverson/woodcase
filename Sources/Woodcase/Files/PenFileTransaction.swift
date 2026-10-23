@@ -347,7 +347,7 @@ public enum PenFileTransaction {
             return Outcome(value: value, commit: .previewed, url: url, lineage: lineage)
         }
         try write(updated, replacing: lock)
-        try await activity.append(events)
+        try await activity.append(events, as: identity ?? ActivityEvent.unattributed)
         return Outcome(value: value, commit: .wrote, url: url, lineage: lineage)
     }
 

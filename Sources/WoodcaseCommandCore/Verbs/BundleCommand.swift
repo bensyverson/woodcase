@@ -20,8 +20,8 @@ struct BundleCommand: AsyncParsableCommand {
         the bundle records where it came from, and any later command run on a \
         design.pen that comes back warns you to edit the bundle instead.
 
-        A bundle keeps its own history in design.umbra/.woodcase/activity.jsonl, which \
-        starts with a `new` row attributed to --as; the original's history stays in \
+        A bundle keeps its own shared history in design.umbra/history/, one file per \
+        writer, which starts with a `new` row attributed to --as; the original's history stays in \
         the log it was written to. Remote images and Google Fonts stay remote unless \
         you pass --embed, which downloads them into the bundle (see `woodcase embed`).
 

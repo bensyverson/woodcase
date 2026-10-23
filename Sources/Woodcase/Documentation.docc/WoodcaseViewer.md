@@ -24,8 +24,9 @@ document need not start a second process. See *The preview pages* below.
 ### Which log it follows
 
 The activity log belongs to a project — `.woodcase/activity.jsonl` at the nearest `.git`
-above the .pen file (see <doc:WoodcaseActivityLog>) — so which one the viewer follows
-depends on what it was asked to serve:
+above a bare .pen file, or a bundle's own `history/`, one file per writer, merged as it
+is read (see <doc:WoodcaseActivityLog>) — so which one the viewer follows depends on what
+it was asked to serve:
 
 | Invocation | Logs followed |
 |---|---|

@@ -39,7 +39,8 @@ struct Activity: AsyncParsableCommand {
         verb, path — or every matching event as JSON (--json), one event per line in \
         the same form the log stores, so it round-trips.
 
-        A read verb: it opens no .pen file at all, only the log. The log is the \
+        A read verb: it opens no .pen file at all, only the log. A bundle's log is \
+        its own history/, one file per writer, merged by time; a bare file's is the \
         project's: .woodcase/activity.jsonl beside the nearest .git, and with no file \
         it is the project the working directory is in. Naming a .pen file — as the \
         first argument, or with --file, which mean the same thing — narrows to that \
@@ -137,7 +138,8 @@ struct Activity: AsyncParsableCommand {
 
                 guard follow else { return }
                 try await Self.printFollowing(
-                    reader.follow(from: page.nextOffset, file: fileURL, identity: who),
+                    // A cursor, not a byte offset: a bundle's history is one file per writer.
+                    reader.follow(after: page.cursor ?? .start, file: fileURL, identity: who),
                     json: output.json,
                     until: parentWatch
                 )
@@ -238,7 +240,7 @@ struct Activity: AsyncParsableCommand {
             "Check $\(ActivityLog.homeEnvironmentVariable), which points at \(log.home.path)."
         case .repository, .directory:
             "Remove it, or set $\(ActivityLog.homeEnvironmentVariable) to a directory you can read."
-        case let .bundle(root, _):
+        case let .bundle(root):
             "Check the permissions of \(root.path) — a bundle keeps its log inside itself."
         }
     }

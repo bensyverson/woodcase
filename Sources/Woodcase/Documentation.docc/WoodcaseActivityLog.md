@@ -6,9 +6,17 @@ how to change it back.
 ## Overview
 
 Every operation a ``PenFileTransaction`` commits is written as one JSON object on one
-line of `activity.jsonl`. That file is the history, the feed the viewer tails, and the
-source `woodcase undo` replays. It is *derived* state — the .pen files are the truth — so
-deleting it costs history, not designs.
+line of the log. The log is the history, the feed the viewer tails, and the source
+`woodcase undo` replays. It comes in two layouts (``ActivityLog/Layout``):
+
+- **A bare .pen file's log** is one `activity.jsonl` in the project's `.woodcase/`. It is
+  *derived*, local state — the .pen files are the truth — kept out of Git, so deleting it
+  costs history, not designs.
+- **A `.umbra` bundle's history** is one file per writer in the bundle's `history/`
+  (`ben@grace.jsonl`, `claude@grace.jsonl`). It is the document's own record, **shared
+  on purpose**: committed to Git and synced through Dropbox or iCloud with the bundle,
+  agents' edits included. See *A bundle's shared history* below; the design and Ben's
+  rulings are Penumbra's `project/2026-10-23-shared-history.md`.
 
 The log is written by ``ActivityLog``, read by ``ActivityReader``, and filled by an
 ``ActivityRecorder`` that a transaction hands to its body.
@@ -25,9 +33,9 @@ Two operations, two events, one batch id — appended once the file is safely on
 ## Where it lives
 
 With the project, not with the user. ``ActivityLogLocation`` resolves it, and is the only
-place that does. A **`.umbra` bundle** keeps its own log, at
-`<bundle>/.woodcase/activity.jsonl`, before any rule below is asked — see *Bundles* below.
-For a bare .pen file:
+place that does. A **`.umbra` bundle** keeps its own history, in `<bundle>/history/`,
+before any rule below is asked — see *A bundle's shared history* below. For a bare .pen
+file:
 
 1. **`$WOODCASE_HOME`**, when set and not empty, is the whole answer: one log at
    `$WOODCASE_HOME/activity.jsonl`, whatever file is being edited.
@@ -51,15 +59,61 @@ everything that happened anywhere, and an agent working in a sandbox that permit
 under the project would find its own history unwritable. This is the same choice a task
 tracker's in-repo database makes.
 
-### Bundles
+### A bundle's shared history
 
-A bundle's log is inside the bundle (``ActivityLog/Origin/bundle(root:repository:)``),
-wherever the bundle sits and whatever `$WOODCASE_HOME` says, so the history travels with
-the document — that is what a bundle is for. Every row in it is about the bundle's one
-document, so a reader asking about that document takes every row, whatever path it was
-written under (``ActivityLog/Origin/holdsOneDocument``): a renamed bundle keeps its
-history, and `woodcase undo` reaches back across the rename. Rows name a bundle by its
-`document.pen` (``ActivityEvent/canonicalPath(for:)``), whichever path the caller gave.
+A bundle's history is inside the bundle (``ActivityLog/Origin/bundle(root:)``), wherever
+the bundle sits and whatever `$WOODCASE_HOME` says, so it travels with the document —
+that is what a bundle is for. It is laid out for sharing (``ActivityLog/Layout/perWriter``):
+
+```
+Design.umbra/
+├── document.pen
+├── history/                 shared: committed and synced
+│   ├── ben@grace.jsonl      ben on the Mac named Grace
+│   ├── ben@hopper.jsonl     ben on another Mac
+│   └── claude@grace.jsonl   an agent, as a writer of its own
+├── .gitignore               ".woodcase/" — the bundle's own, never the repository's
+└── .woodcase/               local: views, cursors, temporary files
+```
+
+- **One file per writer.** A writer (``HistoryWriter``) is an identity on one device:
+  `ben@grace`. Not a ``PeerID``, which lasts one session, and not the bare identity, or
+  one person's two Macs syncing the bundle would append to one `ben.jsonl` from both.
+  Each writer appends only to its own file, so Git merges and file-sync services never
+  see two writers' lines in one file; two writers appending at once touch two files. The
+  file name is the identity and device folded to lowercase letters, digits, `-` and `_`
+  (`José` on `Ben's MacBook Pro` is `jose@ben-s-macbook-pro`); the row keeps the identity
+  exactly as given.
+- **The device** is the caller's to name — ``ActivityLog/device`` — or
+  ``HistoryWriter/currentDevice(environment:)``: `$WOODCASE_DEVICE` when set, else this
+  Mac's computer name, which is what a person recognizes and, unlike the network host
+  name, does not change from one network to the next. Two Macs with the same computer
+  name share a file name; give one a `$WOODCASE_DEVICE`.
+- **Which file a batch goes to** is the appending identity's
+  (``ActivityLog/append(_:as:timeout:)``): a transaction's `--as`, a save's author. The
+  `external` row a write records first names nobody, but goes in the file of the writer
+  who noticed it.
+- **Merged when read.** ``ActivityReader`` — and so `woodcase activity`, `undo`,
+  `changes`, `serve` and ``PenFileFollower`` — reads every writer's file and merges the
+  rows by time. A tie in time goes to the writer whose name sorts first, and a writer's
+  own rows are never reordered: the merge takes each file's next row in turn, so a
+  device whose clock stepped back does not shuffle its own history, and the same files
+  always merge to the same order (``HistoryFiles``). Positions are per-writer
+  ``ActivityCursor``s (see *Resuming*).
+- **No paths.** Every row is about the bundle's one document, so rows are written
+  without `file` — an absolute path says where the bundle sat on its writer's disk, and
+  the history is shared. The reader fills ``ActivityEvent/file`` in with the document's
+  path as it is now, so a renamed or moved bundle keeps its history, and `woodcase undo`
+  reaches back across the move. Identity stays.
+- **Local state stays local.** Views, the change feed's cursors and temporary files are
+  one machine's, and live in the bundle's `.woodcase/` (``ActivityLog/stateDirectory``),
+  which the bundle's own `.gitignore` ignores — written inside the bundle, so a
+  sandboxed app holding a grant on the bundle can write it. The repository's
+  `.gitignore` is never touched for a bundle.
+- **A legacy log** — `<bundle>/.woodcase/activity.jsonl`, from before 2026-10-23 — is not
+  read. Nothing migrates it; the history starts again in `history/`.
+- **Rotation is per writer:** `ben@grace.20260829T163104Z.jsonl` beside the live file.
+
 See <doc:PenBundles>.
 
 A **bare file that moves** — a rename, or a move to another repository — keeps nothing:
@@ -69,13 +123,16 @@ of wherever it now sits, and the old rows stay under the old path in the old log
 
 ### The `.gitignore` line
 
-The log is generated local state, so the write that *creates* `.woodcase/` inside a
-repository adds `.woodcase/` to that repository's root `.gitignore` at the same moment,
-creating the file if there is none (``RepositoryIgnoreFile``). Only a missing pattern is
-appended — `.woodcase`, `/.woodcase` and `.woodcase/` all count as present — so it happens
-once. A bundle inside a repository adds the same line on its own log's first write.
-Outside a repository nothing is written, and a `.gitignore` that cannot be written
-is not an error: the edit and its log line are the work.
+A bare file's log is generated local state, so the write that *creates* `.woodcase/`
+inside a repository adds `.woodcase/` to that repository's root `.gitignore` at the same
+moment, creating the file if there is none (``RepositoryIgnoreFile``). Only a missing
+pattern is appended — `.woodcase`, `/.woodcase` and `.woodcase/` all count as present — so
+it happens once. Outside a repository nothing is written, and a `.gitignore` that cannot
+be written is not an error: the edit and its log line are the work.
+
+A bundle never adds this line: its `history/` is meant to be committed. It writes the
+same pattern to its **own** `.gitignore`, inside the bundle, the first time it creates
+`history/` or `.woodcase/`, so its local state stays out of Git wherever the bundle goes.
 
 ### Pointing it somewhere else
 
@@ -104,9 +161,11 @@ detail. Broken across lines here for reading; on disk it is one line:
  "forward":[{"updateCommon":{"_0":{"nodeID":"jSUCH","common":{"name":"Title"}}}}],
  "identity":"ana",
  "inverse":[{"setProperties":{"_0":{"nodeID":"jSUCH","properties":{"common.name":"child-1"}}}}],
- "nodes":["jSUCH"],"op":"set","paths":["layout-vertical/Title"],
+ "nodes":["jSUCH"],"op":"set","parent":"9be04a7713c2d5e0","paths":["layout-vertical/Title"],
  "revision":"3f2a91c0d4e5b678","time":"2026-08-29T16:31:04.123Z"}
 ```
+
+A row in a bundle's history is the same without `file`.
 
 - **`time`** — when the operation was applied. ISO-8601, UTC, milliseconds:
   `2026-08-29T16:31:04.123Z`. Held to whole milliseconds so a line decodes back to an
@@ -117,7 +176,11 @@ detail. Broken across lines here for reading; on disk it is one line:
   needs one; the log keeps the readable half.
 - **`file`** — the absolute path of the .pen file, standardized with symlinks resolved
   (``ActivityEvent/canonicalPath(for:)``), so `/tmp/x.pen` and `/private/tmp/x.pen`
-  produce one string and a filter on either finds both.
+  produce one string and a filter on either finds both. **Omitted in a bundle's
+  history** (since 2026-10-23): a bundle holds one document, and its history is shared,
+  so a path would only leak where the bundle sat on its writer's disk. A reader fills
+  the field in with the bundle's `document.pen` as it is named now; a line without it
+  decodes with an empty `file`.
 - **`op`** — a short verb: `set`, `place`, `add`, `replace`, `cp`, `mv`, `rm`, `override`,
   `detach`, `var`, `import`, `theme`, `undo`, `redo`, `external`, `migrate`, `new`, `merge`. Coarser than ``EditOperation`` on purpose — a feed wants
   "something was set here", not which of the four property operations did it. Two kinds
@@ -177,6 +240,14 @@ detail. Broken across lines here for reading; on disk it is one line:
 - **`revision`** — the document's ``EditableDocument/documentRevision`` *after* this
   operation. Per operation, not per transaction, so `undo` can check one event against
   the file's current revision and refuse rather than guess.
+- **`parent`** — the document's revision *before* this operation: the one it started
+  from (since 2026-10-23, ``ActivityEvent/parent``). Consecutive rows chain — each row's
+  `parent` is the `revision` the one before produced — so a row whose `parent` no
+  earlier row produced is a seam in the history. An `external` row's `parent` is the
+  last revision the log recorded and its `revision` the one the file was found at (see
+  *Writes from outside*); a `migrate` row's is its own `revision`; a `merge` row's is
+  the revision the save's rows before it explain. Omitted from a `new` row, which starts
+  the history, and from rows written before the field existed.
 - **`batch`** — an id shared by every event of one transaction. Absent from an event
   that stands alone, which today means an `external` row. It is what `undo` reads to
   reverse a whole command in one step — see *Undo is by transaction* below.
@@ -206,9 +277,25 @@ event of its own append:
 ```
 
 It names nobody, touches no node, and carries no inverse, because woodcase did not do it
-and cannot undo it. Its `revision` is the revision the file was **found** at. That row is
-what makes the note fire once rather than on every subsequent write: after it, the newest
-event's revision is the file's revision again and the invariant holds.
+and cannot undo it. Its `revision` is the revision the file was **found** at, and its
+`parent` the last revision the log recorded: it is the history's **seam**, from one to
+the other. That row is what makes the note fire once rather than on every subsequent
+write: after it, the newest event's revision is the file's revision again and the
+invariant holds.
+
+The seam carries **no diff**. The log stores revisions — content hashes — and the
+operations between them, not documents, so once something else has rewritten the file,
+the state the last row produced is nowhere to compare with. A snapshot of that state is a
+later piece of the shared-history design. An app's save records more: a
+``DocumentSession`` that merges the outside change in (``SessionOrigin/file(_:author:)``)
+logs the merge's operations as the `forward` of its `merge` row (*Saves from an app*).
+
+In a bundle's shared history the question is asked of every writer: the log explains the
+file when **any** writer's newest row produced its revision, whatever the devices' clocks
+say about which row is newest (``LogLineage/read(_:at:from:)``). another editor saving the
+bundle's `document.pen`, a hand edit, or a Git merge that combined two branches'
+documents leaves a revision no writer produced, and the next writer to append — on any
+device — records the seam in its own file.
 
 A file with **no** history is not a divergence — a fresh checkout or an exported design
 makes no claim either way — so the first write to a file is never noted.
@@ -315,6 +402,16 @@ counts against `-n`. That is what lets the two units compose: after an `--event`
 taken the last row of a command, a plain `undo` finishes the rest of that command as one
 step. ``ActivityUndo`` is the walk, and ``UndoStep`` the rule it makes each decision with.
 
+### Undo with several writers
+
+Undo reads the merged history, newest row first, exactly as it reads one file, and keeps
+its rule (``UndoStep``): `woodcase undo --as ana` reverses ana's newest command and stops
+at a newer row by anyone else (`blockedByOther`) unless `--all` is given. So with several
+writers, a person's undo reaches their own last edit only while nobody has edited after
+it — the same as two identities sharing one log today. Whether a fresh session's undo
+should reach past others' rows to one's own is an open question in the shared-history
+design.
+
 ## Two processes, no torn lines
 
 An append takes an exclusive `flock(2)` on the log file — the same lock a transaction
@@ -341,6 +438,14 @@ page = try reader.read(from: page.nextOffset, file: url)
 Both calls read the live `activity.jsonl` only, never the archives rotation moved aside:
 on a long history they see its newest part. ``ActivityReader/read(after:file:identity:)``
 from ``ActivityCursor/start`` reads every archive and then the live file.
+
+A byte offset is a position in one file, so a bundle's history — one file per writer —
+is resumed by cursor only: ``ActivityReader/Page/cursor`` holds one position per writer
+(``ActivityCursor/writers``), its token `ben@grace=1a2b-40960,claude@grace=3c-812`, and
+``ActivityReader/Page/nextOffset`` is always zero. A writer the cursor does not name is
+read from its first row, so a writer's file that a sync or a `git pull` delivers later is
+read whole, even when its rows are older than the ones already seen; such rows arrive
+after them, in their own time order.
 
 ``ActivityReader/Page/nextOffset`` is the byte just past the last **complete** line, and
 counts lines that were filtered out as well as those returned — so a follower watching
@@ -373,7 +478,8 @@ the reader forever at the same byte.
 ## Rotation
 
 Before an append, a log at or past ``ActivityLog/rotationThreshold`` (8 MB) is renamed to
-`activity.20260829T163104Z.jsonl` beside itself and a fresh file takes its place. The
+`activity.20260829T163104Z.jsonl` beside itself and a fresh file takes its place — in a
+bundle's history, each writer's file on its own, as `ben@grace.20260829T163104Z.jsonl`. The
 rename happens under the lock, so only one process rotates a given file, and the new file
 is created immediately.
 
@@ -428,8 +534,9 @@ subtrees. A read with no identity records nothing.
  "time":"2026-10-04T16:31:04.123Z","verb":"get"}
 ```
 
-Views go to `views.jsonl` in the same directory (``ViewLog``), **never** to
-`activity.jsonl`. This log is the write history, and three things read it on the
+Views go to `views.jsonl` in the log's ``ActivityLog/stateDirectory`` (``ViewLog``) —
+beside a bare file's `activity.jsonl`, and in a bundle's local `.woodcase/`, not its
+shared `history/` — and **never** into the activity log itself. This log is the write history, and three things read it on the
 assumption that every row is a write: ``LogLineage`` takes the newest row as the file's
 last known state, the undo walk treats a foreign row as a later edit, and change
 attribution pairs rows with file changes. A view in this file would break all three.
@@ -510,7 +617,8 @@ cursor 1a2b3c-40960
 - **Others only.** The identity's own rows are left out (``ChangeFeed/Writers/others``);
   `--mine` (``ChangeFeed/Writers/everyone``) puts them back.
 - **Resumable.** Each identity's last look at each file is an ``ActivityCursor`` kept in
-  `cursors/<identity>.json` beside this log (``ActivityCursorStore``), saved under a lock
+  `cursors/<identity>.json` in the log's ``ActivityLog/stateDirectory`` — a bundle's local
+  `.woodcase/`, never its shared history (``ActivityCursorStore``) — saved under a lock
   so two processes never drop each other's entry. Each run reads after it and saves the
   new end; `--peek` reads without saving; `--since <cursor>` starts elsewhere
   (`0-0` is the whole history). A first look — no cursor yet — starts at the log's end
@@ -552,6 +660,8 @@ and stays the plain log. `changes` is the agent-facing verb.
 
 - ``ActivityRecorder``
 - ``ActivityLog``
+- ``ActivityLog/Layout``
+- ``HistoryWriter``
 - ``PenFileTransaction/save(_:changes:to:log:timeout:)``
 - ``ActivityEvent/folding(_:)``
 

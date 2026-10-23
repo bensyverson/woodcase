@@ -66,20 +66,37 @@ public enum LogLineage: Friendly {
 
     /// Reads a log and judges a file against it.
     ///
+    /// In a bundle's history, the log explains the file when **any** writer's newest row
+    /// produced its revision — that row is ``current(_:)`` — whatever the devices' clocks
+    /// say about which row is newest; otherwise the newest row of all, by time, is the
+    /// one the file ``diverged(since:found:)`` from. That is how a Git merge or a sync
+    /// that changed the document shows as a seam, while a writer whose clock runs ahead
+    /// does not make every other writer's next write look like one.
+    ///
     /// - Parameters:
     ///   - url: The .pen file in question.
     ///   - documentRevision: The revision it was parsed at.
-    ///   - log: The log to read. Only its newest line for this file is decoded.
+    ///   - log: The log to read. Only its newest line for this file — for a bundle, each
+    ///     writer's newest line — is decoded.
     /// - Returns: What the log says about those bytes.
     /// - Throws: Whatever ``ActivityReader/newest(file:)`` throws if the log exists but
     ///   cannot be read.
     public static func read(
         _ url: URL, at documentRevision: String, from log: ActivityLog
     ) throws -> LogLineage {
-        try LogLineage(
-            documentRevision: documentRevision,
-            newest: ActivityReader(log: log).newest(file: url)
-        )
+        let newest = try ActivityReader(log: log).newestPerWriter(file: url)
+        if let explaining = latest(of: newest.filter { explains($0, at: documentRevision) }) {
+            return .current(explaining)
+        }
+        return LogLineage(documentRevision: documentRevision, newest: latest(of: newest))
+    }
+
+    /// The row with the latest time; of rows with the same time, the last.
+    private static func latest(of rows: [ActivityEvent]) -> ActivityEvent? {
+        rows.reduce(nil) { latest, row in
+            guard let latest, latest.time > row.time else { return row }
+            return latest
+        }
     }
 
     /// Whether one event's revision is the file's, and so whether its inverse is exact.
@@ -148,6 +165,11 @@ public enum LogLineage: Friendly {
 
     /// The row that records the outside edit, so the note fires once and never again.
     ///
+    /// It is the history's **seam**: its ``ActivityEvent/parent`` is the last revision the
+    /// log recorded and its ``ActivityEvent/revision`` the one the file was found at. It
+    /// carries no diff between the two: the log keeps revisions, not the documents they
+    /// name, so the state before the outside change is no longer anywhere to compare with.
+    ///
     /// A transaction appends this as the first event of its own append. From then on the
     /// invariant holds again — the newest event's revision is the file's revision at the
     /// moment any woodcase write begins — and `woodcase activity` can say when the
@@ -159,13 +181,14 @@ public enum LogLineage: Friendly {
     ///   - time: When the divergence was noticed. Defaults to now.
     /// - Returns: The event to record, or `nil` when there is nothing to record.
     public func external(naming url: URL, at time: Date = Date()) -> ActivityEvent? {
-        guard case let .diverged(_, found) = self else { return nil }
+        guard case let .diverged(since, found) = self else { return nil }
         return ActivityEvent(
             time: time,
             identity: ActivityEvent.unattributed,
             file: url,
             op: .external,
-            revision: found
+            revision: found,
+            parent: since.revision
         )
     }
 

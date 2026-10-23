@@ -9,8 +9,9 @@ import Foundation
 /// its relative paths resolve against, and where its own state goes.
 ///
 /// A document is either a **bare `.pen` file** or a **`.umbra` bundle** — a directory
-/// holding `document.pen`, the `images/` and `fonts/` it uses, and a `.woodcase/` with
-/// its activity log and temporary files. Every entry point that takes a document's path
+/// holding `document.pen`, the `images/` and `fonts/` it uses, a `history/` with one
+/// shared log file per writer, and a `.woodcase/` with local, uncommitted state — views,
+/// cursors and temporary files. Every entry point that takes a document's path
 /// resolves it here — every CLI verb, ``PenParser/parse(contentsOf:diagnostics:)``,
 /// ``PenFileTransaction``, ``ActivityLogLocation``, ``FileWatcher`` — so a bundle works
 /// wherever a `.pen` does, and there is one rule rather than one per call site.
@@ -19,6 +20,7 @@ import Foundation
 /// let location = PenLocation(URL(fileURLWithPath: "Design.umbra"))
 /// location.document            // Design.umbra/document.pen
 /// location.resourceDirectory   // Design.umbra — "./images/hero.png" resolves here
+/// location.historyDirectory    // Design.umbra/history
 /// location.stateDirectory      // Design.umbra/.woodcase
 /// ```
 ///
@@ -110,10 +112,18 @@ public struct PenLocation: Friendly {
         url.deletingPathExtension().lastPathComponent
     }
 
-    /// The bundle's own `.woodcase/` — its activity log and temporary files — or `nil`
-    /// for a bare file, whose log ``ActivityLogLocation`` places by the project.
+    /// The bundle's own `.woodcase/` — local state that is never committed: views,
+    /// cursors and temporary files — or `nil` for a bare file, whose log
+    /// ``ActivityLogLocation`` places by the project.
     public var stateDirectory: URL? {
         bundle?.appendingPathComponent(ActivityLog.directoryName, isDirectory: true)
+    }
+
+    /// The bundle's shared history, `history/`: one append-only file per writer, meant
+    /// to be committed and synced with the document — or `nil` for a bare file. See
+    /// <doc:WoodcaseActivityLog>.
+    public var historyDirectory: URL? {
+        bundle?.appendingPathComponent(ActivityLog.historyDirectoryName, isDirectory: true)
     }
 
     /// Where a write stages its temporary file before renaming it over ``document``:

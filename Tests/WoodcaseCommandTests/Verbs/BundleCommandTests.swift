@@ -10,7 +10,8 @@ import Woodcase
 @testable import WoodcaseCommandCore
 
 /// Every verb takes a `.umbra` bundle where it takes a `.pen`, and a bundle's history
-/// lands in its own `.woodcase/` — `$WOODCASE_HOME` notwithstanding.
+/// lands in its own `history/` — `$WOODCASE_HOME` notwithstanding (moved from
+/// `.woodcase/activity.jsonl` on 2026-10-23, leaf KAJTF3).
 @Suite("woodcase on bundles")
 struct BundleCommandTests {
     /// A subtree `add` can grow a design with.
@@ -28,7 +29,7 @@ struct BundleCommandTests {
     }
 
     private func bundleRows(_ bundle: URL) throws -> [ActivityEvent] {
-        try ActivityReader(log: ActivityLog(home: bundle.appendingPathComponent(".woodcase"))).read().events
+        try ActivityReader(log: ActivityLogLocation.log(for: bundle, environment: [:])).read().events
     }
 
     @Test("new X.umbra creates a bundle holding document.pen, and logs `new` inside it")
@@ -45,7 +46,7 @@ struct BundleCommandTests {
         #expect(!FileManager.default.fileExists(atPath: fixture.activityLog.path))
     }
 
-    @Test("read and write verbs work on a bundle, and every row lands in its .woodcase")
+    @Test("read and write verbs work on a bundle, and every row lands in its history")
     func verbsWorkOnABundle() throws {
         let fixture = try CommandFixture(fixture: "batch.pen")
         let bundle = try makeBundle(fixture)
@@ -79,7 +80,7 @@ struct BundleCommandTests {
         #expect(ops.contains(.var))
         #expect(!FileManager.default.fileExists(atPath: fixture.activityLog.path))
         let root = try FileManager.default.contentsOfDirectory(atPath: bundle.path).sorted()
-        #expect(root == [".woodcase", "document.pen"])
+        #expect(root == [".gitignore", ".woodcase", "document.pen", "history"])
     }
 
     @Test("the document.pen inside a bundle is the same document, with the same log")
@@ -105,7 +106,7 @@ struct BundleCommandTests {
         #expect(run.status == 0, "\(run.stderr)")
         let beside = try FileManager.default.contentsOfDirectory(atPath: fixture.root.path)
         #expect(beside.contains { $0.hasPrefix("Design") && $0.hasSuffix(".png") })
-        #expect(try FileManager.default.contentsOfDirectory(atPath: bundle.path).sorted() == [".woodcase", "document.pen"])
+        #expect(try FileManager.default.contentsOfDirectory(atPath: bundle.path).sorted() == [".gitignore", ".woodcase", "document.pen", "history"])
     }
 
     @Test("a bundle with no document.pen is refused, naming what is missing")

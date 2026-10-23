@@ -12,8 +12,13 @@ Design.umbra/                    a directory; a package on macOS (one icon in Fi
 ├── images/                      image fills: "./images/5280ed5c223e2c4a.png"
 ├── fonts/                       declared fonts: "./fonts/Inter[wght].ttf"
 ├── converted-from.json          only in a bundle made from a bare .pen
-└── .woodcase/
-    ├── activity.jsonl           this document's activity log
+├── history/                     the shared history: one log per writer, committed
+│   ├── ben@grace.jsonl
+│   └── claude@grace.jsonl
+├── .gitignore                   ".woodcase/" — keeps the local state below out of Git
+└── .woodcase/                   local state, never committed
+    ├── views.jsonl              who read what, on this machine
+    ├── cursors/                 the change feed's last looks
     └── (temporary files)
 ```
 
@@ -35,7 +40,8 @@ a document whose images and fonts are all in place.
 let location = PenLocation(URL(fileURLWithPath: "Design.umbra"))
 location.document            // Design.umbra/document.pen — read and written
 location.resourceDirectory   // Design.umbra — relative paths resolve here
-location.stateDirectory      // Design.umbra/.woodcase — log and temporary files
+location.historyDirectory    // Design.umbra/history — the shared history
+location.stateDirectory      // Design.umbra/.woodcase — local state and temporary files
 location.containingDirectory // the folder holding Design.umbra — renders go here
 ```
 
@@ -57,21 +63,32 @@ that bundle's document), and every CLI verb. So `woodcase tree Design.umbra`,
   `document.pen` — so a bundle and a bare file are locked the same way.
 - **Creating** a bundle — `PenFileTransaction.create(at: "Design.umbra", …)`, which is
   `woodcase new Design.umbra` — makes the directory and its `document.pen`, and records
-  `new` in the bundle's own log.
+  `new` in the bundle's own history.
 
-## The log lives in the bundle
+## The history lives in the bundle
 
-A bundle's activity log is `Design.umbra/.woodcase/activity.jsonl`
-(``ActivityLog/Origin/bundle(root:repository:)``), wherever the bundle sits — in a
-repository or not — and whatever `$WOODCASE_HOME` says: the history is part of the
-document. A bundle inside a repository still adds `.woodcase/` to that repository's
-`.gitignore` on its first write, so the log stays out of Git, as every log does.
+A bundle's history is `Design.umbra/history/`: one append-only file per writer —
+`ben@grace.jsonl`, `claude@grace.jsonl` — where a writer (``HistoryWriter``) is an
+identity on one device (``ActivityLog/Layout/perWriter``). It is there wherever the
+bundle sits — in a repository or not — and whatever `$WOODCASE_HOME` says: the history is
+part of the document, and **meant to be shared**. Commit it with the document, and sync it
+through Dropbox or iCloud; each writer appends only to its own file, so neither a Git
+merge nor a sync service ever sees two writers' lines in one file. Every reader —
+`woodcase activity`, `undo`, `changes`, `serve`, ``PenFileFollower`` — merges the files by
+time. The bundle never adds anything to the repository's `.gitignore`; its own
+`.gitignore`, inside it, keeps its `.woodcase/` — views, cursors, temporary files — out of
+Git.
 
-Every row in a bundle's log is about its one document, so a reader asking about that
-document takes every row, whatever path it was written under
-(``ActivityLog/Origin/holdsOneDocument``). Rename or move the bundle and its history,
-`woodcase undo` and `woodcase activity` all carry on. Rows name a bundle by its
-`document.pen`.
+Every row in a bundle's history is about its one document, so rows carry no path: a
+reader names the document as it is now. Rename or move the bundle and its history,
+`woodcase undo` and `woodcase activity` all carry on. A change the history cannot account
+for — another editor saving `document.pen`, a hand edit, a Git merge of two branches' documents —
+shows as a seam: the next writer records an `external` row from the last recorded
+revision to the one it found. The details, and the wire format, are in
+<doc:WoodcaseActivityLog>.
+
+Because the history is shared, editing a bundle's `document.pen` by hand is discouraged
+(Ben, 2026-10-23): it works, and leaves a seam rather than a record.
 
 ## Converting
 
@@ -80,7 +97,8 @@ document takes every row, whatever path it was written under
   `images/` and `fonts/` and its reference rewritten. A file already under the folder's
   `images/` or `fonts/` keeps its relative path; any other is copied in under its own
   name, numbered when two share one. The original is removed (Git sees a rename), the
-  bundle's log starts with a `new` row, and the original's history stays in its old log.
+  bundle's history starts with a `new` row, and the original's history stays in its old
+  log.
 - An app's Convert… — ``PenBundle/convert(_:to:identity:)`` — makes the same bundle
   wherever the user chose in a save panel and **keeps the original**. The original is
   only read, under a shared lock, and `converted-from.json` names it relative to the
@@ -219,6 +237,7 @@ not in the bundle.
 ### Locations
 
 - ``PenLocation``
+- ``HistoryWriter``
 
 ### Adding files
 

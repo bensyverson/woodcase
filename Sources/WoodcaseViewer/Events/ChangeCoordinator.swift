@@ -100,9 +100,10 @@ public actor ChangeCoordinator {
         // everything at startup and tell the page a dozen lies about what just happened.
         let interval = pollInterval
         logTasks = context.readers.map { reader in
-            let offset = (try? reader.read().nextOffset) ?? 0
+            // A cursor, not a byte offset: a bundle's history is one file per writer.
+            let end = (try? reader.read().cursor) ?? .start
             return Task { [weak self] in
-                for await event in reader.follow(from: offset, pollInterval: interval) {
+                for await event in reader.follow(after: end, pollInterval: interval) {
                     await self?.logged(event)
                 }
             }

@@ -89,7 +89,7 @@ public extension PenFileTransaction {
         try await activity.append([ActivityEvent(
             time: Date(), identity: identity ?? ActivityEvent.unattributed, file: url,
             op: .new, revision: revision, batch: UUID().uuidString
-        )])
+        )], as: identity ?? ActivityEvent.unattributed)
         return Outcome(value: revision, commit: .wrote, url: url)
     }
 

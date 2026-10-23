@@ -43,8 +43,9 @@ swift run woodcase render myfile.pen
 
 Every verb takes the document as its first argument: a `.umbra` **bundle** or a bare
 `.pen` file. A bundle is a directory holding `document.pen` with its `images/`, `fonts/`
-and its own activity log in `.woodcase/`; every verb reads, writes and resolves relative
-paths inside it, and its log is the bundle's whatever `$WOODCASE_HOME` says. **Prefer
+and its own shared history in `history/`, one file per writer; every verb reads, writes
+and resolves relative paths inside it, and its history is the bundle's whatever
+`$WOODCASE_HOME` says. **Prefer
 bundles** for new work — `woodcase new design.umbra` — so a document's images, fonts and
 history travel together; see <doc:PenBundles>. Naming a bare `.pen` that a bundle beside
 it was converted from prints a warning to edit the bundle instead.
@@ -180,10 +181,13 @@ can show what an agent looked at. A read with neither `--as` nor `$WOODCASE_AS` 
 nothing, and a views file that cannot be written never fails the read. See
 <doc:WoodcaseActivityLog>.
 
-The log is the project's, not the machine's: `.woodcase/activity.jsonl` at the nearest
-`.git` above the .pen file, or beside the file when there is no repository. The write
-that creates it adds `.woodcase/` to that repository's `.gitignore`. `$WOODCASE_HOME`
-overrides the whole thing with a single log — see <doc:WoodcaseActivityLog>.
+A bundle's history is its own and shared: `history/<identity>@<device>.jsonl`, one file
+per writer, committed with the document and merged by time when read; the device is this
+Mac's computer name, or `$WOODCASE_DEVICE`. A bare file's log is the project's, not the
+machine's: `.woodcase/activity.jsonl` at the nearest `.git` above the .pen file, or beside
+the file when there is no repository. The write that creates it adds `.woodcase/` to that
+repository's `.gitignore`; a bundle never does. `$WOODCASE_HOME` overrides a bare file's
+log with a single one — see <doc:WoodcaseActivityLog>.
 
 A write that finds the file changed since the log's newest entry leads its answer with
 one note on stdout — `note  <file> was rewritten outside woodcase since rev …` — records
@@ -603,7 +607,7 @@ woodcase changes design.pen --as claude --wait 300
 | `--json` | `false` | `{file, identity, revision, since, cursor, origin, restarted, unlogged, changes}` |
 
 Your last look is kept per identity and file in `.woodcase/cursors/<identity>.json`
-beside the activity log, and every run but a `--peek` moves it to the end, so nothing is
+beside a bare file's log, or in a bundle's local `.woodcase/`, and every run but a `--peek` moves it to the end, so nothing is
 listed twice. The first run lists nothing and says so — the feed starts then. A file
 changed outside woodcase prints `note  … changed outside woodcase since rev … — re-read
 it`, because the log has no record of what changed; that also ends a `--wait`. A

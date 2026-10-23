@@ -28,7 +28,7 @@ struct ChangesCommand: AsyncParsableCommand {
           cursor 1a2b3c-40960
 
         Your last look is kept per identity and file in .woodcase/cursors/ beside the \
-        activity log, and each run moves it to the end, so the next run lists only \
+        activity log (a bundle's own .woodcase/), and each run moves it to the end, so the next run lists only \
         what is new. The first run lists nothing and says so: the feed starts then. \
         --peek reads without moving it; --since <cursor> starts from a cursor you kept \
         (0-0 is the whole history). --mine includes your own edits.

@@ -39,12 +39,15 @@ public extension ActivityEvent {
 
     /// The field names of the wire format. Changing one is a format change.
     internal enum CodingKeys: String, CodingKey {
-        case time, identity, file, op, nodes, paths, inverse, forward, revision, batch
+        case time, identity, file, op, nodes, paths, inverse, forward, revision, batch, parent
     }
 
     /// Decodes an event from one line's JSON.
     ///
     /// - Parameter decoder: The decoder to read from.
+    /// A line without `file` — a bundle's history stores none — decodes with an empty
+    /// ``file``, which the reader fills in.
+    ///
     /// - Throws: `DecodingError` if a required field is missing, or if ``time`` is not
     ///   an ISO-8601 timestamp.
     init(from decoder: Decoder) throws {
@@ -60,7 +63,7 @@ public extension ActivityEvent {
             )
         }
         identity = try container.decode(String.self, forKey: .identity)
-        file = try container.decode(String.self, forKey: .file)
+        file = try container.decodeIfPresent(String.self, forKey: .file) ?? ""
         op = try container.decode(Kind.self, forKey: .op)
         nodes = try container.decodeIfPresent([String].self, forKey: .nodes) ?? []
         paths = try container.decodeIfPresent([String].self, forKey: .paths) ?? []
@@ -68,9 +71,13 @@ public extension ActivityEvent {
         forward = try container.decodeIfPresent([EditOperation].self, forKey: .forward) ?? []
         revision = try container.decode(String.self, forKey: .revision)
         batch = try container.decodeIfPresent(String.self, forKey: .batch)
+        parent = try container.decodeIfPresent(String.self, forKey: .parent)
     }
 
     /// Encodes the event as one line's JSON.
+    ///
+    /// An empty ``file`` is left off the line, as a bundle's history writes it, and so is
+    /// a `nil` ``parent``.
     ///
     /// - Parameter encoder: The encoder to write to.
     /// - Throws: Anything the encoder throws.
@@ -78,7 +85,7 @@ public extension ActivityEvent {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(Self.wireTime(time), forKey: .time)
         try container.encode(identity, forKey: .identity)
-        try container.encode(file, forKey: .file)
+        if !file.isEmpty { try container.encode(file, forKey: .file) }
         try container.encode(op, forKey: .op)
         try container.encode(nodes, forKey: .nodes)
         try container.encode(paths, forKey: .paths)
@@ -86,6 +93,7 @@ public extension ActivityEvent {
         if !forward.isEmpty { try container.encode(forward, forKey: .forward) }
         try container.encode(revision, forKey: .revision)
         try container.encodeIfPresent(batch, forKey: .batch)
+        try container.encodeIfPresent(parent, forKey: .parent)
     }
 
     // MARK: - Lines

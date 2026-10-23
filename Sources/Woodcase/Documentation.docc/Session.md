@@ -137,7 +137,9 @@ An app saves through ``PenFileTransaction/save(_:changes:to:log:timeout:)``, whi
 writes a ``DocumentSnapshot`` under the file's lock in the CLI's bytes and logs the
 changes' rows under the session's author (see <doc:WoodcaseActivityLog>). The file may
 be a bare `.pen` or a `.umbra` bundle — the save writes the bundle's `document.pen` and
-logs in the bundle's own `.woodcase/` (<doc:PenBundles>); prefer a bundle. The save
+appends to the author's own file in the bundle's shared `history/`, `<author>@<device>.jsonl`
+(<doc:PenBundles>); prefer a bundle. The device is the log's ``ActivityLog/device`` —
+this Mac's computer name unless the app names one. The save
 touches only values, so it runs off the main actor. Around it, the app keeps this
 contract:
 
