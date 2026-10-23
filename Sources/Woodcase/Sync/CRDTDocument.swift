@@ -203,13 +203,30 @@ public final class CRDTDocument {
     /// Applies a remote ``CRDTOperation`` and returns mutations for the flat store.
     ///
     /// Returns `nil` if the operation is a no-op (e.g. editing a tombstoned node,
-    /// or a tree move that would create a cycle).
+    /// or a tree move that would create a cycle), or if ``validateRemote(_:)`` refuses
+    /// it — then nothing is logged or witnessed. Call ``validateRemote(_:)`` first to
+    /// learn why.
     ///
     /// - Parameters:
     ///   - operation: The remote CRDT operation.
     ///   - document: The current flat store.
     /// - Returns: Mutations to apply, or `nil` if the operation was rejected.
     public func processRemote(operation: CRDTOperation, document: EditableDocument) -> [DocumentMutation]? {
+        (try? processValidatedRemote(operation: operation, document: document)) ?? nil
+    }
+
+    /// ``processRemote(operation:document:)``, throwing the boundary's refusal rather
+    /// than folding it into `nil`.
+    ///
+    /// - Parameters:
+    ///   - operation: The remote CRDT operation.
+    ///   - document: The current flat store.
+    /// - Returns: Mutations to apply, or `nil` if the CRDT rejected the operation.
+    /// - Throws: The ``RemoteInputError`` from ``validateRemote(_:)``.
+    func processValidatedRemote(
+        operation: CRDTOperation, document: EditableDocument
+    ) throws(RemoteInputError) -> [DocumentMutation]? {
+        try validateRemote(operation)
         operationLog.appendRemote(operation)
 
         switch operation.payload {

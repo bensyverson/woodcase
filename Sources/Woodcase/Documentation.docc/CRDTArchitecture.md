@@ -165,6 +165,43 @@ minimal:
 - **Catch-up:** Call `pendingOperations(since:)` on ``EditableDocument`` with a peer's
   vector clock to get the operations they haven't seen.
 
+### Remote Input Is Untrusted
+
+A peer can send any value a field's type allows — through a bug or on purpose — and a
+relay replays what it stored to every peer that rejoins, so an operation that crashed one
+replica would crash them all, again on every reconnect. Nothing a peer sends may trap or
+hang a replica (the multiplayer relay's security review, H5; leaf Ol1s6D).
+
+The clocks are the one place remote values meet arithmetic: witnessing a time sets the
+Lamport clock to `max(local, remote) + 1`, which traps on `UInt64.max`, and a merged
+vector clock entry for this replica is the base its next local operation increments. So
+``CRDTDocument/validateRemote(_:)`` refuses an operation whose own time or any dependency
+entry ``LamportClock/admits(_:after:)`` rejects: past ``LamportClock/ceiling``
+(2⁵³ − 1, the multiplayer relay's `MaxTime` and the largest integer JSON carries exactly),
+or more than ``LamportClock/maximumLead`` (2³²) ahead of the local clock. The relay's own
+jump bound is far tighter (10⁶ past the room's high-water time); the replica's is loose
+because it judges against its own clock, which may lag the room's while it catches up,
+and it must never refuse an operation the relay accepted from an honest peer. It is a
+backstop for running without a relay, not a second policy.
+
+A refused operation is not logged, witnessed or applied: the document, the clocks and
+the log stay exactly as they were. The refusal is a ``RemoteInputError`` the app reports —
+on ``CommittedChange/rejected`` for a ``DocumentSession`` (the rest of the batch still
+lands), or returned by `applyRemote(_:)` on a bare ``EditableDocument``. A snapshot is
+checked the same way by ``CRDTSnapshot/validate()`` before a replica adopts it: its clock
+and vector clock must be under the ceiling, and its tree must hold no parent cycle, which
+the next move's cycle check would walk forever.
+
+Everything else a peer sends is safe as given: an unknown id, list or position is a
+no-op; a property path or value the codec does not accept leaves the property as it was
+(see ``CRDTDocument``'s property codec); a create whose parent the tree refuses — the node
+itself or its descendant — places the node at the root rather than closing a parent cycle
+in the flat store. Nesting depth is bounded where an operation is decoded: Foundation's
+`JSONDecoder` refuses a document nested deeper than 512 levels with an error.
+`RemoteOperationFuzzTests` throws hostile operations — extreme times and dependency
+entries, junk ids and paths, extreme and deeply nested values, self-parented creates — at
+a replica and holds it to that.
+
 ### Snapshots and State Transfer
 
 A ``CRDTSnapshot`` captures the complete CRDT state as a `Sendable` value type.
@@ -183,14 +220,15 @@ let data = try JSONEncoder().encode(snapshot)
 
 // Receiver: join from snapshot + current document
 let snapshot = try JSONDecoder().decode(CRDTSnapshot.self, from: data)
-let editable = EditableDocument(from: currentPenDoc, snapshot: snapshot, peerID: myPeerID)
+let editable = try EditableDocument(from: currentPenDoc, snapshot: snapshot, peerID: myPeerID)
 
 // Replay any offline operations the new peer had queued
 editable.replayOfflineOperations(offlineOps)
 ```
 
-The snapshot's Lamport clock is automatically advanced during initialization so
-the new peer's timestamps don't collide with those in the snapshot.
+The snapshot is validated first (``CRDTSnapshot/validate()``), and its Lamport clock is
+then advanced during initialization so the new peer's timestamps don't collide with those
+in the snapshot.
 
 ### Checkpoints and Log Truncation
 
@@ -251,6 +289,7 @@ each other after every batch of random concurrent edits.
 - ``OperationLog``
 - ``DocumentMutation``
 - ``PropertyDiff``
+- ``RemoteInputError``
 
 ### State Transfer
 

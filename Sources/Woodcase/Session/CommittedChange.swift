@@ -29,6 +29,7 @@ public struct CommittedChange: Friendly {
     ///   - kept: Other authors' work an undo left in place.
     ///   - conflicts: What a file merge resolved by keeping the local side.
     ///   - undoEffect: What the change did to the author's undo and redo stacks.
+    ///   - rejected: The remote operations refused at the boundary.
     public init(
         origin: SessionOrigin.Kind,
         author: Author,
@@ -42,7 +43,8 @@ public struct CommittedChange: Friendly {
         isDirtying: Bool,
         kept: [KeptChange] = [],
         conflicts: [MergeConflict] = [],
-        undoEffect: UndoEffect = []
+        undoEffect: UndoEffect = [],
+        rejected: [RemoteInputError] = []
     ) {
         self.origin = origin
         self.author = author
@@ -57,6 +59,7 @@ public struct CommittedChange: Friendly {
         self.kept = kept
         self.conflicts = conflicts
         self.undoEffect = undoEffect
+        self.rejected = rejected
     }
 
     /// Where the change came from.
@@ -106,4 +109,10 @@ public struct CommittedChange: Friendly {
     /// joined, an entry consumed and its reversal filed, redo cleared — for an app that
     /// mirrors them into its own undo manager. Empty for a change that left both alone.
     public var undoEffect: UndoEffect
+
+    /// The remote operations refused at the boundary, each with why — out-of-range clock
+    /// values a buggy or hostile peer sent (``CRDTDocument/validateRemote(_:)``). Nothing
+    /// of them was applied. An app reports these and may stop trusting the sender. Empty
+    /// for every origin but remote.
+    public var rejected: [RemoteInputError]
 }

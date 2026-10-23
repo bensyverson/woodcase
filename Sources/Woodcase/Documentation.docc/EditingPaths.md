@@ -87,6 +87,26 @@ retracted for classification (geometry still draws it as a curve). Pass a looser
 tolerance with ``PenPathAnchor/kind(tolerance:)``. A pen-tool drag pulls mirrored handles:
 ``PenPathAnchor/init(point:mirroringOutHandle:)``.
 
+### Adding an anchor on a segment
+
+Segments are numbered from their start anchor: segment `i` joins anchor `i` to anchor
+`i + 1`, and a closed contour's last segment, `anchors.count - 1`, is the closing one back
+to anchor 0. ``PenPathContour/nearestPoint(to:)`` finds where a pointer is nearest the
+drawn path — exactly by projection on a straight segment, by sampling and Newton's method
+on a cubic (good to about 10⁻⁶ of a point) — as a ``PenPathContour/NearestPoint``: the
+segment, the curve parameter `t`, the point and its distance.
+``PenPathContour/insertingAnchor(inSegment:at:)`` then splits that segment there without
+changing the drawn shape: on a cubic by de Casteljau's construction, shortening the
+neighbors' facing handles and giving the new anchor smooth handles; on a straight
+segment, a corner at the straight-line point.
+
+```swift
+if let hit = contour.nearestPoint(to: pointer), hit.distance <= hitRadius {
+    let (split, index) = contour.insertingAnchor(inSegment: hit.segment, at: hit.t)
+    // `split.anchors[index]` is the new anchor.
+}
+```
+
 ## Placing a path node
 
 ``PenPathFrame/init(contours:precision:)`` takes anchors in the node's parent space and
@@ -146,6 +166,7 @@ let anchors = PenPathFrame(x: x, y: y, width: w, height: h, viewBox: viewBox, ge
 ### Anchors
 
 - ``PenPathContour``
+- ``PenPathContour/NearestPoint``
 - ``PenPathAnchor``
 
 ### Placing a node

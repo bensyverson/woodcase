@@ -41,6 +41,9 @@ extension DocumentSession {
     /// - Parameters:
     ///   - operations: The operations, in the order they arrived.
     ///   - sender: The collaborator who sent them, who joins the peer registry.
+    /// An operation the boundary refuses (``CRDTDocument/validateRemote(_:)``) is skipped
+    /// and reported on ``CommittedChange/rejected``; the rest of the batch still lands.
+    ///
     /// - Returns: The committed change; with nothing accepted, an empty change that keeps
     ///   the current sequence.
     /// - Throws: ``SessionError/notCollaborative`` when the session keeps no CRDT.
@@ -51,9 +54,16 @@ extension DocumentSession {
         var probe = ChangeInvalidation.RemoteProbe(document)
         var mutations: [DocumentMutation] = []
         var writes: [(keys: [ChangeKey], author: Author)] = []
+        var rejected: [RemoteInputError] = []
         for operation in operations {
             let keys = ChangeKey.keys(ofRemote: operation, in: document)
-            let applied = document.applyRemoteMutations(operation, journal: &probe.journal)
+            let applied: [DocumentMutation]
+            do {
+                applied = try document.applyRemoteMutations(operation, journal: &probe.journal)
+            } catch {
+                rejected.append(error)
+                continue
+            }
             guard !applied.isEmpty else { continue }
             mutations += applied
             writes.append((keys, author(of: operation.id.peerID)))
@@ -67,7 +77,8 @@ extension DocumentSession {
                 sequence: sequence,
                 documentRevision: document.documentRevision,
                 isUndoable: false,
-                isDirtying: false
+                isDirtying: false,
+                rejected: rejected
             )
         }
         document.reconcileChildrenWithParents(after: &probe.journal)
@@ -84,7 +95,8 @@ extension DocumentSession {
             sequence: sequence,
             documentRevision: document.documentRevision,
             isUndoable: false,
-            isDirtying: false
+            isDirtying: false,
+            rejected: rejected
         )
     }
 

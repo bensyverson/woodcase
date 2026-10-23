@@ -111,7 +111,7 @@ struct RemoteReconcileFuzzTests {
         var probe = ChangeInvalidation.RemoteProbe(document)
         var mutations: [DocumentMutation] = []
         for operation in batch {
-            mutations += document.applyRemoteMutations(operation, journal: &probe.journal)
+            mutations += (try? document.applyRemoteMutations(operation, journal: &probe.journal)) ?? []
         }
         guard !mutations.isEmpty else { return nil }
         document.reconcileChildrenWithParents(after: &probe.journal)

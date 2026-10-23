@@ -22,6 +22,13 @@ public struct LamportClock: Friendly, Comparable {
         time = 0
     }
 
+    /// Creates a clock at a given time.
+    ///
+    /// - Parameter time: The logical time.
+    public init(time: UInt64) {
+        self.time = time
+    }
+
     /// Advances the clock by one and returns the new time.
     ///
     /// - Returns: The new logical time after incrementing.

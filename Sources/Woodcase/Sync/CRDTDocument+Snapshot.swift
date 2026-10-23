@@ -32,10 +32,15 @@ public extension CRDTDocument {
     /// timestamp collisions between the new peer's operations and those
     /// already in the snapshot.
     ///
+    /// The snapshot is checked first (``CRDTSnapshot/validate()``): one from another
+    /// peer is untrusted input.
+    ///
     /// - Parameters:
     ///   - snapshot: The state to initialize from.
     ///   - peerID: The new peer's unique identifier.
-    convenience init(from snapshot: CRDTSnapshot, peerID: PeerID) {
+    /// - Throws: The ``RemoteInputError`` that refused the snapshot.
+    convenience init(from snapshot: CRDTSnapshot, peerID: PeerID) throws(RemoteInputError) {
+        try snapshot.validate()
         self.init(peerID: peerID, bootstrapOperationLog: snapshot.operationLog)
 
         propertyMaps = snapshot.propertyMaps

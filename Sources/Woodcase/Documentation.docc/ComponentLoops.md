@@ -68,6 +68,29 @@ returns to a state the document held, so it runs with the guard off, and undoing
 fix puts the loop back. A merge's operations run the same way (<doc:MergingDocuments>):
 the merge checks its result as a whole.
 
+## Asking before the edit
+
+An editor refuses a drop that would close a loop at the drag — the container never
+highlights, the cursor shows not-allowed — and runs the same check before a paste, an
+insert or a swap commits. It asks the document, per hover, without making the edit:
+
+- ``EditableDocument/componentLoop(placingInstanceOf:under:)`` — a new instance of a
+  component under a node;
+- ``EditableDocument/componentLoop(swapping:to:)`` — an instance pointed at another
+  component, its overrides kept;
+- ``EditableDocument/componentLoop(moving:under:)`` — a node and its subtree moved, as a
+  Layers drag or a canvas reparent does;
+- ``EditableDocument/componentLoop(inserting:under:)`` — a pasted or duplicated subtree.
+
+Each describes its edit as an ``EditOperation`` and asks the write guard's own question
+of it, so the answer is the one ``EditableDocument/apply(_:)`` would give: `nil` when the
+edit closes no new loop, or the ``ComponentLoop`` it would close, starting from the
+component written into, as ``EditRefusal/Detail/componentLoop(_:)`` names it. Nothing is
+copied — the guard reads an overlay — so a query costs a walk of the moved subtree, and,
+when the edit places an instance or a component, a walk up to the components holding the
+target and a search of the component graph from what it newly renders. The graph's
+existing loops are memoized with the expansion cache, rebuilt once after an edit.
+
 ## Merges
 
 A three-way merge whose two sides together would close a loop keeps the local side and
@@ -86,6 +109,10 @@ A component in a loop has the revision of its group, defined once and memoized �
 
 - ``ComponentLoop``
 - ``EditableDocument/componentLoops``
+- ``EditableDocument/componentLoop(placingInstanceOf:under:)``
+- ``EditableDocument/componentLoop(swapping:to:)``
+- ``EditableDocument/componentLoop(moving:under:)``
+- ``EditableDocument/componentLoop(inserting:under:)``
 - ``EditableDocument/recordComponentLoopsOnRead()``
 - ``PenReadContext/componentLoops``
 

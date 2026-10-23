@@ -196,30 +196,54 @@ public extension EditableDocument {
     /// (``reconcileChildrenWithParents(after:)``) to handle cases where list CRDTs and
     /// the tree move CRDT disagree.
     ///
+    /// An operation out of range for this replica (``CRDTDocument/validateRemote(_:)``)
+    /// is refused before the CRDT records it, and the refusal is returned for the caller
+    /// to report.
+    ///
     /// - Parameter operation: The remote CRDT operation from another peer.
-    func applyRemote(_ operation: CRDTOperation) {
-        guard crdtDocument != nil else { return }
+    /// - Returns: Why the operation was refused at the boundary, or `nil` when it was
+    ///   taken (which includes the CRDT's own no-ops, such as a stale write).
+    @discardableResult
+    func applyRemote(_ operation: CRDTOperation) -> RemoteInputError? {
+        guard crdtDocument != nil else { return nil }
         var journal = FlatStoreJournal()
-        guard !applyRemoteMutations(operation, journal: &journal).isEmpty else { return }
+        let applied: [DocumentMutation]
+        do {
+            applied = try applyRemoteMutations(operation, journal: &journal)
+        } catch {
+            return error
+        }
+        guard !applied.isEmpty else { return nil }
         reconcileChildrenWithParents(after: &journal)
         onRemoteChange?()
+        return nil
     }
 
     /// Applies a batch of remote CRDT operations.
     ///
     /// Each operation is processed individually through the CRDT conflict resolution
-    /// pipeline. Operations that are rejected are silently skipped. A final
-    /// reconciliation of what the batch placed ensures structural consistency.
+    /// pipeline. Operations the CRDT rejects (a stale write, a cycle-creating move) are
+    /// skipped; operations refused at the boundary (``CRDTDocument/validateRemote(_:)``)
+    /// are skipped and returned. A final reconciliation of what the batch placed ensures
+    /// structural consistency.
     ///
     /// - Parameter operations: The remote CRDT operations to apply.
-    func applyRemote(_ operations: [CRDTOperation]) {
-        guard crdtDocument != nil else { return }
+    /// - Returns: The refusals, in the order of the operations they refused.
+    @discardableResult
+    func applyRemote(_ operations: [CRDTOperation]) -> [RemoteInputError] {
+        guard crdtDocument != nil else { return [] }
         var journal = FlatStoreJournal()
+        var refused: [RemoteInputError] = []
         for operation in operations {
-            applyRemoteMutations(operation, journal: &journal)
+            do {
+                try applyRemoteMutations(operation, journal: &journal)
+            } catch {
+                refused.append(error)
+            }
         }
         reconcileChildrenWithParents(after: &journal)
         onRemoteChange?()
+        return refused
     }
 
     /// Runs one remote operation through the CRDT and writes what it accepted into the
@@ -233,12 +257,13 @@ public extension EditableDocument {
     ///
     /// - Parameter operation: The remote CRDT operation.
     /// - Returns: The mutations written, in order; empty when the CRDT rejected the
-    ///   operation (a stale write, a cycle-creating move) or the document is not
+    ///   operation (a stale write, a cycle-creating move), when the boundary refused it
+    ///   (``CRDTDocument/validateRemote(_:)``), or when the document is not
     ///   collaborative.
     @discardableResult
     func applyRemoteMutations(_ operation: CRDTOperation) -> [DocumentMutation] {
         var journal = FlatStoreJournal()
-        return applyRemoteMutations(operation, journal: &journal)
+        return (try? applyRemoteMutations(operation, journal: &journal)) ?? []
     }
 
     /// Returns CRDT operations not yet seen by the given vector clock.
@@ -269,10 +294,14 @@ extension EditableDocument {
     ///   - journal: The batch's journal.
     /// - Returns: The mutations written, in order; empty when the CRDT rejected the
     ///   operation or the document is not collaborative.
+    /// - Throws: The ``RemoteInputError`` that refused the operation at the boundary;
+    ///   nothing was recorded or written.
     @discardableResult
-    func applyRemoteMutations(_ operation: CRDTOperation, journal: inout FlatStoreJournal) -> [DocumentMutation] {
+    func applyRemoteMutations(
+        _ operation: CRDTOperation, journal: inout FlatStoreJournal
+    ) throws(RemoteInputError) -> [DocumentMutation] {
         guard let crdtDocument,
-              let mutations = crdtDocument.processRemote(operation: operation, document: self)
+              let mutations = try crdtDocument.processValidatedRemote(operation: operation, document: self)
         else { return [] }
         for mutation in mutations {
             journal.note(mutation, in: self)

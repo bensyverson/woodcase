@@ -121,7 +121,7 @@ extension CRDTDocument {
         // Register in tree move CRDT so all peers converge on the initial parent.
         // This uses the CRDTOperation's id, which is the same timestamp the sender
         // used when processing locally — ensuring tree CRDT state converges.
-        treeMove.applyMove(TreeMoveCRDT.MoveOp(
+        let placed = treeMove.applyMove(TreeMoveCRDT.MoveOp(
             timestamp: timestamp,
             nodeID: p.node.id,
             newParentID: p.parentID
@@ -131,8 +131,11 @@ extension CRDTDocument {
 
         // If the parent is tombstoned, create at root instead — the reconciliation
         // pass will finalize placement. This avoids cascade-tombstoning nodes that
-        // a concurrent peer created or moved, which would cause divergence.
-        if let parentID = p.parentID, !tombstones.contains(parentID) {
+        // a concurrent peer created or moved, which would cause divergence. A parent the
+        // tree refused (the node itself, or one of its descendants) is never written:
+        // a node the tree does not place keeps its flat-store parent, so writing it
+        // would close a parent cycle in the flat store.
+        if placed, let parentID = p.parentID, !tombstones.contains(parentID) {
             mutations.append(.setParent(nodeID: p.node.id, parentID: parentID))
         }
 

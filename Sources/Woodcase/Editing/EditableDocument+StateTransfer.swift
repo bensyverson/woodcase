@@ -17,9 +17,12 @@ public extension EditableDocument {
     ///   - document: The local .pen document to flatten.
     ///   - snapshot: The remote peer's CRDT state snapshot.
     ///   - peerID: This peer's unique identifier.
-    convenience init(from document: PenDocument, snapshot: CRDTSnapshot, peerID: PeerID) {
+    /// - Throws: The ``RemoteInputError`` that refused the snapshot
+    ///   (``CRDTSnapshot/validate()``).
+    convenience init(from document: PenDocument, snapshot: CRDTSnapshot, peerID: PeerID) throws(RemoteInputError) {
+        try snapshot.validate()
         self.init(from: document)
-        crdtDocument = CRDTDocument(from: snapshot, peerID: peerID)
+        crdtDocument = try CRDTDocument(from: snapshot, peerID: peerID)
     }
 
     /// Replays offline operations against the current CRDT state.
@@ -30,7 +33,10 @@ public extension EditableDocument {
     /// initialized from the remote snapshot, not from the local session).
     ///
     /// - Parameter operations: The offline operations to replay.
-    func replayOfflineOperations(_ operations: [CRDTOperation]) {
+    /// - Returns: The operations refused at the boundary, as ``applyRemote(_:)``
+    ///   returns them.
+    @discardableResult
+    func replayOfflineOperations(_ operations: [CRDTOperation]) -> [RemoteInputError] {
         applyRemote(operations)
     }
 }

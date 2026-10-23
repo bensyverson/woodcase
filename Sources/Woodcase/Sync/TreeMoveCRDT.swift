@@ -60,7 +60,7 @@ public struct TreeMoveCRDT: Friendly {
     private(set) var moveLog: [LogEntry]
 
     /// The initial parent map used when rebuilding from scratch.
-    private var initialParentMap: [String: String?]
+    private(set) var initialParentMap: [String: String?]
 
     /// Creates a tree move CRDT with an initial parent map.
     ///

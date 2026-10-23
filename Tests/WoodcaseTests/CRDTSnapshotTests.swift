@@ -98,7 +98,7 @@ struct CRDTSnapshotTests {
         let snapshot = try #require(editableA.crdtDocument?.snapshot())
 
         // Create doc B from the snapshot
-        let crdtB = CRDTDocument(from: snapshot, peerID: peerB)
+        let crdtB = try CRDTDocument(from: snapshot, peerID: peerB)
 
         // B should have the same state as A
         #expect(crdtB.propertyMaps.keys.sorted() == editableA.crdtDocument!.propertyMaps.keys.sorted())
@@ -124,7 +124,7 @@ struct CRDTSnapshotTests {
 
         // Peer B joins from A's snapshot + original .pen
         let snapshot = try #require(editableA.crdtDocument?.snapshot())
-        let editableB = EditableDocument(from: doc, snapshot: snapshot, peerID: peerB)
+        let editableB = try EditableDocument(from: doc, snapshot: snapshot, peerID: peerB)
 
         // Both apply the same subsequent edit from peer A
         let moreOpsA = try editableA.applyLocal(.updateCommon(
@@ -159,7 +159,7 @@ struct CRDTSnapshotTests {
         // Now B joins from A's snapshot + A's current materialized document
         let snapshot = try #require(editableA.crdtDocument?.snapshot())
         let currentDoc = editableA.materialize()
-        let editableB = EditableDocument(from: currentDoc, snapshot: snapshot, peerID: peerB)
+        let editableB = try EditableDocument(from: currentDoc, snapshot: snapshot, peerID: peerB)
 
         // B should already have A's edits from the materialized doc
         #expect(editableB.nodes["r1"]?.common.name == "A's Edit")
@@ -232,7 +232,7 @@ struct CRDTSnapshotTests {
         let maxSnapshotTime = snapshot.operationLog.clock.time
 
         // B inits from snapshot
-        let crdtB = CRDTDocument(from: snapshot, peerID: peerB)
+        let crdtB = try CRDTDocument(from: snapshot, peerID: peerB)
 
         // B's clock should be past the snapshot's clock
         #expect(crdtB.operationLog.clock.time > maxSnapshotTime)

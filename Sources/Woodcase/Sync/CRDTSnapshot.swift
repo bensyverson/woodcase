@@ -25,7 +25,7 @@ import Foundation
 ///
 /// // Receiver
 /// let snapshot = try JSONDecoder().decode(CRDTSnapshot.self, from: data)
-/// let doc = EditableDocument(from: penDocument, snapshot: snapshot, peerID: myPeerID)
+/// let doc = try EditableDocument(from: penDocument, snapshot: snapshot, peerID: myPeerID)
 /// ```
 public struct CRDTSnapshot: Friendly {
     /// The peer that created this snapshot.
