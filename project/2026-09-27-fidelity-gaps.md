@@ -1,5 +1,7 @@
 # 2026-09-27 — Fidelity gaps: where Woodcase draws differently from Pen
 
+> **Correction (2026-10-23, leaf zeSAV7):** two claims below were read from inside Pen.app's bundle: the shader contract quoted from `scripts-and-shaders.md` under `app.asar.unpacked`, and the Material Symbols name table (3,810 names, from `app.asar`). Ben ruled on 2026-10-14 that we never read Pen.app's bundled files, or appear to. The shader contract is also in the published `pen-schema.md` skill the CLI serves, so rely on that; the name-table count and the claim that Pen draws its `help` placeholder for `expand_more` and `expand_less` are unverified until re-rendered through the `pen` CLI.
+
 Research and plan for the "fidelity gaps" feature (agent `gaps`, worktree `wt/gaps` at `721cd59`). It inventories
 every place found where the Core Graphics renderer, the layout engine, the React emitter or the SwiftUI emitter
 draws something other than what Pen draws. Each gap has evidence, a classification and a proposed fix. The plan

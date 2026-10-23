@@ -1,5 +1,7 @@
 # 2026-09-28 — Handoff, wave thirteen: the fidelity plan closes; Woodcase's tracker is empty
 
+> **Correction (2026-10-23, leaf zeSAV7):** the advice to "read `app.asar` in place or into scratch, never into the repo" is withdrawn. Ben ruled on 2026-10-14 that we never read Pen.app's bundled files, or appear to. Do not read it at all.
+
 The thirteenth integrator session, following [wave twelve](2026-09-28-wave-twelve-handoff.md). **Woodcase has no open
 leaves**: the fidelity plan `LxFb4C` closed with `BpaSrF`, and the issue tree is empty. RapidPro and Penumbra are empty
 too. Ben's next step is a review of the SwiftUI output; start there with `job orient` (it will report `target: null`)

@@ -1,5 +1,7 @@
 # How Pen resolves a document's `imports` (2026-09-26)
 
+> **Correction (2026-10-23, leaf zeSAV7):** the aside that the desktop app "keeps the same four inside its `app.asar`" came from listing the bundle. Ben ruled on 2026-10-14 that we never read Pen.app's bundled files, or appear to. Treat it as unverified; the CLI package's `dist/out/data/` (published, and named in the same sentence) is the source for those four libraries.
+
 Author: Claude (agent `readctx`, leaves `koyac9` / `ukfIU2`), for Ben's ruling of the same
 day: every Woodcase read loads the libraries a document's own `imports` declares, as
 read context, and `--library` goes. The ruling asked for Pen's actual behavior to be

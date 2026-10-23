@@ -1,5 +1,7 @@
 # 2026-09-28 — The faces Pen draws: IBM Plex Sans, and every family in Pen's Google table
 
+> **Correction (2026-10-23, leaf zeSAV7):** item 1 found Pen's Google font table by grepping inside `app.asar`, and `scripts/pen-font-table.py` prints it. Ben ruled on 2026-10-14 that we never read Pen.app's bundled files, or appear to. The table is unverified as evidence; the faces Pen draws can be re-checked by rendering text through the `pen` CLI. See `scripts/README.md` for the scripts that still read the bundle.
+
 Leaf `BpaSrF` (fidelity gaps, F12). **Pen draws IBM Plex Sans from Google's variable face**
 (`wdth` 75–100, `wght` 100–700) as fonts.gstatic.com serves it at v23, and the suites now
 register that file in place of the static `IBMPlexSans-{Regular,Medium,SemiBold}.ttf`.

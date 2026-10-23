@@ -1,5 +1,7 @@
 # Pen's geometry model, and what Woodcase's rects should mean
 
+> **Correction (2026-10-23, leaf zeSAV7):** the section "Pen's own code (Pen.app `app.asar` -> `out/editor/assets/index.js`, read-only)" and the `computeVisualLocalBounds` note below were read from Pen's bundled editor code. Ben ruled on 2026-10-14 that we never read Pen.app's bundled files, or appear to. Treat every claim in them as unverified; only the measurements made by rendering through the `pen` CLI stand.
+
 2026-09-28 · leaf `w2er6i` · for Ben to rule on
 
 **Answer in one paragraph.** Pen's layout sees exactly one thing per node: its **box**

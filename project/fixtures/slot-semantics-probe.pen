@@ -1,0 +1,67 @@
+{
+  "version": "2.21",
+  "children": [
+    {
+      "type": "frame",
+      "id": "btnComp",
+      "name": "Suggested Button",
+      "reusable": true,
+      "x": 0,
+      "y": 0,
+      "width": 80,
+      "height": 30,
+      "fill": "#2266CC"
+    },
+    {
+      "type": "frame",
+      "id": "panel",
+      "name": "Panel",
+      "reusable": true,
+      "x": 0,
+      "y": 100,
+      "layout": "vertical",
+      "width": 300,
+      "height": 200,
+      "fill": "#EEEEEE",
+      "children": [
+        {
+          "type": "frame",
+          "id": "slotNamed",
+          "name": "Slot With Component",
+          "layout": "vertical",
+          "width": 280,
+          "height": 60,
+          "fill": "#CCFFCC",
+          "slot": ["btnComp"]
+        },
+        {
+          "type": "frame",
+          "id": "slotTypes",
+          "name": "Slot With Type Names",
+          "layout": "vertical",
+          "width": 280,
+          "height": 60,
+          "fill": "#FFEECC",
+          "slot": ["text"]
+        },
+        {
+          "type": "frame",
+          "id": "plain",
+          "name": "Plain Frame",
+          "layout": "vertical",
+          "width": 280,
+          "height": 60,
+          "fill": "#FFCCCC"
+        }
+      ]
+    },
+    {
+      "type": "ref",
+      "id": "inst",
+      "name": "Panel Instance",
+      "ref": "panel",
+      "x": 400,
+      "y": 100
+    }
+  ]
+}
