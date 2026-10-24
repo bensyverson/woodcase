@@ -43,7 +43,8 @@
       "type": "connection",
       "source": { "path": "NRect", "anchor": "right" },
       "target": { "path": "NElps", "anchor": "left" },
-      "stroke": "#000000"
+      "stroke": "#000000",
+      "strokeWidth": 1
     }
   ]
 }
