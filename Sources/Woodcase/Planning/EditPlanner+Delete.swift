@@ -25,8 +25,14 @@ public extension EditPlanner {
     /// it refuses that (``EditingError/componentHasInstances(componentID:instanceIDs:)``),
     /// and `woodcase rm --detach` detaches them first.
     ///
-    /// Refused for an id inside a component instance (``EditRefusal/Code/insideInstance``)
-    /// and for one naming nothing (``EditRefusal/Code/addressNotFound``).
+    /// Content in an instance's slot deletes from the slot's fill, one `children`
+    /// override of the slot, the default content copied into a fill first when the slot
+    /// shows it (Penumbra spec §13.5 rules 4 and 6); its ``DeletionPlan/nodeIDs`` are
+    /// expanded ids.
+    ///
+    /// Refused for an id inside a component instance outside its slots' content
+    /// (``EditRefusal/Code/insideInstance``) and for one naming nothing
+    /// (``EditRefusal/Code/addressNotFound``).
     ///
     /// - Parameters:
     ///   - nodeIDs: The nodes to delete: stored ids, or the expanded ids an editor holds.
@@ -34,6 +40,7 @@ public extension EditPlanner {
     /// - Returns: The deletes, connectors first, with what they remove.
     /// - Throws: ``EditRefusal`` naming why nothing should be written.
     static func planDelete(nodeIDs: [String], in document: EditableDocument) throws(EditRefusal) -> DeletionPlan {
+        if let slotted = try planSlotDelete(nodeIDs: nodeIDs, in: document) { return slotted }
         var stored: [String] = []
         for id in nodeIDs {
             let node = try restructuredID(id, in: document)

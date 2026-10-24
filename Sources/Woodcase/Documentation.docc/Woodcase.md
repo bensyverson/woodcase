@@ -38,6 +38,7 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 - <doc:PenBundles>
 - <doc:WoodcaseBatches>
 - <doc:EditPlanning>
+- <doc:SlotEditing>
 - <doc:EditingPaths>
 - <doc:Clipboard>
 - <doc:InspectingNodes>

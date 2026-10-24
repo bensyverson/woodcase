@@ -52,13 +52,21 @@ public extension EditableDocument {
     /// The loop that moving a node, with its subtree, under another would close — a
     /// Layers drag or a canvas reparent of something that holds instances.
     ///
+    /// A parent that is an instance's slot — its expanded id, or a container in its
+    /// content — is asked as the move would write it: one `children` override of the
+    /// slot holding the node.
+    ///
     /// - Parameters:
-    ///   - nodeID: The node to move.
-    ///   - parentID: Its new parent, or `nil` for the canvas.
+    ///   - nodeID: The node to move, stored.
+    ///   - parentID: Its new parent — a stored id, or a slot's expanded id — or `nil`
+    ///     for the canvas.
     /// - Returns: The loop, as ``componentLoop(placingInstanceOf:under:)`` gives it, or
     ///   `nil` when the move closes none.
     func componentLoop(moving nodeID: String, under parentID: String?) -> ComponentLoop? {
         guard nodes[nodeID] != nil else { return nil }
+        if let parentID, nodes[parentID] == nil, let subtree = try? materializeSubtree(rootID: nodeID) {
+            return componentLoop(inserting: subtree, under: parentID)
+        }
         return componentLoop(closedBy: .moveNode(EditOperation.MoveNode(nodeID: nodeID, newParentID: parentID)))
     }
 
@@ -67,11 +75,15 @@ public extension EditableDocument {
     ///
     /// - Parameters:
     ///   - subtree: The node to insert, with its children.
-    ///   - parentID: Where it would go, or `nil` for the canvas.
+    ///   - parentID: Where it would go — a stored id, or a slot's expanded id — or `nil`
+    ///     for the canvas.
     /// - Returns: The loop, as ``componentLoop(placingInstanceOf:under:)`` gives it, or
     ///   `nil` when the insert closes none.
     func componentLoop(inserting subtree: PenNode, under parentID: String?) -> ComponentLoop? {
-        componentLoop(closedBy: .insertNode(EditOperation.InsertNode(node: subtree, parentID: parentID)))
+        if let parentID, nodes[parentID] == nil {
+            return slotFillOperations(inserting: subtree, under: parentID).lazy.compactMap(componentLoop(closedBy:)).first
+        }
+        return componentLoop(closedBy: .insertNode(EditOperation.InsertNode(node: subtree, parentID: parentID)))
     }
 }
 
@@ -79,6 +91,21 @@ extension EditableDocument {
     /// The id of the instance a placement query probes with: one no stored node can have,
     /// since it is never an id the document hands out.
     static let loopProbeID = "\u{0}component-loop-probe"
+
+    /// The overrides that would put a subtree into a slot, or none when the parent is
+    /// not a slot or a container in one.
+    ///
+    /// - Parameters:
+    ///   - subtree: The node, with its children.
+    ///   - parentID: The slot's expanded id, or a container's in its content.
+    func slotFillOperations(inserting subtree: PenNode, under parentID: String) -> [EditOperation] {
+        let session = SlotEditSession(document: self)
+        guard case let .slot(refID, slotKey, containerKey)? = try? SlotDestination(parentID, in: session),
+              let json = try? SlotJSON.json(of: subtree),
+              session.insert(json, refID: refID, slotKey: slotKey, containerKey: containerKey, at: nil)
+        else { return [] }
+        return session.overrideOperations()
+    }
 
     /// The loop an operation would close, asked of the write guard without applying it.
     ///

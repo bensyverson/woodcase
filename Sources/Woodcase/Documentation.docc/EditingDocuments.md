@@ -372,6 +372,10 @@ accepts any node in a slot, and so does Woodcase: no edit is refused for what it
 there. A list of node *types* (`["frame", "text"]`) is not the format; Pen finds no
 component by those names and suggests nothing. See `project/2026-10-14-slot-semantics.md`.
 
+That reads a component's definition. How one *instance* shows its slots — default, filled
+or empty, with their content — and how to move, insert, delete, replace or reset what is in
+them is <doc:SlotEditing>.
+
 ### Incremental Layout
 
 For interactive editing, ``EditableDocument`` provides an incremental layout pipeline

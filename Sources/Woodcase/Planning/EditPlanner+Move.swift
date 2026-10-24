@@ -38,6 +38,12 @@ public extension EditPlanner {
     /// )
     /// ```
     ///
+    /// Slot content and slots are refused here as inside an instance: a caller that
+    /// plans a drag node by node and concatenates the plans would write each slot against
+    /// the slot as it stood. Slots are reached through
+    /// ``planMove(nodeIDs:into:at:keepingDrawnPlace:snapping:in:layout:)``, which writes
+    /// each slot once.
+    ///
     /// Refused inside a component instance (``EditRefusal/Code/insideInstance``), for an
     /// id naming nothing (``EditRefusal/Code/addressNotFound``), for a parent that is the
     /// node or inside it (``EditRefusal/Code/wouldCreateCycle``), and for a move that would
@@ -67,6 +73,31 @@ public extension EditPlanner {
         at index: Int? = nil,
         keepingDrawnPlace offset: PenPoint? = nil,
         snapping: PlacementSnapping = .none,
+        in document: EditableDocument,
+        layout: PenLayoutState
+    ) throws(EditRefusal) -> [EditOperation] {
+        try planStoredMove(
+            nodeID: nodeID, into: parentID, at: index, keepingDrawnPlace: offset, snapping: snapping,
+            in: document, layout: layout
+        )
+    }
+}
+
+extension EditPlanner {
+    /// Plans moving a stored node to a stored parent: the single move
+    /// ``planMove(nodeID:into:at:keepingDrawnPlace:snapping:in:layout:)`` plans, and the
+    /// one each stored node of a ``planMove(nodeIDs:into:at:keepingDrawnPlace:snapping:in:layout:)``
+    /// plans when no slot is involved.
+    ///
+    /// - Parameters: As ``planMove(nodeID:into:at:keepingDrawnPlace:snapping:in:layout:)``.
+    /// - Returns: The move, then any size and place it keeps.
+    /// - Throws: ``EditRefusal`` naming why nothing should be written.
+    static func planStoredMove(
+        nodeID: String,
+        into parentID: String?,
+        at index: Int?,
+        keepingDrawnPlace offset: PenPoint?,
+        snapping: PlacementSnapping,
         in document: EditableDocument,
         layout: PenLayoutState
     ) throws(EditRefusal) -> [EditOperation] {
@@ -141,9 +172,22 @@ extension EditPlanner {
         in document: EditableDocument,
         layout: PenLayoutState
     ) -> [String: AnyCodable] {
-        guard !laidOut, let node = document.node(id: id),
-              let size = layout.rects[document.expandedID(of: .node(id: id))]?.drawnSize
-        else { return [:] }
+        guard let node = document.node(id: id) else { return [:] }
+        return keptSizeWrites(
+            of: node, drawnSize: layout.rects[document.expandedID(of: .node(id: id))]?.drawnSize, laidOut: laidOut
+        )
+    }
+
+    /// The writes that keep a node's fill sizes at a drawn size, unless its new parent
+    /// lays it out — for a node with no storage of its own as well as a stored one.
+    ///
+    /// - Parameters:
+    ///   - node: The node, as drawn.
+    ///   - drawnSize: The size the layout drew it at, or `nil` when it drew none.
+    ///   - laidOut: Whether its new parent lays it out: a stack, holding it in flow.
+    /// - Returns: Each `fill_container` dimension's path and drawn size.
+    static func keptSizeWrites(of node: PenNode, drawnSize: PenSize?, laidOut: Bool) -> [String: AnyCodable] {
+        guard !laidOut, let size = drawnSize else { return [:] }
         var writes: [String: AnyCodable] = [:]
         for path in fillPaths(of: node) {
             writes[path] = number(path == widthPath ? size.width : size.height)

@@ -283,7 +283,9 @@ extension BatchApplier {
 
     // MARK: - Ids
 
-    /// A copy of a subtree with fresh ids that no node in the document holds.
+    /// A copy of a subtree with fresh ids that no node in the document holds — the nodes
+    /// in every fill included — and fresh ids in the fills its instances write, which
+    /// Pen would otherwise rename as repeats on load.
     ///
     /// A `ref` inside the subtree that pointed at another node *in* the subtree
     /// follows the copy; one pointing at a component outside it is left alone.
@@ -293,7 +295,10 @@ extension BatchApplier {
     ///   - document: The document it is going into.
     /// - Returns: The subtree with fresh ids.
     static func copied(_ node: PenNode, into document: EditableDocument) -> PenNode {
-        SubtreeIDPlan.regenerating(node, avoiding: document.allNodeIDs).applied(to: node)
+        var taken = document.idsInUse
+        let plan = SubtreeIDPlan.regenerating(node, avoiding: taken)
+        taken.formUnion(plan.ids)
+        return SlotJSON.renumberingFills(of: plan.applied(to: node), taken: &taken)
     }
 
     // MARK: - Reporting

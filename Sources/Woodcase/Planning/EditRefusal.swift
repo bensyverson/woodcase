@@ -111,6 +111,15 @@ public struct EditRefusal: Error, Friendly {
         /// Use as Default Text Style was aimed at a node that is not a text.
         case notAText
 
+        /// A slot intent — Replace Content, Empty Slot, Reset Slot, Suggested Components —
+        /// was aimed at a node that is not a slot.
+        case notASlot
+
+        /// Make Slot was aimed where a slot means nothing: a node that is not a frame, a
+        /// frame outside every component, or a component's own frame, which every
+        /// instance needs as the part that selects it.
+        case slotNotAllowed
+
         /// A move would put a node inside itself: the parent named is the node or one of
         /// its descendants. ``EditRefusal/detail`` names both
         /// (``Detail/wouldCreateCycle(nodeID:targetParentID:)``).

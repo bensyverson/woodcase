@@ -66,20 +66,32 @@ public extension PenClip {
         let added = carried.filter { reused[$0.id] == nil }
 
         var ids = Self.positionalIDs(of: carried, reusing: reused, among: theirs)
-        var taken = Set(document.nodes.keys).union(document.importedStore.nodes.keys)
+        // The nodes in every fill are in use too: Pen renames a repeated id on load, a node
+        // in a fill included, so the copies avoid them, and the copies' own fills are
+        // renumbered — mapped like any id, so an override key or a connector end naming a
+        // node in a fill follows it.
+        var taken = document.idsInUse.union(document.importedStore.nodes.keys)
         let plans = (added + content + connectors).map { root in
             let plan = SubtreeIDPlan.regenerating(root, avoiding: taken)
             taken.formUnion(plan.ids)
             ids.merge(plan.replacements) { _, new in new }
             return plan
         }
+        let fillRenames = (added + content + connectors).map { root in
+            let renames = SlotJSON.fillRenames(in: root, taken: &taken)
+            ids.merge(renames) { _, new in new }
+            return renames
+        }
         let renames = Self.componentRenames(added + content, among: theirs)
         let rewriter = PasteRewriter(
             ids: ids, variables: variables.changes,
             names: Dictionary(renames.map { ($0.id, $0.rename.to) }, uniquingKeysWith: { first, _ in first })
         )
-        let settled = try zip(added + content + connectors, plans).map { root, plan in
-            try SubtreeIDPlan(ids: plan.ids, replacements: [:]).applied(to: rewriter.rewrite(root))
+        let settled = try zip(zip(added + content + connectors, plans), fillRenames).map { pair, renames in
+            let (root, plan) = pair
+            return try SlotJSON.applyingFillRenames(
+                renames, to: SubtreeIDPlan(ids: plan.ids, replacements: [:]).applied(to: rewriter.rewrite(root))
+            )
         }
         let newDefinitions = Array(settled.prefix(added.count))
         let clipDocument = EditableDocument(from: self.document)

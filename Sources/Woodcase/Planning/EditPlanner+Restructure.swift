@@ -164,9 +164,66 @@ extension EditPlanner {
     ) -> [String: AnyCodable] {
         guard let node = document.node(id: id),
               let drawn = canvasMap(of: id, in: document, layout: layout),
-              let inverse = newParentMap.inverted(),
               let oldParentMap = canvasMap(of: oldParent, in: document, layout: layout)
         else { return [:] }
+        let subject = PlacementSubject(
+            node: node,
+            drawn: drawn,
+            drawnSize: layout.rects[document.expandedID(of: .node(id: id))]?.drawnSize,
+            oldParentMap: oldParentMap,
+            oldParentFlips: flipParity(of: oldParent, in: document)
+        )
+        return placementWrites(
+            of: subject, newParentMap: newParentMap, newParentFlips: newParentFlips,
+            placing: placing, movedBy: offset, snapping: snapping
+        )
+    }
+
+    /// A node about to be re-placed, as the layout drew it: what
+    /// ``placementWrites(of:newParentMap:newParentFlips:placing:movedBy:snapping:)`` reads.
+    ///
+    /// A stored node reads it from the store and the layout; a node in a slot's content,
+    /// which has no storage of its own, from its fill and the layout's expanded ids.
+    struct PlacementSubject {
+        /// The node, its own properties as drawn.
+        var node: PenNode
+
+        /// The map from the node's own coordinates to the canvas.
+        var drawn: Transform
+
+        /// The size the layout drew it at, or `nil` when it drew none.
+        var drawnSize: PenSize?
+
+        /// The canvas map of its parent's own coordinates.
+        var oldParentMap: Transform
+
+        /// The flip parity of its parent's chain.
+        var oldParentFlips: (x: Bool, y: Bool)
+    }
+
+    /// The writes that keep a node drawn where it was after it moves to a new parent.
+    ///
+    /// - Parameters:
+    ///   - subject: The node, as it was drawn.
+    ///   - newParentMap: The canvas map of its new parent's own coordinates.
+    ///   - newParentFlips: The flip parity of its new parent's chain.
+    ///   - placing: How the new parent places it.
+    ///   - offset: How far it is carried on the canvas as it moves.
+    ///   - snapping: How the new `x`/`y` are rounded before they are compared with the
+    ///     stored ones.
+    /// - Returns: The property writes, by property path; empty when nothing changes.
+    static func placementWrites(
+        of subject: PlacementSubject,
+        newParentMap: Transform,
+        newParentFlips: (x: Bool, y: Bool),
+        placing: Placing,
+        movedBy offset: PenPoint = .zero,
+        snapping: PlacementSnapping = .none
+    ) -> [String: AnyCodable] {
+        guard let inverse = newParentMap.inverted() else { return [:] }
+        let node = subject.node
+        let drawn = subject.drawn
+        let oldParentMap = subject.oldParentMap
         var writes: [String: AnyCodable] = [:]
         let common = NodePropertyCodec.commonPrefix
         let canvas = Transform.translation(x: offset.x, y: offset.y).concatenating(drawn)
@@ -176,7 +233,7 @@ extension EditPlanner {
         // differently from the old one.
         let change = inverse.concatenating(oldParentMap)
         if !isTranslation(change) {
-            let oldFlips = flipParity(of: oldParent, in: document)
+            let oldFlips = subject.oldParentFlips
             var flipX = (node.common.flipX?.literalValue == true) != (oldFlips.x != newParentFlips.x)
             let flipY = (node.common.flipY?.literalValue == true) != (oldFlips.y != newParentFlips.y)
             // A flip bound to a variable is not in the parity; the map's handedness is the
@@ -216,7 +273,8 @@ extension EditPlanner {
             writes[common + "layoutPosition"] = position.map { .string($0.rawValue) } ?? .null
         }
 
-        writes.merge(keptSizeWrites(of: id, laidOut: placing == .inFlow, in: document, layout: layout)) { _, kept in kept }
+        let kept = keptSizeWrites(of: node, drawnSize: subject.drawnSize, laidOut: placing == .inFlow)
+        writes.merge(kept) { _, kept in kept }
         return writes
     }
 

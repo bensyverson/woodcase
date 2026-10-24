@@ -67,8 +67,15 @@ extension PenClip {
         }
 
         /// Whether a path names a stored node or one drawn inside an instance.
+        ///
+        /// An end names a node by its id path (`Filled/Row2`), which for an instance
+        /// inside another — one placed in a fill, say — is not its expanded id
+        /// (`Filled/Row2/ItemA`), so the path is also resolved as an address of ids.
         private static func names(_ path: String, in document: EditableDocument) -> Bool {
-            document.nodes[path] != nil || document.resolve(expandedID: path) != nil
+            if document.nodes[path] != nil || document.resolve(expandedID: path) != nil { return true }
+            let steps = path.split(separator: NodeAddress.separator, omittingEmptySubsequences: false).map(String.init)
+            guard !steps.isEmpty, !steps.contains(where: \.isEmpty) else { return false }
+            return (try? document.resolve(NodeAddress.path(steps.map { String(NodeAddress.idPrefix) + $0 }))) != nil
         }
     }
 }

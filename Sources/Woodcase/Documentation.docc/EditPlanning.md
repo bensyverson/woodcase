@@ -291,6 +291,11 @@ plain move does: the node's new `x`/`y` are rounded in the new parent's space be
 compared with the stored ones, so a stored fractional coordinate the move would leave in
 place is written rounded too. Rotation and flips are never snapped.
 
+A node in an instance's slot, or a slot as the new parent, is planned by
+``EditPlanner/planMove(nodeIDs:into:at:keepingDrawnPlace:snapping:in:layout:)``, as one
+`children` override of each slot it touches; the single-node planner refuses slots. See
+<doc:SlotEditing>.
+
 A paste needs no rule of its own: a clip already freezes a fill size at the size it was
 drawn at when it copies a node out of its parent (``PenClip``).
 
@@ -405,6 +410,9 @@ let drawn = await document.materializeSnapshot(overlaying: preview)
 - ``EditPlan``
 - ``EditPlanner/plan(_:routedAt:in:)``
 - ``EditPlanner/planMove(nodeID:into:at:keepingDrawnPlace:snapping:in:layout:)``
+- ``EditPlanner/planMove(nodeIDs:into:at:keepingDrawnPlace:snapping:in:layout:)``
+- ``StructuralEditPlan``
+- <doc:SlotEditing>
 - ``EditPlanner/planGroup(nodeIDs:kind:in:layout:)``
 - ``EditPlanner/planUngroup(groupID:in:layout:)``
 - ``EditPlanner/planDelete(nodeIDs:in:)``
