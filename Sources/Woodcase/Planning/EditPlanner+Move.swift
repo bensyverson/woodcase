@@ -85,9 +85,8 @@ public extension EditPlanner {
 
 extension EditPlanner {
     /// Plans moving a stored node to a stored parent: the single move
-    /// ``planMove(nodeID:into:at:keepingDrawnPlace:snapping:in:layout:)`` plans, and the
-    /// one each stored node of a ``planMove(nodeIDs:into:at:keepingDrawnPlace:snapping:in:layout:)``
-    /// plans when no slot is involved.
+    /// ``planMove(nodeID:into:at:keepingDrawnPlace:snapping:in:layout:)`` plans. A run of
+    /// several is ``planStoredRun(_:into:at:keepingDrawnPlace:snapping:in:layout:)``.
     ///
     /// - Parameters: As ``planMove(nodeID:into:at:keepingDrawnPlace:snapping:in:layout:)``.
     /// - Returns: The move, then any size and place it keeps.
@@ -102,12 +101,45 @@ extension EditPlanner {
         layout: PenLayoutState
     ) throws(EditRefusal) -> [EditOperation] {
         let id = try restructuredID(nodeID, in: document)
-        let move = EditOperation.moveNode(EditOperation.MoveNode(nodeID: id, newParentID: parentID, index: index))
+        try validateMove(id, into: parentID, at: index, address: nodeID, in: document)
+        return storedMoveOperations(
+            id, into: parentID, at: index, keepingDrawnPlace: offset, snapping: snapping, in: document, layout: layout
+        )
+    }
+
+    /// Runs the document's own checks on one stored move.
+    ///
+    /// - Parameters:
+    ///   - id: The node, stored.
+    ///   - parentID: The new parent's stored id, or `nil` for the canvas.
+    ///   - index: The index to check, or `nil` to check the move alone.
+    ///   - address: What a refusal names.
+    ///   - document: The document, as it stands.
+    /// - Throws: ``EditRefusal`` naming why the document refuses the move.
+    static func validateMove(
+        _ id: String, into parentID: String?, at index: Int?, address: String, in document: EditableDocument
+    ) throws(EditRefusal) {
         do {
-            try document.validate(move)
+            try document.validate(.moveNode(EditOperation.MoveNode(nodeID: id, newParentID: parentID, index: index)))
         } catch {
-            throw EditRefusal(error, address: nodeID, in: document)
+            throw EditRefusal(error, address: address, in: document)
         }
+    }
+
+    /// A checked stored move's edits: the move, then any size and place it keeps.
+    ///
+    /// - Parameters: As ``planRunStep(_:into:at:keepingDrawnPlace:snapping:in:layout:)``.
+    /// - Returns: The move, then any size and place it keeps.
+    static func storedMoveOperations(
+        _ id: String,
+        into parentID: String?,
+        at index: Int?,
+        keepingDrawnPlace offset: PenPoint?,
+        snapping: PlacementSnapping,
+        in document: EditableDocument,
+        layout: PenLayoutState
+    ) -> [EditOperation] {
+        let move = EditOperation.moveNode(EditOperation.MoveNode(nodeID: id, newParentID: parentID, index: index))
         guard let offset, let placing = placingByPosition(id, in: parentID, of: document) else {
             return [move] + keptSizes(movingNode: id, into: parentID, in: document) { layout }
         }

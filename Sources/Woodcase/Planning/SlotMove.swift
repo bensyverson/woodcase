@@ -88,9 +88,10 @@ struct SlotMove {
         var stored: [EditOperation] = []
         var landings: [Landing] = []
         var renames: [String: String] = [:]
-        // Every node of slot content leaves its fill before any lands, so the index counts
-        // the parent's children with the moving nodes taken out, as a stack reorder does:
-        // a run moved forward lands together.
+        // The index counts the parent's children with the moving nodes taken out
+        // (RunLanding): every node of slot content leaves its fill before any lands, so in
+        // a slot each next node goes one place after the last; in a stored parent each
+        // single move or insert takes the index that keeps the run whole.
         var takenOut: [Int: AnyCodable] = [:]
         for (step, origin) in origins.enumerated() {
             guard case let .content(refID, key) = origin else { continue }
@@ -98,12 +99,13 @@ struct SlotMove {
             session.taken.subtract(SlotJSON.allIDs(in: [taken]))
             takenOut[step] = taken
         }
+        var storedLanding = try storedRunLanding(origins, at: index)
         for (step, origin) in origins.enumerated() {
             let at = index.map { $0 + step }
             switch (origin, destination) {
             case let (.document(id), .document(parent)):
-                stored += try EditPlanner.planStoredMove(
-                    nodeID: id, into: parent, at: at, keepingDrawnPlace: offset, snapping: snapping,
+                stored += try EditPlanner.planRunStep(
+                    id, into: parent, at: storedLanding?.land(id), keepingDrawnPlace: offset, snapping: snapping,
                     in: document, layout: layout
                 )
                 landings.append(.stored(id))
@@ -130,19 +132,40 @@ struct SlotMove {
                 case let .document(parent):
                     let kept = SlotJSON.keepingIDs(moved, base: "", taken: &session.taken, renames: &renames)
                     guard let node = SlotJSON.node(from: kept) else { throw Self.unreadable(key) }
-                    stored.append(.insertNode(EditOperation.InsertNode(node: node, parentID: parent, index: at)))
+                    let index = storedLanding?.land(node.id)
+                    stored.append(.insertNode(EditOperation.InsertNode(node: node, parentID: parent, index: index)))
                     landings.append(.stored(node.id))
                 }
             }
         }
 
         let overrides = session.writeOperations()
-        try validate(overrides + stored.filter(\.isInsert), address: origins.first.map(describe) ?? "")
+        // An insert's index is right only once the run's edits before it have landed;
+        // the run's index was checked by its landing.
+        try validate(overrides + stored.compactMap(\.unindexedInsert), address: origins.first.map(describe) ?? "")
         return StructuralEditPlan(
             operations: deletes + overrides + stored,
             placedIDs: landings.map(expandedID),
             renamedIDs: session.renamedIDs,
             materializedSlotIDs: session.materializedSlotIDs
+        )
+    }
+
+    /// The landing of the run's nodes in a stored destination, or `nil` for a slot, where
+    /// every node of slot content is taken out of its fill before any lands.
+    ///
+    /// - Parameters:
+    ///   - origins: The nodes, top-most only.
+    ///   - index: Where the first goes, counted without the moving nodes.
+    /// - Throws: ``EditRefusal`` for an index past the children left once the run is out.
+    private func storedRunLanding(_ origins: [SlotOrigin], at index: Int?) throws(EditRefusal) -> RunLanding? {
+        guard case let .document(parent) = destination else { return nil }
+        let ids = origins.compactMap { origin -> String? in
+            guard case let .document(id) = origin else { return nil }
+            return id
+        }
+        return try EditPlanner.runLanding(
+            at: index, in: parent, moving: ids, address: origins.first.map(describe) ?? "", of: document
         )
     }
 
@@ -391,9 +414,11 @@ struct SlotMove {
 }
 
 private extension EditOperation {
-    /// Whether this is an insert.
-    var isInsert: Bool {
-        if case .insertNode = self { return true }
-        return false
+    /// This operation without its index when it is an insert, to check against the
+    /// document as it stands; `nil` otherwise.
+    var unindexedInsert: EditOperation? {
+        guard case var .insertNode(insert) = self else { return nil }
+        insert.index = nil
+        return .insertNode(insert)
     }
 }

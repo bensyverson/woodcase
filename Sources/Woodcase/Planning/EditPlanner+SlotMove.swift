@@ -19,21 +19,26 @@ public extension EditPlanner {
     /// in, fresh ids — then applies the change, in the same plan (rule 6);
     /// ``StructuralEditPlan/renamed(_:)`` carries a selection across.
     ///
-    /// The nodes land together, in the order given: the first at `index`, each next one
-    /// after it. When a node is slot content, every one of them leaves its fill before any
-    /// lands, so `index` counts the new parent's children with the moving nodes taken out,
-    /// as a stack reorder does — a run moved forward in its own slot lands together. A
-    /// move with no node in a slot plans what successive single moves at `index`,
-    /// `index + 1`, … plan. Each keeps its drawn size and, given
-    /// `offset`, its drawn place, exactly as ``planMove(nodeID:into:at:keepingDrawnPlace:snapping:in:layout:)``
-    /// plans a single move; a move with no node in a slot plans exactly what that does,
-    /// node by node.
+    /// The nodes land together, side by side in the order given, the first at `index`.
+    /// **`index` counts the new parent's children with the moving nodes taken out**, as a
+    /// stack reorder does — wherever the nodes come from, slot content or stored, one
+    /// parent or several — so a run moved forward past its own siblings lands together:
+    /// in `[A, B, C, D, E]`, moving `[A, B]` to index 2 (after `D` in `[C, D, E]`) gives
+    /// `[C, D, A, B, E]`. For a single node this is the index a `MoveNode` takes. An index
+    /// past the children left once the run is out is refused. In a stored parent the run
+    /// is written as one `MoveNode` per node, each at the index that keeps the run whole
+    /// once the moves before it have landed (leaf 14SEVW); submit the operations as one
+    /// edit, one undo step. Each node keeps its drawn size and, given `offset`, its drawn
+    /// place, exactly as ``planMove(nodeID:into:at:keepingDrawnPlace:snapping:in:layout:)``
+    /// plans a single move.
     ///
     /// ```swift
     /// // Dragging the third row of a list slot to the top.
     /// let plan = try EditPlanner.planMove(
     ///     nodeIDs: ["Filled/Row3/ItemA"], into: "Filled/List", at: 0, in: document, layout: layout
     /// )
+    /// // Moving the first two children of a stack after its fourth: [C, D, A, B, E].
+    /// let reorder = try EditPlanner.planMove(nodeIDs: ["A", "B"], into: "Stack", at: 2, in: document, layout: layout)
     /// ```
     ///
     /// Refused for a node inside an instance outside its slots' content, and for a target
@@ -48,8 +53,8 @@ public extension EditPlanner {
     ///   - nodeIDs: The nodes, by stored id or the expanded id an editor holds.
     ///   - parentID: The new parent — a stored id, a slot frame's or a slot content
     ///     container's expanded id — or `nil` for the canvas.
-    ///   - index: Where the first node goes among the new parent's children (for slot
-    ///     content, counted without the moving nodes); `nil` puts them last, on top.
+    ///   - index: Where the first node goes among the new parent's children, counted
+    ///     without the moving nodes; `nil` puts them last, on top.
     ///   - offset: How far the nodes are carried on the canvas, to keep their drawn
     ///     place; `nil` plans only the move and the sizes they keep.
     ///   - snapping: How each new `x`/`y` is rounded.
@@ -75,18 +80,13 @@ public extension EditPlanner {
             var move = SlotMove(session: session, destination: destination, layout: layout)
             return try move.plan(origins, at: index, keepingDrawnPlace: offset, snapping: snapping)
         }
-        var operations: [EditOperation] = []
-        for (offsetInRun, origin) in origins.enumerated() {
-            guard case let .document(id) = origin else { continue }
-            operations += try planStoredMove(
-                nodeID: id, into: parent, at: index.map { $0 + offsetInRun },
-                keepingDrawnPlace: offset, snapping: snapping, in: document, layout: layout
-            )
-        }
-        let placed = origins.compactMap { origin -> String? in
+        let ids = origins.compactMap { origin -> String? in
             guard case let .document(id) = origin else { return nil }
             return id
         }
-        return StructuralEditPlan(operations: operations, placedIDs: placed)
+        let operations = try planStoredRun(
+            ids, into: parent, at: index, keepingDrawnPlace: offset, snapping: snapping, in: document, layout: layout
+        )
+        return StructuralEditPlan(operations: operations, placedIDs: ids)
     }
 }

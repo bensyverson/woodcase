@@ -50,7 +50,8 @@ default content with the instance's overrides folded in.
 - ``EditPlanner/planMove(nodeIDs:into:at:keepingDrawnPlace:snapping:in:layout:)`` moves nodes
   into, within and out of slots, and anywhere outside instances. A node moved in from the
   document leaves its parent (its attached connectors go with it); one moved out becomes an
-  ordinary node. Several nodes write each slot once. The single-node
+  ordinary node. Several nodes write each slot once, and land side by side at an index
+  counted with the moving nodes taken out, in a slot or a stored parent alike. The single-node
   ``EditPlanner/planMove(nodeID:into:at:keepingDrawnPlace:snapping:in:layout:)`` still refuses
   slots, so a caller that plans node by node and concatenates can't write a slot from a
   stale copy.

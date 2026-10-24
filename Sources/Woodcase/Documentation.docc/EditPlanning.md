@@ -311,6 +311,14 @@ A node in an instance's slot, or a slot as the new parent, is planned by
 `children` override of each slot it touches; the single-node planner refuses slots. See
 <doc:SlotEditing>.
 
+Several nodes move as one run with that planner, wherever they are: they land side by side
+in the order given, and its `index` counts the new parent's children **with the moving nodes
+taken out**, as a stack reorder does. In `[A, B, C, D, E]`, moving `[A, B]` to index 2 lands
+them after `D`: `[C, D, A, B, E]`. In a stored parent the plan is one `MoveNode` per node,
+each at the index that keeps the run whole once the moves before it have landed, so submit
+the operations together, as one undo step. For a single node the index is the one a
+`MoveNode` takes, so a one-node move plans what the single-node planner plans.
+
 A paste needs no rule of its own: a clip already freezes a fill size at the size it was
 drawn at when it copies a node out of its parent (``PenClip``).
 
