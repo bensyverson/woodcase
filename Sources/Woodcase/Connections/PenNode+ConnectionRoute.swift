@@ -31,7 +31,7 @@ public extension PenNode.ConnectionData {
     /// The route from the source's anchor to the target's.
     ///
     /// The rects must all be in one coordinate frame — the canvas, for a connection, which
-    /// Pen allows only at the top level: ``PenLayoutEngine/canvasRects(in:layoutRects:)``
+    /// Pen allows only at the top level: ``PenLayoutEngine/connectionEndpointRects(in:layoutRects:)``
     /// composes them from the layout engine's parent-relative ones. An elbow routes round
     /// the two endpoint boxes, leaving and entering perpendicular to the anchors' sides;
     /// the same rects always give the same points.
@@ -65,7 +65,7 @@ public extension PenNode {
     /// or whose endpoint names a node `canvasRects` lacks.
     ///
     /// - Parameter canvasRects: Every node's box on the canvas
-    ///   (``PenLayoutEngine/canvasRects(in:layoutRects:)``).
+    ///   (``PenLayoutEngine/connectionEndpointRects(in:layoutRects:)``).
     /// - Returns: The route.
     func connectionRoute(in canvasRects: [String: PenRect]) -> ConnectionData.Route? {
         guard case let .connection(data) = kind, let style = connectionStyle else { return nil }

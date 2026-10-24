@@ -16,7 +16,7 @@ public extension PenLayoutEngine {
     /// - Parameters:
     ///   - point: The point, on the canvas.
     ///   - node: The connection.
-    ///   - canvasRects: Every node's box on the canvas (``canvasRects(in:layoutRects:)``).
+    ///   - canvasRects: Every node's box on the canvas (``connectionEndpointRects(in:layoutRects:)``).
     ///   - tolerance: How far outside the painted shape still counts, in points.
     /// - Returns: `false` for a node that is not a connection, one whose endpoint names no
     ///   node, or one that paints nothing.
@@ -38,7 +38,7 @@ public extension PenLayoutEngine {
     ///
     /// - Parameters:
     ///   - node: The connection.
-    ///   - canvasRects: Every node's box on the canvas (``canvasRects(in:layoutRects:)``).
+    ///   - canvasRects: Every node's box on the canvas (``connectionEndpointRects(in:layoutRects:)``).
     /// - Returns: The extent, or `nil` for a node that is not a connection, or one whose
     ///   endpoint names no node or whose stroke width is per side.
     static func connectionPaintedExtent(of node: PenNode, canvasRects: [String: PenRect]) -> PenRect? {

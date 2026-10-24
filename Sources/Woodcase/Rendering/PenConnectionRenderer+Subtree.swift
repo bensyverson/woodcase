@@ -47,7 +47,7 @@ extension PenConnectionRenderer {
         let area = root.parentTransform.bounds(of: PenRect(
             x: Double(shown.minX), y: Double(shown.minY), width: Double(shown.width), height: Double(shown.height)
         ))
-        let canvasRects = PenLayoutEngine.canvasRects(in: document, layoutRects: layoutRects)
+        let canvasRects = PenLayoutEngine.connectionEndpointRects(in: document, layoutRects: layoutRects)
 
         context.saveGState()
         defer { context.restoreGState() }

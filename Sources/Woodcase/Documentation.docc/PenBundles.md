@@ -113,7 +113,12 @@ writing anything when a file of the same name is already in that folder's `histo
 Only writers' files travel (`<identity>@<device>.jsonl` and its archives). The bundle's
 `.woodcase/` local state and its own `.gitignore` never do — the copy writes its own
 `.gitignore` on its first edit — and neither does a legacy `activity.jsonl` or a sync
-service's conflicted copy. ``PenBundle/convert(_:identity:)`` and
+service's conflicted copy. That choice is public: ``PenBundle/historyFiles(in:)`` lists
+the writers' files and ``PenBundle/copyHistory(from:into:)`` copies them, both copies
+above use it, and an app whose copy writes `document.pen` itself — Penumbra's
+`NSDocument` saves write the session's snapshot, unsaved edits included, so they cannot
+use ``PenBundle/copy(_:to:history:)`` — carries the history through it too.
+``PenBundle/convert(_:identity:)`` and
 ``PenBundle/convert(_:to:identity:)`` take no choice: a bare `.pen`'s log is local state
 for its whole project, not a per-document history, and stays where it was written.
 
@@ -274,6 +279,12 @@ not in the bundle.
 - ``PenBundle/imageHashLength``
 - ``PenBundle/importAsset(_:as:into:)``
 - ``PenBundle/importAsset(_:named:as:into:)``
+
+### Copying history
+
+- ``HistoryInclusion``
+- ``PenBundle/historyFiles(in:)``
+- ``PenBundle/copyHistory(from:into:)``
 
 ### Converting
 

@@ -76,7 +76,7 @@ public extension PenNode.ConnectionData {
     ///
     /// - Parameters:
     ///   - rects: Node boxes on the canvas, keyed by id, an expanded instance's descendants
-    ///     by their `instance/child` path (``PenLayoutEngine/canvasRects(in:layoutRects:)``).
+    ///     by their `instance/child` path (``PenLayoutEngine/connectionEndpointRects(in:layoutRects:)``).
     ///   - style: The routing and arrowheads (``PenNode/connectionStyle``).
     /// - Returns: The drawing, or `nil` when either endpoint names a node `rects` lacks or
     ///   the stroke's width is per side, which no connector draws. A stroke of no width
@@ -146,7 +146,7 @@ public extension PenNode {
     /// `canvasRects` lacks, or whose stroke width is per side.
     ///
     /// - Parameter canvasRects: Every node's box on the canvas
-    ///   (``PenLayoutEngine/canvasRects(in:layoutRects:)``).
+    ///   (``PenLayoutEngine/connectionEndpointRects(in:layoutRects:)``).
     /// - Returns: The drawing.
     func connectionDrawing(in canvasRects: [String: PenRect]) -> ConnectionData.Drawing? {
         guard case let .connection(data) = kind, let style = connectionStyle else { return nil }

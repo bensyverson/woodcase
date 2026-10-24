@@ -18,8 +18,9 @@ import CoreGraphics
 ///
 /// Pen allows a connection only at the top level, so its endpoints are found in canvas
 /// coordinates: ``canvasRects(for:layoutRects:)`` composes the layout engine's
-/// parent-relative rects once per render — with ``PenLayoutEngine/canvasRects(in:layoutRects:)`` —
-/// and only when the document has a connection.
+/// parent-relative rects once per render — with ``PenLayoutEngine/connectionEndpointRects(in:layoutRects:)``,
+/// which also keys an instance by the path an end names it by — and only when the
+/// document has a connection.
 enum PenConnectionRenderer {
     /// Every node's box in canvas coordinates, or nothing when the document has no
     /// top-level connection to need them.
@@ -28,13 +29,14 @@ enum PenConnectionRenderer {
     ///   - document: The expanded, resolved document being rendered.
     ///   - layoutRects: The layout engine's parent-relative rects.
     /// - Returns: Boxes keyed by id — an expanded instance's descendants by their
-    ///   `instance/child` path — measured from the canvas origin.
+    ///   `instance/child` path, and its root by its instance path too — measured from the
+    ///   canvas origin.
     static func canvasRects(for document: PenDocument, layoutRects: [String: PenRect]) -> [String: PenRect] {
         let hasConnection = document.children.contains { node in
             if case .connection = node.kind { true } else { false }
         }
         guard hasConnection else { return [:] }
-        return PenLayoutEngine.canvasRects(in: document, layoutRects: layoutRects)
+        return PenLayoutEngine.connectionEndpointRects(in: document, layoutRects: layoutRects)
     }
 
     /// Draws one connection into `context`, whose CTM must be the canvas's: its line and
