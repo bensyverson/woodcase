@@ -1,4 +1,4 @@
-<!-- agents:begin harness@c07145 -->
+<!-- agents:begin harness@dcdb6a -->
 # Harness facts
 
 Facts about the tool an agent runs *inside*, not about this project — they are identical in every repo, which is why they are not in `project/gotchas.md`. One section per harness; today there is only Claude Code. Read this the first time a call fails with a permission error or a refusal you did not expect: none of these failures names the harness, which is exactly what makes them expensive.
@@ -43,7 +43,7 @@ A backgrounded process is reaped when the session ends, so a server meant to out
 
 ### Your context fill
 
-Run `contextfill` ([bensyverson/contextfill](https://github.com/bensyverson/contextfill)) to read how full your context window is; `contextfill --agents` adds each subagent's own fill. That is the number the delegation guide's 40% line is measured in. A subagent's completion notification reports cumulative tokens, not its fill, so don't judge the line from it. Where a PostToolUse hook runs `contextfill hook`, the reading also arrives after every commit, a subagent's included.
+Run `contextfill` ([bensyverson/contextfill](https://github.com/bensyverson/contextfill)) to read how full your context window is; `contextfill --agents` adds each subagent's own fill. That is the number the delegation guide's 40% line is measured in. A subagent's completion notification reports about the same figure, but only once the agent stops; watch a running agent with `contextfill --agents`. Where a PostToolUse hook runs `contextfill hook`, the reading also arrives after every commit, a subagent's included.
 
 ### The shell
 

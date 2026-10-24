@@ -28,7 +28,7 @@ You are working on Woodcase, a Swift library which allows users to parse and ren
 - To edit a .pen file from a shell, run `woodcase help design` first (the long form is DocC `WoodcaseEditor.md`).
 - The format spec is `./local/Pen-Format.md` and the schema `./local/Pen-Schema-2.21.md`, Pen's published schema as the `pen` CLI 0.3.13 serves it (`read_skill({ path: "pen-schema.md" })`; never read Pen.app's bundle). Older copies are listed in `project/README.md`. Read them only when you need to.
 
-<!-- agents:begin core@3a7a5e -->
+<!-- agents:begin core@d4e43a -->
 ## Working rules
 
 **Understand the why.** If the goal behind a request isn't clear, ask before solving — beware the XY problem.
@@ -59,6 +59,13 @@ You are working on Woodcase, a Swift library which allows users to parse and ren
 
 **Local rulings.** A repo-local ruling, or an override of a shared rule, lives in the project-owned head of `AGENTS.md`, above the generated regions — say plainly that it overrides, and link a dated project doc for the why.
 
+## A session
+
+- **Start from the handoff doc in `project/`, if the last session left one, and `job orient`.** A handoff is current only if nothing has been committed since it (`git log` after its date); an older one is history, not a starting point. A handoff the user pastes wins.
+- **Unless the user says they're around, assume they aren't.** Make the call yourself when it's safe and a two-way door, queue the rest, and report every decision at the end. While they're around, bring questions as they come up, including ones an agent raises mid-flight.
+- **Before starting, say what needs the user's eyes.**
+- **The session ends at the user's budget, or when your context passes 40%, whichever comes first.** Then integrate what's in flight, persist what the next session needs in the repo rather than memory, and write the handoff. Where the repo delegates, `project/agents/delegation.md` covers how.
+
 ## Git
 
 - Offer to commit when a unit of work is complete and accepted. Rebase onto upstream; ask on real conflicts, explaining the conflict in plain terms first.
@@ -67,6 +74,7 @@ You are working on Woodcase, a Swift library which allows users to parse and ren
 - Pass the message with `-F <file>`, not inline `-m`; the shell interprets `-m` first. Same for `job`: `note`, `done`, `add` and `edit` all take `-F <file>` (`-F -` reads stdin).
 - Pre-commit hooks run the formatter and tests. Run them yourself first (see the stack rules).
 - Never pipe a gating command (`git commit … | tail`) — the pipe swallows its exit status, so a following `&&` runs even after a failure.
+- Before pushing a repo you haven't been working in, check what's ahead of upstream (`git log @{u}..`). Push only commits you made, or ask.
 <!-- agents:end core -->
 
 <!-- agents:begin principles@7a5b19 -->
