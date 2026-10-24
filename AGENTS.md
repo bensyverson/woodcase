@@ -6,19 +6,8 @@ You are working on Woodcase, a Swift library which allows users to parse and ren
 
 ## Documentation
 
-- [README.md](README.md) — project overview and quick start
-- [DocC documentation](./Sources/Woodcase/Documentation.docc/) — in-depth documentation of the architecture, models and concepts; generated with `swift package generate-documentation --target Woodcase`
-- [WoodcaseEditor.md](./Sources/Woodcase/Documentation.docc/WoodcaseEditor.md) — how to drive the `woodcase` CLI: the read–write–verify loop, addressing, property paths, batches, revision tokens and undo. Read it before editing a .pen file from a shell; `woodcase help design` is the same primer in the terminal
-- [WoodcaseScripting.md](./Sources/Woodcase/Documentation.docc/WoodcaseScripting.md) — the JavaScript host: the contract a `woodcase js` program runs under, the TypeScript declaration of `doc`, the `ScriptHost` API a Swift caller uses, the watchdog and the platform boundary. Read it before touching `Sources/WoodcaseScripting/`, the `js` or `find` verbs; `woodcase help js` is the same contract in the terminal
-- [WoodcaseActivityLog.md](./Sources/Woodcase/Documentation.docc/WoodcaseActivityLog.md) — the activity log's wire format (`forward` beside `inverse`), `views.jsonl`, following a file, and the change feed: `woodcase changes`, the verb an agent taking turns with a person runs to see what *others* changed since its last look, with old and new values and a resumable cursor (`woodcase help recipes` ▸ TAKING TURNS). Read it before touching `Sources/Woodcase/Files/`, `Follow/` or `Feed/`
-- [DESIGN.md](DESIGN.md) — the viewer's design system (design.md format): tokens, color axes, typography, component atoms, do's and don'ts. Read it before styling anything in `WoodcaseViewer`; it must move together with `ViewerStylesheet.swift`
-- [project/](project/) — dated design documents, findings and past plans
-- [project/gotchas.md](project/gotchas.md) — project traps and rule feedback; read it at session start
-- [project/backlog.md](project/backlog.md) — work decided against, and what would revive it
-- [project/agents/harness.md](project/agents/harness.md) — facts about the agent harness (sandbox, `$TMPDIR`, worktrees)
-- [project/agents/delegation.md](project/agents/delegation.md) — how to carve, brief and integrate subagent work
-- [project/agents/jobs.md](project/agents/jobs.md) — the `job` tracker: tree shape, criteria, agent identities
-- [project/agents/cli-design.md](project/agents/cli-design.md) — how to design a CLI for agents: grammar, output, exit codes, errors that teach
+- [README.md](README.md) — overview, quick start and every DocC article; [DocC](./Sources/Woodcase/Documentation.docc/) — architecture and concepts; generate with `swift package generate-documentation --target Woodcase`
+- [project/README.md](project/README.md) — the index of every other doc, each with when to read it: the article or design doc to read before touching a source folder (scripting host, activity log, viewer styling, CLI verbs), current plans, rulings, findings about Pen, and records. Open it when a task enters an area you haven't worked in
 
 ## Platforms
 
@@ -36,7 +25,8 @@ You are working on Woodcase, a Swift library which allows users to parse and ren
 ## Working with .pen files
 
 - To look at a .pen file, read it directly (it's JSON) rather than using the Pencil MCP.
-- The .pen format specification is at `./local/Pen-Format.md`; the schema is at `./local/Pen-Schema-2.21.md` — Pen's published 2.21 schema as the `pen` CLI 0.3.13 serves it (`read_skill({ path: "pen-schema.md" })`; never read Pen.app's bundle). Older copies: `./local/Pen-Schema-2.17.md` (2.17, with a section on what Pen writes beyond the schema, still true), `./local/Pen-Schema.js` (2.10) and `./local/Pen-Schema-v2.js` (2.17 dev docs). Read them only when you need to.
+- To edit a .pen file from a shell, run `woodcase help design` first (the long form is DocC `WoodcaseEditor.md`).
+- The format spec is `./local/Pen-Format.md` and the schema `./local/Pen-Schema-2.21.md`, Pen's published schema as the `pen` CLI 0.3.13 serves it (`read_skill({ path: "pen-schema.md" })`; never read Pen.app's bundle). Older copies are listed in `project/README.md`. Read them only when you need to.
 
 <!-- agents:begin core@3a7a5e -->
 ## Working rules

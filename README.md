@@ -186,6 +186,7 @@ let image = PenRenderer.render(
 - [DESIGN.md](DESIGN.md) — the viewer's design system: tokens, color rules, typography and component atoms, in the [design.md](https://github.com/google-labs-code/design.md) format
 - [CRDT Architecture](Sources/Woodcase/Documentation.docc/CRDTArchitecture.md) — collaborative editing via CRDTs: LWW registers, RGA lists, Kleppmann tree moves, and the sync protocol
 - [Performance](Sources/Woodcase/Documentation.docc/WoodcasePerformance.md) — the measured budgets for parsing, layout, rendering and editing, and how to reproduce them
+- [Project docs index](project/README.md) — the dated plans, design docs, findings and records behind the code, with when to read each
 
 Generate DocC documentation locally:
 
