@@ -21,9 +21,11 @@ import Foundation
 /// }
 /// ```
 ///
-/// A node with no ``stroke`` paint draws no stroke, whatever the other four keys say.
-/// Absent values mean the .pen defaults: ``PenStrokeAlign/center``,
-/// ``PenStrokeJoin/miter``, ``PenStrokeCap/butt``, and a width of 1.
+/// A node with no ``stroke`` paint draws no stroke, whatever the other four keys say, and
+/// neither does one with no ``strokeWidth``: Pen draws no stroke on any kind of node whose
+/// width is absent (`render-stroke-no-width.pen`, pen CLI 0.3.13). Other absent values mean
+/// the .pen defaults: ``PenStrokeAlign/center``, ``PenStrokeJoin/miter`` and
+/// ``PenStrokeCap/butt``.
 public protocol PenStrokable {
     /// The stroke's paint, in the same shapes a fill accepts (`"#RRGGBB"` shorthand included).
     var stroke: PenFills? { get set }
@@ -40,12 +42,13 @@ public protocol PenStrokable {
 public extension PenStrokable {
     /// The resolved width of a uniform stroke, or `nil` when the stroke is per-side.
     ///
-    /// Defaults to 1 when `strokeWidth` is absent, matching the .pen default.
+    /// Zero when `strokeWidth` is absent, since Pen draws no stroke then. A width bound to a
+    /// variable that was not resolved reads as 1.
     var uniformStrokeWidth: Double? {
         switch strokeWidth {
         case let .uniform(value): value.literalValue ?? 1
         case .perSide: nil
-        case nil: 1
+        case nil: 0
         }
     }
 }

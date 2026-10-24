@@ -31,10 +31,11 @@ struct StrokeRingTests {
         #expect(ring.outsets == expected)
     }
 
-    @Test("An absent width is Pen's default of 1, centered")
+    @Test("An absent width is no stroke, as Pen draws it: no band on any side")
     func defaultWidth() {
         let ring = Self.ring(nil, nil)
-        #expect(ring.outsets == EdgeLengths(all: SymbolicLength(points: 0.5)))
+        #expect(ring.widths == EdgeLengths(all: .zero))
+        #expect(ring.outsets == EdgeLengths(all: .zero))
     }
 
     @Test("A width bound to a variable keeps the variable, scaled by the reach")

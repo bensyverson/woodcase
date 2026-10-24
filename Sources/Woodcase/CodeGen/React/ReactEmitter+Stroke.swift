@@ -17,11 +17,14 @@ extension ReactEmitter {
     /// an outer one a spread box-shadow, which is still a band around a 0×0 box, as Pen
     /// draws one (`render-stroke-bands`), where an outline draws nothing.
     static func emitStroke(_ node: any PenStrokable) -> [(String, String)] {
-        guard let colorStr = PaintRoute(node.stroke).plainColor.map(cssColorReference) else {
+        // No width is no stroke, as Pen draws it.
+        guard let strokeWidth = node.strokeWidth,
+              let colorStr = PaintRoute(node.stroke).plainColor.map(cssColorReference)
+        else {
             return []
         }
 
-        switch node.strokeWidth ?? .uniform(.literal(1)) {
+        switch strokeWidth {
         case let .uniform(value):
             let width = SymbolicLength(value)
             switch node.strokeAlignment ?? .center {

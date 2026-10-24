@@ -27,7 +27,7 @@ struct SwiftUIEmitterStrokeShadowTests {
     func centeredStroke() throws {
         let centered = try body(child: rect(##""stroke": "#00FF00", "strokeWidth": 6, "strokeAlignment": "center""##))
         #expect(centered.contains(".penDropShadow(PenSilhouette(Rectangle(), stroke: Rectangle().penStroke(.center, lineWidth: 6)), "))
-        let unset = try body(child: rect(##""stroke": "#00FF00""##))
+        let unset = try body(child: rect(##""stroke": "#00FF00", "strokeWidth": 1"##))
         #expect(unset.contains(".penDropShadow(PenSilhouette(Rectangle(), stroke: Rectangle().penStroke(.center, lineWidth: 1)), "))
     }
 
@@ -44,6 +44,8 @@ struct SwiftUIEmitterStrokeShadowTests {
         #expect(zero.contains(".penDropShadow(Rectangle(), "))
         let none = try body(child: rect(##""strokeWidth": 8, "strokeAlignment": "outer""##))
         #expect(none.contains(".penDropShadow(Rectangle(), "))
+        let unwidened = try body(child: rect(##""stroke": "#00FF00", "strokeAlignment": "outer""##))
+        #expect(unwidened.contains(".penDropShadow(Rectangle(), "))
     }
 
     @Test("Caps and joins shape the band the silhouette takes")

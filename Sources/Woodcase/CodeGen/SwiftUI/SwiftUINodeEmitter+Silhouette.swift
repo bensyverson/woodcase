@@ -63,7 +63,7 @@ extension SwiftUINodeEmitter {
     }
 
     /// The region a stroke covers that can lie outside `shape`, or `nil` when none can: no
-    /// enabled paint, a zero width, an inside stroke, or a width the theme cannot read (which
+    /// enabled paint, no width or a zero one, an inside stroke, or a width the theme cannot read (which
     /// the stroke itself reports).
     private func outsideBand(_ stroke: any PenStrokable, shape: Outline, box: FillBox) -> String? {
         guard PaintRoute(stroke.stroke) != .none else { return nil }
@@ -79,7 +79,7 @@ extension SwiftUINodeEmitter {
             guard let number = number(value, unemitted: &reported) else { return nil }
             width = number
         case nil:
-            width = SwiftUINumber(1)
+            return nil
         }
         guard width.largest > 0 else { return nil }
         if box.width == 0, box.height == 0, let corners = shape.corners {

@@ -50,12 +50,12 @@ struct ReactEmitterStrokePlacementTests {
         ), "\(content)")
     }
 
-    @Test("A stroke with no width is drawn at Pen's default of 1, centered")
+    @Test("A stroke with no width draws nothing, as Pen draws it")
     func defaultWidth() throws {
         let content = try card(child: """
         {"type": "rectangle", "id": "Rect1", "name": "Box", "width": 200, "height": 120, "stroke": "#FF0000"}
         """)
-        #expect(content.contains(##"boxShadow: "inset 0 0 0 0.5px #FF0000, 0 0 0 0.5px #FF0000","##), "\(content)")
+        #expect(!content.contains("#FF0000"), "\(content)")
     }
 
     @Test("A CSS ellipse's centered stroke straddles its edge too")

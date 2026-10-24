@@ -22,10 +22,12 @@ struct SwiftUIEmitterStrokeTests {
         #expect(code.contains("Rectangle()\n.stroke(Color(hex: 0xFF0000), lineWidth: 2)"))
     }
 
-    @Test("A stroke with no width or alignment is Pen's default: 1 point, centered")
+    @Test("A stroke with no width draws nothing, as Pen draws it; one with no alignment is centered")
     func defaultStroke() throws {
-        let code = try body(child: rect(##""stroke": "#FF0000""##))
-        #expect(code.contains(".stroke(Color(hex: 0xFF0000), lineWidth: 1)"))
+        let unwidened = try body(child: rect(##""stroke": "#FF0000""##))
+        #expect(!unwidened.contains("0xFF0000"))
+        let unaligned = try body(child: rect(##""stroke": "#FF0000", "strokeWidth": 1"##))
+        #expect(unaligned.contains(".stroke(Color(hex: 0xFF0000), lineWidth: 1)"))
     }
 
     @Test("An inner stroke on a plain or generously rounded rectangle is strokeBorder")

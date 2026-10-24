@@ -17,8 +17,8 @@ struct StrokeRing: Friendly {
     /// How far the stroke's outer edge lies outside the node's box, per side.
     var outsets: EdgeLengths
 
-    /// Creates the ring for a node's stroke width and alignment. An absent width is
-    /// Pen's default of 1.
+    /// Creates the ring for a node's stroke width and alignment. An absent width is no
+    /// stroke, as Pen draws it: zero on every side.
     init(_ stroke: any PenStrokable) {
         switch stroke.strokeWidth {
         case let .uniform(value):
@@ -30,7 +30,7 @@ struct StrokeRing: Friendly {
                 bottom: side(sides.bottom), left: side(sides.left)
             )
         case nil:
-            widths = EdgeLengths(all: SymbolicLength(points: 1))
+            widths = EdgeLengths(all: .zero)
         }
         let reach: Double = switch stroke.strokeAlignment ?? .center {
         case .inner: 0

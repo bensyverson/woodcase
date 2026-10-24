@@ -5,7 +5,7 @@
 
 extension SwiftUINodeEmitter {
     /// The view that draws a node's stroke in its box, or `nil` when it draws none: no
-    /// enabled paint, a zero width, or a width that names a variable the theme has no
+    /// enabled paint, no width or a zero one, or a width that names a variable the theme has no
     /// number for (reported in `unemitted`). A uniform or per-side width the theme has a
     /// number for is read through it.
     ///
@@ -47,10 +47,8 @@ extension SwiftUINodeEmitter {
                 unemitted: &unemitted
             )
         case nil:
-            return uniformStroke(
-                stroke, width: SwiftUINumber(1), shape: shape, box: box, dash: dash, miterLimit: miterLimit,
-                overFills: overFills, unemitted: &unemitted
-            )
+            // No width is no stroke, as Pen draws it.
+            return nil
         }
     }
 

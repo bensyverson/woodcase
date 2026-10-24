@@ -253,7 +253,7 @@ can carry one conforms to ``PenStrokable``:
 | Key | Type | Absent means |
 |-----|------|--------------|
 | `stroke` | ``PenFills`` — the same shapes `fill` accepts, `"#RRGGBB"` shorthand included | no stroke at all |
-| `strokeWidth` | ``PenStrokeWidth`` — a number, a `"$variable"`, or `{"top":…,"right":…,"bottom":…,"left":…}` | a width of 1 |
+| `strokeWidth` | ``PenStrokeWidth`` — a number, a `"$variable"`, or `{"top":…,"right":…,"bottom":…,"left":…}` | no stroke at all, as Pen draws it; a side the object leaves out has none |
 | `strokeAlignment` | ``PenStrokeAlign`` — `inner`, `center`, `outer` | `center` |
 | `strokeLinejoin` | ``PenStrokeJoin`` — `miter`, `bevel`, `round` | `miter` |
 | `strokeLinecap` | ``PenStrokeCap`` — `butt`, `round`, `square` | `butt` |

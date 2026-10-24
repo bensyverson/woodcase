@@ -133,6 +133,8 @@ extension ReactEmitter {
     /// border cannot draw those even inside the box: it would move the children, which
     /// Pen's stroke does not (`render-inner-sides`), and paint over them.
     private static func overlayFills(_ stroke: any PenStrokable) -> [PenFill]? {
+        // No width is no stroke, as Pen draws it.
+        guard stroke.strokeWidth != nil else { return nil }
         let route = PaintRoute(stroke.stroke)
         if let layered = route.layeredFills { return layered }
         guard let color = route.plainColor, case .perSide = stroke.strokeWidth else {

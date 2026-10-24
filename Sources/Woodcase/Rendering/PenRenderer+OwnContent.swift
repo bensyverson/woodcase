@@ -186,7 +186,7 @@ extension PenRenderer {
         let widths: [Double] = switch stroke?.strokeWidth {
         case let .uniform(value): [value.literalValue ?? 1]
         case let .perSide(sides): [sides.top, sides.right, sides.bottom, sides.left].compactMap { $0?.literalValue }
-        case nil: [stroke == nil ? 0 : 1]
+        case nil: [0]
         }
         return CGFloat(2 * (widths.max() ?? 0))
     }

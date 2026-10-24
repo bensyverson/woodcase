@@ -71,6 +71,14 @@ In .pen 2.17 the `strokeAlignment` key defaults to `"center"`, and the format's 
 
 > Note: This reverses the 2.9 default. The legacy nested `stroke.align` defaulted to `"inside"`, which made strokes on open paths (lines, unclosed SVG paths) invisible unless `align` was set to `"center"` explicitly. ``PenStrokeMigrationRule`` carries every legacy `align` across verbatim — `inside` → `inner`, `outside` → `outer` — so no legacy document changes appearance; only newly authored 2.17 nodes get the centered default.
 
+## A Stroke With No Width
+
+A node with a `stroke` paint and no `strokeWidth` draws **no stroke**, on every kind of node — a rectangle, an ellipse, a frame, a polygon, a path, a line, and a connection, which Pen does not load but Woodcase draws as a line. Pen draws none, and every Woodcase target follows: the Core Graphics renderer, SVG export, React, SwiftUI, the shadow silhouette and a node's own ink (``PenStrokable/drawn(on:)`` takes the paint away; ``PenStrokable/uniformStrokeWidth`` reads zero). The schema's default for `strokeWidth` is 0 for the same reason, so the inspector shows what is drawn. A per-side `strokeWidth` object strokes only the sides it writes, and an empty object strokes none; a width bound to a variable draws at the variable's value, uniform or per side. Pen's re-save keeps the widths as written and adds none, and a 2.9 nested stroke with no `thickness` migrates to no width there as here.
+
+`render-stroke-no-width.pen` pins it against Pen's exports (`scripts/pen-oracle … --scale 2`, pen CLI 0.3.13, 2026-10-23): each kind with no width beside controls with a width of 4, per-side objects with sides left out, and variable-bound widths; `PenStrokeMissingWidthTests` holds all fifteen boards within MAE 0.5. Until leaf `oMI28U` (2026-10-23) Woodcase drew an absent width at 1 point.
+
+Text is apart: Pen strips a text's stroke on load and draws none even with a width, and Woodcase draws none either (`woodcase lint`'s `text-style-stripped`, <doc:WoodcaseLint>).
+
 ## Files From a Newer Editor
 
 The format's own editor migrates a file on load according to the version it declares — version 1.2.14 of the editor, which writes 2.19, turns every inner shadow in a pre-2.19 file into an outer one. So the declared version is data, not a label: Woodcase writes back a newer minor's declared version unchanged rather than stamping its own model's older one, and treats a file of another major as read-only. The whole policy is in <doc:PenEngine>, under *The version gate*.

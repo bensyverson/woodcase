@@ -196,13 +196,13 @@ extension SwiftUINodeEmitter {
             dy = flatY ? reach : 0
         }
 
-        /// The widest literal side of a stroke width; unset is Pen's 1.
+        /// The widest literal side of a stroke width; unset is no stroke, so zero.
         private static func widest(_ width: PenStrokeWidth?) -> Double {
             switch width {
             case let .uniform(value): value.literalValue ?? 1
             case let .perSide(sides):
                 [sides.top, sides.right, sides.bottom, sides.left].compactMap { $0?.literalValue }.max() ?? 1
-            case nil: 1
+            case nil: 0
             }
         }
 

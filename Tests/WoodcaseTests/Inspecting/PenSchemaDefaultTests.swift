@@ -75,9 +75,9 @@ struct PenSchemaDefaultTests {
         #expect(unset("common.layoutPosition", on: .rectangle) == .string("auto"))
     }
 
-    @Test("Strokes are 1 point, centered, mitered and butt-capped; shapes have their own")
+    @Test("Strokes are no width (no stroke, as Pen draws one), centered, mitered and butt-capped; shapes have their own")
     func strokeAndShapeDefaults() {
-        #expect(unset("kind.strokeWidth", on: .rectangle) == .number(1))
+        #expect(unset("kind.strokeWidth", on: .rectangle) == .number(0))
         #expect(unset("kind.strokeAlignment", on: .line) == .string("center"))
         #expect(unset("kind.strokeLinejoin", on: .polygon) == .string("miter"))
         #expect(unset("kind.strokeLinecap", on: .line) == .string("butt"))

@@ -80,8 +80,10 @@ extension PenSchema {
         "kind.sweepAngle": .number(360),
         "kind.polygonCount": .number(Double(PenShapeGeometry.defaultPolygonCount)),
         "kind.fillRule": .string(PenFillRule.nonzero.rawValue),
-        // Stroke (`PenStrokable.uniformStrokeWidth`, `PenStrokeRenderer.Style`).
-        "kind.strokeWidth": .number(1),
+        // Stroke (`PenStrokable.uniformStrokeWidth`, `PenStrokeRenderer.Style`). An unset
+        // width draws no stroke, as Pen draws it (`render-stroke-no-width.pen`), which is
+        // what a width of 0 draws.
+        "kind.strokeWidth": .number(0),
         "kind.strokeAlignment": .string(PenStrokeAlign.center.rawValue),
         "kind.strokeLinejoin": .string(PenStrokeJoin.miter.rawValue),
         "kind.strokeLinecap": .string(PenStrokeCap.butt.rawValue),
