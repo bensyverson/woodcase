@@ -71,6 +71,35 @@ struct PasteCommandTests {
         #expect(try Data(contentsOf: fixture.file) == before)
     }
 
+    @Test("--into a slot of an instance writes the copy into its fill")
+    func intoSlot() throws {
+        let fixture = try CommandFixture(fixture: "clip.pen")
+        let slotted = fixture.root.appendingPathComponent("slots.pen")
+        try Data("""
+        {"version": "2.19", "children": [
+          {"id": "Item", "type": "frame", "name": "Item", "reusable": true, "x": 0, "y": 0, "width": 100, "height": 20},
+          {"id": "Screen", "type": "frame", "name": "Screen", "reusable": true, "x": 200, "y": 0, "width": 200,
+           "height": "fit_content", "layout": "vertical", "children": [
+            {"id": "List", "type": "frame", "name": "List", "slot": ["Item"], "width": "fill_container",
+             "height": "fit_content", "layout": "vertical"}]},
+          {"id": "Filled", "type": "ref", "ref": "Screen", "name": "Filled", "x": 500, "y": 0,
+           "descendants": {"List": {"children": [{"id": "Row1", "type": "ref", "ref": "Item", "name": "Row 1"}]}}},
+          {"id": "Loose", "type": "rectangle", "name": "Loose", "x": 0, "y": 300, "width": 30, "height": 30}
+        ]}
+        """.utf8).write(to: slotted)
+        let clipRun = try fixture.run("clip", slotted.path, "Loose", "--json")
+        #expect(clipRun.status == 0)
+        let clip = fixture.root.appendingPathComponent("loose.json")
+        try Data(clipRun.stdout.utf8).write(to: clip)
+
+        let run = try fixture.run("paste", slotted.path, clip.path, "--into", "Filled/List", "--as", "ana", "--json")
+
+        #expect(run.status == 0, "\(run.stderr)")
+        let report = try JSONDecoder().decode(PasteCommand.Report.self, from: Data(run.stdout.utf8))
+        let document = try EditableDocument(from: PenParser.parse(Data(contentsOf: slotted)))
+        #expect(document.slot("Filled/List")?.contentIDs.last == report.insertedRootIDs.first)
+    }
+
     @Test("Two placements at once is a usage failure")
     func onePlacement() throws {
         let fixture = try CommandFixture(fixture: "clip.pen")

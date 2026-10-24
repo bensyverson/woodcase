@@ -173,6 +173,22 @@ canvas, or a clip without ``PenClip/origins`` — keeps its canvas position
 instead, written in the container's coordinates, and so does every copy of a paste when
 any one lacks an offset, so the copies keep their arrangement.
 
+### Pasting into a slot
+
+``PasteTarget/inside(containerID:)`` and ``PasteTarget/after(siblingID:)`` also take the
+expanded id of a node drawn inside an instance: a slot frame, or a frame or group in a
+slot's content, to paste after its last child; any node of a slot's content, to paste right
+after it. The copies are placed as anywhere else — in the flow of a stack slot, at their
+offsets or beside the node in a free one — then written by
+``EditPlanner/planInsert(_:into:at:in:)`` as **one `children` override of the slot**, the
+default content copied into a fill first when the slot shows it (<doc:SlotEditing>).
+``PastePlan/insertedRootIDs`` names the copies by their expanded ids (`Filled/k3Fq9`).
+Carried components still land as roots, before the fill that places them; connectors still
+land at the top level, their ends naming the copies in the fill (`Filled/k3Fq9`). A loop
+the fill would close is refused as ``PasteError/wouldCloseComponentLoop(_:)``; a node of an
+instance outside its slots as ``PasteError/slotRefused(_:)``, and an instance in a slot as
+``PasteError/notAContainer(id:)``. The other targets still name stored containers only.
+
 ### Back where it came from
 
 ``PasteTarget/whereCopied(documentID:)`` places each copied root on its own, so copies

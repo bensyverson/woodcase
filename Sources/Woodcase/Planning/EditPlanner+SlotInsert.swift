@@ -43,6 +43,32 @@ public extension EditPlanner {
         at index: Int? = nil,
         in document: EditableDocument
     ) throws(EditRefusal) -> StructuralEditPlan {
+        try planInsert(nodes, into: parentID, at: index, reserving: [], in: document).plan
+    }
+}
+
+extension EditPlanner {
+    /// ``planInsert(_:into:at:in:)`` with ids reserved for other nodes the caller writes in
+    /// the same edit — a paste's definitions and connectors — so a default content copied
+    /// into a fill never takes one.
+    ///
+    /// - Parameters:
+    ///   - nodes: The nodes, each with its children inline.
+    ///   - parentID: A stored id, a slot's or a slot content container's expanded id, or
+    ///     `nil` for the canvas.
+    ///   - index: Where the first goes among the parent's children; `nil` puts them last.
+    ///   - reserving: Ids no copy of default content may take.
+    ///   - document: The document, as it stands.
+    /// - Returns: The plan, and for a slot the expanded-id prefix of its content after the
+    ///   plan (`Filled/`); `nil` outside slots.
+    /// - Throws: ``EditRefusal`` naming why nothing should be written.
+    static func planInsert(
+        _ nodes: [PenNode],
+        into parentID: String?,
+        at index: Int?,
+        reserving: Set<String>,
+        in document: EditableDocument
+    ) throws(EditRefusal) -> (plan: StructuralEditPlan, contentBase: String?) {
         let session = SlotEditSession(document: document)
         let destination = try SlotDestination(parentID, in: session)
         var renames: [String: String] = [:]
@@ -55,12 +81,13 @@ public extension EditPlanner {
                 operations.append(.insertNode(EditOperation.InsertNode(
                     node: settled, parentID: parent, index: index.map { $0 + step }
                 )))
-                placed.append(expandedID(ofInserted: settled, in: document))
+                placed.append(settled.id)
             }
             try validating(operations, address: parentID ?? "", in: document)
-            return StructuralEditPlan(operations: operations, placedIDs: placed)
+            return (StructuralEditPlan(operations: operations, placedIDs: placed), nil)
 
         case let .slot(refID, slotKey, containerKey):
+            session.taken.formUnion(reserving)
             var localIDs: [String] = []
             for (step, node) in nodes.enumerated() {
                 let base = session.contentBase(refID: refID, slotKey: slotKey)
@@ -76,71 +103,17 @@ public extension EditPlanner {
                 ) else { throw SlotMove.unreadable(parentID ?? slotKey) }
                 localIDs.append(SlotJSON.id(of: kept) ?? node.id)
             }
-            return try finishing(session, placing: localIDs, in: slotKey, of: refID, address: parentID ?? "")
+            let plan = try finishing(session, placing: localIDs, in: slotKey, of: refID, address: parentID ?? "")
+            return (plan, session.contentBase(refID: refID, slotKey: slotKey))
         }
-    }
-
-    /// Plans Duplicate: a copy of each node right after it, in its own parent — slot
-    /// content in its slot, with fresh ids throughout, the nodes in the fills an
-    /// instance among them writes included (Penumbra spec §13.5 rules 4 and 8).
-    ///
-    /// A copy of slot content is written into the slot's fill, the default content
-    /// copied into one first when the slot shows it; a copy of a stored node is an
-    /// insert after it. Penumbra's own offsets for a top-level duplicate are its own;
-    /// this plans the in-place copy.
-    ///
-    /// ```swift
-    /// let plan = try EditPlanner.planDuplicate(nodeIDs: ["Filled/Row2/ItemB"], in: document)
-    /// selection = plan.placedIDs
-    /// ```
-    ///
-    /// Refused for a node inside an instance outside its slots' content
-    /// (``EditRefusal/Code/insideInstance``) and for one naming nothing
-    /// (``EditRefusal/Code/addressNotFound``).
-    ///
-    /// - Parameters:
-    ///   - nodeIDs: The nodes, by stored or expanded id; a node inside another given
-    ///     goes with it.
-    ///   - document: The document, as it stands.
-    /// - Returns: The edits, to submit as one, and the copies' ids in the order given.
-    /// - Throws: ``EditRefusal`` naming why nothing should be written.
-    static func planDuplicate(nodeIDs: [String], in document: EditableDocument) throws(EditRefusal) -> StructuralEditPlan {
-        let session = SlotEditSession(document: document)
-        let origins = try SlotOrigin.topMost(
-            nodeIDs.map { id throws(EditRefusal) in try SlotOrigin(id, in: session) }, in: session
-        )
-        var stored: [EditOperation] = []
-        var placed: [Placed] = []
-        var copied: [String?: [Int]] = [:]
-        for origin in origins {
-            switch origin {
-            case let .document(id):
-                let copy = try storedCopy(of: id, taken: &session.taken, in: document)
-                let parent = document.parentID(of: id)
-                let original = siblingIndex(of: id, in: document)
-                let index = original + 1 + (copied[parent] ?? []).count(where: { $0 < original })
-                copied[parent, default: []].append(original)
-                stored.append(.insertNode(EditOperation.InsertNode(node: copy, parentID: parent, index: index)))
-                placed.append(.stored(expandedID(ofInserted: copy, in: document)))
-            case let .content(refID, key):
-                try placed.append(duplicate(key, of: refID, in: session))
-            }
-        }
-        let overrides = session.writeOperations()
-        try validating(stored + overrides, address: nodeIDs.first ?? "", in: document)
-        return StructuralEditPlan(
-            operations: stored + overrides,
-            placedIDs: placed.map { $0.expandedID(in: session) },
-            renamedIDs: session.renamedIDs,
-            materializedSlotIDs: session.materializedSlotIDs
-        )
     }
 }
 
 extension EditPlanner {
     /// A node a slot plan placed, to name once the plan is done.
     enum Placed {
-        /// A stored node, by its expanded id.
+        /// A stored node, by its own id — what an editor selects it by, an instance
+        /// among them.
         case stored(String)
 
         /// A node in a slot's fill, by its id there.
@@ -189,48 +162,5 @@ extension EditPlanner {
         } catch {
             throw EditRefusal(error, address: address, in: document)
         }
-    }
-
-    /// The expanded id a node inserted into the document answers to: its id, and for an
-    /// instance its component root's after that.
-    static func expandedID(ofInserted node: PenNode, in document: EditableDocument) -> String {
-        guard case let .ref(data) = node.kind, let root = document.componentRootID(of: data) else { return node.id }
-        return node.id + String(NodeAddress.separator) + root
-    }
-
-    /// A copy of a stored node, every id fresh, its fills' included.
-    private static func storedCopy(
-        of id: String, taken: inout Set<String>, in document: EditableDocument
-    ) throws(EditRefusal) -> PenNode {
-        let subtree: PenNode
-        do {
-            subtree = try document.materializeSubtree(rootID: id)
-        } catch {
-            throw EditRefusal(error, address: id, in: document)
-        }
-        let plan = SubtreeIDPlan.regenerating(subtree, avoiding: taken)
-        taken.formUnion(plan.ids)
-        return SlotJSON.renumberingFills(of: plan.applied(to: subtree), taken: &taken)
-    }
-
-    /// Copies one node of slot content into its fill, right after it.
-    private static func duplicate(_ key: String, of refID: String, in session: SlotEditSession) throws(EditRefusal) -> Placed {
-        guard let before = session.map(of: refID), let siteIndex = before.nodes[key]?.siteIndex else {
-            throw outsideSlotsRefusal(key)
-        }
-        let slotKey = before.sites[siteIndex].slotKey
-        guard let (site, fill) = session.ensureFill(slotKey: session.current(slotKey, in: refID), in: refID),
-              let map = session.map(of: refID),
-              let localID = map.nodes[session.current(key, in: refID)]?.localID,
-              let node = SlotJSON.node(localID, in: fill),
-              let (parent, index) = SlotJSON.position(of: localID, in: fill)
-        else { throw SlotMove.unreadable(key) }
-        var copies: [String: String] = [:]
-        let base = session.contentBase(refID: refID, slotKey: slotKey)
-        let copy = SlotJSON.renumbered(.dictionary(node), oldBase: base, newBase: base, taken: &session.taken, renames: &copies)
-        var list = fill
-        SlotJSON.insert(copy, into: parent, at: index + 1, in: &list)
-        session.setFill(list, of: site)
-        return .slot(refID: refID, slotKey: slotKey, localID: SlotJSON.id(of: copy) ?? localID)
     }
 }

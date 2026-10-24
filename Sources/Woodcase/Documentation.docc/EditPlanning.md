@@ -112,23 +112,30 @@ ruling of 2026-10-15, which follows Figma). Each returns plain operations to sub
 edit, and each reads the canvas from a ``PenLayoutState`` of the document as it stands:
 
 ```swift
-let plan = try EditPlanner.planGroup(nodeIDs: ["a", "b"], kind: .group, in: document, layout: layout)
+let plan = try EditPlanner.planGroup(nodeIDs: ["a", "b"], kind: .group, named: "Group", in: document, layout: layout)
 try session.submit(.local(LocalEdit(operations: plan.operations)))   // then select plan.wrapperID
 
 let operations = try EditPlanner.planUngroup(groupID: plan.wrapperID, in: document, layout: layout)
+let several = try EditPlanner.planUngroup(groupIDs: [plan.wrapperID], in: document, layout: layout)
 ```
 
-- ``EditPlanner/planGroup(nodeIDs:kind:in:layout:)`` wraps the top-most members (a member
+- ``EditPlanner/planGroup(nodeIDs:kind:named:in:layout:)`` wraps the top-most members (a member
   inside another is dropped, not refused) in a group or a free frame (``WrapKind``). The
   wrapper goes into the parent of the front-most member — the last in document order — at
   that member's index; members from other parents move in, in document order. In a stack
   the wrapper takes that member's place in the flow, and the members become its free
-  children where they were drawn.
+  children where they were drawn. A name given rides the wrapper. When the front-most
+  member is in an instance's slot content, the wrapper goes into that slot's fill and the
+  whole change is one override of the slot (<doc:SlotEditing>); a stored front-most member
+  with slot content among the others is refused.
 - ``EditPlanner/planUngroup(groupID:in:layout:)`` moves a group's or a frame's children to
   its parent at its index, in their order, and removes it. In a stack they join the flow.
   A connector attached to the group or frame itself would be left naming nothing, so it is
   deleted first, in the same edit, as a delete takes one; the connectors attached to the
   children stay (the integrator's ruling of 2026-10-23).
+- ``EditPlanner/planUngroup(groupIDs:in:layout:)`` takes several apart as one edit: stored
+  ones front to back, as the one-group plan plans each, and ones in slot content in their
+  fills, each slot written once, with ``StructuralEditPlan/placedIDs`` naming the children.
 
 **Nothing moves on the canvas.** A node placed by its own `x`/`y` is drawn by
 `translate(x, y) · turn · flip` about its anchor in its parent's own coordinates, so each
@@ -203,8 +210,10 @@ wrapper it removes does take its own connectors, as a delete would.
 Copy, and so Cut, carries every connector whose two ends are both inside the copied nodes
 — a copied node or anything inside it — whether or not the connector was selected; a
 connector with one end outside the copy stays behind (Ben's ruling of 2026-10-23,
-Penumbra's interaction spec §11). Duplicate and an Option-drag copy follow the same rule,
-so it lives in one query:
+Penumbra's interaction spec §11). Duplicate and an Option-drag copy
+(``EditPlanner/planDuplicate(nodeIDs:in:)``, whose copies are named in
+``StructuralEditPlan/carriedConnectorIDs``) and `woodcase cp` follow the same rule, so it
+lives in one query:
 
 ```swift
 let carried = EditPlanner.connectorIDs(enclosedBy: ["CardA", "CardB"], in: document)
@@ -213,7 +222,8 @@ let carried = EditPlanner.connectorIDs(enclosedBy: ["CardA", "CardB"], in: docum
 
 An end is inside the copy when its path's first id is a copied stored node or a node inside
 one (`Chip/Label` is inside a copied `Chip`), or when it is the expanded id of a copied node
-drawn inside an instance, or of anything drawn inside that. A connector among the copied
+drawn inside an instance, or of anything drawn inside that — an instance drawn there
+included under the path an end names it by (`Filled/Row2`, not `Filled/Row2/ItemB`). A connector among the copied
 nodes is not listed: it is copied already. ``PenClip/extract(nodeIDs:from:documentID:)``
 asks this (<doc:Clipboard>); its counterpart for a removal is
 ``EditPlanner/connectorIDs(attachedTo:in:)``.
@@ -413,8 +423,9 @@ let drawn = await document.materializeSnapshot(overlaying: preview)
 - ``EditPlanner/planMove(nodeIDs:into:at:keepingDrawnPlace:snapping:in:layout:)``
 - ``StructuralEditPlan``
 - <doc:SlotEditing>
-- ``EditPlanner/planGroup(nodeIDs:kind:in:layout:)``
+- ``EditPlanner/planGroup(nodeIDs:kind:named:in:layout:)``
 - ``EditPlanner/planUngroup(groupID:in:layout:)``
+- ``EditPlanner/planUngroup(groupIDs:in:layout:)``
 - ``EditPlanner/planDelete(nodeIDs:in:)``
 - ``DeletionPlan``
 - ``EditPlanner/connectorIDs(attachedTo:in:)``

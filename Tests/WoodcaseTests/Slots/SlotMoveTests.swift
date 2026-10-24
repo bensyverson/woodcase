@@ -145,7 +145,7 @@ struct SlotMoveTests {
         #expect(doc.parentID(of: "Row2") == "Board")
         guard case let .ref(data)? = doc.node(id: "Row2")?.kind else { Issue.record("not a ref"); return }
         #expect(data.descendants?["BLbl"]?.properties["content"] == .string("Second"))
-        #expect(plan.placedIDs == ["Row2/ItemB"])
+        #expect(plan.placedIDs == ["Row2"], "a stored instance is selected by its own id")
     }
 
     @Test("A node dragged out of a free slot keeps its drawn place")

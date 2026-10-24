@@ -83,6 +83,11 @@ public struct WriteDivergence: Friendly {
         /// A ``Severity/note``: it is what deleting a node means.
         case deletedConnectors
 
+        /// A copy also copied the connectors whose two ends are both inside the copied
+        /// node, attached to the copy (``EditPlanner/connectorIDs(enclosedBy:in:)``). A
+        /// ``Severity/note``: it is what copying a node means.
+        case carriedConnectors
+
         /// A `var` line carried a themed value: several values on one line, one per
         /// theme option, plus whatever axes the document had to grow to hold them.
         case themedVariable

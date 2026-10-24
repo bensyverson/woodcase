@@ -66,7 +66,7 @@ private struct EnclosedNodes {
     var stored: Set<String> = []
 
     /// The expanded ids of the nodes drawn inside an instance that were copied, and of
-    /// everything drawn inside one.
+    /// everything drawn inside one — an instance among them also by its ref's path.
     var drawn: Set<String> = []
 
     /// Whether nothing was found.
@@ -89,7 +89,15 @@ private struct EnclosedNodes {
             case let .instanceDescendant(refID, _)?:
                 guard let expansion = try? document.expandRef(nodeID: refID).expandedNode,
                       let node = Self.find(id, in: expansion) else { continue }
-                drawn.formUnion(Self.ids(in: node))
+                for drawnID in Self.ids(in: node) {
+                    drawn.insert(drawnID)
+                    // An instance drawn here answers to its ref's path and its component
+                    // root's id (`Filled/Row2/ItemB`); an end names it by the ref's path.
+                    var steps = drawnID.split(separator: NodeAddress.separator).map(String.init)
+                    if steps.count > 1, let last = steps.popLast(), document.componentRegistry[last] != nil {
+                        drawn.insert(steps.joined(separator: String(NodeAddress.separator)))
+                    }
+                }
             case nil:
                 continue
             }

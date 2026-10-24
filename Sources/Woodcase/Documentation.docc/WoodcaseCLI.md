@@ -904,7 +904,10 @@ restoring the previous subtree exactly.
 Copy a node into a parent, with fresh ids. Copying a reusable component makes an
 *instance* of it, as Pen does; copying anything else deep-copies it. Properties apply
 to the copy and never to the source, and a key written as a name path
-(`Header/Title/kind.content`) lands on that node inside the copy.
+(`Header/Title/kind.content`) lands on that node inside the copy. The copy carries every
+connector whose two ends are both inside the source, attached to the copy — to the instance
+when the source is a component (`Chip/Label`) — and the answer notes them; a connector with
+an end outside stays single (``EditPlanner/connectorIDs(enclosedBy:in:)``).
 
 ```bash
 woodcase cp design.pen Home document common.name=Checkout \
@@ -957,6 +960,9 @@ woodcase clip design.pen Hero --json | woodcase paste other.pen - --at 0,0 --as 
 | `--json` | `false` | `{"insertedRootIDs":[…],"reusedComponents":{…},"renamedComponents":[…],"reusedVariables":[…],"renamedVariables":[…],"insertedConnectorIDs":[…],"droppedConnectorIDs":[…],"revision":…}`; the two connector lists are left out when empty |
 
 Pass at most one placement. `--dry-run` and `--as` work as for every write verb.
+`--into` and `--after` also take a slot of an instance (`Filled/List`) or a node of its
+content: the copies join the instance's fill, written as one override of the slot, and a
+connector's end on a copy names it through the instance (<doc:Clipboard#Pasting-into-a-slot>).
 
 ### `mv`
 
@@ -976,7 +982,7 @@ woodcase mv design.pen Card/Badge Card/Header --at 0 --as ana
 ### `group`
 
 What an editor's Group (⌘G) and Frame Selection (⌥⌘G) do
-(``EditPlanner/planGroup(nodeIDs:kind:in:layout:)``; see <doc:EditPlanning>). The wrapper
+(``EditPlanner/planGroup(nodeIDs:kind:named:in:layout:)``; see <doc:EditPlanning>). The wrapper
 goes into the parent of the front-most node — the last in document order — at its index,
 and nodes from other parents move in. Nothing moves on the canvas: each node's `x`/`y`, and
 its turn and flips under a turned or flipped parent, are rewritten to keep it where it is

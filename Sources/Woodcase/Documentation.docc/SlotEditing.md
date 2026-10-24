@@ -55,8 +55,21 @@ default content with the instance's overrides folded in.
   slots, so a caller that plans node by node and concatenates can't write a slot from a
   stale copy.
 - ``EditPlanner/planInsert(_:into:at:in:)`` places new or pasted nodes;
-  ``EditPlanner/planDuplicate(nodeIDs:in:)`` copies nodes after themselves;
-  ``EditPlanner/planDelete(nodeIDs:in:)`` deletes slot content from its fill.
+  ``EditPlanner/planDuplicate(nodeIDs:in:)`` copies nodes after themselves, with the
+  connectors between them; ``EditPlanner/planDelete(nodeIDs:in:)`` deletes slot content
+  from its fill.
+- A paste lands in a slot when its target names one: ``PasteTarget/inside(containerID:)``
+  with a slot frame's or a slot content container's expanded id puts the copies after its
+  last child, and ``PasteTarget/after(siblingID:)`` with slot content's expanded id puts them
+  right after it. ``PenClip/plan(into:at:)`` hands the placed copies to the slot planner,
+  so the fill is one override (<doc:Clipboard#Pasting-into-a-slot>).
+- ``EditPlanner/planGroup(nodeIDs:kind:named:in:layout:)`` wraps slot content in a group or
+  a free frame in its fill when the front-most member is slot content; the wrapper answers
+  to ``WrapPlan/wrapperID`` as an expanded id, and ``WrapPlan/renamedIDs`` carries a
+  selection across a default content's first copy.
+  ``EditPlanner/planUngroup(groupIDs:in:layout:)`` takes groups in slot content apart, every
+  slot touched written once; the one-group ``EditPlanner/planUngroup(groupID:in:layout:)``
+  still refuses slot content, for the same reason the single-node move does.
 - ``EditPlanner/planReplaceSlotContent(slotID:with:count:in:)`` replaces the content with
   instances of a component — as many as it had layers, at least one;
   ``EditPlanner/planEmptySlot(slotID:in:)`` leaves it empty, which is not its default;
@@ -87,6 +100,15 @@ plan.materializedSlotIDs                      // ["Default/List"]
 plan.renamed("Default/Empty1/EmptyState")     // "Default/k3Fq9/EmptyState"
 ```
 
+### Connectors
+
+Pen keeps a connector at the top level wherever the nodes it joins live, and an end names a
+node in a fill by the instance and its key (`Filled/Row2`, `HostInst/Nest/NRow1`). So a
+connector a duplicate or a paste carries into a slot is inserted as a root with its ends on
+the copies in the fill (`Filled/<copy>`); a connector attached to default content follows it
+when the first change copies it into a fill; a connector attached to a group Ungroup takes
+apart in a fill is deleted with it.
+
 ### Ids stay unique
 
 Pen renames a repeated id on load, a node in a fill included, and a path to it stops
@@ -112,6 +134,8 @@ node anywhere has them (``EditableDocument`` counts fills as in use). `woodcase 
 - ``EditPlanner/planMove(nodeIDs:into:at:keepingDrawnPlace:snapping:in:layout:)``
 - ``EditPlanner/planInsert(_:into:at:in:)``
 - ``EditPlanner/planDuplicate(nodeIDs:in:)``
+- ``EditPlanner/planGroup(nodeIDs:kind:named:in:layout:)``
+- ``EditPlanner/planUngroup(groupIDs:in:layout:)``
 - ``EditPlanner/planReplaceSlotContent(slotID:with:count:in:)``
 - ``EditPlanner/planEmptySlot(slotID:in:)``
 - ``EditPlanner/planResetSlot(slotID:in:)``

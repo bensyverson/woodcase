@@ -70,14 +70,23 @@ struct PasteSite: Friendly {
     /// How the copies are positioned.
     var arrangement: Arrangement
 
+    /// The instance whose slot the copies land in, when ``parentID`` is the expanded id of
+    /// a slot frame or a container in its content; `nil` for a parent the document stores.
+    var slot: SlotParent?
+
     /// Resolves a paste target.
     ///
     /// - Parameters:
     ///   - target: Where the paste was asked to go.
     ///   - document: The target document.
+    /// ``PasteTarget/inside(containerID:)`` and ``PasteTarget/after(siblingID:)`` also
+    /// resolve the expanded id of a node in an instance's slot (``inSlot(inside:in:)``,
+    /// ``inSlot(after:in:)``).
+    ///
     /// - Throws: ``PasteError/targetNotFound(id:)`` for an id the document does not
     ///   store, ``PasteError/notAContainer(id:)`` for a container that cannot hold
-    ///   children.
+    ///   children, ``PasteError/slotRefused(_:)`` for a node of an instance outside its
+    ///   slots.
     init(_ target: PasteTarget, in document: EditableDocument) throws {
         switch target {
         case .inPlace:
@@ -85,6 +94,10 @@ struct PasteSite: Friendly {
         case let .whereCopied(documentID):
             self.init(parentID: nil, index: nil, arrangement: .whereCopied(documentID: documentID))
         case let .inside(id):
+            if let site = try Self.inSlot(inside: id, in: document) {
+                self = site
+                return
+            }
             try self.init(into: id, free: .container(id: id), in: document)
         case let .atBoardOffset(id):
             try self.init(into: id, free: .boardOffset(containerID: id), in: document)
@@ -95,6 +108,10 @@ struct PasteSite: Friendly {
         case let .centered(point, id):
             try self.init(by: .center(point), in: id, of: document)
         case let .after(id):
+            if let site = try Self.inSlot(after: id, in: document) {
+                self = site
+                return
+            }
             guard document.nodes[id] != nil else { throw PasteError.targetNotFound(id: id) }
             guard let parentID = document.parents[id] else {
                 let index = (document.rootOrder.firstIndex(of: id) ?? document.rootOrder.count - 1) + 1
@@ -111,10 +128,11 @@ struct PasteSite: Friendly {
     }
 
     /// Creates a site from its parts.
-    init(parentID: String?, index: Int?, arrangement: Arrangement) {
+    init(parentID: String?, index: Int?, arrangement: Arrangement, slot: SlotParent? = nil) {
         self.parentID = parentID
         self.index = index
         self.arrangement = arrangement
+        self.slot = slot
     }
 
     /// A site placed by a corner: in a container, or on the canvas when there is none.

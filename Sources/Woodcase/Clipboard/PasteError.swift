@@ -24,6 +24,11 @@ public enum PasteError: Error, Friendly, CustomStringConvertible {
     /// The loop is named in render order, starting from the component pasted into.
     case wouldCloseComponentLoop(ComponentLoop)
 
+    /// The target names a node inside an instance that the slot planner refuses to paste
+    /// at: one outside the instance's slots (``EditRefusal/Code/insideInstance``), or a
+    /// fill it cannot read (``EditRefusal/Code/documentRefused``). The refusal says which.
+    case slotRefused(EditRefusal)
+
     /// The refusal as a sentence.
     public var description: String {
         switch self {
@@ -37,6 +42,8 @@ public enum PasteError: Error, Friendly, CustomStringConvertible {
         case let .wouldCloseComponentLoop(loop):
             "Pasting here would make components contain each other: \(loop). "
                 + "Paste outside the component, or paste a copy without that instance."
+        case let .slotRefused(refusal):
+            refusal.message
         }
     }
 }

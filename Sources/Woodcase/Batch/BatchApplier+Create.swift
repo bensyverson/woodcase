@@ -136,16 +136,27 @@ extension BatchApplier {
 
         // Placing a reusable node makes an instance of it, which is what Pen
         // does — duplicating the definition would make a second component.
-        var node: PenNode = if source.common.reusable == true {
-            PenNode(
+        var taken = document.idsInUse
+        var node: PenNode
+        let end: (String) -> String
+        if source.common.reusable == true {
+            node = PenNode(
                 id: PenID.generate(avoiding: document.allNodeIDs),
                 common: PenNodeCommon(name: source.common.name),
                 kind: .ref(PenNode.RefData(ref: sourceID))
             )
+            taken.insert(node.id)
+            end = { [instanceID = node.id] path in Self.instanceEnd(path, component: sourceID, instance: instanceID) }
         } else {
-            try copied(document.materializeSubtree(rootID: sourceID), into: document)
+            let copy = try copied(document.materializeSubtree(rootID: sourceID), taken: &taken)
+            node = copy.node
+            end = { EditPlanner.mappingSteps(of: $0, through: copy.ids) }
         }
-        let carried = node
+        // The copy carries every connector whose two ends are both inside the source,
+        // its ends on the copy, as Duplicate and a paste do.
+        let carried = EditPlanner.connectorIDs(enclosedBy: [sourceID], in: document)
+        let connectors = EditPlanner.connectorCopies(of: carried, in: document, taken: &taken, end: end)
+        let carriedNode = node
         if parentID == nil {
             node = placedAtRoot(node, in: document, coordinates: .copied)
         }
@@ -164,8 +175,12 @@ extension BatchApplier {
             divergences += EditPlanner.propertyDivergences(rootProperties, on: node, in: document)
         }
         let placedCoordinates = rootProperties["common.x"] == nil && rootProperties["common.y"] == nil
-        if placedCoordinates, let moved = placement(of: renamed(node, by: rootProperties), from: carried, coordinates: .copied) {
+        if placedCoordinates, let moved = placement(of: renamed(node, by: rootProperties), from: carriedNode, coordinates: .copied) {
             divergences.insert(moved, at: 0)
+        }
+        operations += connectors.map { .insertNode(EditOperation.InsertNode(node: $0)) }
+        if let note = connectorCarry(of: carried, copying: sourceID, in: document) {
+            divergences.append(note)
         }
 
         return (
@@ -292,13 +307,31 @@ extension BatchApplier {
     ///
     /// - Parameters:
     ///   - node: The subtree to renumber.
-    ///   - document: The document it is going into.
-    /// - Returns: The subtree with fresh ids.
-    static func copied(_ node: PenNode, into document: EditableDocument) -> PenNode {
-        var taken = document.idsInUse
+    ///   - taken: Every id in use in the document it is going into, the copy's ids added.
+    /// - Returns: The subtree with fresh ids, and old id → new id for each, so a connector
+    ///   end naming a node of the source can name its copy.
+    static func copied(_ node: PenNode, taken: inout Set<String>) -> (node: PenNode, ids: [String: String]) {
         let plan = SubtreeIDPlan.regenerating(node, avoiding: taken)
         taken.formUnion(plan.ids)
-        return SlotJSON.renumberingFills(of: plan.applied(to: node), taken: &taken)
+        let renumbered = plan.applied(to: node)
+        let fills = SlotJSON.fillRenames(in: renumbered, taken: &taken)
+        return (SlotJSON.applyingFillRenames(fills, to: renumbered), plan.replacements.merging(fills) { _, new in new })
+    }
+
+    /// Where a connector end inside a component lands on an instance of it: the
+    /// component's root becomes the instance, and a node inside it is reached through the
+    /// instance (`Chip/Label`).
+    ///
+    /// - Parameters:
+    ///   - path: The end's path, naming the component or a node inside it.
+    ///   - component: The component's id.
+    ///   - instance: The new instance's id.
+    /// - Returns: The path on the instance.
+    static func instanceEnd(_ path: String, component: String, instance: String) -> String {
+        let separator = String(NodeAddress.separator)
+        if path == component { return instance }
+        if path.hasPrefix(component + separator) { return instance + String(path.dropFirst(component.count)) }
+        return instance + separator + path
     }
 
     // MARK: - Reporting

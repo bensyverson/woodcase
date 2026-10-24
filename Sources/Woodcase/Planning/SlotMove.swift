@@ -16,8 +16,8 @@ import Foundation
 struct SlotMove {
     /// Where a node landed, to name it afterward.
     private enum Landing {
-        /// A stored node, and the node itself when the move inserted it.
-        case stored(String, PenNode?)
+        /// A stored node, by its id.
+        case stored(String)
         /// A node in a slot's fill, by its id there.
         case slot(refID: String, slotKey: String, localID: String)
     }
@@ -30,6 +30,29 @@ struct SlotMove {
 
     /// The layout of the document as it stands.
     let layout: PenLayoutState
+
+    /// A new container the nodes move into — Group's wrapper — put into its slot once the
+    /// slots touched show fills, before anything moves; `nil` for a plain move.
+    var wrapper: Wrapper?
+
+    /// The new parent's geometry when the layout cannot read it — a wrapper not drawn
+    /// yet; `nil` reads it from the layout.
+    var fixedTarget: TargetGeometry?
+
+    /// A container a move makes and fills: Group's wrapper in a slot's content.
+    struct Wrapper {
+        /// The container's JSON.
+        var json: AnyCodable
+        /// The outermost instance.
+        var refID: String
+        /// The slot frame's key.
+        var slotKey: String
+        /// The key of the container in the slot's content it goes into, or `nil` for the
+        /// slot frame.
+        var containerKey: String?
+        /// Where among that parent's children it goes; `nil` puts it last.
+        var index: Int?
+    }
 
     /// The document, as it stands.
     private var document: EditableDocument {
@@ -51,14 +74,30 @@ struct SlotMove {
         keepingDrawnPlace offset: PenPoint?,
         snapping: PlacementSnapping
     ) throws(EditRefusal) -> StructuralEditPlan {
-        let target = targetGeometry()
+        let target = fixedTarget ?? targetGeometry()
         let writes = origins.map { placementWrites(of: $0, into: target, movedBy: offset, snapping: snapping) }
         copyTouchedDefaults(origins)
+        if let wrapper {
+            try insert(
+                wrapper.json, refID: wrapper.refID, slotKey: wrapper.slotKey,
+                containerKey: wrapper.containerKey, at: wrapper.index
+            )
+        }
 
         var deletes: [EditOperation] = []
         var stored: [EditOperation] = []
         var landings: [Landing] = []
         var renames: [String: String] = [:]
+        // Every node of slot content leaves its fill before any lands, so the index counts
+        // the parent's children with the moving nodes taken out, as a stack reorder does:
+        // a run moved forward lands together.
+        var takenOut: [Int: AnyCodable] = [:]
+        for (step, origin) in origins.enumerated() {
+            guard case let .content(refID, key) = origin else { continue }
+            let taken = try take(key, from: refID)
+            session.taken.subtract(SlotJSON.allIDs(in: [taken]))
+            takenOut[step] = taken
+        }
         for (step, origin) in origins.enumerated() {
             let at = index.map { $0 + step }
             switch (origin, destination) {
@@ -67,7 +106,7 @@ struct SlotMove {
                     nodeID: id, into: parent, at: at, keepingDrawnPlace: offset, snapping: snapping,
                     in: document, layout: layout
                 )
-                landings.append(.stored(id, nil))
+                landings.append(.stored(id))
 
             case let (.document(id), .slot(refID, slotKey, containerKey)):
                 let node = try Self.patched(storedSubtree(id), with: writes[step], address: id, in: document)
@@ -79,9 +118,8 @@ struct SlotMove {
                 deletes += deletion(of: id)
                 landings.append(.slot(refID: refID, slotKey: slotKey, localID: SlotJSON.id(of: kept) ?? id))
 
-            case let (.content(refID, key), _):
-                let taken = try take(key, from: refID)
-                session.taken.subtract(SlotJSON.allIDs(in: [taken]))
+            case let (.content(_, key), _):
+                guard let taken = takenOut[step] else { throw Self.unreadable(key) }
                 let moved = try Self.patched(taken, with: writes[step], address: key, in: document)
                 switch destination {
                 case let .slot(toRef, slotKey, containerKey):
@@ -93,7 +131,7 @@ struct SlotMove {
                     let kept = SlotJSON.keepingIDs(moved, base: "", taken: &session.taken, renames: &renames)
                     guard let node = SlotJSON.node(from: kept) else { throw Self.unreadable(key) }
                     stored.append(.insertNode(EditOperation.InsertNode(node: node, parentID: parent, index: at)))
-                    landings.append(.stored(node.id, node))
+                    landings.append(.stored(node.id))
                 }
             }
         }
@@ -275,10 +313,9 @@ struct SlotMove {
     /// The id a landed node answers to after the edit.
     private func expandedID(of landing: Landing) -> String {
         switch landing {
-        case let .stored(id, inserted):
-            guard let inserted else { return document.expandedID(of: .node(id: id)) }
-            guard case let .ref(data) = inserted.kind, let root = document.componentRootID(of: data) else { return id }
-            return id + String(NodeAddress.separator) + root
+        case let .stored(id):
+            // A stored node is selected by its own id, an instance among them.
+            return id
         case let .slot(refID, slotKey, localID):
             guard let map = session.map(of: refID),
                   let site = map.site(slotKey: session.current(slotKey, in: refID))

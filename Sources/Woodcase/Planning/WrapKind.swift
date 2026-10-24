@@ -5,7 +5,7 @@
 
 import Foundation
 
-/// What ``EditPlanner/planGroup(nodeIDs:kind:in:layout:)`` wraps its members in.
+/// What ``EditPlanner/planGroup(nodeIDs:kind:named:in:layout:)`` wraps its members in.
 public enum WrapKind: String, Friendly, CaseIterable {
     /// A group: no box of its own, its rect the union of its children's (Group, ⌘G).
     case group

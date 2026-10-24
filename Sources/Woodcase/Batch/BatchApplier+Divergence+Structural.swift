@@ -160,6 +160,34 @@ extension BatchApplier {
         )
     }
 
+    /// The note a copy writes when it carried connectors along: the caller asked for one
+    /// node, and the answer has to say what else was copied with it.
+    ///
+    /// - Parameters:
+    ///   - connectorIDs: The originals of the connectors carried.
+    ///   - nodeID: The node copied.
+    ///   - document: The document before the write, for the names.
+    /// - Returns: The note, or `nil` when no connector was carried.
+    static func connectorCarry(
+        of connectorIDs: [String],
+        copying nodeID: String,
+        in document: EditableDocument
+    ) -> WriteDivergence? {
+        guard !connectorIDs.isEmpty else { return nil }
+        let name = document.node(id: nodeID)?.common.name ?? nodeID
+        let paths = connectorIDs.map { document.namePath(of: $0) }
+        let subject = connectorIDs.count == 1 ? "1 connector" : "\(connectorIDs.count) connectors"
+        return WriteDivergence(
+            kind: .carriedConnectors,
+            severity: .note,
+            target: name,
+            requested: "copying \(name)",
+            applied: "copying \(name) and \(subject)",
+            note: "copying \(name) also copied \(subject) between nodes inside it: "
+                + paths.joined(separator: ", ")
+        )
+    }
+
     // MARK: - Spelling
 
     /// A root node's coordinates as a sentence reads them, or `nil` when it has none.

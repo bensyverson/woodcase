@@ -10,7 +10,7 @@ import Woodcase
 /// Wraps nodes in a new group, or in a new free frame, without moving them on the canvas.
 ///
 /// The verb is an adapter: it resolves the addresses, lays the file out, and applies the
-/// operations ``Woodcase/EditPlanner/planGroup(nodeIDs:kind:in:layout:)`` plans in one
+/// operations ``Woodcase/EditPlanner/planGroup(nodeIDs:kind:named:in:layout:)`` plans in one
 /// transaction, so one `woodcase undo` takes the whole group back. Where the wrapper goes
 /// and how each member is re-placed is the library's.
 struct GroupCommand: AsyncParsableCommand {

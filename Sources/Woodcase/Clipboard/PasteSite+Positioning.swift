@@ -33,7 +33,8 @@ extension PasteSite {
             rects = PenLayoutEngine.layout(self.document)
         }
 
-        /// Where a stored node is drawn on the canvas, or `nil` when it is not drawn.
+        /// Where a stored node — or a node drawn inside an instance, by its expanded id — is
+        /// drawn on the canvas, or `nil` when it is not drawn.
         func placement(of id: String, in document: EditableDocument) -> PenPlacement? {
             PenLayoutEngine.canvasPlacement(
                 of: document.expandedID(of: .node(id: id)), in: self.document, layoutRects: rects
@@ -182,9 +183,10 @@ extension PasteSite {
         ))
     }
 
-    /// A node's rect in its parent's coordinates — the canvas's for a root.
+    /// A node's rect in its parent's coordinates — the canvas's for a root. A node drawn
+    /// inside an instance is named by its expanded id.
     private static func rect(of id: String, in document: EditableDocument) -> PenRect? {
-        if document.parents[id] == nil {
+        if document.nodes[id] != nil, document.parents[id] == nil {
             return RootOverlap.roots(in: document).first { $0.id == id }?.rect
         }
         return Layout(of: document).rects[document.expandedID(of: .node(id: id))]

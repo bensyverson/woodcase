@@ -28,31 +28,37 @@ public struct StructuralEditPlan: Friendly {
     ///
     /// - Parameters:
     ///   - operations: The edits to apply, in order, as one.
-    ///   - placedIDs: The expanded ids the moved, inserted or copied nodes answer to
-    ///     after the edit, in the order they were asked for.
+    ///   - placedIDs: The ids the moved, inserted or copied nodes answer to after the
+    ///     edit, as an editor selects them, in the order they were asked for.
     ///   - renamedIDs: Expanded id before → after, for every node of default content the
     ///     edit copied into a fill.
     ///   - materializedSlotIDs: The slot frames whose default content became a fill.
+    ///   - carriedConnectorIDs: The ids of the connectors a copy carried along.
     public init(
         operations: [EditOperation],
         placedIDs: [String] = [],
         renamedIDs: [String: String] = [:],
-        materializedSlotIDs: [String] = []
+        materializedSlotIDs: [String] = [],
+        carriedConnectorIDs: [String] = []
     ) {
         self.operations = operations
         self.placedIDs = placedIDs
         self.renamedIDs = renamedIDs
         self.materializedSlotIDs = materializedSlotIDs
+        self.carriedConnectorIDs = carriedConnectorIDs
     }
 
     /// The edits to apply, in order. Submit them as one edit, so one undo reverts the
     /// whole change — a default content copied into a fill included.
     public var operations: [EditOperation]
 
-    /// The expanded ids the nodes the edit placed answer to after it, in the order they
-    /// were asked for: a moved node's new id (a node moved from a stored parent into a
-    /// slot keeps its own id behind the instance's), an inserted or copied node's id.
-    /// Empty for an edit that places nothing (a delete, Empty Slot, Reset Slot).
+    /// The ids the nodes the edit placed answer to after it, in the order they were asked
+    /// for — the ids an editor selects: a stored node by its own id, an instance among
+    /// them (`Row2`, never its component root's expanded id); a node in a slot's content
+    /// by its expanded id (`Filled/Row2/ItemB`, `Filled/k3Fq9`). A moved node's new id (a
+    /// node moved from a stored parent into a slot keeps its own id behind the
+    /// instance's), an inserted or copied node's id. Empty for an edit that places
+    /// nothing (a delete, Empty Slot, Reset Slot).
     public var placedIDs: [String]
 
     /// Expanded id before the edit → after it, for each node of a slot's default content
@@ -62,6 +68,13 @@ public struct StructuralEditPlan: Friendly {
     /// The expanded ids of the slot frames whose default content this edit copied into
     /// a fill (Penumbra spec §13.5 rule 6).
     public var materializedSlotIDs: [String]
+
+    /// The ids of the connectors a copy carried along — each one whose two ends are both
+    /// inside the copied nodes, inserted at the top level with its ends on the copies
+    /// (``EditPlanner/connectorIDs(enclosedBy:in:)``). They are not among
+    /// ``placedIDs``: an editor selects the copies, as a paste does. Empty for an edit
+    /// that copies nothing.
+    public var carriedConnectorIDs: [String]
 
     /// The id a node answers to after the edit: its renamed id when the edit copied it
     /// into a fill, or a node inside an instance it copied, else the id as given.

@@ -50,8 +50,9 @@ import Foundation
 ///
 /// ### Restructuring
 /// - ``planMove(nodeID:into:at:keepingDrawnPlace:snapping:in:layout:)``
-/// - ``planGroup(nodeIDs:kind:in:layout:)``
+/// - ``planGroup(nodeIDs:kind:named:in:layout:)``
 /// - ``planUngroup(groupID:in:layout:)``
+/// - ``planUngroup(groupIDs:in:layout:)``
 /// - ``planDelete(nodeIDs:in:)``
 /// - ``connectorIDs(attachedTo:in:)``
 /// - ``connectorIDs(enclosedBy:in:)``

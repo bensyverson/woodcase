@@ -44,6 +44,10 @@ struct CopyCommand: AsyncParsableCommand {
 
         \(PropertyAssignment.valueRules)
 
+        A copy carries every connector whose two ends are both inside the source, \
+        attached to the copy (to the instance, when the source is a component); a \
+        connector with an end outside stays single. The report notes the ones carried.
+
         A root-level copy (parent `document`) is placed in empty space to the right \
         of the existing roots: the source's own x and y say where the source sits, \
         not where its copy belongs. Pass common.x or common.y to put it somewhere \

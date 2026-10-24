@@ -104,12 +104,6 @@ extension EditPlanner {
         return PenLayoutEngine.canvasPlacement(of: expanded, in: layout.document, layoutRects: layout.rects)?.transform
     }
 
-    /// The quad a stored node is drawn as on the canvas, or `nil` when it is not drawn.
-    static func canvasCorners(of id: String, in document: EditableDocument, layout: PenLayoutState) -> [PenPoint]? {
-        let expanded = document.expandedID(of: .node(id: id))
-        return PenLayoutEngine.canvasPlacement(of: expanded, in: layout.document, layoutRects: layout.rects)?.corners
-    }
-
     /// Whether a node and its ancestors flip, taken together: each flip an odd number of
     /// times along the chain.
     static func flipParity(of id: String?, in document: EditableDocument) -> (x: Bool, y: Bool) {

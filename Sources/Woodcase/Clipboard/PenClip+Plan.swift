@@ -34,6 +34,11 @@ public extension PenClip {
     ///   the copies. One with an end that would name a node neither the paste nor the
     ///   target holds is left out (``PastePlan/droppedConnectorIDs``).
     /// - **Component loops** are refused before anything is planned to be written.
+    /// - **Into a slot**: ``PasteTarget/inside(containerID:)`` and
+    ///   ``PasteTarget/after(siblingID:)`` naming a node of an instance's slot put the copies
+    ///   in its fill, one `children` override of the slot written by
+    ///   ``EditPlanner/planInsert(_:into:at:in:)``; ``PastePlan/insertedRootIDs`` are then
+    ///   expanded ids, and a connector's end on a copy names it in the fill (`Filled/Card`).
     ///
     /// Apply ``PastePlan/operations`` together, in order — as one ``LocalEdit`` through a
     /// ``DocumentSession``, which makes the paste one undo step.
@@ -124,10 +129,16 @@ public extension PenClip {
             copiedConnections.map { contentSettled[$0] }, from: copiedConnections.map { content[$0] }
         )
         let carriedConnectors = ends.keeping(Array(settled.suffix(connectors.count)), from: connectors)
+        // A copy in a slot is stored on its instance, so a loop closes through the
+        // instance's components.
         try Self.refuseComponentLoops(
-            content: placed.map(\.node), definitions: newDefinitions, parentIDs: placed.map(\.parentID),
-            among: theirs, in: document
+            content: placed.map(\.node), definitions: newDefinitions,
+            parentIDs: placed.map { site.slot?.refID ?? $0.parentID }, among: theirs, in: document
         )
+        let landing = try site.slot.map { _ in
+            let own = Set(placed.flatMap { SlotLanding.ids(in: $0.node) })
+            return try Self.landing(placed.map(\.node), at: site, reserving: taken.subtracting(own), in: document)
+        }
         let onCanvas = zip(placed, placeable.map { content[$0] }).filter { $0.0.parentID == nil }
         let placedDefinitions = Self.pastTheCanvas(
             newDefinitions,
@@ -144,15 +155,20 @@ public extension PenClip {
 
         var operations = themeOperations(in: document) + variables.operations
         operations += placedDefinitions.map { .insertNode(EditOperation.InsertNode(node: $0)) }
-        operations += placed.map { root in
-            .insertNode(EditOperation.InsertNode(node: root.node, parentID: root.parentID, index: root.index))
+        if let landing {
+            operations += landing.operations
+        } else {
+            operations += placed.map { root in
+                .insertNode(EditOperation.InsertNode(node: root.node, parentID: root.parentID, index: root.index))
+            }
         }
         // Connections last, as roots: after the nodes their ends name, so the undo takes
         // them out first.
         operations += (connections.nodes + carriedConnectors.nodes).map { node in
-            .insertNode(EditOperation.InsertNode(node: node))
+            .insertNode(EditOperation.InsertNode(node: landing?.attaching(node) ?? node))
         }
-        var pastedIDs = Dictionary(uniqueKeysWithValues: zip(placeable, placed.map(\.node.id)))
+        let landedIDs = landing?.placedIDs(of: placed.map(\.node), definitions: Set(newDefinitions.map(\.id)))
+        var pastedIDs = Dictionary(uniqueKeysWithValues: zip(placeable, landedIDs ?? placed.map(\.node.id)))
         for (index, node) in zip(connections.kept, connections.nodes) {
             pastedIDs[copiedConnections[index]] = node.id
         }

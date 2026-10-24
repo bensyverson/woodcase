@@ -33,6 +33,10 @@ struct PasteCommand: AsyncParsableCommand {
           --at x,y            on the canvas, as roots, centered on the point
           --in-place          on the canvas, as roots, where they were copied (the default)
 
+        --into and --after also take a slot of an instance (Card/List), or a frame or \
+        node in its content: the copies join the instance's fill, written as one \
+        override of the slot. Anywhere else inside an instance is refused.
+
         Every id is new. A component or variable the file already has with the same \
         name and the same definition is reused, so pasting twice never duplicates a \
         component; one whose name the file holds with a different definition comes \
@@ -42,7 +46,7 @@ struct PasteCommand: AsyncParsableCommand {
         naming the loop, and nothing is written.
 
         Connections land at the top level, where Pen keeps them, wherever the copies \
-        go. A connector the clip carried — one whose two ends were both inside the \
+        go — in a slot, their ends name the copies through the instance (Card/k3Fq9). A connector the clip carried — one whose two ends were both inside the \
         copied nodes — is attached to the pasted copies. A connector with an end that \
         would name a node neither the paste nor the file holds is left out, so none \
         points at nothing.
@@ -194,31 +198,28 @@ struct PasteCommand: AsyncParsableCommand {
         return PenPoint(x: x, y: y)
     }
 
-    /// The placement against the document: each address resolved to a stored node.
+    /// The placement against the document: each address resolved to a stored node, or to
+    /// the expanded id of a node drawn inside an instance — a slot, or slot content —
+    /// which the planner pastes into the instance's fill or refuses.
     ///
-    /// - Throws: Whatever resolving throws, and ``CommandFailure`` with
-    ///   ``ExitCode/usage`` for a node inside an instance, which a paste cannot write
-    ///   into.
+    /// - Throws: Whatever resolving throws.
     private static func target(_ placement: Placement, in document: EditableDocument) throws -> PasteTarget {
         switch placement {
-        case let .into(address): try .inside(containerID: stored(address, in: document))
-        case let .after(address): try .after(siblingID: stored(address, in: document))
+        case let .into(address): try .inside(containerID: nodeID(address, in: document))
+        case let .after(address): try .after(siblingID: nodeID(address, in: document))
         case let .at(point): .centered(on: point, in: nil)
         case .inPlace: .inPlace
         }
     }
 
-    /// A stored node's id.
-    private static func stored(_ address: NodeAddress, in document: EditableDocument) throws -> String {
+    /// A stored node's id, or the id a node drawn inside an instance answers to by its
+    /// instance and key (`Filled/List`).
+    private static func nodeID(_ address: NodeAddress, in document: EditableDocument) throws -> String {
         switch try document.resolve(address) {
         case let .node(id):
-            return id
-        case .instanceDescendant:
-            throw CommandFailure(
-                message: "\(address) is inside a component instance, whose nodes are its component's; "
-                    + "paste into the component itself, or beside the instance.",
-                exitCode: .usage
-            )
+            id
+        case let .instanceDescendant(refID, key):
+            refID + String(NodeAddress.separator) + key
         }
     }
 

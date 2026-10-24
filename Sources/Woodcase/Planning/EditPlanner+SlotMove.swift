@@ -20,8 +20,11 @@ public extension EditPlanner {
     /// ``StructuralEditPlan/renamed(_:)`` carries a selection across.
     ///
     /// The nodes land together, in the order given: the first at `index`, each next one
-    /// after it, as successive moves at `index`, `index + 1`, … would place them — the
-    /// index a drop's insertion cursor names. Each keeps its drawn size and, given
+    /// after it. When a node is slot content, every one of them leaves its fill before any
+    /// lands, so `index` counts the new parent's children with the moving nodes taken out,
+    /// as a stack reorder does — a run moved forward in its own slot lands together. A
+    /// move with no node in a slot plans what successive single moves at `index`,
+    /// `index + 1`, … plan. Each keeps its drawn size and, given
     /// `offset`, its drawn place, exactly as ``planMove(nodeID:into:at:keepingDrawnPlace:snapping:in:layout:)``
     /// plans a single move; a move with no node in a slot plans exactly what that does,
     /// node by node.
@@ -45,8 +48,8 @@ public extension EditPlanner {
     ///   - nodeIDs: The nodes, by stored id or the expanded id an editor holds.
     ///   - parentID: The new parent — a stored id, a slot frame's or a slot content
     ///     container's expanded id — or `nil` for the canvas.
-    ///   - index: Where the first node goes among the new parent's children; `nil` puts
-    ///     them last, on top.
+    ///   - index: Where the first node goes among the new parent's children (for slot
+    ///     content, counted without the moving nodes); `nil` puts them last, on top.
     ///   - offset: How far the nodes are carried on the canvas, to keep their drawn
     ///     place; `nil` plans only the move and the sizes they keep.
     ///   - snapping: How each new `x`/`y` is rounded.
@@ -82,7 +85,7 @@ public extension EditPlanner {
         }
         let placed = origins.compactMap { origin -> String? in
             guard case let .document(id) = origin else { return nil }
-            return document.expandedID(of: .node(id: id))
+            return id
         }
         return StructuralEditPlan(operations: operations, placedIDs: placed)
     }

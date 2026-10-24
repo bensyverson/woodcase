@@ -81,7 +81,7 @@ struct SlotFillIDTests {
         try SlotScreenFixture.apply(plan.operations, to: doc)
 
         #expect(repeats(in: doc).isEmpty)
-        #expect(plan.placedIDs == ["Copy/Screen"])
+        #expect(plan.placedIDs == ["Copy"], "a stored instance is selected by its own id")
     }
 
     @Test("Pasting a filled instance gives its fill fresh ids")
@@ -117,6 +117,7 @@ struct SlotFillIDTests {
         }
         let path = try #require(pasted.first)
         #expect(path != "Filled/Row2")
-        #expect(try doc.resolve(#require(NodeAddress(path.split(separator: "/").map { "#\($0)" }.joined(separator: "/")))) != nil)
+        let address = try #require(NodeAddress(path.split(separator: "/").map { "#\($0)" }.joined(separator: "/")))
+        #expect(throws: Never.self) { try doc.resolve(address) }
     }
 }

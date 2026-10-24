@@ -26,8 +26,15 @@ public extension EditPlanner {
     ///   union; a frame is placed and sized to it. In a stack, the wrapper takes the
     ///   front-most member's place in the flow (and its absolute position, if it had one).
     ///
-    /// Refused inside a component instance (``EditRefusal/Code/insideInstance``), for an
-    /// empty list (``EditRefusal/Code/noNodes``), for an id naming nothing
+    /// In an instance's slot content — the front-most member there — the wrapper goes into
+    /// that member's parent in the fill, and the whole change is one `children` override of
+    /// each slot it touches, a default content copied into a fill first (Penumbra spec
+    /// §13.5 rules 4–6): ``WrapPlan/wrapperID`` is then the wrapper's expanded id, and
+    /// ``WrapPlan/renamedIDs`` carries a selection across the copy.
+    ///
+    /// Refused inside a component instance outside its slots' content, and when the
+    /// front-most member is stored but another is slot content
+    /// (``EditRefusal/Code/insideInstance``); for an empty list (``EditRefusal/Code/noNodes``), for an id naming nothing
     /// (``EditRefusal/Code/addressNotFound``), and when a member moving in would make a
     /// component contain itself (``EditRefusal/Code/wouldCloseComponentLoop``, whose
     /// ``EditRefusal/detail`` is the loop).
@@ -36,6 +43,8 @@ public extension EditPlanner {
     ///   - nodeIDs: The members: stored ids, or the expanded ids an editor holds (an
     ///     instance's root resolves to its `ref`).
     ///   - kind: A group, or a free frame.
+    ///   - name: The wrapper's name, written with it so one undo takes both away; `nil`
+    ///     leaves it unnamed.
     ///   - document: The document, as it stands.
     ///   - layout: The layout of `document` as it stands, which the canvas quads are read
     ///     from.
@@ -44,9 +53,13 @@ public extension EditPlanner {
     static func planGroup(
         nodeIDs: [String],
         kind: WrapKind,
+        named name: String? = nil,
         in document: EditableDocument,
         layout: PenLayoutState
     ) throws(EditRefusal) -> WrapPlan {
+        if let inSlot = try planSlotGroup(nodeIDs, kind: kind, named: name, in: document, layout: layout) {
+            return inSlot
+        }
         let members = try topMostMembers(nodeIDs, in: document)
         guard let front = members.last else {
             throw EditRefusal(code: .noNodes, address: "", message: "Select something to \(kind.verb).")
@@ -61,7 +74,9 @@ public extension EditPlanner {
         }
 
         let parentMap = canvasMap(of: parent, in: document, layout: layout) ?? .identity
-        let union = wrapperFrame(of: members, under: parentMap, in: document, layout: layout)
+        let union = wrapperFrame(
+            ofExpanded: members.map { document.expandedID(of: .node(id: $0)) }, under: parentMap, layout: layout
+        )
         let placing: Placing = if !laysOut(parent, in: document) {
             .free
         } else if document.node(id: front)?.common.layoutPosition == .absolute {
@@ -71,7 +86,8 @@ public extension EditPlanner {
         }
 
         let wrapperID = freshID(in: document)
-        let wrapper = wrapperNode(wrapperID, kind: kind, frame: union, placing: placing)
+        var wrapper = wrapperNode(wrapperID, kind: kind, frame: union, placing: placing)
+        wrapper.common.name = name
         var operations: [EditOperation] = [
             .insertNode(EditOperation.InsertNode(
                 node: wrapper, parentID: parent, index: siblingIndex(of: front, in: document)
@@ -113,17 +129,19 @@ public extension EditPlanner {
     /// The wrapper's frame in its parent's own coordinates: the bounds of the members'
     /// canvas quads mapped there, snapped to a millionth. A wrapper whose members are all
     /// hidden is an empty box at the front-most one's anchor.
-    private static func wrapperFrame(
-        of members: [String],
-        under parentMap: Transform,
-        in document: EditableDocument,
-        layout: PenLayoutState
-    ) -> PenRect {
+    ///
+    /// - Parameters:
+    ///   - members: The members' expanded ids, front-most last.
+    ///   - parentMap: The canvas map of the wrapper's parent.
+    ///   - layout: The layout the quads are read from.
+    internal static func wrapperFrame(ofExpanded members: [String], under parentMap: Transform, layout: PenLayoutState) -> PenRect {
         let inverse = parentMap.inverted() ?? .identity
-        let points = members.flatMap { canvasCorners(of: $0, in: document, layout: layout) ?? [] }
-            .map(inverse.apply(to:))
+        let placement = { (id: String) in
+            PenLayoutEngine.canvasPlacement(of: id, in: layout.document, layoutRects: layout.rects)
+        }
+        let points = members.flatMap { placement($0)?.corners ?? [] }.map(inverse.apply(to:))
         guard !points.isEmpty else {
-            let anchor = members.last.flatMap { canvasMap(of: $0, in: document, layout: layout) }
+            let anchor = members.last.flatMap { placement($0)?.transform }
                 .map { inverse.concatenating($0).apply(to: .zero) } ?? .zero
             return PenRect(x: snapped(anchor.x), y: snapped(anchor.y), width: 0, height: 0)
         }
@@ -142,7 +160,7 @@ public extension EditPlanner {
     }
 
     /// The new wrapper: placed by its anchor unless a stack places it, with no turn.
-    private static func wrapperNode(_ id: String, kind: WrapKind, frame: PenRect, placing: Placing) -> PenNode {
+    internal static func wrapperNode(_ id: String, kind: WrapKind, frame: PenRect, placing: Placing) -> PenNode {
         var common = PenNodeCommon()
         if placing != .inFlow {
             common.x = .literal(frame.x)
