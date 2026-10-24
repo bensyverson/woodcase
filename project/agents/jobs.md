@@ -1,4 +1,4 @@
-<!-- agents:begin jobs@5b9707 -->
+<!-- agents:begin jobs@42b4fe -->
 # Working in `job`
 
 **Subagents pass a unique `--as <name>` and an absolute `--db` on every call; they `claim`, `note` and `release`, never `done`.**
@@ -23,6 +23,8 @@ Jobs is the tracker: where work is filed, how big a unit of work is, and what a 
 - **`job claim <id>` prints the full briefing**, so no follow-up `show` is needed. Claims last 30m and any write by the holder extends them; `job claim <id> 2h` for longer work, `job heartbeat` only during a genuine pause.
 - **Claiming focuses that leaf's root** — one focus per tree kind — which scopes bare `next`, `claim --next` and `orient` to that tree. `job focus <id>` sets it explicitly; `job focus --release` clears it.
 - **Note as you go, not only at the end.** A note is where a finding outlives the session: `job note <id> -F <file>`. At least one substantive note per leaf.
+- **A ruling other work builds on goes in the design doc it rules on**, and the note points there. A note alone falls out of view behind the next one and never reaches another repo's agents.
+- **Don't keep a session log on a root.** The handoff doc is the record; every note on a root is read by every `orient` that follows.
 - **Read the leaf's own history before anything expensive to change** — schema, a wire format, a public interface. `job show <id>` carries what `orient` elides.
 - **Close with `job done <id> -F <file>`**, marking criteria in the same call. `--claim-next` closes and takes the next leaf in the same root atomically.
 
