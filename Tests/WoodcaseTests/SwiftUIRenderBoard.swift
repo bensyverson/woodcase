@@ -34,7 +34,8 @@
         /// The top-level frame's name, or `nil` for a fixture with one board.
         var artboard: String?
 
-        /// Pen's export of a one-board fixture, when it is not named for the fixture.
+        /// Pen's export, when it is not named for the fixture (a one-board fixture) or for
+        /// the fixture and artboard.
         var reference: String?
 
         /// The artboard whose export this board is measured against, and which the CG
@@ -164,6 +165,7 @@
 
         /// Pen's export, without `.png`, or `nil` when Pen exported none for this artboard.
         var referenceName: String? {
+            if let reference { return reference }
             guard let artboard = referenceArtboard ?? artboard else { return reference ?? fixture }
             return ["\(fixture)-\(artboard)@2x", "\(fixture)-\(artboard)", artboard].first {
                 FileManager.default.fileExists(atPath: SwiftUIFixtures.directory.appendingPathComponent("\($0).png").path)

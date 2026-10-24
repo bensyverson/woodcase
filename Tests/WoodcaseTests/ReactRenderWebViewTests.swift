@@ -110,8 +110,17 @@
             "render-painted-lines",
         ]
 
-        /// Every board, in a stable order, ending with the image mode and crop boards
-        /// (``SwiftUIRenderBoard/imageCropBoards``).
+        /// `codegen-slots.pen`'s pages, whose instances fill their components' slots — or
+        /// leave them at their default content — through the slot props (``ReactSlot``,
+        /// leaf 7o25fm). Its component frames are no pages, and are drawn by these.
+        nonisolated static let slotPageBoards = [
+            "Default Card", "Filled Card", "Profile Card", "Filled Panel", "Header Panel", "Upload Button",
+        ].map { name in
+            SwiftUIRenderBoard(fixture: "codegen-slots", artboard: name, reference: "codegen-slots-" + name.filter { $0 != " " })
+        }
+
+        /// Every board, in a stable order, ending with the slot pages (``slotPageBoards``)
+        /// and the image mode and crop boards (``SwiftUIRenderBoard/imageCropBoards``).
         nonisolated static let boards: [SwiftUIRenderBoard] = {
             let single = (SwiftUIFixtures.rendered + SwiftUIRenderBoard.effectFixtures).map { SwiftUIRenderBoard(fixture: $0) }
                 + SwiftUIRenderBoard.shapeBoards + SwiftUIRenderBoard.textBoards
@@ -119,7 +128,7 @@
                 let names = (try? PenSnapshotTestHelpers.artboardNames(in: fixture, fixturesDir: SwiftUIFixtures.directory)) ?? []
                 return names.map { SwiftUIRenderBoard(fixture: fixture, artboard: $0) }.filter { $0.referenceName != nil }
             }
-            return single + many + SwiftUIRenderBoard.imageCropBoards
+            return single + many + slotPageBoards + SwiftUIRenderBoard.imageCropBoards
         }()
 
         private nonisolated static let fixturesDir = SwiftUIFixtures.directory

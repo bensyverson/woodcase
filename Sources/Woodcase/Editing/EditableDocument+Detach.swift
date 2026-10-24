@@ -67,7 +67,8 @@ public extension EditableDocument {
     /// Applies an ``EditOperation/DetachRef`` operation.
     ///
     /// Expands the ref node, derives compact IDs for all expanded nodes, removes the
-    /// ref, and inserts the expanded subtree at the same position.
+    /// ref, inserts the expanded subtree at the same position, and rewrites every
+    /// connector end that named the instance or a node inside it to its new id.
     ///
     /// - Parameter op: The detach operation parameters.
     /// - Throws: ``EditingError/nodeNotFound(id:)`` or ``EditingError/notARefNode(id:)``.
@@ -95,7 +96,8 @@ public extension EditableDocument {
 }
 
 extension EditableDocument {
-    /// Carries out one planned detach.
+    /// Carries out one planned detach, then rewrites the connector ends that named the
+    /// instance or a node inside it to the detached copy (``connectorRewrites(for:)``).
     ///
     /// - Parameter plan: The detach, from ``detachPlans(for:)``.
     /// - Returns: The ID mapping and new root node ID.
@@ -108,9 +110,14 @@ extension EditableDocument {
         // The ref among them drops the entry the plan's expansion warmed, which the
         // detach has just consumed.
         let subjects = descendantIDs(of: plan.refID) + collectInsertedIDs(in: plan.subtree)
-        return try invalidatingCaches(touching: subjects) {
+        let rewrites = connectorRewrites(for: plan)
+        let result = try invalidatingCaches(touching: subjects) {
             try detachingRef(plan)
         }
+        for rewrite in rewrites {
+            try apply(rewrite)
+        }
+        return result
     }
 
     /// The detach itself, wrapped by ``detachRef(_:)-(PlannedDetach)``'s cache rule.

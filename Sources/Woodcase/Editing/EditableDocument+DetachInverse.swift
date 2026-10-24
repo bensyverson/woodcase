@@ -17,7 +17,8 @@ extension EditableDocument {
     /// the ref — its whole subtree, at its index.
     ///
     /// - Parameter op: The detach about to be applied.
-    /// - Returns: `[deleteNode(expanded root), insertNode(ref)]`.
+    /// - Returns: `[deleteNode(expanded root), insertNode(ref)]`, then the connector ends
+    ///   the detach rewrites put back.
     /// - Throws: ``EditingError/nodeNotFound(id:)`` or ``EditingError/notARefNode(id:)``.
     func prepareInverseDetachRef(_ op: EditOperation.DetachRef) throws -> [EditOperation] {
         guard let plan = try detachPlans(for: [op.refNodeID]).first else {
@@ -26,12 +27,23 @@ extension EditableDocument {
         return try detachInverse(of: plan)
     }
 
-    /// The two steps that undo one planned detach.
+    /// The steps that undo one planned detach: its two structural steps, then the
+    /// connector ends it rewrites put back.
+    ///
+    /// - Parameter plan: The detach, from ``detachPlans(for:)``.
+    /// - Returns: `[deleteNode(expanded root), insertNode(ref)]`, then an
+    ///   ``EditOperation/updateKind(_:)`` per connector the detach rewrites.
+    /// - Throws: ``EditingError/nodeNotFound(id:)`` if the ref is gone.
+    func detachInverse(of plan: PlannedDetach) throws -> [EditOperation] {
+        try structuralDetachInverse(of: plan) + connectorRestores(for: [plan])
+    }
+
+    /// The two structural steps that undo one planned detach, without its connectors.
     ///
     /// - Parameter plan: The detach, from ``detachPlans(for:)``.
     /// - Returns: `[deleteNode(expanded root), insertNode(ref)]`.
     /// - Throws: ``EditingError/nodeNotFound(id:)`` if the ref is gone.
-    func detachInverse(of plan: PlannedDetach) throws -> [EditOperation] {
+    func structuralDetachInverse(of plan: PlannedDetach) throws -> [EditOperation] {
         try [
             .deleteNode(EditOperation.DeleteNode(nodeID: plan.subtree.id)),
             .insertNode(EditOperation.InsertNode(

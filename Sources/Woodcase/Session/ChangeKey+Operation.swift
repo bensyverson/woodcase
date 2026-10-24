@@ -20,7 +20,8 @@ public extension ChangeKey {
     ///   both kinds, so a later write to any one of them meets it.
     /// - A ``EditOperation/detachRef(_:)``, and a delete that detaches instances, write
     ///   the existence of each ref removed and of every node its expansion inserts — the
-    ///   ids come from the same detach plan the operation carries out.
+    ///   ids come from the same detach plan the operation carries out — and the ends of
+    ///   every connector the detach rewrites.
     /// - ``EditOperation/setDocumentProperties(_:)`` writes ``document(_:)`` per key.
     /// - A write of `common.metadata` writes one key per metadata entry it changes
     ///   (`common.metadata.woodcase.tint`), the keys a collaborator's replicated entry
@@ -113,11 +114,14 @@ public extension ChangeKey {
     }
 
     /// A run of detaches' keys: each ref's existence and the existence of every node its
-    /// planned expansion inserts, from the same plan the detach itself carries out.
+    /// planned expansion inserts, from the same plan the detach itself carries out, then
+    /// the ends of every connector the run rewrites.
     private static func detachKeys(_ plans: [EditableDocument.PlannedDetach], in document: EditableDocument) -> [ChangeKey] {
         plans.flatMap { plan in
             [ChangeKey.existence(node: plan.refID)]
                 + document.collectInsertedIDs(in: plan.subtree).map { .existence(node: $0) }
+        } + document.detachedConnectors(for: plans).flatMap { connector in
+            kindKeys(nodeID: connector.connectorID, old: connector.before, new: connector.after)
         }
     }
 

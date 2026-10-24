@@ -231,6 +231,16 @@ delete the expanded root, re-insert the ref's whole subtree where it was — *be
 detach runs. A detaching delete's inverse is likewise whole: the deleted subtree back,
 then each detach undone, last first.
 
+Every node of the instance takes a derived id, its root included, so a detach also
+rewrites every connector end that named the instance or a node drawn inside it — the
+instance itself (`Card`), a node of it (`Card/Title`), a node of one of its slot fills, a
+node inside an instance nested in it, and an end reached through an instance of a
+component holding the detached ref (`Panel1/Inner/Title`) — to the detached copy's id, in
+the same edit. The inverse puts the ends back after restoring the ref, and a collaborative
+detach replicates the rewrites with the delete and insert it decomposes into, so both peers
+keep the connector attached. Keeping the root's own id instead would split the
+collaborative detach, whose delete tombstones the ref's id.
+
 In a collaborative session the hash is also namespaced by the replica's ``PeerID``. A CRDT
 names a node by its id, so two peers detaching one instance concurrently must create
 distinct nodes — with shared ids, one peer's delete of its copy was undone by the other's

@@ -1,0 +1,51 @@
+{
+  "version": "2.20",
+  "children": [
+    {
+      "type": "frame",
+      "id": "Board",
+      "name": "Board",
+      "x": 0,
+      "y": 0,
+      "width": 800,
+      "height": 600,
+      "layout": "none",
+      "children": [
+        { "type": "ref", "id": "Chip", "ref": "Comp", "name": "Chip", "x": 100, "y": 400 },
+        { "type": "rectangle", "id": "Lone", "name": "Lone", "x": 400, "y": 300, "width": 40, "height": 40, "fill": "#993366" }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Comp",
+      "name": "Comp",
+      "reusable": true,
+      "x": 0,
+      "y": 700,
+      "width": 100,
+      "height": 40,
+      "layout": "none",
+      "children": [
+        { "type": "text", "id": "Label", "name": "Label", "x": 4, "y": 4, "content": "L" }
+      ]
+    },
+    {
+      "type": "connection",
+      "id": "KChip",
+      "name": "chip link",
+      "source": { "path": "Chip", "anchor": "top" },
+      "target": { "path": "Lone", "anchor": "left" },
+      "stroke": "#71717A",
+      "strokeWidth": 2
+    },
+    {
+      "type": "connection",
+      "id": "KLabel",
+      "name": "label link",
+      "source": { "path": "Chip/Label", "anchor": "right" },
+      "target": { "path": "Lone", "anchor": "bottom" },
+      "stroke": "#71717A",
+      "strokeWidth": 2
+    }
+  ]
+}

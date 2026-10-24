@@ -75,7 +75,8 @@ extension BatchApplier {
 
     /// An `rm` line: the public planner's ``EditPlanner/planDelete(nodeIDs:in:)``, so the
     /// connectors that end on the node go with it, after detaching the component's
-    /// instances when the line asks.
+    /// instances when the line asks — less the connectors those detaches keep, whose ends
+    /// into an instance they rewrite to the detached copy.
     private static func planRemove(
         _ op: BatchOperation.RemoveOp,
         in document: EditableDocument,
@@ -88,7 +89,18 @@ extension BatchApplier {
         let detaches: [EditOperation] = detached.map {
             .detachRef(EditOperation.DetachRef(refNodeID: $0))
         }
-        let deletion = try EditPlanner.planDelete(nodeIDs: [id], in: document)
+        var deletion = try EditPlanner.planDelete(nodeIDs: [id], in: document)
+        // The deletion is planned before the detaches run, so it takes a connector into
+        // an instance (`Chip/Label`) that the detach rewrites to the detached copy.
+        let kept = try document.connectorsKept(
+            deletion.connectorIDs, detaching: detached, removing: Set(document.descendantIDs(of: id))
+        )
+        if !kept.isEmpty {
+            deletion.connectorIDs.removeAll(where: kept.contains)
+            deletion.operations.removeAll { operation in
+                if case let .deleteNode(delete) = operation { kept.contains(delete.nodeID) } else { false }
+            }
+        }
         return BatchPlan(
             operations: detaches + deletion.operations,
             expecting: expecting(op.rev, on: id),

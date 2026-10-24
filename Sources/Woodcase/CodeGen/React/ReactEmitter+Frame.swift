@@ -20,11 +20,13 @@ extension ReactEmitter {
         // Build className
         let isNoneLayout = data.layout == .some(.none)
         var classes: [String] = isNoneLayout ? ["relative"] : ["flex"]
+        let slot = isRoot ? nil : ctx.slot(framedBy: node.id)
 
         if !isNoneLayout {
-            // Check if any child has absolute positioning → add relative
+            // Check if any child has absolute positioning → add relative. A slot's content
+            // comes from its caller, and may place a child absolutely too.
             let hasAbsoluteChild = (data.children ?? []).contains { $0.common.layoutPosition == .absolute }
-            if hasAbsoluteChild {
+            if hasAbsoluteChild || slot != nil {
                 classes.append("relative")
             }
             // Frame default layout is horizontal (matching pen format spec and PenLayoutEngine)
@@ -252,10 +254,14 @@ extension ReactEmitter {
         ctx.childPlacement = isNoneLayout ? .free : .flow
         let closingTag = isRoot ? tag : "div"
         let turnedFillSizes = TurnedFillSizes(container: data)
-        var steps = childSteps(
-            data.children ?? [], component: component, indent: indent, ctx: ctx,
-            wrapped: isNoneLayout, parentLayout: data.layout
-        ) { ctx.turnedFillSizes = turnedFillSizes }
+        var steps: [ReactEmitStep] = if let slot {
+            slotSteps(slot, component: component, indent: indent, ctx: ctx, turnedFillSizes: turnedFillSizes)
+        } else {
+            childSteps(
+                data.children ?? [], component: component, indent: indent, ctx: ctx,
+                wrapped: isNoneLayout, parentLayout: data.layout
+            ) { ctx.turnedFillSizes = turnedFillSizes }
+        }
         steps.append(.then {
             ctx.lines.append("\(pad)</\(closingTag)>")
             ctx.childPlacement = savedPlacement
@@ -267,7 +273,7 @@ extension ReactEmitter {
     /// set while it is emitted (for state var substitution) and `prepare` run first;
     /// `wrapped` places each in an absolutely positioned `div` at its `x`/`y`, as a free
     /// layout's children are.
-    private static func childSteps(
+    static func childSteps(
         _ children: [PenNode],
         component: ComponentDefinition,
         indent: Int,

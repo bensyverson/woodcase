@@ -83,7 +83,7 @@ extension ReactEmitter {
         case let .browser(data):
             emitBrowser(node, data: data, indent: indent, ctx: ctx, isRoot: isRoot, parentLayout: parentLayout)
         case let .ref(data):
-            steps = emitRef(node, data: data, indent: indent, ctx: ctx, isRoot: isRoot)
+            steps = emitRef(node, data: data, component: component, indent: indent, ctx: ctx, isRoot: isRoot)
         case .connection:
             // A connector between two nodes on the canvas — Pen allows it only between
             // artboards — has no place in a component's markup.

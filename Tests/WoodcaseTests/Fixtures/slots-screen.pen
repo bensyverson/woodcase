@@ -1,0 +1,75 @@
+{
+  "version": "2.20",
+  "children": [
+    {
+      "id": "itemA", "name": "Item A", "type": "frame", "reusable": true,
+      "x": 0, "y": 0, "width": 240, "height": 40, "layout": "horizontal", "padding": 8, "gap": 8,
+      "fill": "#EEF2FF",
+      "children": [
+        { "id": "itemAText", "name": "Label", "type": "text", "content": "Item A", "fontSize": 14, "fill": "#1E1B4B" }
+      ]
+    },
+    {
+      "id": "itemB", "name": "Item B", "type": "frame", "reusable": true,
+      "x": 0, "y": 60, "width": 240, "height": 56, "layout": "vertical", "padding": 8, "gap": 4,
+      "fill": "#FEF3C7",
+      "children": [
+        { "id": "itemBTitle", "name": "Title", "type": "text", "content": "Item B", "fontSize": 14, "fill": "#451A03" },
+        { "id": "itemBDetail", "name": "Detail", "type": "text", "content": "Detail line", "fontSize": 11, "fill": "#92400E" }
+      ]
+    },
+    {
+      "id": "emptyState", "name": "Empty State", "type": "frame", "reusable": true,
+      "x": 0, "y": 140, "width": 240, "height": 80, "layout": "vertical", "padding": 16,
+      "fill": "#F3F4F6",
+      "children": [
+        { "id": "emptyText", "name": "Message", "type": "text", "content": "Nothing here yet", "fontSize": 13, "fill": "#6B7280" }
+      ]
+    },
+    {
+      "id": "screen", "name": "Screen", "type": "frame", "reusable": true,
+      "x": 300, "y": 0, "width": 280, "height": "fit_content", "layout": "vertical", "padding": 20, "gap": 12,
+      "fill": "#FFFFFF",
+      "children": [
+        { "id": "screenTitle", "name": "Title", "type": "text", "content": "Inbox", "fontSize": 20, "fill": "#111827" },
+        {
+          "id": "list", "name": "List", "type": "frame", "slot": ["itemA", "itemB", "emptyState"],
+          "width": 240, "height": "fit_content", "layout": "vertical", "gap": 8,
+          "children": [
+            { "id": "listRow1", "name": "Row 1", "type": "ref", "ref": "itemA" },
+            { "id": "listRow2", "name": "Row 2", "type": "ref", "ref": "itemA" }
+          ]
+        },
+        {
+          "id": "actions", "name": "Actions", "type": "frame", "slot": [],
+          "width": "fit_content", "height": "fit_content", "layout": "horizontal", "gap": 8
+        }
+      ]
+    },
+    {
+      "id": "board", "name": "Board", "type": "frame", "layout": "none",
+      "x": 0, "y": 320, "width": 940, "height": 360, "fill": "#F9FAFB",
+      "children": [
+        { "id": "screenDefault", "name": "Default", "type": "ref", "ref": "screen", "x": 20, "y": 20 },
+        {
+          "id": "screenFilled", "name": "Filled", "type": "ref", "ref": "screen", "x": 330, "y": 20,
+          "descendants": {
+            "list": {
+              "children": [
+                { "id": "fillB1", "name": "B 1", "type": "ref", "ref": "itemB" },
+                { "id": "fillB2", "name": "B 2", "type": "ref", "ref": "itemB" },
+                { "id": "fillB3", "name": "B 3", "type": "ref", "ref": "itemB" }
+              ]
+            }
+          }
+        },
+        {
+          "id": "screenEmpty", "name": "Emptied", "type": "ref", "ref": "screen", "x": 640, "y": 20,
+          "descendants": {
+            "list": { "children": [] }
+          }
+        }
+      ]
+    }
+  ]
+}

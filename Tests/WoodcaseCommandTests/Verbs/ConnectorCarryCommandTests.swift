@@ -12,6 +12,9 @@ import Woodcase
 ///
 /// `connectors-group.pen`: `Board` holds `Pair`, a group of `G1` and `G2`, and `Lone`;
 /// `KG` ("group link") joins `Pair` to `Lone`, and `K12` ("inner link") joins `G1` to `G2`.
+/// `connectors-instance.pen`: `Board` holds `Chip`, an instance of `Comp` (whose child is
+/// `Label`), and `Lone`; `KChip` joins `Chip` to `Lone`, and `KLabel` joins `Chip/Label` to
+/// `Lone`.
 @Suite("woodcase ungroup, clip and paste name their connectors")
 struct ConnectorCarryCommandTests {
     @Test("ungroup removes the connector attached to the group and names it")
@@ -26,6 +29,25 @@ struct ConnectorCarryCommandTests {
         let document = try EditableDocument(from: PenParser.parse(Data(contentsOf: fixture.file)))
         #expect(document.node(id: "KG") == nil)
         #expect(document.node(id: "K12") != nil)
+    }
+
+    @Test("rm --detach keeps the connectors attached to the instance it detaches, and into it")
+    func removeDetachKeepsConnectors() throws {
+        let fixture = try CommandFixture(fixture: "connectors-instance.pen")
+
+        let run = try fixture.run("rm", fixture.file.path, "Comp", "--detach", "--as", "ana")
+
+        #expect(run.status == 0, "\(run.stderr)")
+        let document = try EditableDocument(from: PenParser.parse(Data(contentsOf: fixture.file)))
+        for id in ["KChip", "KLabel"] {
+            guard case let .connection(data)? = document.node(id: id)?.kind else {
+                Issue.record("\(id) is gone")
+                continue
+            }
+            #expect(document.node(id: data.source.path) != nil, "\(id) dangles: \(data.source.path)")
+        }
+        guard case let .connection(label)? = document.node(id: "KLabel")?.kind else { return }
+        #expect(document.node(id: label.source.path)?.common.name == "Label")
     }
 
     @Test("ungroup --json lists the connectors removed")

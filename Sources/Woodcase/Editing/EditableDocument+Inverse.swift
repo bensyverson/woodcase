@@ -101,7 +101,8 @@ extension EditableDocument {
     /// it again, then each detach undone, last first.
     ///
     /// - Returns: The insert that restores the deleted subtree, followed by a detach
-    ///   inverse per instance the delete will detach.
+    ///   inverse per instance the delete will detach, then the connector ends those
+    ///   detaches rewrite put back.
     private func prepareInverseDelete(_ op: EditOperation.DeleteNode) throws -> [EditOperation] {
         let subtree = try materializeSubtree(rootID: op.nodeID)
         let parentID = parents[op.nodeID]
@@ -117,10 +118,11 @@ extension EditableDocument {
         ))]
 
         guard op.instances == .detach else { return inverse }
-        for plan in try detachPlans(deleting: op).reversed() {
-            try inverse.append(contentsOf: detachInverse(of: plan))
+        let plans = try detachPlans(deleting: op)
+        for plan in plans.reversed() {
+            try inverse.append(contentsOf: structuralDetachInverse(of: plan))
         }
-        return inverse
+        return inverse + connectorRestores(for: plans)
     }
 
     /// Inverse of a replace: replace it right back with the subtree it had.

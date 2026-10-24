@@ -6,11 +6,17 @@
 extension ReactEmitter {
     // MARK: - Interface
 
-    static func emitInterface(_ component: ComponentDefinition, into lines: inout [String]) {
+    /// Writes the component's props interface: its props, its `slots` as optional
+    /// `React.ReactNode`s, the props its role and structural states imply, and `className`
+    /// and `style`.
+    static func emitInterface(_ component: ComponentDefinition, slots: [ReactSlot] = [], into lines: inout [String]) {
         lines.append("interface \(component.name)Props {")
         for prop in component.props {
             let tsType = typescriptType(for: prop.type)
             lines.append("  \(prop.name)?: \(tsType);")
+        }
+        for slot in slots {
+            lines.append("  \(slot.name)?: React.ReactNode;")
         }
         // Role-derived props
         if let role = component.role {
@@ -216,7 +222,8 @@ extension ReactEmitter {
 
     // MARK: - Destructured Props Helper
 
-    /// Emit the destructured props shared by all render function variants.
+    /// Emit the destructured props shared by all render function variants: the props,
+    /// then the slots, then what the role implies, `className` and `style`.
     private static func emitDestructuredProps(
         _ component: ComponentDefinition,
         ctx: EmitContext
@@ -224,6 +231,9 @@ extension ReactEmitter {
         for prop in component.props {
             let defaultStr = formatDefaultValue(prop)
             ctx.lines.append("  \(prop.name)\(defaultStr),")
+        }
+        for slot in ctx.slots {
+            ctx.lines.append("  \(slot.name),")
         }
         if let role = component.role {
             if role == .toggle {

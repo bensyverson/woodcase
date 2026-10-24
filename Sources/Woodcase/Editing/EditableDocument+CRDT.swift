@@ -94,7 +94,9 @@ public extension EditableDocument {
         return ops
     }
 
-    /// Carries out one planned detach in CRDT mode by decomposing it into primitives.
+    /// Carries out one planned detach in CRDT mode by decomposing it into primitives:
+    /// the ref's delete, the expansion's insert, and a kind write per connector whose
+    /// ends it renames (``connectorRewrites(for:)``).
     ///
     /// The plan was made once, with derived ids
     /// (``SubtreeIDPlan/detaching(_:refID:replica:avoiding:)``), so the CRDT and the flat
@@ -118,9 +120,14 @@ public extension EditableDocument {
             node: plan.subtree, parentID: parentID, index: index
         ))
 
-        // Process both through the normal applyLocal path
+        // Process both through the normal applyLocal path, then the connector ends the
+        // detach renames, so a peer receives them as part of the same change.
+        let rewrites = connectorRewrites(for: plan)
         var allOps = try applyLocal(deleteOp)
         try allOps.append(contentsOf: applyLocal(insertOp))
+        for rewrite in rewrites {
+            try allOps.append(contentsOf: applyLocal(rewrite))
+        }
         return allOps
     }
 

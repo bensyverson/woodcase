@@ -198,6 +198,11 @@ that is itself being deleted is not taken again. An id inside a component instan
 refused (``EditRefusal/Code/insideInstance``), and one naming nothing
 (``EditRefusal/Code/addressNotFound``).
 
+`woodcase rm --detach` detaches a component's instances before it deletes the component,
+and a detach rewrites the connector ends into an instance to the detached copy (see
+<doc:EditingDocuments>), so the connectors into those instances (`Chip/Label`) stay; only an
+end still naming a removed node takes its connector.
+
 A batch `replace` that drops nodes from the subtree it rewrites takes their connectors the
 same way. Both answers name what went, as a ``WriteDivergence/Kind/deletedConnectors``
 note: `removing Card also removed 2 connectors that ended on it or inside it: Flow, Link`.

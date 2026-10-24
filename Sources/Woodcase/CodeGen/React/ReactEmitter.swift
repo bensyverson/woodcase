@@ -51,6 +51,13 @@ final class EmitContext {
     /// Whether the file draws a cropped image paint, and so imports `PenImageCrop` from the
     /// support file ``ReactEmitter/imageCropSupportFile``.
     var usesImageCrop = false
+    /// The slots of the component the file declares, in order; empty for a page.
+    var slots: [ReactSlot] = []
+
+    /// The slot of the component being emitted whose frame is `nodeID`, if it is one.
+    func slot(framedBy nodeID: String) -> ReactSlot? {
+        slots.first { $0.frame.id == nodeID }
+    }
 
     /// How the node with `common` is placed: free when it is absolutely positioned, else
     /// as its container places its children.
@@ -225,15 +232,12 @@ public enum ReactEmitter {
         ctx.lines.append("  );")
         ctx.lines.append("}")
 
-        // Collect component imports by scanning for refs
+        // Collect component imports by scanning for refs, with the calls the emission
+        // wrote that the page's own tree does not hold: those in an instance's slot fill.
         let refIDs = PageAnalyzer.referencedComponentIDs(in: page.sourceNode)
-        var componentImports: [String] = []
-        for refID in refIDs.sorted() {
-            if let comp = registry[refID] {
-                componentImports.append(
-                    "import { \(comp.name) } from \"../components/\(comp.name)\";"
-                )
-            }
+        let names = Set(refIDs.compactMap { registry[$0]?.name }).union(ctx.componentRefs)
+        let componentImports: [String] = names.subtracting([page.name]).map { name in
+            "import { \(name) } from \"../components/\(name)\";"
         }
 
         // Assemble with imports at top
@@ -302,8 +306,9 @@ public enum ReactEmitter {
         }
 
         // Interface (into separate lines first)
+        ctx.slots = ReactSlot.slots(of: component)
         var interfaceLines: [String] = []
-        emitInterface(component, into: &interfaceLines)
+        emitInterface(component, slots: ctx.slots, into: &interfaceLines)
 
         // Function body (may accumulate icon imports)
         emitFunction(component, theme: theme, ctx: ctx)

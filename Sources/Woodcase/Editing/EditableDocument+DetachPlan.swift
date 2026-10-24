@@ -24,6 +24,10 @@ extension EditableDocument {
         var subtree: PenNode
         /// Expanded id → derived id, for every node of the subtree.
         var idMapping: [String: String]
+        /// What a connector end names → derived id: ``idMapping``, and each instance's
+        /// path (`ref`, `ref/row`) → the derived id of the root it expands to, the
+        /// spelling a connector end uses for an instance (``connectorRewrites(for:)``).
+        var endMapping: [String: String]
     }
 
     /// The ids no detach may mint: every id the document holds, and in a collaborative
@@ -73,7 +77,8 @@ extension EditableDocument {
                 parentID: parentID,
                 index: index,
                 subtree: ids.applied(to: expanded),
-                idMapping: ids.replacements
+                idMapping: ids.replacements,
+                endMapping: Self.endMapping(of: expanded, refID: refID, idMapping: ids.replacements)
             ))
         }
         return plans
