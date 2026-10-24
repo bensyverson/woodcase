@@ -22,7 +22,8 @@ pasteboard.setData(try JSONEncoder().encode(clip), forType: clipType)
 ### What a clip holds
 
 The clip's roots are the copied subtrees first, named by ``PenClip/contentIDs`` in
-document order, then the component definitions carried along for them. Its `variables`
+document order, then the connectors carried between them, named by
+``PenClip/connectorIDs``, then the component definitions carried along for them. Its `variables`
 and `themes` hold exactly what those roots need, and it has no `imports`.
 
 | Copied | Comes out as |
@@ -39,6 +40,20 @@ a canvas selects and hit-tests (``EditableDocument/expandedID(of:)``) — and a 
 node's own id is accepted as well. A position is the canvas point a root's `x` and `y`
 name, its own origin: a node keeps its own turn, but a turn it inherited from an
 ancestor is not carried.
+
+### Connectors
+
+Every connector whose two ends are both inside the copied nodes — a copied node or anything
+inside it — comes along, whether or not it was selected
+(``EditPlanner/connectorIDs(enclosedBy:in:)``, Ben's ruling of 2026-10-23, Penumbra's
+interaction spec §11), so a Cut and Paste of two connected cards keeps their connector. A
+connector with one end outside the copy stays behind. A carried connector is a root of the
+clip, as Pen keeps connections, named by ``PenClip/connectorIDs`` and not by
+``PenClip/contentIDs``: it was not copied itself. Its ends name the copies in the clip — an
+end on a node drawn inside an instance follows the detached copy's derived id, and an end
+inside a copied instance keeps its instance path (`Chip/Label`). A connector that was
+selected is content, as before. A clip that does not say (one written by hand, or by an
+older Woodcase) carries none.
 
 ### Where each copy came from
 
@@ -114,8 +129,21 @@ select(plan.insertedRootIDs)
 ```
 
 The operations come in a fixed order: theme axes, then variables, then the component
-definitions the target lacks, then the copied roots. ``PastePlan/insertedRootIDs`` names
-the copies; the rest of the plan says what was reused and what was renamed.
+definitions the target lacks, then the copied roots, then the connections.
+``PastePlan/insertedRootIDs`` names the copies, ``PastePlan/insertedConnectorIDs`` the
+connectors the clip carried; the rest of the plan says what was reused and what was renamed.
+
+### Connectors in a paste
+
+Pen keeps connections only at the top level, so every pasted connector — one the clip
+carried and one that was copied itself — is inserted as a root, after the nodes, wherever
+the copies go; its ends follow the pasted ids, like every other reference. Inserting the
+connectors last means the undo takes them out first. Pen's format has no free end, so a
+connector is left out when an end would name nothing: an end on a pasted node must name a
+node of the clip, and any other end — a copied connector's end outside the copy — must name
+a node the target holds, so pasting such a connector back into its own document attaches it
+to the original and pasting it elsewhere leaves it out. ``PastePlan/droppedConnectorIDs``
+names what was left out.
 
 ### Where the copies go
 

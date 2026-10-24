@@ -18,6 +18,12 @@ public extension EditPlanner {
     /// unless the group was absolutely positioned there, when each child is too.
     /// Ungrouping a frame works the same, and its own fills, strokes and clip go with it.
     ///
+    /// A connector attached to the group or frame itself would be left naming nothing, so
+    /// it is deleted first, in the same edit, as ``planDelete(nodeIDs:in:)`` deletes one
+    /// (``connectorIDs(attachedTo:in:)`` of the wrapper alone); the connectors attached to
+    /// the children stay, since the children keep their ids (the integrator's ruling of
+    /// 2026-10-23).
+    ///
     /// Refused for a node that is neither a group nor a frame
     /// (``EditRefusal/Code/notAGroup``), inside a component instance
     /// (``EditRefusal/Code/insideInstance``), for an id naming nothing
@@ -30,7 +36,9 @@ public extension EditPlanner {
     ///   - document: The document, as it stands.
     ///   - layout: The layout of `document` as it stands, which the canvas quads are read
     ///     from.
-    /// - Returns: The edits, to submit as one. The children keep their ids.
+    /// - Returns: The edits, to submit as one: the wrapper's connectors' deletes first, then
+    ///   the moves, the wrapper's delete and the placement writes. The children keep their
+    ///   ids.
     /// - Throws: ``EditRefusal`` naming why nothing should be written.
     static func planUngroup(
         groupID: String,
@@ -63,7 +71,12 @@ public extension EditPlanner {
             .inFlow
         }
 
-        var operations: [EditOperation] = children.enumerated().map { offset, child in
+        // The wrapper goes, so a connector attached to it would name nothing: it goes
+        // first, as a delete takes one, and the undo puts it back last.
+        var operations: [EditOperation] = connectorIDs(attachedTo: [group], in: document).map { id in
+            .deleteNode(EditOperation.DeleteNode(nodeID: id))
+        }
+        operations += children.enumerated().map { offset, child in
             .moveNode(EditOperation.MoveNode(nodeID: child, newParentID: parent, index: index + offset))
         }
         operations.append(delete)

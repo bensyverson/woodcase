@@ -41,8 +41,14 @@ struct PasteCommand: AsyncParsableCommand {
         canvas. A paste that would make components contain each other is refused, \
         naming the loop, and nothing is written.
 
-        The report names the new roots, then what was reused and what was renamed. \
-        --json prints the same as an object.
+        Connections land at the top level, where Pen keeps them, wherever the copies \
+        go. A connector the clip carried — one whose two ends were both inside the \
+        copied nodes — is attached to the pasted copies. A connector with an end that \
+        would name a node neither the paste nor the file holds is left out, so none \
+        points at nothing.
+
+        The report names the new roots, the connectors attached and any left out, \
+        then what was reused and what was renamed. --json prints the same as an object.
 
         \(AddressArgument.addressForms)
 
@@ -69,6 +75,14 @@ struct PasteCommand: AsyncParsableCommand {
 
         /// The variables that came along under a new name.
         let renamedVariables: [PastePlan.Rename]
+
+        /// The new ids of the connectors the clip carried, attached to the copies, or `nil`
+        /// when it carried none.
+        let insertedConnectorIDs: [String]?
+
+        /// The clip ids of the connectors left out because an end would name nothing, or
+        /// `nil` when none was.
+        let droppedConnectorIDs: [String]?
 
         /// The document revision the write left behind, or `nil` for a dry run.
         let revision: String?
@@ -123,6 +137,8 @@ struct PasteCommand: AsyncParsableCommand {
                         renamedComponents: plan.renamedComponents,
                         reusedVariables: plan.reusedVariables,
                         renamedVariables: plan.renamedVariables,
+                        insertedConnectorIDs: plan.insertedConnectorIDs.isEmpty ? nil : plan.insertedConnectorIDs,
+                        droppedConnectorIDs: plan.droppedConnectorIDs.isEmpty ? nil : plan.droppedConnectorIDs,
                         revision: effect == .dryRun ? nil : document.documentRevision,
                         dryRun: effect == .dryRun ? true : nil
                     )
@@ -231,6 +247,12 @@ struct PasteCommand: AsyncParsableCommand {
     static func text(_ report: Report) -> String {
         var lines: [String] = report.dryRun == true ? [DryRunOption.marker] : []
         lines.append("pasted \(report.insertedRootIDs.joined(separator: ", "))")
+        if let connectors = report.insertedConnectorIDs {
+            lines.append("attached connectors \(connectors.joined(separator: ", "))")
+        }
+        if let dropped = report.droppedConnectorIDs {
+            lines.append("left out connectors \(dropped.joined(separator: ", ")), an end naming nothing here")
+        }
         if !report.reusedComponents.isEmpty {
             lines.append("reused components \(report.reusedComponents.values.sorted().joined(separator: ", "))")
         }

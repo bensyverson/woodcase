@@ -53,6 +53,8 @@ import Foundation
 /// - ``planGroup(nodeIDs:kind:in:layout:)``
 /// - ``planUngroup(groupID:in:layout:)``
 /// - ``planDelete(nodeIDs:in:)``
+/// - ``connectorIDs(attachedTo:in:)``
+/// - ``connectorIDs(enclosedBy:in:)``
 public enum EditPlanner {
     /// Plans an intent against the node an address names.
     ///

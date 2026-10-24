@@ -28,7 +28,11 @@ public extension PenClip {
     ///   `$name` in the paste follows.
     /// - **Theme axes** the document lacks are added; one it has is widened by the
     ///   options it lacks, appended so its first option stays its default.
-    /// - **Placement** is the target's (``PasteTarget``).
+    /// - **Placement** is the target's (``PasteTarget``) — except for a connection, which
+    ///   Pen keeps only at the top level: a copied connector and each one the clip carried
+    ///   (``PenClip/connectorIDs``) go in as roots, after the nodes, its ends following
+    ///   the copies. One with an end that would name a node neither the paste nor the
+    ///   target holds is left out (``PastePlan/droppedConnectorIDs``).
     /// - **Component loops** are refused before anything is planned to be written.
     ///
     /// Apply ``PastePlan/operations`` together, in order — as one ``LocalEdit`` through a
@@ -46,7 +50,11 @@ public extension PenClip {
             return root
         }
         let site = try PasteSite(target, in: document)
-        let copied = Set(contentIDs)
+        let connectors = try connectorIDs.map { id in
+            guard let root = roots[id] else { throw PasteError.contentNotInClip(id: id) }
+            return root
+        }
+        let copied = Set(contentIDs).union(connectorIDs)
         let carried = self.document.children.filter { !copied.contains($0.id) }
 
         let variables = PasteVariables(
@@ -59,7 +67,7 @@ public extension PenClip {
 
         var ids = Self.positionalIDs(of: carried, reusing: reused, among: theirs)
         var taken = Set(document.nodes.keys).union(document.importedStore.nodes.keys)
-        let plans = (added + content).map { root in
+        let plans = (added + content + connectors).map { root in
             let plan = SubtreeIDPlan.regenerating(root, avoiding: taken)
             taken.formUnion(plan.ids)
             ids.merge(plan.replacements) { _, new in new }
@@ -70,31 +78,45 @@ public extension PenClip {
             ids: ids, variables: variables.changes,
             names: Dictionary(renames.map { ($0.id, $0.rename.to) }, uniquingKeysWith: { first, _ in first })
         )
-        let settled = try zip(added + content, plans).map { root, plan in
+        let settled = try zip(added + content + connectors, plans).map { root, plan in
             try SubtreeIDPlan(ids: plan.ids, replacements: [:]).applied(to: rewriter.rewrite(root))
         }
         let newDefinitions = Array(settled.prefix(added.count))
+        let clipDocument = EditableDocument(from: self.document)
+        let ends = ConnectorEnds(
+            regenerated: Set(plans.flatMap(\.replacements.keys)), clip: clipDocument, target: document
+        )
         let clipRects = Dictionary(
-            RootOverlap.roots(in: EditableDocument(from: self.document)).map { ($0.id, $0.rect) },
+            RootOverlap.roots(in: clipDocument).map { ($0.id, $0.rect) },
             uniquingKeysWith: { first, _ in first }
         )
+        // A connection is not placed: Pen keeps it at the top level, wherever the copies go.
+        let contentSettled = Array(settled[added.count ..< added.count + content.count])
+        let placeable = content.indices.filter { !content[$0].isConnection }
+        let copiedConnections = content.indices.filter { content[$0].isConnection }
         let copies = PasteSite.Copies(
-            rects: contentIDs.map { clipRects[$0] },
-            origins: contentIDs.map { origins?[$0] },
+            rects: placeable.map { clipRects[contentIDs[$0]] },
+            origins: placeable.map { origins?[contentIDs[$0]] },
             sourceDocumentID: sourceDocumentID
         )
         let placed = Self.sized(
-            site.placed(Array(settled.dropFirst(added.count)), copies: copies, in: document),
+            site.placed(placeable.map { contentSettled[$0] }, copies: copies, in: document),
             origins: copies.origins,
-            drawn: { drawnSizes() },
+            drawn: {
+                let sizes = drawnSizes()
+                return placeable.map { sizes[$0] }
+            },
             in: document
         )
-        let placedContent = placed.map(\.node)
+        let connections = ends.keeping(
+            copiedConnections.map { contentSettled[$0] }, from: copiedConnections.map { content[$0] }
+        )
+        let carriedConnectors = ends.keeping(Array(settled.suffix(connectors.count)), from: connectors)
         try Self.refuseComponentLoops(
-            content: placedContent, definitions: newDefinitions, parentIDs: placed.map(\.parentID),
+            content: placed.map(\.node), definitions: newDefinitions, parentIDs: placed.map(\.parentID),
             among: theirs, in: document
         )
-        let onCanvas = zip(placed, content).filter { $0.0.parentID == nil }
+        let onCanvas = zip(placed, placeable.map { content[$0] }).filter { $0.0.parentID == nil }
         let placedDefinitions = Self.pastTheCanvas(
             newDefinitions,
             widths: added.map { clipRects[$0.id]?.width ?? 0 },
@@ -113,13 +135,24 @@ public extension PenClip {
         operations += placed.map { root in
             .insertNode(EditOperation.InsertNode(node: root.node, parentID: root.parentID, index: root.index))
         }
+        // Connections last, as roots: after the nodes their ends name, so the undo takes
+        // them out first.
+        operations += (connections.nodes + carriedConnectors.nodes).map { node in
+            .insertNode(EditOperation.InsertNode(node: node))
+        }
+        var pastedIDs = Dictionary(uniqueKeysWithValues: zip(placeable, placed.map(\.node.id)))
+        for (index, node) in zip(connections.kept, connections.nodes) {
+            pastedIDs[copiedConnections[index]] = node.id
+        }
         return PastePlan(
             operations: operations,
-            insertedRootIDs: placedContent.map(\.id),
+            insertedRootIDs: content.indices.compactMap { pastedIDs[$0] },
             reusedComponents: reused,
             renamedComponents: renames.map(\.rename),
             reusedVariables: variables.reused,
-            renamedVariables: variables.renamed
+            renamedVariables: variables.renamed,
+            insertedConnectorIDs: carriedConnectors.nodes.map(\.id),
+            droppedConnectorIDs: connections.dropped + carriedConnectors.dropped
         )
     }
 }

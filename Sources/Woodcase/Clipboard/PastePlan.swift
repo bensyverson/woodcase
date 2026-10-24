@@ -46,14 +46,21 @@ public struct PastePlan: Friendly {
     ///   - renamedComponents: The components that came along under a new name.
     ///   - reusedVariables: The clip's variables the target already had, sorted.
     ///   - renamedVariables: The variables that came along under a new name.
+    ///   - insertedConnectorIDs: The new ids of the carried connectors, in clip order.
+    ///   - droppedConnectorIDs: The clip ids of the connectors left out because an end
+    ///     would name nothing.
     public init(
         operations: [EditOperation],
         insertedRootIDs: [String],
         reusedComponents: [String: String] = [:],
         renamedComponents: [Rename] = [],
         reusedVariables: [String] = [],
-        renamedVariables: [Rename] = []
+        renamedVariables: [Rename] = [],
+        insertedConnectorIDs: [String] = [],
+        droppedConnectorIDs: [String] = []
     ) {
+        self.insertedConnectorIDs = insertedConnectorIDs
+        self.droppedConnectorIDs = droppedConnectorIDs
         self.operations = operations
         self.insertedRootIDs = insertedRootIDs
         self.reusedComponents = reusedComponents
@@ -63,12 +70,23 @@ public struct PastePlan: Friendly {
     }
 
     /// The operations, in the order they apply: theme axes, then variables, then the
-    /// component definitions the target lacked (as roots), then the copied roots.
+    /// component definitions the target lacked (as roots), then the copied roots, then the
+    /// carried connectors (as roots).
     public var operations: [EditOperation]
 
     /// The new ids of the copied roots, in clip order — what an editor selects after
-    /// the paste.
+    /// the paste. A copied connector left out (``droppedConnectorIDs``) is not among them.
     public var insertedRootIDs: [String]
+
+    /// The new ids of the connectors the clip carried (``PenClip/connectorIDs``), in clip
+    /// order, each attached to the pasted copies and inserted at the top level, where Pen
+    /// keeps connections. Not among ``insertedRootIDs``: they were not copied themselves.
+    public var insertedConnectorIDs: [String]
+
+    /// The clip ids of the connectors the paste left out, carried or copied, because an end
+    /// would name a node neither the paste nor the target holds — Pen's format has no free
+    /// end. In clip order.
+    public var droppedConnectorIDs: [String]
 
     /// Each carried component the target already had, with the same name and the same
     /// definition: clip id → the target's id. Nothing is inserted for one of these; every

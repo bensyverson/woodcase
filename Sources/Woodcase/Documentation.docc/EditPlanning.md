@@ -126,6 +126,9 @@ let operations = try EditPlanner.planUngroup(groupID: plan.wrapperID, in: docume
   children where they were drawn.
 - ``EditPlanner/planUngroup(groupID:in:layout:)`` moves a group's or a frame's children to
   its parent at its index, in their order, and removes it. In a stack they join the flow.
+  A connector attached to the group or frame itself would be left naming nothing, so it is
+  deleted first, in the same edit, as a delete takes one; the connectors attached to the
+  children stay (the integrator's ruling of 2026-10-23).
 
 **Nothing moves on the canvas.** A node placed by its own `x`/`y` is drawn by
 `translate(x, y) · turn · flip` about its anchor in its parent's own coordinates, so each
@@ -192,7 +195,28 @@ A batch `replace` that drops nodes from the subtree it rewrites takes their conn
 same way. Both answers name what went, as a ``WriteDivergence/Kind/deletedConnectors``
 note: `removing Card also removed 2 connectors that ended on it or inside it: Flow, Link`.
 
-Ungroup is not a delete of its children: they keep their ids and their connectors.
+Ungroup is not a delete of its children: they keep their ids and their connectors. The
+wrapper it removes does take its own connectors, as a delete would.
+
+### Connectors a copy carries
+
+Copy, and so Cut, carries every connector whose two ends are both inside the copied nodes
+— a copied node or anything inside it — whether or not the connector was selected; a
+connector with one end outside the copy stays behind (Ben's ruling of 2026-10-23,
+Penumbra's interaction spec §11). Duplicate and an Option-drag copy follow the same rule,
+so it lives in one query:
+
+```swift
+let carried = EditPlanner.connectorIDs(enclosedBy: ["CardA", "CardB"], in: document)
+// ["KAB"]: both its ends are inside the copy; one from CardA to CardC is not carried
+```
+
+An end is inside the copy when its path's first id is a copied stored node or a node inside
+one (`Chip/Label` is inside a copied `Chip`), or when it is the expanded id of a copied node
+drawn inside an instance, or of anything drawn inside that. A connector among the copied
+nodes is not listed: it is copied already. ``PenClip/extract(nodeIDs:from:documentID:)``
+asks this (<doc:Clipboard>); its counterpart for a removal is
+``EditPlanner/connectorIDs(attachedTo:in:)``.
 
 ### The default text style
 
@@ -385,6 +409,8 @@ let drawn = await document.materializeSnapshot(overlaying: preview)
 - ``EditPlanner/planUngroup(groupID:in:layout:)``
 - ``EditPlanner/planDelete(nodeIDs:in:)``
 - ``DeletionPlan``
+- ``EditPlanner/connectorIDs(attachedTo:in:)``
+- ``EditPlanner/connectorIDs(enclosedBy:in:)``
 - ``EditPlanner/planScale(nodeIDs:by:anchor:in:layout:)``
 - ``EditPlanner/planMarkDefaultTextStyle(nodeID:in:)``
 - ``EditPlanner/planUnmarkDefaultTextStyle(in:)``

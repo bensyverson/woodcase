@@ -371,8 +371,9 @@ woodcase get design.pen Button --instances
 
 What an editor's Copy puts on the pasteboard: the nodes asked for, as a .pen that draws
 on its own (``PenClip``; see <doc:Clipboard>). Its first roots are the nodes, in document
-order and at the canvas positions they were drawn at; after them come the component
-definitions they draw — through nested instances and ref chains, copied as stored, an
+order and at the canvas positions they were drawn at; then the connectors whose two ends
+are both inside them, asked for or not, their ends naming the copies (a connector with one
+end outside stays behind); then the component definitions they draw — through nested instances and ref chains, copied as stored, an
 imported library's as local definitions — with the variables and theme axes they need.
 A node inside an instance (`Orders/Value`) is copied as drawn and detached. `cp` is the
 verb that duplicates a node *inside* a file; `clip` writes nothing.
@@ -383,8 +384,8 @@ woodcase shot clip.pen
 ```
 
 **Options:** `--as` (a reader, for the view log), `--json`, which prints
-`{"contentIDs": [...], "document": {...}, "origins": {...}}` so the copied roots can be
-told from the carried definitions; `origins` gives each root where it came from
+`{"contentIDs": [...], "connectorIDs": [...], "document": {...}, "origins": {...}}` so the
+copied roots and the carried connectors can be told from the carried definitions; `origins` gives each root where it came from
 (``PenClip/Origin``): its `parentID` and `offset` there, which `paste --into` a free
 container keeps, and its `boardID` and `boardOffset` from that board's corner.
 
@@ -936,8 +937,10 @@ Every id is new. A component or variable the file already has with the same name
 definition is reused; one whose name it holds with a different definition comes along
 renamed (`Button 2`, `$primary-2`), and every use in the paste follows. Components the file
 lacks land as roots past everything on its canvas. A paste that would make components
-contain each other is refused, naming the loop, and nothing is written. The whole paste is
-one transaction, so one `woodcase undo` takes it back.
+contain each other is refused, naming the loop, and nothing is written. Connections land at
+the top level, where Pen keeps them, wherever the copies go; one the clip carried is attached
+to the pasted copies, and one with an end that would name nothing in the file is left out
+and named. The whole paste is one transaction, so one `woodcase undo` takes it back.
 
 ```bash
 woodcase clip source.pen Buy --json > clip.json
@@ -951,7 +954,7 @@ woodcase clip design.pen Hero --json | woodcase paste other.pen - --at 0,0 --as 
 | `--after <node>` | — | Right after the node in its parent: in a stack, in the flow; elsewhere to its right, top-aligned |
 | `--at x,y` | — | On the canvas, as roots, centered on the point |
 | `--in-place` | on | On the canvas, as roots, where the nodes were copied |
-| `--json` | `false` | `{"insertedRootIDs":[…],"reusedComponents":{…},"renamedComponents":[…],"reusedVariables":[…],"renamedVariables":[…],"revision":…}` |
+| `--json` | `false` | `{"insertedRootIDs":[…],"reusedComponents":{…},"renamedComponents":[…],"reusedVariables":[…],"renamedVariables":[…],"insertedConnectorIDs":[…],"droppedConnectorIDs":[…],"revision":…}`; the two connector lists are left out when empty |
 
 Pass at most one placement. `--dry-run` and `--as` work as for every write verb.
 
@@ -997,14 +1000,17 @@ woodcase group design.pen Hero Footer --frame --as ana
 What an editor's Ungroup (⇧⌘G) does (``EditPlanner/planUngroup(groupID:in:layout:)``): the
 group's or frame's children go to its parent at its index, in their order, with its
 position, turn and flips folded into each, and it is removed. In a stack the children join
-the flow there. A node inside a component instance, a node that is neither a group nor a
-frame, and a component with instances are refused.
+the flow there. A connector attached to the group itself goes too, in the same edit, and
+the report names it; connectors attached to the children stay. A node inside a component
+instance, a node that is neither a group nor a frame, and a component with instances are
+refused.
 
 ```bash
 woodcase ungroup design.pen Card/Header --as ana
 ```
 
-`--json` prints `{"ids":[…],"revision":…}`.
+`--json` prints `{"ids":[…],"deletedConnectors":[…],"connectorNote":…,"revision":…}`, the
+connector fields only when one was removed.
 
 ### `scale`
 

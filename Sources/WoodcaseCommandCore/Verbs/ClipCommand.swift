@@ -24,7 +24,9 @@ struct ClipCommand: AsyncParsableCommand {
         The output is a .pen document that draws on its own. Its first roots are the \
         nodes asked for, in document order, each at the canvas position it was drawn \
         at — a node inside another one asked for travels inside it. After them come \
-        the component definitions those nodes draw, through nested instances and ref \
+        the connectors whose two ends are both inside those nodes, asked for or not, \
+        their ends naming the copies; a connector with one end outside stays behind. \
+        Then come the component definitions those nodes draw, through nested instances and ref \
         chains, copied as stored; a component from an imported library comes along as \
         a local definition under its prefixed id (K:Chip1), so the clip has no \
         imports. It carries the variables the nodes and definitions use, the variables \
@@ -34,9 +36,10 @@ struct ClipCommand: AsyncParsableCommand {
         drawn: overrides applied, detached from its component, under fresh ids derived \
         from the document, so the same copy prints the same bytes every time.
 
-        --json prints {"contentIDs": [...], "document": {...}, "origins": {...}} \
-        instead: the clip with the ids of the roots that were copied, so a reader can \
-        tell them from the definitions carried along, and where each one came from — \
+        --json prints {"contentIDs": [...], "connectorIDs": [...], "document": {...}, \
+        "origins": {...}} instead: the clip with the ids of the roots that were copied \
+        and of the connectors carried, so a reader can tell them from the definitions \
+        carried along, and where each copied root came from — \
         its parent and offset there, its board and offset from the board's corner — \
         the offset `woodcase paste --into` a free container keeps.
 

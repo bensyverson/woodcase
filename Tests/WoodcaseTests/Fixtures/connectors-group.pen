@@ -1,0 +1,47 @@
+{
+  "version": "2.20",
+  "children": [
+    {
+      "type": "frame",
+      "id": "Board",
+      "name": "Board",
+      "x": 0,
+      "y": 0,
+      "width": 800,
+      "height": 600,
+      "layout": "none",
+      "children": [
+        {
+          "type": "group",
+          "id": "Pair",
+          "name": "Pair",
+          "x": 100,
+          "y": 400,
+          "children": [
+            { "type": "rectangle", "id": "G1", "name": "G1", "x": 0, "y": 0, "width": 20, "height": 20, "fill": "#336699" },
+            { "type": "rectangle", "id": "G2", "name": "G2", "x": 40, "y": 0, "width": 20, "height": 20, "fill": "#336699" }
+          ]
+        },
+        { "type": "rectangle", "id": "Lone", "name": "Lone", "x": 400, "y": 300, "width": 40, "height": 40, "fill": "#993366" }
+      ]
+    },
+    {
+      "type": "connection",
+      "id": "KG",
+      "name": "group link",
+      "source": { "path": "Pair", "anchor": "top" },
+      "target": { "path": "Lone", "anchor": "left" },
+      "stroke": "#71717A",
+      "strokeWidth": 2
+    },
+    {
+      "type": "connection",
+      "id": "K12",
+      "name": "inner link",
+      "source": { "path": "G1", "anchor": "right" },
+      "target": { "path": "G2", "anchor": "left" },
+      "stroke": "#71717A",
+      "strokeWidth": 2
+    }
+  ]
+}

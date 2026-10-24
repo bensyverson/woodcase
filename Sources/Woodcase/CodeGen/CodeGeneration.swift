@@ -17,8 +17,8 @@
 ///   takes `Page`, two of one name are numbered in the order asked.
 ///
 /// The components a definition uses are referenced by name, not included. A caller that
-/// wants them asks for them too: a ``PenClip``'s roots other than its copied ones are
-/// exactly the components the copy needs.
+/// wants them asks for them too: a ``PenClip``'s roots other than its copied ones and its
+/// carried connectors (``PenClip/connectorIDs``) are exactly the components the copy needs.
 ///
 /// ```swift
 /// let clip = try PenClip.extract(nodeIDs: selection, from: document)

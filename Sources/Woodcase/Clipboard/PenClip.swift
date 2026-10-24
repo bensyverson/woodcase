@@ -19,6 +19,9 @@ import Foundation
 ///   already holds. A component defined inside another travels inside it.
 /// - **The variables they use**, the variables those reference, and **the theme axes**
 ///   those variables and any theme pin need, with every option of each axis.
+/// - **The connectors between them** — every connector whose two ends are both inside the
+///   copied nodes, selected or not (``EditPlanner/connectorIDs(enclosedBy:in:)``), its
+///   ends naming the copies.
 ///
 /// A node *inside* an instance is copied as drawn: its expansion, overrides applied,
 /// detached from the component under ids derived the way a detach derives them
@@ -27,9 +30,9 @@ import Foundation
 /// (`K:Chip1`), with the library variables it uses (`$K:accent`), so the clip has no
 /// `imports`.
 ///
-/// The roots of ``document`` are the copied subtrees, named by ``contentIDs``, followed
-/// by the carried definitions. A copied node that is itself a component is content, and
-/// is not repeated as a definition.
+/// The roots of ``document`` are the copied subtrees, named by ``contentIDs``, then the
+/// carried connectors, named by ``connectorIDs``, then the carried definitions. A copied
+/// node that is itself a component is content, and is not repeated as a definition.
 ///
 /// ```swift
 /// let clip = try PenClip.extract(nodeIDs: selection, from: document)
@@ -48,16 +51,20 @@ public struct PenClip: Friendly {
     ///   - origins: Where each copied root came from, by id; `nil` when nothing says.
     ///   - sourceDocumentID: The id of the document it was copied out of, as the copy
     ///     named it; `nil` when it named none.
+    ///   - connectorIDs: The ids of the roots that are connectors carried along because
+    ///     both their ends are inside the copied nodes, in document order.
     public init(
         document: PenDocument,
         contentIDs: [String],
         origins: [String: Origin]? = nil,
-        sourceDocumentID: String? = nil
+        sourceDocumentID: String? = nil,
+        connectorIDs: [String] = []
     ) {
         self.document = document
         self.contentIDs = contentIDs
         self.origins = origins
         self.sourceDocumentID = sourceDocumentID
+        self.connectorIDs = connectorIDs
     }
 
     /// The clip as a .pen document: the copied roots, then the carried definitions,
@@ -65,8 +72,18 @@ public struct PenClip: Friendly {
     public var document: PenDocument
 
     /// The ids of the roots that were copied, in document order. Every other root of
-    /// ``document`` is a component definition carried along for them.
+    /// ``document`` is a connector named by ``connectorIDs`` or a component definition
+    /// carried along for them.
     public var contentIDs: [String]
+
+    /// The ids of the roots that are connectors carried along because both their ends are
+    /// inside the copied nodes, though they were not copied themselves, in document order
+    /// (``EditPlanner/connectorIDs(enclosedBy:in:)``).
+    ///
+    /// Each one's ends name the copies in ``document``, and a paste attaches it to the
+    /// pasted copies, at the top level. A connector that was copied itself is content.
+    /// Empty for a clip that carries none, and for one that does not say.
+    public var connectorIDs: [String]
 
     /// Where each copied root came from — its parent, its board and its offset in each —
     /// keyed by the root's id in ``document``. A clip that says nothing has `nil`: one a
@@ -109,14 +126,19 @@ public struct PenClip: Friendly {
         let order = document.nodeIDsInDocumentOrder()
         let position = Dictionary(uniqueKeysWithValues: order.enumerated().map { ($1, $0) })
         let selected = try selection(nodeIDs, in: document, position: position)
-        let positioned = placed(copies(of: selected, in: document), of: selected, in: document)
+        let copied = copies(of: selected, in: document)
+        let positioned = placed(copied.nodes, of: selected, in: document)
         let definitions = definitions(for: positioned.nodes, in: document, position: position)
         let content = renumbered(positioned.nodes, apartFrom: definitions, in: document)
         var origins: [String: Origin] = [:]
-        for (root, origin) in zip(content, positioned.origins) {
+        for (root, origin) in zip(content.nodes, positioned.origins) {
             origins[root.id] = origin
         }
-        let roots = content + definitions
+        let connectors = try carriedConnectors(
+            EditPlanner.connectorIDs(enclosedBy: nodeIDs, in: document),
+            in: document, drawn: copied.replacements, renumbered: content.replacements
+        )
+        let roots = content.nodes + connectors + definitions
         let needs = needs(of: roots, in: document)
         return PenClip(
             document: PenDocument(
@@ -125,9 +147,10 @@ public struct PenClip: Friendly {
                 variables: needs.variables.isEmpty ? nil : needs.variables,
                 children: roots
             ),
-            contentIDs: content.map(\.id),
+            contentIDs: content.nodes.map(\.id),
             origins: origins.isEmpty ? nil : origins,
-            sourceDocumentID: documentID
+            sourceDocumentID: documentID,
+            connectorIDs: connectors.map(\.id)
         )
     }
 
@@ -142,15 +165,22 @@ public struct PenClip: Friendly {
     /// - Parameters:
     ///   - selected: The selection, in document order.
     ///   - document: The source document.
-    /// - Returns: One subtree per selected node.
-    private static func copies(of selected: [Selected], in document: EditableDocument) -> [PenNode] {
+    /// - Returns: One subtree per selected node, and each drawn node's expanded id → the
+    ///   id its copy took.
+    private static func copies(
+        of selected: [Selected],
+        in document: EditableDocument
+    ) -> (nodes: [PenNode], replacements: [String: String]) {
         var taken = Set(document.nodes.keys).union(document.importedStore.nodes.keys)
-        return selected.map { node in
+        var replacements: [String: String] = [:]
+        let nodes = selected.map { node in
             guard let instanceID = node.instanceID else { return node.subtree }
             let plan = SubtreeIDPlan.detaching(node.subtree, refID: instanceID, avoiding: taken)
             taken.formUnion(plan.ids)
+            replacements.merge(plan.replacements) { _, new in new }
             return plan.applied(to: node.subtree)
         }
+        return (nodes, replacements)
     }
 
     /// The copied subtrees, each one that shares an id with a carried definition given
@@ -166,22 +196,26 @@ public struct PenClip: Friendly {
     ///   - content: The copied subtrees.
     ///   - definitions: The carried definitions.
     ///   - document: The source document.
-    /// - Returns: The subtrees, none sharing an id with a definition.
+    /// - Returns: The subtrees, none sharing an id with a definition, and each renumbered
+    ///   id → its new id.
     private static func renumbered(
         _ content: [PenNode],
         apartFrom definitions: [PenNode],
         in document: EditableDocument
-    ) -> [PenNode] {
+    ) -> (nodes: [PenNode], replacements: [String: String]) {
         let defined = Set(definitions.flatMap(subtreeIDs(of:)))
         var taken = Set(document.nodes.keys)
             .union(document.importedStore.nodes.keys)
             .union(defined)
             .union(content.flatMap(subtreeIDs(of:)))
-        return content.map { root in
+        var replacements: [String: String] = [:]
+        let nodes = content.map { root in
             guard !defined.isDisjoint(with: subtreeIDs(of: root)) else { return root }
             let plan = SubtreeIDPlan.detaching(root, refID: root.id, avoiding: taken)
             taken.formUnion(plan.ids)
+            replacements.merge(plan.replacements) { _, new in new }
             return plan.applied(to: root)
         }
+        return (nodes, replacements)
     }
 }

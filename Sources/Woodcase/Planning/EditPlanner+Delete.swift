@@ -51,30 +51,3 @@ public extension EditPlanner {
         return DeletionPlan(operations: deletes, nodeIDs: topMost, connectorIDs: connectors)
     }
 }
-
-extension EditPlanner {
-    /// The connectors with an end attached to one of `removed`, none of them among it, in
-    /// document order.
-    ///
-    /// An end's path names a node by id, or steps into instances by id
-    /// (`instance/child`); it is attached to a removed node when any of those ids is one.
-    /// Connectors are found at any depth, though Pen keeps them only at the top level.
-    ///
-    /// - Parameters:
-    ///   - removed: Every node an edit removes, descendants included.
-    ///   - document: The document, before the edit.
-    /// - Returns: The connectors to delete with them.
-    static func connectorIDs(attachedTo removed: Set<String>, in document: EditableDocument) -> [String] {
-        guard !removed.isEmpty else { return [] }
-        let attached: Set<String> = Set(document.nodes.compactMap { id, node in
-            guard !removed.contains(id), case let .connection(data) = node.kind else { return nil }
-            let ends = [data.source.path, data.target.path]
-            let touches = ends.contains { path in
-                path.split(separator: "/").contains { removed.contains(String($0)) }
-            }
-            return touches ? id : nil
-        })
-        guard !attached.isEmpty else { return [] }
-        return document.nodeIDsInDocumentOrder().filter(attached.contains)
-    }
-}
