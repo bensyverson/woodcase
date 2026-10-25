@@ -76,9 +76,15 @@ struct FlatStoreJournalTests {
         let base = SessionTestDocuments.make().materialize()
         let session = DocumentSession(document: base, author: ana, collaborative: true)
         let peer = SessionTestPeer(claude, document: base)
-        try session.submit(.local(LocalEdit(operations: [.detachRef(EditOperation.DetachRef(refNodeID: "ref1"))])))
-        try session.submit(.undo)
-        try session.submit(.redo)
+        // Concurrent moves that would close a cycle: the tree keeps ana's, so claude's
+        // leaves f2 a live entry at the head of f1's list, where the flat store has none —
+        // and an insert at index 1 of f1 lands, in the lists, before c1.
+        let crossing = try peer.edit(.moveNode(EditOperation.MoveNode(nodeID: "f2", newParentID: "f1", index: 0)))
+        try session.submit(.local(LocalEdit(operations: [.moveNode(EditOperation.MoveNode(nodeID: "f1", newParentID: "f2"))])))
+        try session.submit(.remote(crossing, from: claude))
+        #expect(session.document.parents["f1"] == "f2")
+        let node = PenNode(id: "n1", common: PenNodeCommon(name: "New"), kind: .rectangle(PenNode.RectangleData()))
+        try session.submit(.local(LocalEdit(operations: [.insertNode(EditOperation.InsertNode(node: node, parentID: "f1", index: 1))])))
         #expect(session.document._placementUnsettled)
 
         try session.submit(.remote(peer.edit(.setProperties(EditOperation.SetProperties(

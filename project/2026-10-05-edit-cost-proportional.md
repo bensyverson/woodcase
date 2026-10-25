@@ -49,6 +49,12 @@ at the root. The whole-document pass used to hide both at the next remote batch.
 they disagree; the next batch reconciles whole, once, as before. The two divergences are
 pre-existing; they are filed as `doNRb5`.
 
+> **Corrected 2026-10-25 (leaf Re3ipI, w-revive):** the second divergence is gone. A node's
+> existence is now a last-writer-wins register per id (DocC `CRDTArchitecture.md`, "Node
+> Existence"), so a redo that re-creates a tombstoned id brings it back on every peer, nested
+> where the redo put it, and the store stays settled. The first — an index counted over stale
+> live entries — still marks the store unsettled.
+
 ## Figures
 
 Release builds, `swift test -c release -Xswiftc -enable-testing`, provisional: other agents

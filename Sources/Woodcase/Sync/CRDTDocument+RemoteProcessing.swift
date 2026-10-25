@@ -9,8 +9,14 @@ extension CRDTDocument {
     // MARK: - Remote processing helpers
 
     func processRemoteSetProperty(_ p: CRDTOperation.SetProperty, timestamp: Timestamp, document: EditableDocument) -> [DocumentMutation]? {
-        guard !tombstones.contains(p.nodeID) else { return nil }
+        // A write to a deleted node is kept for its return (see CRDTDocument+Existence).
+        guard !tombstones.contains(p.nodeID) else {
+            keepDormant(p, at: timestamp)
+            return nil
+        }
         guard document.nodes[p.nodeID] != nil else { return nil }
+        // The create that brought the node into being wrote every property it carries.
+        guard postdatesExistence(of: p.nodeID, at: timestamp) else { return nil }
 
         if propertyMaps[p.nodeID] == nil {
             propertyMaps[p.nodeID] = LWWPropertyMap()
@@ -112,22 +118,30 @@ extension CRDTDocument {
         return mutations.isEmpty ? nil : mutations
     }
 
-    func processRemoteCreateNode(_ p: CRDTOperation.CreateNode, timestamp: Timestamp) -> [DocumentMutation]? {
+    func processRemoteCreateNode(
+        _ p: CRDTOperation.CreateNode, timestamp: Timestamp, document: EditableDocument
+    ) -> [DocumentMutation]? {
         let strippedNode = PenNode(
             id: p.node.id, common: p.node.common, kind: p.node.kind.withEmptyChildren(), extras: p.node.extras
         )
-        propertyMaps[p.node.id] = LWWPropertyMap()
 
         // Register in tree move CRDT so all peers converge on the initial parent.
         // This uses the CRDTOperation's id, which is the same timestamp the sender
-        // used when processing locally — ensuring tree CRDT state converges.
+        // used when processing locally — ensuring tree CRDT state converges. Every
+        // create's move is taken, whether or not the create wins the node's existence
+        // register, so every replica's tree sees the same moves.
         let placed = treeMove.applyMove(TreeMoveCRDT.MoveOp(
             timestamp: timestamp,
             nodeID: p.node.id,
             newParentID: p.parentID
         ))
 
-        var mutations: [DocumentMutation] = [.setNode(strippedNode)]
+        // A create older than the id's latest create or delete loses to it.
+        guard postdatesExistence(of: p.node.id, at: timestamp) else { return nil }
+        let held = tombstones.contains(p.node.id) ? nil : document.nodes[p.node.id]
+        recordExistence(of: p.node.id, alive: true, at: timestamp, holding: held)
+
+        var mutations: [DocumentMutation] = [.setNode(applyingDormantWrites(to: strippedNode))]
 
         // If the parent is tombstoned, create at root instead — the reconciliation
         // pass will finalize placement. This avoids cascade-tombstoning nodes that
@@ -142,12 +156,19 @@ extension CRDTDocument {
         return mutations
     }
 
-    func processRemoteDeleteNode(_ p: CRDTOperation.DeleteNode, document _: EditableDocument) -> [DocumentMutation]? {
+    func processRemoteDeleteNode(
+        _ p: CRDTOperation.DeleteNode, timestamp: Timestamp, document: EditableDocument
+    ) -> [DocumentMutation]? {
+        // A delete older than the id's latest create or delete loses to it: an undone
+        // delete's node stays back.
+        guard postdatesExistence(of: p.nodeID, at: timestamp) else { return nil }
+        let wasDeleted = tombstones.contains(p.nodeID)
+        recordExistence(of: p.nodeID, alive: false, at: timestamp, holding: wasDeleted ? nil : document.nodes[p.nodeID])
+        guard !wasDeleted else { return nil }
         // Only tombstone the specific node — don't cascade on the receiver side.
         // The originator sends individual deleteNode ops for each descendant,
         // so cascading here would double-delete and could incorrectly capture
         // nodes that were concurrently moved INTO the subtree by another peer.
-        tombstones.insert(p.nodeID)
         return [
             .removeNode(nodeID: p.nodeID),
             .removeParent(nodeID: p.nodeID),

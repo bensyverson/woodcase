@@ -23,7 +23,9 @@ public extension CRDTDocument {
             variableTimestamps: variableTimestamps,
             importTimestamps: importTimestamps,
             themeTimestamps: themeTimestamps,
-            documentPropertyTimestamps: documentPropertyTimestamps
+            documentPropertyTimestamps: documentPropertyTimestamps,
+            existenceTimestamps: existenceTimestamps,
+            dormantWrites: dormantWrites
         )
     }
 
@@ -50,6 +52,8 @@ public extension CRDTDocument {
         childrenLists = snapshot.childrenLists
         treeMove = snapshot.treeMove
         tombstones = snapshot.tombstones
+        existenceTimestamps = snapshot.existenceTimestamps
+        dormantWrites = snapshot.dormantWrites
         variableTimestamps = snapshot.variableTimestamps
         importTimestamps = snapshot.importTimestamps
         themeTimestamps = snapshot.themeTimestamps

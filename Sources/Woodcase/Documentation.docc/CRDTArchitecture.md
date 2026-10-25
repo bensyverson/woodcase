@@ -144,6 +144,38 @@ stop at the first id they have already seen. A walk that trusted the chain grew 
 array until the process was killed for it, with no summary and no crash report —
 see `project/2026-08-30-suite-stability.md`.
 
+### Node Existence
+
+Whether a node exists is a last-writer-wins register per id. A
+``CRDTOperation/Payload/createNode(_:)`` writes "alive", a
+``CRDTOperation/Payload/deleteNode(_:)`` writes "deleted", and the newer of them wins
+whatever order they arrive in. The register's value is membership in
+``CRDTDocument/tombstones``; its timestamp is ``CRDTDocument/existenceTimestamps``. A node
+that came with the document has never been written, so any create or delete beats it.
+
+This is what makes a delete undoable among collaborators. Undo of a delete creates the node
+again under its own id; that create is newer than the delete, so every peer brings the node
+back — where the undo put it, by the create's tree move and list insert like any other
+insert. A peer that deleted the same node concurrently removes it everywhere only if its
+delete is the newer write. A deleted id stays deleted under a property write: only a create
+brings a node back.
+
+A create writes every property of the node it carries, so its timestamp is also the floor of
+the node's property registers: a concurrent write older than the create that brought the
+node back loses to it, even on a peer where it arrives afterwards. Writes *newer* than a
+node's latest existence write are never lost to a delete. Those that arrive while the node
+is deleted, and those the node held when a delete removed it, are kept as
+``CRDTDocument/dormantWrites``; a newer create applies each kept write newer than itself on
+top of what it carries, so every register still resolves by its own timestamp. A write older
+than the latest existence write is dropped, since any create that could bring the node back
+is newer still. Every create's tree move is taken, winning or not, so the tree sees the same
+moves on every replica.
+
+> Ben ruled this design on 2026-10-25 (session 52, leaf Re3ipI), over refusing to create a
+> deleted id again — which breaks undo of a delete and id-keeping replaces — and over
+> reviving without keeping writes, which a concurrent write can still make diverge. See
+> `project/2026-10-04-document-session-design.md`.
+
 ### Operation Log and Sync Protocol
 
 The ``OperationLog`` is an append-only log of ``CRDTOperation`` values. Each
@@ -290,7 +322,9 @@ The transfer is validated first (``CRDTStateTransfer/validate()``): its snapshot
 ``CRDTSnapshot/validate()`` checks one, and its document must hold no node the snapshot
 deleted. The snapshot's log is adopted under the joiner's own peer id, and its Lamport
 clock advanced, so the joiner's operations neither carry the donor's id nor collide with
-its timestamps. Held operations do not travel: the donor's are still on their way to the
+its timestamps. The snapshot carries each node's existence register and the writes kept for
+deleted nodes (<doc:CRDTArchitecture#Node-Existence>), so a joiner brings a node back exactly
+as the donor would. Held operations do not travel: the donor's are still on their way to the
 joiner from the relay.
 
 **Offline replay.** A peer that edited while disconnected and rejoins from a donor —
@@ -351,6 +385,7 @@ each other after every batch of random concurrent edits.
 
 - ``LWWRegister``
 - ``LWWPropertyMap``
+- ``CRDTDocument/DormantWrite``
 - ``RGAList``
 - ``PositionID``
 - ``TreeMoveCRDT``

@@ -50,6 +50,14 @@ public struct CRDTSnapshot: Friendly {
     /// Node IDs that have been deleted (tombstoned).
     public var tombstones: Set<String>
 
+    /// The timestamp of each id's latest winning create or delete: with ``tombstones``,
+    /// the per-id existence registers.
+    public var existenceTimestamps: [String: Timestamp]
+
+    /// Property writes kept for deleted nodes, by node id and property path, to apply if
+    /// a newer create brings the node back.
+    public var dormantWrites: [String: [String: CRDTDocument.DormantWrite]]
+
     /// Timestamps for document-level variable writes.
     public var variableTimestamps: [String: Timestamp]
 
@@ -63,6 +71,9 @@ public struct CRDTSnapshot: Friendly {
     public var documentPropertyTimestamps: [String: Timestamp]
 
     /// Creates a snapshot with all CRDT state fields.
+    ///
+    /// `existenceTimestamps` and `dormantWrites` default to empty: the state of a replica
+    /// in which no node has been created or deleted since the document was loaded.
     public init(
         peerID: PeerID,
         operationLog: OperationLog,
@@ -73,7 +84,9 @@ public struct CRDTSnapshot: Friendly {
         variableTimestamps: [String: Timestamp],
         importTimestamps: [String: Timestamp],
         themeTimestamps: [String: Timestamp],
-        documentPropertyTimestamps: [String: Timestamp]
+        documentPropertyTimestamps: [String: Timestamp],
+        existenceTimestamps: [String: Timestamp] = [:],
+        dormantWrites: [String: [String: CRDTDocument.DormantWrite]] = [:]
     ) {
         self.peerID = peerID
         self.operationLog = operationLog
@@ -81,6 +94,8 @@ public struct CRDTSnapshot: Friendly {
         self.childrenLists = childrenLists
         self.treeMove = treeMove
         self.tombstones = tombstones
+        self.existenceTimestamps = existenceTimestamps
+        self.dormantWrites = dormantWrites
         self.variableTimestamps = variableTimestamps
         self.importTimestamps = importTimestamps
         self.themeTimestamps = themeTimestamps

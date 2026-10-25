@@ -32,6 +32,18 @@ extension CRDTDocument {
             // This shouldn't happen — caller checks first
             return PenNode(id: nodeID, common: PenNodeCommon(), kind: .rectangle(PenNode.RectangleData()))
         }
+        return applyingProperty(property, value: value, to: node)
+    }
+
+    /// Returns `node` with one property set from a CRDT write.
+    ///
+    /// - Parameters:
+    ///   - property: The property path: a register's path as a ``CRDTOperation/SetProperty``
+    ///     names it.
+    ///   - value: The new value in .pen JSON shape.
+    ///   - node: The node to patch.
+    /// - Returns: The patched node, or the node unchanged if the write does not apply.
+    func applyingProperty(_ property: String, value: AnyCodable, to node: PenNode) -> PenNode {
         if property == Self.extrasProperty {
             return applyExtras(value, to: node)
         }
@@ -42,6 +54,32 @@ extension CRDTDocument {
             return written
         }
         return (try? NodePropertyCodec.setting(value, at: property, on: node)) ?? node
+    }
+
+    /// Reads the value a node holds in one of its property registers: what a
+    /// ``CRDTOperation/SetProperty`` to `property` would write to give it that value.
+    ///
+    /// The inverse of ``applyingProperty(_:value:to:)``, register by register: the extras
+    /// register whole, a metadata entry or an override entry (wrapped, as it travels)
+    /// by its entry path, and any other path through ``NodePropertyCodec``.
+    ///
+    /// - Parameters:
+    ///   - property: The register's path.
+    ///   - node: The node to read.
+    /// - Returns: The value, ``AnyCodable/null`` for an absent entry, or `nil` when the
+    ///   path names nothing this node's kind holds.
+    func registerValue(at property: String, of node: PenNode) -> AnyCodable? {
+        if property == Self.extrasProperty {
+            return .dictionary(node.extras.values)
+        }
+        if property.hasPrefix(NodePropertyCodec.metadataPath + ".") {
+            return NodePropertyCodec.metadataEntries(of: node.common.metadata)[property] ?? .null
+        }
+        if property.hasPrefix(Self.descendantEntryPrefix) || property.hasPrefix(Self.rootOverrideEntryPrefix) {
+            guard case let .ref(ref) = node.kind else { return nil }
+            return Self.overrideEntries(of: ref)[property] ?? .null
+        }
+        return try? NodePropertyCodec.value(at: property, of: node)
     }
 
     /// Returns `common` with one shared property set, or unchanged if the write does not apply.

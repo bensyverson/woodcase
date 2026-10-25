@@ -41,9 +41,20 @@ extension CRDTDocument {
             let strippedNode = PenNode(
                 id: node.id, common: node.common, kind: node.kind.withEmptyChildren(), extras: node.extras
             )
+            // A node created again under a deleted id — an undone delete — may still have
+            // live list entries a concurrent create left behind; they go first, so the
+            // node lands only where this insert puts it.
+            if tombstones.contains(node.id) {
+                for (listID, posID) in findAllEntries(for: node.id) {
+                    childrenLists[listID]?.delete(positionID: posID)
+                    ops.append(makeOp(.listDelete(CRDTOperation.ListDelete(listID: listID, positionID: posID))))
+                }
+            }
             let createOp = makeOp(.createNode(CRDTOperation.CreateNode(node: strippedNode, parentID: parentID)))
             ops.append(createOp)
-            propertyMaps[node.id] = LWWPropertyMap()
+            // Newer than every write this replica has seen, so it wins the node's
+            // existence register and every write kept for it.
+            recordExistence(of: node.id, alive: true, at: createOp.id, holding: nil)
 
             // Register in tree move CRDT so all peers converge on the initial parent
             treeMove.applyMove(TreeMoveCRDT.MoveOp(
@@ -59,14 +70,11 @@ extension CRDTDocument {
             }
 
             let afterPos: PositionID?
-            if node.id == op.node.id, let index = op.index, index > 0 {
-                afterPos = childrenLists[listID]?.positionID(atIndex: index - 1)
-            } else if node.id == op.node.id, op.index == nil {
-                // Append — after last element
-                let count = childrenLists[listID]?.count ?? 0
-                afterPos = count > 0 ? childrenLists[listID]?.positionID(atIndex: count - 1) : nil
+            if node.id == op.node.id, let index = op.index {
+                // Index 0 is the head of the list.
+                afterPos = index > 0 ? childrenLists[listID]?.positionID(atIndex: index - 1) : nil
             } else {
-                // Subtree children: append after previous sibling
+                // No index, or a child within the subtree: append after the last element
                 let count = childrenLists[listID]?.count ?? 0
                 afterPos = count > 0 ? childrenLists[listID]?.positionID(atIndex: count - 1) : nil
             }
@@ -93,8 +101,10 @@ extension CRDTDocument {
         let allIDs = collectDescendants(of: op.nodeID, document: document)
 
         for nodeID in allIDs {
-            tombstones.insert(nodeID)
-            ops.append(makeOp(.deleteNode(CRDTOperation.DeleteNode(nodeID: nodeID))))
+            let deleteOp = makeOp(.deleteNode(CRDTOperation.DeleteNode(nodeID: nodeID)))
+            ops.append(deleteOp)
+            // Newer than every write this replica has seen, so nothing it holds is kept.
+            recordExistence(of: nodeID, alive: false, at: deleteOp.id, holding: nil)
 
             // Remove from all RGA lists. A node can have live entries in multiple
             // lists due to concurrent moves. Tombstone all of them so remote peers

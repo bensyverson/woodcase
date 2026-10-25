@@ -324,4 +324,22 @@ struct CRDTEdgeCaseTests {
         #expect(b.nodes["c1"] != nil, "c1 should survive on B")
         assertConverged(a, b)
     }
+
+    @Test("an insert at index 0 lands first on every peer")
+    func insertAtIndexZeroLandsFirst() throws {
+        let existing = PenNode(id: "e1", common: PenNodeCommon(name: "E"), kind: .rectangle(PenNode.RectangleData()))
+        let frame = PenNode(id: "f1", common: PenNodeCommon(name: "F"), kind: .frame(PenNode.FrameData(children: [existing])))
+        let (a, b) = makePair(from: PenDocument(children: [frame]))
+        let n1 = PenNode(id: "n1", common: PenNodeCommon(name: "N1"), kind: .rectangle(PenNode.RectangleData()))
+        let n2 = PenNode(id: "n2", common: PenNodeCommon(name: "N2"), kind: .rectangle(PenNode.RectangleData()))
+
+        let ops = try a.applyLocal(.insertNode(EditOperation.InsertNode(node: n1, parentID: "f1", index: 0)))
+            + a.applyLocal(.insertNode(EditOperation.InsertNode(node: n2, parentID: nil, index: 0)))
+        sync(a, to: b, ops: ops)
+
+        #expect(a.children["f1"] == ["n1", "e1"])
+        #expect(b.children["f1"] == ["n1", "e1"])
+        #expect(b.rootOrder == ["n2", "f1"])
+        assertConverged(a, b)
+    }
 }

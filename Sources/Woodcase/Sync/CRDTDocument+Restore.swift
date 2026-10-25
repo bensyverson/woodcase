@@ -22,6 +22,8 @@ extension CRDTDocument {
         childrenLists = snapshot.childrenLists
         treeMove = snapshot.treeMove
         tombstones = snapshot.tombstones
+        existenceTimestamps = snapshot.existenceTimestamps
+        dormantWrites = snapshot.dormantWrites
         variableTimestamps = snapshot.variableTimestamps
         importTimestamps = snapshot.importTimestamps
         themeTimestamps = snapshot.themeTimestamps

@@ -19,8 +19,7 @@ import Foundation
 /// every batch.
 ///
 /// A local edit can leave the flat store disagreeing with the CRDT: an index the lists
-/// cannot give (a list holding live entries the flat store does not), or a node created
-/// again under an id the CRDT has tombstoned. The local author keeps the edit as made, as
+/// cannot give (a list holding live entries the flat store does not). The local author keeps the edit as made, as
 /// before; ``applyLocal(_:)`` checks the edit's own footprint and, when it disagrees,
 /// marks the store unsettled (`_placementUnsettled`), and the next remote batch runs the
 /// whole-document pass once instead — which is when the store used to catch up with the
@@ -133,8 +132,8 @@ extension EditableDocument {
         for (id, before) in journal.nodes {
             let created = before == nil && nodes[id] != nil
             let removed = before != nil && nodes[id] == nil
-            // A node deleted and created again stays tombstoned, so it can no longer hold
-            // the children it had.
+            // A node its existence register says is deleted can no longer hold the
+            // children it had.
             guard created || removed || crdt.tombstones.contains(id) else { continue }
             if created { moved.insert(id) }
             parentsChanged.insert(id)

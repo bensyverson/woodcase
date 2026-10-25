@@ -42,8 +42,19 @@ public final class CRDTDocument {
     /// The tree move CRDT for structural convergence.
     public internal(set) var treeMove: TreeMoveCRDT
 
-    /// Node IDs that have been deleted (tombstoned).
+    /// Node IDs that have been deleted (tombstoned): the ids whose existence register
+    /// last took a delete. See <doc:CRDTArchitecture#Node-Existence>.
     public internal(set) var tombstones: Set<String>
+
+    /// The timestamp of each id's latest winning existence write — the create or delete
+    /// that set whether it is in ``tombstones``. An id with none came with the document,
+    /// and any create or delete beats it.
+    public internal(set) var existenceTimestamps: [String: Timestamp]
+
+    /// Property writes kept for deleted nodes, by node id and property path: each one
+    /// newer than the node's latest existence write, to apply if a newer create brings
+    /// the node back.
+    public internal(set) var dormantWrites: [String: [String: DormantWrite]]
 
     /// Timestamps for document-level variable writes.
     public internal(set) var variableTimestamps: [String: Timestamp]
@@ -79,6 +90,8 @@ public final class CRDTDocument {
         propertyMaps = [:]
         childrenLists = [:]
         tombstones = []
+        existenceTimestamps = [:]
+        dormantWrites = [:]
         variableTimestamps = [:]
         importTimestamps = [:]
         themeTimestamps = [:]
@@ -139,6 +152,8 @@ public final class CRDTDocument {
         childrenLists = [:]
         treeMove = TreeMoveCRDT(initialParentMap: [:])
         tombstones = []
+        existenceTimestamps = [:]
+        dormantWrites = [:]
         variableTimestamps = [:]
         importTimestamps = [:]
         themeTimestamps = [:]
@@ -266,9 +281,9 @@ public final class CRDTDocument {
         case let .treeMove(p):
             return processRemoteTreeMove(p, timestamp: operation.id, document: document)
         case let .createNode(p):
-            return processRemoteCreateNode(p, timestamp: operation.id)
+            return processRemoteCreateNode(p, timestamp: operation.id, document: document)
         case let .deleteNode(p):
-            return processRemoteDeleteNode(p, document: document)
+            return processRemoteDeleteNode(p, timestamp: operation.id, document: document)
         case let .setVariable(p):
             return processRemoteSetVariable(p, timestamp: operation.id)
         case let .removeVariable(p):
