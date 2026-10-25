@@ -9,7 +9,7 @@ import Foundation
 ///
 /// Each operation carries:
 /// - A unique ``id`` (``Timestamp``) for total ordering
-/// - A ``dependencies`` vector clock for causal ordering
+/// - A ``dependencies`` vector clock: its causal past, for causal delivery
 /// - A ``payload`` describing the mutation
 ///
 /// Operations are the unit of replication: the consuming app stores and
@@ -19,7 +19,10 @@ public struct CRDTOperation: Friendly {
     /// The operation's unique, totally-ordered identifier.
     public var id: Timestamp
 
-    /// The vector clock at the time this operation was created.
+    /// The operation's causal past: for each peer, the Lamport time of the latest of its
+    /// operations the making replica had applied — its own previous one included, this
+    /// one excluded. A receiver applies the operation once its own vector clock
+    /// ``VectorClock/dominates(_:)`` this.
     public var dependencies: VectorClock
 
     /// The mutation this operation performs.
@@ -67,6 +70,8 @@ public struct CRDTOperation: Friendly {
         case setThemeAxis(SetThemeAxis)
         /// Remove a theme axis.
         case removeThemeAxis(RemoveThemeAxis)
+        /// Set one of the document root's own properties.
+        case setDocumentProperty(SetDocumentProperty)
     }
 
     // MARK: - Payload parameter structs
@@ -243,6 +248,20 @@ public struct CRDTOperation: Friendly {
 
         public init(name: String) {
             self.name = name
+        }
+    }
+
+    /// Parameters for setting one of the document root's own properties.
+    public struct SetDocumentProperty: Friendly {
+        /// The ``DocumentPropertyCodec`` key: `fonts`, `version`, `fileToken`, a table
+        /// name, or `extras.<key>`.
+        public var key: String
+        /// The value in .pen JSON shape; ``AnyCodable/null`` removes the property.
+        public var value: AnyCodable
+
+        public init(key: String, value: AnyCodable) {
+            self.key = key
+            self.value = value
         }
     }
 }

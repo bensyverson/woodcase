@@ -122,9 +122,8 @@ struct CRDTSnapshotTests {
         // B never receives these ops: they reach it through the snapshot.
         #expect(!opsA.isEmpty)
 
-        // Peer B joins from A's snapshot + original .pen
-        let snapshot = try #require(editableA.crdtDocument?.snapshot())
-        let editableB = try EditableDocument(from: doc, snapshot: snapshot, peerID: peerB)
+        // Peer B joins from A's document and snapshot, taken together
+        let editableB = try EditableDocument(joining: #require(editableA.stateTransfer()), peerID: peerB)
 
         // Both apply the same subsequent edit from peer A
         let moreOpsA = try editableA.applyLocal(.updateCommon(
@@ -156,10 +155,8 @@ struct CRDTSnapshotTests {
             EditOperation.UpdateCommon(nodeID: "t1", common: PenNodeCommon(name: "B's Offline Edit"))
         ))
 
-        // Now B joins from A's snapshot + A's current materialized document
-        let snapshot = try #require(editableA.crdtDocument?.snapshot())
-        let currentDoc = editableA.materialize()
-        let editableB = try EditableDocument(from: currentDoc, snapshot: snapshot, peerID: peerB)
+        // Now B joins from A's current document and snapshot
+        let editableB = try EditableDocument(joining: #require(editableA.stateTransfer()), peerID: peerB)
 
         // B should already have A's edits from the materialized doc
         #expect(editableB.nodes["r1"]?.common.name == "A's Edit")
@@ -210,8 +207,9 @@ struct CRDTSnapshotTests {
         let snapshotMirror = Mirror(reflecting: snapshot)
         let snapshotProperties: Set<String> = Set(snapshotMirror.children.compactMap(\.label))
 
-        // Every CRDTDocument property should have a corresponding snapshot field
-        let missing = crdtProperties.subtracting(snapshotProperties)
+        // Every CRDTDocument property should have a corresponding snapshot field, except
+        // the operations held for causal delivery, which are not replica state.
+        let missing = crdtProperties.subtracting(snapshotProperties).subtracting(["held"])
         #expect(missing.isEmpty, "CRDTDocument properties not in CRDTSnapshot: \(missing)")
     }
 

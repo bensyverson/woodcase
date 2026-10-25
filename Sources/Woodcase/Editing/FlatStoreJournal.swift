@@ -133,7 +133,8 @@ struct FlatStoreJournal: Friendly {
             noteChildren(of: parentID, in: document)
         case let .removeParent(nodeID):
             noteParent(of: nodeID, in: document)
-        case .setVariable, .removeVariable, .setImport, .removeImport, .setThemeAxis, .removeThemeAxis:
+        case .setVariable, .removeVariable, .setImport, .removeImport, .setThemeAxis, .removeThemeAxis,
+             .setDocumentProperty:
             break
         }
     }

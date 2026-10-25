@@ -33,4 +33,7 @@ public enum DocumentMutation: Friendly {
     case setThemeAxis(name: String, options: [String])
     /// Remove a theme axis.
     case removeThemeAxis(name: String)
+    /// Set one of the document root's own properties (``DocumentPropertyCodec`` key and
+    /// value; ``AnyCodable/null`` removes it).
+    case setDocumentProperty(key: String, value: AnyCodable)
 }

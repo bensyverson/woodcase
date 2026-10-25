@@ -200,16 +200,20 @@ struct EditOperationDocumentPropertiesTests {
 
     // MARK: - CRDT
 
-    @Test("In collaborative mode it is local-only: the flat store takes it and nothing replicates")
-    func crdtIsLocalOnly() throws {
+    @Test("In collaborative mode the flat store takes it and each changed key replicates")
+    func crdtReplicatesPerKey() throws {
         let source = try document()
         let a = EditableDocument(from: source, peerID: peerA)
+        let b = EditableDocument(from: source, peerID: PeerID(rawValue: "peer-b-doc-props"))
 
-        let ops = try a.applyLocal(set(["version": "2.20", "extras.added": 1]))
+        let ops = try a.applyLocal(set(["version": "2.99", "extras.added": 1]))
+        b.applyRemote(ops)
 
-        #expect(ops.isEmpty)
-        #expect(a.version == "2.20")
+        #expect(ops.count == 2)
+        #expect(a.version == "2.99")
         #expect(a.extras["added"] == 1)
+        #expect(b.version == "2.99")
+        #expect(b.extras["added"] == 1)
     }
 
     @Test("In collaborative mode a refused document write still throws, and replicates nothing")

@@ -117,7 +117,9 @@ struct RemoteInputBoundsTests {
         snapshot.operationLog.clock = LamportClock(time: .max)
 
         #expect(throws: RemoteInputError.snapshotTimeOutOfRange(time: .max)) {
-            _ = try EditableDocument(from: FuzzFixture.document(), snapshot: snapshot, peerID: remote)
+            _ = try EditableDocument(
+                joining: CRDTStateTransfer(document: FuzzFixture.document(), snapshot: snapshot), peerID: remote
+            )
         }
     }
 

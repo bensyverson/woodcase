@@ -128,8 +128,10 @@ batch reconciles the whole document once, which is when the store always caught 
 A remote change is someone else's work: it is neither undoable nor dirtying, writes no
 activity (its author's own session logs it), broadcasts nothing, and leaves the local
 author's redo stack and open undo group alone. The local author's later undo keeps it,
-as *Keep theirs* below describes. Operations are applied in the order given; holding
-back one whose causal dependencies have not arrived is not done yet.
+as *Keep theirs* below describes. Operations are delivered causally and exactly once: one
+whose causal past has not arrived is held — the batch that brings it applies both, in
+order, and credits each to its own author — and one already applied is ignored. See
+*Causal Delivery* in <doc:CRDTArchitecture>.
 
 ### Saving from an app
 

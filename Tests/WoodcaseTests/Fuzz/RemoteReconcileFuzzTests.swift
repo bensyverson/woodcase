@@ -59,6 +59,8 @@ struct RemoteReconcileFuzzTests {
                 result.formUnion(ChangeInvalidation(category: .structural, documentLevel: [.importAlias(alias)], full: true))
             case let .setThemeAxis(name, _), let .removeThemeAxis(name):
                 result.formUnion(ChangeInvalidation(category: .structural, documentLevel: [.themeAxis(name)], full: true))
+            case let .setDocumentProperty(key, _):
+                result.formUnion(ChangeInvalidation.Probe.documentProperties([key]))
             }
         }
         for nodeID in written {

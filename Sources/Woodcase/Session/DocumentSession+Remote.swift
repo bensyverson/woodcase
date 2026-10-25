@@ -24,6 +24,12 @@ public extension DocumentSession {
 extension DocumentSession {
     /// Applies a collaborator's CRDT operations.
     ///
+    /// Operations are delivered causally and exactly once: each is checked at the
+    /// boundary and handed to the CRDT's hold, and after each, every held operation whose
+    /// causal past has been applied — from this batch or an earlier one — is applied, in
+    /// causal order (``CRDTDocument/heldOperations``). One whose causal past is still missing waits
+    /// for a later batch; one already applied is ignored.
+    ///
     /// Each operation is keyed against the document before it lands
     /// (``ChangeKey/keys(ofRemote:in:)``), then run through the CRDT; only the ones the
     /// CRDT accepts are stamped, under the author of the replica that made them. What
@@ -35,8 +41,7 @@ extension DocumentSession {
     /// The change is somebody else's work: it joins no undo history — the local
     /// author's undo keeps it instead, through the ledger — leaves redo and the open
     /// undo group as they were, writes no activity (the collaborator's own session
-    /// logs it), broadcasts nothing and does not dirty the file. Ordering operations
-    /// whose dependencies have not arrived is not done here: they are applied as given.
+    /// logs it), broadcasts nothing and does not dirty the file.
     ///
     /// - Parameters:
     ///   - operations: The operations, in the order they arrived.
@@ -44,11 +49,11 @@ extension DocumentSession {
     /// An operation the boundary refuses (``CRDTDocument/validateRemote(_:)``) is skipped
     /// and reported on ``CommittedChange/rejected``; the rest of the batch still lands.
     ///
-    /// - Returns: The committed change; with nothing accepted, an empty change that keeps
-    ///   the current sequence.
+    /// - Returns: The committed change; with nothing applied — every operation held,
+    ///   ignored or refused — an empty change that keeps the current sequence.
     /// - Throws: ``SessionError/notCollaborative`` when the session keeps no CRDT.
     func commitRemote(_ operations: [CRDTOperation], from sender: Author) throws -> CommittedChange {
-        guard document.crdtDocument != nil else { throw SessionError.notCollaborative }
+        guard let crdt = document.crdtDocument else { throw SessionError.notCollaborative }
         noteJoined(sender)
 
         var probe = ChangeInvalidation.RemoteProbe(document)
@@ -56,17 +61,21 @@ extension DocumentSession {
         var writes: [(keys: [ChangeKey], author: Author)] = []
         var rejected: [RemoteInputError] = []
         for operation in operations {
-            let keys = ChangeKey.keys(ofRemote: operation, in: document)
-            let applied: [DocumentMutation]
             do {
-                applied = try document.applyRemoteMutations(operation, journal: &probe.journal)
+                try document.receiveRemote(operation)
             } catch {
                 rejected.append(error)
                 continue
             }
-            guard !applied.isEmpty else { continue }
-            mutations += applied
-            writes.append((keys, author(of: operation.id.peerID)))
+            // Drained after each one, so a batch in causal order never holds more than
+            // the operation in hand.
+            while let delivered = crdt.nextDeliverable() {
+                let keys = ChangeKey.keys(ofRemote: delivered, in: document)
+                let applied = document.applyDelivered(delivered, journal: &probe.journal)
+                guard !applied.isEmpty else { continue }
+                mutations += applied
+                writes.append((keys, author(of: delivered.id.peerID)))
+            }
         }
         guard !mutations.isEmpty else {
             return CommittedChange(

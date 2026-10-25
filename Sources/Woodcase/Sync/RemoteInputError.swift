@@ -47,6 +47,12 @@ public enum RemoteInputError: Error, Friendly {
     ///
     /// - Parameter nodeID: A node on the cycle.
     case snapshotTreeCycle(nodeID: String)
+
+    /// A state transfer's document holds a node its CRDT state has deleted, so the two
+    /// were not taken together.
+    ///
+    /// - Parameter nodeID: The node the document holds and the state deleted.
+    case transferDisagrees(nodeID: String)
 }
 
 extension RemoteInputError: LocalizedError {
@@ -63,6 +69,8 @@ extension RemoteInputError: LocalizedError {
             "A remote snapshot was refused: its clock time \(time) is out of range."
         case let .snapshotTreeCycle(nodeID):
             "A remote snapshot was refused: its tree has a parent cycle through \(nodeID)."
+        case let .transferDisagrees(nodeID):
+            "A state transfer was refused: its document holds \(nodeID), which its CRDT state deleted."
         }
     }
 }

@@ -230,7 +230,8 @@ extension EditableDocument {
             [nodeID]
         case .setVariable, .removeVariable,
              .setImport, .removeImport,
-             .setThemeAxis, .removeThemeAxis:
+             .setThemeAxis, .removeThemeAxis,
+             .setDocumentProperty:
             []
         }
     }

@@ -8,8 +8,10 @@ import Foundation
 extension CRDTDocument {
     // MARK: - Local operation processing
 
+    /// Logs a local operation and returns it. It depends on any of this replica's own
+    /// operations still held (see ``latestHeldOwnTime``), so peers apply them first.
     func makeOp(_ payload: CRDTOperation.Payload) -> CRDTOperation {
-        operationLog.appendLocal(payload: payload)
+        operationLog.appendLocal(payload: payload, following: latestHeldOwnTime)
     }
 
     /// Generates a position timestamp for RGA inserts from the operation log's clock.
@@ -209,9 +211,10 @@ extension CRDTDocument {
         guard let node = document.nodes[op.nodeID] else { return [] }
 
         let changedProps = PropertyDiff.diffKind(old: node.kind, new: op.kind)
-        var ops: [CRDTOperation] = []
+        // A ref's override maps replicate entry by entry, never whole.
+        var ops = processLocalOverrideEntries(nodeID: op.nodeID, from: node.kind, to: op.kind)
 
-        for property in changedProps {
+        for property in changedProps where !Self.isReplicatedByEntry(property, from: node.kind, to: op.kind) {
             let value = extractKindValue(property: property, from: op.kind)
             let crdtOp = makeOp(.setProperty(CRDTOperation.SetProperty(
                 nodeID: op.nodeID,
@@ -257,8 +260,11 @@ extension CRDTDocument {
         if writesMetadata {
             ops += processLocalMetadata(nodeID: op.nodeID, from: node.common.metadata, to: patched.common.metadata)
         }
+        // So do a ref's override maps, entry by entry.
+        ops += processLocalOverrideEntries(nodeID: op.nodeID, from: node.kind, to: patched.kind)
         for (path, value) in op.orderedProperties where !NodePropertyCodec.isExtrasPath(path) {
             if NodePropertyCodec.writesMetadata(at: path, on: node.kind) { continue }
+            if Self.isReplicatedByEntry(path, from: node.kind, to: patched.kind) { continue }
             let normalized = (try? NodePropertyCodec.value(at: path, of: patched)) ?? value
             let crdtOp = makeOp(.setProperty(CRDTOperation.SetProperty(
                 nodeID: op.nodeID,
@@ -294,7 +300,7 @@ extension CRDTDocument {
         descendants[op.descendantID] = existing.isEmpty ? nil : PenDescendantOverride(properties: existing)
         refData.descendants = descendants.isEmpty ? nil : descendants
 
-        // Delegate to processLocalUpdateKind — CRDT sees this as a kind.descendants change
+        // Delegate to processLocalUpdateKind, which replicates the override entries it changed
         let newKind = PenNode.Kind.ref(refData)
         return processLocalUpdateKind(
             EditOperation.UpdateKind(nodeID: op.refNodeID, kind: newKind),
@@ -307,10 +313,9 @@ extension CRDTDocument {
     /// The ref is resolved exactly as ``EditableDocument/applyLocal(_:)`` resolves it, so a
     /// Woodcase-owned key (`kind.strokeDash`, `common.locked`) that the document moves onto
     /// the ref's own `metadata.woodcase` (rule 6) replicates as those metadata entries,
-    /// one per entry and sorted by path, before the `kind.rootOverrides` change that
-    /// carries the rest. The map is one CRDT property, exactly as `kind.descendants` is: a
-    /// peer that writes one key and a peer that writes another converge on whichever wrote
-    /// last, which is the granularity `set kind.rootOverrides=…` has always had.
+    /// one per entry and sorted by path, before the `kind.rootOverrides` entries that carry
+    /// the rest — one register per key, so a peer that writes one key and a peer that
+    /// writes another both keep theirs.
     ///
     /// - Parameters:
     ///   - op: The root override applied locally.

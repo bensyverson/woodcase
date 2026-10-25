@@ -25,5 +25,6 @@ extension CRDTDocument {
         variableTimestamps = snapshot.variableTimestamps
         importTimestamps = snapshot.importTimestamps
         themeTimestamps = snapshot.themeTimestamps
+        documentPropertyTimestamps = snapshot.documentPropertyTimestamps
     }
 }

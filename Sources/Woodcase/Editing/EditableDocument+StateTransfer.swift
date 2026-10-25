@@ -6,34 +6,50 @@
 import Foundation
 
 public extension EditableDocument {
-    /// Creates an editable document by merging a local .pen file with a remote CRDT snapshot.
+    /// This replica's document and CRDT state, taken together for a peer joining the
+    /// session ("Hot Swap").
     ///
-    /// This is the "Hot Swap" entry point: a peer joining a live session flattens
-    /// their local `.pen` file for the document structure (nodes, version, themes,
-    /// imports, variables), then attaches a ``CRDTDocument`` initialized from the
-    /// remote snapshot for convergence state.
-    ///
-    /// - Parameters:
-    ///   - document: The local .pen document to flatten.
-    ///   - snapshot: The remote peer's CRDT state snapshot.
-    ///   - peerID: This peer's unique identifier.
-    /// - Throws: The ``RemoteInputError`` that refused the snapshot
-    ///   (``CRDTSnapshot/validate()``).
-    convenience init(from document: PenDocument, snapshot: CRDTSnapshot, peerID: PeerID) throws(RemoteInputError) {
-        try snapshot.validate()
-        self.init(from: document)
-        crdtDocument = try CRDTDocument(from: snapshot, peerID: peerID)
+    /// - Returns: The transfer, or `nil` when the document is not collaborative.
+    func stateTransfer() -> CRDTStateTransfer? {
+        guard let crdtDocument else { return nil }
+        return CRDTStateTransfer(document: materialize(), snapshot: crdtDocument.snapshot())
     }
 
-    /// Replays offline operations against the current CRDT state.
+    /// Joins a live session from a donor's ``CRDTStateTransfer``: the flat store is the
+    /// donor's document and the CRDT state the donor's, so the two agree.
     ///
-    /// After initializing from a snapshot, a peer may have locally-generated
-    /// operations from their offline session that need to be merged. These are
-    /// applied as remote operations (since the CRDT document was freshly
-    /// initialized from the remote snapshot, not from the local session).
+    /// The joiner's own file plays no part — it may be older than the session, or another
+    /// file. A peer that edited offline replays those operations next, with
+    /// ``replayOfflineOperations(_:)``.
     ///
-    /// - Parameter operations: The offline operations to replay.
-    /// - Returns: The operations refused at the boundary, as ``applyRemote(_:)``
+    /// - Parameters:
+    ///   - transfer: What the donor sent.
+    ///   - peerID: This peer's identifier.
+    /// - Throws: The ``RemoteInputError`` that refused the transfer
+    ///   (``CRDTStateTransfer/validate()``).
+    convenience init(joining transfer: CRDTStateTransfer, peerID: PeerID) throws(RemoteInputError) {
+        try transfer.validate()
+        self.init(from: transfer.document)
+        crdtDocument = try CRDTDocument(from: transfer.snapshot, peerID: peerID)
+    }
+
+    /// Replays the operations this peer made while it was offline, after joining from a
+    /// donor's state.
+    ///
+    /// They are taken like any peer's operations (``applyRemote(_:)-([CRDTOperation])``):
+    /// those the donor's state already holds are ignored, the rest are applied in causal
+    /// order, and any whose causal past the donor's state lacks — an operation from a
+    /// third peer this one saw and the donor has not — are held until it arrives, rather
+    /// than applied against a list position or node this replica does not have. Once
+    /// applied they are in this replica's log, so ``pendingOperations(since:)`` sends
+    /// them on.
+    ///
+    /// Replay every offline operation, in one call, before making a local edit: a local
+    /// edit made while some are held depends on them, so peers keep this replica's order,
+    /// but one replayed *after* a local edit would be taken for a duplicate.
+    ///
+    /// - Parameter operations: The offline operations, from this peer's earlier log.
+    /// - Returns: The operations refused at the boundary, as ``applyRemote(_:)-([CRDTOperation])``
     ///   returns them.
     @discardableResult
     func replayOfflineOperations(_ operations: [CRDTOperation]) -> [RemoteInputError] {

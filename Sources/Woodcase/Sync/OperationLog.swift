@@ -45,47 +45,69 @@ public struct OperationLog: Friendly {
         operations = []
     }
 
+    /// Creates a log for a new replica that starts from another's: its operations and
+    /// clocks, under this replica's own peer id.
+    ///
+    /// - Parameters:
+    ///   - peerID: The new replica's identifier.
+    ///   - log: The log it starts from.
+    init(peerID: PeerID, adopting log: OperationLog) {
+        self.peerID = peerID
+        clock = log.clock
+        vectorClock = log.vectorClock
+        operations = log.operations
+    }
+
     /// Appends a locally-generated operation to the log.
     ///
-    /// Ticks the Lamport clock, increments the vector clock for this peer,
-    /// and records the operation with its dependencies.
+    /// Ticks the Lamport clock, stamps the operation with the vector clock as it stood
+    /// — its causal past — and then records the operation in the vector clock.
     ///
     /// - Parameter payload: The operation payload.
     /// - Returns: The complete operation with timestamp and dependencies.
     @discardableResult
     public mutating func appendLocal(payload: CRDTOperation.Payload) -> CRDTOperation {
-        let time = clock.tick()
-        vectorClock.increment(for: peerID)
+        appendLocal(payload: payload, following: nil)
+    }
 
-        let op = CRDTOperation(
-            id: Timestamp(time: time, peerID: peerID),
-            dependencies: vectorClock,
-            payload: payload
-        )
+    /// ``appendLocal(payload:)``, also depending on an earlier operation of this replica's
+    /// that has not been applied here yet — one being replayed from an earlier run.
+    ///
+    /// - Parameters:
+    ///   - payload: The operation payload.
+    ///   - ownTime: The time of the latest such operation, or `nil` for none.
+    /// - Returns: The complete operation with timestamp and dependencies.
+    mutating func appendLocal(payload: CRDTOperation.Payload, following ownTime: UInt64?) -> CRDTOperation {
+        let id = Timestamp(time: clock.tick(), peerID: peerID)
+        var dependencies = vectorClock
+        if let ownTime {
+            dependencies.record(Timestamp(time: ownTime, peerID: peerID))
+        }
+        let op = CRDTOperation(id: id, dependencies: dependencies, payload: payload)
+        vectorClock.record(id)
         operations.append(op)
         return op
     }
 
     /// Appends a remotely-received operation to the log.
     ///
-    /// Advances the Lamport clock past the remote timestamp and merges
-    /// the remote vector clock.
+    /// Advances the Lamport clock past the remote timestamp, merges the operation's
+    /// dependencies, and records the operation in the vector clock.
     ///
     /// - Parameter operation: The remote operation to record.
     public mutating func appendRemote(_ operation: CRDTOperation) {
         clock.witness(operation.id.time)
         vectorClock.merge(operation.dependencies)
+        vectorClock.record(operation.id)
         operations.append(operation)
     }
 
     /// Returns operations that are not yet reflected in the given vector clock.
     ///
     /// - Parameter since: A vector clock representing the recipient's state.
-    /// - Returns: Operations whose timestamps are newer than the recipient has seen.
+    /// - Returns: Operations the clock does not ``VectorClock/covers(_:)``.
     public func pending(since: VectorClock) -> [CRDTOperation] {
-        operations.filter { op in
-            since.time(for: op.id.peerID) < op.id.time
-        }
+        operations.filter { !since.covers($0.id) }
     }
 
     /// Removes operations that are acknowledged by all peers.
@@ -96,8 +118,6 @@ public struct OperationLog: Friendly {
     /// - Parameter acknowledgedBy: A vector clock representing the minimum
     ///   state that all peers have seen.
     public mutating func truncate(acknowledgedBy: VectorClock) {
-        operations.removeAll { op in
-            acknowledgedBy.time(for: op.id.peerID) >= op.id.time
-        }
+        operations.removeAll { acknowledgedBy.covers($0.id) }
     }
 }

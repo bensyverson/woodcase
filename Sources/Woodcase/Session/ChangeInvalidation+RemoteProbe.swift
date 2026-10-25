@@ -51,6 +51,7 @@ extension ChangeInvalidation {
                 case let .setVariable(name, _), let .removeVariable(name): result.formUnion(Self.full(.variable(name)))
                 case let .setImport(alias, _), let .removeImport(alias): result.formUnion(Self.full(.importAlias(alias)))
                 case let .setThemeAxis(name, _), let .removeThemeAxis(name): result.formUnion(Self.full(.themeAxis(name)))
+                case let .setDocumentProperty(key, _): result.formUnion(Probe.documentProperties([key]))
                 }
             }
             for nodeID in written {

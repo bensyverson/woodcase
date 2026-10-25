@@ -12,8 +12,8 @@ extension ChangeKey {
     /// Remote keys come from the CRDT payload rather than from an ``EditOperation``, but
     /// they must meet the keys a local edit stamps, or an undo would not see the
     /// collaborator's work. So a property write is keyed as finely as the local
-    /// vocabulary: the override maps, which replicate whole, are keyed per override
-    /// key that differs; the extras register per `extras.<key>` that differs; and a
+    /// vocabulary: an override entry (or a whole override map, which no Woodcase peer
+    /// sends any more) is keyed per override key that differs; the extras register per `extras.<key>` that differs; and a
     /// change of node type like ``kindKeys(nodeID:old:new:)``. A tree or list move keys
     /// the moved node's place; a create its existence and place; a delete its existence
     /// and place.
@@ -51,6 +51,8 @@ extension ChangeKey {
             [.themeAxis(p.name)]
         case let .removeThemeAxis(p):
             [.themeAxis(p.name)]
+        case let .setDocumentProperty(p):
+            [.document(p.key)]
         }
         var seen = Set<ChangeKey>()
         return keys.filter { seen.insert($0).inserted }
@@ -68,7 +70,7 @@ extension ChangeKey {
             }
         case kindTypePath:
             return kindKeys(nodeID: p.nodeID, old: before.kind, new: after.kind)
-        case descendantsPath:
+        case let path where path == descendantsPath || path.hasPrefix(CRDTDocument.descendantEntryPrefix):
             let old = refData(before)?.descendants ?? [:]
             let new = refData(after)?.descendants ?? [:]
             let overrides = Set(old.keys).union(new.keys).sorted().flatMap { descendant in
@@ -76,11 +78,12 @@ extension ChangeKey {
                     ChangeKey.override(ref: p.nodeID, descendant: descendant, key: $0)
                 }
             }
-            return [whole] + overrides
-        case rootOverridesPath:
+            return [.property(node: p.nodeID, path: descendantsPath)] + overrides
+        case let path where path == rootOverridesPath || path.hasPrefix(CRDTDocument.rootOverrideEntryPrefix):
             let old = refData(before)?.rootOverrides ?? [:]
             let new = refData(after)?.rootOverrides ?? [:]
-            return [whole] + changedKeys(old, new).map { .rootOverride(ref: p.nodeID, key: $0) }
+            return [.property(node: p.nodeID, path: rootOverridesPath)]
+                + changedKeys(old, new).map { .rootOverride(ref: p.nodeID, key: $0) }
         default:
             return [whole]
         }
@@ -101,9 +104,9 @@ extension ChangeKey {
         document.crdtDocument?.childrenLists[listID]?.value(at: position)
     }
 
-    /// The path an instance's whole descendant-override map replicates under.
+    /// The path of an instance's whole descendant-override map.
     private static let descendantsPath = "kind.descendants"
 
-    /// The path an instance's whole root-override map replicates under.
+    /// The path of an instance's whole root-override map.
     private static let rootOverridesPath = "kind.rootOverrides"
 }

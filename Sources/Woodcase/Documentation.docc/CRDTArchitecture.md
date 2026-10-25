@@ -36,9 +36,12 @@ increments its clock on every local operation and merges the maximum on every
 remote operation. When two timestamps have the same counter, the ``PeerID``
 breaks the tie deterministically.
 
-A ``VectorClock`` tracks per-peer progress and is attached to each operation as
-a causal dependency set. This lets receivers detect missing operations and request
-retransmission.
+A ``VectorClock`` tracks per-peer progress: its entry for a peer is the Lamport time of
+the latest of that peer's operations this replica has applied. Each operation carries
+the clock as it stood before the operation — its ``CRDTOperation/dependencies``, its
+causal past — which is what causal delivery waits on. Because entries are Lamport times,
+a clock answers for an operation id directly (``VectorClock/covers(_:)``), which is the
+comparison the multiplayer relay makes with the op ids it can see.
 
 ### LWW Registers and Property Maps
 
@@ -72,11 +75,24 @@ that changed (``NodePropertyCodec/metadataEntryWrites(from:to:)``), so two peers
 one note's tint and its state both keep their edit, and no whole-object write exists to
 race an entry write. See <doc:PenMetadataNamespace>.
 
-An instance's root override goes out as the ref node the document stores for it. A raw
-``EditOperation/OverrideRoot`` naming a Woodcase-owned key (`kind.strokeDash`,
-`common.locked`) is stored on the ref's own `metadata.woodcase`, not among its root
-overrides, so it replicates as those metadata entries, sorted by path, followed by the
-`kind.rootOverrides` register for the rest.
+An instance's overrides replicate **per key** too. Each key of a descendant's override
+is its own register under `kind.descendants.<descendant>.<key>`, and each root-override
+key under `kind.rootOverrides.<key>`, segments escaped as metadata entry keys are. An
+override can hold JSON `null` (it clears that key on the instance), so a present value
+travels wrapped as `{"value": …}` and `null` means the key is gone; a descendant left with
+no keys, and an emptied map, are removed. Every local write of the maps — an override, a
+root override, an `updateKind`, or a `setProperties` naming `kind.descendants` or
+`kind.rootOverrides` — is sent as the entries it changed, never as a whole map, so two
+people overriding different keys of one instance both keep theirs
+(`CRDTOverrideKeyTests`). A raw ``EditOperation/OverrideRoot`` naming a Woodcase-owned key
+(`kind.strokeDash`, `common.locked`) is stored on the ref's own `metadata.woodcase`, not
+among its root overrides, so it replicates as those metadata entries, sorted by path,
+followed by the root-override entries for the rest.
+
+**Text content is last-writer-wins per node.** A text node's content is one register, so
+two people typing in the same text node at once keep only the later one's text. That is
+acceptable for now: a character-level text CRDT is a larger piece of work than any
+current need.
 
 A local `setProperties` is resolved, and its writes emitted, in one order on every peer:
 broadest storage first, ties by path (``EditOperation/SetProperties/orderedProperties``;
@@ -154,16 +170,54 @@ minimal:
   ``EditOperation/replaceSubtree(_:)``, which becomes the deletes, property writes and
   inserts that add up to it. Both are validated as a whole first, so the decomposition
   cannot be refused half way through.
-  One operation is **local-only**: ``EditOperation/setDocumentProperties(_:)`` — the
-  root's `fonts`, `version`, `fileToken` and extras — has no replicated register, so it
-  is validated, applied to the flat store, and replicates nothing. Peers can therefore
-  disagree on those keys until each takes the same write some other way, such as merging
-  the same file.
-- **Remote path:** Call `applyRemote(_:)` on ``EditableDocument`` with operations
-  received from a peer. This feeds them through the CRDT layer and applies the
-  resulting ``DocumentMutation``s to the flat store.
+  ``EditOperation/setDocumentProperties(_:)`` — the root's `fonts`, `version`,
+  `fileToken`, table declarations and root extras — replicates one
+  ``CRDTOperation/SetDocumentProperty`` per key it changes, each its own last-writer-wins
+  register (``CRDTDocument/documentPropertyTimestamps``), so two peers writing different
+  root extras both keep theirs.
+- **Remote path:** Call `applyRemote(_:)` on ``EditableDocument`` — or submit
+  ``SessionOrigin/remote(_:from:)`` to a ``DocumentSession`` — with operations received
+  from a peer, in any order. They are delivered causally (below), fed through the CRDT
+  layer, and the resulting ``DocumentMutation``s applied to the flat store.
 - **Catch-up:** Call `pendingOperations(since:)` on ``EditableDocument`` with a peer's
   vector clock to get the operations they haven't seen.
+
+### Causal Delivery
+
+A relay delivers late, out of order and more than once: a retry, a replay after a
+reconnect, a joiner's snapshot that already holds some of what follows. The merges above
+are order-free only for operations whose causal past has been applied — a write to a node
+not yet created would be dropped, and an insert after a list position not yet known would
+land at the end of the list, on one replica and not another; an insert applied twice
+would appear twice. So Woodcase delivers causally and exactly once, in the replica
+(``CRDTDocument``), for both ``EditableDocument``'s `applyRemote(_:)` and a
+``DocumentSession``:
+
+- An operation the clock already ``VectorClock/covers(_:)`` — applied before — or one
+  already held is ignored.
+- An operation whose ``CRDTOperation/dependencies`` the clock does not
+  ``VectorClock/dominates(_:)`` is held (``CRDTDocument/heldOperations``); the Lamport
+  clock witnesses it at once, so no local operation made meanwhile takes its id.
+- Every held operation whose causal past has arrived is then applied, smallest id first,
+  until none is ready — so the batch that brings a missing operation applies everything
+  it was holding up.
+
+Because each peer's operations are applied in the order it made them, the clock entry
+for a peer says exactly which of its operations are here. A replica's own operations
+replayed from an earlier run (*Offline replay*, below) are held like anyone's, and a
+local operation made while some are held depends on them, so peers keep the replica's
+order. `CRDTCausalDeliveryTests` covers the rules, and `SessionShuffledDeliveryFuzzTests`
+— the relay contract — runs two sessions editing over several rounds while a network
+delivers a random part of what is in flight, shuffled and partly twice; they converge on
+every seed.
+
+``CRDTDocument/processRemote(operation:document:)`` remains the raw step: it applies one
+operation as given, without waiting or deduplicating.
+
+Held operations are not replica state: a snapshot does not carry them, and there is no
+bound on how many a replica holds — a peer that sends operations whose causal past never
+arrives grows the hold. The relay only stores and forwards operations it accepted from
+an authenticated peer.
 
 ### Remote Input Is Untrusted
 
@@ -208,27 +262,46 @@ A ``CRDTSnapshot`` captures the complete CRDT state as a `Sendable` value type.
 This enables the "Hot Swap" scenario: a peer joins a live session and initializes
 from another peer's current state rather than replaying the entire operation history.
 
-A snapshot and a ``CRDTOperation`` are the *only* things that travel between peers. A
-``CRDTDocument``, like the ``EditableDocument`` it shadows, is not `Sendable`: each peer's
-document stays in the isolation domain that owns it, and convergence happens by exchanging
-values. See *Who owns a document* in <doc:EditingDocuments>.
+A replica is a document *and* the CRDT state that says how it came to be, and the two must
+agree. So a joiner takes both from the donor, together, as a ``CRDTStateTransfer`` — the
+donor's materialized document and its snapshot, taken at one moment. The joiner's own file
+plays no part: it may be older than the session or another file entirely, and a store built
+from it would disagree with the donor's CRDT state on every node either changed.
+
+A ``CRDTStateTransfer`` and a ``CRDTOperation`` are the *only* things that travel between
+peers. A ``CRDTDocument``, like the ``EditableDocument`` it shadows, is not `Sendable`:
+each peer's document stays in the isolation domain that owns it, and convergence happens by
+exchanging values. See *Who owns a document* in <doc:EditingDocuments>.
 
 ```swift
-// Sender: capture and serialize current state
-let snapshot = crdtDocument.snapshot()
-let data = try JSONEncoder().encode(snapshot)
+// Donor: take its document and CRDT state together, and serialize them
+let transfer = try #require(editable.stateTransfer())
+let data = try JSONEncoder().encode(transfer)
 
-// Receiver: join from snapshot + current document
-let snapshot = try JSONDecoder().decode(CRDTSnapshot.self, from: data)
-let editable = try EditableDocument(from: currentPenDoc, snapshot: snapshot, peerID: myPeerID)
+// Joiner: join from the donor's document and state
+let received = try JSONDecoder().decode(CRDTStateTransfer.self, from: data)
+let joined = try EditableDocument(joining: received, peerID: myPeerID)
 
-// Replay any offline operations the new peer had queued
-editable.replayOfflineOperations(offlineOps)
+// Replay any offline operations the joiner had queued, before editing
+joined.replayOfflineOperations(offlineOps)
 ```
 
-The snapshot is validated first (``CRDTSnapshot/validate()``), and its Lamport clock is
-then advanced during initialization so the new peer's timestamps don't collide with those
-in the snapshot.
+The transfer is validated first (``CRDTStateTransfer/validate()``): its snapshot as
+``CRDTSnapshot/validate()`` checks one, and its document must hold no node the snapshot
+deleted. The snapshot's log is adopted under the joiner's own peer id, and its Lamport
+clock advanced, so the joiner's operations neither carry the donor's id nor collide with
+its timestamps. Held operations do not travel: the donor's are still on their way to the
+joiner from the relay.
+
+**Offline replay.** A peer that edited while disconnected and rejoins from a donor —
+keeping its peer id, which the relay binds — replays its offline operations as it would
+take anyone's. Those the donor's state already covers are ignored; the rest are applied
+in causal order; and one whose causal past the donor lacks (an operation from a third
+peer the joiner saw and the donor has not yet) is held rather than applied against a list
+position or node the joiner does not have. Applied, they are in the joiner's log, so
+`pendingOperations(since:)` sends them on. Replay every offline operation in one call
+before the first local edit: one replayed after a local edit would be taken for a
+duplicate.
 
 ### Checkpoints and Log Truncation
 
@@ -294,3 +367,4 @@ each other after every batch of random concurrent edits.
 ### State Transfer
 
 - ``CRDTSnapshot``
+- ``CRDTStateTransfer``

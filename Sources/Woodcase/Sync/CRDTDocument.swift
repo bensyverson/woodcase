@@ -54,6 +54,14 @@ public final class CRDTDocument {
     /// Timestamps for document-level theme axis writes.
     public internal(set) var themeTimestamps: [String: Timestamp]
 
+    /// Timestamps for the document root's own property writes, by
+    /// ``DocumentPropertyCodec`` key.
+    public internal(set) var documentPropertyTimestamps: [String: Timestamp]
+
+    /// Remote operations received but not yet applied, by id: part of their causal past
+    /// has not arrived. Not replica state — a snapshot does not carry them.
+    var held: [Timestamp: CRDTOperation] = [:]
+
     /// The sentinel key used for root-level children lists.
     public static let rootListID = "__root__"
 
@@ -74,6 +82,7 @@ public final class CRDTDocument {
         variableTimestamps = [:]
         importTimestamps = [:]
         themeTimestamps = [:]
+        documentPropertyTimestamps = [:]
 
         // Build initial parent map for tree move CRDT
         var initialParentMap: [String: String?] = [:]
@@ -133,6 +142,7 @@ public final class CRDTDocument {
         variableTimestamps = [:]
         importTimestamps = [:]
         themeTimestamps = [:]
+        documentPropertyTimestamps = [:]
     }
 
     // MARK: - Local operation processing
@@ -192,20 +202,22 @@ public final class CRDTDocument {
             processLocalSetThemeAxis(name: op.name, options: op.options)
         case let .removeThemeAxis(op):
             processLocalRemoveThemeAxis(name: op.name)
-        case .setDocumentProperties:
-            // Local-only: the replica keeps no register for the root's fonts, version,
-            // file token or extras, so the edit stays on this peer's flat store and
-            // nothing is sent. See ``EditableDocument/applyLocal(_:)``.
-            []
+        case let .setDocumentProperties(op):
+            processLocalSetDocumentProperties(op, document: document)
         }
     }
 
-    /// Applies a remote ``CRDTOperation`` and returns mutations for the flat store.
+    /// Applies a remote ``CRDTOperation`` at once and returns mutations for the flat store.
     ///
     /// Returns `nil` if the operation is a no-op (e.g. editing a tombstoned node,
     /// or a tree move that would create a cycle), or if ``validateRemote(_:)`` refuses
     /// it — then nothing is logged or witnessed. Call ``validateRemote(_:)`` first to
     /// learn why.
+    ///
+    /// This is the raw step: the operation is applied as given, without waiting for its
+    /// causal past or checking whether it was applied before. ``EditableDocument``'s
+    /// `applyRemote` and a ``DocumentSession`` deliver causally instead (see
+    /// ``heldOperations``).
     ///
     /// - Parameters:
     ///   - operation: The remote CRDT operation.
@@ -227,6 +239,19 @@ public final class CRDTDocument {
         operation: CRDTOperation, document: EditableDocument
     ) throws(RemoteInputError) -> [DocumentMutation]? {
         try validateRemote(operation)
+        return processDelivered(operation: operation, document: document)
+    }
+
+    /// Records a remote operation whose turn has come and applies it to the CRDT state.
+    ///
+    /// The operation has been through ``validateRemote(_:)``; under causal delivery, its
+    /// causal past has been applied.
+    ///
+    /// - Parameters:
+    ///   - operation: The remote CRDT operation.
+    ///   - document: The current flat store.
+    /// - Returns: Mutations to apply, or `nil` if the CRDT rejected the operation.
+    func processDelivered(operation: CRDTOperation, document: EditableDocument) -> [DocumentMutation]? {
         operationLog.appendRemote(operation)
 
         switch operation.payload {
@@ -256,6 +281,8 @@ public final class CRDTDocument {
             return processRemoteSetThemeAxis(p, timestamp: operation.id)
         case let .removeThemeAxis(p):
             return processRemoteRemoveThemeAxis(p, timestamp: operation.id)
+        case let .setDocumentProperty(p):
+            return processRemoteSetDocumentProperty(p, timestamp: operation.id)
         }
     }
 

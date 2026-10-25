@@ -22,7 +22,8 @@ public extension CRDTDocument {
             tombstones: tombstones,
             variableTimestamps: variableTimestamps,
             importTimestamps: importTimestamps,
-            themeTimestamps: themeTimestamps
+            themeTimestamps: themeTimestamps,
+            documentPropertyTimestamps: documentPropertyTimestamps
         )
     }
 
@@ -41,7 +42,9 @@ public extension CRDTDocument {
     /// - Throws: The ``RemoteInputError`` that refused the snapshot.
     convenience init(from snapshot: CRDTSnapshot, peerID: PeerID) throws(RemoteInputError) {
         try snapshot.validate()
-        self.init(peerID: peerID, bootstrapOperationLog: snapshot.operationLog)
+        // The log is adopted under this replica's id: its operations would otherwise
+        // carry the donor's, and collide with the donor's own.
+        self.init(peerID: peerID, bootstrapOperationLog: OperationLog(peerID: peerID, adopting: snapshot.operationLog))
 
         propertyMaps = snapshot.propertyMaps
         childrenLists = snapshot.childrenLists
@@ -50,6 +53,7 @@ public extension CRDTDocument {
         variableTimestamps = snapshot.variableTimestamps
         importTimestamps = snapshot.importTimestamps
         themeTimestamps = snapshot.themeTimestamps
+        documentPropertyTimestamps = snapshot.documentPropertyTimestamps
 
         // Advance clock past the snapshot to prevent timestamp collisions
         operationLog.clock.witness(snapshot.operationLog.clock.time)

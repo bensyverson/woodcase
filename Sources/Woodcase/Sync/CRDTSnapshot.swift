@@ -12,8 +12,9 @@ import Foundation
 /// `Friendly`. `CRDTSnapshot` captures them as a `Sendable` value type that can cross
 /// actor boundaries and serialize for network transfer — enabling the "Hot Swap"
 /// scenario where a peer joins a live session from another peer's current state.
-/// A snapshot and a ``CRDTOperation`` are the only two things that travel between
-/// peers; the documents on either end never do.
+/// A snapshot travels inside a ``CRDTStateTransfer``, with the donor's document as a
+/// value; that and a ``CRDTOperation`` are the only things that travel between peers. The
+/// live documents on either end never do.
 ///
 /// ## Usage
 ///
@@ -25,8 +26,11 @@ import Foundation
 ///
 /// // Receiver
 /// let snapshot = try JSONDecoder().decode(CRDTSnapshot.self, from: data)
-/// let doc = try EditableDocument(from: penDocument, snapshot: snapshot, peerID: myPeerID)
+/// let crdt = try CRDTDocument(from: snapshot, peerID: myPeerID)
 /// ```
+///
+/// A peer joining a live session needs the donor's document with it: see
+/// ``CRDTStateTransfer``.
 public struct CRDTSnapshot: Friendly {
     /// The peer that created this snapshot.
     public var peerID: PeerID
@@ -55,6 +59,9 @@ public struct CRDTSnapshot: Friendly {
     /// Timestamps for document-level theme axis writes.
     public var themeTimestamps: [String: Timestamp]
 
+    /// Timestamps for the document root's own property writes.
+    public var documentPropertyTimestamps: [String: Timestamp]
+
     /// Creates a snapshot with all CRDT state fields.
     public init(
         peerID: PeerID,
@@ -65,7 +72,8 @@ public struct CRDTSnapshot: Friendly {
         tombstones: Set<String>,
         variableTimestamps: [String: Timestamp],
         importTimestamps: [String: Timestamp],
-        themeTimestamps: [String: Timestamp]
+        themeTimestamps: [String: Timestamp],
+        documentPropertyTimestamps: [String: Timestamp]
     ) {
         self.peerID = peerID
         self.operationLog = operationLog
@@ -76,5 +84,6 @@ public struct CRDTSnapshot: Friendly {
         self.variableTimestamps = variableTimestamps
         self.importTimestamps = importTimestamps
         self.themeTimestamps = themeTimestamps
+        self.documentPropertyTimestamps = documentPropertyTimestamps
     }
 }

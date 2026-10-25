@@ -265,9 +265,8 @@ so undo puts the map back exactly as it stood.
   for one that has some, since its inverse could not restore them. Removing a table's
   last entry still leaves the table out, so a merge that must end on `"variables": {}`
   removes the entries and then declares the table. Its inverse names exactly the keys
-  it wrote, with their prior values. It is **local-only** in a collaborative session: the CRDT keeps no
-  register for these, so ``EditableDocument/applyLocal(_:)`` applies it to the flat
-  store and returns no operations to send.
+  it wrote, with their prior values. In a collaborative session each key it changes
+  replicates as its own last-writer-wins register (see <doc:CRDTArchitecture>).
 
 ### Component Registry and Expansion
 
@@ -1077,9 +1076,10 @@ to enable the CRDT layer. Use ``EditableDocument/applyLocal(_:)`` instead of
 ``EditableDocument/apply(_:)`` to produce replicable operations, and
 `applyRemote(_:)` to merge operations from other peers.
 
-For late-joining peers, use ``EditableDocument/init(from:snapshot:peerID:)``
-with a ``CRDTSnapshot`` from an existing peer. Offline operations can be
-merged via ``EditableDocument/replayOfflineOperations(_:)``.
+For late-joining peers, use ``EditableDocument/init(joining:peerID:)`` with the
+``CRDTStateTransfer`` an existing peer's ``EditableDocument/stateTransfer()`` gives —
+its document and CRDT state, together. Offline operations can be merged via
+``EditableDocument/replayOfflineOperations(_:)``.
 
 Coordinate save-point truncation with ``EditableDocument/checkpoint()``
 and ``EditableDocument/truncateLog(acknowledgedBy:)``.
@@ -1089,3 +1089,4 @@ See <doc:CRDTArchitecture> for details on the convergence guarantees.
 - ``CRDTDocument``
 - ``CRDTOperation``
 - ``CRDTSnapshot``
+- ``CRDTStateTransfer``
