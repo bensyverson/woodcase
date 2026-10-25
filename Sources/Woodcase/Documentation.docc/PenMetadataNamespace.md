@@ -152,7 +152,10 @@ planner, ``EditOperation/normalized(in:)``, the document's apply, the CRDT and d
 use). On expansion the override's metadata is laid over the component node's **per
 entry**, `woodcase` key by key (``PenMetadata/overlaying(_:onto:)``): the component's notes
 and other Woodcase keys still reach the instance, later edits to them still flow through,
-and a `null` clears one key on that instance alone. An override of `kind.effects` names only
+and a `null` clears one key on that instance alone. The keys an override's metadata
+holds are held to the shapes a `set`'s are (``NodePropertyCodec/checkAuthoredOverrideMetadata(_:on:nodeID:)``),
+a text's spans among them, so a malformed value inside an instance is refused as it is on
+a node of its own. An override of `kind.effects` names only
 what it changes: one whose shadows name no spread leaves the spreads to the component (an
 entry still applies where its shadow still matches), and one that names a spread stores the
 override's own `shadowSpread` — an empty list when every spread named is `0`, which clears
@@ -190,7 +193,8 @@ metadata[woodcase: .leaf] = nil                  // both spellings removed
 `spans` is the one key whose value is structured: its shape,
 ``PenMetadata/WoodcaseKey/Shape/textSpans``, holds an authored write to
 ``PenTextSpans/init(metadataValue:)``, and a refusal names what is wrong
-(``EditingError/textSpansRejected(nodeID:reason:)``). Code reads it as typed spans through
+(``EditingError/textSpansRejected(nodeID:reason:)``) — in an instance override too, where
+the spans of a text inside an instance live (<doc:PenRichText>). Code reads it as typed spans through
 ``PenMetadata/textSpans``, which goes through the same subscript.
 
 **Adding a key** is one case of ``PenMetadata/WoodcaseKey``, and, for a key that stands

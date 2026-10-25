@@ -135,7 +135,9 @@ struct OverrideCommand: AsyncParsableCommand {
             let outcome = try await CommandTransaction.run(at: url, identity: writer, effect: effect, fonts: .shared) { document, recorder in
                 do {
                     let findings = try effect.preview(of: document)
-                    let instanceID = try document.resolve(target).targetID
+                    let resolved = try document.resolve(target)
+                    let instanceID = resolved.targetID
+                    let spansWereStale = SpansStaleWarnings.finding(at: resolved, in: document) != nil
                     let result = try BatchApplier.applyOne(
                         .override(BatchOperation.OverrideOp(
                             target: target, props: properties, unset: unset,
@@ -146,22 +148,28 @@ struct OverrideCommand: AsyncParsableCommand {
                         log: ActivityLogLocation.log(for: url),
                         file: url
                     )
-                    return try WriteReport(
-                        path: result.path ?? document.namePath(of: instanceID),
-                        id: instanceID,
-                        nodeRevision: document.revision(of: instanceID),
-                        documentRevision: document.documentRevision,
-                        node: result.node,
-                        divergences: result.divergences,
-                        dryRun: effect == .dryRun,
-                        lint: findings?.introduced(in: document) ?? []
-                    ).rendered(json: wantsJSON)
+                    let warnings = SpansStaleWarnings.lines(overriding: resolved, wereStale: spansWereStale, in: document)
+                    return try WrittenOutcome(
+                        rendered: WriteReport(
+                            path: result.path ?? document.namePath(of: instanceID),
+                            id: instanceID,
+                            nodeRevision: document.revision(of: instanceID),
+                            documentRevision: document.documentRevision,
+                            warnings: warnings,
+                            node: result.node,
+                            divergences: result.divergences,
+                            dryRun: effect == .dryRun,
+                            lint: findings?.introduced(in: document) ?? []
+                        ).rendered(json: wantsJSON),
+                        warnings: warnings
+                    )
                 } catch {
                     throw CommandFailure.describing(error, in: document, editing: url)
                 }
             }
             OutsideWriteNote.report(outcome, json: wantsJSON)
-            print(outcome.value)
+            print(outcome.value.rendered)
+            RootOverlapWarnings.report(outcome.value.warnings)
         }
     }
 

@@ -47,11 +47,29 @@ public extension NodePropertyCodec {
         }
     }
 
+    /// Refuses the metadata of an instance override that breaks the convention: what a
+    /// descendant's `descendants` entry, or a `ref` node for its root, will lay over the
+    /// component node's metadata key by key (rule 6). Held to the same shapes a `set` is,
+    /// so malformed spans inside an instance are refused as they are on a plain text.
+    ///
+    /// - Parameters:
+    ///   - metadata: The override's metadata as it will be written; anything but an object
+    ///     passes.
+    ///   - definition: The node the override patches, as this instance already shows it; a
+    ///     key left at the value it shows is not checked. `nil` checks every key.
+    ///   - nodeID: The node the refusal names: the instance's expanded id for a descendant.
+    /// - Throws: ``EditingError/postItMetadataRejected(nodeID:key:value:accepted:suggestion:)``
+    ///   or ``EditingError/textSpansRejected(nodeID:reason:)``, as ``checkAuthoredPostIt(_:on:)``.
+    static func checkAuthoredOverrideMetadata(_ metadata: AnyCodable, on definition: PenNode?, nodeID: String) throws {
+        guard case let .dictionary(object) = metadata else { return }
+        try check(object, comparedTo: definition?.common.metadata, kind: definition?.kind, nodeID: nodeID)
+    }
+
     /// Throws the convention's first refusal of one metadata object.
     private static func check(
         _ object: [String: AnyCodable],
         comparedTo current: PenMetadata?,
-        kind: PenNode.Kind,
+        kind: PenNode.Kind?,
         nodeID: String
     ) throws {
         guard let violation = PenPostIt.violation(in: object, comparedTo: current, on: kind) else { return }

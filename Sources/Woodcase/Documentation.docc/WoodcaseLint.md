@@ -518,8 +518,16 @@ the new words, so spans whose every run covered the whole text raise no finding:
 inside an instance is skipped (an instance that overrides the content draws it plain by
 design). A `set` that makes a text's spans stale prints this same line on standard error.
 
+A text inside an instance can hold spans of its own, in its override
+(<doc:PenRichText>, *Inside an instance*). When they no longer fit the words the instance
+shows, the instance's row reports them, one finding per text, named by the text's expanded
+id and the instance's path; the remedy is an `override`. The component's spans on an
+instance that changed the words are still not reported there. An `override` that makes an
+instance's own spans stale prints the line on standard error, as a `set` does.
+
 ```text
 warning spans-stale  Board/Stale (Stl01)  has 1 styled run made for "Make this bold", not its content, so it draws plain. Restate `kind.spans` for the new words, or remove it with `woodcase set <file> Stl01 kind.spans=null`.
+warning spans-stale  First/Title (Ins01/Ttl01)  has 1 styled run made for "Make this bold", not its content, so it draws plain. Restate `kind.spans` for the new words, or remove the instance's own with `woodcase override <file> Ins01/Ttl01 --unset kind.spans`.
 ```
 
 `stroke-dash-ignored` is a warning, one finding per node with a stroke paint whose

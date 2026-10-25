@@ -1287,6 +1287,15 @@ $ woodcase set design.pen Hero/Title kind.content='Make this BOLD' 'kind.spans={
 $ woodcase set design.pen Hero/Title kind.spans=null
 ```
 
+**Inside an instance, spans are an override.** `override` writes a text's spans on the
+instance, in the override's own metadata, and the component keeps its own; the same
+shapes are held, refusals and stale warnings included:
+
+```text
+$ woodcase override design.pen Home/Card/Title 'kind.spans={"text":"Make this bold","runs":[{"start":10,"end":14,"fontWeight":"700"}]}'
+$ woodcase override design.pen Home/Card/Title --unset kind.spans
+```
+
 See <doc:PenRichText> for how runs set, measure and draw.
 
 ## Filling a slot

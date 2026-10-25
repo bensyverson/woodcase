@@ -57,8 +57,12 @@ extension BatchErrorMessage {
 extension BatchErrorMessage {
     /// Describes a `metadata.woodcase.spans` value that is not spans Woodcase can draw.
     ///
+    /// A text inside an instance takes its spans through an override, so for one named by
+    /// its expanded id (`<ref id>/<descendant key>`) the node is named by its path in the
+    /// instance and the remedy is an `override`.
+    ///
     /// - Parameters:
-    ///   - nodeID: The node written to.
+    ///   - nodeID: The node written to, or a text inside an instance by its expanded id.
     ///   - reason: What is wrong, from ``PenTextSpans/WireError``.
     ///   - document: The document, for the node's name path.
     ///   - dialect: Which grammar the remedy is written in.
@@ -72,10 +76,14 @@ extension BatchErrorMessage {
         let key = PenMetadata.WoodcaseKey.spans.propertyPath
         let shape = "spans take \(PenTextSpans.wireForm), offsets in UTF-16 units of text"
         let example = #"{"text":"Make this bold","runs":[{"start":10,"end":14,"fontWeight":"700"}]}"#
+        let steps = nodeID.split(separator: NodeAddress.separator, maxSplits: 1).map(String.init)
+        let (named, verb) = steps.count == 2
+            ? ("\(document.namePath(ofDescendant: steps[1], in: steps[0])) (\(nodeID))", "override")
+            : (name(nodeID, in: document), "set")
         return sentence(
-            "\(key) on \(name(nodeID, in: document)) is not spans Woodcase can draw: \(reason)",
+            "\(key) on \(named) is not spans Woodcase can draw: \(reason)",
             batch: "\(shape), for example `\"\(key)\":\(example)`",
-            command: "\(shape), for example `woodcase set \(dialect.file) \(nodeID) \(key)='\(example)'`",
+            command: "\(shape), for example `woodcase \(verb) \(dialect.file) \(nodeID) \(key)='\(example)'`",
             in: dialect
         )
     }

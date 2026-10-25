@@ -243,7 +243,7 @@ public enum DocumentLinter {
         found += textOverflow(row, node: node)
         found += collapsedText(row, node: node)
         found += textStyleStripped(row, node: node)
-        found += spansStale(row, node: node)
+        found += spansStale(row, node: node, in: context)
         found += fillContainerInFitParent(row, node: node, parent: parent, in: context)
         found += emptyFitContent(row, node: node)
         found += collapsedAbsoluteFrame(row, node: node)

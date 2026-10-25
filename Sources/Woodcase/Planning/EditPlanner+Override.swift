@@ -76,7 +76,7 @@ extension EditPlanner {
                     rawRequested, unset: rawUnset, onto: overrideEntry(of: refID, at: entryKey, in: document)
                 )
             } else {
-                if let write = rootNaturalWrite(
+                if let write = try rootNaturalWrite(
                     spreads.properties, unset: rawUnset, shadowSpread: spreads.shadowSpread, refID: refID, in: document
                 ) {
                     operations.append(write)
@@ -95,6 +95,13 @@ extension EditPlanner {
             try NodePropertyCodec.checkAuthoredOverride(
                 overrides, on: patched, refID: refID, descendantKey: group.descendantKey
             )
+            // The Woodcase-owned keys folded into the entry's metadata — a text's spans
+            // among them — are held to the shapes a set's are.
+            if let entryKey = group.descendantKey, let metadata = overrides[NodePropertyCodec.rawKey(for: NodePropertyCodec.metadataPath)] {
+                try NodePropertyCodec.checkAuthoredOverrideMetadata(
+                    metadata, on: patched, nodeID: "\(refID)\(NodeAddress.separator)\(entryKey)"
+                )
+            }
             try checkOverrideValues(
                 overrides, on: patched, refID: refID, descendantKey: group.descendantKey,
                 written: written, in: document
@@ -143,11 +150,12 @@ extension EditPlanner {
     ///
     /// A `null`, like an unset, removes the ref's key, so the root shows the component's:
     /// to draw a component's dash solid on one instance, override it with `[]`. The spreads
-    /// the root's effects name (`shadowSpread`) are one more such key.
+    /// the root's effects name (`shadowSpread`) are one more such key. The written
+    /// metadata is held to the shapes a set's is.
     private static func rootNaturalWrite(
         _ properties: [String: AnyCodable], unset: [String], shadowSpread: AnyCodable?, refID: String,
         in document: EditableDocument
-    ) -> EditOperation? {
+    ) throws -> EditOperation? {
         var writes = properties.compactMap { name, value in NodePropertyCodec.naturalOverrideKey(name).map { ($0, value) } }
         if let shadowSpread { writes.append((.shadowSpread, shadowSpread)) }
         let removals = unset.compactMap(NodePropertyCodec.naturalOverrideKey)
@@ -160,6 +168,11 @@ extension EditPlanner {
             metadata[woodcase: key] = nil
         }
         let written: AnyCodable = metadata.typedForWriting().map { .dictionary($0.object) } ?? .null
+        // Held to the shapes a set is, against what the instance root shows.
+        var shown = document.componentRoot(ofInstance: refID)
+        let rootMetadata = PenMetadata.instanceRoot(of: shown?.common.metadata, under: ref.common.metadata)
+        shown?.common.metadata = rootMetadata
+        try NodePropertyCodec.checkAuthoredOverrideMetadata(written, on: shown, nodeID: refID)
         return .setProperties(EditOperation.SetProperties(
             nodeID: refID, properties: [NodePropertyCodec.metadataPath: written]
         )).normalized(in: document)

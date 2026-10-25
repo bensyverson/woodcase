@@ -1,0 +1,34 @@
+{
+  "version": "2.20",
+  "children": [
+    {
+      "id": "Crd01",
+      "name": "Card",
+      "type": "frame",
+      "reusable": true,
+      "x": 0,
+      "y": 0,
+      "width": 200,
+      "height": 40,
+      "children": [
+        {
+          "id": "Ttl01",
+          "name": "Title",
+          "type": "text",
+          "content": "Make this bold",
+          "fontFamily": "Inter",
+          "fontSize": 16,
+          "fill": "#000000"
+        }
+      ]
+    },
+    {
+      "id": "Ins01",
+      "name": "First",
+      "type": "ref",
+      "ref": "Crd01",
+      "x": 0,
+      "y": 100
+    }
+  ]
+}

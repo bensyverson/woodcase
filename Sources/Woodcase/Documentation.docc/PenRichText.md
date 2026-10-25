@@ -31,7 +31,23 @@ let layout = PenTextLayout(node, box: box)   // sets "bold" in the 700 face
 
 ``PenTextSpans/text`` is the content the runs were made for. ``PenTextSpans/appliedRuns(to:)`` returns the runs while the content still equals it, code unit for code unit — two strings equal only by Unicode equivalence have different offsets. Once it differs, a run over part of the text is dropped, since where it belongs in new words cannot be known; a run that covered the whole text is stretched over the whole of the new content (Ben's ruling of 2026-10-15, leaf `0LwfSn`), except a mention, which names the words it was made for, and nothing is stretched over empty content. ``PenTextSpans/ignoredRuns(for:)`` lists what is dropped. ``PenNode/appliedRuns`` asks that of the node's literal content, read from its metadata, and every consumer reads it: measurement, ink, the renderer, ``PenTextLayout/init(_:box:color:)``, the overflow lint. ``PenNode/hasStaleTextSpans`` says when some run is dropped that way, which the `spans-stale` lint, `tree` (`⚠ stale runs`) and a `set` that changes the words report (<doc:WoodcaseLint>, <doc:WoodcaseEditor>). Stale runs are kept, not moved: re-anchoring them by diffing the old text against the new can come later.
 
-An instance that overrides a component text's content keeps only the component's whole-text runs, by the same rule: the spans were made for the component's words. So a node whose words were changed by a tool that does not know about runs loses its partial styling everywhere at once. Anything that changes `content` must restate the spans for the new text, or they go stale.
+An instance that overrides a component text's content keeps only the component's whole-text runs, by the same rule: the spans were made for the component's words. So a node whose words were changed by a tool that does not know about runs loses its partial styling everywhere at once. Anything that changes `content` must restate the spans for the new text, or they go stale — inside an instance, as spans of the instance's own (below).
+
+### Inside an instance
+
+A text inside a component instance takes rich text through an instance override, as every other instance edit does (Ben's ruling of 2026-10-11, Penumbra spec §7.6 (1)). The spans are a Woodcase-owned key, so the override stores them in its own metadata, `descendants[<key>].metadata.woodcase.spans` — on the `ref` node's own metadata for a text that is the component's root — and expansion lays that over the component text's metadata key by key (rule 6, <doc:PenMetadataNamespace>): the component's other keys still reach the instance, the component is never touched, and a `null` clears the component's spans on that instance alone. An instance without spans of its own shows the component's, and later edits to them.
+
+An editor plans the write where the text is stored, as an inspector does (``EditPlanner/plan(_:routedAt:in:)``, or ``EditPlanner/routeWrites(_:at:in:)`` for values it computed): bolding a word writes `kind.spans`, with the content when the words changed too, and the plan is one override on the instance.
+
+```swift
+let spans = PenTextSpans(text: "Make this bold", runs: [PenTextRun(start: 10, end: 14, fontWeight: 700)])
+let plan = try EditPlanner.plan(
+    .set(["kind.spans": spans.metadataValue]),
+    routedAt: .instanceDescendant(refID: "Ins01", descendantKey: "Ttl01"), in: document
+)   // [.overrideDescendant(Ins01, Ttl01: metadata.woodcase.spans)]
+```
+
+The override is held to the shapes a `set` is (``EditingError/textSpansRejected(nodeID:reason:)``, naming the text by its expanded id). Stale detection runs against the content the instance shows: an instance's own spans whose words its content override changed are stale as a plain text's are — ``PenNode/appliedRuns`` and ``PenNode/hasStaleTextSpans`` read the expanded node — and the `spans-stale` lint reports them on the instance (``DocumentLinter/spansStaleFinding(instance:descendantKey:in:)``), as an `override` that makes them stale does. Pen drops override metadata on save, so instance styling does not survive a round trip through Pen (`pen-drops-override`).
 
 ### Editing runs
 
@@ -123,6 +139,7 @@ Another renderer draws a text node's spans through the same layout: `PenTextLayo
 - ``PenNode/textSpans``
 - ``PenNode/appliedRuns``
 - ``PenNode/hasStaleTextSpans``
+- ``DocumentLinter/spansStaleFinding(instance:descendantKey:in:)``
 
 ### Editing
 
