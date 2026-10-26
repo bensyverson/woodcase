@@ -35,6 +35,10 @@ public struct CRDTSnapshot: Friendly {
     /// The peer that created this snapshot.
     public var peerID: PeerID
 
+    /// The fingerprint of the document the snapshotted replica was seeded from — or, for
+    /// one made from a snapshot itself, its donor's (``CRDTDocument/seedFingerprint``).
+    public var seedFingerprint: SeedFingerprint
+
     /// The full operation log at snapshot time.
     public var operationLog: OperationLog
 
@@ -76,6 +80,7 @@ public struct CRDTSnapshot: Friendly {
     /// in which no node has been created or deleted since the document was loaded.
     public init(
         peerID: PeerID,
+        seedFingerprint: SeedFingerprint,
         operationLog: OperationLog,
         propertyMaps: [String: LWWPropertyMap],
         childrenLists: [String: RGAList<String>],
@@ -89,6 +94,7 @@ public struct CRDTSnapshot: Friendly {
         dormantWrites: [String: [String: CRDTDocument.DormantWrite]] = [:]
     ) {
         self.peerID = peerID
+        self.seedFingerprint = seedFingerprint
         self.operationLog = operationLog
         self.propertyMaps = propertyMaps
         self.childrenLists = childrenLists

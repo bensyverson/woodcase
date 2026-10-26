@@ -337,6 +337,41 @@ position or node the joiner does not have. Applied, they are in the joiner's log
 before the first local edit: one replayed after a local edit would be taken for a
 duplicate.
 
+### Seed Fingerprint
+
+Replicas converge only from a common seed. A ``CRDTDocument`` built from a document gives
+that document's own nodes the genesis list positions (``PeerID/genesis``) and no
+timestamps, so every replica seeded from the same document agrees on them without a
+word exchanged — and two replicas seeded from *different* documents share ids that mean
+different things. Their operations must not be mixed; a peer seeded from another file
+joins from a donor's state instead.
+
+``SeedFingerprint`` is how peers tell. ``CRDTDocument/seedFingerprint`` (and
+``EditableDocument/seedFingerprint``, `nil` for a document that is not collaborative) is
+a 32-byte digest of the document the replica was seeded from:
+
+- **Equal seeds, equal fingerprints.** It depends on the document alone, never the peer
+  id, so every replica seeded from an equal ``PenDocument`` reports the same one.
+- **The seed's, not the current document's.** Edits do not change it.
+- **Carried, not recomputed.** A ``CRDTSnapshot`` holds it, so a replica restored from one
+  — or joined from a ``CRDTStateTransfer`` — reports its donor's: the session's seed, though
+  its own document is the donor's edited one. A peer that joined by Hot Swap and later
+  rejoins still matches the peers seeded from the original.
+
+It is SHA-256 over the scheme prefix `woodcase.crdt-seed.v1` and a newline, then the seed's
+canonical encoding: compact JSON with every object's keys sorted and slashes unescaped,
+and non-finite numbers written as strings. The encoding is deterministic: sorting at
+output removes dictionary iteration order (Swift seeds it afresh in each process), the
+model stores no set, and `JSONEncoder` writes each number in the shortest form that reads
+back as the same value. A replica seeded through ``CRDTDocument/init(peerID:document:)``
+fingerprints ``EditableDocument/materialize()``, the document as the flat store holds it,
+so equal input documents always meet. Two documents that are not `==` but encode alike —
+`-0.0` and `0.0`, or an integer and the equal double — share a fingerprint; they also
+seed identical replicas. `CRDTSeedFingerprintTests` pins the encoding and a digest.
+
+The fingerprint is a plain digest. An app that sends it somewhere it should not be
+readable keys it first.
+
 ### Checkpoints and Log Truncation
 
 Over time the operation log grows unbounded. Checkpoints provide a coordination
@@ -403,3 +438,4 @@ each other after every batch of random concurrent edits.
 
 - ``CRDTSnapshot``
 - ``CRDTStateTransfer``
+- ``SeedFingerprint``

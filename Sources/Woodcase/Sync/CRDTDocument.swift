@@ -30,6 +30,11 @@ public final class CRDTDocument {
     /// This peer's identifier.
     public let peerID: PeerID
 
+    /// The fingerprint of the document this replica was seeded from: equal on every
+    /// replica seeded from an equal document, and carried by a ``CRDTSnapshot`` to a
+    /// replica made from one. See <doc:CRDTArchitecture#Seed-Fingerprint>.
+    public let seedFingerprint: SeedFingerprint
+
     /// The operation log (also owns the Lamport clock and vector clock).
     public internal(set) var operationLog: OperationLog
 
@@ -81,11 +86,16 @@ public final class CRDTDocument {
     /// Initializes all CRDT metadata (RGA lists, tree move state, property maps)
     /// from the existing flat store. All initial entries use a zero timestamp.
     ///
+    /// The ``seedFingerprint`` is taken over the document as the flat store holds it
+    /// (``EditableDocument/materialize()``), so every replica seeded from an equal
+    /// document reports the same one.
+    ///
     /// - Parameters:
     ///   - peerID: This peer's unique identifier.
     ///   - document: The editable document to shadow.
     public init(peerID: PeerID, document: EditableDocument) {
         self.peerID = peerID
+        seedFingerprint = SeedFingerprint(of: document.materialize())
         operationLog = OperationLog(peerID: peerID)
         propertyMaps = [:]
         childrenLists = [:]
@@ -144,9 +154,11 @@ public final class CRDTDocument {
     ///
     /// - Parameters:
     ///   - peerID: This peer's unique identifier.
+    ///   - seedFingerprint: The fingerprint of the seed the donor's replica began from.
     ///   - bootstrapOperationLog: An existing operation log to adopt.
-    init(peerID: PeerID, bootstrapOperationLog: OperationLog) {
+    init(peerID: PeerID, seedFingerprint: SeedFingerprint, bootstrapOperationLog: OperationLog) {
         self.peerID = peerID
+        self.seedFingerprint = seedFingerprint
         operationLog = bootstrapOperationLog
         propertyMaps = [:]
         childrenLists = [:]

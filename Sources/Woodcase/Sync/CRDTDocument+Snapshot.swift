@@ -15,6 +15,7 @@ public extension CRDTDocument {
     func snapshot() -> CRDTSnapshot {
         CRDTSnapshot(
             peerID: peerID,
+            seedFingerprint: seedFingerprint,
             operationLog: operationLog,
             propertyMaps: propertyMaps,
             childrenLists: childrenLists,
@@ -35,6 +36,9 @@ public extension CRDTDocument {
     /// timestamp collisions between the new peer's operations and those
     /// already in the snapshot.
     ///
+    /// The replica takes the snapshot's ``CRDTSnapshot/seedFingerprint``: it was never
+    /// seeded itself, and reports the seed of the session it joined.
+    ///
     /// The snapshot is checked first (``CRDTSnapshot/validate()``): one from another
     /// peer is untrusted input.
     ///
@@ -46,7 +50,11 @@ public extension CRDTDocument {
         try snapshot.validate()
         // The log is adopted under this replica's id: its operations would otherwise
         // carry the donor's, and collide with the donor's own.
-        self.init(peerID: peerID, bootstrapOperationLog: OperationLog(peerID: peerID, adopting: snapshot.operationLog))
+        self.init(
+            peerID: peerID,
+            seedFingerprint: snapshot.seedFingerprint,
+            bootstrapOperationLog: OperationLog(peerID: peerID, adopting: snapshot.operationLog)
+        )
 
         propertyMaps = snapshot.propertyMaps
         childrenLists = snapshot.childrenLists

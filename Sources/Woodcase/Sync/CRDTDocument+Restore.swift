@@ -17,6 +17,7 @@ extension CRDTDocument {
     ///   since.
     func restore(_ snapshot: CRDTSnapshot) {
         precondition(snapshot.peerID == peerID, "A CRDT document can only restore its own snapshot")
+        precondition(snapshot.seedFingerprint == seedFingerprint, "A CRDT document can only restore its own snapshot")
         operationLog = snapshot.operationLog
         propertyMaps = snapshot.propertyMaps
         childrenLists = snapshot.childrenLists
