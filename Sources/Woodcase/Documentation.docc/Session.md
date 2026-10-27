@@ -35,6 +35,7 @@ origin, the owner reacts to the same value:
 | ``CommittedChange/isUndoable`` | Offers Undo |
 | ``CommittedChange/undoEffect`` | Mirrors the undo and redo stacks into its own undo manager |
 | ``CommittedChange/kept`` | Tells the author whose work an undo kept |
+| ``CommittedChange/unrestored`` | Tells the author what an undo could not take back, when no one else's work is to credit |
 | ``CommittedChange/conflicts`` | Tells the author where a file merge kept their value over the file's |
 
 So there is no second path that edits the document and forgets to log, broadcast or
@@ -338,7 +339,12 @@ author *after* the entry's first change can stop it.
   by undoing a delete stays deleted when its parent has since been deleted, or one of
   its ids taken.
 - The steps that take back one structural operation run together or not at all, so
-  half a detach is never undone.
+  half a detach is never undone. They are weighed in order: a node an earlier step puts
+  back counts as present for a later one, so a detach's connector restores, guarded by
+  the ref its re-insert recreates, run with it.
+- A step stopped by a node that is gone, or an id that is taken, with no other author to
+  credit — gone through an edit that never joined the undo history — is reported in
+  ``CommittedChange/unrestored``. No undo is skipped silently.
 - A node put back by a move or a delete lands next to the sibling it sat after
   (``Placement``), not at an index someone else's insert has since shifted.
 

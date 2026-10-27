@@ -115,12 +115,16 @@ public enum PenRefExpander {
     /// With `strippingDefinitions`, a reusable definition is left out as the walk
     /// reaches it — in the same pass, so no expanded tree is built only to be thrown
     /// away, which in a debug build costs stack as deep as the tree to free.
+    ///
+    /// With `expandingOnly`, a `ref` naming any other component is kept as written —
+    /// its overrides, handed down by the instance around it, stay its own.
     private static func expandNodes(
         _ nodes: [PenNode],
         registry: [String: PenNode],
         visited: Set<String>,
         cache: ResolverCache,
-        strippingDefinitions: Bool = false
+        strippingDefinitions: Bool = false,
+        expandingOnly components: Set<String>? = nil
     ) -> [PenNode] {
         PenTreeRewrite.rewrite(nodes, context: visited) { node, visited in
             if strippingDefinitions, node.common.reusable == true { return .drop }
@@ -130,6 +134,7 @@ public enum PenRefExpander {
                 guard node.common.reusable == true else { return .descend(node, visited) }
                 return .descend(node, visited.union([node.id]))
             }
+            if let components, !components.contains(refData.ref) { return .keep(node) }
             guard let instance = prepareInstance(
                 refNode: node, refData: refData, registry: registry, visited: visited, cache: cache
             ) else { return .keep(node) }
@@ -156,6 +161,40 @@ public enum PenRefExpander {
         guard case .ref = refNode.kind else { return refNode }
         let cache = cache ?? ResolverCache(loops: ComponentLoopIndex(registry: registry))
         return expandNodes([refNode], registry: registry, visited: visited, cache: cache).first ?? refNode
+    }
+
+    /// Expands one instance a single level, as a detach writes it.
+    ///
+    /// The component is cloned and every override of the instance applied, exactly as a
+    /// full expansion does before it reaches the instances nested inside — so an
+    /// override on a nested instance patches that `ref` node, and one on a node inside
+    /// it is handed down into its `descendants`, re-rooted on it (`badge/pip` becomes
+    /// `pip` on `badge`). The nested `ref`s then stay refs, drawing just what they drew,
+    /// except those naming one of `components`, which expand in turn by the same rule.
+    ///
+    /// - Parameters:
+    ///   - refNode: The `ref` node.
+    ///   - registry: Component id → component.
+    ///   - cache: The override-key resolvers and component loops of this registry.
+    ///   - components: The components whose nested instances expand too — the ones a
+    ///     delete is removing; empty for a plain detach.
+    /// - Returns: The instance's clone, ids prefixed with the ref's, or `refNode` for a
+    ///   circular or unresolved ref, or for a node that is no `ref`.
+    static func expandInstanceLevel(
+        refNode: PenNode,
+        registry: [String: PenNode],
+        cache: ResolverCache,
+        expandingNestedInstancesOf components: Set<String> = []
+    ) -> PenNode {
+        guard case let .ref(refData) = refNode.kind,
+              let instance = prepareInstance(
+                  refNode: refNode, refData: refData, registry: registry, visited: [], cache: cache
+              )
+        else { return refNode }
+        return expandNodes(
+            [instance.node], registry: registry, visited: instance.chainVisited, cache: cache,
+            expandingOnly: components
+        ).first ?? instance.node
     }
 
     /// Transfers positional properties from the ref node to the expanded component root.

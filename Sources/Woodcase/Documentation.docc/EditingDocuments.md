@@ -219,7 +219,16 @@ which replicate as one write of the node's whole extras register
 **Component operations** work with reusable component instances:
 - ``EditOperation/overrideDescendant(_:)`` — create or update descendant overrides on a ref node
 - ``EditOperation/overrideRoot(_:)`` — create or update the root overrides a ref shows the component through
-- ``EditOperation/detachRef(_:)`` — replace a ref with its expanded independent nodes
+- ``EditOperation/detachRef(_:)`` — replace a ref with plain layers, its overrides baked in
+
+A detach expands the instance one level (Ben, 2026-10-27; Penumbra spec §13). The nodes its
+component wrote become plain layers with the instance's overrides applied; the instances
+nested inside it — in the component or in its slot fills — **stay instances**, linked to
+their components. An override the detached instance made on a nested instance itself is
+baked onto that `ref`; one on a node inside it is re-rooted into the nested ref's own
+`descendants`, so `"badge/pip": {fill}` on `ok` becomes `"pip": {fill}` on the copy of
+`badge`, and `badge/gem/facet` becomes `gem/facet`. The copy draws exactly what the
+instance drew.
 
 A detach's ids are derived, not drawn: ``SubtreeIDPlan/detaching(_:refID:replica:avoiding:)``
 hashes the ref's id and each expanded node's id (FNV-1a, written as five base-62
@@ -236,7 +245,8 @@ rewrites every connector end that named the instance or a node drawn inside it �
 instance itself (`Card`), a node of it (`Card/Title`), a node of one of its slot fills, a
 node inside an instance nested in it, and an end reached through an instance of a
 component holding the detached ref (`Panel1/Inner/Title`) — to the detached copy's id, in
-the same edit. The inverse puts the ends back after restoring the ref, and a collaborative
+the same edit. An end inside a nested instance paths through that instance's copy, which
+is still an instance: `ok/badge/pip` becomes `<badge copy>/pip`. The inverse puts the ends back after restoring the ref, and a collaborative
 detach replicates the rewrites with the delete and insert it decomposes into, so both peers
 keep the connector attached. Keeping the root's own id instead would split the
 collaborative detach, whose delete tombstones the ref's id.
@@ -920,8 +930,10 @@ refuses with ``EditingError/componentHasInstances(componentID:instanceIDs:)``, n
 every instance that would be stranded. Instances *inside* the deleted subtree go away
 with it and do not count. To go ahead, set
 ``EditOperation/DeleteNode/instances`` to ``EditOperation/DeleteNode/Instances/detach``:
-each stranded instance is detached into independent nodes first, then the component is
-deleted.
+each stranded instance is detached first, then the component is deleted. Each detach
+keeps the instances nested in it, as a plain detach does — except an instance of a
+component the delete removes, which would be stranded in turn and so is detached too, by
+the same rule.
 
 ```swift
 // Refused, naming the instances:

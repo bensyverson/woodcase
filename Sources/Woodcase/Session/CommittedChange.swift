@@ -30,6 +30,8 @@ public struct CommittedChange: Friendly {
     ///   - conflicts: What a file merge resolved by keeping the local side.
     ///   - undoEffect: What the change did to the author's undo and redo stacks.
     ///   - rejected: The remote operations refused at the boundary.
+    ///   - unrestored: What an undo or redo could not take back and nobody else is to
+    ///     credit for.
     public init(
         origin: SessionOrigin.Kind,
         author: Author,
@@ -44,7 +46,8 @@ public struct CommittedChange: Friendly {
         kept: [KeptChange] = [],
         conflicts: [MergeConflict] = [],
         undoEffect: UndoEffect = [],
-        rejected: [RemoteInputError] = []
+        rejected: [RemoteInputError] = [],
+        unrestored: [ChangeKey] = []
     ) {
         self.origin = origin
         self.author = author
@@ -60,6 +63,7 @@ public struct CommittedChange: Friendly {
         self.conflicts = conflicts
         self.undoEffect = undoEffect
         self.rejected = rejected
+        self.unrestored = unrestored
     }
 
     /// Where the change came from.
@@ -100,6 +104,13 @@ public struct CommittedChange: Friendly {
 
     /// Other authors' work an undo left in place rather than overwrite.
     public var kept: [KeptChange]
+
+    /// What an undo or a redo could not take back although no other author is to credit
+    /// for it, so the app can say so rather than appear to do nothing: the existence of
+    /// each node a step needed that is gone, or of each id it would have taken that is in
+    /// use — gone through an edit that never joined the undo history, say. Its steps did
+    /// not run, and the entry is consumed as for ``kept``. Empty for every other origin.
+    public var unrestored: [ChangeKey]
 
     /// What a file merge could not take from both sides, and resolved — local changes
     /// win a same-key conflict. Empty for every other origin.

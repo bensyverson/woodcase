@@ -94,12 +94,12 @@ struct DetachConnectorTests {
         #expect(ends("KOther", in: doc) == ["Default/Title", "Loose"])
         for id in ["KRoot", "KIn", "KBoth", "KFill", "KFillIn"] {
             let paths = try #require(ends(id, in: doc))
-            #expect(paths.allSatisfy { doc.nodes[$0] != nil }, "\(id) still names a drawn node: \(paths)")
+            #expect(paths.allSatisfy { ConnectorFixture.resolves($0, in: doc) }, "\(id) still names a drawn node: \(paths)")
         }
         #expect(endNames(in: doc) == names)
     }
 
-    @Test("Detaching an instance rewrites the ends naming nodes in its slot fill")
+    @Test("Detaching an instance rewrites the ends naming nodes in its slot fill, through the instances there")
     func detachRewritesFillEnds() throws {
         let doc = try document()
 
@@ -108,9 +108,10 @@ struct DetachConnectorTests {
         let row1 = try #require(ends("KFill", in: doc)?.first)
         let label = try #require(ends("KFillIn", in: doc)?.first)
         #expect(doc.nodes[row1]?.common.name == "Row 1")
-        #expect(doc.nodes[label] != nil)
         #expect(Set(result.idMapping.values).contains(row1))
-        #expect(Set(result.idMapping.values).contains(label))
+        // `Row2` stays an instance of `Item/B`, so the end names its label through it.
+        #expect(label == (result.idMapping["Filled/Row2"] ?? "-") + "/BLbl")
+        #expect(ConnectorFixture.resolves(label, in: doc))
     }
 
     @Test("Detaching an instance rewrites an end inside a nested instance")

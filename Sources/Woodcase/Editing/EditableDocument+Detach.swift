@@ -66,9 +66,11 @@ public extension EditableDocument {
 
     /// Applies an ``EditOperation/DetachRef`` operation.
     ///
-    /// Expands the ref node, derives compact IDs for all expanded nodes, removes the
-    /// ref, inserts the expanded subtree at the same position, and rewrites every
-    /// connector end that named the instance or a node inside it to its new id.
+    /// Expands the ref node one level — its overrides baked in, the instances nested in
+    /// it left as instances carrying the overrides it made inside them — derives compact
+    /// IDs for all expanded nodes, removes the ref, inserts the expanded subtree at the
+    /// same position, and rewrites every connector end that named the instance or a node
+    /// inside it to its new id.
     ///
     /// - Parameter op: The detach operation parameters.
     /// - Throws: ``EditingError/nodeNotFound(id:)`` or ``EditingError/notARefNode(id:)``.
@@ -77,6 +79,11 @@ public extension EditableDocument {
     }
 
     /// Detaches a ref node, returning detailed results.
+    ///
+    /// The instances nested in the detached one stay instances, linked to their
+    /// components: an override the instance made on one of them is baked onto its `ref`,
+    /// and one on a node inside it is re-rooted into its `descendants` (`badge/pip` on
+    /// the instance becomes `pip` on the copy of `badge`).
     ///
     /// Use this overload when you need the ``DetachResult`` (e.g. to construct
     /// undo operations for the expanded subtree). The ids the expansion takes are
@@ -106,9 +113,8 @@ extension EditableDocument {
         try requireRef(plan.refID)
 
         // The subjects are every node the detach removes and every one it inserts: the
-        // inserted expansion can hold instances, which the referrer index has to learn.
-        // The ref among them drops the entry the plan's expansion warmed, which the
-        // detach has just consumed.
+        // inserted expansion holds the instances nested in the detached one, which the
+        // referrer index has to learn. The ref among them drops its expansion entry.
         let subjects = descendantIDs(of: plan.refID) + collectInsertedIDs(in: plan.subtree)
         let rewrites = connectorRewrites(for: plan)
         let result = try invalidatingCaches(touching: subjects) {

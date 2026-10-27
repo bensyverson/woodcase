@@ -26,7 +26,7 @@ public extension CommittedChange {
     ///   ``PenFileTransaction/save(_:changes:to:log:timeout:)`` includes the folded change
     ///   exactly when it would have included the last of the run, and its last row
     ///   explains the saved revision;
-    /// - ``applied``, ``broadcast``, ``kept`` and ``conflicts`` are every change's, in
+    /// - ``applied``, ``broadcast``, ``kept``, ``unrestored`` and ``conflicts`` are every change's, in
     ///   order; ``invalidation`` and ``undoEffect`` their union; it is undoable or
     ///   dirtying when any of them is.
     ///
@@ -59,7 +59,8 @@ public extension CommittedChange {
             isDirtying: changes.contains(where: \.isDirtying),
             kept: changes.flatMap(\.kept),
             conflicts: changes.flatMap(\.conflicts),
-            undoEffect: changes.reduce(into: UndoEffect()) { $0.formUnion($1.undoEffect) }
+            undoEffect: changes.reduce(into: UndoEffect()) { $0.formUnion($1.undoEffect) },
+            unrestored: changes.flatMap(\.unrestored)
         )
     }
 }

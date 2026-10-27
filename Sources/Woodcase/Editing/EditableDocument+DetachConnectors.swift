@@ -11,8 +11,9 @@ import Foundation
 /// (``SubtreeIDPlan/detaching(_:refID:replica:avoiding:)``), the root included, so a
 /// connector end naming the instance (`Card`), a node drawn inside it (`Card/title`), a
 /// node of one of its slot fills, or a node inside an instance nested in it would name
-/// nothing afterward. The detach rewrites each such end to the detached copy's id, in the
-/// same edit: the flat store writes the rewrite with the expansion, a collaborative detach
+/// nothing afterward. The detach rewrites each such end to the detached copy's id — for a
+/// node inside a nested instance, which the detach leaves an instance, the path through
+/// that instance's copy (`ok/badge/pip` becomes `<badge copy>/pip`) — in the same edit: the flat store writes the rewrite with the expansion, a collaborative detach
 /// replicates it with the delete and insert it decomposes into, and the detach's inverse
 /// puts the ends back. Keeping the root's own id instead would split the collaborative
 /// detach, whose delete tombstones the ref's id (integrator's ruling, session 48).
