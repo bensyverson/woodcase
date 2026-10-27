@@ -318,6 +318,10 @@ let joined = try EditableDocument(joining: received, peerID: myPeerID)
 joined.replayOfflineOperations(offlineOps)
 ```
 
+An app editing through a ``DocumentSession`` joins with
+``DocumentSession/init(joining:author:file:synced:merger:)`` instead, which wraps the
+joined document in a fresh session (*Joining a live session* in <doc:Session>).
+
 The transfer is validated first (``CRDTStateTransfer/validate()``): its snapshot as
 ``CRDTSnapshot/validate()`` checks one, and its document must hold no node the snapshot
 deleted. The snapshot's log is adopted under the joiner's own peer id, and its Lamport

@@ -1079,7 +1079,8 @@ to enable the CRDT layer. Use ``EditableDocument/applyLocal(_:)`` instead of
 For late-joining peers, use ``EditableDocument/init(joining:peerID:)`` with the
 ``CRDTStateTransfer`` an existing peer's ``EditableDocument/stateTransfer()`` gives —
 its document and CRDT state, together. Offline operations can be merged via
-``EditableDocument/replayOfflineOperations(_:)``.
+``EditableDocument/replayOfflineOperations(_:)``. An app on a ``DocumentSession`` joins
+through ``DocumentSession/init(joining:author:file:synced:merger:)``.
 
 Coordinate save-point truncation with ``EditableDocument/checkpoint()``
 and ``EditableDocument/truncateLog(acknowledgedBy:)``.

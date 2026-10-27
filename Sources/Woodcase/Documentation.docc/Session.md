@@ -133,6 +133,24 @@ whose causal past has not arrived is held — the batch that brings it applies b
 order, and credits each to its own author — and one already applied is ignored. See
 *Causal Delivery* in <doc:CRDTArchitecture>.
 
+### Joining a live session
+
+A peer that must load another's board — a fresh joiner, or one whose replica can't catch
+up by operations — replaces its session with one made from the donor's
+``CRDTStateTransfer`` (*Snapshots and State Transfer* in <doc:CRDTArchitecture>):
+
+```swift
+let joined = try DocumentSession(joining: transfer, author: me, file: url, synced: onDisk, merger: .threeWay)
+joined.document.replayOfflineOperations(offlineOps) // only for a peer that edited offline
+```
+
+The new session holds the donor's document and CRDT state under the joiner's peer id, so
+it reports the donor's ``EditableDocument/seedFingerprint`` and takes the donor's later
+operations as ``SessionOrigin/remote(_:from:)``. Nothing carries over from the session it
+replaces — its undo history and ledger describe a board the window no longer shows. It
+counts as unsynced from the start, since its file never held the donor's board; `synced`,
+the file's document as last read, is the base a later file merge diffs from.
+
 ### Saving from an app
 
 An app saves through ``PenFileTransaction/save(_:changes:to:log:timeout:)``, which
