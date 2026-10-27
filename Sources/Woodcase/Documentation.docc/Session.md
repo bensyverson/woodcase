@@ -133,6 +133,14 @@ whose causal past has not arrived is held — the batch that brings it applies b
 order, and credits each to its own author — and one already applied is ignored. See
 *Causal Delivery* in <doc:CRDTArchitecture>.
 
+### Starting to share
+
+A session opened without a CRDT starts sharing with ``DocumentSession/makeCollaborative()``,
+which seeds one from the live document under the author's peer id. The session itself stays:
+its undo history, ledger and sequence carry on, so undo still undoes what its author did, and
+an undo of an edit made before sharing now broadcasts operations like any other change. Peers
+join from the state transfer taken afterward.
+
 ### Joining a live session
 
 A peer that must load another's board — a fresh joiner, or one whose replica can't catch
