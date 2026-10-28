@@ -7,13 +7,14 @@ import CoreGraphics
 
 extension SVGWriter {
     /// A group's silhouette in opaque black: its descendants' combined outline, which casts
-    /// its outer and inner shadows — ``PenRenderer/drawGroupSilhouette(of:layoutRects:overrides:imageProvider:in:)``
+    /// its outer and inner shadows — ``PenRenderer/drawDescendantSilhouettes(of:clip:layoutRects:overrides:imageProvider:in:)``
     /// in SVG.
     ///
     /// Built from the descendants' outlines rather than their painted elements, so a
-    /// translucent child casts at full strength, a frame casts its box and not its
-    /// children, and a line, a child's opacity and a child's own shadow cast nothing — as
-    /// Pen casts it.
+    /// translucent child casts at full strength and a child's opacity and own shadow cast
+    /// nothing. Each shape casts what its own paint covers (``PenShadowSilhouette/path(for:rect:)``),
+    /// but a frame's children and a line still cast nothing here, as Pen 1.2.16 cast them;
+    /// Pen CLI 0.3.13 casts both, as the Core Graphics renderer does.
     ///
     /// - Parameter children: The group's children.
     /// - Returns: The silhouette, in the group's own coordinates.

@@ -20,6 +20,9 @@
             /// A group's outer shadow is a `drop-shadow` of what it paints, not Pen's silhouette:
             /// a CSS limit, kept by Ben's ruling of 2026-09-27.
             case groupDropShadow = "a group's shadow is a drop-shadow of its painted content: translucent children cast a fainter shadow that shows through them, and a line, a child's own shadow and a frame child's overhang cast one too"
+            /// A frame's outer shadow is a `box-shadow` of its box, where Pen CLI 0.3.13 casts it
+            /// from the frame's content; not yet followed in React (leaf LB02SZ's report).
+            case frameBoxShadow = "a frame's shadow is a box-shadow of its box: Pen CLI 0.3.13 casts it from the frame's content, so a fill-less frame's box shadows and its children cast nothing"
             /// A group's inner shadow is not written, and generating it warns: a CSS limit.
             case groupInnerShadow = "React writes no inner shadow on a group, and warns: CSS has no filter for one"
             /// React writes no inner shadow on text, and generating it warns: a CSS limit, kept
@@ -70,6 +73,10 @@
             // `group-child-shadow` (1.124) now gate at CG + 1.0. Before, with no shadow at all:
             // translucent 10.713, stroke-path 5.976, inner 6.739, nested 9.356 and frame-child
             // 4.399, which the drop-shadow of the frame's overhanging child makes worse.
+            // Measured 2026-10-28 (leaf LB02SZ, `swift test --quiet`) against `pen` CLI 0.3.13's
+            // references, which cast a frame's shadow from its content; the CG renderer follows.
+            "render-shadows-outer-frame-children": (20.559, .frameBoxShadow),
+            "render-sizeless-frames-paint": (2.355, .frameBoxShadow),
             "render-group-shadows-group-translucent": (7.153, .groupDropShadow),
             "render-group-shadows-group-stroke-path": (1.614, .groupDropShadow),
             "render-group-shadows-group-inner": (6.739, .groupInnerShadow),

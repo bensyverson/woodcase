@@ -1,0 +1,84 @@
+#!/usr/bin/env python3
+"""gen-content-shadows-fixture — write Tests/WoodcaseTests/Fixtures/render-content-shadows.pen:
+one 200x200 white board per case of a frame casting a black outer shadow (offset 10,14, blur 4)
+— so each board shows what Pen CLI 0.3.13 casts a frame's outer shadow from: its box, or its
+rendered content (its own fill and stroke, and its children), and how clipping, disabled or
+transparent fills, translucent children, a child's own shadow and a line child change that (leaf LB02SZ).
+
+Cases: a filled frame whose child overhangs it, unclipped and clipped; a fill-less clipped frame
+whose child overhangs it; a fill-less, child-less frame with only a stroke; one with nothing at
+all; a frame whose only fill is disabled, and one whose fill is fully transparent; translucent
+children (a quarter-alpha fill, and a child at half opacity); a child with its own shadow; a line
+child; a fill-less frame inside a fill-less frame; a frame with a quarter-alpha fill; and a
+rectangle with a fully transparent fill, and one with only a stroke.
+
+Usage:
+    scripts/gen-content-shadows-fixture [<out.pen>]     (default: the fixture's path)
+    scripts/pen-oracle Tests/WoodcaseTests/Fixtures/render-content-shadows.pen --scale 1,2
+
+The second command (sandbox disabled, `pen` logged in, CLI 0.3.13 or later) writes Pen's layout,
+its 1x and 2x exports and its re-save beside the fixture. Standard library only; runs sandboxed.
+"""
+
+import json, sys
+
+SHADOW = {"type": "shadow", "shadowType": "outer", "color": "#000000FF", "offset": {"x": 10, "y": 14}, "blur": 4}
+ORANGE, BLUE, GRAY = "#CC6600", "#2288FF", "#DDDDDD"
+
+nodes = []
+
+
+def board(name, holder):
+    k = len(nodes)
+    nodes.append({"type": "frame", "id": f"cs{k:02d}", "name": name, "x": k % 4 * 240, "y": k // 4 * 240,
+                  "width": 200, "height": 200, "layout": "none", "clip": True, "fill": "#FFFFFF",
+                  "children": [holder]})
+
+
+def frame(i, children=(), width=100, height=100, effect=SHADOW, **keys):
+    d = {"type": "frame", "id": i, "x": 30, "y": 30, "width": width, "height": height, "layout": "none"}
+    if effect:
+        d["effect"] = effect
+    d.update(keys)
+    if children:
+        d["children"] = list(children)
+    return d
+
+
+def rect(i, x, y, w, h, fill, **keys):
+    d = {"type": "rectangle", "id": i, "x": x, "y": y, "width": w, "height": h, "fill": fill}
+    d.update(keys)
+    return d
+
+
+def pair(prefix):
+    """A square inside the holder and a circle that overhangs its 100x100 box."""
+    return [rect(prefix + "a", 10, 10, 40, 40, ORANGE),
+            {"type": "ellipse", "id": prefix + "b", "x": 70, "y": 70, "width": 50, "height": 50, "fill": BLUE}]
+
+
+board("filled-overhang", frame("Fov", pair("Fov"), fill=GRAY))
+board("filled-clipped", frame("Fcl", pair("Fcl"), fill=GRAY, clip=True))
+board("fillless-clipped", frame("Ncl", pair("Ncl"), clip=True))
+board("stroke-only", frame("Str", stroke="#333333", strokeWidth=8))
+board("empty", frame("Emp"))
+board("fill-disabled", frame("Fdi", pair("Fdi"), fill={"type": "color", "color": GRAY, "enabled": False}))
+board("fill-transparent", frame("Ftr", pair("Ftr"), fill="#DDDDDD00"))
+board("translucent-children", frame("Tch", [rect("Tcha", 10, 10, 40, 40, "#CC660040"),
+                                           rect("Tchb", 60, 60, 40, 40, ORANGE, opacity=0.5)]))
+child_shadow = {"type": "shadow", "shadowType": "outer", "color": "#FF0000FF", "offset": {"x": -12, "y": -12}, "blur": 0}
+board("child-shadow", frame("Csh", [rect("Csha", 40, 40, 40, 40, ORANGE, effect=child_shadow)]))
+board("line-child", frame("Lin", [rect("Lina", 10, 10, 40, 40, ORANGE),
+                                 {"type": "line", "id": "Linb", "x": 10, "y": 80, "width": 100, "height": 0,
+                                  "stroke": "#008888", "strokeWidth": 6}]))
+board("nested-frames", frame("Nst", [frame("Nsti", [rect("Nsta", 30, 30, 50, 50, ORANGE)], width=60, height=60,
+                                           effect=None, clip=True, x=10, y=10)]))
+board("frame-translucent-fill", frame("Fql", pair("Fql"), fill="#DDDDDD40"))
+board("rect-transparent-fill", rect("Rtr", 30, 30, 100, 100, "#DDDDDD00", effect=SHADOW))
+board("rect-stroke-only", {"type": "rectangle", "id": "Rso", "x": 30, "y": 30, "width": 100, "height": 100,
+                           "stroke": "#333333", "strokeWidth": 8, "effect": SHADOW})
+
+out = sys.argv[1] if len(sys.argv) > 1 else "Tests/WoodcaseTests/Fixtures/render-content-shadows.pen"
+with open(out, "w") as f:
+    json.dump({"version": "2.21", "children": nodes}, f, indent=2)
+    f.write("\n")

@@ -3,14 +3,16 @@ import Foundation
 import Testing
 @testable import Woodcase
 
-/// Pins a group's outer and inner shadows against Pen 1.2.14's own exports.
+/// Pins a group's outer and inner shadows against Pen's own exports.
 ///
 /// `render-group-shadows.pen` has one artboard per case. Pen casts a group's shadow from the
-/// combined opaque outline of its descendants, reached through groups only: a translucent
-/// child casts at full strength, a frame child casts its box and its own children nothing, a
-/// line casts nothing, and a child's own shadow feeds nothing. A group's inner shadow falls
-/// inside that same outline, over the children. The references are Pen's PNG exports at 1x and
-/// 2x (`scripts/pen-oracle Tests/WoodcaseTests/Fixtures/render-group-shadows.pen --scale 1,2`).
+/// combined opaque outline of its descendants: a translucent child casts at full strength, a
+/// frame child casts its box and its own children with it, a line casts its stroke, and a
+/// child's own shadow feeds nothing. A group's inner shadow falls inside that same outline,
+/// over the children. The references are Pen's PNG exports at 1x and 2x (`scripts/pen-oracle
+/// Tests/WoodcaseTests/Fixtures/render-group-shadows.pen --scale 1,2`, `pen` CLI 0.3.13,
+/// 2026-10-28, leaf LB02SZ). Pen 1.2.14–1.2.16 cast a frame child's box alone and nothing
+/// of a line.
 struct PenGroupShadowSnapshotTests {
     private static let fixture = "render-group-shadows"
     private static let fixturesDir = URL(fileURLWithPath: #filePath)
@@ -22,15 +24,17 @@ struct PenGroupShadowSnapshotTests {
     /// Each limit is `max(measured × 1.5, measured + 0.25)` over the worse of the two scales,
     /// rounded up to a hundredth; the measured figure sits beside it
     /// (`swift test --filter PenGroupShadowSnapshotTests`, 2026-09-26); "was" is the figure before
-    /// the renderer cast a group's shadows from its silhouette.
+    /// the renderer cast a group's shadows from its silhouette. `group-stroke-path` and
+    /// `group-frame-child` were measured again on 2026-10-28 against CLI 0.3.13's references,
+    /// "then" giving the figure before the line and the frame's child cast (leaf LB02SZ).
     private static let artboards: [(name: String, limit: Double)] = [
         ("group-outer", 0.47), // measured 0.212 (was 0.212)
         ("group-translucent", 0.69), // measured 0.437 (was 6.405)
-        ("group-stroke-path", 0.43), // measured 0.173 (was 3.480)
+        ("group-stroke-path", 0.59), // measured 0.333 (then 1.763; was 3.480)
         ("group-inner", 0.53), // measured 0.275 (was 6.739: no group inner shadow)
         ("group-child-shadow", 0.53), // measured 0.276 (was 0.943)
         ("group-nested", 0.56), // measured 0.300 (was 0.300)
-        ("group-frame-child", 0.36), // measured 0.106 (was 6.507)
+        ("group-frame-child", 0.51), // measured 0.257 (then 6.512; was 6.507)
     ]
 
     @Test("The case list names every artboard of the fixture")

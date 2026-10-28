@@ -101,8 +101,10 @@ struct PenShadowFidelityTests {
         #expect(outside == PixelGrid.RGBA(r: 0, g: 0, b: 0, a: 255), "the shadow is full strength; got \(outside)")
     }
 
-    @Test("A frame casts the shadow of its box, not of its children")
-    func frameCastsItsBox() throws {
+    /// Pen CLI 0.3.13 casts a frame's shadow from its content; Pen 1.2.16 (CLI 0.3.11) cast
+    /// it from the frame's box, which this test pinned until leaf LB02SZ.
+    @Test("A frame with no fill casts its children's shadow, not its box's")
+    func fillLessFrameCastsItsChildren() throws {
         let chip = PenNode(
             id: "chip", common: PenNodeCommon(),
             kind: .rectangle(PenNode.RectangleData(fills: .single(.shorthand("#FF8800"))))
@@ -116,7 +118,7 @@ struct PenShadowFidelityTests {
             "holder": PenRect(x: 20, y: 20, width: 40, height: 40),
             "chip": PenRect(x: 30, y: 30, width: 30, height: 30),
         ])
-        #expect(pixels.pixel(35, 65).a == 255 && pixels.pixel(35, 65).r == 0, "box shadow: \(pixels.pixel(35, 65))")
-        #expect(pixels.pixel(85, 85).a == 0, "the child casts nothing: \(pixels.pixel(85, 85))")
+        #expect(pixels.pixel(35, 65).a == 0, "the box casts nothing: \(pixels.pixel(35, 65))")
+        #expect(pixels.pixel(85, 85).a == 255 && pixels.pixel(85, 85).r == 0, "child shadow: \(pixels.pixel(85, 85))")
     }
 }

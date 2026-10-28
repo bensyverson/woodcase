@@ -14,7 +14,9 @@ import Testing
 /// the point, and gives it no room in a flex flow.
 ///
 /// `render-sizeless-frames.pen` is a Pen-oracle reference (`scripts/pen-oracle <fixture>`,
-/// 2x), written by `scripts/gen-sizeless-frames-fixture` (leaf Jg0BOv).
+/// 2x), written by `scripts/gen-sizeless-frames-fixture` (leaf Jg0BOv); its exports were
+/// regenerated under `pen` CLI 0.3.13 on 2026-10-28 (leaf LB02SZ), where `paint`'s shadow is
+/// cast by the frame's stroke and its child, not the 0×0 box alone.
 struct PenSizelessFrameTests {
     private static let fixturesDir = URL(fileURLWithPath: #filePath)
         .deletingLastPathComponent()
@@ -48,7 +50,8 @@ struct PenSizelessFrameTests {
     /// union: `plain` 1.39 and `explicit` 2.03 (its fill drawn across them), `clip` 5.92
     /// (children drawn), `flex` 1.28 and `fitflex` 0.73 (the sibling and the parent moved),
     /// and `paint` 6.29 — 0.51 once the frame was 0×0, since Core Graphics stroked nothing
-    /// along a path of no length, and so cast no shadow from the stroke either.
+    /// along a path of no length, and so cast no shadow from the stroke either. Against CLI
+    /// 0.3.13's `paint` (2026-10-28, leaf LB02SZ): 0.037, and 2.345 while the child cast nothing.
     private static let maeCeilings: [(board: String, ceiling: Double)] = [
         ("plain", 0.25), ("clip", 0.25), ("paint", 0.26), ("flex", 0.25), ("fitflex", 0.25), ("explicit", 0.25),
     ]

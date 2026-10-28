@@ -10,9 +10,10 @@ import Testing
 /// outside, centered and inside, rounded, translucent, per side, on a frame with a child, an
 /// ellipse, a polygon, a path and two lines — and an inside stroke over an inner shadow.
 /// Pen casts the shadow from the silhouette the stroke band grows, knocks it out under the
-/// band, and casts nothing from a line. The references are Pen's 2x exports
+/// band, and casts a line's from its stroke. The references are Pen's 2x exports
 /// (`scripts/pen-oracle Tests/WoodcaseTests/Fixtures/render-stroke-shadows.pen --scale 2`,
-/// `pen` CLI, 2026-09-28).
+/// `pen` CLI 0.3.13, 2026-10-28, leaf LB02SZ; the earlier ones, from 2026-09-28, cast nothing
+/// from a line).
 struct PenStrokeShadowSnapshotTests {
     private static let fixture = "render-stroke-shadows"
     private static let fixturesDir = URL(fileURLWithPath: #filePath)
@@ -25,7 +26,10 @@ struct PenStrokeShadowSnapshotTests {
     /// measured figure beside it (`swift test --filter PenStrokeShadowSnapshotTests`,
     /// 2026-09-28). The two lines were far from Pen until leaf B7M4na (2026-09-28):
     /// `PenShadowSilhouette` cast a line's shadow from its stroke, where Pen casts none; it
-    /// now casts nothing from a line, matching the group silhouette rule.
+    /// then cast nothing from a line. Pen CLI 0.3.13 casts a line's shadow from its stroke
+    /// again, and so does the renderer since leaf LB02SZ: against the regenerated references
+    /// (2026-10-28) `line-diagonal` measures 0.129 and `line-flat` 0.086, where casting nothing
+    /// measured 2.629 and 4.545.
     private static let artboards: [(name: String, limit: Double)] = [
         ("rect-outer", 0.36), // measured 0.109
         ("rect-center", 0.35), // measured 0.099
@@ -38,8 +42,8 @@ struct PenStrokeShadowSnapshotTests {
         ("ellipse-outer", 0.43), // measured 0.179
         ("polygon-outer", 0.39), // measured 0.140
         ("path-outer", 0.35), // measured 0.099
-        ("line-diagonal", 0.26), // measured 0.006, was 3.78 (measured 2.520) before B7M4na fixed the line shadow
-        ("line-flat", 0.25), // measured 0.000, was 6.86 (measured 4.569) before B7M4na fixed the line shadow
+        ("line-diagonal", 0.38), // measured 0.129 against CLI 0.3.13
+        ("line-flat", 0.34), // measured 0.086 against CLI 0.3.13
         ("inner-under-inner-stroke", 0.25), // measured 0.000
     ]
 

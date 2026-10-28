@@ -23,25 +23,39 @@ extension PenRenderer {
     /// - Parameters:
     ///   - node: The node.
     ///   - own: Its draw rect, shadows and fill override.
-    ///   - groupSilhouette: Draws a group's silhouette, which casts its shadows; ignored for
-    ///     any other node.
+    ///   - descendants: Draws a frame's or a group's descendants' silhouettes, which cast its
+    ///     outer shadows with its own paint (``drawDescendantSilhouettes(of:clip:layoutRects:overrides:imageProvider:in:)``);
+    ///     a no-op for any other node.
+    ///   - descendantBounds: Contains everything `descendants` draws, in the node's own space,
+    ///     or `nil` when it draws nothing.
     ///   - imageProvider: Resolves image paints.
     ///   - context: The context to draw into.
     static func renderOwnContent(
         _ node: PenNode,
         _ own: OwnContent,
-        groupSilhouette: (CGContext) -> Void,
+        descendants: (CGContext) -> Void,
+        descendantBounds: CGRect?,
         imageProvider: ImageProvider,
         in context: CGContext
     ) {
         let rect = own.drawRect
         if !own.outerShadows.isEmpty {
             let reach = outerStrokeReach(of: node) + max(0, own.outerShadows.map(\.spread).max() ?? 0)
-            let bounds = rect.cgRect.insetBy(dx: -reach, dy: -reach)
+            let ownBounds = rect.cgRect.insetBy(dx: -reach, dy: -reach)
+            let bounds = descendantBounds.map { ownBounds.union($0) } ?? ownBounds
             PenEffectRenderer.renderOuterShadows(own.outerShadows, bounds: bounds, in: context) { target, spread in
-                PenShadowSilhouette.draw(
-                    node, rect: rect, spread: spread, in: target, children: groupSilhouette, imageProvider: imageProvider
-                )
+                func ink(_ inkTarget: CGContext) {
+                    PenShadowSilhouette.draw(
+                        node, rect: rect, spread: spread, in: inkTarget, children: descendants,
+                        imageProvider: imageProvider
+                    )
+                }
+                // Many pieces of ink cast one shadow from their union only as one image.
+                if descendantBounds == nil {
+                    ink(target)
+                } else {
+                    PenSilhouetteMask.draw(within: bounds, in: target, ink: ink)
+                }
             }
         }
 

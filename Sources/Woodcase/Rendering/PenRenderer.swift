@@ -232,8 +232,8 @@ public enum PenRenderer {
             case let .groupInnerShadows(ref, shadows, drawRect):
                 guard case let .group(data) = ref.node.kind, let children = data.children else { continue }
                 renderGroupInnerShadows(shadows, bounds: drawRect.cgRect, in: context) { target in
-                    drawGroupSilhouette(
-                        of: children, layoutRects: layoutRects, overrides: overrides,
+                    drawDescendantSilhouettes(
+                        of: children, clip: nil, layoutRects: layoutRects, overrides: overrides,
                         imageProvider: imageProvider, in: target
                     )
                 }
@@ -327,12 +327,17 @@ public enum PenRenderer {
             nil
         }
 
-        /// A group's shadows are cast by its descendants' combined outline.
-        func castGroupSilhouette(_ target: CGContext) {
-            guard case .group = ref.node.kind, let children else { return }
-            drawGroupSilhouette(
-                of: children, layoutRects: layoutRects, overrides: overrides, imageProvider: imageProvider, in: target
+        // A frame's or a group's shadows are cast by its descendants with its own paint.
+        let clip = silhouetteClip(of: ref.node, drawRect: drawRect)
+        func castDescendants(_ target: CGContext) {
+            guard let children, !children.isEmpty else { return }
+            drawDescendantSilhouettes(
+                of: children, clip: clip, layoutRects: layoutRects, overrides: overrides,
+                imageProvider: imageProvider, in: target
             )
+        }
+        let descendantBounds = outerShadows.isEmpty ? nil : children.flatMap {
+            descendantSilhouetteBounds(of: $0, clipsTo: clip.map { _ in drawRect.cgRect }, layoutRects: layoutRects)
         }
         let own = OwnContent(
             drawRect: drawRect, outerShadows: outerShadows, innerShadows: innerShadows, overrideFills: overrideFills
@@ -347,7 +352,8 @@ public enum PenRenderer {
             }.max() ?? 0
             PenEffectRenderer.renderBlur(blur, rect: drawRect, overflow: shadowReach, in: context) { offscreenCtx in
                 renderOwnContent(
-                    ref.node, own, groupSilhouette: castGroupSilhouette, imageProvider: imageProvider, in: offscreenCtx
+                    ref.node, own, descendants: castDescendants, descendantBounds: descendantBounds,
+                    imageProvider: imageProvider, in: offscreenCtx
                 )
                 renderChildren(
                     ref, drawRect: drawRect, children: children,
@@ -355,7 +361,7 @@ public enum PenRenderer {
                     overrides: overrides, imageProvider: imageProvider, postIt: postIt
                 )
                 if case .group = ref.node.kind {
-                    renderGroupInnerShadows(innerShadows.map(\.shadow), bounds: drawRect.cgRect, in: offscreenCtx, silhouette: castGroupSilhouette)
+                    renderGroupInnerShadows(innerShadows.map(\.shadow), bounds: drawRect.cgRect, in: offscreenCtx, silhouette: castDescendants)
                 }
             }
             // Cleanup: close the group layer + restore GState
@@ -369,7 +375,10 @@ public enum PenRenderer {
         // Non-blur path: own content now, before the frame's clip, then children and
         // cleanup through the stack. Pushed in reverse execution order (the stack is LIFO):
         // restoreGState — pushed first, executed last.
-        renderOwnContent(ref.node, own, groupSilhouette: castGroupSilhouette, imageProvider: imageProvider, in: context)
+        renderOwnContent(
+            ref.node, own, descendants: castDescendants, descendantBounds: descendantBounds,
+            imageProvider: imageProvider, in: context
+        )
         stack.append(.restoreGState)
         if let composite {
             stack.append(.endComposite(composite))

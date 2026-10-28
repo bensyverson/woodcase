@@ -118,6 +118,11 @@ These degrade, on purpose:
 > linear burn and add.
 - **A group's silhouette** is built from its descendants' outlines, as Pen casts it; a
   descendant's own clip does not cut it.
+- **A frame's shadow is cast by its own paint alone.** Each shape casts what its fill and
+  stroke paint (``PenShadowSilhouette/path(for:rect:)``, shared with the CG renderer), but a
+  frame's children and a line still cast nothing, as Pen 1.2.16 cast them; `pen` CLI 0.3.13
+  and the CG renderer cast both (<doc:PenRendering>, *Shadows*). `render-shadows` and
+  `render-group-shadows` measure 1.08 and 1.16 against CG for it (leaf `LB02SZ`).
 
 ## How Close It Is
 

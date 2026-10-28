@@ -43,6 +43,16 @@
             // height the board offers, and generating it warns (leaf ozlazY, 2026-09-28, same
             // toolchain); every other `render-turned-fill` board gates at CG + 1.0.
             "render-turned-fill-row-cross-fit-30": (23.04, "turned fill whose box only the layout knows: a flexible frame"),
+            // `pen` CLI 0.3.13 casts an outer shadow from the node's content — a frame's children
+            // and a line's stroke included — and its references were regenerated with it; the CG
+            // renderer follows, the emitter still casts 1.2.16's silhouette (a frame's box, nothing
+            // from a line). Recorded 2026-10-28 (leaf LB02SZ, `swift test --quiet`), same toolchain.
+            "render-shadows-outer-frame-children": (20.60, "a frame's shadow is still cast by its box, not its content"),
+            "render-group-shadows-group-frame-child": (6.46, "a group's frame child still casts its box alone"),
+            "render-group-shadows-group-stroke-path": (1.64, "a line in a group still casts nothing"),
+            "render-sizeless-frames-paint": (2.34, "a frame's children still cast nothing into its shadow"),
+            "render-stroke-shadows-line-diagonal": (2.63, "a line still casts no shadow"),
+            "render-stroke-shadows-line-flat": (4.54, "a line still casts no shadow"),
         ]
 
         /// Boards held *below* CG + 1.0, keyed like ``baselines``, with the MAE each
@@ -61,7 +71,6 @@
             // Outer shadows cast by the stroke band as well as the shape (leaf vPZ0ia): before it,
             // sizeless-frames-paint measured 0.329, outer-and-inner 0.600, and each stroke-shadows
             // board with a band outside its shape 4.4–14.1. Recorded 2026-09-28, same toolchain.
-            "render-sizeless-frames-paint": (0.01, "tighter than CG + 1.0; CG scores 0.008"),
             "render-shadows-outer-and-inner": (0.19, "tighter than CG + 1.0; CG scores 0.234"),
             "render-stroke-shadows-rect-outer": (0.09, "tighter than CG + 1.0; CG scores 0.109"),
             "render-stroke-shadows-rect-center": (0.08, "tighter than CG + 1.0; CG scores 0.099"),
@@ -75,11 +84,8 @@
             "render-stroke-shadows-polygon-outer": (0.12, "tighter than CG + 1.0; CG scores 0.140"),
             "render-stroke-shadows-path-outer": (0.10, "tighter than CG + 1.0; CG scores 0.099"),
             "render-stroke-shadows-inner-under-inner-stroke": (0.00, "tighter than CG + 1.0; CG scores 0.000"),
-            // Pen, SwiftUI and CG all cast nothing from a line since leaf B7M4na fixed
-            // PenShadowSilhouette (2026-09-28); kept as a ceiling, not folded into CG + 1.0,
-            // so a line shadow regressing in either renderer is still caught on its own.
-            "render-stroke-shadows-line-diagonal": (0.01, "Pen, SwiftUI and CG cast nothing from a line; CG scores 0.006"),
-            "render-stroke-shadows-line-flat": (0.00, "Pen, SwiftUI and CG cast nothing from a line; CG scores 0.000"),
+            // The two line boards and `render-sizeless-frames-paint` were ceilings here until
+            // `pen` CLI 0.3.13's references (leaf LB02SZ): they are ``baselines`` now.
         ]
 
         /// How far a baselined or ceilinged board may drift before it fails.
