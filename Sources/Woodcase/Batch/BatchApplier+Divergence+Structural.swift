@@ -104,7 +104,8 @@ extension BatchApplier {
     /// The divergence a delete that detached instances implies.
     ///
     /// - Parameters:
-    ///   - instanceIDs: The instances the delete detaches first.
+    ///   - instanceIDs: The instances the delete detaches first: stored ids, and the
+    ///     addresses of those slot fills write.
     ///   - componentID: The component being removed.
     ///   - document: The document, for the names.
     /// - Returns: The divergence, or `nil` when the delete stranded nothing.
@@ -115,7 +116,11 @@ extension BatchApplier {
     ) -> WriteDivergence? {
         guard !instanceIDs.isEmpty else { return nil }
         let name = document.node(id: componentID)?.common.name ?? componentID
-        let paths = instanceIDs.map { document.namePath(of: $0) }
+        // An instance a slot fill writes is named by its address (`Card1/Btn2`), which
+        // resolves where a stored id's plain lookup would not.
+        let paths = instanceIDs.map { id in
+            (try? document.resolve(id)).map { document.namePath(of: $0) } ?? document.namePath(of: id)
+        }
         let count = instanceIDs.count
         let subject = count == 1
             ? "1 instance of it into a standalone copy"

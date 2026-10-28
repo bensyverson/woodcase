@@ -51,8 +51,9 @@ public extension EditableDocument {
         // strands instances it is not allowed to detach.
         if case let .deleteNode(deleteOp) = operation {
             let plans = try detachPlans(deleting: deleteOp)
-            if !plans.isEmpty {
-                return try applyLocalDetachingDelete(deleteOp, plans: plans)
+            let fills = fillDetaches(deleting: deleteOp, besides: plans)
+            if !plans.isEmpty || !fills.isEmpty {
+                return try applyLocalDetachingDelete(deleteOp, fills: fills, plans: plans)
             }
         }
 
@@ -173,15 +174,21 @@ public extension EditableDocument {
 
     /// Handles a detaching delete in CRDT mode by decomposing it into primitives.
     ///
-    /// Each stranded instance goes through `applyLocalDetachRef`, the same planned path
+    /// Each slot fill that writes a stranded instance is rewritten first, as an ordinary
+    /// override (``fillDetaches(deleting:besides:)``). Each stranded stored instance
+    /// then goes through `applyLocalDetachRef`, the same planned path
     /// a plain detach uses, so both peers see the same ids — the ones
     /// ``prepareInverse(of:)`` named. The component then goes through an ordinary
     /// delete, which by then strands nothing — and would throw if it somehow still did.
     private func applyLocalDetachingDelete(
         _ op: EditOperation.DeleteNode,
+        fills: [EditOperation.OverrideDescendant],
         plans: [PlannedDetach]
     ) throws -> [CRDTOperation] {
         var ops: [CRDTOperation] = []
+        for fill in fills {
+            try ops.append(contentsOf: applyLocal(.overrideDescendant(fill)))
+        }
         for plan in plans {
             try ops.append(contentsOf: applyLocalDetachRef(plan))
         }

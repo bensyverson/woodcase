@@ -58,9 +58,24 @@ extension EditableDocument {
     func detachPlans(for refIDs: [String], dropping: Set<String> = []) throws -> [PlannedDetach] {
         var taken = detachTakenIDs
         var plans: [PlannedDetach] = []
+        var fills = dropping.isEmpty ? nil : FillInstanceDetacher(
+            components: dropping,
+            registry: materializedComponents(),
+            cache: PenRefExpander.ResolverCache(loops: componentLoopIndex),
+            replica: crdtDocument?.peerID,
+            taken: idsInUse
+        )
         for refID in refIDs {
             try requireRef(refID)
-            let expanded = try Self.removingInstances(of: dropping, from: detachExpansion(of: refID, expanding: dropping))
+            var expanded = try Self.removingInstances(of: dropping, from: detachExpansion(of: refID, expanding: dropping))
+            if var detacher = fills {
+                // An instance of a dropped component in a fill one of the expansion's own
+                // instances writes would be stranded too: it is detached in that fill.
+                detacher.taken.formUnion(taken)
+                expanded = detacher.detachingFills(within: expanded)
+                taken.formUnion(detacher.taken)
+                fills = detacher
+            }
             let ids = SubtreeIDPlan.detaching(
                 expanded, refID: refID, replica: crdtDocument?.peerID, avoiding: taken
             )
@@ -93,8 +108,10 @@ extension EditableDocument {
     /// expands with the inner instance that closes the cycle left as a `ref` — the
     /// expansion stops where it would repeat — and once the delete removes that
     /// component such a ref would name nothing, so it is left out: what it drew is going
-    /// away with the delete. No ref survives that names a deleted component, and the
-    /// delete's inverse, which reads these same plans, puts the instance back as it was.
+    /// away with the delete. An instance of one written into a slot fill that a nested
+    /// instance carries is detached in that fill (``FillInstanceDetacher``). No ref
+    /// survives that names a deleted component, and the delete's inverse, which reads
+    /// these same plans, puts the instance back as it was.
     ///
     /// - Parameter op: The delete.
     /// - Returns: One plan per stranded instance; empty for a delete that strands none.
@@ -138,7 +155,7 @@ extension EditableDocument {
     ///   - expanded: The expansion.
     /// - Returns: The expansion, every `ref` naming one of `components` removed below its
     ///   root.
-    private static func removingInstances(of components: Set<String>, from expanded: PenNode) -> PenNode {
+    static func removingInstances(of components: Set<String>, from expanded: PenNode) -> PenNode {
         guard !components.isEmpty else { return expanded }
         return PenTreeRewrite.rewrite(expanded, context: true) { node, isRoot in
             if !isRoot, case let .ref(data) = node.kind, components.contains(data.ref) { return .drop }

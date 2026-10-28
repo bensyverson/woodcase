@@ -101,14 +101,18 @@ public extension ChangeKey {
             + paths.sorted().map { .property(node: nodeID, path: $0) }
     }
 
-    /// A delete's keys: every node of the subtree, its root's place, and each instance
-    /// a detaching delete will detach.
+    /// A delete's keys: every node of the subtree, its root's place, each instance a
+    /// detaching delete will detach, and each slot fill it rewrites to detach one there.
     private static func deleteKeys(_ op: EditOperation.DeleteNode, in document: EditableDocument) throws -> [ChangeKey] {
         _ = try document.requireNode(op.nodeID)
         var keys: [ChangeKey] = document.descendantIDs(of: op.nodeID).map { .existence(node: $0) }
         keys.append(.placement(node: op.nodeID))
         if op.instances == .detach {
-            keys += try detachKeys(document.detachPlans(deleting: op), in: document)
+            let plans = try document.detachPlans(deleting: op)
+            keys += detachKeys(plans, in: document)
+            for fill in document.fillDetaches(deleting: op, besides: plans) {
+                keys += try Self.keys(of: .overrideDescendant(fill), in: document)
+            }
         }
         return keys
     }

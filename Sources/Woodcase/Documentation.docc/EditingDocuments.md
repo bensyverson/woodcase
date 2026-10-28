@@ -935,6 +935,16 @@ keeps the instances nested in it, as a plain detach does — except an instance 
 component the delete removes, which would be stranded in turn and so is detached too, by
 the same rule.
 
+An instance written inside a slot fill — a `ref` in another instance's `descendants`
+`children`, at any depth of the fill, or in the fill an instance inside it writes — is no
+stored node, so ``EditableDocument/instanceIDs(ofComponent:)`` does not list it;
+``EditableDocument/instanceIDsInFills(ofComponent:)`` does, by its expanded address
+(`Card1/Btn2`, `Card1/Tag/Btn3`). It counts all the same: the refusal names it by that
+address, a replace that drops its component refuses for it, and under `.detach` it is
+detached where it stands — its fill rewritten, by one ordinary override of the `ref` that
+writes it, with the instance's expansion in its place — before the stored instances are
+detached. That override is what is recorded, replicated and undone.
+
 ```swift
 // Refused, naming the instances:
 try document.apply(.deleteNode(EditOperation.DeleteNode(nodeID: "Btn01")))

@@ -14,7 +14,8 @@ public struct DetachResult: Friendly {
 }
 
 public extension EditableDocument {
-    /// Deletes a node and its descendants, detaching any instances it would strand.
+    /// Deletes a node and its descendants, detaching any instances it would strand —
+    /// those a slot fill writes included, detached in place in their fill.
     ///
     /// This is what ``apply(_:)`` runs for ``EditOperation/deleteNode(_:)``. Use this
     /// overload when you need the ``DetachResult`` of each instance that was detached
@@ -36,8 +37,14 @@ public extension EditableDocument {
         // sit inside one. This is a mutating entry point of its own — ``apply(_:)``
         // delegates to it — so it carries the rule itself.
         return try invalidatingCaches(touching: allIDs) {
+            let plans = try detachPlans(deleting: op)
+            // The fills first: an instance a surviving fill writes is detached in place,
+            // by an override on the ref that writes it.
+            for fill in fillDetaches(deleting: op, besides: plans) {
+                try apply(.overrideDescendant(fill))
+            }
             var detached: [DetachResult] = []
-            for plan in try detachPlans(deleting: op) {
+            for plan in plans {
                 try detached.append(detachRef(plan))
             }
 

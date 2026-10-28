@@ -35,6 +35,8 @@ extension EditableDocument {
     ///
     /// Includes refs nested inside other components' definitions — those expand
     /// through the outer component, so they break just as loudly as a ref on a page.
+    /// An instance written inside a slot fill is no stored node and is not included;
+    /// ``instanceIDsInFills(ofComponent:)`` answers those.
     ///
     /// Public because it is a question worth asking on its own, not only a guard:
     /// `woodcase get --instances` is this call and nothing else, reordered.
@@ -55,13 +57,15 @@ extension EditableDocument {
     /// The instances a delete would strand, refusing when it is not allowed to.
     ///
     /// A delete strands an instance when the deleted subtree defines a reusable
-    /// component and a `ref` to that component survives outside the subtree. Under
-    /// ``EditOperation/DeleteNode/Instances/refuse`` that is an error; under
-    /// ``EditOperation/DeleteNode/Instances/detach`` the survivors come back so the
-    /// caller can detach them before the delete lands.
+    /// component and a `ref` to that component survives outside the subtree — a stored
+    /// one, or one a surviving instance writes into a slot fill. Under
+    /// ``EditOperation/DeleteNode/Instances/refuse`` that is an error naming both kinds,
+    /// a fill's by expanded address; under ``EditOperation/DeleteNode/Instances/detach``
+    /// the stored survivors come back so the caller can detach them before the delete
+    /// lands, and the fills are rewritten by ``fillDetaches(deleting:besides:)``.
     ///
     /// - Parameter op: The delete about to be applied.
-    /// - Returns: The instances to detach first, empty when the delete strands none.
+    /// - Returns: The stored instances to detach first, empty when the delete strands none.
     /// - Throws: ``EditingError/componentHasInstances(componentID:instanceIDs:)``.
     func instancesToDetach(for op: EditOperation.DeleteNode) throws -> [String] {
         guard nodes[op.nodeID] != nil else { return [] }
@@ -69,12 +73,12 @@ extension EditableDocument {
         var stranded: [String] = []
         for componentID in doomedComponents(in: doomed, target: op.nodeID) {
             let survivors = instanceIDs(ofComponent: componentID).filter { !doomed.contains($0) }
-            guard !survivors.isEmpty else { continue }
             guard op.instances == .detach else {
-                throw EditingError.componentHasInstances(
-                    componentID: componentID,
-                    instanceIDs: survivors
-                )
+                let stranded = survivors + instanceIDsInFills(of: [componentID], outside: doomed)
+                guard stranded.isEmpty else {
+                    throw EditingError.componentHasInstances(componentID: componentID, instanceIDs: stranded)
+                }
+                continue
             }
             stranded.append(contentsOf: survivors)
         }

@@ -119,7 +119,8 @@ extension EditableDocument {
     ///
     /// The same rule a delete carries, scoped to the descendants: the node itself
     /// survives — that is the whole point of a replace — so only a definition *inside*
-    /// the subtree can be stranded, and only by a `ref` that outlives it.
+    /// the subtree can be stranded, and only by a `ref` that outlives it, stored or
+    /// written into a slot fill (``instanceIDsInFills(ofComponent:)``).
     ///
     /// - Parameters:
     ///   - rootID: The node being replaced.
@@ -128,6 +129,7 @@ extension EditableDocument {
     private func requireNothingStranded(by rootID: String, freed: Set<String>) throws {
         for componentID in freed.subtracting([rootID]).filter({ componentRegistry[$0] != nil }).sorted() {
             let survivors = instanceIDs(ofComponent: componentID).filter { !freed.contains($0) }
+                + instanceIDsInFills(of: [componentID], outside: freed)
             guard survivors.isEmpty else {
                 throw EditingError.componentHasInstances(componentID: componentID, instanceIDs: survivors)
             }
@@ -157,6 +159,7 @@ extension EditableDocument {
         guard existing.common.reusable == true else { return }
         guard existing.kind.typeName != replacement.kind.typeName else { return }
         let instances = instanceIDs(ofComponent: existing.id).filter { !freed.contains($0) }
+            + instanceIDsInFills(of: [existing.id], outside: freed)
         guard instances.isEmpty else {
             throw EditingError.componentTypeChange(
                 componentID: existing.id,

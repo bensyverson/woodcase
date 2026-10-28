@@ -102,7 +102,8 @@ extension EditableDocument {
     ///
     /// - Returns: The insert that restores the deleted subtree, followed by a detach
     ///   inverse per instance the delete will detach, then the connector ends those
-    ///   detaches rewrite put back.
+    ///   detaches rewrite put back, then each slot fill the delete rewrites
+    ///   (``fillDetaches(deleting:besides:)``) as it stood.
     private func prepareInverseDelete(_ op: EditOperation.DeleteNode) throws -> [EditOperation] {
         let subtree = try materializeSubtree(rootID: op.nodeID)
         let parentID = parents[op.nodeID]
@@ -122,7 +123,11 @@ extension EditableDocument {
         for plan in plans.reversed() {
             try inverse.append(contentsOf: structuralDetachInverse(of: plan))
         }
-        return inverse + connectorRestores(for: plans)
+        // The fills were rewritten first, so they are put back last.
+        let fills = try fillDetaches(deleting: op, besides: plans).reversed().map { fill in
+            try prepareInverseOverrideDescendant(fill)
+        }
+        return inverse + connectorRestores(for: plans) + fills
     }
 
     /// Inverse of a replace: replace it right back with the subtree it had.

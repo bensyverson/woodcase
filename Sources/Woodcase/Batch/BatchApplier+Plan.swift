@@ -75,8 +75,9 @@ extension BatchApplier {
 
     /// An `rm` line: the public planner's ``EditPlanner/planDelete(nodeIDs:in:)``, so the
     /// connectors that end on the node go with it, after detaching the component's
-    /// instances when the line asks — less the connectors those detaches keep, whose ends
-    /// into an instance they rewrite to the detached copy.
+    /// instances when the line asks — those slot fills write included, in place — less
+    /// the connectors those detaches keep, whose ends into an instance they rewrite to
+    /// the detached copy.
     private static func planRemove(
         _ op: BatchOperation.RemoveOp,
         in document: EditableDocument,
@@ -86,15 +87,20 @@ extension BatchApplier {
         // Detaching first is what makes the delete safe; without it the document
         // refuses a component that still has instances, and says so.
         let detached = op.detach ? document.instanceIDs(ofComponent: id) : []
-        let detaches: [EditOperation] = detached.map {
+        // An instance a slot fill writes is no stored ref to detach: its fill is
+        // rewritten with the instance detached in place, before the stored detaches.
+        let removed = Set(document.descendantIDs(of: id))
+        let fills = op.detach
+            ? document.fillDetaches(of: [id], outside: removed, avoiding: document.idsInUse)
+            : []
+        let filled = op.detach ? document.instanceIDsInFills(of: [id], outside: removed) : []
+        let detaches: [EditOperation] = fills.map { .overrideDescendant($0) } + detached.map {
             .detachRef(EditOperation.DetachRef(refNodeID: $0))
         }
         var deletion = try EditPlanner.planDelete(nodeIDs: [id], in: document)
         // The deletion is planned before the detaches run, so it takes a connector into
         // an instance (`Chip/Label`) that the detach rewrites to the detached copy.
-        let kept = try document.connectorsKept(
-            deletion.connectorIDs, detaching: detached, removing: Set(document.descendantIDs(of: id))
-        )
+        let kept = try document.connectorsKept(deletion.connectorIDs, detaching: detached, removing: removed)
         if !kept.isEmpty {
             deletion.connectorIDs.removeAll(where: kept.contains)
             deletion.operations.removeAll { operation in
@@ -106,7 +112,7 @@ extension BatchApplier {
             expecting: expecting(op.rev, on: id),
             actedOnID: id,
             divergences: [
-                detachment(of: detached, removing: id, in: document),
+                detachment(of: detached + filled, removing: id, in: document),
                 connectorRemoval(of: deletion.connectorIDs, removing: id, in: document),
             ].compactMap(\.self)
         )
