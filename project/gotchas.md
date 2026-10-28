@@ -22,7 +22,7 @@ RapidPro depends on `../Woodcase` and `../PixelPeeper`, and Penumbra's Xcode pro
 
 ## 2026-09-26 — Under load, these suites fail and pass alone
 
-With several agents building (load 90–200) the same suites fail in full runs and pass re-run alone: `ReactPaintWebViewTests`, `WebViewTestHarnessTests` ("Icon font renders glyphs via file URL"), `WebViewRegressionTests` (StatCard), `ReactTransformStateWebViewTests`, `ViewerBrowserTests` scroll, WebKit `__READY__` timeouts and frame-load interruptions, the `tree`/`set` `PerformanceBudgets` at 3–5×, and `SwiftUIRenderBatchRunAsyncTests` (issue `1nZPfP`). Re-run the suite alone (`--filter` on its Swift type name) before believing a failure there; one that fails on a quiet machine is real. A test failing only under load can still be a real race — `ActivityCommandTests`' follower was one (leaf `55P02C`) — so a failure that recurs alone gets a leaf, not a shrug.
+With several agents building (load 90–200) the same suites fail in full runs and pass re-run alone: `ReactPaintWebViewTests`, `WebViewTestHarnessTests` ("Icon font renders glyphs via file URL"), `WebViewRegressionTests` (StatCard), `ReactTransformStateWebViewTests`, `ViewerBrowserTests` scroll, WebKit `__READY__` timeouts and frame-load interruptions, and the `tree`/`set` `PerformanceBudgets` at 3–5×. Re-run the suite alone (`--filter` on its Swift type name) before believing a failure there; one that fails on a quiet machine is real. A test failing only under load can still be a real race — `ActivityCommandTests`' follower was one (leaf `55P02C`), and `SwiftUIRenderBatchRunAsyncTests`' crash another (issue `1nZPfP`) — so a failure that recurs alone gets a leaf, not a shrug.
 
 ## 2026-10-11 — `nil` in an `AnyCodable` dictionary write can store `.null`
 
@@ -32,9 +32,9 @@ With several agents building (load 90–200) the same suites fail in full runs a
 
 **A `swift test --filter …` rerun rewrites `performance/mae-test.csv` with its few rows, so the commit hook's `mae-check` then lists every other id as MISSING and prints "MAE baseline updated".** The tracked baseline did not change on 2026-10-11 (`git status` clean), but the check covered 11–12 rows, not the suite. To gate a commit on MAE, run the full `swift test --quiet` last, after any filtered reruns of load flakes.
 
-`pen interactive --enable-preview --preview-output out.png` sometimes exits without writing the PNG. Two `execute({ input: 'Print(1)' })` calls before `save()` make it write reliably (w-shade, 2026-10-15); the cause is unknown. Not always: on 2026-10-20 (leaf TesTbK) the two calls still left no PNG for a 2.20 file, though `out.pen` saved. Check `out.pen` for a key-survival question; don't depend on the preview.
+**"MISSING: <id> … not in this test run" never means lost baseline rows.** The update merges, keeping every row the run didn't produce; it appears when WebView tests time out under load, after a filtered run, or on main after squashing a branch whose new boards main's `mae-test.csv` predates (checked 2026-10-15 and 2026-10-20). Confirm with `git show HEAD:performance/mae-baseline.csv | grep <id>`. Only a rise in a row the run did produce is a regression.
 
-The pre-commit hook's `scripts/mae-check` prints "MISSING: `svg-render-…` was in the baseline … but not in this test run" whenever the WebView SVG tests time out under load, then "MAE baseline updated". That is harmless: the update merges, keeping every row the run didn't produce (checked 2026-10-15, all 21 svg-render rows kept). Only a rise in a row the run did produce is a regression.
+`pen interactive --enable-preview --preview-output out.png` sometimes exits without writing the PNG. Two `execute({ input: 'Print(1)' })` calls before `save()` make it write reliably (w-shade, 2026-10-15); the cause is unknown. Not always: on 2026-10-20 (leaf TesTbK) the two calls still left no PNG for a 2.20 file, though `out.pen` saved. Check `out.pen` for a key-survival question; don't depend on the preview.
 
 ## 2026-10-17 — swiftformat turns `(consume x).method()` into `consume x.method()`
 
@@ -43,10 +43,6 @@ The pre-commit hook's `scripts/mae-check` prints "MISSING: `svg-render-…` was 
 ## 2026-10-20 — Apple's raw-deflate stream never says "error", and skips two checks
 
 **`compression_stream_process` with `COMPRESSION_ZLIB` met every malformed stream we built (block type 3, over-subscribed or incomplete codes, a distance before the output, reserved symbols) by returning `COMPRESSION_STATUS_OK` and producing nothing more — the same as a stream cut short — never `COMPRESSION_STATUS_ERROR`** (macOS 27, leaf Uip9cb). A loop that waits for `ERROR` would never see one; `DeflateDecoder` treats "OK, step not filled, no END" as malformed. It also returns a stored block whose length complement is wrong, and consumes bytes after the final block without complaint, so whatever decodes the inflated bytes (the Kiwi schema, for Figma) is the real check. See DocC `FigmaClipboard.md`.
-
-## 2026-10-20 — The commit hook's "MISSING … not in this test run" doesn't mean lost baseline rows
-
-**`scripts/mae-check` compares `performance/mae-baseline.csv` with `performance/mae-test.csv`, the file the WebView tests write in the checkout where they last ran.** On main, after squashing an agent's branch that added WebView boards, the hook prints `MISSING: <id> was in the baseline … but not in this test run` for each new board, because main's `mae-test.csv` predates them, and then says "MAE baseline updated" (session 41, Knr8GN). The committed baseline kept every row; check with `git show HEAD:performance/mae-baseline.csv | grep <id>` rather than assuming they were dropped.
 
 ## 2026-10-22 — `swift test --scratch-path` fails every binary-driven command test
 

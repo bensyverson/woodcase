@@ -280,7 +280,6 @@
         ) async throws -> ProcessOutcome {
             FileManager.default.createFile(atPath: log.path, contents: nil)
             let handle = try FileHandle(forWritingTo: log)
-            defer { try? handle.close() }
             let process = Process()
             process.executableURL = URL(fileURLWithPath: arguments[0])
             process.arguments = Array(arguments.dropFirst())
@@ -292,11 +291,18 @@
             let command = commandSummary(arguments)
             do {
                 let status = try await BoundedWait.value(command, within: deadline) {
-                    try await withTaskCancellationHandler {
+                    // The job, not runAsync, closes the handle: a lost race abandons the job,
+                    // which may not start until after runAsync has returned.
+                    defer { try? handle.close() }
+                    try Task.checkCancellation()
+                    return try await withTaskCancellationHandler {
                         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Int32, Error>) in
                             process.terminationHandler = { continuation.resume(returning: $0.terminationStatus) }
                             do {
                                 try process.run()
+                                // A cancel between the check above and the launch found no
+                                // process to terminate.
+                                if Task.isCancelled { process.terminate() }
                             } catch {
                                 process.terminationHandler = nil
                                 continuation.resume(throwing: error)

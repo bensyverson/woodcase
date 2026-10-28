@@ -26,9 +26,9 @@
 
         @Test("A process that exits on its own reports its status and output")
         func exitsNormally() async throws {
-            let outcome = try await SwiftUIRenderBatch.runAsync(
-                ["/bin/echo", "hello"], log: freshLog(), deadline: .seconds(30)
-            )
+            // The default deadline: this pins the exit path, and a short one lets a loaded
+            // machine's scheduling decide the outcome instead.
+            let outcome = try await SwiftUIRenderBatch.runAsync(["/bin/echo", "hello"], log: freshLog())
             guard case let .exited(status, output, _) = outcome else {
                 Issue.record("expected .exited, got \(outcome)")
                 return
@@ -65,6 +65,22 @@
             #expect(outcome.output.contains("killed after 1 s"))
             #expect(outcome.output.lowercased().contains("loaded"))
             #expect(outcome.output.contains("SwiftUIRenderTests"))
+        }
+
+        @Test("A run canceled before its process starts never starts it")
+        func canceledBeforeStart() async throws {
+            // The job a lost race abandons can still be waiting for a thread after
+            // runAsync returns; it must not launch then, with the log handle closed
+            // under it (an uncaught NSFileHandleOperationException under load).
+            let marker = TestOutputDirectory.url.appendingPathComponent("runAsync-\(UUID().uuidString.prefix(8)).marker")
+            let log = freshLog()
+            let run = Task {
+                withUnsafeCurrentTask { $0?.cancel() }
+                return try await SwiftUIRenderBatch.runAsync(["/usr/bin/touch", marker.path], log: log)
+            }
+            await #expect(throws: CancellationError.self) { try await run.value }
+            try await Task.sleep(for: .seconds(1))
+            #expect(!FileManager.default.fileExists(atPath: marker.path))
         }
 
         @Test("A killed child's message survives even when its log truly has nothing in it")

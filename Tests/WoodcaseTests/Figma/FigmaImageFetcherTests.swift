@@ -18,6 +18,7 @@ struct FigmaImageFetcherTests {
         let delay: Duration
         private(set) var inFlight = 0
         private(set) var peak = 0
+        private(set) var canceled = 0
 
         init(_ table: [String: Data], delay: Duration = .zero) {
             self.table = Dictionary(uniqueKeysWithValues: table.map { (URL(string: $0.key)!, $0.value) })
@@ -28,7 +29,14 @@ struct FigmaImageFetcherTests {
             inFlight += 1
             peak = max(peak, inFlight)
             defer { inFlight -= 1 }
-            if delay > .zero { try await Task.sleep(for: delay) }
+            if delay > .zero {
+                do {
+                    try await Task.sleep(for: delay)
+                } catch {
+                    canceled += 1
+                    throw error
+                }
+            }
             guard let data = table[url] else { throw RemoteFetchError.httpError(statusCode: 404) }
             return data
         }
@@ -84,14 +92,16 @@ struct FigmaImageFetcherTests {
         #expect(await table.peak == 0)
     }
 
-    @Test("A fetch that outlasts the timeout fails as timed out, promptly")
+    @Test("A fetch that outlasts the timeout fails as timed out, and is canceled", .hangGuard)
     func timeout() async {
-        let slow = TableFetcher(["https://example.test/a": Self.png], delay: .seconds(30))
+        // No wall-clock bound: a loaded machine can delay the canceled download's wake-up
+        // for seconds. A download that is never canceled would hold the fetch for the
+        // hour, so the hang guard is what catches it.
+        let slow = TableFetcher(["https://example.test/a": Self.png], delay: .seconds(3600))
         let fetcher = FigmaImageFetcher(fetcher: slow, timeout: .milliseconds(50))
-        let start = ContinuousClock.now
         let results = await fetcher.fetch(["ab": "https://example.test/a"])
         #expect(results["ab"] == .failure(.timedOut))
-        #expect(ContinuousClock.now - start < .seconds(10))
+        #expect(await slow.canceled == 1)
     }
 
     @Test("No more fetches run at once than the bound")
