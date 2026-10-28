@@ -49,7 +49,7 @@ struct PenFileTransactionRewriteTests {
 
             #expect(outcome.commit == .wrote)
             #expect(outcome.value.declaredVersion == "2.17")
-            #expect(outcome.value.writtenVersion == "2.20")
+            #expect(outcome.value.writtenVersion == "2.21")
             let written = try Data(contentsOf: url)
             #expect(written == outcome.value.data)
             // The spread leaves the shadow for metadata.woodcase.shadowSpread (leaf zRp9CO),
@@ -93,7 +93,7 @@ struct PenFileTransactionRewriteTests {
     func migrateSkipsCurrentWithoutForce() async throws {
         try await withDirectory { directory, log in
             let url = directory.appendingPathComponent("compact.pen")
-            try Data(#"{"version":"2.20","children":[]}"#.utf8).write(to: url)
+            try Data(#"{"version":"2.21","children":[]}"#.utf8).write(to: url)
 
             let skipped = try await PenFileTransaction.migrate(at: url, identity: "bob", log: log)
             #expect(skipped.commit == .unchanged)

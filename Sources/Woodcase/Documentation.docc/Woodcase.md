@@ -326,6 +326,7 @@ All model types conform to `Friendly` (`Codable & Equatable & Hashable & Sendabl
 - ``PenEffects``
 - ``PenScriptInput``
 - ``PenShaderUniform``
+- ``PenShaderUniforms``
 - ``PenMeshPoint``
 
 ### Variables

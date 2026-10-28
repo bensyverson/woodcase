@@ -145,7 +145,7 @@ Cannot read /w/broken.pen: not a .pen document — children[0].id should be a st
 ```
 
 A document whose `version` is not a `major.minor` string says so instead. A file from
-a newer Pen of the same major — 2.21 while this build models 2.20 — reads and writes
+a newer Pen of the same major — 2.22 while this build models 2.21 — reads and writes
 normally: every read verb prints one `notice: [migration]` line on stderr, and every
 write keeps the file's declared version. A file of another major is **read-only**:
 when it still reads as a 2.x document, the read verbs work and print a warning, and

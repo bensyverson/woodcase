@@ -103,7 +103,8 @@ meaningless layout rect.
 ### The version gate
 
 The `.pen` format has had one breaking change, 2.10 → 2.17, and two changes of meaning,
-2.17 → 2.19 (shadows) and 2.19 → 2.20 (image modes). Woodcase models 2.20 and keeps **one**
+2.17 → 2.19 (shadows) and 2.19 → 2.20 (image modes); 2.20 → 2.21 only added the shader
+effect, so it needs no rule. Woodcase models 2.21 (Pen 1.2.16) and keeps **one**
 in-memory model — the current one — so `PenParser` decodes the raw JSON tree first,
 parses the `version` field as a numeric ``PenFormatVersion`` (`"2.9"` sorts *below*
 `"2.17"` numerically but above it lexically, so the string comparison is not an
@@ -114,7 +115,8 @@ option), and dispatches:
 | 2.8 – 2.10 | ``PenLegacyMigrator`` rewrites the JSON tree, then the current decoder runs | the model's version |
 | below 2.8 | migrated as legacy, with a warning | the model's version |
 | 2.11 – 2.19 | the rules ``PenLegacyMigrator/rules(upgrading:)`` picks rewrite the tree (the 2.19 shadow change for a pre-2.19 file, then the 2.20 image-mode change, both below), then the current decoder; a warning unless it is 2.17 or 2.19, the ones Pen has been seen to write | the model's version |
-| 2.20 | current decoder | 2.20 |
+| 2.20 | current decoder, silently; no rule, as Pen 1.2.16 rewrites only the version | the model's version |
+| 2.21 | current decoder | 2.21 |
 | newer 2.x | current decoder, with one **notice** | **the declared version, unchanged** |
 | another major | the structural probe below; read-only, with a warning | never — writes are refused |
 | unparsable | throws ``PenParserError/unsupportedVersion(url:version:)`` | — |

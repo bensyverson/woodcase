@@ -104,7 +104,7 @@ extension RandomEditGenerator {
     mutating func documentPropertyEdit(in _: EditableDocument, label: String, index: Int) -> EditOperation? {
         let property: (String, AnyCodable) = switch Int.random(in: 0 ..< 6, using: &rng) {
         case 0: (DocumentChangeKey.Table.allCases.randomElement(using: &rng)!.rawValue, Bool.random(using: &rng) ? .null : [:])
-        case 1: ("version", Bool.random(using: &rng) ? "2.20" : "2.19")
+        case 1: ("version", Bool.random(using: &rng) ? .string(PenDocument.currentFormatVersion) : "2.19")
         case 2: ("fileToken", Bool.random(using: &rng) ? .null : .string("\(label)\(index)"))
         case 3: ("fonts", Bool.random(using: &rng) ? .null : [["name": .string("Fuzz\(label)"), "url": .string("https://example.com/\(index).ttf")]])
         default: ("extras.fuzz\(Int.random(in: 0 ..< 2, using: &rng))", Bool.random(using: &rng) ? .null : .int(index))

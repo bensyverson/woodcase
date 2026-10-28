@@ -17,7 +17,8 @@ import Foundation
 /// | 2.8 – 2.10 | ``PenLegacyMigrator`` rewrites the JSON tree, then the current decoder runs |
 /// | below 2.8 | migrated as legacy, with a warning |
 /// | 2.11 – 2.19 | the rules ``PenLegacyMigrator/rules(upgrading:)`` picks rewrite the tree (2.19 shadows for a pre-2.19 file, then 2.20 image modes), then the current decoder; a warning for a version never observed in the wild |
-/// | 2.20 | current decoder |
+/// | 2.20 | current decoder; no rule, since 2.21 only adds the shader effect |
+/// | 2.21 | current decoder |
 /// | newer 2.x | current decoder, with a notice; the declared version is kept |
 /// | any other major | read-only if it passes the structural probe, with a warning; otherwise ``PenParserError/differentMajor(url:version:reason:)`` |
 /// | unparsable | ``PenParserError/unsupportedVersion(url:version:)`` |

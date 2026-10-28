@@ -448,15 +448,18 @@ it. `underline: false` loses nothing and is clean.
 notice text-style-stripped  Board/Terms (Txt01)  sets underline: true, which Pen strips from text when it opens the file and draws none. It is protected: Woodcase keeps it in metadata.woodcase.textDecoration, which Pen keeps, and restores it when it next reads the file, so only Pen's own render goes without it.
 ```
 
-`shader-not-drawn` is a warning, one finding per enabled shader, fills first and then
-the stroke, placed in its list when there are several (`fill 2 of 3`). The file is
-well formed and Pen draws it as written — it runs the shader, uniforms, samplers,
-`@sdf` and `@backdrop` included (`render-shader-fills.pen`) — but Woodcase has no shader
-runtime: `render`, `shot`, the viewer and generated React and SwiftUI all leave that
-paint out, so their output will not match Pen's. A disabled shader is clean.
+`shader-not-drawn` is a warning, one finding per enabled shader, fills first, then
+the stroke, then the effects, placed in its list when there are several (`fill 2 of 3`,
+`effect 2 of 2`). The file is well formed and Pen draws it as written — it runs the
+shader, uniforms, samplers, `@sdf` and `@backdrop` included (`render-shader-fills.pen`),
+and runs a shader effect (format 2.21) over the drawn node — but Woodcase has no shader
+runtime: `render`, `shot`, the viewer and generated React and SwiftUI all leave a shader
+paint out and draw a node with a shader effect unprocessed, so their output will not
+match Pen's. A disabled shader is clean.
 
 ```text
 warning shader-not-drawn  Swatch (Rct01)  has a shader fill (`./shader-uv.frag`) that Pen runs and Woodcase does not draw: render, shot and generated code leave that paint out, so they will not match Pen.
+warning shader-not-drawn  Glow (Glo01)  has a shader effect 2 of 2 (`./shader-post.frag`) that Pen runs and Woodcase does not draw: render, shot and generated code draw the node without it, so they will not match Pen.
 ```
 
 `per-side-stroke-on-shape` is a warning, one finding per node. Pen lays a per-side

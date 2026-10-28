@@ -9,8 +9,8 @@ import Foundation
 
 /// A visual effect applied to a .pen node.
 ///
-/// The .pen format supports three effect types: blur, background blur, and shadow.
-/// A node can have multiple effects (applied sequentially).
+/// The .pen format supports four effect types: blur, background blur, shadow and, since
+/// format 2.21, shader. A node can have multiple effects (applied sequentially).
 public enum PenEffect: Friendly {
     case blur(PenBlurEffect)
 
@@ -18,6 +18,10 @@ public enum PenEffect: Friendly {
     case backgroundBlur(PenBackgroundBlurEffect)
 
     case shadow(PenShadowEffect)
+
+    /// A fragment shader that post-processes the rendered node (format 2.21). Woodcase
+    /// keeps it but never runs it; see ``PenShaderEffect``.
+    case shader(PenShaderEffect)
 
     /// An effect whose `type` this build does not recognize, kept verbatim.
     ///

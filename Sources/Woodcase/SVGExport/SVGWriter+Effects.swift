@@ -186,15 +186,3 @@ extension SVGWriter {
         }
     }
 }
-
-private extension PenEffect {
-    /// Whether the effect draws: an explicit `enabled: false` turns it off.
-    var isEnabled: Bool {
-        switch self {
-        case let .blur(blur): blur.enabled?.literalValue != false
-        case let .backgroundBlur(blur): blur.enabled?.literalValue != false
-        case let .shadow(shadow): shadow.enabled?.literalValue != false
-        case .unknown: false
-        }
-    }
-}

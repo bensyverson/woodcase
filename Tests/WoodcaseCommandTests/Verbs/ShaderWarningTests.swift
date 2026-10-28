@@ -57,6 +57,36 @@ struct ShaderWarningTests {
         #expect(lines.first?.contains("Swatch (Rct01)") == true, "\(run.stderr)")
     }
 
+    // MARK: - Shader effects (format 2.21)
+
+    /// `render-shader-effect-warning.pen` has an enabled shader effect after a shadow
+    /// (`Glow`) and a disabled one (`Dormant`).
+    @Test("render names a node with an enabled shader effect, and not one whose effect is off")
+    func renderEffect() throws {
+        let fixture = try CommandFixture(fixture: "render-shader-effect-warning.pen")
+        let run = try fixture.run("render", fixture.file.path, "--scale", "1")
+
+        #expect(run.status == 0, "\(run.stderr)")
+        let lines = shaderLines(run.stderr)
+        #expect(lines.count == 1, "\(run.stderr)")
+        let line = try #require(lines.first)
+        #expect(line.hasPrefix("warning:"), "\(line)")
+        #expect(line.contains("Glow (Glo01)"), "\(line)")
+        #expect(!line.contains("Off01"), "\(line)")
+    }
+
+    @Test("lint lists an enabled shader effect as shader-not-drawn, and not a disabled one")
+    func lintEffect() throws {
+        let fixture = try CommandFixture(fixture: "render-shader-effect-warning.pen")
+        let run = try fixture.run("lint", fixture.file.path)
+
+        let findings = run.stdoutLines.filter { $0.contains("shader-not-drawn") }
+        #expect(findings.count == 1, "\(run.stdout)")
+        #expect(findings.first?.contains("Glow") == true, "\(run.stdout)")
+        #expect(findings.first?.contains("./shader-post.frag") == true, "\(run.stdout)")
+        #expect(!run.stdout.contains("Dormant"), "\(run.stdout)")
+    }
+
     @Test("shot of an artboard with no shader says nothing about the other's")
     func shotScoped() throws {
         let fixture = try CommandFixture(fixture: "render-shader-warning.pen")

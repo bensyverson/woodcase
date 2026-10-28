@@ -206,6 +206,7 @@ struct PenSchemaTests {
         ("effect", "blur", ##"{"type":"blur"}"##),
         ("effect", "background_blur", ##"{"type":"background_blur"}"##),
         ("effect", "shadow", ##"{"type":"shadow"}"##),
+        ("effect", "shader", ##"{"type":"shader","url":"s.frag"}"##),
     ]
 
     @Test("A nested variant lists exactly the payload's own keys", arguments: nestedSamples)

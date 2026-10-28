@@ -173,6 +173,22 @@ struct SchemaCommandTests {
         #expect(radius.contains("[topLeft, topRight, bottomRight, bottomLeft]"))
     }
 
+    @Test("The effect table lists the shader effect with its url and its uniforms")
+    func shaderEffectIsListed() throws {
+        let fixture = try CommandFixture(fixture: "every-node-type.pen")
+        let run = try fixture.run("schema", "frame")
+
+        let lines = run.stdoutLines
+        let start = try #require(lines.firstIndex { $0.hasPrefix("  effect —") }, "\(run.stdout)")
+        let block = Array(lines[(start + 1)...].prefix { !$0.isEmpty })
+        let shader = try #require(block.firstIndex { $0.contains(##""type": "shader""##) }, "\(block)")
+        let keys = block[(shader + 1)...].prefix { !$0.contains(##""type": ""##) }
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+        #expect(keys.contains { $0.hasPrefix("url* ") }, "\(keys)")
+        let uniforms = try #require(keys.first { $0.hasPrefix("uniforms ") }, "\(keys)")
+        #expect(uniforms.contains("$var"), "\(uniforms)")
+    }
+
     @Test("A gradient's center, size and rotation print their defaults, as the top-level ones do")
     func nestedDefaultsArePrinted() throws {
         let fixture = try CommandFixture(fixture: "every-node-type.pen")

@@ -83,7 +83,7 @@ Text is apart: Pen strips a text's stroke on load and draws none even with a wid
 
 The format's own editor migrates a file on load according to the version it declares — version 1.2.14 of the editor, which writes 2.19, turns every inner shadow in a pre-2.19 file into an outer one. So the declared version is data, not a label: Woodcase writes back a newer minor's declared version unchanged rather than stamping its own model's older one, and treats a file of another major as read-only. The whole policy is in <doc:PenEngine>, under *The version gate*.
 
-Woodcase models and writes 2.20, the format version 1.2.15 of the editor writes, and migrates an older file the way the editor does: every pre-2.19 inner shadow becomes an outer one — which is what every earlier editor drew — with a diagnostic naming the node, and `spread`, which 2.19 removed, moves into `metadata.woodcase.shadowSpread` (see *Miter Limits and Shadow Spreads Live in Metadata*, below); and a pre-2.20 image paint's `fill`/`fit` mode becomes `cover`/`contain`, and a missing one an explicit `stretch`. The editor does all of it silently. See <doc:PenEngine>, *Shadows before 2.19* and *Image modes before 2.20*.
+Woodcase models and writes 2.21, the format version 1.2.16 of the editor writes, and migrates an older file the way the editor does: every pre-2.19 inner shadow becomes an outer one — which is what every earlier editor drew — with a diagnostic naming the node, and `spread`, which 2.19 removed, moves into `metadata.woodcase.shadowSpread` (see *Miter Limits and Shadow Spreads Live in Metadata*, below); and a pre-2.20 image paint's `fill`/`fit` mode becomes `cover`/`contain`, and a missing one an explicit `stretch`. The editor does all of it silently. See <doc:PenEngine>, *Shadows before 2.19* and *Image modes before 2.20*.
 
 ## Dashed Strokes Live in Metadata
 
@@ -106,7 +106,7 @@ An instance override still writes the raw `blendMode` key into the instance's ov
 
 ## Underline and Strikethrough Survive the Editor
 
-The editor strips a text node's `underline` and `strikethrough` when it opens a file and draws neither, though both are in its schema; it keeps metadata. Woodcase writes both into `metadata.woodcase.textDecoration` too and restores them from it on its next read (``PenTextDecoration``; <doc:PenRichText>, *Underline and strikethrough survive Pen*), so a save in the editor loses neither. Its headless CLI (pen 0.3.11, 2026-10-15) saves the file as version 2.21, which Woodcase reads as a newer minor and writes back unchanged.
+The editor strips a text node's `underline` and `strikethrough` when it opens a file and draws neither, though both are in its schema; it keeps metadata. Woodcase writes both into `metadata.woodcase.textDecoration` too and restores them from it on its next read (``PenTextDecoration``; <doc:PenRichText>, *Underline and strikethrough survive Pen*), so a save in the editor loses neither. Its headless CLI (pen 0.3.11, 2026-10-15) saves the file as version 2.21, which Woodcase now models (it read it as a newer minor when this was probed).
 
 > Corrected 2026-10-15 (leaf `ajB4uc`): this section was titled *Dash Patterns Are Gone* and said Woodcase's model had no dash and its renderer never dashed a stroke; that held from the 2.17 port until dashes moved into metadata.
 

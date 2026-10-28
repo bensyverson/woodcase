@@ -4,19 +4,7 @@ import CoreGraphics
 extension PenRenderer {
     /// Extracts the effects from a node's kind-specific data.
     static func effects(for node: PenNode) -> PenEffects? {
-        switch node.kind {
-        case let .rectangle(data): data.effects
-        case let .ellipse(data): data.effects
-        case let .polygon(data): data.effects
-        case let .line(data): data.effects
-        case let .path(data): data.effects
-        case let .frame(data): data.effects
-        case let .group(data): data.effects
-        case let .text(data): data.effects
-        case let .icon(data): data.effects
-        case let .browser(data): data.effects
-        default: nil
-        }
+        node.kind.effectList
     }
 
     /// The node's own blend mode (``PenNode/blendMode``), stored in its metadata.

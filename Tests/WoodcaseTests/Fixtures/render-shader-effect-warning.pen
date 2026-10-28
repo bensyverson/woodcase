@@ -1,0 +1,43 @@
+{
+  "version": "2.21",
+  "children": [
+    {
+      "type": "frame",
+      "id": "Eff01",
+      "name": "Effects",
+      "x": 0,
+      "y": 0,
+      "width": 120,
+      "height": 60,
+      "layout": "none",
+      "fill": "#FFFFFF",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "Glo01",
+          "name": "Glow",
+          "x": 10,
+          "y": 10,
+          "width": 40,
+          "height": 40,
+          "fill": "#3366FF",
+          "effect": [
+            {"type": "shadow", "shadowType": "outer", "offset": {"x": 0, "y": 2}, "blur": 4, "color": "#00000040"},
+            {"type": "shader", "url": "./shader-post.frag", "uniforms": {"u_strength": 0.5, "u_tint": "#FF8800"}}
+          ]
+        },
+        {
+          "type": "rectangle",
+          "id": "Off01",
+          "name": "Dormant",
+          "x": 70,
+          "y": 10,
+          "width": 40,
+          "height": 40,
+          "fill": "#CCCCCC",
+          "effect": {"type": "shader", "enabled": false, "url": "./shader-post.frag"}
+        }
+      ]
+    }
+  ]
+}

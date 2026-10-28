@@ -88,6 +88,42 @@ struct DocumentLinterShaderTests {
         #expect(found.isEmpty)
     }
 
+    // MARK: - Shader effects (format 2.21)
+
+    @Test("An enabled shader effect is a finding naming its file and calling it an effect")
+    func effect() throws {
+        let found = try shaders(board(
+            ##"{"type": "rectangle", "id": "Rct01", "name": "Glow", "width": 40, "height": 40, "fill": "#FF0000", "##
+                + ##""effect": {"type": "shader", "url": "./post.frag", "uniforms": {"u_strength": 0.5}}}"##
+        ))
+        #expect(found.count == 1)
+        let finding = try #require(found.first)
+        #expect(finding.nodeID == "Rct01")
+        #expect(finding.message.contains("./post.frag"), "\(finding.message)")
+        #expect(finding.message.contains("effect"), "\(finding.message)")
+        #expect(finding.message.contains("Woodcase does not draw"), "\(finding.message)")
+    }
+
+    @Test("A shader effect is placed in the effect list, after the node's paints")
+    func effectAfterPaints() throws {
+        let found = try shaders(board(
+            ##"{"type": "rectangle", "id": "Rct01", "name": "Glow", "width": 40, "height": 40, "fill": \##(Self.shader), "##
+                + ##""effect": [{"type": "blur", "radius": 2}, {"type": "shader", "url": "./post.frag"}]}"##
+        ))
+        #expect(found.count == 2)
+        #expect(found.first?.message.contains("fill") == true, "\(found.map(\.message))")
+        #expect(found.last?.message.contains("effect 2 of 2") == true, "\(found.map(\.message))")
+    }
+
+    @Test("A disabled shader effect is clean")
+    func disabledEffectIsClean() throws {
+        let found = try shaders(board(
+            ##"{"type": "rectangle", "id": "Rct01", "name": "Glow", "width": 40, "height": 40, "##
+                + ##""effect": {"type": "shader", "url": "./post.frag", "enabled": false}}"##
+        ))
+        #expect(found.isEmpty)
+    }
+
     @Test("Every shader in render-shader-fills.pen is a finding")
     func fixture() throws {
         let url = URL(fileURLWithPath: #filePath).deletingLastPathComponent()

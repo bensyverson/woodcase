@@ -5,36 +5,41 @@
 
 import Foundation
 
-/// Shader fills: Pen runs them, and Woodcase draws nothing for one on any target.
+/// Shaders: Pen runs them, and Woodcase runs none on any target.
 ///
 /// A shader fill (``PenFill/PenShaderFill``) is a WebGL fragment shader Pen runs over the
 /// node's box — in its editor and in its exporter, on shapes, text and icons alike
-/// (`render-shader-fills.pen`; finding F1 of `project/2026-09-27-fidelity-gaps.md`).
-/// Woodcase has no shader runtime: the renderer draws such a fill as transparent, and
-/// neither code generator writes it. Every place that leaves one out says so from here, so
-/// they agree on which fills count: an enabled shader, in a node's fills or its stroke. A
-/// disabled one draws nothing in Pen either, and is not reported.
+/// (`render-shader-fills.pen`; finding F1 of `project/2026-09-27-fidelity-gaps.md`). A
+/// shader effect (``PenEffect/PenShaderEffect``, format 2.21) post-processes the rendered
+/// node. Woodcase has no shader runtime: the renderer draws such a fill as transparent and
+/// draws the node of such an effect unprocessed, and neither code generator writes either.
+/// Every place that leaves one out says so from here, so they agree on which shaders
+/// count: an enabled shader in a node's fills, its stroke or its effects. A disabled one
+/// draws nothing in Pen either, and is not reported.
 public enum ShaderFills {
-    /// One enabled shader fill on a node.
+    /// One enabled shader on a node: a fill, a stroke's paint or an effect.
     struct Found: Friendly {
-        /// Whether a paint is one of the node's fills or its stroke's paint.
+        /// Which of the node's lists holds the shader.
         enum Role: String, Friendly {
             /// One of the node's fills.
             case fill
             /// The stroke's paint.
             case stroke
+            /// One of the node's effects.
+            case effect
         }
 
-        /// Which of the node's paint lists holds the shader.
+        /// Which of the node's lists holds the shader.
         var role: Role
         /// Its 1-based place in that list.
         var ordinal: Int
         /// How many paints the list holds.
         var total: Int
-        /// The shader file, as the fill names it.
+        /// The shader file, as the fill or effect names it.
         var url: String
 
-        /// The shader's place, as a message names it: `fill`, or `fill 2 of 3` in a stack.
+        /// The shader's place, as a message names it: `fill`, or `fill 2 of 3` in a stack;
+        /// `effect`, or `effect 2 of 2`.
         var label: String {
             total > 1 ? "\(role.rawValue) \(ordinal) of \(total)" : role.rawValue
         }
@@ -43,14 +48,16 @@ public enum ShaderFills {
     /// How many nodes ``diagnostic(under:)`` names before it counts the rest.
     static let namedLimit = 8
 
-    /// Every enabled shader on a node of `kind`, fills first, then the stroke.
+    /// Every enabled shader on a node of `kind`: its fills first, then the stroke, then
+    /// its effects.
     static func found(in kind: PenNode.Kind) -> [Found] {
         let lists = kind.paintLists
         return found(in: lists.fills, role: .fill) + found(in: lists.stroke, role: .stroke)
+            + found(in: kind.effectList)
     }
 
-    /// The one warning a render of `roots` earns for its shader fills, or `nil` when no
-    /// node under them has an enabled one.
+    /// The one warning a render of `roots` earns for its shader fills and effects, or `nil`
+    /// when no node under them has an enabled one.
     ///
     /// The warning names each node that has one — by name and id, in document order, the
     /// first ``namedLimit`` of them — so a caller can find it, and points at `woodcase lint`,
@@ -71,8 +78,8 @@ public enum ShaderFills {
         return PenDiagnostic(
             severity: .warning,
             stage: .rendering,
-            message: "Woodcase does not draw shader fills, which Pen runs, so \(count) render without that paint: "
-                + "\(named). `woodcase lint` lists each one (shader-not-drawn).",
+            message: "Woodcase does not run shaders, which Pen does, so \(count) render without "
+                + "their shader fill or effect: \(named). `woodcase lint` lists each one (shader-not-drawn).",
             nodeID: nodes.count == 1 ? first.id : nil
         )
     }
@@ -110,6 +117,15 @@ public enum ShaderFills {
         return all.enumerated().compactMap { index, fill in
             guard case let .shader(shader) = fill, fill.isEnabled else { return nil }
             return Found(role: role, ordinal: index + 1, total: all.count, url: shader.url)
+        }
+    }
+
+    /// The enabled shader effects in one effect list, numbered by their place in it.
+    private static func found(in effects: PenEffects?) -> [Found] {
+        let all = effects?.all ?? []
+        return all.enumerated().compactMap { index, effect in
+            guard case let .shader(shader) = effect, effect.isEnabled else { return nil }
+            return Found(role: .effect, ordinal: index + 1, total: all.count, url: shader.url)
         }
     }
 }

@@ -203,7 +203,7 @@ struct SizedNoteTests {
               "y": 20
             }
           ],
-          "version": "2.20"
+          "version": "2.21"
         }
         """
         let document = try PenParser.parse(file)

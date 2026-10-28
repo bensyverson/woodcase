@@ -7,9 +7,10 @@ import Foundation
 import Testing
 import Woodcase
 
-/// Covers reading and writing around format 2.20, which Pen 1.2.15 writes: the model is
-/// 2.20, a 2.19 file gets only the 2.20 image-mode upgrade — never the 2.19 shadow rule
-/// again — and an older file gets both, in version order.
+/// Covers reading and writing around format 2.20, which Pen 1.2.15 writes: a 2.19 file
+/// gets only the 2.20 image-mode upgrade — never the 2.19 shadow rule again — and an
+/// older file gets both, in version order. The model itself is 2.21 since Pen 1.2.16
+/// (``PenFormat221Tests``), which needs no rule of its own.
 ///
 /// The rule's every location is covered at the JSON level by
 /// ``PenImageModeMigrationRuleTests``; these tests run whole documents through the parser.
@@ -53,18 +54,16 @@ struct PenFormat220MigrationTests {
 
     // MARK: - The version
 
-    @Test("The model writes format 2.20, and 2.20 is a version Pen has been seen to write")
-    func currentVersionIs220() {
-        #expect(PenFormatVersion.current == PenFormatVersion(major: 2, minor: 20))
-        #expect(PenDocument.currentFormatVersion == "2.20")
+    @Test("2.20 is a version Pen has been seen to write")
+    func format220IsObserved() {
         #expect(PenFormatVersion.observedModern.contains(PenFormatVersion(major: 2, minor: 20)))
     }
 
-    @Test("A 2.20 file reads with no diagnostic and keeps its version")
+    @Test("A 2.20 file reads with no diagnostic and no rewrite")
     func format220ReadsQuietly() throws {
         let diagnostics = PenDiagnosticCollector()
         let doc = try PenParser.parse(document(version: "2.20", children: shadowAndImage), diagnostics: diagnostics)
-        #expect(doc.version == "2.20")
+        #expect(doc.version == PenDocument.currentFormatVersion)
         #expect(diagnostics.diagnostics.isEmpty, "\(diagnostics.diagnostics)")
         let node = try #require(doc.children.first)
         #expect(try shadow(of: node).shadowType == .inner)
@@ -73,11 +72,11 @@ struct PenFormat220MigrationTests {
 
     // MARK: - A 2.19 file
 
-    @Test("A 2.19 inner shadow with a spread stays inner when read by the 2.20 model, silently")
+    @Test("A 2.19 inner shadow with a spread stays inner when read by the current model, silently")
     func format219KeepsItsInnerShadow() throws {
         let diagnostics = PenDiagnosticCollector()
         let doc = try PenParser.parse(document(version: "2.19", children: shadowAndImage), diagnostics: diagnostics)
-        #expect(doc.version == "2.20")
+        #expect(doc.version == PenDocument.currentFormatVersion)
         let node = try #require(doc.children.first)
         #expect(try shadow(of: node).shadowType == .inner)
         #expect(diagnostics.diagnostics.isEmpty, "\(diagnostics.diagnostics)")
@@ -90,11 +89,11 @@ struct PenFormat220MigrationTests {
         #expect(try imageMode(of: #require(doc.children.first)) == .stretch)
     }
 
-    @Test("A 2.19 file survives a write by the 2.20 model with its inner shadow and its stretch")
+    @Test("A 2.19 file survives a write by the current model with its inner shadow and its stretch")
     func format219RoundTrip() throws {
         let outcome = try PenFileMigrator.migrate(document(version: "2.19", children: shadowAndImage))
         #expect(!outcome.wasAlreadyCurrent)
-        #expect(outcome.writtenVersion == "2.20")
+        #expect(outcome.writtenVersion == PenDocument.currentFormatVersion)
         let reread = try PenParser.parse(outcome.data)
         let node = try #require(reread.children.first)
         #expect(try shadow(of: node).shadowType == .inner)
@@ -135,7 +134,7 @@ struct PenFormat220MigrationTests {
     func olderFileGetsBothRules(version: String) throws {
         let diagnostics = PenDiagnosticCollector()
         let doc = try PenParser.parse(document(version: version, children: shadowAndImage), diagnostics: diagnostics)
-        #expect(doc.version == "2.20")
+        #expect(doc.version == PenDocument.currentFormatVersion)
         let node = try #require(doc.children.first)
         #expect(try shadow(of: node).shadowType == .outer)
         #expect(try imageMode(of: node) == .stretch)

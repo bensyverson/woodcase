@@ -9,7 +9,7 @@ import Foundation
 ///
 /// The spelling an agent gets wrong here is `background_blur` — a blur *behind* a node
 /// is not `backdrop`, and the only defense against inventing a name is printing the
-/// three the decoder takes. `PenSchemaTests` checks each variant's keys against the
+/// four the decoder takes. `PenSchemaTests` checks each variant's keys against the
 /// payload's own stored properties with `Mirror` — all but a shadow's ``spreadField``,
 /// which the codec keeps in metadata.
 public extension PenEffect {
@@ -18,7 +18,7 @@ public extension PenEffect {
         name: "effect",
         singular: "an effect object",
         plural: "an array of effect objects",
-        summary: "a blur, a blur of what is behind the node, or a shadow",
+        summary: "a blur, a blur of what is behind the node, a shadow, or a shader run over the drawn node",
         discriminator: "type",
         variants: [
             PenNestedShape.Variant(
@@ -56,6 +56,16 @@ public extension PenEffect {
                         default: .string(PenBlendMode.normal.rawString)
                     ),
                     spreadField,
+                ]
+            ),
+            PenNestedShape.Variant(
+                spelling: "shader",
+                fields: [
+                    // No renderer runs a shader, so nothing pins `enabled`'s default here;
+                    // it is left unstated, as on the shader fill.
+                    enabledField.withoutDefault,
+                    PenNestedShape.Field(key: "url", forms: [.text(.plain)], isRequired: true),
+                    PenShaderUniform.schemaField,
                 ]
             ),
         ]

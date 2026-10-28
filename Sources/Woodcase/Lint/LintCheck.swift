@@ -125,9 +125,9 @@ public enum LintCheck: String, Friendly, CaseIterable {
     /// strips from text when it opens the file, and never draws.
     case textStyleStripped = "text-style-stripped"
 
-    /// An enabled shader fill, in a node's fills or its stroke. Pen runs it; Woodcase
-    /// draws nothing for it on any target, so a render, a shot or generated code leaves
-    /// that paint out.
+    /// An enabled shader fill, in a node's fills or its stroke, or an enabled shader effect
+    /// (format 2.21). Pen runs it; Woodcase runs no shader on any target, so a render, a
+    /// shot or generated code leaves that paint out, or draws the node unprocessed.
     case shaderNotDrawn = "shader-not-drawn"
 
     /// A per-side stroke width on a shape without box sides — an ellipse, a polygon, a
@@ -299,7 +299,7 @@ public enum LintCheck: String, Friendly, CaseIterable {
         case .textStyleStripped:
             "A text node with a stroke, underline or strikethrough, which Pen strips on load and never draws."
         case .shaderNotDrawn:
-            "A shader fill, which Pen runs and Woodcase does not draw on any target."
+            "A shader fill or effect, which Pen runs and Woodcase does not draw on any target."
         case .perSideStrokeOnShape:
             "A per-side stroke width on an ellipse, polygon, path or line, which Pen draws at the top width alone."
         case .noteUnsized:

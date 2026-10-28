@@ -88,13 +88,7 @@ public extension PenFill {
                     // defaults; they are left unstated rather than guessed.
                     enabledField.withoutDefault, blendModeField.withoutDefault, opacityField.withoutDefault,
                     PenNestedShape.Field(key: "url", forms: [.text(.plain)], isRequired: true),
-                    PenNestedShape.Field(
-                        key: "uniforms",
-                        forms: [.open(PenValueForm.OpenShape(
-                            phrase: "an object of uniform names to numbers, colors, booleans or vectors",
-                            signature: "{name: number | color | boolean | [number, …] | $var}"
-                        ))]
-                    ),
+                    PenShaderUniform.schemaField,
                 ]
             ),
         ]

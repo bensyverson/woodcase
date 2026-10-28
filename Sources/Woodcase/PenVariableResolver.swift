@@ -960,6 +960,12 @@ public enum PenVariableResolver {
             }
             return .shadow(result)
 
+        case let .shader(shader):
+            var result = shader
+            result.enabled = resolve(shader.enabled, from: table)
+            result.uniforms = shader.uniforms?.mapValues { resolveShaderUniform($0, from: table) }
+            return .shader(result)
+
         case .unknown:
             return effect
         }

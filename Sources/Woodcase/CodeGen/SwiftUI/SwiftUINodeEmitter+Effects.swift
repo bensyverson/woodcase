@@ -79,6 +79,10 @@ extension SwiftUINodeEmitter {
                 guard blur.enabled?.literalValue != false else { continue }
                 guard let radius = number(blur.radius, unemitted: &result.unemitted) else { continue }
                 if !radius.isZero { result.backgroundBlurs.append(radius) }
+            case let .shader(shader):
+                // No shader runtime: the node is drawn unprocessed, and says so.
+                guard shader.enabled?.literalValue != false else { continue }
+                result.unemitted.append("shader effects")
             case let .unknown(typeName, _):
                 result.unemitted.append("\(typeName) effects")
             }

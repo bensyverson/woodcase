@@ -12,6 +12,7 @@ extension PenEffect {
         case blur
         case backgroundBlur = "background_blur"
         case shadow
+        case shader
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -64,6 +65,10 @@ extension PenEffect {
             try effect.extras.encode(into: encoder)
             try container.encode(EffectType.shadow, forKey: .type)
             try effect.encode(to: encoder)
+        case let .shader(effect):
+            try effect.extras.encode(into: encoder)
+            try container.encode(EffectType.shader, forKey: .type)
+            try effect.encode(to: encoder)
         case let .unknown(typeName, payload):
             try payload.encode(into: encoder)
             try container.encode(typeName, forKey: .type)
@@ -89,6 +94,10 @@ extension PenEffect {
             var effect = try PenShadowEffect(from: decoder)
             effect.extras = try capture(from: decoder, claiming: PenShadowEffect.CodingKeys.self, describing: "a shadow effect")
             return .shadow(effect)
+        case .shader:
+            var effect = try PenShaderEffect(from: decoder)
+            effect.extras = try capture(from: decoder, claiming: PenShaderEffect.CodingKeys.self, describing: "a shader effect")
+            return .shader(effect)
         }
     }
 

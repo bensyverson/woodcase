@@ -30,7 +30,7 @@ public extension EditOperation {
     ///
     /// ```swift
     /// try document.apply(.setDocumentProperties(EditOperation.SetDocumentProperties(
-    ///     properties: ["version": "2.20", "extras.futureKey": .null]
+    ///     properties: ["version": "2.21", "extras.futureKey": .null]
     /// )))
     /// ```
     struct SetDocumentProperties: Friendly {

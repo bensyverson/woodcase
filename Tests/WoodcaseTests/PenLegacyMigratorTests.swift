@@ -203,7 +203,7 @@ struct PenLegacyMigratorTests {
         #expect(Set(ruleNames(upgrading: "2.19")) == ["PenVersionMigrationRule", "PenImageModeMigrationRule"])
     }
 
-    @Test("A document at or past the model's version gets no rules", arguments: ["2.20", "2.21"])
+    @Test("A document at or past the model's version gets no rules", arguments: ["2.21", "2.22"])
     func currentGetsNothing(declared: String) {
         #expect(ruleNames(upgrading: declared).isEmpty)
     }
