@@ -73,15 +73,18 @@ assert_contains "$WORKDIR/out1.txt" "MISSING: \`d\`"
 assert_not_contains "$WORKDIR/out1.txt" "\`a\`"
 assert_not_contains "$WORKDIR/out1.txt" "\`c\`"
 
+# The run's rows replace theirs, and `d`, which the run did not produce, is
+# kept: a filtered `swift test` writes a partial mae-test.csv.
 cat >"$WORKDIR/expected-baseline-1.csv" <<'EOF'
 id,MAE,limit
 a,1.00,2.0
 b,1.50,2.0
 c,1.00,2.0
+d,1.00,2.0
 e,2.00,3.0
 EOF
 diff "$WORKDIR/expected-baseline-1.csv" "$WORKDIR/performance/mae-baseline.csv" \
-    || fail "baseline after scenario 1 did not match the sorted test results"
+    || fail "baseline after scenario 1 is not the sorted merge of the baseline and the run"
 
 echo "Scenario 1 (regression/new/missing) OK"
 
@@ -115,5 +118,29 @@ diff "$WORKDIR/expected-baseline-1.csv" "$WORKDIR/performance/mae-baseline.csv" 
     || fail "baseline was not sorted deterministically after a reordered mae-test.csv"
 
 echo "Scenario 3 (deterministic sort) OK"
+
+# --- Scenario 4: a rise from a zero baseline is a regression, not a crash ---
+# A board that matched Pen exactly records 0.00; dividing by it used to kill
+# awk mid-report and drop every later warning.
+
+cat >"$WORKDIR/performance/mae-baseline.csv" <<'EOF'
+id,MAE,limit
+a,0.00,1.0
+b,1.00,2.0
+EOF
+
+cat >"$WORKDIR/performance/mae-test.csv" <<'EOF'
+id,MAE,limit
+a,0.25,1.0
+b,1.50,2.0
+EOF
+
+run_mae_check "$WORKDIR/out4.txt"
+
+assert_not_contains "$WORKDIR/out4.txt" "division by zero"
+assert_contains "$WORKDIR/out4.txt" 'Regression in `a` MAE test. 0.00 -> 0.25 / 1.0 (from zero)'
+assert_contains "$WORKDIR/out4.txt" 'Regression in `b` MAE test.'
+
+echo "Scenario 4 (zero baseline) OK"
 
 echo "All mae-check tests passed."

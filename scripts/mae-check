@@ -65,7 +65,12 @@ if [ -f "$BASELINE_CSV" ]; then
                 mae = testMAE[id] + 0
                 if (id in baselineSeen) {
                     prev = baselineMAE[id] + 0
-                    if (mae > prev) {
+                    if (mae > prev && prev == 0) {
+                        # A board that matched exactly has no percentage to rise by.
+                        printf "  WARNING: Regression in `%s` MAE test. %s -> %s / %s (from zero)\n", \
+                            id, baselineMAE[id], testMAE[id], testLimit[id]
+                        findings++
+                    } else if (mae > prev) {
                         pct = ((mae - prev) / prev) * 100
                         printf "  WARNING: Regression in `%s` MAE test. %s -> %s / %s (%.1f%% increase)\n", \
                             id, baselineMAE[id], testMAE[id], testLimit[id], pct
