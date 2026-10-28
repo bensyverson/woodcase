@@ -205,6 +205,20 @@ struct DocumentSessionRemoteTests {
         #expect(session.canRedo)
     }
 
+    @Test("an op from the session's own replica is credited to the session's author, whoever sent it")
+    func ownReplicaOpIsCreditedToAuthor() throws {
+        let session = makeSession()
+        let beforeCrash = SessionTestPeer(ana, document: original)
+
+        let change = try session.submit(.remote(
+            beforeCrash.edit(set("c1", ["common.name": "Ana"])),
+            from: .unattributed(peer: ana.peerID)
+        ))
+
+        #expect(change.author == ana)
+        #expect(session.ledger.stamp(for: .property(node: "c1", path: "common.name"))?.author == ana)
+    }
+
     @Test("a session that is not collaborative refuses remote operations")
     func nonCollaborativeRefuses() throws {
         let session = DocumentSession(document: original, author: ana)

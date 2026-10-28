@@ -12,7 +12,8 @@ public extension DocumentSession {
     /// the mapping back. Call it when a peer joins. A ``SessionOrigin/remote(_:from:)``
     /// submission introduces its sender too, so an operation relayed through one peer
     /// on behalf of another is credited to whoever made it, as long as that peer has
-    /// been introduced; one from a replica nobody introduced is credited to
+    /// been introduced; one from the session's own replica is credited to the session's
+    /// author, and one from a replica nobody introduced to
     /// ``Author/unattributed(peer:)``.
     ///
     /// - Parameter author: The collaborator, with the peer id their replica uses.
@@ -45,7 +46,8 @@ extension DocumentSession {
     ///
     /// - Parameters:
     ///   - operations: The operations, in the order they arrived.
-    ///   - sender: The collaborator who sent them, who joins the peer registry.
+    ///   - sender: The collaborator who sent them, who joins the peer registry; a sender
+    ///     on the session's own replica is the session's author, whatever name it carries.
     /// An operation the boundary refuses (``CRDTDocument/validateRemote(_:)``) is skipped
     /// and reported on ``CommittedChange/rejected``; the rest of the batch still lands.
     ///
@@ -54,6 +56,7 @@ extension DocumentSession {
     /// - Throws: ``SessionError/notCollaborative`` when the session keeps no CRDT.
     func commitRemote(_ operations: [CRDTOperation], from sender: Author) throws -> CommittedChange {
         guard let crdt = document.crdtDocument else { throw SessionError.notCollaborative }
+        let sender = sender.peerID == author.peerID ? author : sender
         noteJoined(sender)
 
         var probe = ChangeInvalidation.RemoteProbe(document)
@@ -109,8 +112,10 @@ extension DocumentSession {
         )
     }
 
-    /// The author of the replica a remote operation came from.
+    /// The author of the replica a remote operation came from: the session's own
+    /// author for its own replica — ops it made before a crash, coming back from the
+    /// relay — or the introduced collaborator.
     private func author(of peer: PeerID) -> Author {
-        peers[peer] ?? .unattributed(peer: peer)
+        peer == author.peerID ? author : peers[peer] ?? .unattributed(peer: peer)
     }
 }

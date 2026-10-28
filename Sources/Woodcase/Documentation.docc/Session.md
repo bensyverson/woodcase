@@ -108,8 +108,9 @@ CRDT accepts stamps the ledger with the keys it wrote — keyed as finely as a l
 so a remote write to one override key meets a local undo of that key — under the author
 of the replica that made it. Each operation names its replica by ``PeerID``;
 ``DocumentSession/noteJoined(_:)`` maps a peer to an ``Author``, the sender of a
-submission is introduced automatically, and a replica nobody introduced is
-``Author/unattributed(peer:)``. A write the CRDT rejects as stale stamps nothing, and a
+submission is introduced automatically, the session's own replica is the session's
+author (its ops from before a crash, coming back from the relay), and a replica nobody
+introduced is ``Author/unattributed(peer:)``. A write the CRDT rejects as stale stamps nothing, and a
 submission with nothing accepted applies nothing and keeps the current sequence.
 
 The invalidation compares the document before and after the whole batch, because the
