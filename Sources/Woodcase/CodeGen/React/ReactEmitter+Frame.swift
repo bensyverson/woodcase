@@ -139,7 +139,8 @@ extension ReactEmitter {
         // Stroke + Effects (merged to combine boxShadow values)
         styles.append(contentsOf: emitStrokeAndEffects(
             stroke: data, strokeDrawnByOverlay: dashedOverlay != nil, effects: data.effects,
-            showsBackdrop: data.fills?.hasVisiblePaint == true, layered: shadowLayers != nil
+            showsBackdrop: paintsBox(data.fills), layered: shadowLayers != nil,
+            caster: shadowCaster(node)
         ))
         let layersOverFill = liftingInsetShadows(&styles, over: fill.layers, beneathChildren: hasChildren)
 

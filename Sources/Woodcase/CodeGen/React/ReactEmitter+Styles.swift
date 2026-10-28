@@ -77,9 +77,10 @@ extension ReactEmitter {
     ///
     /// - Parameters:
     ///   - showsBackdrop: Whether a background blur shows through the node; `nil` asks
-    ///     its fills (``PenFills/hasVisiblePaint``).
+    ///     its fills (``paintsBox(_:)``: a theme color counts as painting).
     ///   - layered: Whether the outer shadows are drawn by layers of their own
     ///     (``shadowLayerStyles(_:borderRadius:stroke:)``).
+    ///   - caster: How the outer shadows are cast (``shadowCaster(_:)``).
     static func emitVisualStyles(
         fills: PenFills?,
         box: FillBox,
@@ -89,6 +90,7 @@ extension ReactEmitter {
         effects: PenEffects?,
         showsBackdrop: Bool? = nil,
         layered: Bool = false,
+        caster: ShadowCaster = .box,
         ctx: EmitContext
     ) -> [(String, String)] {
         var styles: [(String, String)] = []
@@ -105,7 +107,7 @@ extension ReactEmitter {
 
         styles.append(contentsOf: emitStrokeAndEffects(
             stroke: stroke, strokeDrawnByOverlay: strokeDrawnByOverlay, effects: effects,
-            showsBackdrop: showsBackdrop ?? (fills?.hasVisiblePaint == true), layered: layered
+            showsBackdrop: showsBackdrop ?? paintsBox(fills), layered: layered, caster: caster
         ))
 
         return styles

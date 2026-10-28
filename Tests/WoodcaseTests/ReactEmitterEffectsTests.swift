@@ -133,7 +133,7 @@ struct ReactEmitterEffectsTests {
     @Test("A shadow's fractional offset and blur are kept")
     func shadowKeepsFractions() throws {
         let content = try card(##"{"type": "rectangle", "id": "R1", "name": "Box", "width": 80, "height": 80, "fill": "#FFFFFF", "effect": {"type": "shadow", "shadowType": "outer", "color": "#000000", "offset": {"x": 0.5, "y": 1.5}, "blur": 2.5}}"##)
-        #expect(content.contains(##"boxShadow: "0.5px 1.5px 2.5px #000000","##))
+        #expect(content.contains(##"boxShadow: "0.5px 1.5px 2.5px #010101","##))
     }
 
     @Test("Several blurs write one filter, the first enabled blur as the renderer draws it")
@@ -175,7 +175,7 @@ struct ReactEmitterEffectsTests {
          "effect": [{"type": "shadow", "shadowType": "outer", "color": "#000000", "offset": {"x": 0, "y": 4}, "blur": 8},
                     {"type": "shadow", "shadowType": "outer", "color": "#FF0000", "offset": {"x": 2, "y": 2}, "blur": 3, "blendMode": "multiply"}]}
         """##)
-        let black = try #require(content.range(of: ##"boxShadow: "0px 4px 8px #000000","##))
+        let black = try #require(content.range(of: ##"boxShadow: "0px 4px 8px #010101","##))
         let red = try #require(content.range(of: ##"boxShadow: "2px 2px 3px #FF0000","##))
         #expect(black.lowerBound < red.lowerBound, "the first shadow's layer comes first, so it paints below")
         #expect(content.contains(##"mixBlendMode: "multiply","##))

@@ -24,16 +24,20 @@ extension ReactEmitter {
     ///     none of it; its reach still spreads the outer shadows.
     ///   - effects: The node's effects, if it has any.
     ///   - showsBackdrop: Whether the node has a visible fill: Pen draws no background
-    ///     blur through a node without one (``PenFills/hasVisiblePaint``).
+    ///     blur through a node without one (``paintsBox(_:)``).
     ///   - layered: Whether the outer shadows are drawn by layers of their own
     ///     (``shadowLayerStyles(_:borderRadius:stroke:)``) and left out of the list.
+    ///   - caster: How the outer shadows are cast (``shadowCaster(_:)``): in the
+    ///     `box-shadow` list, or as `drop-shadow()`s of the content in the `filter`, before
+    ///     the layer blur.
     /// - Returns: The declarations.
     static func emitStrokeAndEffects(
         stroke: (any PenStrokable)?,
         strokeDrawnByOverlay: Bool = false,
         effects: PenEffects?,
         showsBackdrop: Bool,
-        layered: Bool = false
+        layered: Bool = false,
+        caster: ShadowCaster = .box
     ) -> [(String, String)] {
         let strokeStyles = strokeDrawnByOverlay ? [] : stroke.map { emitStroke($0) } ?? []
         let drawn = NodeEffects(effects)
@@ -43,7 +47,7 @@ extension ReactEmitter {
             shadows.append(String(strokeShadow.dropFirst().dropLast()))
         }
         shadows += drawn.innerShadowList
-        if !layered {
+        if !layered, caster == .box {
             shadows += drawn.outerShadowList(spread: shadowSpread(stroke))
         }
 
@@ -52,8 +56,10 @@ extension ReactEmitter {
             result.append(("boxShadow", "\"\(shadows.joined(separator: ", "))\""))
         }
         result.append(contentsOf: strokeStyles.filter { $0.0 != "boxShadow" })
-        if let blur = drawn.blurFunction {
-            result.append(("filter", "\"\(blur)\""))
+        let castFromContent = caster == .content ? drawn.dropShadowFunctions : []
+        let filters = castFromContent + [drawn.blurFunction].compactMap(\.self)
+        if !filters.isEmpty {
+            result.append(("filter", "\"\(filters.joined(separator: " "))\""))
         }
         if showsBackdrop, let backdrop = drawn.backdropFunction {
             result.append(("backdropFilter", "\"\(backdrop)\""))
@@ -212,11 +218,13 @@ extension ReactEmitter {
     }
 
     /// Whether a node's outer shadows can be drawn by layers of their own: a CSS box that
-    /// holds children and does not clip them — a rectangle, an ellipse drawn as a CSS box
-    /// (no inner radius, a full sweep, as ``emitEllipse(_:data:indent:ctx:isRoot:parentLayout:)``
-    /// decides) or a frame without `clip`, whose `overflow: hidden` would cut the shadow.
+    /// casts them as a `box-shadow` (``shadowCaster(_:)``), holds children and does not clip
+    /// them — a rectangle, an ellipse drawn as a CSS box (no inner radius, a full sweep, as
+    /// ``emitEllipse(_:data:indent:ctx:isRoot:parentLayout:)`` decides) or a frame without
+    /// `clip`, whose `overflow: hidden` would cut the shadow.
     static func layersShadows(_ node: PenNode) -> Bool {
-        switch node.kind {
+        guard shadowCaster(node) == .box else { return false }
+        return switch node.kind {
         case .rectangle:
             true
         case let .ellipse(data):

@@ -103,11 +103,12 @@
         /// and turned `fill_container` flex children, whose slot is their turned bounds (leaf ozlazY,
         /// `scripts/gen-turned-fill-fixture`, exported after Pen's settled relayout); and inner
         /// shadows on SVG shapes and icons, and painted strokes on lines (leaf 4fZZ38,
-        /// `scripts/gen-react-fx-fixtures`).
+        /// `scripts/gen-react-fx-fixtures`); and outer shadows cast from a frame's or a shape's
+        /// content, pen CLI 0.3.13's `render-content-shadows` (leaf S1cB6z).
         nonisolated static let gapFixtures = [
             "render-font-faces", "render-angular-shapes", "render-inner-sides", "render-unstroked-lines",
             "render-stroke-bands", "render-sizeless-frames", "render-turned-fill", "render-inner-shadow-shapes",
-            "render-painted-lines",
+            "render-painted-lines", "render-content-shadows",
         ]
 
         /// `codegen-slots.pen`'s pages, whose instances fill their components' slots — or

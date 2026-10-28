@@ -72,9 +72,9 @@ struct ReactEmitterStrokePlacementTests {
     func strokeAboveShadows() throws {
         let content = try rectangle(
             width: "8",
-            extra: ##", "effect": {"type": "shadow", "shadowType": "outer", "color": "#000000", "offset": {"x": 0, "y": 4}, "blur": 6}"##
+            extra: ##", "fill": "#FFFFFF", "effect": {"type": "shadow", "shadowType": "outer", "color": "#000000", "offset": {"x": 0, "y": 4}, "blur": 6}"##
         )
-        #expect(content.contains(##"boxShadow: "inset 0 0 0 4px #FF0000, 0 0 0 4px #FF0000, 0px 4px 6px 4px #000000","##), "\(content)")
+        #expect(content.contains(##"boxShadow: "inset 0 0 0 4px #FF0000, 0 0 0 4px #FF0000, 0px 4px 6px 4px #010101","##), "\(content)")
     }
 
     // MARK: - Per-side strokes (hPsLl7)

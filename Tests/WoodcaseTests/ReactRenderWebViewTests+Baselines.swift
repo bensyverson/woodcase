@@ -17,12 +17,14 @@
             case autoTextWidth = "an auto-width label's width stays fractional where Pen rounds it up, and a row of them drifts"
             /// `backdropFilter` is emitted, but the WebKit snapshot does not draw it.
             case backdropNotCaptured = "backdropFilter is emitted, but the WebKit snapshot draws no backdrop-filter"
-            /// A group's outer shadow is a `drop-shadow` of what it paints, not Pen's silhouette:
-            /// a CSS limit, kept by Ben's ruling of 2026-09-27.
-            case groupDropShadow = "a group's shadow is a drop-shadow of its painted content: translucent children cast a fainter shadow that shows through them, and a line, a child's own shadow and a frame child's overhang cast one too"
-            /// A frame's outer shadow is a `box-shadow` of its box, where Pen CLI 0.3.13 casts it
-            /// from the frame's content; not yet followed in React (leaf LB02SZ's report).
-            case frameBoxShadow = "a frame's shadow is a box-shadow of its box: Pen CLI 0.3.13 casts it from the frame's content, so a fill-less frame's box shadows and its children cast nothing"
+            /// A group's, or a fill-less frame's, outer shadow is a `drop-shadow` of what it
+            /// paints, not Pen's opaque silhouette: a CSS limit, kept by Ben's ruling of
+            /// 2026-09-27 for groups and followed for frames with leaf S1cB6z.
+            case contentDropShadow = "the shadow is a drop-shadow of the painted content: translucent children cast a fainter shadow that shows through them, and a child's own shadow casts one too"
+            /// A frame under a translucent fill keeps its `box-shadow`, exact for its box, and
+            /// its children reaching past the box cast nothing: a `drop-shadow` would cast the
+            /// fill faint and show through it, which measured worse (leaf S1cB6z).
+            case translucentFillOverhang = "a frame under a translucent fill casts its box: children reaching past it cast no shadow"
             /// A group's inner shadow is not written, and generating it warns: a CSS limit.
             case groupInnerShadow = "React writes no inner shadow on a group, and warns: CSS has no filter for one"
             /// React writes no inner shadow on text, and generating it warns: a CSS limit, kept
@@ -72,16 +74,21 @@
             // Group shadows are drop-shadows since leaf 0M8jRo; `group-outer` (0.482) and
             // `group-child-shadow` (1.124) now gate at CG + 1.0. Before, with no shadow at all:
             // translucent 10.713, stroke-path 5.976, inner 6.739, nested 9.356 and frame-child
-            // 4.399, which the drop-shadow of the frame's overhanging child makes worse.
-            // Measured 2026-10-28 (leaf LB02SZ, `swift test --quiet`) against `pen` CLI 0.3.13's
-            // references, which cast a frame's shadow from its content; the CG renderer follows.
-            "render-shadows-outer-frame-children": (20.559, .frameBoxShadow),
-            "render-sizeless-frames-paint": (2.355, .frameBoxShadow),
-            "render-group-shadows-group-translucent": (7.153, .groupDropShadow),
-            "render-group-shadows-group-stroke-path": (1.614, .groupDropShadow),
+            // 4.399. Against pen CLI 0.3.13's references `group-stroke-path` (0.034) and
+            // `group-frame-child` (0.223) match CG, and gate at CG + 1.0 (leaf S1cB6z).
+            // A frame's shadow is cast from its content since leaf S1cB6z (`ShadowCaster`):
+            // `render-shadows-outer-frame-children` 20.559 → 0.042 and `render-sizeless-frames-paint`
+            // 2.355 → 0.037 now gate at CG + 1.0, as do twelve of the fourteen
+            // `render-content-shadows` boards (4.4–16.6 → 0.00–0.66). Measured 2026-10-28 with
+            // `swift test -j 3 --filter ReactRenderWebViewTests`.
+            "render-content-shadows-translucent-children": (6.513, .contentDropShadow),
+            // `filled-clipped` (6.388 → 0.563) left with the opaque-black box-shadow written
+            // `#010101`, which WebKit draws. A drop-shadow here measured 12.595 (faint, and seen
+            // through the fill); the 4.418 is the overhanging ellipse's missing shadow.
+            "render-content-shadows-frame-translucent-fill": (4.418, .translucentFillOverhang),
+            "render-group-shadows-group-translucent": (7.153, .contentDropShadow),
             "render-group-shadows-group-inner": (6.739, .groupInnerShadow),
-            "render-group-shadows-group-nested": (1.555, .groupDropShadow),
-            "render-group-shadows-group-frame-child": (6.498, .groupDropShadow),
+            "render-group-shadows-group-nested": (1.544, .contentDropShadow),
             "render-text-shadows-text-inner": (5.094, .textInnerShadow),
             "render-text-shadows-text-inner-soft": (3.024, .textInnerShadow),
             "render-text-shadows-text-inner-outer": (3.775, .textInnerShadow),

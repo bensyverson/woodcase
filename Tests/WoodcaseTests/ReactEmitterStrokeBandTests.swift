@@ -82,7 +82,7 @@ struct ReactEmitterStrokeBandTests {
     @Test("An outer stroke is a spread box-shadow on top of the node's shadows, which it grows by its width")
     func outerStrokeSpread() throws {
         let content = try card(child: """
-        {"type": "rectangle", "id": "Box01", "name": "Box", "width": 100, "height": 60, "cornerRadius": 10,
+        {"type": "rectangle", "id": "Box01", "name": "Box", "width": 100, "height": 60, "cornerRadius": 10, "fill": "#808080",
          "stroke": "#00FF00", "strokeWidth": 12, "strokeAlignment": "outer", \(Self.shadow)}
         """)
         #expect(content.contains(##"boxShadow: "0 0 0 12px #00FF00, 10px 10px 8px 12px #FFFFFF","##), "\(content)")
@@ -92,7 +92,7 @@ struct ReactEmitterStrokeBandTests {
     @Test("A centered stroke grows the node's shadows by half its width")
     func centeredStrokeSpread() throws {
         let content = try card(child: """
-        {"type": "rectangle", "id": "Box01", "name": "Box", "width": 100, "height": 60,
+        {"type": "rectangle", "id": "Box01", "name": "Box", "width": 100, "height": 60, "fill": "#808080",
          "stroke": "#00FF00", "strokeWidth": 12, \(Self.shadow)}
         """)
         #expect(content.contains(##"boxShadow: "inset 0 0 0 6px #00FF00, 0 0 0 6px #00FF00, 10px 10px 8px 6px #FFFFFF","##), "\(content)")
@@ -102,7 +102,7 @@ struct ReactEmitterStrokeBandTests {
     @Test("An inner stroke leaves the node's shadows as they are")
     func innerStrokeNoSpread() throws {
         let content = try card(child: """
-        {"type": "rectangle", "id": "Box01", "name": "Box", "width": 100, "height": 60,
+        {"type": "rectangle", "id": "Box01", "name": "Box", "width": 100, "height": 60, "fill": "#808080",
          "stroke": "#00FF00", "strokeWidth": 12, "strokeAlignment": "inner", \(Self.shadow)}
         """)
         #expect(content.contains(##"boxShadow: "inset 0 0 0 12px #00FF00, 10px 10px 8px #FFFFFF","##), "\(content)")
@@ -112,7 +112,7 @@ struct ReactEmitterStrokeBandTests {
     @Test("A stroke width with no stroke paint grows no shadow")
     func unpaintedStrokeNoSpread() throws {
         let content = try card(child: """
-        {"type": "rectangle", "id": "Box01", "name": "Box", "width": 100, "height": 60,
+        {"type": "rectangle", "id": "Box01", "name": "Box", "width": 100, "height": 60, "fill": "#808080",
          "strokeWidth": 12, "strokeAlignment": "outer", \(Self.shadow)}
         """)
         #expect(content.contains(##"boxShadow: "10px 10px 8px #FFFFFF","##), "\(content)")
@@ -131,7 +131,7 @@ struct ReactEmitterStrokeBandTests {
     @Test("A blended shadow's layer is grown by the stroke too")
     func layeredShadowSpread() throws {
         let content = try card(child: """
-        {"type": "rectangle", "id": "Box01", "name": "Box", "width": 100, "height": 60,
+        {"type": "rectangle", "id": "Box01", "name": "Box", "width": 100, "height": 60, "fill": "#808080",
          "stroke": "#00FF00", "strokeWidth": 12, "strokeAlignment": "outer",
          "effect": {"type": "shadow", "shadowType": "outer", "color": "#FFFFFF", "offset": {"x": 10, "y": 10}, "blur": 8, "blendMode": "multiply"}}
         """)

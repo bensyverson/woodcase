@@ -28,7 +28,8 @@ extension ReactEmitter {
             styles.append(("height", cssHeight))
         }
 
-        let shadowLayers = shadowLayerStyles(data.effects, borderRadius: data.cornerRadius.flatMap(emitCornerRadius), stroke: data)
+        let shadowLayers = layersShadows(node)
+            ? shadowLayerStyles(data.effects, borderRadius: data.cornerRadius.flatMap(emitCornerRadius), stroke: data) : nil
         let box = FillBox(width: data.width, height: data.height)
         let fills = PaintSplit(data.fills)
         let dashedOverlay = dashedStrokeOverlay(node, stroke: data, box: box, beneathChildren: false, ctx: ctx)
@@ -39,8 +40,9 @@ extension ReactEmitter {
             stroke: data,
             strokeDrawnByOverlay: dashedOverlay != nil,
             effects: data.effects,
-            showsBackdrop: data.fills?.hasVisiblePaint == true,
+            showsBackdrop: paintsBox(data.fills),
             layered: shadowLayers != nil,
+            caster: shadowCaster(node),
             ctx: ctx
         ))
         let layersOverFill = liftingInsetShadows(
@@ -150,7 +152,7 @@ extension ReactEmitter {
 
             styles.append(("borderRadius", "\"50%\""))
 
-            let shadowLayers = shadowLayerStyles(data.effects, borderRadius: "\"50%\"", stroke: data)
+            let shadowLayers = layersShadows(node) ? shadowLayerStyles(data.effects, borderRadius: "\"50%\"", stroke: data) : nil
             let box = FillBox(width: data.width, height: data.height)
             let fills = PaintSplit(data.fills)
             styles.append(contentsOf: emitVisualStyles(
@@ -159,8 +161,9 @@ extension ReactEmitter {
                 cornerRadius: nil,
                 stroke: data,
                 effects: data.effects,
-                showsBackdrop: data.fills?.hasVisiblePaint == true,
+                showsBackdrop: paintsBox(data.fills),
                 layered: shadowLayers != nil,
+                caster: shadowCaster(node),
                 ctx: ctx
             ))
             let layersOverFill = liftingInsetShadows(

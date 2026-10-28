@@ -177,6 +177,7 @@ struct ReactEmitterTests {
                 id: "c1",
                 common: PenNodeCommon(name: "Component/Card", reusable: true, metadata: ["type": "component"]),
                 kind: .frame(PenNode.FrameData(
+                    fills: .single(.shorthand("#FFFFFF")),
                     stroke: .single(.shorthand("#000")),
                     strokeWidth: .uniform(.literal(2)),
                     strokeAlignment: .inner,
@@ -748,6 +749,7 @@ struct ReactEmitterTests {
                 id: "c1",
                 common: PenNodeCommon(name: "Component/Card", reusable: true, metadata: ["type": "component"]),
                 kind: .frame(PenNode.FrameData(
+                    fills: .single(.shorthand("#FFFFFF")),
                     effects: .multiple([
                         .shadow(PenEffect.PenShadowEffect(
                             shadowType: .outer,
