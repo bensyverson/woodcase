@@ -60,17 +60,30 @@ never re-derived from SVG's own primitives.
 | Frame `clip` | a `clipPath` on its children |
 | Opacity | the node's `<g opacity>` |
 | Blend mode | `mix-blend-mode` on the node's or paint's element; a node whose paints blend draws them in a `<g style="isolation:isolate">`, so a paint blends only with the paints beneath it on its node (Ben's reading-1 ruling, 2026-10-20) |
-| Outer shadow | a filter on the node's silhouette: blur, offset, flood, knocked out under the silhouette; a spread (``PenShadowSpread``) dilates or erodes the silhouette first with `feMorphology` |
+| Outer shadow | a filter on the node's silhouette — what it paints, with a frame's or a group's descendants' silhouettes, cut where a frame clips — as one element: blur, offset, flood, knocked out under the silhouette; a spread (``PenShadowSpread``) grows the node's own path along its outline, and a mask of the ungrown silhouette knocks the shadow out |
 | Inner shadow | a filter on the silhouette's complement, kept inside it; a spread dilates the complement first |
 | Layer blur | `feGaussianBlur` on the node's `<g>`, sigma half the radius |
 | Text | real `<text>`, one `<tspan>` per styled run per line |
 | Icon | its glyph's outline, as a `<path>` |
 | Instance | its expanded subtree (expand the document first) |
 
-`feMorphology`'s kernel is a square, so a spread grows a rounded or slanted edge square,
-where the CG renderer grows it along the outline: a corner differs by up to the spread ×
-(√2 − 1). It works on any silhouette, so a text's, an icon's and a group's spread shadows
-— which the CG renderer casts without spread — draw spread in the SVG.
+An outer shadow is cast as the CG renderer casts it (<doc:PenRendering>, *Shadows*): the
+silhouette is what the node paints (``PenShadowSilhouette/path(for:rect:)`` for a shape's
+fills and stroke, a line's stroke included; a text's or an icon's glyphs, whatever they are
+painted with — a fill-less text or icon draws only its shadows) united with a
+frame's or a group's enabled descendants' own silhouettes, recursively — their opacity,
+blend mode, effects and shadows ignored — each frame's children cut to it where it clips.
+The pieces sit under one filtered element, so they cast one shadow from their union, never
+a darker one where they meet. A spread grows only the node's own path, with the CG
+renderer's ``PenShadowSilhouette/spread(_:rule:by:)``; glyphs and descendants cast as they
+are. Since the filter's source is then the grown silhouette, the shadow is knocked out by a
+luminance `mask` of the ungrown one instead of inside the filter. Until leaf `Fq1RBB` a
+spread was an `feMorphology` over the whole silhouette, which grew a rounded or slanted edge
+square and grew glyphs and descendants too.
+
+An inner shadow's spread is still an `feMorphology` over the silhouette's complement: its
+square kernel grows a rounded or slanted edge square, where the CG renderer shrinks the
+shape along its outline, so a corner differs by up to the spread × (√2 − 1).
 
 A shadow's offset is written as authored, in the node's own coordinates, so it turns and
 flips with the node and its ancestors, as Pen and the CG renderer cast it. (Before leaf
@@ -116,13 +129,6 @@ These degrade, on purpose:
 > **Correction, 2026-10-20 (leaf 8nwlNY):** this entry said the CG renderer drew linear burn
 > and linear dodge as multiply and screen; since leaf 22DryP it draws Photoshop's true
 > linear burn and add.
-- **A group's silhouette** is built from its descendants' outlines, as Pen casts it; a
-  descendant's own clip does not cut it.
-- **A frame's shadow is cast by its own paint alone.** Each shape casts what its fill and
-  stroke paint (``PenShadowSilhouette/path(for:rect:)``, shared with the CG renderer), but a
-  frame's children and a line still cast nothing, as Pen 1.2.16 cast them; `pen` CLI 0.3.13
-  and the CG renderer cast both (<doc:PenRendering>, *Shadows*). `render-shadows` and
-  `render-group-shadows` measure 1.08 and 1.16 against CG for it (leaf `LB02SZ`).
 
 ## How Close It Is
 
@@ -139,8 +145,8 @@ CG render of the same region, both at 2x. Measured 2026-10-14 with
 | render-rotated-free | 0.045 |
 | render-transforms-and-effects | 0.068 |
 | render-text-fills | 0.152 |
-| render-shadows | 0.153 |
-| render-group-shadows | 0.187 |
+| render-shadows | 0.151 (2026-10-28, `swift test --filter SVGExport`) |
+| render-group-shadows | 0.213 (2026-10-28, `swift test --filter SVGExport`) |
 | render-text | 0.236 |
 | render-inner-shadow-shapes | 0.252 |
 | render-stroke-fills | 0.439 |

@@ -476,7 +476,7 @@ svg-render-background-blur,1.65,2.5
 svg-render-clipping-and-gradients,0.00,0.2
 svg-render-free-groups,0.01,0.3
 svg-render-gradients,0.00,0.2
-svg-render-group-shadows,1.16,1.8
+svg-render-group-shadows,0.21,0.5
 svg-render-icon-placement,0.66,1.0
 svg-render-image-crops,0.03,0.3
 svg-render-inner-shadow-shapes,0.25,0.5
@@ -484,7 +484,7 @@ svg-render-mesh-gradients,0.00,0.2
 svg-render-painted-lines,0.00,0.2
 svg-render-per-side-strokes,0.00,0.2
 svg-render-rotated-free,0.04,0.3
-svg-render-shadows,1.08,1.6
+svg-render-shadows,0.15,0.4
 svg-render-shapes-and-fills,0.00,0.2
 svg-render-stroke-fills,0.44,0.7
 svg-render-strokes-and-paths,0.00,0.2

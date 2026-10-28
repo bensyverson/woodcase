@@ -59,12 +59,13 @@
             Board(fixture: "render-painted-lines", limit: 0.25), // measured 0.000
             Board(fixture: "render-rotated-free", limit: 0.30), // measured 0.045
             Board(fixture: "render-free-groups", limit: 0.26), // measured 0.008
-            // The two shadow fixtures measured 0.153 and 0.187 until the CG renderer cast a
-            // frame's shadow from its children and a line's from its stroke, as `pen` CLI 0.3.13
-            // does (leaf LB02SZ, 2026-10-28, `swift test --quiet`); the SVG export does not yet.
-            Board(fixture: "render-shadows", limit: 1.63), // measured 1.082
+            // The two outer-shadow fixtures measured 1.082 and 1.160 after the CG renderer cast
+            // a frame's shadow from its children and a line's from its stroke (leaf LB02SZ), and
+            // 0.151 and 0.213 once the SVG export cast them too (leaf Fq1RBB, 2026-10-28,
+            // `swift test --filter SVGExport`).
+            Board(fixture: "render-shadows", limit: 0.40), // measured 0.151
             Board(fixture: "render-inner-shadow-shapes", limit: 0.50), // measured 0.252
-            Board(fixture: "render-group-shadows", limit: 1.75), // measured 1.160
+            Board(fixture: "render-group-shadows", limit: 0.46), // measured 0.213
             Board(fixture: "render-image-crops", limit: 0.28), // measured 0.029
             Board(fixture: "render-angular-shapes", limit: 0.25), // measured 0.000
             Board(fixture: "render-mesh-gradients", limit: 0.25), // measured 0.000

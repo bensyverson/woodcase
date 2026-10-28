@@ -27,35 +27,56 @@ extension SVGWriter {
         }
     }
 
-    /// Each outer shadow cast by `silhouette`, as Pen casts it: blurred, moved, in its color,
-    /// and knocked out where the silhouette is, so a translucent fill never shows its own
-    /// shadow through it. A spread grows the cast silhouette first (`Cast.morphology(of:)`).
+    /// One outer shadow cast by `silhouette`, as Pen casts it: blurred, moved, in its color,
+    /// and knocked out where the ungrown silhouette is, so a translucent fill never shows its
+    /// own shadow through it.
     ///
     /// - Parameters:
-    ///   - shadows: The outer shadows, in order, with their spreads.
-    ///   - silhouette: What casts them, drawn opaque.
+    ///   - shadow: The shadow.
+    ///   - silhouette: What casts it, drawn opaque — grown already when it is spread.
+    ///   - knockout: The ungrown silhouette, when `silhouette` was grown: the shadow is
+    ///     masked out under it. `nil` knocks it out under `silhouette` itself, in the filter.
     ///   - region: The silhouette's bounds, in the node's coordinates.
-    /// - Returns: One element per shadow: the silhouette, filtered to its shadow alone.
-    func outerShadows(
-        _ shadows: [PenCastShadow],
+    /// - Returns: The silhouette, filtered to its shadow alone.
+    func outerShadow(
+        _ shadow: PenEffect.PenShadowEffect,
         silhouette: SVGElement,
+        knockout: SVGElement?,
         region: CGRect
-    ) -> [SVGElement] {
-        shadows.map { entry in
-            let shadow = entry.shadow
-            let cast = Cast(shadow, spread: entry.spread)
-            let filter = SVGElement("filter", cast.region(around: region), children: cast.morphology(of: "SourceAlpha") + [
-                SVGElement("feGaussianBlur", ["in": cast.grown("SourceAlpha"), "stdDeviation": cast.deviation.svgNumber]),
-                SVGElement("feOffset", ["dx": cast.dx.svgNumber, "dy": cast.dy.svgNumber, "result": "cast"]),
-                SVGElement("feFlood", ["flood-color": cast.color.svgColor, "flood-opacity": cast.color.svgAlpha]),
-                SVGElement("feComposite", ["in2": "cast", "operator": "in", "result": "shadow"]),
-                SVGElement("feComposite", ["in": "shadow", "in2": "SourceAlpha", "operator": "out"]),
-            ])
-            var element = silhouette
-            element["filter"] = define(filter, prefix: "shadow")
-            element["style"] = shadow.blendMode?.svgStyle
-            return element
+    ) -> SVGElement {
+        let cast = Cast(shadow)
+        var primitives = [
+            SVGElement("feGaussianBlur", ["in": "SourceAlpha", "stdDeviation": cast.deviation.svgNumber]),
+            SVGElement("feOffset", ["dx": cast.dx.svgNumber, "dy": cast.dy.svgNumber, "result": "cast"]),
+            SVGElement("feFlood", ["flood-color": cast.color.svgColor, "flood-opacity": cast.color.svgAlpha]),
+            SVGElement("feComposite", ["in2": "cast", "operator": "in", "result": "shadow"]),
+        ]
+        if knockout == nil {
+            primitives.append(SVGElement("feComposite", ["in": "shadow", "in2": "SourceAlpha", "operator": "out"]))
         }
+        var element = silhouette
+        element["filter"] = define(SVGElement("filter", cast.region(around: region), children: primitives), prefix: "shadow")
+        if let knockout {
+            element = SVGElement("g", ["mask": knockoutMask(knockout, area: cast.area(around: region))], children: [element])
+        }
+        element["style"] = shadow.blendMode?.svgStyle
+        return element
+    }
+
+    /// A luminance mask that keeps everything in `area` but `silhouette`: white over the
+    /// area, the silhouette in its opaque black over that.
+    ///
+    /// - Returns: `url(#…)` for the mask.
+    private func knockoutMask(_ silhouette: SVGElement, area: CGRect) -> String {
+        let bounds: KeyValuePairs<String, String?> = [
+            "x": Double(area.minX).svgNumber, "y": Double(area.minY).svgNumber,
+            "width": Double(area.width).svgNumber, "height": Double(area.height).svgNumber,
+        ]
+        var white = SVGElement("rect", bounds)
+        white["fill"] = "#FFFFFF"
+        var mask = SVGElement("mask", bounds, children: [white, silhouette])
+        mask["maskUnits"] = "userSpaceOnUse"
+        return define(mask, prefix: "knockout")
     }
 
     /// Each inner shadow inside `silhouette`: the inverse of the silhouette, blurred,
@@ -147,10 +168,15 @@ extension SVGWriter {
             color = shadow.color?.literalValue.flatMap(PenHexColor.init) ?? PenHexColor(red: 0, green: 0, blue: 0, alpha: 128)
         }
 
+        /// The area around `bounds` that holds the whole shadow.
+        func area(around bounds: CGRect) -> CGRect {
+            let reach = 3 * deviation + abs(dx) + abs(dy) + max(spread, 0) + 2
+            return bounds.insetBy(dx: -reach, dy: -reach)
+        }
+
         /// The filter region around `bounds` that holds the whole shadow.
         func region(around bounds: CGRect) -> KeyValuePairs<String, String?> {
-            let reach = 3 * deviation + abs(dx) + abs(dy) + max(spread, 0) + 2
-            return Self.filterRegion(bounds.insetBy(dx: -reach, dy: -reach))
+            Self.filterRegion(area(around: bounds))
         }
 
         /// The primitive that grows `input` by the spread — `feMorphology`, dilating or, for a

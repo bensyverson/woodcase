@@ -31,17 +31,14 @@ extension SVGWriter {
         case let .path(data):
             shape(node, fills: data.fills, stroke: data, box: box, effects: effects)
         case let .line(data):
-            line(node, data: data, box: box)
+            line(node, data: data, box: box, effects: effects)
         case .text:
             text(node, box: box, effects: effects)
         case let .icon(data):
             icon(node, data: data, box: box, effects: effects)
         case .group:
             // A group paints nothing but its children; they cast its shadows.
-            outerShadows(
-                effects.outerShadows, silhouette: groupSilhouette(of: node.kind.inlineChildren),
-                region: groupRegion(node, box: box)
-            )
+            outerShadows(effects.outerShadows, of: node, box: box)
         default:
             []
         }
@@ -57,11 +54,7 @@ extension SVGWriter {
     ) -> [SVGElement] {
         guard let outline = PenShapeBuilder.buildPath(for: node, rect: box) else { return [] }
         let rule = PenShapeBuilder.fillRule(for: node)
-        var elements: [SVGElement] = []
-        if !effects.outerShadows.isEmpty, let silhouette = PenShadowSilhouette.path(for: node, rect: box) {
-            let ink = SVGShape(path: silhouette.path, rule: silhouette.rule).element(fill: "#000000")
-            elements += outerShadows(effects.outerShadows, silhouette: ink, region: silhouette.path.boundingBoxOfPath)
-        }
+        let elements = outerShadows(effects.outerShadows, of: node, box: box)
         let shape = SVGShape(path: outline, rule: rule)
         var paints = paint(fills, through: shape, domain: box.cgRect)
         paints += innerShadows(effects.innerShadows, silhouette: shape.element(fill: "#000000"), region: outline.boundingBoxOfPath)
@@ -73,11 +66,12 @@ extension SVGWriter {
         return elements + isolatingPaints(of: node, paints)
     }
 
-    /// A line: only its stroke, laid over its band where it has no extent.
-    private func line(_ node: PenNode, data: PenNode.LineData, box: PenRect) -> [SVGElement] {
+    /// A line: its stroke's outer shadows, then its stroke, laid over its band where it has
+    /// no extent.
+    private func line(_ node: PenNode, data: PenNode.LineData, box: PenRect, effects: Effects) -> [SVGElement] {
         guard let path = PenShapeBuilder.buildPath(for: node, rect: box) else { return [] }
         let stroke = data.drawn(on: node)
-        return isolatingPaints(of: node, self.stroke(
+        return outerShadows(effects.outerShadows, of: node, box: box) + isolatingPaints(of: node, self.stroke(
             stroke, path: path, box: PenRenderer.lineBand(box, strokeWidth: stroke.uniformStrokeWidth ?? 1),
             roundedBox: nil, dash: node.strokeDash, miterLimit: node.strokeMiterLimit
         ))
@@ -92,24 +86,16 @@ extension SVGWriter {
         effects: Effects
     ) -> [SVGElement] {
         let size = CGSize(width: box.width, height: box.height)
-        guard PenGlyphPaint(fills: data.fills) != .nothing,
-              let glyph = PenIconGlyph(data: data, box: size)
-        else { return [] }
+        guard let glyph = PenIconGlyph(data: data, box: size) else { return [] }
         let outline = glyph.outlines().path
         guard !outline.isEmpty else { return [] }
         let shape = SVGShape(path: outline, rule: .winding)
         let ink = shape.element(fill: "#000000")
-        return outerShadows(effects.outerShadows, silhouette: ink, region: outline.boundingBoxOfPath)
-            + isolatingPaints(
-                of: node,
-                paint(data.fills, through: shape, domain: box.cgRect)
-                    + innerShadows(effects.innerShadows, silhouette: ink, region: outline.boundingBoxOfPath)
-            )
-    }
-
-    /// What a group may paint, in its own coordinates: the region its shadows' filters
-    /// must cover.
-    func groupRegion(_ node: PenNode, box: PenRect) -> CGRect {
-        (PenLayoutEngine.localPaintedExtent(of: node, box: box, layoutRects: layoutRects) ?? box).cgRect
+        // The glyph casts its shadows in ink whatever it is painted with, none included, as
+        // the CG renderer casts them (``PenShadowSilhouette``).
+        let outer = outerShadows(effects.outerShadows, of: node, box: box, glyphs: (ink, outline.boundingBoxOfPath))
+        let inner = innerShadows(effects.innerShadows, silhouette: ink, region: outline.boundingBoxOfPath)
+        guard PenGlyphPaint(fills: data.fills) != .nothing else { return outer + inner }
+        return outer + isolatingPaints(of: node, paint(data.fills, through: shape, domain: box.cgRect) + inner)
     }
 }

@@ -27,8 +27,7 @@ extension SVGWriter {
         let fills = data.fills
         let paint = PenGlyphPaint(fills: fills)
         let hasOwnFills = node.appliedRuns.contains { $0.fill != nil }
-        guard paint != .nothing || hasOwnFills,
-              let layout = PenTextLayout(node, box: CGSize(width: box.width, height: box.height)),
+        guard let layout = PenTextLayout(node, box: CGSize(width: box.width, height: box.height)),
               !layout.lines.lines.isEmpty
         else { return [] }
 
@@ -36,7 +35,11 @@ extension SVGWriter {
         let region = (layout.inkBounds ?? .null).union(box.cgRect)
         let ink = shape.element(fill: "#000000")
 
-        let elements = outerShadows(effects.outerShadows, silhouette: ink, region: region)
+        // The glyphs cast their shadows in ink whatever they are painted with, none included,
+        // as the CG renderer casts them (``PenShadowSilhouette``).
+        let elements = outerShadows(effects.outerShadows, of: node, box: box, glyphs: (ink, region))
+        let innerShadows = innerShadows(effects.innerShadows, silhouette: ink, region: region)
+        guard paint != .nothing || hasOwnFills else { return elements + innerShadows }
         var paints: [SVGElement] = []
         switch paint {
         case .nothing:
@@ -46,8 +49,7 @@ extension SVGWriter {
         case .glyphOutlines:
             paints += self.paint(fills, through: shape, domain: box.cgRect)
         }
-        paints += innerShadows(effects.innerShadows, silhouette: ink, region: region)
-        return elements + isolatingPaints(of: node, paints)
+        return elements + isolatingPaints(of: node, paints + innerShadows)
     }
 
     /// A text node's glyphs as a region to paint, or `nil` when it sets no lines.

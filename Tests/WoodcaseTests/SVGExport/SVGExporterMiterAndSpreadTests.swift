@@ -6,7 +6,8 @@
 
     /// A node's miter limit and shadow spreads in an SVG export (leaf zRp9CO): the limit as
     /// `stroke-miterlimit`, Pen's 4 unless `metadata.woodcase.strokeMiterLimit` says
-    /// otherwise; a spread as an `feMorphology` that grows the shape a shadow is cast by.
+    /// otherwise; an outer shadow's spread as the node's path grown along its outline, as the
+    /// CG renderer grows it, and an inner shadow's as an `feMorphology` of its inverse.
     struct SVGExporterMiterAndSpreadTests {
         private typealias Fixture = SVGExportFixture
 
@@ -35,14 +36,17 @@
             #expect(try miterLimit(svg(woodcase: #""strokeMiterLimit": 10"#)) == "10")
         }
 
-        @Test("A spread outer shadow dilates the silhouette; a negative one erodes it")
+        @Test("A spread outer shadow is cast by the silhouette's path grown, or shrunk, along its outline")
         func outerSpread() throws {
-            let grown = try Fixture.elements("feMorphology", in: svg(woodcase: #""shadowSpread": [{"effect": 0, "spread": 4, "shadow": SHADOW}]"#))
-            #expect(grown.count == 1)
-            #expect(grown.first.flatMap { Fixture.attribute("operator", of: $0) } == "dilate")
-            #expect(grown.first.flatMap { Fixture.attribute("radius", of: $0) } == "4")
-            let shrunk = try Fixture.elements("feMorphology", in: svg(woodcase: #""shadowSpread": [{"effect": 0, "spread": -3, "shadow": SHADOW}]"#))
-            #expect(shrunk.first.flatMap { Fixture.attribute("operator", of: $0) } == "erode")
+            for spread in [4, -3] {
+                let xml = try svg(woodcase: #""shadowSpread": [{"effect": 0, "spread": \#(spread), "shadow": SHADOW}]"#)
+                #expect(try Fixture.elements("feMorphology", in: xml).isEmpty, "grown as the CG renderer grows it, not by a square kernel")
+                let filtered = try xml.nodes(forXPath: "//*[local-name()='path'][@filter]").compactMap { $0 as? XMLElement }
+                let silhouette = try #require(filtered.first.flatMap { Fixture.attribute("d", of: $0) })
+                let fill = try Fixture.elements("path", in: xml).first { Fixture.attribute("fill", of: $0) == "#FFFFFF" }
+                #expect(silhouette != fill.flatMap { Fixture.attribute("d", of: $0) }, "spread \(spread) changes the outline")
+                #expect(try Fixture.elements("mask", in: xml).count == 1, "knocked out under the ungrown silhouette")
+            }
         }
 
         @Test("A spread inner shadow dilates the inverse it is cast from")
