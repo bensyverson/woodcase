@@ -54,7 +54,7 @@ Woodcase includes a command-line tool that reads, edits and renders `.pen` files
 
 ### Install
 
-With Homebrew (macOS 15+, Xcode 26; builds from source):
+With Homebrew (macOS 15+; a prebuilt binary on Apple silicon, otherwise it builds from source with Xcode 26):
 
 ```bash
 brew install bensyverson/tap/woodcase
