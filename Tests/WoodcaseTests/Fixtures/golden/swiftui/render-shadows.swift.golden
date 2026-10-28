@@ -156,7 +156,19 @@ public struct OuterFrameChildren: View {
                     .offset(x: 70, y: 70)
             }
             .frame(width: 140, height: 140, alignment: .topLeading)
-            .penDropShadow(Rectangle(), color: Color(hex: 0x000000), radius: 3, x: 10, y: 10)
+            .penContentShadows(outer: [PenShadowStyle(color: Color(hex: 0x000000), radius: 3, x: 10, y: 10)]) {
+                ZStack(alignment: .topLeading) {
+                    Rectangle()
+                        .fill(Color(hex: 0x000000))
+                        .frame(width: 50, height: 50)
+                        .offset(x: 10, y: 10)
+                    Ellipse()
+                        .fill(Color(hex: 0x000000))
+                        .frame(width: 50, height: 50)
+                        .offset(x: 70, y: 70)
+                }
+                .frame(width: 140, height: 140, alignment: .topLeading)
+            }
             .offset(x: 30, y: 30)
         }
         .frame(width: 200, height: 200, alignment: .topLeading)

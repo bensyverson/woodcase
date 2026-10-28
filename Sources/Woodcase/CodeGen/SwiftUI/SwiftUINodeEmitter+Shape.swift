@@ -167,7 +167,7 @@ extension SwiftUINodeEmitter {
             view = view.modified(".compositingGroup()")
         }
         warnUnemitted(node, unemitted)
-        let silhouette = silhouette(of: node, shape: shape, stroke: drawn, box: box, outset: outset)
+        let silhouette = silhouette(of: node, shape: shape, fills: fills, stroke: drawn, box: box, outset: outset)
         return withEffects(view, of: node, effects: effects, fills: fills, silhouette: silhouette)
     }
 

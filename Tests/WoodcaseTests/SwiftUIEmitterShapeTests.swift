@@ -51,14 +51,14 @@ struct SwiftUIEmitterShapeTests {
         #expect(code.contains("private struct Node3dStarShape: Shape {"))
     }
 
-    @Test("A path is stroked through its shape and casts its shadow from it and its stroke band; it is no placeholder")
+    @Test("A fill-less path is stroked through its shape and casts its shadow from its stroke band alone; it is no placeholder")
     func pathStrokeAndShadow() throws {
         let diagnostics = PenDiagnosticCollector()
         let keys = ##""geometry": "M0 0 L10 20 L20 0", "stroke": "#0000FF", "strokeWidth": 4, "strokeLinecap": "round", "effect": {"type": "shadow", "color": "#000000", "blur": 4}"##
         let code = try page(child: path(keys), diagnostics: diagnostics)
         #expect(code.contains("ZigZagShape()\n.stroke(Color(hex: 0x0000FF), style: StrokeStyle(lineWidth: 4, lineCap: .round))"))
         #expect(code.contains(
-            ".penDropShadow(PenSilhouette(ZigZagShape(), stroke: ZigZagShape().penStroke(.center, style: StrokeStyle(lineWidth: 4, lineCap: .round))), color: Color(hex: 0x000000), radius: 2)"
+            ".penDropShadow(ZigZagShape().penStroke(.center, style: StrokeStyle(lineWidth: 4, lineCap: .round)), color: Color(hex: 0x000000), radius: 2)"
         ))
         #expect(!diagnostics.diagnostics.contains { $0.nodeID == "p" })
     }

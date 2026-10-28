@@ -231,6 +231,7 @@ View.onHover(perform:)
 View.onTapGesture(count:perform:)
 View.accessibilityElement(children:)
 View.accessibilityAddTraits(_:)
+View.accessibilityHidden(_:)
 AccessibilityChildBehavior.contain
 AccessibilityTraits.isTabBar
 View.buttonStyle(_:)

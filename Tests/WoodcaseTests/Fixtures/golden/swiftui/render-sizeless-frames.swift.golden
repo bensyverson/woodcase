@@ -161,7 +161,21 @@ public struct Paint: View {
                     .padding(-8)
             }
             .background(Color(hex: 0x808080))
-            .penDropShadow(PenSilhouette(Rectangle(), stroke: PenSideStroke(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8), alignment: .outside)), color: Color(hex: 0xFFFFFF), radius: 4, x: 10, y: 10, outset: CGSize(width: 8, height: 8))
+            .penContentShadows(outer: [PenShadowStyle(color: Color(hex: 0xFFFFFF), radius: 4, x: 10, y: 10)]) {
+                ZStack(alignment: .topLeading) {
+                    Rectangle()
+                        .fill(Color(hex: 0x000000))
+                        .frame(width: 80, height: 40)
+                        .offset(x: 10, y: 10)
+                }
+                .frame(width: 0, height: 0, alignment: .topLeading)
+                .background {
+                    PenSideStroke(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8), alignment: .outside).penOutset(dx: 8, dy: 8)
+                        .fill(Color(hex: 0x000000))
+                        .padding(-8)
+                }
+                .background(Color(hex: 0x000000))
+            }
             .offset(x: 50, y: 50)
         }
         .frame(width: 300, height: 300, alignment: .topLeading)

@@ -7,10 +7,11 @@ import Foundation
 import Testing
 @testable import Woodcase
 
-/// What a stroked node's outer shadow is cast by in emitted SwiftUI: Pen casts it from the
-/// node's silhouette, its shape grown by the part of the stroke band outside it — outside
-/// and centered strokes, per side, on every shape kind — never from a line, and knocks it out
-/// under the whole silhouette. ``SwiftUIRenderTests`` measures the same against Pen's exports
+/// What a stroked node's outer shadow is cast by in emitted SwiftUI: Pen casts it from what
+/// the node paints — its shape where a fill paints, grown by its painted stroke's band
+/// (outside and centered strokes, per side, on every shape kind), a fill-less shape's band
+/// alone, a line's stroke — and knocks it out under the whole silhouette; a frame's children
+/// cast with it (pen CLI 0.3.13). ``SwiftUIRenderTests`` measures the same against Pen's exports
 /// of `render-stroke-shadows` and `render-sizeless-frames`.
 struct SwiftUIEmitterStrokeShadowTests {
     private static let shadow = ##""effect": {"type": "shadow", "color": "#000000", "blur": 4}"##
@@ -65,31 +66,61 @@ struct SwiftUIEmitterStrokeShadowTests {
         ))
     }
 
-    @Test("A frame with children casts its box and its stroke band, not its children")
+    @Test("A frame with children casts them with its own band, as one inked copy of the frame")
     func frameWithChildren() throws {
         let child = ##"{"type": "rectangle", "id": "c", "width": 5, "height": 5, "fill": "#FF00FF"}"##
         let frame = ##"{"type": "frame", "id": "f", "width": 40, "height": 30, "layout": "none", "stroke": "#00FF00", "strokeWidth": 6, "strokeAlignment": "outer", \##(Self.shadow), "children": [\##(child)]}"##
         let code = try body(child: frame)
-        #expect(code.contains(".penDropShadow(PenSilhouette(Rectangle(), stroke: Rectangle().penStroke(.outside, lineWidth: 6)), "))
+        #expect(!code.contains(".penDropShadow("))
+        let shadows = try #require(code.range(of: ".penContentShadows(outer: [PenShadowStyle(color: Color(hex: 0x000000), radius: 2)]) {"))
+        let silhouette = String(code[shadows.upperBound...])
+        #expect(silhouette.contains("width: 5, height: 5"))
+        #expect(!silhouette.contains("0xFF00FF"))
+        #expect(!silhouette.contains("0x00FF00"))
     }
 
-    @Test("A 0×0 frame casts the band laid out from its box, drawn in a box the stroke's reach larger")
+    @Test("A clipping frame whose fill paints casts its own silhouette alone: the fill covers every child the clip leaves")
+    func clippedFilledFrame() throws {
+        let child = ##"{"type": "rectangle", "id": "c", "x": 30, "y": 20, "width": 50, "height": 50, "fill": "#FF00FF"}"##
+        let frame = ##"{"type": "frame", "id": "f", "width": 40, "height": 30, "layout": "none", "clip": true, "fill": "#808080", \##(Self.shadow), "children": [\##(child)]}"##
+        let code = try body(child: frame)
+        #expect(code.contains(".penDropShadow(Rectangle(), color: Color(hex: 0x000000), radius: 2)"))
+        #expect(!code.contains("penContentShadows"))
+    }
+
+    @Test("A 0×0 frame casts its overhanging children with its band")
     func pointFrame() throws {
         let child = ##"{"type": "rectangle", "id": "c", "x": 10, "y": 10, "width": 80, "height": 40, "fill": "#FF00FF"}"##
         let frame = ##"{"type": "frame", "id": "f", "x": 50, "y": 50, "layout": "none", "fill": "#808080", "stroke": "#00FF00", "strokeWidth": 8, "strokeAlignment": "outer", \##(Self.shadow), "children": [\##(child)]}"##
         let code = try body(child: frame, layout: "none")
-        #expect(code.contains(
-            ".penDropShadow(PenSilhouette(Rectangle(), stroke: PenSideStroke(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8), alignment: .outside)), color: Color(hex: 0x000000), radius: 2, outset: CGSize(width: 8, height: 8))"
-        ))
+        let shadows = try #require(code.range(of: ".penContentShadows(outer: "))
+        let silhouette = String(code[shadows.upperBound...])
+        #expect(silhouette.contains("width: 80, height: 40"))
+        #expect(silhouette.contains("PenSideStroke(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8), alignment: .outside)"))
     }
 
-    @Test("An ellipse, a polygon and a path cast their outline and their band")
+    @Test("A fill-less shape casts its stroke's band alone, inside strokes included")
+    func strokeOnly() throws {
+        let outer = try body(child: ##"{"type": "rectangle", "id": "r", "width": 40, "height": 30, \##(Self.shadow), "stroke": "#00FF00", "strokeWidth": 8, "strokeAlignment": "outer"}"##)
+        #expect(outer.contains(".penDropShadow(Rectangle().penStroke(.outside, lineWidth: 8), color: Color(hex: 0x000000), radius: 2)"))
+        let inner = try body(child: ##"{"type": "rectangle", "id": "r", "width": 40, "height": 30, \##(Self.shadow), "stroke": "#00FF00", "strokeWidth": 8, "strokeAlignment": "inner"}"##)
+        #expect(inner.contains(".penDropShadow(Rectangle().penStroke(.inside, lineWidth: 8), color: Color(hex: 0x000000), radius: 2)"))
+    }
+
+    @Test("A shape whose fill is transparent and that has no stroke casts no shadow")
+    func paintsNothing() throws {
+        let code = try body(child: ##"{"type": "rectangle", "id": "r", "width": 40, "height": 30, "fill": "#80808000", \##(Self.shadow)}"##)
+        #expect(!code.contains("penDropShadow"))
+        #expect(!code.contains(".shadow("))
+    }
+
+    @Test("A filled ellipse, polygon and path cast their outline and their band")
     func otherShapes() throws {
-        let ellipse = try body(child: ##"{"type": "ellipse", "id": "e", "width": 30, "height": 20, "stroke": "#00FF00", "strokeWidth": 4, "strokeAlignment": "outer", \##(Self.shadow)}"##)
+        let ellipse = try body(child: ##"{"type": "ellipse", "id": "e", "width": 30, "height": 20, "fill": "#808080", "stroke": "#00FF00", "strokeWidth": 4, "strokeAlignment": "outer", \##(Self.shadow)}"##)
         #expect(ellipse.contains(".penDropShadow(PenSilhouette(Ellipse(), stroke: Ellipse().penStroke(.outside, lineWidth: 4)), "))
-        let polygon = try body(child: ##"{"type": "polygon", "id": "p", "name": "Star", "width": 30, "height": 20, "polygonCount": 5, "stroke": "#00FF00", "strokeWidth": 4, "strokeAlignment": "outer", \##(Self.shadow)}"##)
+        let polygon = try body(child: ##"{"type": "polygon", "id": "p", "name": "Star", "width": 30, "height": 20, "polygonCount": 5, "fill": "#808080", "stroke": "#00FF00", "strokeWidth": 4, "strokeAlignment": "outer", \##(Self.shadow)}"##)
         #expect(polygon.contains(".penDropShadow(PenSilhouette(StarShape(), stroke: StarShape().penStroke(.outside, lineWidth: 4)), "))
-        let path = try body(child: ##"{"type": "path", "id": "h", "name": "Tri", "width": 30, "height": 20, "geometry": "M0 0 L30 0 L15 20 Z", "stroke": "#00FF00", "strokeWidth": 4, \##(Self.shadow)}"##)
+        let path = try body(child: ##"{"type": "path", "id": "h", "name": "Tri", "width": 30, "height": 20, "geometry": "M0 0 L30 0 L15 20 Z", "fill": "#808080", "stroke": "#00FF00", "strokeWidth": 4, \##(Self.shadow)}"##)
         #expect(path.contains(".penDropShadow(PenSilhouette(TriShape(), stroke: TriShape().penStroke(.center, lineWidth: 4)), "))
     }
 
@@ -107,10 +138,10 @@ struct SwiftUIEmitterStrokeShadowTests {
         #expect(code.contains(".penDropShadow(RingShape(), color: Color(hex: 0x000000), radius: 2, eoFill: true)"))
     }
 
-    @Test("A line casts no shadow from its stroke, as Pen casts none")
-    func lineCastsNothing() throws {
+    @Test("A line casts its stroke, centered on it, as pen CLI 0.3.13 does")
+    func lineCastsItsStroke() throws {
         let code = try body(child: ##"{"type": "line", "id": "l", "name": "Rule", "width": 30, "height": 20, "stroke": "#00FF00", "strokeWidth": 4, \##(Self.shadow)}"##)
-        #expect(!code.contains("PenSilhouette"))
+        #expect(code.contains(".penDropShadow(RuleShape().penStroke(.center, lineWidth: 4), color: Color(hex: 0x000000), radius: 2)"))
     }
 
     // MARK: - Helpers

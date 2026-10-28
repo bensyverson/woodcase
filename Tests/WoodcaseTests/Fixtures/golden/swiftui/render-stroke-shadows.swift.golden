@@ -176,7 +176,7 @@ public struct LineDiagonal: View {
                     LdiaShape()
                         .stroke(Color(hex: 0x00FF00), lineWidth: 12)
                 }
-                .penDropShadow(LdiaShape(), color: Color(hex: 0xFFFFFF), radius: 4, x: 10, y: 10)
+                .penDropShadow(LdiaShape().penStroke(.center, lineWidth: 12), color: Color(hex: 0xFFFFFF), radius: 4, x: 10, y: 10)
                 .offset(x: 50, y: 50)
         }
         .frame(width: 240, height: 200, alignment: .topLeading)
@@ -217,7 +217,7 @@ public struct LineFlat: View {
                         .stroke(Color(hex: 0x00FF00), lineWidth: 12)
                         .padding(.vertical, -12)
                 }
-                .penDropShadow(LfltShape(), color: Color(hex: 0xFFFFFF), radius: 4, x: 10, y: 10)
+                .penDropShadow(LfltShape().penStroke(.center, lineWidth: 12), color: Color(hex: 0xFFFFFF), radius: 4, x: 10, y: 10, outset: CGSize(width: 0, height: 12))
                 .offset(x: 50, y: 50)
         }
         .frame(width: 240, height: 200, alignment: .topLeading)

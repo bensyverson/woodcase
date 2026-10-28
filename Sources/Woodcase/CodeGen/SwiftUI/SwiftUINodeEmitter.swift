@@ -30,7 +30,7 @@ struct SwiftUINodeEmitter {
     }
 
     /// Receives a warning for every node or property this emitter does not write yet.
-    let diagnostics: PenDiagnosticCollector?
+    var diagnostics: PenDiagnosticCollector?
 
     /// The `Shape` types the page declares for its paths, polygons, lines and arcs.
     let shapes = SwiftUIShapeDeclarations()

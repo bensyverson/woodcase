@@ -6,7 +6,9 @@
 extension SwiftUINodeEmitter {
     /// A frame: a stack of its children — `HStack`, `VStack`, or a top-leading `ZStack`
     /// for `layout: none` — padded, framed to its size, clipped, then painted and stroked
-    /// under them, its outer shadows cast by its box and its stroke band (``Silhouette``).
+    /// under them, its outer shadows cast by its own paint and its children's
+    /// (``contentSilhouette(of:in:flow:)``), or by its own ``Silhouette`` alone when its fill
+    /// covers all of them its clip leaves, or all of them lie inside it (``SwiftUIShadowCover``).
     ///
     /// A frame with nothing in it is drawn as its own outline, like a rectangle. An
     /// absolutely positioned child of a stack rides in an `.overlay`, placed by its
@@ -28,13 +30,15 @@ extension SwiftUINodeEmitter {
         let flowNodes = slot == nil ? turnedFillsSized(inFlow, of: data) : []
         let overlaidNodes = layout == .none || slot != nil ? [] : children.filter { $0.common.layoutPosition == .absolute }
         let requests = flowNodes.map { request(for: $0, in: childContainer) } + overlaidNodes.map { request(for: $0, in: .absolute) }
-        return views(requests).map { (views: [SwiftUIViewCode?]) -> SwiftUIViewCode in
+        return views(requests).flatMap { (views: [SwiftUIViewCode?]) -> SwiftUIPendingView<SwiftUIViewCode> in
             let flowViews = slot.map { [SwiftUIViewCode(head: $0.name)] } ?? views.prefix(flowNodes.count).compactMap(\.self)
             let overlaid = views.dropFirst(flowNodes.count).compactMap(\.self)
             var unemitted = outlineUnemitted
             // A frame with nothing in it is drawn as a shape: its outline, painted and stroked.
             if flowViews.isEmpty, overlaid.isEmpty {
-                return filledShape(node, shape: shape, fills: data.fills, stroke: data, effects: data.effects, in: container, unemitted: unemitted)
+                return .done(filledShape(
+                    node, shape: shape, fills: data.fills, stroke: data, effects: data.effects, in: container, unemitted: unemitted
+                ))
             }
             // A `layout: none` frame's children do not size it: Pen settles its `fit_content`
             // at the fallback, 0 by default, and they overhang it (see `PenEngine.md`).
@@ -82,9 +86,20 @@ extension SwiftUINodeEmitter {
                 in: shape, isolated: isolatesPaints(fills: layers, stroke: stroke == nil ? nil : data)
             )
             warnUnemitted(node, unemitted)
-            // Cast by its box and its stroke band, not its children.
-            let silhouette = silhouette(of: node, shape: shape, stroke: data, box: box, outset: outset)
-            return withEffects(view, of: node, effects: data.effects, fills: data.fills, silhouette: silhouette)
+            let silhouette = silhouette(of: node, shape: shape, fills: data.fills, stroke: data, box: box, outset: outset)
+            // A fill that paints covers all the children a clip leaves, and all the children
+            // the layout keeps inside its shape (``SwiftUIShadowCover``), so the frame's own
+            // silhouette is its whole one; otherwise its children cast with it.
+            let coversChildren = Self.castsPaint(data.fills)
+                && (data.clip?.literalValue == true || scope.shadowCover.covered.contains(node.id))
+            guard !coversChildren, !effects(data.effects).outer.isEmpty else {
+                return .done(withEffects(view, of: node, effects: data.effects, fills: data.fills, silhouette: silhouette))
+            }
+            return contentSilhouette(of: node, in: container).map { content in
+                var cast = silhouette
+                cast.cast = nil
+                return withEffects(view, of: node, effects: data.effects, fills: data.fills, silhouette: cast, content: content)
+            }
         }
     }
 

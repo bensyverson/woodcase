@@ -21,7 +21,7 @@ public struct GroupChildShadow: View {
                     .padding(.leading, 50)
                     .padding(.top, 50)
             }
-            .penGroupShadows(outer: [PenShadowStyle(color: Color(hex: 0x0000FF), radius: 2, x: 14, y: 14)]) {
+            .penContentShadows(outer: [PenShadowStyle(color: Color(hex: 0x0000FF), radius: 2, x: 14, y: 14)]) {
                 ZStack(alignment: .topLeading) {
                     Rectangle()
                         .fill(Color(hex: 0x000000))
@@ -67,11 +67,16 @@ public struct GroupFrameChild: View {
                 .frame(width: 80, height: 80, alignment: .topLeading)
                 .background(Color(hex: 0xDDDDDD))
             }
-            .penGroupShadows(outer: [PenShadowStyle(color: Color(hex: 0x000000), radius: 2, x: 10, y: 14)]) {
+            .penContentShadows(outer: [PenShadowStyle(color: Color(hex: 0x000000), radius: 2, x: 10, y: 14)]) {
                 ZStack(alignment: .topLeading) {
-                    Rectangle()
-                        .fill(Color(hex: 0x000000))
-                        .frame(width: 80, height: 80)
+                    ZStack(alignment: .topLeading) {
+                        Rectangle()
+                            .fill(Color(hex: 0x000000))
+                            .frame(width: 70, height: 50)
+                            .offset(x: 50, y: 50)
+                    }
+                    .frame(width: 80, height: 80, alignment: .topLeading)
+                    .background(Color(hex: 0x000000))
                 }
             }
             .offset(x: 30, y: 30)
@@ -108,7 +113,7 @@ public struct GroupInner: View {
                     .padding(.leading, 60)
                     .padding(.top, 60)
             }
-            .penGroupShadows(inner: [PenShadowStyle(color: Color(hex: 0x000000), radius: 5, x: 6, y: 6)]) {
+            .penContentShadows(inner: [PenShadowStyle(color: Color(hex: 0x000000), radius: 5, x: 6, y: 6)]) {
                 ZStack(alignment: .topLeading) {
                     Rectangle()
                         .fill(Color(hex: 0x000000))
@@ -161,7 +166,7 @@ public struct GroupNested: View {
                 .padding(.leading, 80)
                 .padding(.top, 20)
             }
-            .penGroupShadows(outer: [PenShadowStyle(color: Color(hex: 0x000000, opacity: 0.502), radius: 8, x: 0, y: 16), PenShadowStyle(color: Color(hex: 0xFF8800, opacity: 0.6), radius: 1, x: -10, y: -6)]) {
+            .penContentShadows(outer: [PenShadowStyle(color: Color(hex: 0x000000, opacity: 0.502), radius: 8, x: 0, y: 16), PenShadowStyle(color: Color(hex: 0xFF8800, opacity: 0.6), radius: 1, x: -10, y: -6)]) {
                 ZStack(alignment: .topLeading) {
                     HexShape()
                         .fill(Color(hex: 0x000000))
@@ -229,7 +234,7 @@ public struct GroupOuter: View {
                     .padding(.leading, 60)
                     .padding(.top, 50)
             }
-            .penGroupShadows(outer: [PenShadowStyle(color: Color(hex: 0x000000, opacity: 0.627), radius: 6, x: 8, y: 10)]) {
+            .penContentShadows(outer: [PenShadowStyle(color: Color(hex: 0x000000, opacity: 0.627), radius: 6, x: 8, y: 10)]) {
                 ZStack(alignment: .topLeading) {
                     RoundedRectangle(cornerRadius: 10, style: .circular)
                         .fill(Color(hex: 0x000000))
@@ -290,7 +295,7 @@ public struct GroupStrokePath: View {
                     .padding(.leading, 10)
                     .padding(.top, 110)
             }
-            .penGroupShadows(outer: [PenShadowStyle(color: Color(hex: 0x0044FF, opacity: 0.8), radius: 3, x: 0, y: 12)]) {
+            .penContentShadows(outer: [PenShadowStyle(color: Color(hex: 0x0044FF, opacity: 0.8), radius: 3, x: 0, y: 12)]) {
                 ZStack(alignment: .topLeading) {
                     Rectangle()
                         .fill(Color(hex: 0x000000))
@@ -306,6 +311,15 @@ public struct GroupStrokePath: View {
                         .frame(width: 60, height: 60)
                         .padding(.leading, 80)
                         .padding(.top, 20)
+                    Color.clear
+                        .frame(width: 120, height: 0)
+                        .overlay {
+                            RuleShape().penOutset(dx: 0, dy: 6)
+                                .stroke(Color(hex: 0x000000), lineWidth: 6)
+                                .padding(.vertical, -6)
+                        }
+                        .padding(.leading, 10)
+                        .padding(.top, 110)
                 }
             }
             .offset(x: 30, y: 30)
@@ -364,7 +378,7 @@ public struct GroupTranslucent: View {
                     .padding(.leading, 70)
                     .padding(.top, 30)
             }
-            .penGroupShadows(outer: [PenShadowStyle(color: Color(hex: 0x000000), radius: 4, x: 12, y: 12)]) {
+            .penContentShadows(outer: [PenShadowStyle(color: Color(hex: 0x000000), radius: 4, x: 12, y: 12)]) {
                 ZStack(alignment: .topLeading) {
                     Rectangle()
                         .fill(Color(hex: 0x000000))

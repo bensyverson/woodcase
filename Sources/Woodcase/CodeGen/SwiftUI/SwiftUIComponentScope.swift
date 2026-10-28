@@ -42,6 +42,10 @@ struct SwiftUIComponentScope: Friendly {
     /// body; `nil` everywhere else.
     var textField: String?
 
+    /// The frames whose fill covers everything their descendants cast into their outer
+    /// shadows, which cast them from their own silhouette alone.
+    var shadowCover = SwiftUIShadowCover()
+
     /// A scope with no components, for a page of a document without any.
     init() {}
 
@@ -50,6 +54,7 @@ struct SwiftUIComponentScope: Friendly {
     init(document: PenDocument, components: [ComponentDefinition], typeNames: [String: String], theme: SwiftUITheme? = nil) {
         reusable = PenRefExpander.buildRegistry(from: document.children)
         loops = ComponentLoopIndex(registry: reusable)
+        shadowCover = SwiftUIShadowCover(document: document)
         self.theme = theme
         for definition in components {
             let name = typeNames[definition.id] ?? definition.name

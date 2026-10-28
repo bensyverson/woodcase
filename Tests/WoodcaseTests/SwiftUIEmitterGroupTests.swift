@@ -123,9 +123,9 @@ struct SwiftUIEmitterGroupTests {
         let ghost = ##"{"type": "rectangle", "id": "a", "x": 0, "y": 0, "width": 80, "height": 80, "fill": "#FF000040"}"##
         let code = try body(child: group(keys: effect, children: [ghost]))
         #expect(code.contains(
-            ".penGroupShadows(outer: [PenShadowStyle(color: Color(hex: 0x000000, opacity: 0.627), radius: 6, x: 8, y: 10)]) {"
+            ".penContentShadows(outer: [PenShadowStyle(color: Color(hex: 0x000000, opacity: 0.627), radius: 6, x: 8, y: 10)]) {"
         ))
-        let silhouette = try #require(code.range(of: ".penGroupShadows"))
+        let silhouette = try #require(code.range(of: ".penContentShadows"))
         #expect(code[silhouette.upperBound...].contains(".fill(Color(hex: 0x000000))"))
     }
 
@@ -134,37 +134,37 @@ struct SwiftUIEmitterGroupTests {
         let effect = ##""effect": {"type": "shadow", "color": "#0000FF", "blur": 4}"##
         let chip = ##"{"type": "rectangle", "id": "a", "width": 70, "height": 70, "fill": "#EEEEEE", "opacity": 0.5, "blendMode": "screen", "effect": {"type": "shadow", "color": "#FF0000", "offset": {"x": -16, "y": 0}, "blur": 4}}"##
         let code = try body(child: group(keys: effect, children: [chip]))
-        let silhouette = try #require(code.range(of: ".penGroupShadows"))
+        let silhouette = try #require(code.range(of: ".penContentShadows"))
         let tail = String(code[silhouette.upperBound...])
         #expect(!tail.contains("0xFF0000"))
         #expect(!tail.contains(".opacity(0.5)"))
         #expect(!tail.contains(".blendMode(.screen)"))
     }
 
-    @Test("A line casts no part of its group's shadow; a stroke that reaches outside does, in black")
+    @Test("A line casts its stroke into its group's shadow, and a stroke that reaches outside does, in black")
     func lineAndStroke() throws {
         let effect = ##""effect": {"type": "shadow", "color": "#0044FFCC", "offset": {"x": 0, "y": 12}, "blur": 6}"##
         let framed = ##"{"type": "rectangle", "id": "a", "width": 60, "height": 60, "fill": "#FFFFFF", "stroke": "#333333", "strokeWidth": 8, "strokeAlignment": "outer"}"##
         let line = ##"{"type": "line", "id": "l", "x": 10, "y": 110, "width": 120, "height": 0, "stroke": "#008888", "strokeWidth": 6}"##
         let code = try body(child: group(keys: effect, children: [framed, line]))
-        let silhouette = try #require(code.range(of: ".penGroupShadows"))
+        let silhouette = try #require(code.range(of: ".penContentShadows"))
         let tail = String(code[silhouette.upperBound...])
         #expect(!tail.contains("0x008888"))
-        #expect(!tail.contains(".padding(.top, 110)"))
+        #expect(tail.contains(".padding(.top, 110)"))
         #expect(!tail.contains("0x333333"))
-        #expect(tail.components(separatedBy: "Color(hex: 0x000000)").count >= 3)
+        #expect(tail.components(separatedBy: "Color(hex: 0x000000)").count >= 4)
     }
 
-    @Test("A frame child casts its box: its own children are not part of the silhouette")
-    func frameChildCastsItsBox() throws {
+    @Test("A frame child casts its own children with it, in black")
+    func frameChildCastsItsContent() throws {
         let effect = ##""effect": {"type": "shadow", "color": "#000000", "blur": 4}"##
         let overhang = ##"{"type": "rectangle", "id": "o", "x": 50, "y": 50, "width": 70, "height": 50, "fill": "#CC6600"}"##
         let card = ##"{"type": "frame", "id": "c", "width": 80, "height": 80, "layout": "none", "fill": "#DDDDDD", "children": [\##(overhang)]}"##
         let code = try body(child: group(keys: effect, children: [card]))
-        let silhouette = try #require(code.range(of: ".penGroupShadows"))
+        let silhouette = try #require(code.range(of: ".penContentShadows"))
         let tail = String(code[silhouette.upperBound...])
         #expect(!tail.contains("0xCC6600"))
-        #expect(!tail.contains("width: 70, height: 50"))
+        #expect(tail.contains("width: 70, height: 50"))
         #expect(tail.contains("width: 80, height: 80"))
     }
 
@@ -174,7 +174,7 @@ struct SwiftUIEmitterGroupTests {
         let inner = group(id: "n", keys: ##""x": 80, "y": 20, \##(innerEffect)"##, children: [rect(id: "b", x: 0, y: 0)])
         let effect = ##""effect": {"type": "shadow", "color": "#000000", "blur": 16}"##
         let code = try body(child: group(keys: effect, children: [rect(id: "a", x: 0, y: 0), inner]))
-        let silhouette = try #require(code.range(of: ".penGroupShadows(outer: [PenShadowStyle(color: Color(hex: 0x000000), radius: 8)])"))
+        let silhouette = try #require(code.range(of: ".penContentShadows(outer: [PenShadowStyle(color: Color(hex: 0x000000), radius: 8)])"))
         let tail = String(code[silhouette.upperBound...])
         #expect(!tail.contains("0xFF8800"))
         #expect(tail.contains(".padding(.leading, 80)"))
@@ -184,23 +184,25 @@ struct SwiftUIEmitterGroupTests {
     func innerShadow() throws {
         let effect = ##""effect": {"type": "shadow", "shadowType": "inner", "color": "#000000", "offset": {"x": 6, "y": 6}, "blur": 10}"##
         let code = try body(child: group(keys: effect, children: [rect(id: "a", x: 0, y: 0)]))
-        #expect(code.contains(".penGroupShadows(inner: [PenShadowStyle(color: Color(hex: 0x000000), radius: 5, x: 6, y: 6)]) {"))
+        #expect(code.contains(".penContentShadows(inner: [PenShadowStyle(color: Color(hex: 0x000000), radius: 5, x: 6, y: 6)]) {"))
     }
 
-    @Test("A group of lines alone has no silhouette, and so no shadow modifier")
+    @Test("A group whose children paint nothing has no silhouette, and so no shadow modifier")
     func noSilhouette() throws {
         let effect = ##""effect": {"type": "shadow", "color": "#000000", "blur": 4}"##
-        let line = ##"{"type": "line", "id": "l", "width": 120, "height": 0, "stroke": "#008888", "strokeWidth": 6}"##
-        let code = try body(child: group(keys: effect, children: [line]))
+        let bare = ##"{"type": "rectangle", "id": "a", "width": 60, "height": 60, "fill": "#FFFFFF00"}"##
+        let line = ##"{"type": "line", "id": "l", "width": 120, "height": 0, "strokeWidth": 6}"##
+        let code = try body(child: group(keys: effect, children: [bare, line]))
         #expect(code.contains("ZStack(alignment: .topLeading) {"))
-        #expect(!code.contains("penGroupShadows"))
+        #expect(!code.contains("penContentShadows"))
     }
 
-    @Test("The support file defines the group shadow modifier and its style")
-    func supportDefinesGroupShadows() throws {
-        let support = try #require(SwiftUIEmitter.supportTemplates()["PenSupport+Group.swift"])
+    @Test("The support file defines the content shadow modifier and its style, which takes no hits")
+    func supportDefinesContentShadows() throws {
+        let support = try #require(SwiftUIEmitter.supportTemplates()["PenSupport+ContentShadows.swift"])
         #expect(support.contains("struct PenShadowStyle"))
-        #expect(support.contains("func penGroupShadows("))
+        #expect(support.contains("func penContentShadows("))
+        #expect(support.contains(".allowsHitTesting(false)"))
     }
 
     @Test("The support file defines the layout a group in a stack uses")

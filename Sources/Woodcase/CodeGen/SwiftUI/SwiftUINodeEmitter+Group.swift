@@ -15,7 +15,7 @@ extension SwiftUINodeEmitter {
     /// when it turns, so the group is a `PenGroupFlow` and turns about its center.
     ///
     /// Layer effects are the group's as a whole: its shadows are cast by its descendants'
-    /// silhouette (``groupSilhouette(_:flow:)``), its blur blurs everything in it, and a group
+    /// silhouette (``contentSilhouette(of:in:flow:)``), its blur blurs everything in it, and a group
     /// with an opacity or blend mode is composited first, so it fades and blends as one
     /// layer rather than child by child. A background blur is left out with a warning:
     /// a group has no shape to blur the backdrop through.
@@ -30,7 +30,7 @@ extension SwiftUINodeEmitter {
         return groupStack(children, flow: flow).flatMap { stacked in
             var effects = effects(data.effects)
             let casts = !effects.outer.isEmpty || !effects.inner.isEmpty
-            let silhouette: SwiftUIPendingView<SwiftUIViewCode?> = casts ? groupSilhouette(children, flow: flow) : .done(nil)
+            let silhouette: SwiftUIPendingView<SwiftUIViewCode?> = casts ? contentSilhouette(of: node, in: container, flow: flow) : .done(nil)
             return silhouette.map { silhouette in
                 var view = stacked
                 if let silhouette {
@@ -39,7 +39,7 @@ extension SwiftUINodeEmitter {
                     if !effects.outer.isEmpty { arguments.append("outer: \(style(effects.outer))") }
                     if !effects.inner.isEmpty { arguments.append("inner: \(style(effects.inner))") }
                     view.modifiers.append(SwiftUIViewCode.Modifier(
-                        ".penGroupShadows(\(arguments.joined(separator: ", ")))", content: [silhouette]
+                        ".penContentShadows(\(arguments.joined(separator: ", ")))", content: [silhouette]
                     ))
                 }
                 if !effects.backgroundBlurs.isEmpty {

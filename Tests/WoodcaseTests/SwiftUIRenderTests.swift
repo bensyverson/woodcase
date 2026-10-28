@@ -43,16 +43,6 @@
             // height the board offers, and generating it warns (leaf ozlazY, 2026-09-28, same
             // toolchain); every other `render-turned-fill` board gates at CG + 1.0.
             "render-turned-fill-row-cross-fit-30": (23.04, "turned fill whose box only the layout knows: a flexible frame"),
-            // `pen` CLI 0.3.13 casts an outer shadow from the node's content — a frame's children
-            // and a line's stroke included — and its references were regenerated with it; the CG
-            // renderer follows, the emitter still casts 1.2.16's silhouette (a frame's box, nothing
-            // from a line). Recorded 2026-10-28 (leaf LB02SZ, `swift test --quiet`), same toolchain.
-            "render-shadows-outer-frame-children": (20.60, "a frame's shadow is still cast by its box, not its content"),
-            "render-group-shadows-group-frame-child": (6.46, "a group's frame child still casts its box alone"),
-            "render-group-shadows-group-stroke-path": (1.64, "a line in a group still casts nothing"),
-            "render-sizeless-frames-paint": (2.34, "a frame's children still cast nothing into its shadow"),
-            "render-stroke-shadows-line-diagonal": (2.63, "a line still casts no shadow"),
-            "render-stroke-shadows-line-flat": (4.54, "a line still casts no shadow"),
         ]
 
         /// Boards held *below* CG + 1.0, keyed like ``baselines``, with the MAE each
@@ -84,8 +74,12 @@
             "render-stroke-shadows-polygon-outer": (0.12, "tighter than CG + 1.0; CG scores 0.140"),
             "render-stroke-shadows-path-outer": (0.10, "tighter than CG + 1.0; CG scores 0.099"),
             "render-stroke-shadows-inner-under-inner-stroke": (0.00, "tighter than CG + 1.0; CG scores 0.000"),
-            // The two line boards and `render-sizeless-frames-paint` were ceilings here until
-            // `pen` CLI 0.3.13's references (leaf LB02SZ): they are ``baselines`` now.
+            // `render-shadows-outer-frame-children`, `render-group-shadows-group-frame-child` and
+            // `-group-stroke-path`, `render-sizeless-frames-paint` and the two `render-stroke-shadows`
+            // line boards were ``baselines`` from `pen` CLI 0.3.13's references (leaf LB02SZ) until
+            // the emitter cast shadows from content too (leaf guwOmM, `swift test --filter
+            // SwiftUIRenderTests`, 2026-10-28): 20.60 → 0.08, 6.46 → 0.12, 1.64 → 0.08, 2.34 → 0.03,
+            // 2.63 → 0.30 and 4.54 → 0.25. Each gates at CG + 1.0 now.
         ]
 
         /// How far a baselined or ceilinged board may drift before it fails.

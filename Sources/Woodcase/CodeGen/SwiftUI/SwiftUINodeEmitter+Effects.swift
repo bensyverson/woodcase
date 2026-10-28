@@ -146,9 +146,12 @@ extension SwiftUINodeEmitter {
     /// `view` with the background blur, outer shadows and layer blur of `penEffects`,
     /// warning for what it leaves out. `silhouette` is what the node's shadows are cast by
     /// and its outline, or `nil` for text, whose glyphs cast its shadow; a text's inner
-    /// shadows go with its paint (``text(_:data:in:)``).
+    /// shadows go with its paint (``text(_:data:in:)``). `content`, when given, is a frame's
+    /// inked copy (``contentSilhouette(of:in:flow:)``), which casts its outer shadows in place
+    /// of `silhouette`'s shape.
     func withEffects(
-        _ view: SwiftUIViewCode, of node: PenNode, effects penEffects: PenEffects?, fills: PenFills?, silhouette: Silhouette?
+        _ view: SwiftUIViewCode, of node: PenNode, effects penEffects: PenEffects?, fills: PenFills?, silhouette: Silhouette?,
+        content: SwiftUIViewCode? = nil
     ) -> SwiftUIViewCode {
         var effects = effects(penEffects)
         var view = view
@@ -166,14 +169,22 @@ extension SwiftUINodeEmitter {
                 effects.unemitted.append("background blur on text")
             }
         }
-        // A later `.background` draws under an earlier one, so the first shadow goes last.
-        for shadow in effects.outer.reversed() {
-            if let silhouette {
-                view = view.modified(
-                    ".penDropShadow(\(silhouette.cast), \(shadow.arguments)\(silhouette.outsetArgument)\(silhouette.eoFillArgument))"
-                )
-            } else {
-                view = view.modified(".shadow(\(shadow.arguments))")
+        if let content, !effects.outer.isEmpty {
+            view.modifiers.append(SwiftUIViewCode.Modifier(
+                ".penContentShadows(outer: \(Effects.Shadow.styles(effects.outer)))", content: [content]
+            ))
+        } else {
+            // A later `.background` draws under an earlier one, so the first shadow goes last.
+            for shadow in effects.outer.reversed() {
+                if let silhouette {
+                    // A node that paints nothing casts nothing.
+                    guard let cast = silhouette.cast else { continue }
+                    view = view.modified(
+                        ".penDropShadow(\(cast), \(shadow.arguments)\(silhouette.outsetArgument)\(silhouette.eoFillArgument))"
+                    )
+                } else {
+                    view = view.modified(".shadow(\(shadow.arguments))")
+                }
             }
         }
         for radius in effects.blurs {
